@@ -1,0 +1,7 @@
+author = bluemagic123
+version = 0.1
+displayName = Magic Storage
+hideCode = false
+hideResources = false
+includeSource = true
+buildIgnore = OldArt\*
