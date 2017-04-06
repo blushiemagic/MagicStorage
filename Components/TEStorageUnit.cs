@@ -156,10 +156,9 @@ namespace MagicStorage.Components
 				}
 				if (!finished && !IsFull)
 				{
-					if (Main.netMode != 1)
-					{
-						items.Add(toDeposit.Clone());
-					}
+					Item item = toDeposit.Clone();
+					item.newAndShiny = false;
+					items.Add(item);
 					toDeposit.SetDefaults(0);
 					hasChange = true;
 					finished = true;
