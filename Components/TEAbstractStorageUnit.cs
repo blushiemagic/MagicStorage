@@ -16,6 +16,18 @@ namespace MagicStorage.Components
 		private bool inactive;
 		private Point16 center;
 
+		public bool Inactive
+		{
+			get
+			{
+				return inactive;
+			}
+			set
+			{
+				inactive = value;
+			}
+		}
+
 		public abstract bool IsFull
 		{
 			get;

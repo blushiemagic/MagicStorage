@@ -30,11 +30,15 @@ namespace MagicStorage.Components
 
 		public override bool HasItem(Item check, bool locked = false)
 		{
-			return true;
+			return !Inactive;
 		}
 
 		public override IEnumerable<Item> GetItems()
 		{
+			if (Inactive)
+			{
+				yield break;
+			}
 			for (int k = 1; k < ItemID.Sets.Deprecated.Length; k++)
 			{
 				if (!ItemID.Sets.Deprecated[k])
@@ -53,6 +57,10 @@ namespace MagicStorage.Components
 
 		public override Item TryWithdraw(Item lookFor, bool locked = false)
 		{
+			if (Inactive)
+			{
+				return new Item();
+			}
 			return lookFor.Clone();
 		}
 	}

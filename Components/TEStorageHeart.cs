@@ -98,6 +98,54 @@ namespace MagicStorage.Components
 		}
 
 		//precondition: lock is already taken
+		public bool EmptyInactive()
+		{
+			TEStorageUnit inactiveUnit = null;
+			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
+			{
+				if (!(abstractStorageUnit is TEStorageUnit))
+				{
+					continue;
+				}
+				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				if (storageUnit.Inactive && !storageUnit.IsEmpty)
+				{
+					inactiveUnit = storageUnit;
+					break;
+				}
+			}
+			if (inactiveUnit == null)
+			{
+				return false;
+			}
+			bool hasChange = false;
+			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
+			{
+				if (!(abstractStorageUnit is TEStorageUnit))
+				{
+					continue;
+				}
+				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				if (storageUnit.IsEmpty)
+				{
+					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
+					return true;
+				}
+				else while (!storageUnit.IsFull && !inactiveUnit.IsEmpty)
+				{
+					Item item = inactiveUnit.WithdrawStack();
+					storageUnit.DepositItem(item);
+					if (!item.IsAir)
+					{
+						inactiveUnit.DepositItem(item);
+					}
+					hasChange = true;
+				}
+			}
+			return hasChange;
+		}
+
+		//precondition: lock is already taken
 		public bool Defragment()
 		{
 			TEStorageUnit emptyUnit = null;
