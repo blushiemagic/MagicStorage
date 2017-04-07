@@ -12,8 +12,14 @@ namespace MagicStorage
 	{
 		public static MagicStorage Instance;
 
+		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
+
 		public override void Load()
 		{
+			if (ModLoader.version < requiredVersion)
+			{
+				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
+			}
 			Instance = this;
 		}
 
