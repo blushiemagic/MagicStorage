@@ -87,7 +87,9 @@ namespace MagicStorage.Components
 			}
 			TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 			Main.player[Main.myPlayer].tileInteractionHappened = true;
-			Main.NewText(storageUnit.NumItems + " / " + storageUnit.Capacity + " Items");
+			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
+			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
+			Main.NewText(activeString + ", " + fullnessString);
 		}
 
 		private bool TryUpgrade(int i, int j)
