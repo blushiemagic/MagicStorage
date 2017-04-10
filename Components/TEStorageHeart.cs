@@ -81,7 +81,7 @@ namespace MagicStorage.Components
 					try
 					{
 						bool noChange = true;
-						if (Defragment() || PackItems())
+						if (EmptyInactive() || Defragment() || PackItems())
 						{
 							noChange = false;
 						}
@@ -121,7 +121,7 @@ namespace MagicStorage.Components
 			bool hasChange = false;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit))
+				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
 				{
 					continue;
 				}
@@ -156,7 +156,7 @@ namespace MagicStorage.Components
 					continue;
 				}
 				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
-				if (emptyUnit == null && storageUnit.IsEmpty)
+				if (emptyUnit == null && storageUnit.IsEmpty && !storageUnit.Inactive)
 				{
 					emptyUnit = storageUnit;
 				}
@@ -180,7 +180,7 @@ namespace MagicStorage.Components
 					continue;
 				}
 				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
-				if (unitWithSpace == null && !storageUnit.IsFull)
+				if (unitWithSpace == null && !storageUnit.IsFull && !storageUnit.Inactive)
 				{
 					unitWithSpace = storageUnit;
 				}
@@ -208,7 +208,7 @@ namespace MagicStorage.Components
 			{
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
-					if (storageUnit.HasSpaceInStackFor(toDeposit, true))
+					if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit, true))
 					{
 						storageUnit.DepositItem(toDeposit, true);
 						if (toDeposit.IsAir)
@@ -219,7 +219,7 @@ namespace MagicStorage.Components
 				}
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
-					if (!storageUnit.IsFull)
+					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{
 						storageUnit.DepositItem(toDeposit, true);
 						if (toDeposit.IsAir)

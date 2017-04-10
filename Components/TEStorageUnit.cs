@@ -253,12 +253,24 @@ namespace MagicStorage.Components
 			{
 				GetHeart().ExitReadLock();
 			}
+			if (Inactive)
+			{
+				style += 3;
+			}
 			style *= 36;
 			topLeft.frameX = (short)style;
 			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
 			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
 			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
 			return oldFrame != style;
+		}
+
+		public void UpdateTileFrameWithNetSend(bool locked = false)
+		{
+			if (UpdateTileFrame(locked))
+			{
+				NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
+			}
 		}
 
 		//precondition: lock is already taken
@@ -368,10 +380,7 @@ namespace MagicStorage.Components
 		private void PostChangeContents()
 		{
 			RepairMetadata();
-			if (UpdateTileFrame(true))
-			{
-				NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
-			}
+			UpdateTileFrameWithNetSend(true);
 			NetHelper.SendTEUpdate(ID, Position);
 		}
 	}

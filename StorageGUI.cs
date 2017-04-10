@@ -173,7 +173,7 @@ namespace MagicStorage
 				temp[10] = item;
 				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
 			}
-			if (hoverSlot >= 0)
+			if (hoverSlot >= 0 && hoverSlot < items.Count)
 			{
 				Main.toolTip = items[hoverSlot].Clone();
 				Main.instance.MouseText(string.Empty);
@@ -400,7 +400,7 @@ namespace MagicStorage
 
 		private static void SlotFocusLogic()
 		{
-			if (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			if (slotFocus >= items.Count || (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)))
 			{
 				ResetSlotFocus();
 			}

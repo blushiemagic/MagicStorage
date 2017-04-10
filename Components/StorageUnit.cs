@@ -14,8 +14,8 @@ namespace MagicStorage.Components
 		public override void ModifyObjectData()
 		{
 			TileObjectData.newTile.StyleHorizontal = true;
-			TileObjectData.newTile.StyleMultiplier = 3;
-			TileObjectData.newTile.StyleWrapLimit = 3;
+			TileObjectData.newTile.StyleMultiplier = 6;
+			TileObjectData.newTile.StyleWrapLimit = 6;
 		}
 
 		public override ModTileEntity GetTileEntity()

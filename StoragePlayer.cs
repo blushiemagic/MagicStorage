@@ -18,7 +18,7 @@ namespace MagicStorage
 
 		public override void ResetEffects()
 		{
-			if (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1)
+			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1))
 			{
 				CloseStorage();
 				Recipe.FindRecipes();

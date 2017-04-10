@@ -40,7 +40,16 @@ namespace MagicStorage
 
 		public override void PostUpdateInput()
 		{
-			StorageGUI.Update(null);
+			try
+			{
+				StorageGUI.Update(null);
+			}
+			catch (Exception e)
+			{
+				ErrorLogger.ClearLog();
+				ErrorLogger.Log(e.ToString());
+				throw;
+			}
 		}
 	}
 }
