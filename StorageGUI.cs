@@ -57,6 +57,9 @@ namespace MagicStorage
 		private const int startMaxRightClickTimer = 20;
 		private static int maxRightClickTimer = startMaxRightClickTimer;
 
+		private static UIElement bottomBar = new UIElement();
+		private static UIText capacityText = new UIText("Items");
+
 		public static void Initialize()
 		{
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
@@ -95,7 +98,7 @@ namespace MagicStorage
 
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(40f, 0f);
-			slotZone.Height.Set(-40f, 1f);
+			slotZone.Height.Set(-80f, 1f);
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
@@ -106,10 +109,35 @@ namespace MagicStorage
 				noDisplayRows = 0;
 			}
 			scrollBarMaxViewSize = 1 + noDisplayRows;
-			scrollBar.Height.Set(0f, 1f);
+			scrollBar.Height.Set(displayRows * (itemSlotHeight + padding), 0f);
 			scrollBar.Left.Set(-20f, 1f);
 			scrollBar.SetView(scrollBarViewSize, scrollBarMaxViewSize);
 			slotZone.Append(scrollBar);
+
+			bottomBar.Width.Set(0f, 1f);
+			bottomBar.Height.Set(32f, 0f);
+			bottomBar.Top.Set(-32f, 1f);
+			basePanel.Append(bottomBar);
+
+			capacityText.Left.Set(6f, 0f);
+			capacityText.Top.Set(6f, 0f);
+			TEStorageHeart heart = GetHeart();
+			int numItems = 0;
+			int capacity = 0;
+			if (heart != null)
+			{
+				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
+				{
+					if (abstractStorageUnit is TEStorageUnit)
+					{
+						TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+						numItems += storageUnit.NumItems;
+						capacity += storageUnit.Capacity;
+					}
+				}
+			}
+			capacityText.SetText(numItems + "/" + capacity + " Items");
+			bottomBar.Append(capacityText);
 		}
 
 		private static void InitSortButtons()
