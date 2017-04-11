@@ -83,20 +83,17 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
 				{
 					explored.Add(explore);
-					if (IsStorageComponent(explore))
+					if (TEStorageCenter.IsStorageCenter(explore))
 					{
-						if (TEStorageCenter.IsStorageCenter(explore))
+						count++;
+						if (count >= 2)
 						{
-							count++;
-							if (count >= 2)
-							{
-								return -1;
-							}
+							return -1;
 						}
-						foreach (Point16 point in TEStorageComponent.AdjacentComponents(explore))
-						{
-							toExplore.Enqueue(point);
-						}
+					}
+					foreach (Point16 point in TEStorageComponent.AdjacentComponents(explore))
+					{
+						toExplore.Enqueue(point);
 					}
 				}
 			}

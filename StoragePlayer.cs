@@ -13,7 +13,7 @@ namespace MagicStorage
 
 		public override void UpdateDead()
 		{
-			storageAccess = new Point16(-1, -1);
+			CloseStorage();
 		}
 
 		public override void ResetEffects()

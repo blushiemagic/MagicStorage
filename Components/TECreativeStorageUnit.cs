@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -35,20 +36,7 @@ namespace MagicStorage.Components
 
 		public override IEnumerable<Item> GetItems()
 		{
-			if (Inactive)
-			{
-				yield break;
-			}
-			for (int k = 1; k < ItemID.Sets.Deprecated.Length; k++)
-			{
-				if (!ItemID.Sets.Deprecated[k])
-				{
-					Item item = new Item();
-					item.SetDefaults(k);
-					item.stack = item.maxStack;
-					yield return item;
-				}
-			}
+			return new CreativeEnumerable(Inactive);
 		}
 
 		public override void DepositItem(Item toDeposit, bool locked = false)
@@ -62,6 +50,79 @@ namespace MagicStorage.Components
 				return new Item();
 			}
 			return lookFor.Clone();
+		}
+	}
+
+	class CreativeEnumerable : IEnumerable<Item>
+	{
+		private bool inactive;
+
+		internal CreativeEnumerable(bool inactive)
+		{
+			this.inactive = inactive;
+		}
+
+		public IEnumerator<Item> GetEnumerator()
+		{
+			return new CreativeEnumerator(inactive);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+	}
+
+	class CreativeEnumerator : IEnumerator<Item>
+	{
+		private bool inactive;
+		private int id = 0;
+
+		internal CreativeEnumerator(bool inactive)
+		{
+			this.inactive = inactive;
+		}
+
+		public Item Current
+		{
+			get
+			{
+				Item item = new Item();
+				item.SetDefaults(id);
+				item.stack = item.maxStack;
+				return item;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			get
+			{
+				return Current;
+			}
+		}
+
+		public bool MoveNext()
+		{
+			if (inactive)
+			{
+				return false;
+			}
+			do
+			{
+				id++;
+			}
+			while (id < ItemID.Sets.Deprecated.Length && ItemID.Sets.Deprecated[id]);
+			return id < ItemID.Sets.Deprecated.Length;
+		}
+
+		public void Reset()
+		{
+			id = 0;
+		}
+
+		public void Dispose()
+		{
 		}
 	}
 }

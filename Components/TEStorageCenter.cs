@@ -34,23 +34,20 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
 				{
 					explored.Add(explore);
-					if (StorageComponent.IsStorageComponent(explore))
+					if (TileEntity.ByPosition.ContainsKey(explore) && TileEntity.ByPosition[explore] is TEAbstractStorageUnit)
 					{
-						if (TileEntity.ByPosition.ContainsKey(explore) && TileEntity.ByPosition[explore] is TEAbstractStorageUnit)
+						TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[explore];
+						if (storageUnit.Link(Position))
 						{
-							TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[explore];
-							if (storageUnit.Link(Position))
-							{
-								NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
-								changed = true;
-							}
-							storageUnits.Add(explore);
-							hashStorageUnits.Add(explore);
+							NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
+							changed = true;
 						}
-						foreach (Point16 point in AdjacentComponents(explore))
-						{
-							toExplore.Enqueue(point);
-						}
+						storageUnits.Add(explore);
+						hashStorageUnits.Add(explore);
+					}
+					foreach (Point16 point in AdjacentComponents(explore))
+					{
+						toExplore.Enqueue(point);
 					}
 				}
 			}

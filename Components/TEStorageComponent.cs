@@ -70,6 +70,14 @@ namespace MagicStorage.Components
 			new Point16(-1, 1)
 		};
 
+		private static IEnumerable<Point16> checkNeighbors1x1 = new Point16[]
+		{
+			new Point16(-1, 0),
+			new Point16(0, -1),
+			new Point16(1, 0),
+			new Point16(0, 1)
+		};
+
 		public IEnumerable<Point16> AdjacentComponents()
 		{
 			return AdjacentComponents(Position);
@@ -78,11 +86,16 @@ namespace MagicStorage.Components
 		public static IEnumerable<Point16> AdjacentComponents(Point16 point)
 		{
 			List<Point16> points = new List<Point16>();
-			foreach (Point16 add in checkNeighbors)
+			bool isConnector = Main.tile[point.X, point.Y].type == MagicStorage.Instance.TileType("StorageConnector");
+			foreach (Point16 add in (isConnector ? checkNeighbors1x1 : checkNeighbors))
 			{
 				int checkX = point.X + add.X;
 				int checkY = point.Y + add.Y;
 				Tile tile = Main.tile[checkX, checkY];
+				if (!tile.active())
+				{
+					continue;
+				}
 				if (TileLoader.GetTile(tile.type) is StorageComponent)
 				{
 					if (tile.frameX % 36 == 18)
@@ -93,6 +106,14 @@ namespace MagicStorage.Components
 					{
 						checkY--;
 					}
+					Point16 check = new Point16(checkX, checkY);
+					if (!points.Contains(check))
+					{
+						points.Add(check);
+					}
+				}
+				else if (tile.type == MagicStorage.Instance.TileType("StorageConnector"))
+				{
 					Point16 check = new Point16(checkX, checkY);
 					if (!points.Contains(check))
 					{
@@ -119,16 +140,13 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
 				{
 					explored.Add(explore);
-					if (StorageComponent.IsStorageComponent(explore))
+					if (TEStorageCenter.IsStorageCenter(explore))
 					{
-						if (TEStorageCenter.IsStorageCenter(explore))
-						{
-							return explore;
-						}
-						foreach (Point16 point in AdjacentComponents(explore))
-						{
-							toExplore.Enqueue(point);
-						}
+						return explore;
+					}
+					foreach (Point16 point in AdjacentComponents(explore))
+					{
+						toExplore.Enqueue(point);
 					}
 				}
 			}
