@@ -41,6 +41,7 @@ namespace MagicStorage
 		public override void PostUpdateInput()
 		{
 			StorageGUI.Update(null);
+			CraftingGUI.Update(null);
 		}
 	}
 }

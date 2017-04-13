@@ -40,7 +40,14 @@ namespace MagicStorage
 			{
 				return true;
 			}
-			StorageGUI.Draw(heart);
+			if (modTile is CraftingAccess)
+			{
+				CraftingGUI.Draw(heart);
+			}
+			else
+			{
+				StorageGUI.Draw(heart);
+			}
 			return true;
 		}
 	}

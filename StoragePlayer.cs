@@ -9,6 +9,7 @@ namespace MagicStorage
 {
 	public class StoragePlayer : ModPlayer
 	{
+		public int timeSinceOpen = 1;
 		private Point16 storageAccess = new Point16(-1, -1);
 
 		public override void UpdateDead()
@@ -18,6 +19,12 @@ namespace MagicStorage
 
 		public override void ResetEffects()
 		{
+			if (timeSinceOpen < 1)
+			{
+				player.talkNPC = -1;
+				Main.playerInventory = true;
+				timeSinceOpen++;
+			}
 			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1))
 			{
 				CloseStorage();

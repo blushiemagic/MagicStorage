@@ -5,11 +5,11 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
-	public class StorageAccess : ModItem
+	public class CraftingAccess : ModItem
 	{
 		public override void SetDefaults()
 		{
-			item.name = "Storage Access";
+			item.name = "Storage Crafting Interface";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -20,16 +20,16 @@ namespace MagicStorage.Items
 			item.useStyle = 1;
 			item.consumable = true;
 			item.rare = 1;
-			item.value = Item.sellPrice(0, 0, 67, 50);
-			item.createTile = mod.TileType("StorageAccess");
+			item.value = Item.sellPrice(0, 1, 16, 25);
+			item.createTile = mod.TileType("CraftingAccess");
 		}
 
 		public override void AddRecipes()
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddIngredient(ItemID.Diamond, 3);
-			recipe.AddIngredient(ItemID.Topaz, 10);
+			recipe.AddIngredient(ItemID.Diamond, 5);
+			recipe.AddIngredient(ItemID.Sapphire, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
