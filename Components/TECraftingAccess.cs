@@ -15,9 +15,91 @@ namespace MagicStorage.Components
 	{
 		public Item[] stations = new Item[10];
 
+		public TECraftingAccess()
+		{
+			for (int k = 0; k < stations.Length; k++)
+			{
+				stations[k] = new Item();
+			}
+		}
+
 		public override bool ValidTile(Tile tile)
 		{
 			return tile.type == mod.TileType("CraftingAccess") && tile.frameX == 0 && tile.frameY == 0;
+		}
+
+		public void TryDespositStation(Item item)
+		{
+			if (Main.netMode == 1)
+			{
+				return;
+			}
+			foreach (Item station in stations)
+			{
+				if (stations[k].type == item.type)
+				{
+					return;
+				}
+			}
+			for (int k = 0; k < stations.Length; k++)
+			{
+				if (stations[k].IsAir)
+				{
+					stations[k] = item.Clone();
+					stations[k].stack = 1;
+					item.stack--;
+					if (item.stack <= 0)
+					{
+						item.SetDefaults(0);
+					}
+					SendTEUpdate(ID, Position);
+					return;
+				}
+			}
+		}
+
+		public Item TryWithdrawStation(int slot)
+		{
+			if (Main.netMode == 1)
+			{
+				return new Item();
+			}
+			if (!stations[slot].IsAir)
+			{
+				Item item = stations[slot];
+				stations[slot] = new Item();
+				SendTEUpdate(ID, Position);
+				return item;
+			}
+			return new Item();
+		}
+
+		public Item DoStationSwap(Item item, int slot)
+		{
+			if (Main.netMode == 1)
+			{
+				return new Item();
+			}
+			if ((item.IsAir || item.stack == 1) && !stations[slot].IsAir)
+			{
+				Item temp = item;
+				item = stations[slot];
+				stations[slot] = temp;
+				SendTEUpdate(ID, Position);
+				return item;
+			}
+			else if (!item.IsAir && stations[slot].IsAir)
+			{
+				stations[slot] = item.Clone();
+				stations[slot].stack = 1;
+				item.stack--;
+				if (item.stack <= 0)
+				{
+					item.SetDefaults(0);
+				}
+				SendTEUpdate(ID, Position);
+				return item;
+			}
 		}
 
 		public override TagCompound Save()
@@ -35,9 +117,12 @@ namespace MagicStorage.Components
 		public override void Load(TagCompound tag)
 		{
 			IList<TagCompound> listStations = tag.GetList<TagCompound>("Stations");
-			for (int k = 0; k < stations.Length; k++)
+			if (listStations != null && listStations.Count > 0)
 			{
-				stations[k] = ItemIO.Load(listStations[k]);
+				for (int k = 0; k < stations.Length; k++)
+				{
+					stations[k] = ItemIO.Load(listStations[k]);
+				}
 			}
 		}
 

@@ -35,6 +35,14 @@ namespace MagicStorage
 			{
 				ReceiveClientSendTEUpdate(reader, sender);
 			}
+			else if (type == MessageType.TryStationOperation)
+			{
+				ReceiveStationOperation(reader, sender);
+			}
+			else if (type == MessageType.StationOperationResult)
+			{
+				ReceiveStationResult(reader);
+			}
 		}
 
 		public static void SendComponentPlace(int i, int j, int type)
@@ -199,30 +207,7 @@ namespace MagicStorage
 			if (op == 0 || op == 1 || op == 3)
 			{
 				Item item = ItemIO.Receive(reader, true);
-				if (op != 3 && Main.playerInventory && Main.mouseItem.IsAir)
-				{
-					Main.mouseItem = item;
-					item = new Item();
-				}
-				else if (op != 3 && Main.playerInventory && Main.mouseItem.type == item.type)
-				{
-					int total = Main.mouseItem.stack + item.stack;
-					if (total > Main.mouseItem.maxStack)
-					{
-						total = Main.mouseItem.maxStack;
-					}
-					int difference = total - Main.mouseItem.stack;
-					Main.mouseItem.stack = total;
-					item.stack -= total;
-				}
-				if (item.stack > 0)
-				{
-					item = player.GetItem(Main.myPlayer, item, false, true);
-					if (!item.IsAir)
-					{
-						player.QuickSpawnClonedItem(item, item.stack);
-					}
-				}
+				StoragePlayer.GetItem(item, op != 3);
 			}
 			else if (op == 2)
 			{
@@ -230,11 +215,7 @@ namespace MagicStorage
 				for (int k = 0; k < count; k++)
 				{
 					Item item = ItemIO.Receive(reader, true);
-					item = player.GetItem(Main.myPlayer, item, false, true);
-					if (!item.IsAir)
-					{
-						player.QuickSpawnClonedItem(item, item.stack);
-					}
+					StoragePlayer.GetItem(item, false);
 				}
 			}
 		}
@@ -263,6 +244,139 @@ namespace MagicStorage
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, "", id, ent.Position.X, ent.Position.Y);
 			}
 		}
+
+		private static ModPacket PrepareStationOperation(int ent, byte op)
+		{
+			ModPacket packet = MagicStorage.Instance.GetPacket();
+			packet.Write((byte)MessageType.TryStationOperation);
+			packet.Write(ent);
+			packet.Write(op);
+			return packet;
+		}
+
+		private static ModPacket PrepareStationResult(byte op)
+		{
+			ModPacket packet = MagicStorage.Instance.GetPacket();
+			packet.Write((byte)MessageType.StationOperationResult);
+			packet.Write(op);
+			return packet;
+		}
+
+		public static void SendDepositStation(int ent, Item item)
+		{
+			if (Main.netMode == 1)
+			{
+				ModPacket packet = PrepareStationOperation(ent, 0);
+				ItemIO.Send(item, packet, true);
+				packet.Send();
+			}
+		}
+
+		public static void SendWithdrawStation(int ent, int slot)
+		{
+			if (Main.netMode == 1)
+			{
+				ModPacket packet = PrepareStationOperation(ent, 1);
+				packet.Write((byte)slot);
+				packet.Send();
+			}
+		}
+
+		public static void SendStationSlotClick(int ent, Item item, int slot)
+		{
+			if (Main.netMode == 1)
+			{
+				ModPacket packet = PrepareStationOperation(ent, 2);
+				ItemIO.Send(item, packet, true);
+				packet.Write((byte)slot);
+				packet.Send();
+			}
+		}
+
+		public static void ReceiveStationOperation(BinaryReader reader, int sender)
+		{
+			if (Main.netMode != 2)
+			{
+				return;
+			}
+			int ent = reader.ReadInt32();
+			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess))
+			{
+				return;
+			}
+			TECraftingAccess access = (TECraftingAccess)TileEntity.ByID[ent];
+			Item[] stations = access.stations;
+			byte op = reader.ReadByte();
+			if (op == 0)
+			{
+				Item item = ItemIO.Receive(reader, true);
+				access.TryDepositStation(item);
+				if (item.stack > 0)
+				{
+					ModPacket packet = PrepareStationResult(op);
+					ItemIO.Send(item, packet, true);
+					packet.Send();
+				}
+			}
+			else if (op == 1)
+			{
+				int slot = reader.ReadByte();
+				Item item = access.TryWithdrawStation(slot);
+				if (!item.IsAir)
+				{
+					ModPacket packet = PrepareStationResult(op);
+					ItemIO.Send(item, packet, true);
+					packet.Send();
+				}
+			}
+			else if (op == 2)
+			{
+				Item item = ItemIO.Receive(reader, true);
+				int slot = reader.ReadByte();
+				item = access.DoStationSwap(item, slot);
+				if (!item.IsAir)
+				{
+					ModPacket packet = PrepareStationResult(op);
+					ItemIO.Send(item, packet, true);
+					packet.Send();
+				}
+			}
+		}
+
+		public static void ReceiveStationResult(BinaryReader reader)
+		{
+			if (Main.netMode != 1)
+			{
+				return;
+			}
+			Player player = Main.player[Main.myPlayer];
+			byte op = reader.ReadByte();
+			Item item = ItemIO.Receive(reader, true);
+			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
+			{
+				Main.mouseItem = item;
+				item = new Item();
+			}
+			else if (op == 2 && Main.playerInventory && Main.mouseItem.type == item.type)
+			{
+				int total = Main.mouseItem.stack + item.stack;
+				if (total > Main.mouseItem.maxStack)
+				{
+					total = Main.mouseItem.maxStack;
+				}
+				int difference = total - Main.mouseItem.stack;
+				Main.mouseItem.stack = total;
+				item.stack -= total;
+			}
+			if (item.stack > 0)
+			{
+				item = player.GetItem(Main.myPlayer, item, false, true);
+				if (!item.IsAir)
+				{
+					player.QuickSpawnClonedItem(item, item.stack);
+				}
+			}
+		}
 	}
 
 	enum MessageType : byte
@@ -271,6 +385,8 @@ namespace MagicStorage
 		TryStorageOperation,
 		StorageOperationResult,
 		RefreshNetworkItems,
-		ClientSendTEUpdate
+		ClientSendTEUpdate,
+		TryStationOperation,
+		StationOperationResult
 	}
 }

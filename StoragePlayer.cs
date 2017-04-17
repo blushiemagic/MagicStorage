@@ -67,6 +67,35 @@ namespace MagicStorage
 			return storageAccess;
 		}
 
+		public static void GetItem(Item item, bool toMouse)
+		{
+			Player player = Main.player[Main.myPlayer];
+			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir)
+			{
+				Main.mouseItem = item;
+				item = new Item();
+			}
+			else if (toMouse && Main.playerInventory && Main.mouseItem.type == item.type)
+			{
+				int total = Main.mouseItem.stack + item.stack;
+				if (total > Main.mouseItem.maxStack)
+				{
+					total = Main.mouseItem.maxStack;
+				}
+				int difference = total - Main.mouseItem.stack;
+				Main.mouseItem.stack = total;
+				item.stack -= difference;
+			}
+			if (!item.IsAir)
+			{
+				item = player.GetItem(Main.myPlayer, item, false, true);
+				if (!item.IsAir)
+				{
+					player.QuickSpawnClonedItem(item, item.stack);
+				}
+			}
+		}
+
 		public void FindRecipesFromStorage()
 		{
 			

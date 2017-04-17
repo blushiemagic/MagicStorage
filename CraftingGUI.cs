@@ -39,7 +39,8 @@ namespace MagicStorage
 		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar = new UISearchBar();
 		internal static UIButtonChoice sortButtons;
-		internal static UITextPanel<string> depositButton = new UITextPanel<string>("Deposit All", 1f);
+		private static UIElement stationZone = new UIElement();
+		private static UIText stationText = new UIText("Crafting Stations");
 		private static UIElement slotZone = new UIElement();
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -85,21 +86,20 @@ namespace MagicStorage
 			InitSortButtons();
 			topBar.Append(sortButtons);
 
-			depositButton.Left.Set(sortButtons.GetDimensions().Width + 2 * padding, 0f);
-			depositButton.Width.Set(-sortButtons.GetDimensions().Width - 4 * padding, 0.5f);
-			depositButton.Height.Set(-2 * padding, 1f);
-			depositButton.PaddingTop = 8f;
-			depositButton.PaddingBottom = 8f;
-			topBar.Append(depositButton);
-
 			searchBar.Left.Set(0f, 0.5f);
 			searchBar.Width.Set(0f, 0.5f);
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			stationZone.Width.Set(0f, 1f);
+			stationZone.Top.Set(40f, 0f);
+			stationZone.Height.Set(60f, 0f);
+			basePanel.Append(stationZone);
+			stationZone.Append(stationText);
+
 			slotZone.Width.Set(0f, 1f);
-			slotZone.Top.Set(40f, 0f);
-			slotZone.Height.Set(-80f, 1f);
+			slotZone.Top.Set(100f, 0f);
+			slotZone.Height.Set(-140f, 1f);
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
@@ -168,7 +168,6 @@ namespace MagicStorage
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
-				UpdateDepositButton();
 				UpdateItemSlots();
 			}
 			else
@@ -273,6 +272,24 @@ namespace MagicStorage
 			return ((StorageAccess)modTile).GetHeart(pos.X, pos.Y);
 		}
 
+		private static TECraftingAccess GetCraftingEntity()
+		{
+			Player player = Main.player[Main.myPlayer];
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
+			Point16 pos = modPlayer.ViewingStorage();
+			if (pos.X < 0 || pos.Y < 0 || !TileEntity.ByPosition.ContainsKey(pos))
+			{
+				return null;
+			}
+			return TileEntity.ByPosition[pos] as TECraftingAccess;
+		}
+
+		private static Item[] GetCraftingStations()
+		{
+			TECraftingEntity ent = GetCraftingEntity();
+			return ent == null ? null : ent.stations;
+		}
+
 		public static void RefreshItems()
 		{
 			items.Clear();
@@ -302,27 +319,6 @@ namespace MagicStorage
 				break;
 			}
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
-		}
-
-		private static void UpdateDepositButton()
-		{
-			CalculatedStyle dim = depositButton.GetDimensions();
-			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-			{
-				depositButton.BackgroundColor = new Color(73, 94, 171);
-				if (MouseClicked)
-				{
-					if (TryDepositAll())
-					{
-						RefreshItems();
-						Main.PlaySound(7, -1, -1, 1);
-					}
-				}
-			}
-			else
-			{
-				depositButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			}
 		}
 
 		private static void UpdateItemSlots()

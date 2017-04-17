@@ -59,12 +59,12 @@ namespace MagicStorage.Components
 
 		public override bool CanKillTile(int i, int j, ref bool blockDamage)
 		{
-			return Main.tile[i, j].frameX < 36;
+			return (Main.tile[i, j].frameX / 36) % 3 == 0;
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (Main.tile[i, j].frameX >= 36)
+			if ((Main.tile[i, j].frameX / 36) % 3 != 0)
 			{
 				fail = true;
 			}
