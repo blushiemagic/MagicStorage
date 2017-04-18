@@ -168,12 +168,10 @@ namespace MagicStorage
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
-				UpdateItemSlots();
 			}
 			else
 			{
 				scrollBarFocus = false;
-				ResetSlotFocus();
 			}
 		}
 
@@ -286,7 +284,7 @@ namespace MagicStorage
 
 		private static Item[] GetCraftingStations()
 		{
-			TECraftingEntity ent = GetCraftingEntity();
+			TECraftingAccess ent = GetCraftingEntity();
 			return ent == null ? null : ent.stations;
 		}
 
@@ -319,219 +317,6 @@ namespace MagicStorage
 				break;
 			}
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
-		}
-
-		private static void UpdateItemSlots()
-		{
-			Player player = Main.player[Main.myPlayer];
-			if (!player.trashItem.IsAir)
-			{
-				if (TryDeposit(player.trashItem))
-				{
-					RefreshItems();
-				}
-				if (!player.trashItem.IsAir)
-				{
-					player.trashItem = player.GetItem(Main.myPlayer, player.trashItem, false, true);
-				}
-			}
-
-			hoverSlot = -1;
-			if (curMouse.RightButton == ButtonState.Released)
-			{
-				ResetSlotFocus();
-			}
-			TryHoverSlot();
-			if (slotFocus >= 0)
-			{
-				SlotFocusLogic();
-			}
-		}
-
-		private static void ResetSlotFocus()
-		{
-			slotFocus = -1;
-			rightClickTimer = 0;
-			maxRightClickTimer = startMaxRightClickTimer;
-		}
-
-		private static void TryHoverSlot()
-		{
-			Vector2 slotOrigin = slotZone.GetDimensions().Position();
-			if (curMouse.X <= slotOrigin.X || curMouse.Y <= slotOrigin.Y)
-			{
-				return;
-			}
-			int itemSlotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale);
-			int itemSlotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale);
-			int slotX = (curMouse.X - (int)slotOrigin.X) / (itemSlotWidth + padding);
-			int slotY = (curMouse.Y - (int)slotOrigin.Y) / (itemSlotHeight + padding);
-			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= displayRows)
-			{
-				return;
-			}
-			Vector2 slotPos = slotOrigin + new Vector2(slotX * (itemSlotWidth + padding), slotY * (itemSlotHeight + padding));
-			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + itemSlotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + itemSlotHeight)
-			{
-				HoverItemSlot(slotX + numColumns * slotY);
-			}
-		}
-
-		private static void HoverItemSlot(int slot)
-		{
-			Player player = Main.player[Main.myPlayer];
-			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
-			if (MouseClicked)
-			{
-				bool changed = false;
-				if (!Main.mouseItem.IsAir)
-				{
-					if (TryDeposit(Main.mouseItem))
-					{
-						changed = true;
-					}
-				}
-				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
-				{
-					Item toWithdraw = items[slot].Clone();
-					if (toWithdraw.stack > toWithdraw.maxStack)
-					{
-						toWithdraw.stack = toWithdraw.maxStack;
-					}
-					Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
-					if (ItemSlot.ShiftInUse)
-					{
-						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
-					}
-					changed = true;
-				}
-				if (changed)
-				{
-					RefreshItems();
-					Main.PlaySound(7, -1, -1, 1);
-				}
-			}
-
-			if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
-			{
-				slotFocus = slot;
-			}
-			
-			if (slot < items.Count && !items[slot].IsAir)
-			{
-				hoverSlot = slot;
-			}
-		}
-
-		private static void SlotFocusLogic()
-		{
-			if (slotFocus >= items.Count || (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)))
-			{
-				ResetSlotFocus();
-			}
-			else
-			{
-				if (rightClickTimer <= 0)
-				{
-					rightClickTimer = maxRightClickTimer;
-					maxRightClickTimer = maxRightClickTimer * 3 / 4;
-					if (maxRightClickTimer <= 0)
-					{
-						maxRightClickTimer = 1;
-					}
-					Item toWithdraw = items[slotFocus].Clone();
-					toWithdraw.stack = 1;
-					Item result = DoWithdraw(toWithdraw);
-					if (Main.mouseItem.IsAir)
-					{
-						Main.mouseItem = result;
-					}
-					else
-					{
-						Main.mouseItem.stack += result.stack;
-					}
-					Main.soundInstanceMenuTick.Stop();
-					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
-					Main.PlaySound(12, -1, -1, 1);
-					RefreshItems();
-				}
-				rightClickTimer--;
-			}
-		}
-
-		private static bool TryDeposit(Item item)
-		{
-			int oldStack = item.stack;
-			DoDeposit(item);
-			return oldStack != item.stack;
-		}
-
-		private static void DoDeposit(Item item)
-		{
-			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0)
-			{
-				heart.DepositItem(item);
-			}
-			else
-			{
-				NetHelper.SendDeposit(heart.ID, item);
-				item.SetDefaults(0);
-			}
-		}
-
-		private static bool TryDepositAll()
-		{
-			Player player = Main.player[Main.myPlayer];
-			TEStorageHeart heart = GetHeart();
-			bool changed = false;
-			if (Main.netMode == 0)
-			{
-				for (int k = 10; k < 50; k++)
-				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
-					{
-						int oldStack = player.inventory[k].stack;
-						heart.DepositItem(player.inventory[k]);
-						if (oldStack != player.inventory[k].stack)
-						{
-							changed = true;
-						}
-					}
-				}
-			}
-			else
-			{
-				List<Item> items = new List<Item>();
-				for (int k = 10; k < 50; k++)
-				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
-					{
-						items.Add(player.inventory[k]);
-					}
-				}
-				NetHelper.SendDepositAll(heart.ID, items);
-				foreach (Item item in items)
-				{
-					item.SetDefaults(0);
-				}
-				changed = true;
-			}
-			return changed;
-		}
-
-		private static Item DoWithdraw(Item item, bool toInventory = false)
-		{
-			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0)
-			{
-				return heart.TryWithdraw(item);
-			}
-			else
-			{
-				NetHelper.SendWithdraw(heart.ID, item, toInventory);
-				return new Item();
-			}
 		}
 	}
 }

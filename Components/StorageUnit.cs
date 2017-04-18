@@ -135,6 +135,8 @@ namespace MagicStorage.Components
 			}
 			if (success)
 			{
+				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
+				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 2, 2);
 				item.stack--;
 				if (item.stack <= 0)

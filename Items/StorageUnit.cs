@@ -28,7 +28,7 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageComponent"));
-			recipe.AddIngredient(ItemID.Chest);
+			recipe.AddRecipeGroup("MagicStorage:WoodChest");
 			recipe.AddIngredient(ItemID.SilverBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
@@ -36,7 +36,7 @@ namespace MagicStorage.Items
 
 			recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageComponent"));
-			recipe.AddIngredient(ItemID.Chest);
+			recipe.AddRecipeGroup("MagicStorage:WoodChest");
 			recipe.AddIngredient(ItemID.TungstenBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);

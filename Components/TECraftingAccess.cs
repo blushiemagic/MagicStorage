@@ -28,7 +28,7 @@ namespace MagicStorage.Components
 			return tile.type == mod.TileType("CraftingAccess") && tile.frameX == 0 && tile.frameY == 0;
 		}
 
-		public void TryDespositStation(Item item)
+		public void TryDepositStation(Item item)
 		{
 			if (Main.netMode == 1)
 			{
@@ -36,7 +36,7 @@ namespace MagicStorage.Components
 			}
 			foreach (Item station in stations)
 			{
-				if (stations[k].type == item.type)
+				if (station.type == item.type)
 				{
 					return;
 				}
@@ -52,7 +52,7 @@ namespace MagicStorage.Components
 					{
 						item.SetDefaults(0);
 					}
-					SendTEUpdate(ID, Position);
+					NetHelper.SendTEUpdate(ID, Position);
 					return;
 				}
 			}
@@ -68,7 +68,7 @@ namespace MagicStorage.Components
 			{
 				Item item = stations[slot];
 				stations[slot] = new Item();
-				SendTEUpdate(ID, Position);
+				NetHelper.SendTEUpdate(ID, Position);
 				return item;
 			}
 			return new Item();
@@ -85,7 +85,7 @@ namespace MagicStorage.Components
 				Item temp = item;
 				item = stations[slot];
 				stations[slot] = temp;
-				SendTEUpdate(ID, Position);
+				NetHelper.SendTEUpdate(ID, Position);
 				return item;
 			}
 			else if (!item.IsAir && stations[slot].IsAir)
@@ -97,9 +97,10 @@ namespace MagicStorage.Components
 				{
 					item.SetDefaults(0);
 				}
-				SendTEUpdate(ID, Position);
+				NetHelper.SendTEUpdate(ID, Position);
 				return item;
 			}
+			return item;
 		}
 
 		public override TagCompound Save()

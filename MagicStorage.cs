@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 
@@ -26,6 +27,12 @@ namespace MagicStorage
 		public override void PostSetupContent()
 		{
 			
+		}
+
+		public override void AddRecipeGroups()
+		{
+			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Craftable Wood Chest", ItemID.Chest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.ShadewoodChest, ItemID.PalmWoodChest, ItemID.BorealWoodChest, ItemID.SpookyChest);
+			RecipeGroup.RegisterGroup("MagicStorage:WoodChest", group);
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
