@@ -173,6 +173,7 @@ namespace MagicStorage
 			else
 			{
 				scrollBarFocus = false;
+				scrollBar.ViewPosition = 0f;
 				ResetSlotFocus();
 			}
 		}
@@ -185,6 +186,8 @@ namespace MagicStorage
 			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 			{
 				player.mouseInterface = true;
+				player.showItemIcon = false;
+				InterfaceHelper.HideItemIconCache();
 			}
 			basePanel.Draw(Main.spriteBatch);
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;

@@ -93,7 +93,7 @@ namespace MagicStorage
 
 			stationZone.Width.Set(0f, 1f);
 			stationZone.Top.Set(40f, 0f);
-			stationZone.Height.Set(60f, 0f);
+			stationZone.Height.Set(70f, 0f);
 			basePanel.Append(stationZone);
 			stationZone.Append(stationText);
 
@@ -183,6 +183,8 @@ namespace MagicStorage
 			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 			{
 				player.mouseInterface = true;
+				player.showItemIcon = false;
+				InterfaceHelper.HideItemIconCache();
 			}
 			basePanel.Draw(Main.spriteBatch);
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
@@ -191,12 +193,11 @@ namespace MagicStorage
 			float oldScale = Main.inventoryScale;
 			Main.inventoryScale = inventoryScale;
 			Item[] temp = new Item[11];
-			for (int k = 0; k < numColumns * displayRows; k++)
+			Item[] craftingStations = GetCraftingStations();
+			for (int k = 0; k < numColumns; k++)
 			{
-				int index = k + numColumns * (int)Math.Round(scrollBar.ViewPosition);
-				Item item = index < items.Count ? items[index] : new Item();
-				Vector2 drawPos = slotZonePos + new Vector2((itemSlotWidth + padding) * (k % 10), (itemSlotHeight + padding) * (k / 10));
-				temp[10] = item;
+				temp[10] = craftingStations[k];
+				Vector2 drawPos = GetSlotPosition(k);
 				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
 			}
 			if (hoverSlot >= 0 && hoverSlot < items.Count)
@@ -317,6 +318,23 @@ namespace MagicStorage
 				break;
 			}
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
+		}
+
+		public static Vector2 GetSlotSize()
+		{
+			return new Vector2(Main.inventoryBackTexture.Width, Main.inventoryBackTexture.Height) * inventoryScale;
+		}
+
+		public static Vector2 GetSlotPosition(int slot)
+		{
+			Vector2 slotSize = GetSlotSize();
+			if (slot < numColumns)
+			{
+				CalculatedStyle dim = stationZone.GetDimensions();
+				Vector2 origin = new Vector2(dim.X, dim.Y + dim.Height - slotSize.Y);
+				return origin + new Vector2(slot * (slotSize.X + padding), 0f);
+			}
+			return Vector2.Zero;
 		}
 	}
 }

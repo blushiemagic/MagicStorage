@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -9,6 +10,13 @@ namespace MagicStorage
 {
 	public static class InterfaceHelper
 	{
+		private static FieldInfo _itemIconCacheTimeInfo;
+
+		public static void Initialize()
+		{
+			_itemIconCacheTimeInfo = typeof(Main).GetField("_itemIconCacheTime", BindingFlags.NonPublic | BindingFlags.Static);
+		}
+
 		public static void ModifyInterfaceLayers(List<MethodSequenceListItem> layers)
 		{
 			for (int k = 0; k < layers.Count; k++)
@@ -49,6 +57,11 @@ namespace MagicStorage
 				StorageGUI.Draw(heart);
 			}
 			return true;
+		}
+
+		public static void HideItemIconCache()
+		{
+			_itemIconCacheTimeInfo.SetValue(null, 0);
 		}
 	}
 }

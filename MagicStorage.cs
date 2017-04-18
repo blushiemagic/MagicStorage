@@ -22,6 +22,7 @@ namespace MagicStorage
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
 			}
 			Instance = this;
+			InterfaceHelper.Initialize();
 		}
 
 		public override void PostSetupContent()
