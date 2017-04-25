@@ -131,15 +131,20 @@ namespace MagicStorage.Components
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
 					return true;
 				}
-				else while (!storageUnit.IsFull && !inactiveUnit.IsEmpty)
+				else 
 				{
-					Item item = inactiveUnit.WithdrawStack();
-					storageUnit.DepositItem(item);
-					if (!item.IsAir)
+					NetHelper.StartUpdateQueue();
+					while (!storageUnit.IsFull && !inactiveUnit.IsEmpty)
 					{
-						inactiveUnit.DepositItem(item);
+						Item item = inactiveUnit.WithdrawStack();
+						storageUnit.DepositItem(item);
+						if (!item.IsAir)
+						{
+							inactiveUnit.DepositItem(item);
+						}
+						hasChange = true;
 					}
-					hasChange = true;
+					NetHelper.ProcessUpdateQueue();
 				}
 			}
 			return hasChange;

@@ -12,6 +12,10 @@ namespace MagicStorage
 {
 	public static class NetHelper
 	{
+		private static bool queueUpdates = false;
+		private static Queue<int> updateQueue = new Queue<int>();
+		private static HashSet<int> updateQueueContains = new HashSet<int>();
+
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
 			MessageType type = (MessageType)reader.ReadByte();
@@ -54,11 +58,41 @@ namespace MagicStorage
 			}
 		}
 
+		public static void StartUpdateQueue()
+		{
+			queueUpdates = true;
+		}
+
 		public static void SendTEUpdate(int id, Point16 position)
 		{
-			if (Main.netMode == 2)
+			if (Main.netMode != 2)
+			{
+				return;
+			}
+			if (queueUpdates)
+			{
+				if (!updateQueueContains.Contains(id))
+				{
+					updateQueue.Enqueue(id);
+					updateQueueContains.Add(id);
+				}
+			}
+			else
 			{
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, "", id, position.X, position.Y);
+			}
+		}
+
+		public static void ProcessUpdateQueue()
+		{
+			if (queueUpdates)
+			{
+				queueUpdates = false;
+				while (updateQueue.Count > 0)
+				{
+					NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, "", updateQueue.Dequeue());
+				}
+				updateQueueContains.Clear();
 			}
 		}
 
@@ -170,6 +204,7 @@ namespace MagicStorage
 			{
 				int count = reader.ReadByte();
 				List<Item> items = new List<Item>();
+				StartUpdateQueue();
 				for (int k = 0; k < count; k++)
 				{
 					Item item = ItemIO.Receive(reader, true);
@@ -179,6 +214,7 @@ namespace MagicStorage
 						items.Add(item);
 					}
 				}
+				ProcessUpdateQueue();
 				if (items.Count > 0)
 				{
 					ModPacket packet = PrepareOperationResult(op);
