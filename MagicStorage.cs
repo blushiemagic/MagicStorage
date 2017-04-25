@@ -32,8 +32,48 @@ namespace MagicStorage
 
 		public override void AddRecipeGroups()
 		{
-			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Craftable Wood Chest", ItemID.Chest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.ShadewoodChest, ItemID.PalmWoodChest, ItemID.BorealWoodChest, ItemID.SpookyChest);
-			RecipeGroup.RegisterGroup("MagicStorage:WoodChest", group);
+			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Chest",
+			ItemID.Chest,
+			ItemID.GoldChest,
+			ItemID.ShadowChest,
+			ItemID.EbonwoodChest,
+			ItemID.RichMahoganyChest,
+			ItemID.PearlwoodChest,
+			ItemID.IvyChest,
+			ItemID.IceChest,
+			ItemID.LivingWoodChest,
+			ItemID.SkywareChest,
+			ItemID.ShadewoodChest,
+			ItemID.WebCoveredChest,
+			ItemID.LihzahrdChest,
+			ItemID.WaterChest,
+			ItemID.JungleChest,
+			ItemID.CorruptionChest,
+			ItemID.CrimsonChest,
+			ItemID.HallowedChest,
+			ItemID.FrozenChest,
+			ItemID.DynastyChest,
+			ItemID.HoneyChest,
+			ItemID.SteampunkChest,
+			ItemID.PalmWoodChest,
+			ItemID.MushroomChest,
+			ItemID.BorealWoodChest,
+			ItemID.SlimeChest,
+			ItemID.GreenDungeonChest,
+			ItemID.PinkDungeonChest,
+			ItemID.BlueDungeonChest,
+			ItemID.BoneChest,
+			ItemID.CactusChest,
+			ItemID.FleshChest,
+			ItemID.ObsidianChest,
+			ItemID.PumpkinChest,
+			ItemID.SpookyChest,
+			ItemID.GlassChest,
+			ItemID.MartianChest,
+			ItemID.GraniteChest,
+			ItemID.MeteoriteChest
+			ItemID.MarbleChest);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
