@@ -64,13 +64,19 @@ namespace MagicStorage.Components
 			{
 				return;
 			}
+			bool remoteChange = false;
 			for (int k = 0; k < remoteAccesses.Count; k++)
 			{
 				if (!TileEntity.ByPosition.ContainsKey(remoteAccesses[k]) || !(TileEntity.ByPosition[remoteAccesses[k]] is TERemoteAccess))
 				{
 					remoteAccesses.RemoveAt(k);
 					k--;
+					remoteChange = true;
 				}
+			}
+			if (remoteChange)
+			{
+				NetHelper.SendTEUpdate(ID, Position);
 			}
 			updateTimer++;
 			if (updateTimer >= 120)
