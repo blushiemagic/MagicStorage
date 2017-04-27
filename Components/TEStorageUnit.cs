@@ -24,6 +24,10 @@ namespace MagicStorage.Components
 			get
 			{
 				int style = Main.tile[Position.X, Position.Y].frameY / 36;
+				if (style == 8)
+				{
+					return 4;
+				}
 				if (style > 1)
 				{
 					style--;
@@ -92,6 +96,11 @@ namespace MagicStorage.Components
 					GetHeart().ExitReadLock();
 				}
 			}
+		}
+
+		public bool HasSpaceFor(Item check, bool locked = false)
+		{
+			return !IsFull || HasSpaceInStackFor(check, locked);
 		}
 
 		public override bool HasItem(Item check, bool locked = false)

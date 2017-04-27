@@ -16,7 +16,8 @@ namespace MagicStorage.Components
 	{
 		private ReaderWriterLockSlim itemsLock = new ReaderWriterLockSlim();
 		public List<Point16> remoteAccesses = new List<Point16>();
-		private int updateTimer = 600;
+		private int updateTimer = 60;
+		private int compactStage = 0;
 
 		public override bool ValidTile(Tile tile)
 		{
@@ -79,18 +80,14 @@ namespace MagicStorage.Components
 				NetHelper.SendTEUpdate(ID, Position);
 			}
 			updateTimer++;
-			if (updateTimer >= 120)
+			if (updateTimer >= 60)
 			{
 				updateTimer = 0;
 				if (Main.netMode != 2 || itemsLock.TryEnterWriteLock(2))
 				{
 					try
 					{
-						bool noChange = true;
-						if (EmptyInactive() || Defragment() || PackItems())
-						{
-							noChange = false;
-						}
+						CompactOne();
 					}
 					finally
 					{
@@ -100,6 +97,23 @@ namespace MagicStorage.Components
 						}
 					}
 				}
+			}
+		}
+
+		//precondition: lock is already taken
+		public void CompactOne()
+		{
+			if (compactStage == 0)
+			{
+				EmptyInactive();
+			}
+			else if (compactStage == 1)
+			{
+				Defragment();
+			}
+			else if (compactStage == 2)
+			{
+				PackItems();
 			}
 		}
 
@@ -117,14 +131,13 @@ namespace MagicStorage.Components
 				if (storageUnit.Inactive && !storageUnit.IsEmpty)
 				{
 					inactiveUnit = storageUnit;
-					break;
 				}
 			}
 			if (inactiveUnit == null)
 			{
+				compactStage++;
 				return false;
 			}
-			bool hasChange = false;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
 				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
@@ -132,26 +145,45 @@ namespace MagicStorage.Components
 					continue;
 				}
 				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
-				if (storageUnit.IsEmpty)
+				if (storageUnit.IsEmpty && inactiveUnit.NumItems <= storageUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
+					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
-				else 
+			}
+			bool hasChange = false;
+			NetHelper.StartUpdateQueue();
+			Item tryMove = inactiveUnit.WithdrawStack();
+			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
+			{
+				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
 				{
-					NetHelper.StartUpdateQueue();
-					while (!storageUnit.IsFull && !inactiveUnit.IsEmpty)
-					{
-						Item item = inactiveUnit.WithdrawStack();
-						storageUnit.DepositItem(item);
-						if (!item.IsAir)
-						{
-							inactiveUnit.DepositItem(item);
-						}
-						hasChange = true;
-					}
-					NetHelper.ProcessUpdateQueue();
+					continue;
 				}
+				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir)
+				{
+					storageUnit.DepositItem(tryMove, true);
+					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
+					{
+						tryMove = inactiveUnit.WithdrawStack();
+					}
+					hasChange = true;
+				}
+			}
+			if (!tryMove.IsAir)
+			{
+				inactiveUnit.DepositItem(tryMove, true);
+			}
+			NetHelper.ProcessUpdateQueue();
+			if (hasChange)
+			{
+				NetHelper.SendRefreshNetworkItems(ID);
+			}
+			else
+			{
+				compactStage++;
 			}
 			return hasChange;
 		}
@@ -171,12 +203,14 @@ namespace MagicStorage.Components
 				{
 					emptyUnit = storageUnit;
 				}
-				else if (emptyUnit != null && !storageUnit.IsEmpty)
+				else if (emptyUnit != null && !storageUnit.IsEmpty && storageUnit.NumItems <= emptyUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(emptyUnit, storageUnit);
+					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
 			}
+			compactStage++;
 			return false;
 		}
 
@@ -197,16 +231,31 @@ namespace MagicStorage.Components
 				}
 				else if (unitWithSpace != null && !storageUnit.IsEmpty)
 				{
-					Item item = storageUnit.WithdrawStack();
-					unitWithSpace.DepositItem(item, true);
-					if (!item.IsAir)
+					NetHelper.StartUpdateQueue();
+					while (!unitWithSpace.IsFull && !storageUnit.IsEmpty)
 					{
-						storageUnit.DepositItem(item);
+						Item item = storageUnit.WithdrawStack();
+						unitWithSpace.DepositItem(item, true);
+						if (!item.IsAir)
+						{
+							storageUnit.DepositItem(item, true);
+						}
 					}
+					NetHelper.ProcessUpdateQueue();
+					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
 			}
+			compactStage++;
 			return false;
+		}
+
+		public void ResetCompactStage(int stage = 0)
+		{
+			if (stage < compactStage)
+			{
+				compactStage = stage;
+			}
 		}
 
 		public void DepositItem(Item toDeposit)
@@ -215,6 +264,7 @@ namespace MagicStorage.Components
 			{
 				EnterWriteLock();
 			}
+			int oldStack = toDeposit.stack;
 			try
 			{
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -242,6 +292,10 @@ namespace MagicStorage.Components
 			}
 			finally
 			{
+				if (oldStack != toDeposit.stack)
+				{
+					ResetCompactStage();
+				}
 				if (Main.netMode == 2)
 				{
 					ExitWriteLock();
@@ -279,10 +333,15 @@ namespace MagicStorage.Components
 							}
 							if (lookFor.stack <= 0)
 							{
+								ResetCompactStage();
 								return result;
 							}
 						}
 					}
+				}
+				if (result.stack > 0)
+				{
+					ResetCompactStage();
 				}
 				return result;
 			}

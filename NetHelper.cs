@@ -226,10 +226,7 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			ModPacket packet2 = MagicStorage.Instance.GetPacket();
-			packet2.Write((byte)MessageType.RefreshNetworkItems);
-			packet2.Write(ent);
-			packet2.Send();
+			SendRefreshNetworkItems(ent);
 		}
 
 		public static void ReceiveOperationResult(BinaryReader reader)
@@ -256,6 +253,17 @@ namespace MagicStorage
 			}
 		}
 
+		public static void SendRefreshNetworkItems(int ent)
+		{
+			if (Main.netMode == 2)
+			{
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.RefreshNetworkItems);
+				packet.Write(ent);
+				packet.Send();
+			}
+		}
+
 		public static void ClientSendTEUpdate(int id)
 		{
 			if (Main.netMode == 1)
@@ -277,6 +285,14 @@ namespace MagicStorage
 				ent.ID = id;
 				TileEntity.ByID[id] = ent;
 				TileEntity.ByPosition[ent.Position] = ent;
+				if (ent is TEStorageUnit)
+				{
+					TEStorageHeart heart = ((TEStorageUnit)ent).GetHeart();
+					if (heart != null)
+					{
+						heart.ResetCompactStage();
+					}
+				}
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, "", id, ent.Position.X, ent.Position.Y);
 			}
 		}

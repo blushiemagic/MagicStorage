@@ -50,6 +50,10 @@ namespace MagicStorage.Items
 					if (storageUnit is TEStorageUnit)
 					{
 						((TEStorageUnit)storageUnit).UpdateTileFrameWithNetSend();
+						if (Main.netMode == 0)
+						{
+							storageUnit.GetHeart().ResetCompactStage();
+						}
 					}
 				}
 			}

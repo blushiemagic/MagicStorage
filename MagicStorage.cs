@@ -71,7 +71,7 @@ namespace MagicStorage
 			ItemID.GlassChest,
 			ItemID.MartianChest,
 			ItemID.GraniteChest,
-			ItemID.MeteoriteChest
+			ItemID.MeteoriteChest,
 			ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 		}

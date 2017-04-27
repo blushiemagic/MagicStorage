@@ -50,6 +50,9 @@ namespace MagicStorage.Components
 			case 7:
 				type = mod.ItemType("StorageUnitTerra");
 				break;
+			case 8:
+				type = mod.ItemType("StorageUnitTiny");
+				break;
 			default:
 				type = mod.ItemType("StorageUnit");
 				break;
