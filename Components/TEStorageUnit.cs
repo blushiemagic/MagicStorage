@@ -167,6 +167,7 @@ namespace MagicStorage.Components
 				{
 					Item item = toDeposit.Clone();
 					item.newAndShiny = false;
+					item.favorited = false;
 					items.Add(item);
 					toDeposit.SetDefaults(0);
 					hasChange = true;
