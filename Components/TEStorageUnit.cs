@@ -16,8 +16,8 @@ namespace MagicStorage.Components
 		private IList<Item> items = new List<Item>();
 
 		//metadata
-		private Dictionary<ItemData, bool> hasSpaceInStack = new Dictionary<ItemData, bool>();
-		private Dictionary<ItemData, bool> hasItem = new Dictionary<ItemData, bool>();
+		private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
+		private HashSet<ItemData> hasItem = new HashSet<ItemData>();
 
 		public int Capacity
 		{
@@ -87,7 +87,7 @@ namespace MagicStorage.Components
 			try
 			{
 				ItemData data = new ItemData(check);
-				return hasSpaceInStack.ContainsKey(data) && hasSpaceInStack[data];
+				return hasSpaceInStack.Contains(data);
 			}
 			finally
 			{
@@ -112,7 +112,7 @@ namespace MagicStorage.Components
 			try
 			{
 				ItemData data = new ItemData(check);
-				return hasItem.ContainsKey(data) && hasItem[data];
+				return hasItem.Contains(data);
 			}
 			finally
 			{
@@ -289,7 +289,7 @@ namespace MagicStorage.Components
 			IList<Item> items = unit1.items;
 			unit1.items = unit2.items;
 			unit2.items = items;
-			Dictionary<ItemData, bool> dict = unit1.hasSpaceInStack;
+			HashSet<ItemData> dict = unit1.hasSpaceInStack;
 			unit1.hasSpaceInStack = unit2.hasSpaceInStack;
 			unit2.hasSpaceInStack = dict;
 			dict = unit1.hasItem;
@@ -331,9 +331,9 @@ namespace MagicStorage.Components
 				ItemData data = new ItemData(item);
 				if (item.stack < item.maxStack)
 				{
-					hasSpaceInStack[data] = true;
+					hasSpaceInStack.Add(data);
 				}
-				hasItem[data] = true;
+				hasItem.Add(data);
 			}
 		}
 
@@ -359,9 +359,9 @@ namespace MagicStorage.Components
 				ItemData data = new ItemData(item);
 				if (item.stack < item.maxStack)
 				{
-					hasSpaceInStack[data] = true;
+					hasSpaceInStack.Add(data);
 				}
-				hasItem[data] = true;
+				hasItem.Add(data);
 			}
 		}
 
@@ -381,9 +381,9 @@ namespace MagicStorage.Components
 				ItemData data = new ItemData(item);
 				if (item.stack < item.maxStack)
 				{
-					hasSpaceInStack[data] = true;
+					hasSpaceInStack.Add(data);
 				}
-				hasItem[data] = true;
+				hasItem.Add(data);
 			}
 		}
 
