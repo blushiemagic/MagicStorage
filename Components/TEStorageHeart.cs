@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -31,12 +32,12 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			return new StorageSystem(this);
+			return storageUnits.Concat(remoteAccesses.SelectMany(remoteAccess => ((TERemoteAccess)TileEntity.ByPosition[remoteAccess]).storageUnits)).Select(storageUnit => (TEAbstractStorageUnit)TileEntity.ByPosition[storageUnit]);
 		}
 
 		public IEnumerable<Item> GetStoredItems()
 		{
-			return new StoredItems(this);
+			return GetStorageUnits().SelectMany(storageUnit => storageUnit.GetItems());
 		}
 
 		public void EnterReadLock()
@@ -396,175 +397,6 @@ namespace MagicStorage.Components
 			for (int k = 0; k < count; k++)
 			{
 				remoteAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
-			}
-		}
-	}
-
-	public class StorageSystem : IEnumerable<TEAbstractStorageUnit>
-	{
-		private TEStorageHeart heart;
-
-		internal StorageSystem(TEStorageHeart heart)
-		{
-			this.heart = heart;
-		}
-
-		public IEnumerator<TEAbstractStorageUnit> GetEnumerator()
-		{
-			return new StorageSystemEnumerator(heart);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-	}
-
-	class StorageSystemEnumerator : IEnumerator<TEAbstractStorageUnit>
-	{
-		private TEStorageHeart heart;
-		private IEnumerator<Point16> remoteAccesses;
-		private IEnumerator<Point16> currentList;
-
-		internal StorageSystemEnumerator(TEStorageHeart heart)
-		{
-			this.heart = heart;
-			this.remoteAccesses = heart.remoteAccesses.GetEnumerator();
-			this.currentList = heart.storageUnits.GetEnumerator();
-		}
-
-		public TEAbstractStorageUnit Current
-		{
-			get
-			{
-				return (TEAbstractStorageUnit)TileEntity.ByPosition[currentList.Current];
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return Current;
-			}
-		}
-
-		public bool MoveNext()
-		{
-			while (!currentList.MoveNext())
-			{
-				if (!remoteAccesses.MoveNext())
-				{
-					return false;
-				}
-				TileEntity remoteAccess = TileEntity.ByPosition[remoteAccesses.Current];
-				currentList.Dispose();
-				currentList = ((TEStorageCenter)remoteAccess).storageUnits.GetEnumerator();
-			}
-			return true;
-		}
-
-		public void Reset()
-		{
-			remoteAccesses.Reset();
-			currentList = heart.storageUnits.GetEnumerator();
-		}
-
-		public void Dispose()
-		{
-			remoteAccesses.Dispose();
-			currentList.Dispose();
-		}
-	}
-
-	public class StoredItems : IEnumerable<Item>
-	{
-		private TEStorageHeart heart;
-
-		internal StoredItems(TEStorageHeart heart)
-		{
-			this.heart = heart;
-		}
-
-		public IEnumerator<Item> GetEnumerator()
-		{
-			return new StoredItemsEnumerator(heart);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-	}
-
-	class StoredItemsEnumerator : IEnumerator<Item>
-	{
-		private TEStorageHeart heart;
-		private IEnumerator<TEAbstractStorageUnit> storageUnits;
-		private IEnumerator<Item> currentList;
-
-		internal StoredItemsEnumerator(TEStorageHeart heart)
-		{
-			this.heart = heart;
-			this.storageUnits = heart.GetStorageUnits().GetEnumerator();
-			if (this.storageUnits.MoveNext())
-			{
-				this.currentList = this.storageUnits.Current.GetItems().GetEnumerator();
-			}
-		}
-
-		public Item Current
-		{
-			get
-			{
-				return currentList.Current;
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return Current;
-			}
-		}
-
-		public bool MoveNext()
-		{
-			if (currentList == null)
-			{
-				return false;
-			}
-			while (!currentList.MoveNext())
-			{
-				if (!storageUnits.MoveNext())
-				{
-					return false;
-				}
-				TEAbstractStorageUnit storageUnit = storageUnits.Current;
-				currentList.Dispose();
-				currentList = storageUnit.GetItems().GetEnumerator();
-			}
-			return true;
-		}
-
-		public void Reset()
-		{
-			storageUnits.Reset();
-			currentList.Dispose();
-			currentList = null;
-			if (storageUnits.MoveNext())
-			{
-				currentList = storageUnits.Current.GetItems().GetEnumerator();
-			}
-		}
-
-		public void Dispose()
-		{
-			storageUnits.Dispose();
-			if (currentList != null)
-			{
-				currentList.Dispose();
 			}
 		}
 	}

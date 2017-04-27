@@ -88,7 +88,7 @@ namespace MagicStorage.Components
 			get
 			{
 				Item item = new Item();
-				item.SetDefaults(id);
+				item.SetDefaults(id, true);
 				item.stack = item.maxStack;
 				return item;
 			}

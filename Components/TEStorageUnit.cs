@@ -157,7 +157,7 @@ namespace MagicStorage.Components
 						toDeposit.stack = total - newStack;
 						if (toDeposit.stack <= 0)
 						{
-							toDeposit.SetDefaults(0);
+							toDeposit.SetDefaults(0, true);
 							finished = true;
 							break;
 						}
@@ -169,7 +169,7 @@ namespace MagicStorage.Components
 					item.newAndShiny = false;
 					item.favorited = false;
 					items.Add(item);
-					toDeposit.SetDefaults(0);
+					toDeposit.SetDefaults(0, true);
 					hasChange = true;
 					finished = true;
 				}

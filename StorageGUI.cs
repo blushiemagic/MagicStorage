@@ -49,6 +49,7 @@ namespace MagicStorage
 		private static float scrollBarMaxViewSize = 2f;
 
 		private static List<Item> items = new List<Item>();
+		private static List<bool> didMatCheck = new List<bool>();
 		private static int numRows;
 		private static int displayRows;
 		private static int hoverSlot = -1;
@@ -200,6 +201,11 @@ namespace MagicStorage
 			{
 				int index = k + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 				Item item = index < items.Count ? items[index] : new Item();
+				if (!item.IsAir && !didMatCheck[index])
+				{
+					item.checkMat();
+					didMatCheck[index] = true;
+				}
 				Vector2 drawPos = slotZonePos + new Vector2((itemSlotWidth + padding) * (k % 10), (itemSlotHeight + padding) * (k / 10));
 				temp[10] = item;
 				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
@@ -278,6 +284,7 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			items.Clear();
+			didMatCheck.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 			{
@@ -304,6 +311,10 @@ namespace MagicStorage
 				break;
 			}
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
+			for (int k = 0; k < items.Count; k++)
+			{
+				didMatCheck.Add(false);
+			}
 		}
 
 		private static void UpdateDepositButton()
@@ -482,7 +493,7 @@ namespace MagicStorage
 			else
 			{
 				NetHelper.SendDeposit(heart.ID, item);
-				item.SetDefaults(0);
+				item.SetDefaults(0, true);
 			}
 		}
 
@@ -519,7 +530,7 @@ namespace MagicStorage
 				NetHelper.SendDepositAll(heart.ID, items);
 				foreach (Item item in items)
 				{
-					item.SetDefaults(0);
+					item.SetDefaults(0, true);
 				}
 				changed = true;
 			}
