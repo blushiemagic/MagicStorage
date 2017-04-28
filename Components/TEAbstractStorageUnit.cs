@@ -47,7 +47,7 @@ namespace MagicStorage.Components
 
 		public TEStorageHeart GetHeart()
 		{
-			if (center != new Point16(-1, -1))
+			if (center != new Point16(-1, -1) && TileEntity.ByPosition.ContainsKey(center) && TileEntity.ByPosition[center] is TEStorageCenter)
 			{
 				return ((TEStorageCenter)TileEntity.ByPosition[center]).GetHeart();
 			}

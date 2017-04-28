@@ -23,6 +23,11 @@ namespace MagicStorage.Components
 			return mod.GetTileEntity("TEStorageUnit");
 		}
 
+		public override void MouseOver(int i, int j)
+		{
+			Main.LocalPlayer.noThrow = 2;
+		}
+
 		public override int ItemType(int frameX, int frameY)
 		{
 			int style = frameY / 36;
@@ -157,6 +162,10 @@ namespace MagicStorage.Components
 				if (item.stack <= 0)
 				{
 					item.SetDefaults(0);
+				}
+				if (player.selectedItem == 58)
+				{
+					Main.mouseItem = item.Clone();
 				}
 			}
 			return success;

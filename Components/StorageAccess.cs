@@ -33,6 +33,15 @@ namespace MagicStorage.Components
 			return ((TEStorageCenter)heart).GetHeart();
 		}
 
+		public override void MouseOver(int i, int j)
+		{
+			Player player = Main.LocalPlayer;
+			Tile tile = Main.tile[i, j];
+			player.showItemIcon = true;
+			player.showItemIcon2 = ItemType(tile.frameX, tile.frameY);
+			player.noThrow = 2;
+		}
+
 		public override void RightClick(int i, int j)
 		{
 			if (Main.tile[i, j].frameX % 36 == 18)
