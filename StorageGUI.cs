@@ -37,9 +37,12 @@ namespace MagicStorage
 
 		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar = new UISearchBar("Search Items");
-		internal static UIButtonChoice sortButtons;
+		private static UIButtonChoice sortButtons;
 		internal static UITextPanel<string> depositButton = new UITextPanel<string>("Deposit All", 1f);
 		private static UIElement topBar2 = new UIElement();
+		private static UIButtonChoice filterButtons;
+		internal static UISearchBar searchBar2 = new UISearchBar("Search Mods");
+
 		private static UIElement slotZone = new UIElement();
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -103,6 +106,13 @@ namespace MagicStorage
 			topBar2.Height.Set(32f, 0f);
 			topBar2.Top.Set(36f, 0f);
 			basePanel.Append(topBar2);
+
+			InitFilterButtons();
+			topBar2.Append(filterButtons);
+			searchBar2.Left.Set(depositButtonRight + padding, 0f);
+			searchBar2.Width.Set(-depositButtonRight - 2 * padding, 1f);
+			searchBar2.Height.Set(0f, 1f);
+			topBar2.Append(searchBar2);
 
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(76f, 0f);
@@ -169,6 +179,33 @@ namespace MagicStorage
 			}
 		}
 
+		private static void InitFilterButtons()
+		{
+			if (filterButtons == null)
+			{
+				filterButtons = new UIButtonChoice(new Texture2D[]
+				{
+					MagicStorage.Instance.GetTexture("FilterAll"),
+					MagicStorage.Instance.GetTexture("FilterMelee"),
+					MagicStorage.Instance.GetTexture("FilterPickaxe"),
+					MagicStorage.Instance.GetTexture("FilterArmor"),
+					MagicStorage.Instance.GetTexture("FilterPotion"),
+					MagicStorage.Instance.GetTexture("FilterTile"),
+					MagicStorage.Instance.GetTexture("FilterMisc"),
+				},
+				new string[]
+				{
+					"Filter All",
+					"Filter Weapons",
+					"Filter Tools",
+					"Filter Equipment",
+					"Filter Potions",
+					"Filter Placeables",
+					"Filter Misc"
+				});
+			}
+		}
+
 		public static void Update(GameTime gameTime)
 		{
 			oldMouse = curMouse;
@@ -225,6 +262,7 @@ namespace MagicStorage
 				Main.instance.MouseText(string.Empty);
 			}
 			sortButtons.DrawText();
+			filterButtons.DrawText();
 			Main.inventoryScale = oldScale;
 		}
 
@@ -300,6 +338,7 @@ namespace MagicStorage
 				return;
 			}
 			InitSortButtons();
+			InitFilterButtons();
 			SortMode sortMode;
 			switch (sortButtons.Choice)
 			{
@@ -319,7 +358,35 @@ namespace MagicStorage
 				sortMode = SortMode.Default;
 				break;
 			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, "", searchBar.Text));
+			FilterMode filterMode;
+			switch (filterButtons.Choice)
+			{
+			case 0:
+				filterMode = FilterMode.All;
+				break;
+			case 1:
+				filterMode = FilterMode.Weapons;
+				break;
+			case 2:
+				filterMode = FilterMode.Tools;
+				break;
+			case 3:
+				filterMode = FilterMode.Equipment;
+				break;
+			case 4:
+				filterMode = FilterMode.Potions;
+				break;
+			case 5:
+				filterMode = FilterMode.Placeables;
+				break;
+			case 6:
+				filterMode = FilterMode.Misc;
+				break;
+			default:
+				filterMode = FilterMode.All;
+				break;
+			}
+			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 			for (int k = 0; k < items.Count; k++)
 			{
 				didMatCheck.Add(false);

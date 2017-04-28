@@ -60,6 +60,7 @@ namespace MagicStorage
 			storageAccess = new Point16(-1, -1);
 			Main.blockInput = false;
 			StorageGUI.searchBar.Reset();
+			StorageGUI.searchBar2.Reset();
 		}
 
 		public Point16 ViewingStorage()

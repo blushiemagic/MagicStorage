@@ -7,9 +7,37 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, string modFilter, string filter)
+		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
 		{
-			IEnumerable<Item> filteredItems = items.Where((item) => FilterName(item, modFilter, filter));
+			ItemFilter filter;
+			switch (filterMode)
+			{
+			case FilterMode.All:
+				filter = new FilterAll();
+				break;
+			case FilterMode.Weapons:
+				filter = new FilterWeapon();
+				break;
+			case FilterMode.Tools:
+				filter = new FilterTool();
+				break;
+			case FilterMode.Equipment:
+				filter = new FilterEquipment();
+				break;
+			case FilterMode.Potions:
+				filter = new FilterPotion();
+				break;
+			case FilterMode.Placeables:
+				filter = new FilterPlaceable();
+				break;
+			case FilterMode.Misc:
+				filter = new FilterMisc();
+				break;
+			default:
+				filter = new FilterAll();
+				break;
+			}
+			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
 			CompareFunction func;
 			switch (sortMode)
 			{
