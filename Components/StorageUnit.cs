@@ -141,6 +141,18 @@ namespace MagicStorage.Components
 				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 2, 2);
+				TEStorageHeart heart = storageUnit.GetHeart();
+				if (heart != null)
+				{
+					if (Main.netMode == 0)
+					{
+						heart.ResetCompactStage();
+					}
+					else if (Main.netMode == 1)
+					{
+						NetHelper.SendResetCompactStage(heart.ID);
+					}
+				}
 				item.stack--;
 				if (item.stack <= 0)
 				{

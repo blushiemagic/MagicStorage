@@ -47,6 +47,10 @@ namespace MagicStorage
 			{
 				ReceiveStationResult(reader);
 			}
+			else if (type == MessageType.ResetCompactStage)
+			{
+				ReceiveResetCompactStage(reader);
+			}
 		}
 
 		public static void SendComponentPlace(int i, int j, int type)
@@ -429,6 +433,29 @@ namespace MagicStorage
 				}
 			}
 		}
+
+		public static void SendResetCompactStage(int ent)
+		{
+			if (Main.netMode == 1)
+			{
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.ResetCompactStage);
+				packet.Write(ent);
+				packet.Send();
+			}
+		}
+
+		public static void ReceiveResetCompactStage(BinaryReader reader)
+		{
+			if (Main.netMode == 2)
+			{
+				int ent = reader.ReadInt32();
+				if (TileEntity.ByID[ent] is TEStorageHeart)
+				{
+					((TEStorageHeart)TileEntity.ByID[ent]).ResetCompactStage();
+				}
+			}
+		}
 	}
 
 	enum MessageType : byte
@@ -439,6 +466,7 @@ namespace MagicStorage
 		RefreshNetworkItems,
 		ClientSendTEUpdate,
 		TryStationOperation,
-		StationOperationResult
+		StationOperationResult,
+		ResetCompactStage
 	}
 }
