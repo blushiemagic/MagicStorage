@@ -24,7 +24,7 @@ namespace MagicStorage.Items
 			item.createTile = mod.TileType("CraftingAccess");
 		}
 
-		public override void AddRecipes()
+		/*public override void AddRecipes()
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
@@ -40,6 +40,6 @@ namespace MagicStorage.Items
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
-		}
+		}*/
 	}
 }
