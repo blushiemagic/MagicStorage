@@ -36,9 +36,10 @@ namespace MagicStorage
 		private static float panelHeight;
 
 		private static UIElement topBar = new UIElement();
-		internal static UISearchBar searchBar = new UISearchBar();
+		internal static UISearchBar searchBar = new UISearchBar("Search Items");
 		internal static UIButtonChoice sortButtons;
 		internal static UITextPanel<string> depositButton = new UITextPanel<string>("Deposit All", 1f);
+		private static UIElement topBar2 = new UIElement();
 		private static UIElement slotZone = new UIElement();
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -98,9 +99,14 @@ namespace MagicStorage
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			topBar2.Width.Set(0f, 1f);
+			topBar2.Height.Set(32f, 0f);
+			topBar2.Top.Set(36f, 0f);
+			basePanel.Append(topBar2);
+
 			slotZone.Width.Set(0f, 1f);
-			slotZone.Top.Set(40f, 0f);
-			slotZone.Height.Set(-80f, 1f);
+			slotZone.Top.Set(76f, 0f);
+			slotZone.Height.Set(-116f, 1f);
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
@@ -313,7 +319,7 @@ namespace MagicStorage
 				sortMode = SortMode.Default;
 				break;
 			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
+			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, "", searchBar.Text));
 			for (int k = 0; k < items.Count; k++)
 			{
 				didMatCheck.Add(false);

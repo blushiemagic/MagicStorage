@@ -12,6 +12,7 @@ namespace MagicStorage
 	public class UISearchBar : UIElement
 	{
 		private const int padding = 4;
+		private string defaultText = "Search";
 		private string text = string.Empty;
 		private int cursorPosition = 0;
 		private bool hasFocus = false;
@@ -20,6 +21,11 @@ namespace MagicStorage
 		public UISearchBar()
 		{
 			this.SetPadding(padding);
+		}
+
+		public UISearchBar(string defaultText) : this()
+		{
+			this.defaultText = defaultText;
 		}
 
 		public string Text
@@ -104,7 +110,7 @@ namespace MagicStorage
 			spriteBatch.Draw(texture, new Vector2(dim.X + padding + innerWidth, dim.Y + padding + innerHeight), new Rectangle(padding + 1, padding + 1, padding, padding), Color.White);
 
 			bool isEmpty = text.Length == 0;
-			string drawText = isEmpty ? "Search" : text;
+			string drawText = isEmpty ? defaultText : text;
 			SpriteFont font = Main.fontMouseText;
 			Vector2 size = font.MeasureString(drawText);
 			float scale = innerHeight / size.Y;

@@ -7,9 +7,9 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, string filter)
+		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, string modFilter, string filter)
 		{
-			IEnumerable<Item> filteredItems = items.Where((item) => item.name.ToLowerInvariant().IndexOf(filter) >= 0);
+			IEnumerable<Item> filteredItems = items.Where((item) => FilterName(item, modFilter, filter));
 			CompareFunction func;
 			switch (sortMode)
 			{
@@ -43,6 +43,16 @@ namespace MagicStorage.Sorting
 				}
 			}
 			return sortedTree.GetSortedItems();
+		}
+
+		private static bool FilterName(Item item, string modFilter, string filter)
+		{
+			string modName = "Terraria";
+			if (item.modItem != null)
+			{
+				modName = item.modItem.mod.Name;
+			}
+			return modName.ToLowerInvariant().IndexOf(modFilter) >= 0 && item.name.ToLowerInvariant().IndexOf(filter) >= 0;
 		}
 	}
 }

@@ -41,6 +41,7 @@ namespace MagicStorage
 		internal static UIButtonChoice sortButtons;
 		private static UIElement stationZone = new UIElement();
 		private static UIText stationText = new UIText("Crafting Stations");
+		private static UIElement topBar2 = new UIElement();
 		private static UIElement slotZone = new UIElement();
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -91,15 +92,20 @@ namespace MagicStorage
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			topBar2.Width.Set(0f, 1f);
+			topBar2.Height.Set(32f, 0f);
+			topBar2.Top.Set(36f, 0f);
+			basePanel.Append(topBar2);
+
 			stationZone.Width.Set(0f, 1f);
-			stationZone.Top.Set(40f, 0f);
+			stationZone.Top.Set(76f, 0f);
 			stationZone.Height.Set(70f, 0f);
 			basePanel.Append(stationZone);
 			stationZone.Append(stationText);
 
 			slotZone.Width.Set(0f, 1f);
-			slotZone.Top.Set(100f, 0f);
-			slotZone.Height.Set(-140f, 1f);
+			slotZone.Top.Set(136f, 0f);
+			slotZone.Height.Set(-176f, 1f);
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
@@ -319,7 +325,7 @@ namespace MagicStorage
 				sortMode = SortMode.Default;
 				break;
 			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, searchBar.Text));
+			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, "", searchBar.Text));
 		}
 
 		public static Vector2 GetSlotSize()
