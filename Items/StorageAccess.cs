@@ -28,7 +28,7 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddIngredient(ItemID.Diamond, 3);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			recipe.AddIngredient(ItemID.Topaz, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);

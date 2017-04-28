@@ -23,7 +23,7 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "RadiantJewel");
-			recipe.AddIngredient(ItemID.Diamond);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
@@ -33,7 +33,7 @@ namespace MagicStorage.Items
 			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
-				recipe.AddIngredient(ItemID.Diamond);
+				recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
 				recipe.AddRecipe();
@@ -44,7 +44,7 @@ namespace MagicStorage.Items
 			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
-				recipe.AddIngredient(ItemID.Diamond);
+				recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);
 				recipe.AddRecipe();

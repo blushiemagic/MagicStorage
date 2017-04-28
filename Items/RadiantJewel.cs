@@ -12,7 +12,7 @@ namespace MagicStorage.Items
 		{
 			item.name = "Radiant Jewel";
 			item.toolTip = "'Shines with a dazzling light'";
-			item.width = 10;
+			item.width = 14;
 			item.height = 14;
 			item.maxStack = 99;
 			item.rare = 11;

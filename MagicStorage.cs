@@ -74,6 +74,8 @@ namespace MagicStorage
 			ItemID.MeteoriteChest,
 			ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
+			group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Diamond], ItemID.Diamond, ItemType("ShadowDiamond"));
+			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
