@@ -29,7 +29,14 @@ namespace MagicStorage.Items
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 5);
-			recipe.AddIngredient(ItemID.Ruby, 10);
+			if (MagicStorage.legendMod == null)
+			{
+				recipe.AddIngredient(ItemID.Ruby, 10);
+			}
+			else
+			{
+				recipe.AddRecipeGroup("MagicStorage:AnyRuby", 10);
+			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

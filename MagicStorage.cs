@@ -12,6 +12,7 @@ namespace MagicStorage
 	public class MagicStorage : Mod
 	{
 		public static MagicStorage Instance;
+		public static Mod legendMod;
 
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
 
@@ -23,6 +24,7 @@ namespace MagicStorage
 			}
 			Instance = this;
 			InterfaceHelper.Initialize();
+			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 		}
 
 		public override void PostSetupContent()
@@ -75,7 +77,25 @@ namespace MagicStorage
 			ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Diamond], ItemID.Diamond, ItemType("ShadowDiamond"));
+			if (legendMod != null)
+			{
+				group.ValidItems.Add(legendMod.ItemType("GemChrysoberyl"));
+				group.ValidItems.Add(legendMod.ItemType("GemAlexandrite"));
+			}
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
+			if (legendMod != null)
+			{
+				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Amethyst], ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
+				RecipeGroup.RegisterGroup("MagicStorage:AnyAmethyst", group);
+				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Topaz], ItemID.Topaz, legendMod.ItemType("GemGarnet"));
+				RecipeGroup.RegisterGroup("MagicStorage:AnyTopaz", group);
+				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Sapphire], ItemID.Sapphire, legendMod.ItemType("GemCharoite"));
+				RecipeGroup.RegisterGroup("MagicStorage:AnySapphire", group);
+				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Emerald], ItemID.Emerald, legendMod.ItemType("GemPeridot"));
+				RecipeGroup.RegisterGroup("MagicStorage:AnyEmerald", group);
+				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Ruby], ItemID.Ruby, legendMod.ItemType("GemOpal"));
+				RecipeGroup.RegisterGroup("MagicStorage:AnyRuby", group);
+			}
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)

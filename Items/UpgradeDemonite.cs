@@ -23,7 +23,14 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.DemoniteBar, 10);
-			recipe.AddIngredient(ItemID.Amethyst);
+			if (MagicStorage.legendMod == null)
+			{
+				recipe.AddIngredient(ItemID.Amethyst);
+			}
+			else
+			{
+				recipe.AddRecipeGroup("MagicStorage:AnyAmethyst");
+			}
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
