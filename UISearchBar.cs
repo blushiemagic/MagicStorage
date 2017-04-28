@@ -11,6 +11,8 @@ namespace MagicStorage
 {
 	public class UISearchBar : UIElement
 	{
+		private static List<UISearchBar> searchBars = new List<UISearchBar>();
+
 		private const int padding = 4;
 		private string defaultText = "Search";
 		private string text = string.Empty;
@@ -21,6 +23,7 @@ namespace MagicStorage
 		public UISearchBar()
 		{
 			this.SetPadding(padding);
+			searchBars.Add(this);
 		}
 
 		public UISearchBar(string defaultText) : this()
@@ -41,6 +44,7 @@ namespace MagicStorage
 			text = string.Empty;
 			cursorPosition = 0;
 			hasFocus = false;
+			CheckBlockInput();
 		}
 
 		public override void Update(GameTime gameTime)
@@ -56,13 +60,25 @@ namespace MagicStorage
 				if (!hasFocus && mouseOver)
 				{
 					hasFocus = true;
-					Main.blockInput = true;
+					CheckBlockInput();
 				}
 				else if (hasFocus && !mouseOver)
 				{
 					hasFocus = false;
-					Main.blockInput = false;
+					CheckBlockInput();
 					cursorPosition = text.Length;
+				}
+			}
+			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus)
+			{
+				CalculatedStyle dim = GetDimensions();
+				MouseState mouse = StorageGUI.curMouse;
+				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+				if (!mouseOver)
+				{
+					hasFocus = false;
+					cursorPosition = text.Length;
+					CheckBlockInput();
 				}
 			}
 
@@ -162,7 +178,7 @@ namespace MagicStorage
 			else if (letter == '\n' || letter == '\t')
 			{
 				hasFocus = false;
-				Main.blockInput = false;
+				CheckBlockInput();
 			}
 			cursorTimer = 0;
 		}
@@ -179,5 +195,18 @@ namespace MagicStorage
 			{ Keys.Escape, '\n' },
 			{ Keys.Tab, '\t' }
 		};
+
+		private static void CheckBlockInput()
+		{
+			Main.blockInput = false;
+			foreach (UISearchBar searchBar in searchBars)
+			{
+				if (searchBar.hasFocus)
+				{
+					Main.blockInput = true;
+					break;
+				}
+			}
+		}
 	}
 }

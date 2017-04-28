@@ -35,7 +35,7 @@ namespace MagicStorage.Items
 			}
 			else
 			{
-				recipe.AddRecipeGroup("MagicStorage:Emerald", 10);
+				recipe.AddRecipeGroup("MagicStorage:AnyEmerald", 10);
 			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
