@@ -86,14 +86,15 @@ namespace MagicStorage
 			topBar.Append(sortButtons);
 
 			depositButton.Left.Set(sortButtons.GetDimensions().Width + 2 * padding, 0f);
-			depositButton.Width.Set(-sortButtons.GetDimensions().Width - 4 * padding, 0.5f);
+			depositButton.Width.Set(128f, 0f);
 			depositButton.Height.Set(-2 * padding, 1f);
 			depositButton.PaddingTop = 8f;
 			depositButton.PaddingBottom = 8f;
 			topBar.Append(depositButton);
 
-			searchBar.Left.Set(0f, 0.5f);
-			searchBar.Width.Set(0f, 0.5f);
+			float depositButtonRight = sortButtons.GetDimensions().Width + 2 * padding + depositButton.GetDimensions().Width;
+			searchBar.Left.Set(depositButtonRight + padding, 0f);
+			searchBar.Width.Set(-depositButtonRight - 2 * padding, 1f);
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
@@ -149,13 +150,15 @@ namespace MagicStorage
 				{
 					Main.inventorySortTexture[0],
 					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName")
+					MagicStorage.Instance.GetTexture("SortName"),
+					MagicStorage.Instance.GetTexture("SortNumber")
 				},
 				new string[]
 				{
 					"Default Sorting",
 					"Sort By ID",
-					"Sort By Name"
+					"Sort By Name",
+					"Sort By Stacks"
 				});
 			}
 		}

@@ -23,7 +23,7 @@ namespace MagicStorage.Sorting
 				func = new CompareName();
 				break;
 			case SortMode.Quantity:
-				func = new CompareQuantity();
+				func = new CompareID();
 				break;
 			default:
 				return filteredItems;
@@ -32,6 +32,15 @@ namespace MagicStorage.Sorting
 			foreach (Item item in filteredItems)
 			{
 				sortedTree.Insert(item);
+			}
+			if (sortMode == SortMode.Quantity)
+			{
+				BTree oldTree = sortedTree;
+				sortedTree = new BTree(new CompareQuantity());
+				foreach (Item item in oldTree.GetSortedItems())
+				{
+					sortedTree.Insert(item);
+				}
 			}
 			return sortedTree.GetSortedItems();
 		}

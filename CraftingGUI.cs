@@ -149,13 +149,15 @@ namespace MagicStorage
 				{
 					Main.inventorySortTexture[0],
 					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName")
+					MagicStorage.Instance.GetTexture("SortName"),
+					MagicStorage.Instance.GetTexture("SortNumber")
 				},
 				new string[]
 				{
 					"Default Sorting",
 					"Sort By ID",
-					"Sort By Name"
+					"Sort By Name",
+					"Sort By Stacks"
 				});
 			}
 		}

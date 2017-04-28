@@ -29,7 +29,7 @@ namespace MagicStorage.Sorting
 	{
 		public override int Compare(Item item1, Item item2)
 		{
-			return item2.stack - item1.stack;
+			return (int)Math.Ceiling((float)item2.stack / (float)item2.maxStack) - (int)Math.Ceiling((float)item1.stack / (float)item1.maxStack);
 		}
 	}
 }
