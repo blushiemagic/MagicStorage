@@ -8,10 +8,13 @@ namespace MagicStorage.Items
 {
 	public class ShadowDiamond : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			Tooltip.SetDefault("Traces of light still linger inside");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Shadow Diamond";
-			item.toolTip = "Traces of light still linger inside";
 			item.width = 16;
 			item.height = 16;
 			item.maxStack = 99;

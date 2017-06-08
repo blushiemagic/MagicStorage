@@ -9,7 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetDefaults()
 		{
-			item.name = "Storage Connector";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 999;

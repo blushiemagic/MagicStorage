@@ -427,7 +427,7 @@ namespace MagicStorage.Sorting
 
 		private static int CompareName(Item item1, Item item2)
 		{
-			return string.Compare(item1.name, item2.name, StringComparison.OrdinalIgnoreCase);
+			return string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 

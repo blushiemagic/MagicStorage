@@ -9,10 +9,14 @@ namespace MagicStorage.Items
 {
 	public class StorageDeactivator : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Storage Unit Wand");
+			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Storage Unit Wand";
-			item.toolTip = "Right-click Storage Unit to toggle between Active/Inactive";
 			item.width = 24;
 			item.height = 28;
 			item.useTurn = true;

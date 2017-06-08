@@ -9,7 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetDefaults()
 		{
-			item.name = "Storage Heart";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

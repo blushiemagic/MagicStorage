@@ -247,7 +247,7 @@ namespace MagicStorage
 			}
 			if (hoverSlot >= 0 && hoverSlot < items.Count)
 			{
-				Main.toolTip = items[hoverSlot].Clone();
+				Main.HoverItem = items[hoverSlot].Clone();
 				Main.instance.MouseText(string.Empty);
 			}
 			sortButtons.DrawText();

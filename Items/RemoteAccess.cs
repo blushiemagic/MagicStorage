@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class RemoteAccess : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Remote Storage Access");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Remote Storage Access";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

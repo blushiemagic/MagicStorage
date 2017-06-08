@@ -7,11 +7,15 @@ namespace MagicStorage.Items
 {
 	public class UpgradeDemonite : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Demonite Storage Upgrade");
+			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
+				+ "\n<right> a Storage Unit to use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Demonite Storage Upgrade";
-			item.toolTip = "Upgrades Storage Unit to 80 capacity";
-			item.toolTip2 = "Right-click a Storage Unit to use";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;

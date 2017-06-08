@@ -21,7 +21,7 @@ namespace MagicStorage.Sorting
 	{
 		public override int Compare(Item item1, Item item2)
 		{
-			return string.Compare(item1.name, item2.name, StringComparison.OrdinalIgnoreCase);
+			return string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 

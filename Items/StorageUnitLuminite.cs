@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class StorageUnitLuminite : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Luminite Storage Unit");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Luminite Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

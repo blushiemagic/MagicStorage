@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class StorageUnitDemonite : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Demonite Storage Unit");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Demonite Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

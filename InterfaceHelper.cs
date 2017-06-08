@@ -4,6 +4,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.UI;
 using MagicStorage.Components;
 
 namespace MagicStorage
@@ -17,13 +18,13 @@ namespace MagicStorage
 			_itemIconCacheTimeInfo = typeof(Main).GetField("_itemIconCacheTime", BindingFlags.NonPublic | BindingFlags.Static);
 		}
 
-		public static void ModifyInterfaceLayers(List<MethodSequenceListItem> layers)
+		public static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			for (int k = 0; k < layers.Count; k++)
 			{
 				if (layers[k].Name == "Vanilla: Inventory")
 				{
-					layers.Insert(k + 1, new MethodSequenceListItem("MagicStorage: StorageAccess", DrawStorageGUI, layers[k]));
+					layers.Insert(k + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
 					k++;
 				}
 			}

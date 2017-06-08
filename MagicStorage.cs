@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.UI;
 using Microsoft.Xna.Framework;
 
 namespace MagicStorage
@@ -76,7 +76,7 @@ namespace MagicStorage
 			ItemID.MeteoriteChest,
 			ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
-			group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Diamond], ItemID.Diamond, ItemType("ShadowDiamond"));
+			group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
 			if (legendMod != null)
 			{
 				group.ValidItems.Add(legendMod.ItemType("GemChrysoberyl"));
@@ -85,15 +85,15 @@ namespace MagicStorage
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 			if (legendMod != null)
 			{
-				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Amethyst], ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
+				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Amethyst), ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnyAmethyst", group);
-				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Topaz], ItemID.Topaz, legendMod.ItemType("GemGarnet"));
+				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Topaz), ItemID.Topaz, legendMod.ItemType("GemGarnet"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnyTopaz", group);
-				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Sapphire], ItemID.Sapphire, legendMod.ItemType("GemCharoite"));
+				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Sapphire), ItemID.Sapphire, legendMod.ItemType("GemCharoite"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnySapphire", group);
-				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Emerald], ItemID.Emerald, legendMod.ItemType("GemPeridot"));
+				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Emerald), legendMod.ItemType("GemPeridot"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnyEmerald", group);
-				group = new RecipeGroup(() => Lang.misc[37] + " " + Main.itemName[ItemID.Ruby], ItemID.Ruby, legendMod.ItemType("GemOpal"));
+				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Ruby), ItemID.Ruby, legendMod.ItemType("GemOpal"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnyRuby", group);
 			}
 		}
@@ -103,7 +103,7 @@ namespace MagicStorage
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override void ModifyInterfaceLayers(List<MethodSequenceListItem> layers)
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			InterfaceHelper.ModifyInterfaceLayers(layers);
 		}

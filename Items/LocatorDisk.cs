@@ -7,11 +7,16 @@ namespace MagicStorage.Items
 {
 	public class LocatorDisk : Locator
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Locator Drive");
+			Tooltip.SetDefault("<right> Storage Heart to store location"
+				+ "\n<right> Remote Storage Access to set it"
+				+ "\nDoes not get destroyed upon use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Locator Drive";
-			item.toolTip = "Right-click Storage Heart to store location";
-			item.toolTip2 = "Does not get destroyed upon use";
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;

@@ -35,7 +35,9 @@ namespace MagicStorage.Components
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(TEStorageComponent.Hook_AfterPlacement_NoEntity, -1, 0, false);
 			}
 			TileObjectData.addTile(Type);
-			AddMapEntry(new Color(153, 107, 61), "Magic Storage");
+			ModTranslation text = CreateMapEntryName();
+			text.SetDefault("Magic Storage");
+			AddMapEntry(new Color(153, 107, 61), text);
 			dustType = 7;
 			disableSmartCursor = true;
 		}

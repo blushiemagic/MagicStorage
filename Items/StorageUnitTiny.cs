@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class StorageUnitTiny : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Tiny Storage Unit");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Tiny Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

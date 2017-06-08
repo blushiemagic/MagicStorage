@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class StorageUnitTerra : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Terra Storage Unit");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Terra Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

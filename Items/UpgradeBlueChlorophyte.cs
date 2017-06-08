@@ -7,11 +7,15 @@ namespace MagicStorage.Items
 {
 	public class UpgradeBlueChlorophyte : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Blue Chlorophyte Storage Upgrade");
+			Tooltip.SetDefault("Upgrades Storage Unit to 240 capacity"
+				+ "\n<right> a Hallowed Storage Unit to use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Blue Chlorophyte Storage Upgrade";
-			item.toolTip = "Upgrades Storage Unit to 240 capacity";
-			item.toolTip2 = "Right-click a Hallowed Storage Unit to use";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;

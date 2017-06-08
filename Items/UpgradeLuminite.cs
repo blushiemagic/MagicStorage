@@ -7,11 +7,15 @@ namespace MagicStorage.Items
 {
 	public class UpgradeLuminite : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Luminite Storage Upgrade");
+			Tooltip.SetDefault("Upgrades Storage Unit to 320 capacity"
+				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Luminite Storage Upgrade";
-			item.toolTip = "Upgrades Storage Unit to 320 capacity";
-			item.toolTip2 = "Right-click a Blue Chlorophyte Storage Unit to use";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;

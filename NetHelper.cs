@@ -58,7 +58,7 @@ namespace MagicStorage
 			if (Main.netMode == 1)
 			{
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 2, 2);
-				NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, "", i, j, type);
+				NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, type);
 			}
 		}
 
@@ -83,7 +83,7 @@ namespace MagicStorage
 			}
 			else
 			{
-				NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, "", id, position.X, position.Y);
+				NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, id, position.X, position.Y);
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace MagicStorage
 				queueUpdates = false;
 				while (updateQueue.Count > 0)
 				{
-					NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, "", updateQueue.Dequeue());
+					NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, updateQueue.Dequeue());
 				}
 				updateQueueContains.Clear();
 			}
@@ -297,7 +297,7 @@ namespace MagicStorage
 						heart.ResetCompactStage();
 					}
 				}
-				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, "", id, ent.Position.X, ent.Position.Y);
+				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, id, ent.Position.X, ent.Position.Y);
 			}
 		}
 

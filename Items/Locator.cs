@@ -21,10 +21,14 @@ namespace MagicStorage.Items
 			}
 		}
 
+		public override void SetStaticDefaults()
+		{
+			Tooltip.SetDefault("<right> Storage Heart to store location"
+				+ "\n<right> Remote Storage Access to set it");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Locator";
-			item.toolTip = "Right-click Storage Heart to store location";
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
@@ -34,16 +38,17 @@ namespace MagicStorage.Items
 
 		public override void ModifyTooltips(List<TooltipLine> lines)
 		{
-			if (location.X < 0 || location.Y < 0)
-			{
-				return;
-			}
+			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
 			{
-				if (lines[k].mod == "Terraria" && lines[k].Name == "Tooltip")
+				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0")
 				{
 					lines[k].text = "Set to: X=" + location.X + ", Y=" + location.Y;
-					lines[k].text += "\nRight-click Remote Storage Access to set it";
+				}
+				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
+				{
+					lines.RemoveAt(k);
+					k--;
 				}
 			}
 		}

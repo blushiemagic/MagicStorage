@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class CraftingAccess : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Storage Crafting Interface");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Storage Crafting Interface";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

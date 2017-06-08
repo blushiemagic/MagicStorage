@@ -7,9 +7,13 @@ namespace MagicStorage.Items
 {
 	public class StorageUnitHellstone : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Hellstone Storage Unit");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Hellstone Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

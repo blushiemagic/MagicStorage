@@ -9,7 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetDefaults()
 		{
-			item.name = "Creative Storage Unit";
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

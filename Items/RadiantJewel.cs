@@ -8,10 +8,13 @@ namespace MagicStorage.Items
 {
 	public class RadiantJewel : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			Tooltip.SetDefault("'Shines with a dazzling light'");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Radiant Jewel";
-			item.toolTip = "'Shines with a dazzling light'";
 			item.width = 14;
 			item.height = 14;
 			item.maxStack = 99;

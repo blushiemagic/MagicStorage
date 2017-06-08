@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Graphics;
 using Terraria;
 using Terraria.UI;
 using Terraria.ModLoader;
@@ -127,7 +128,7 @@ namespace MagicStorage
 
 			bool isEmpty = text.Length == 0;
 			string drawText = isEmpty ? defaultText : text;
-			SpriteFont font = Main.fontMouseText;
+			DynamicSpriteFont font = Main.fontMouseText;
 			Vector2 size = font.MeasureString(drawText);
 			float scale = innerHeight / size.Y;
 			if (isEmpty && hasFocus)

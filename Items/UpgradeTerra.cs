@@ -7,11 +7,15 @@ namespace MagicStorage.Items
 {
 	public class UpgradeTerra : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Terra Storage Upgrade");
+			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity"
+				+ "\n<right> a Luminite Storage Unit to use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Terra Storage Upgrade";
-			item.toolTip = "Upgrades Storage Unit to 640 capacity";
-			item.toolTip2 = "Right-click a Luminite Storage Unit to use";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;

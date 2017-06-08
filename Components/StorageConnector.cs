@@ -23,7 +23,9 @@ namespace MagicStorage.Components
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
-			AddMapEntry(new Color(153, 107, 61), "Magic Storage");
+			ModTranslation text = CreateMapEntryName();
+			text.SetDefault("Magic Storage");
+			AddMapEntry(new Color(153, 107, 61), text);
 			dustType = 7;
 			drop = mod.ItemType("StorageConnector");
 		}

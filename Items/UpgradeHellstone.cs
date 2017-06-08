@@ -7,11 +7,15 @@ namespace MagicStorage.Items
 {
 	public class UpgradeHellstone : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Hellstone Storage Upgrade");
+			Tooltip.SetDefault("Upgrades Storage Unit to 120 capacity"
+				+ "\n<right> a Demonite/Crimtane Storage Unit to use");
+		}
+
 		public override void SetDefaults()
 		{
-			item.name = "Hellstone Storage Upgrade";
-			item.toolTip = "Upgrades Storage Unit to 120 capacity";
-			item.toolTip2 = "Right-click a Demonite/Crimtane Storage Unit to use";
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;
