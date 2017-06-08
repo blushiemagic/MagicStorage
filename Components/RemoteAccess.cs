@@ -58,6 +58,10 @@ namespace MagicStorage.Components
 						item.SetDefaults(0);
 					}
 				}
+				if (player.selectedItem == 58)
+				{
+					Main.mouseItem = item.Clone();
+				}
 				Main.NewText(message);
 			}
 			else

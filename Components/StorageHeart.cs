@@ -45,6 +45,10 @@ namespace MagicStorage.Components
 				player.tileInteractionHappened = true;
 				Locator locator = (Locator)item.modItem;
 				locator.location = new Point16(i, j);
+				if (player.selectedItem == 58)
+				{
+					Main.mouseItem = item.Clone();
+				}
 				Main.NewText("Locator successfully set to: X=" + i + ", Y=" + j);
 			}
 			else
