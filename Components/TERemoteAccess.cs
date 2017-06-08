@@ -49,15 +49,10 @@ namespace MagicStorage.Components
 
 		public override void Update()
 		{
-			if (Main.netMode == 1)
-			{
-				return;
-			}
 			TEStorageHeart heart = GetHeart();
 			if (heart != null && !heart.remoteAccesses.Contains(Position))
 			{
 				heart.remoteAccesses.Add(Position);
-				NetHelper.SendTEUpdate(heart.ID, heart.Position);
 			}
 		}
 

@@ -32,7 +32,10 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			return storageUnits.Concat(remoteAccesses.SelectMany(remoteAccess => ((TERemoteAccess)TileEntity.ByPosition[remoteAccess]).storageUnits)).Select(storageUnit => (TEAbstractStorageUnit)TileEntity.ByPosition[storageUnit]);
+			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => TileEntity.ByPosition.ContainsKey(remoteAccess) && TileEntity.ByPosition[remoteAccess] is TERemoteAccess)
+				.SelectMany(remoteAccess => ((TERemoteAccess)TileEntity.ByPosition[remoteAccess]).storageUnits))
+				.Where(storageUnit => TileEntity.ByPosition.ContainsKey(storageUnit) && TileEntity.ByPosition[storageUnit] is TEAbstractStorageUnit)
+				.Select(storageUnit => (TEAbstractStorageUnit)TileEntity.ByPosition[storageUnit]);
 		}
 
 		public IEnumerable<Item> GetStoredItems()
@@ -62,23 +65,17 @@ namespace MagicStorage.Components
 
 		public override void Update()
 		{
-			if (Main.netMode == 1)
-			{
-				return;
-			}
-			bool remoteChange = false;
 			for (int k = 0; k < remoteAccesses.Count; k++)
 			{
 				if (!TileEntity.ByPosition.ContainsKey(remoteAccesses[k]) || !(TileEntity.ByPosition[remoteAccesses[k]] is TERemoteAccess))
 				{
 					remoteAccesses.RemoveAt(k);
 					k--;
-					remoteChange = true;
 				}
 			}
-			if (remoteChange)
+			if (Main.netMode == 1)
 			{
-				NetHelper.SendTEUpdate(ID, Position);
+				return;
 			}
 			updateTimer++;
 			if (updateTimer >= 60)
