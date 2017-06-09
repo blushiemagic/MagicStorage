@@ -14,8 +14,8 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("Upgrades Storage Unit to 240 capacity"
 				+ "\n<right> a Hallowed Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Синее хлорофитовое улучшение хранилища");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Блок Хранения до 240 вместимости"
-			        + "\n<right> по Святому Блоку Хранения для использования);	
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 240 вместимости"
+			        + "\n<right> по святому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()
