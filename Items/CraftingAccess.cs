@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Storage Crafting Interface");
 			DisplayName.AddTranslation(GameCulture.Russian, "Интерфейс создания хранилищ");
+			DisplayName.AddTranslation(GameCulture.Polish, "Interfejs Rzemieślniczy Magazynu");
 		}
 
 		public override void SetDefaults()

@@ -5,8 +5,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Graphics;
 using Terraria;
-using Terraria.UI;
+using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace MagicStorage
 {
@@ -15,7 +16,7 @@ namespace MagicStorage
 		private static List<UISearchBar> searchBars = new List<UISearchBar>();
 
 		private const int padding = 4;
-		private string defaultText = "Search";
+		private LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
 		private string text = string.Empty;
 		private int cursorPosition = 0;
 		private bool hasFocus = false;
@@ -27,7 +28,7 @@ namespace MagicStorage
 			searchBars.Add(this);
 		}
 
-		public UISearchBar(string defaultText) : this()
+		public UISearchBar(LocalizedText defaultText) : this()
 		{
 			this.defaultText = defaultText;
 		}
@@ -127,7 +128,7 @@ namespace MagicStorage
 			spriteBatch.Draw(texture, new Vector2(dim.X + padding + innerWidth, dim.Y + padding + innerHeight), new Rectangle(padding + 1, padding + 1, padding, padding), Color.White);
 
 			bool isEmpty = text.Length == 0;
-			string drawText = isEmpty ? defaultText : text;
+			string drawText = isEmpty ? defaultText.Value : text;
 			DynamicSpriteFont font = Main.fontMouseText;
 			Vector2 size = font.MeasureString(drawText);
 			float scale = innerHeight / size.Y;

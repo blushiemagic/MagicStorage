@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
+
 namespace MagicStorage.Items
 {
 	public class CreativeStorageUnit : ModItem
@@ -10,7 +11,8 @@ namespace MagicStorage.Items
 	
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Креативный блок хранения");
+			DisplayName.AddTranslation(GameCulture.Russian, "Креативный блок хранения");
+			DisplayName.AddTranslation(GameCulture.Polish, "Kreatywna Jednostka Magazynująca");
 		}
 		
 		public override void SetDefaults()

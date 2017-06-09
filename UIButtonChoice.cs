@@ -4,8 +4,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
-using Terraria.UI;
+using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace MagicStorage
 {
@@ -15,7 +16,7 @@ namespace MagicStorage
 		private const int buttonPadding = 8;
 
 		private Texture2D[] buttons;
-		private string[] names;
+		private LocalizedText[] names;
 		private int choice = 0;
 
 		public int Choice
@@ -26,7 +27,7 @@ namespace MagicStorage
 			}
 		}
 
-		public UIButtonChoice(Texture2D[] buttons, string[] names)
+		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 			{
@@ -92,7 +93,7 @@ namespace MagicStorage
 			{
 				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k))
 				{
-					Main.instance.MouseText(names[k]);
+					Main.instance.MouseText(names[k].Value);
 				}
 			}
 		}

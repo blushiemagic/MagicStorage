@@ -8,8 +8,14 @@ namespace MagicStorage
 {
 	public class BlockRecipes : GlobalRecipe
 	{
+		public static bool active = true;
+
 		public override bool RecipeAvailable(Recipe recipe)
 		{
+			if (!active)
+			{
+				return true;
+			}
 			try
 			{
 				Player player = Main.player[Main.myPlayer];

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -14,7 +14,7 @@ namespace MagicStorage.Items
 				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает бБлок хранения до 320 вместимости"
-			        + "\n<right> по синему хлорофитовому блоку хранения для использования);	
+			        + "\n<right> по синему хлорофитовому блоку хранения для использования");	
 		}
 
 		public override void SetDefaults()

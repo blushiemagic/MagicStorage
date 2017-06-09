@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,7 +15,7 @@ namespace MagicStorage.Items
 				+ "\n<right> a Demonite/Crimtane Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Адское улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 120 вместимости"
-			        + "\n<right> по демонитовому/кримтановому блоку хранения для использования);	
+			        + "\n<right> по демонитовому/кримтановому блоку хранения для использования");	
 		}
 
 		public override void SetDefaults()

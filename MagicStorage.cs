@@ -25,6 +25,70 @@ namespace MagicStorage
 			Instance = this;
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
+			AddTranslations();
+		}
+
+		private void AddTranslations()
+		{
+			ModTranslation text = CreateTranslation("DepositAll");
+			text.SetDefault("Deposit All");
+			AddTranslation(text);
+
+			text = CreateTranslation("Search");
+			text.SetDefault("Search");
+			AddTranslation(text);
+
+			text = CreateTranslation("SearchName");
+			text.SetDefault("Search Name");
+			AddTranslation(text);
+
+			text = CreateTranslation("SearchMod");
+			text.SetDefault("Search Mod");
+			AddTranslation(text);
+
+			text = CreateTranslation("SortDefault");
+			text.SetDefault("Default Sorting");
+			AddTranslation(text);
+
+			text = CreateTranslation("SortID");
+			text.SetDefault("Sort by ID");
+			AddTranslation(text);
+
+			text = CreateTranslation("SortName");
+			text.SetDefault("Sort by Name");
+			AddTranslation(text);
+
+			text = CreateTranslation("SortStack");
+			text.SetDefault("Sort by Stacks");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterAll");
+			text.SetDefault("Filter All");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeapons");
+			text.SetDefault("Filter Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterTools");
+			text.SetDefault("Filter Tools");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterEquips");
+			text.SetDefault("Filter Equipment");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterPotions");
+			text.SetDefault("Filter Potions");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterTiles");
+			text.SetDefault("Filter Placeables");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterMisc");
+			text.SetDefault("Filter Misc");
+			AddTranslation(text);
 		}
 
 		public override void PostSetupContent()

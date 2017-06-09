@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,7 +15,7 @@ namespace MagicStorage.Items
 				+ "\n<right> a Hellstone Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Святое улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 160 вместимости"
-			        + "\n<right> по адскому блоку хранения для использования);	
+			        + "\n<right> по адскому блоку хранения для использования");	
 		}
 
 		public override void SetDefaults()

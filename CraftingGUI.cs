@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
@@ -37,11 +38,11 @@ namespace MagicStorage
 		private static float panelHeight;
 
 		private static UIElement topBar = new UIElement();
-		internal static UISearchBar searchBar = new UISearchBar("Search Items");
+		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-		internal static UISearchBar searchBar2 = new UISearchBar("Search Mods");
+		internal static UISearchBar searchBar2;
 
 		private static UIElement stationZone = new UIElement();
 		private static UIText stationText = new UIText("Crafting Stations");
@@ -68,6 +69,7 @@ namespace MagicStorage
 
 		public static void Initialize()
 		{
+			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
 
@@ -159,6 +161,18 @@ namespace MagicStorage
 			bottomBar.Append(capacityText);
 		}
 
+		private static void InitLangStuff()
+		{
+			if (searchBar == null)
+			{
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"));
+			}
+			if (searchBar2 == null)
+			{
+				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
+			}
+		}
+
 		private static void InitSortButtons()
 		{
 			if (sortButtons == null)
@@ -170,12 +184,12 @@ namespace MagicStorage
 					MagicStorage.Instance.GetTexture("SortName"),
 					MagicStorage.Instance.GetTexture("SortNumber")
 				},
-				new string[]
+				new LocalizedText[]
 				{
-					"Default Sorting",
-					"Sort By ID",
-					"Sort By Name",
-					"Sort By Stacks"
+					Language.GetText("Mods.MagicStorage.SortDefault"),
+					Language.GetText("Mods.MagicStorage.SortID"),
+					Language.GetText("Mods.MagicStorage.SortName"),
+					Language.GetText("Mods.MagicStorage.SortStack")
 				});
 			}
 		}
@@ -194,15 +208,15 @@ namespace MagicStorage
 					MagicStorage.Instance.GetTexture("FilterTile"),
 					MagicStorage.Instance.GetTexture("FilterMisc"),
 				},
-				new string[]
+				new LocalizedText[]
 				{
-					"Filter All",
-					"Filter Weapons",
-					"Filter Tools",
-					"Filter Equipment",
-					"Filter Potions",
-					"Filter Placeables",
-					"Filter Misc"
+					Language.GetText("Mods.MagicStorage.FilterAll"),
+					Language.GetText("Mods.MagicStorage.FilterWeapons"),
+					Language.GetText("Mods.MagicStorage.FilterTools"),
+					Language.GetText("Mods.MagicStorage.FilterEquips"),
+					Language.GetText("Mods.MagicStorage.FilterPotions"),
+					Language.GetText("Mods.MagicStorage.FilterTiles"),
+					Language.GetText("Mods.MagicStorage.FilterMisc")
 				});
 			}
 		}
@@ -215,6 +229,7 @@ namespace MagicStorage
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
+				UpdateItemSlots();
 			}
 			else
 			{
@@ -244,12 +259,12 @@ namespace MagicStorage
 			for (int k = 0; k < numColumns; k++)
 			{
 				temp[10] = craftingStations[k];
-				Vector2 drawPos = GetSlotPosition(k);
+				Vector2 drawPos = GetCraftSlotPos(k);
 				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
 			}
-			if (hoverSlot >= 0 && hoverSlot < items.Count)
+			if (hoverSlot >= 0 && hoverSlot < craftingStations.Length)
 			{
-				Main.HoverItem = items[hoverSlot].Clone();
+				Main.HoverItem = craftingStations[hoverSlot].Clone();
 				Main.instance.MouseText(string.Empty);
 			}
 			sortButtons.DrawText();
@@ -329,6 +344,7 @@ namespace MagicStorage
 			{
 				return;
 			}
+			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
 			SortMode sortMode;
@@ -381,12 +397,40 @@ namespace MagicStorage
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 		}
 
+		private static void UpdateItemSlots()
+		{
+			hoverSlot = -1;
+			TryHoverSlot();
+		}
+
+		private static void TryHoverSlot()
+		{
+			Vector2 slotOrigin = stationZone.GetDimensions().Position();
+			if (curMouse.X <= slotOrigin.X || curMouse.Y <= slotOrigin.Y)
+			{
+				return;
+			}
+			int itemSlotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale);
+			int itemSlotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale);
+			int slotX = (curMouse.X - (int)slotOrigin.X) / (itemSlotWidth + padding);
+			int slotY = (curMouse.Y - (int)slotOrigin.Y) / (itemSlotHeight + padding);
+			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= displayRows)
+			{
+				return;
+			}
+			Vector2 slotPos = slotOrigin + new Vector2(slotX * (itemSlotWidth + padding), slotY * (itemSlotHeight + padding));
+			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + itemSlotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + itemSlotHeight)
+			{
+				//HoverItemSlot(slotX + numColumns * slotY);
+			}
+		}
+
 		public static Vector2 GetSlotSize()
 		{
 			return new Vector2(Main.inventoryBackTexture.Width, Main.inventoryBackTexture.Height) * inventoryScale;
 		}
 
-		public static Vector2 GetSlotPosition(int slot)
+		public static Vector2 GetCraftSlotPos(int slot)
 		{
 			Vector2 slotSize = GetSlotSize();
 			if (slot < numColumns)

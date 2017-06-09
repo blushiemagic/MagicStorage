@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,7 +15,7 @@ namespace MagicStorage.Items
 				+ "\n<right> a Hallowed Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Синее хлорофитовое улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 240 вместимости"
-			        + "\n<right> по святому блоку хранения для использования);	
+			        + "\n<right> по святому блоку хранения для использования");	
 		}
 
 		public override void SetDefaults()

@@ -5,4 +5,4 @@ homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
 hideCode = false
 hideResources = false
 includeSource = true
-buildIgnore = OldArt\*
+buildIgnore = OldArt\*, .git\*

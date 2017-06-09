@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
@@ -36,12 +37,12 @@ namespace MagicStorage
 		private static float panelHeight;
 
 		private static UIElement topBar = new UIElement();
-		internal static UISearchBar searchBar = new UISearchBar("Search Items");
+		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
-		internal static UITextPanel<string> depositButton = new UITextPanel<string>("Deposit All", 1f);
+		internal static UITextPanel<LocalizedText> depositButton;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-		internal static UISearchBar searchBar2 = new UISearchBar("Search Mods");
+		internal static UISearchBar searchBar2;
 
 		private static UIElement slotZone = new UIElement();
 
@@ -67,6 +68,7 @@ namespace MagicStorage
 
 		public static void Initialize()
 		{
+			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
 
@@ -158,6 +160,22 @@ namespace MagicStorage
 			bottomBar.Append(capacityText);
 		}
 
+		private static void InitLangStuff()
+		{
+			if (depositButton == null)
+			{
+				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"), 1f);
+			}
+			if (searchBar == null)
+			{
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"));
+			}
+			if (searchBar2 == null)
+			{
+				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
+			}
+		}
+
 		private static void InitSortButtons()
 		{
 			if (sortButtons == null)
@@ -169,12 +187,12 @@ namespace MagicStorage
 					MagicStorage.Instance.GetTexture("SortName"),
 					MagicStorage.Instance.GetTexture("SortNumber")
 				},
-				new string[]
+				new LocalizedText[]
 				{
-					"Default Sorting",
-					"Sort By ID",
-					"Sort By Name",
-					"Sort By Stacks"
+					Language.GetText("Mods.MagicStorage.SortDefault"),
+					Language.GetText("Mods.MagicStorage.SortID"),
+					Language.GetText("Mods.MagicStorage.SortName"),
+					Language.GetText("Mods.MagicStorage.SortStack")
 				});
 			}
 		}
@@ -193,15 +211,15 @@ namespace MagicStorage
 					MagicStorage.Instance.GetTexture("FilterTile"),
 					MagicStorage.Instance.GetTexture("FilterMisc"),
 				},
-				new string[]
+				new LocalizedText[]
 				{
-					"Filter All",
-					"Filter Weapons",
-					"Filter Tools",
-					"Filter Equipment",
-					"Filter Potions",
-					"Filter Placeables",
-					"Filter Misc"
+					Language.GetText("Mods.MagicStorage.FilterAll"),
+					Language.GetText("Mods.MagicStorage.FilterWeapons"),
+					Language.GetText("Mods.MagicStorage.FilterTools"),
+					Language.GetText("Mods.MagicStorage.FilterEquips"),
+					Language.GetText("Mods.MagicStorage.FilterPotions"),
+					Language.GetText("Mods.MagicStorage.FilterTiles"),
+					Language.GetText("Mods.MagicStorage.FilterMisc")
 				});
 			}
 		}
@@ -326,6 +344,7 @@ namespace MagicStorage
 			{
 				return;
 			}
+			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
 			SortMode sortMode;
