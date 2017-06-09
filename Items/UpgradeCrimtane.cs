@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -12,6 +13,9 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Crimtane Storage Upgrade");
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
 				+ "\n<right> a Storage Unit to use");
+			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановое улучшение хранилища");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Блок Хранения до 80 вместимости"
+			        + "\n<right> по Блоку Хранения для использования);
 		}
 
 		public override void SetDefaults()
