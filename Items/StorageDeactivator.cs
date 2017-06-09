@@ -4,6 +4,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using MagicStorage.Components;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -13,6 +14,8 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Storage Unit Wand");
 			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
+			DisplayName.AddTranslation(GameCulture.Russian, "Посох блока хранения");
+			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Блоку Хранения для переключения между Включенным/Выключенным состоянием);
 		}
 
 		public override void SetDefaults()
