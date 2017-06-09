@@ -210,7 +210,7 @@ namespace MagicStorage
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0)
+			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
@@ -314,6 +314,11 @@ namespace MagicStorage
 
 		public static void RefreshItems()
 		{
+			if (StoragePlayer.IsStorageCrafting())
+			{
+				CraftingGUI.RefreshItems();
+				return;
+			}
 			items.Clear();
 			didMatCheck.Clear();
 			TEStorageHeart heart = GetHeart();

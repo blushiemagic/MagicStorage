@@ -37,11 +37,11 @@ namespace MagicStorage
 		private static float panelHeight;
 
 		private static UIElement topBar = new UIElement();
-		internal static UISearchBar searchBar = new UISearchBar();
+		internal static UISearchBar searchBar = new UISearchBar("Search Items");
 		private static UIButtonChoice sortButtons;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-		internal static UISearchBar searchBar2 = new UISearchBar();
+		internal static UISearchBar searchBar2 = new UISearchBar("Search Mods");
 
 		private static UIElement stationZone = new UIElement();
 		private static UIText stationText = new UIText("Crafting Stations");
@@ -89,9 +89,10 @@ namespace MagicStorage
 
 			InitSortButtons();
 			topBar.Append(sortButtons);
+			float sortButtonsRight = sortButtons.GetDimensions().Width + padding;
 
-			searchBar.Left.Set(0f, 0.5f);
-			searchBar.Width.Set(0f, 0.5f);
+			searchBar.Left.Set(sortButtonsRight + padding, 0f);
+			searchBar.Width.Set(-sortButtonsRight - 2 * padding, 1f);
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
@@ -101,9 +102,10 @@ namespace MagicStorage
 			basePanel.Append(topBar2);
 
 			InitFilterButtons();
+			float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
 			topBar2.Append(filterButtons);
-			searchBar2.Left.Set(0f, 0.5f);
-			searchBar2.Width.Set(0f, 0.5f);
+			searchBar2.Left.Set(filterButtonsRight + padding, 0f);
+			searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
 			searchBar2.Height.Set(0f, 1f);
 			topBar2.Append(searchBar2);
 
@@ -209,7 +211,7 @@ namespace MagicStorage
 		{
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0)
+			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
@@ -328,6 +330,7 @@ namespace MagicStorage
 				return;
 			}
 			InitSortButtons();
+			InitFilterButtons();
 			SortMode sortMode;
 			switch (sortButtons.Choice)
 			{

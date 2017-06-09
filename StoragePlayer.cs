@@ -62,6 +62,8 @@ namespace MagicStorage
 			Main.blockInput = false;
 			StorageGUI.searchBar.Reset();
 			StorageGUI.searchBar2.Reset();
+			CraftingGUI.searchBar.Reset();
+			CraftingGUI.searchBar2.Reset();
 		}
 
 		public Point16 ViewingStorage()
@@ -149,6 +151,21 @@ namespace MagicStorage
 				return null;
 			}
 			return ((StorageAccess)modTile).GetHeart(storageAccess.X, storageAccess.Y);
+		}
+
+		public bool StorageCrafting()
+		{
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
+				return false;
+			}
+			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
+			return tile != null && tile.type == mod.TileType("CraftingAccess");
+		}
+
+		public static bool IsStorageCrafting()	
+		{
+			return Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
 		}
 	}
 }
