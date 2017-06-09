@@ -2,11 +2,17 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-
+using Terraria.Localization;
 namespace MagicStorage.Items
 {
 	public class CreativeStorageUnit : ModItem
 	{
+	
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Креативный блок хранения");
+		}
+		
 		public override void SetDefaults()
 		{
 			item.width = 26;
