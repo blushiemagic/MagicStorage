@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -12,6 +13,9 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Hallowed Storage Upgrade");
 			Tooltip.SetDefault("Upgrades Storage Unit to 160 capacity"
 				+ "\n<right> a Hellstone Storage Unit to use");
+			DisplayName.AddTranslation(GameCulture.Russian, "Святое улучшение хранилища");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 160 вместимости"
+			        + "\n<right> по адскому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()

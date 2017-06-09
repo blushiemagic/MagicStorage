@@ -2,11 +2,18 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
 	public class StorageAccess : ModItem
 	{
+	
+		public override void SetStaticDefaults()
+		{
+			DisplayName.AddTranslation(GameCulture.Russian, "Магическое хранилище");
+		}
+		
 		public override void SetDefaults()
 		{
 			item.width = 26;

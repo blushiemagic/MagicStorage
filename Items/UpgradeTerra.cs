@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -12,6 +13,9 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Terra Storage Upgrade");
 			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity"
 				+ "\n<right> a Luminite Storage Unit to use");
+			DisplayName.AddTranslation(GameCulture.Russian, "Улучшение Терры");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 640 вместимости"
+			        + "\n<right> по люминитовому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()

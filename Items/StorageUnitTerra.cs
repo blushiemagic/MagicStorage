@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -10,6 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Terra Storage Unit");
+			DisplayName.AddTranslation(GameCulture.Russian, "Блок хранения Терры");
 		}
 
 		public override void SetDefaults()

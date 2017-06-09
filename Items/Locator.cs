@@ -6,6 +6,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -25,6 +26,9 @@ namespace MagicStorage.Items
 		{
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\n<right> Remote Storage Access to set it");
+			DisplayName.AddTranslation(GameCulture.Russian, "Локатор");
+			Tooltip.AddTranslation(GameCulture.Russian, "<right> по сердцу хранилища чтобы сохранить локацию"
+			        + "\n<right> по дистанционному доступу к хранилищу чтобы установить его");	
 		}
 
 		public override void SetDefaults()

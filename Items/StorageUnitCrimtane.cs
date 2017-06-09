@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -10,6 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Crimtane Storage Unit");
+			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановый блок хранения");
 		}
 
 		public override void SetDefaults()

@@ -2,6 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -10,6 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Blue Chlorophyte Storage Unit");
+			DisplayName.AddTranslation(GameCulture.Russian, "Синий хлорофитовый улучшение хранилища");
 		}
 
 		public override void SetDefaults()

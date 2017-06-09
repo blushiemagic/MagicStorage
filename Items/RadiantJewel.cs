@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
@@ -11,6 +12,8 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			Tooltip.SetDefault("'Shines with a dazzling light'");
+			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая драгоценность");
+			Tooltip.AddTranslation(GameCulture.Russian, "'Блестит ослепительным светом'");
 		}
 
 		public override void SetDefaults()

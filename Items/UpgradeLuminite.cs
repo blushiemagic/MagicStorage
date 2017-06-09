@@ -2,7 +2,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-
+using Terraria.Localization;
 namespace MagicStorage.Items
 {
 	public class UpgradeLuminite : ModItem
@@ -12,6 +12,9 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Luminite Storage Upgrade");
 			Tooltip.SetDefault("Upgrades Storage Unit to 320 capacity"
 				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
+			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое улучшение хранилища");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает бБлок хранения до 320 вместимости"
+			        + "\n<right> по синему хлорофитовому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()
