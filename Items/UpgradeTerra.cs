@@ -14,8 +14,8 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity"
 				+ "\n<right> a Luminite Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Улучшение Терры");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Блок Хранения до 640 вместимости"
-			        + "\n<right> по Люминитовому Блоку Хранения для использования);	
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 640 вместимости"
+			        + "\n<right> по люминитовому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()
