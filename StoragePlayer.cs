@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.UI;
 using MagicStorage.Components;
 
 namespace MagicStorage
@@ -97,9 +98,57 @@ namespace MagicStorage
 			}
 		}
 
-		public void FindRecipesFromStorage()
+		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
 		{
-			
+			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
+			{
+				return false;
+			}
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
+				return false;
+			}
+			Item item = inventory[slot];
+			if (item.favorited || item.IsAir)
+			{
+				return false;
+			}
+			int oldStack = item.stack;
+			if (Main.netMode == 0)
+			{
+				GetStorageHeart().DepositItem(item);
+			}
+			else
+			{
+				NetHelper.SendDeposit(GetStorageHeart().ID, item);
+				item.SetDefaults(0, true);
+			}
+			if (item.stack != oldStack)
+			{
+				Main.PlaySound(7, -1, -1, 1, 1f, 0f);
+				StorageGUI.RefreshItems();
+			}
+			return true;
+		}
+
+		public TEStorageHeart GetStorageHeart()
+		{
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
+				return null;
+			}
+			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
+			if (tile == null)
+			{
+				return null;
+			}
+			int tileType = tile.type;
+			ModTile modTile = TileLoader.GetTile(tileType);
+			if (modTile == null || !(modTile is StorageAccess))
+			{
+				return null;
+			}
+			return ((StorageAccess)modTile).GetHeart(storageAccess.X, storageAccess.Y);
 		}
 	}
 }

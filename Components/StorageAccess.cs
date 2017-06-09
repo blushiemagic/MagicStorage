@@ -110,7 +110,6 @@ namespace MagicStorage.Components
 				}
 				Main.recBigList = false;
 				Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10, -1, -1, 1);
-				modPlayer.FindRecipesFromStorage();
 				Recipe.FindRecipes();
 			}
 		}

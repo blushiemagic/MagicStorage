@@ -308,24 +308,8 @@ namespace MagicStorage
 		private static TEStorageHeart GetHeart()
 		{
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
-			Point16 pos = modPlayer.ViewingStorage();
-			if (pos.X < 0 || pos.Y < 0)
-			{
-				return null;
-			}
-			Tile tile = Main.tile[pos.X, pos.Y];
-			if (tile == null)
-			{
-				return null;
-			}
-			int tileType = tile.type;
-			ModTile modTile = TileLoader.GetTile(tileType);
-			if (modTile == null || !(modTile is StorageAccess))
-			{
-				return null;
-			}
-			return ((StorageAccess)modTile).GetHeart(pos.X, pos.Y);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			return modPlayer.GetStorageHeart();
 		}
 
 		public static void RefreshItems()
@@ -417,17 +401,6 @@ namespace MagicStorage
 		private static void UpdateItemSlots()
 		{
 			Player player = Main.player[Main.myPlayer];
-			if (!player.trashItem.IsAir)
-			{
-				if (TryDeposit(player.trashItem))
-				{
-					RefreshItems();
-				}
-				if (!player.trashItem.IsAir)
-				{
-					player.trashItem = player.GetItem(Main.myPlayer, player.trashItem, false, true);
-				}
-			}
 
 			hoverSlot = -1;
 			if (curMouse.RightButton == ButtonState.Released)

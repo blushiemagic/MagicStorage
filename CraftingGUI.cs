@@ -297,24 +297,8 @@ namespace MagicStorage
 		private static TEStorageHeart GetHeart()
 		{
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
-			Point16 pos = modPlayer.ViewingStorage();
-			if (pos.X < 0 || pos.Y < 0)
-			{
-				return null;
-			}
-			Tile tile = Main.tile[pos.X, pos.Y];
-			if (tile == null)
-			{
-				return null;
-			}
-			int tileType = tile.type;
-			ModTile modTile = TileLoader.GetTile(tileType);
-			if (modTile == null || !(modTile is StorageAccess))
-			{
-				return null;
-			}
-			return ((StorageAccess)modTile).GetHeart(pos.X, pos.Y);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			return modPlayer.GetStorageHeart();
 		}
 
 		private static TECraftingAccess GetCraftingEntity()
