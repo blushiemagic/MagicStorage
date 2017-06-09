@@ -1,0 +1,94 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.UI;
+
+namespace MagicStorage
+{
+	public class UISlotZone : UIElement
+	{
+		public delegate void HoverItemSlot(int slot, ref int hoverSlot);
+		public delegate Item GetItem(int slot);
+
+		private const float inventoryScale = 0.85f;
+		private const int padding = 4;
+		private int numColumns = 10;
+		private int numRows = 4;
+		private int hoverSlot = -1;
+		private HoverItemSlot onHover;
+		private GetItem getItem;
+
+		private static Item[] temp = new Item[11];
+
+		public UISlotZone(HoverItemSlot onHover, GetItem getItem)
+		{
+			this.onHover = onHover;
+			this.getItem = getItem;
+		}
+
+		public void SetDimensions(int columns, int rows)
+		{
+			this.numColumns = columns;
+			this.numRows = rows;
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			hoverSlot = -1;
+			Vector2 origin = GetDimensions().Position();
+			MouseState curMouse = StorageGUI.curMouse;
+			if (curMouse.X <= origin.X || curMouse.Y <= origin.Y)
+			{
+				return;
+			}
+			int slotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale);
+			int slotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale);
+			int slotX = (curMouse.X - (int)origin.X) / (slotWidth + padding);
+			int slotY = (curMouse.Y - (int)origin.Y) / (slotHeight + padding);
+			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= numRows)
+			{
+				return;
+			}
+			Vector2 slotPos = origin + new Vector2(slotX * (slotWidth + padding), slotY * (slotHeight + padding));
+			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + slotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + slotHeight)
+			{
+				onHover(slotX + numColumns * slotY, ref hoverSlot);
+			}
+		}
+
+		protected override void DrawSelf(SpriteBatch spriteBatch)
+		{
+			float slotWidth = Main.inventoryBackTexture.Width * inventoryScale;
+			float slotHeight = Main.inventoryBackTexture.Height * inventoryScale;
+			Vector2 origin = GetDimensions().Position();
+			float oldScale = Main.inventoryScale;
+			Main.inventoryScale = inventoryScale;
+			Item[] temp = new Item[11];
+			for (int k = 0; k < numColumns * numRows; k++)
+			{
+				Item item = getItem(k);
+				Vector2 drawPos = origin + new Vector2((slotWidth + padding) * (k % 10), (slotHeight + padding) * (k / 10));
+				temp[10] = item;
+				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
+			}
+			Main.inventoryScale = oldScale;
+		}
+
+		public void DrawText()
+		{
+			if (hoverSlot >= 0)
+			{
+				Item hoverItem = getItem(hoverSlot);
+				if (!hoverItem.IsAir)
+				{
+					Main.HoverItem = hoverItem.Clone();
+					Main.instance.MouseText(string.Empty);
+				}
+			}
+		}
+	}
+}

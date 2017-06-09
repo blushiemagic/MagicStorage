@@ -18,7 +18,7 @@ namespace MagicStorage
 	{
 		private const int padding = 4;
 		private const int numColumns = 10;
-		private const float inventoryScale = 0.85f;
+		public const float inventoryScale = 0.85f;
 
 		public static MouseState curMouse;
 		public static MouseState oldMouse;
@@ -44,7 +44,11 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
 
-		private static UIElement slotZone = new UIElement();
+		private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem);
+		private static int slotFocus = -1;
+		private static int rightClickTimer = 0;
+		private const int startMaxRightClickTimer = 20;
+		private static int maxRightClickTimer = startMaxRightClickTimer;
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
 		private static bool scrollBarFocus = false;
@@ -57,11 +61,6 @@ namespace MagicStorage
 		private static List<bool> didMatCheck = new List<bool>();
 		private static int numRows;
 		private static int displayRows;
-		private static int hoverSlot = -1;
-		private static int slotFocus = -1;
-		private static int rightClickTimer = 0;
-		private const int startMaxRightClickTimer = 20;
-		private static int maxRightClickTimer = startMaxRightClickTimer;
 
 		private static UIElement bottomBar = new UIElement();
 		private static UIText capacityText = new UIText("Items");
@@ -123,6 +122,7 @@ namespace MagicStorage
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
 			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
+			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
 			{
@@ -230,10 +230,13 @@ namespace MagicStorage
 			curMouse = Mouse.GetState();
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
 			{
+				if (StorageGUI.curMouse.RightButton == ButtonState.Released)
+				{
+					ResetSlotFocus();
+				}
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
-				UpdateItemSlots();
 			}
 			else
 			{
@@ -255,33 +258,21 @@ namespace MagicStorage
 				InterfaceHelper.HideItemIconCache();
 			}
 			basePanel.Draw(Main.spriteBatch);
-			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
-			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
-			Vector2 slotZonePos = slotZone.GetDimensions().Position();
-			float oldScale = Main.inventoryScale;
-			Main.inventoryScale = inventoryScale;
-			Item[] temp = new Item[11];
-			for (int k = 0; k < numColumns * displayRows; k++)
-			{
-				int index = k + numColumns * (int)Math.Round(scrollBar.ViewPosition);
-				Item item = index < items.Count ? items[index] : new Item();
-				if (!item.IsAir && !didMatCheck[index])
-				{
-					item.checkMat();
-					didMatCheck[index] = true;
-				}
-				Vector2 drawPos = slotZonePos + new Vector2((itemSlotWidth + padding) * (k % 10), (itemSlotHeight + padding) * (k / 10));
-				temp[10] = item;
-				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
-			}
-			if (hoverSlot >= 0 && hoverSlot < items.Count)
-			{
-				Main.HoverItem = items[hoverSlot].Clone();
-				Main.instance.MouseText(string.Empty);
-			}
+			slotZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
-			Main.inventoryScale = oldScale;
+		}
+
+		private static Item GetItem(int slot)
+		{
+			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			Item item = index < items.Count ? items[index] : new Item();
+			if (!item.IsAir && !didMatCheck[index])
+			{
+				item.checkMat();
+				didMatCheck[index] = true;
+			}
+			return item;
 		}
 
 		private static void UpdateScrollBar()
@@ -422,22 +413,6 @@ namespace MagicStorage
 			}
 		}
 
-		private static void UpdateItemSlots()
-		{
-			Player player = Main.player[Main.myPlayer];
-
-			hoverSlot = -1;
-			if (curMouse.RightButton == ButtonState.Released)
-			{
-				ResetSlotFocus();
-			}
-			TryHoverSlot();
-			if (slotFocus >= 0)
-			{
-				SlotFocusLogic();
-			}
-		}
-
 		private static void ResetSlotFocus()
 		{
 			slotFocus = -1;
@@ -445,31 +420,10 @@ namespace MagicStorage
 			maxRightClickTimer = startMaxRightClickTimer;
 		}
 
-		private static void TryHoverSlot()
-		{
-			Vector2 slotOrigin = slotZone.GetDimensions().Position();
-			if (curMouse.X <= slotOrigin.X || curMouse.Y <= slotOrigin.Y)
-			{
-				return;
-			}
-			int itemSlotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale);
-			int itemSlotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale);
-			int slotX = (curMouse.X - (int)slotOrigin.X) / (itemSlotWidth + padding);
-			int slotY = (curMouse.Y - (int)slotOrigin.Y) / (itemSlotHeight + padding);
-			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= displayRows)
-			{
-				return;
-			}
-			Vector2 slotPos = slotOrigin + new Vector2(slotX * (itemSlotWidth + padding), slotY * (itemSlotHeight + padding));
-			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + itemSlotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + itemSlotHeight)
-			{
-				HoverItemSlot(slotX + numColumns * slotY);
-			}
-		}
-
-		private static void HoverItemSlot(int slot)
+		private static void HoverItemSlot(int slot, ref int hoverSlot)
 		{
 			Player player = Main.player[Main.myPlayer];
+			int visualSlot = slot;
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			if (MouseClicked)
 			{
@@ -509,7 +463,12 @@ namespace MagicStorage
 			
 			if (slot < items.Count && !items[slot].IsAir)
 			{
-				hoverSlot = slot;
+				hoverSlot = visualSlot;
+			}
+
+			if (slotFocus >= 0)
+			{
+				SlotFocusLogic();
 			}
 		}
 
@@ -518,6 +477,8 @@ namespace MagicStorage
 			if (slotFocus >= items.Count || (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)))
 			{
 				ResetSlotFocus();
+				rightClickTimer = 0;
+				maxRightClickTimer = startMaxRightClickTimer;
 			}
 			else
 			{
