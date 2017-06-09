@@ -13,8 +13,8 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("Upgrades Storage Unit to 320 capacity"
 				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое улучшение хранилища");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Блок Хранения до 320 вместимости"
-			        + "\n<right> по Синему Хлорофитовому Блоку Хранения для использования);	
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает бБлок хранения до 320 вместимости"
+			        + "\n<right> по синему хлорофитовому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()
