@@ -14,8 +14,8 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("Upgrades Storage Unit to 120 capacity"
 				+ "\n<right> a Demonite/Crimtane Storage Unit to use");
 			DisplayName.AddTranslation(GameCulture.Russian, "Адское улучшение хранилища");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Блок Хранения до 120 вместимости"
-			        + "\n<right> по Демонитовому/Кримтановому Блоку Хранения для использования);	
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 120 вместимости"
+			        + "\n<right> по демонитовому/кримтановому блоку хранения для использования);	
 		}
 
 		public override void SetDefaults()
