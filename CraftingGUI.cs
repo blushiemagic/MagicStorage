@@ -46,7 +46,8 @@ namespace MagicStorage
 
 		private static UIText stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation);
-		private static UIElement slotZone = new UIElement();
+		private static UIText recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
+		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe);
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
 		private static bool scrollBarFocus = false;
@@ -56,6 +57,7 @@ namespace MagicStorage
 		private static float scrollBarMaxViewSize = 2f;
 
 		private static List<Item> items = new List<Item>();
+		private static List<Recipe> recipes = new List<Recipe>();
 		private static int numRows;
 		private static int displayRows;
 		private static int hoverSlot = -1;
@@ -120,13 +122,17 @@ namespace MagicStorage
 			stationZone.SetDimensions(numColumns, 1);
 			basePanel.Append(stationZone);
 
-			slotZone.Width.Set(0f, 1f);
-			slotZone.Top.Set(136f, 0f);
-			slotZone.Height.Set(-176f, 1f);
-			basePanel.Append(slotZone);
+			recipeText.Top.Set(152f, 0f);
+			basePanel.Append(recipeText);
 
-			numRows = (items.Count + numColumns - 1) / numColumns;
-			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
+			recipeZone.Width.Set(0f, 1f);
+			recipeZone.Top.Set(176f, 0f);
+			recipeZone.Height.Set(-216f, 1f);
+			basePanel.Append(recipeZone);
+
+			numRows = (recipes.Count + numColumns - 1) / numColumns;
+			displayRows = (int)recipeZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
+			recipeZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
 			{
@@ -136,7 +142,7 @@ namespace MagicStorage
 			scrollBar.Height.Set(displayRows * (itemSlotHeight + padding), 0f);
 			scrollBar.Left.Set(-20f, 1f);
 			scrollBar.SetView(scrollBarViewSize, scrollBarMaxViewSize);
-			slotZone.Append(scrollBar);
+			recipeZone.Append(scrollBar);
 
 			bottomBar.Width.Set(0f, 1f);
 			bottomBar.Height.Set(32f, 0f);
@@ -184,15 +190,13 @@ namespace MagicStorage
 				{
 					Main.inventorySortTexture[0],
 					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName"),
-					MagicStorage.Instance.GetTexture("SortNumber")
+					MagicStorage.Instance.GetTexture("SortName")
 				},
 				new LocalizedText[]
 				{
 					Language.GetText("Mods.MagicStorage.SortDefault"),
 					Language.GetText("Mods.MagicStorage.SortID"),
-					Language.GetText("Mods.MagicStorage.SortName"),
-					Language.GetText("Mods.MagicStorage.SortStack")
+					Language.GetText("Mods.MagicStorage.SortName")
 				});
 			}
 		}
@@ -252,11 +256,12 @@ namespace MagicStorage
 			}
 			basePanel.Draw(Main.spriteBatch);
 			stationZone.DrawText();
+			recipeZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
 		}
 
-		private static Item GetStation(int slot)
+		private static Item GetStation(int slot, ref int context)
 		{
 			Item[] stations = GetCraftingStations();
 			if (stations == null || slot >= stations.Length)
@@ -264,6 +269,12 @@ namespace MagicStorage
 				return new Item();
 			}
 			return stations[slot];
+		}
+
+		private static Item GetRecipe(int slot, ref int context)
+		{
+			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			return index < recipes.Count ? recipes[index].createItem : new Item();
 		}
 
 		private static void UpdateScrollBar()
@@ -328,11 +339,13 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			items.Clear();
+			recipes.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 			{
 				return;
 			}
+			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, "", ""));
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
@@ -347,9 +360,6 @@ namespace MagicStorage
 				break;
 			case 2:
 				sortMode = SortMode.Name;
-				break;
-			case 3:
-				sortMode = SortMode.Quantity;
 				break;
 			default:
 				sortMode = SortMode.Default;
@@ -383,7 +393,7 @@ namespace MagicStorage
 				filterMode = FilterMode.All;
 				break;
 			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
+			recipes.AddRange(ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text));
 		}
 
 		private static void HoverStation(int slot, ref int hoverSlot)
@@ -435,6 +445,16 @@ namespace MagicStorage
 			}
 			
 			hoverSlot = slot;
+		}
+
+		private static void HoverRecipe(int slot, ref int hoverSlot)
+		{
+			int visualSlot = slot;
+			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			if (slot < recipes.Count)
+			{
+				hoverSlot = visualSlot;
+			}
 		}
 
 		private static Item DoWithdraw(int slot)

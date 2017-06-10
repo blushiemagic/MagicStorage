@@ -12,7 +12,7 @@ namespace MagicStorage
 	public class UISlotZone : UIElement
 	{
 		public delegate void HoverItemSlot(int slot, ref int hoverSlot);
-		public delegate Item GetItem(int slot);
+		public delegate Item GetItem(int slot, ref int context);
 
 		private const float inventoryScale = 0.85f;
 		private const int padding = 4;
@@ -70,10 +70,11 @@ namespace MagicStorage
 			Item[] temp = new Item[11];
 			for (int k = 0; k < numColumns * numRows; k++)
 			{
-				Item item = getItem(k);
+				int context = 0;
+				Item item = getItem(k, ref context);
 				Vector2 drawPos = origin + new Vector2((slotWidth + padding) * (k % 10), (slotHeight + padding) * (k / 10));
 				temp[10] = item;
-				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
+				ItemSlot.Draw(Main.spriteBatch, temp, context, 10, drawPos);
 			}
 			Main.inventoryScale = oldScale;
 		}
@@ -82,7 +83,8 @@ namespace MagicStorage
 		{
 			if (hoverSlot >= 0)
 			{
-				Item hoverItem = getItem(hoverSlot);
+				int context = 0;
+				Item hoverItem = getItem(hoverSlot, ref context);
 				if (!hoverItem.IsAir)
 				{
 					Main.HoverItem = hoverItem.Clone();

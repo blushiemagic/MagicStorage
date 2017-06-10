@@ -7,6 +7,19 @@ namespace MagicStorage.Sorting
 	public abstract class ItemFilter
 	{
 		public abstract bool Passes(Item item);
+
+		public bool Passes(object obj)
+		{
+			if (obj is Item)
+			{
+				return Passes((Item)obj);
+			}
+			if (obj is Recipe)
+			{
+				return Passes(((Recipe)obj).createItem);
+			}
+			return false;
+		}
 	}
 
 	public class FilterAll : ItemFilter

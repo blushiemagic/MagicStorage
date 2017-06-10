@@ -263,7 +263,7 @@ namespace MagicStorage
 			filterButtons.DrawText();
 		}
 
-		private static Item GetItem(int slot)
+		private static Item GetItem(int slot, ref int context)
 		{
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < items.Count ? items[index] : new Item();
