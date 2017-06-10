@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -57,7 +59,15 @@ namespace MagicStorage
 		private static float scrollBarMaxViewSize = 2f;
 
 		private static List<Item> items = new List<Item>();
+		private static Dictionary<int, int> itemCounts = new Dictionary<int, int>();
+		private static bool[] adjTiles = new bool[TileLoader.TileCount];
+		private static bool adjWater = false;
+		private static bool adjLava = false;
+		private static bool adjHoney = false;
+		private static bool zoneSnow = false;
+		private static bool alchemyTable = false;
 		private static List<Recipe> recipes = new List<Recipe>();
+		private static List<bool> recipeAvailable = new List<bool>();
 		private static int numRows;
 		private static int displayRows;
 		private static int hoverSlot = -1;
@@ -274,7 +284,12 @@ namespace MagicStorage
 		private static Item GetRecipe(int slot, ref int context)
 		{
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
-			return index < recipes.Count ? recipes[index].createItem : new Item();
+			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
+			if (!item.IsAir && !recipeAvailable[index])
+			{
+				context = 3;
+			}
+			return item;
 		}
 
 		private static void UpdateScrollBar()
@@ -340,12 +355,14 @@ namespace MagicStorage
 		{
 			items.Clear();
 			recipes.Clear();
+			recipeAvailable.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 			{
 				return;
 			}
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, "", ""));
+			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
@@ -394,6 +411,180 @@ namespace MagicStorage
 				break;
 			}
 			recipes.AddRange(ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text));
+			recipeAvailable.AddRange(recipes.Select(recipe => IsAvailable(recipe)));
+		}
+
+		private static void AnalyzeIngredients()
+		{
+			Player player = Main.player[Main.myPlayer];
+			itemCounts.Clear();
+			if (adjTiles.Length != player.adjTile.Length)
+			{
+				Array.Resize(ref adjTiles, player.adjTile.Length);
+			}
+			for (int k = 0; k < adjTiles.Length; k++)
+			{
+				adjTiles[k] = false;
+			}
+			adjWater = false;
+			adjLava = false;
+			adjHoney = false;
+			zoneSnow = false;
+
+			foreach (Item item in items)
+			{
+				if (itemCounts.ContainsKey(item.netID))
+				{
+					itemCounts[item.netID] += item.stack;
+				}
+				else
+				{
+					itemCounts[item.netID] = item.stack;
+				}
+			}
+			foreach (Item item in GetCraftingStations())
+			{
+				if (item.createTile >= 0)
+				{
+					adjTiles[item.createTile] = true;
+					if (item.createTile == TileID.GlassKiln || item.createTile == TileID.Hellforge || item.createTile == TileID.AdamantiteForge)
+					{
+						adjTiles[TileID.Furnaces] = true;
+					}
+					if (item.createTile == TileID.AdamantiteForge)
+					{
+						adjTiles[TileID.Hellforge] = true;
+					}
+					if (item.createTile == TileID.MythrilAnvil)
+					{
+						adjTiles[TileID.Anvils] = true;
+					}
+					if (item.createTile == TileID.BewitchingTable || item.createTile == TileID.Tables2)
+					{
+						adjTiles[TileID.Tables] = true;
+					}
+					if (item.createTile == TileID.AlchemyTable)
+					{
+						adjTiles[TileID.Bottles] = true;
+						adjTiles[TileID.Tables] = true;
+						alchemyTable = true;
+					}
+					bool[] oldAdjTile = player.adjTile;
+					bool oldAdjWater = adjWater;
+					bool oldAdjLava = adjLava;
+					bool oldAdjHoney = adjHoney;
+					bool oldAlchemyTable = alchemyTable;
+					player.adjTile = adjTiles;
+					player.adjWater = false;
+					player.adjLava = false;
+					player.adjHoney = false;
+					player.alchemyTable = false;
+					TileLoader.AdjTiles(player, item.createTile);
+					if (player.adjWater)
+					{
+						adjWater = true;
+					}
+					if (player.adjLava)
+					{
+						adjLava = true;
+					}
+					if (player.adjHoney)
+					{
+						adjHoney = true;
+					}
+					if (player.alchemyTable)
+					{
+						alchemyTable = true;
+					}
+					player.adjTile = oldAdjTile;
+					player.adjWater = oldAdjWater;
+					player.adjLava = oldAdjLava;
+					player.adjHoney = oldAdjHoney;
+					player.alchemyTable = oldAlchemyTable;
+				}
+				if (item.type == ItemID.WaterBucket || item.type == ItemID.BottomlessBucket)
+				{
+					adjWater = true;
+				}
+				if (item.type == ItemID.LavaBucket)
+				{
+					adjLava = true;
+				}
+				if (item.type == ItemID.HoneyBucket)
+				{
+					adjHoney = true;
+				}
+				//TODO - zoneSnow
+			}
+		}
+
+		private static bool IsAvailable(Recipe recipe)
+		{
+			foreach (int tile in recipe.requiredTile)
+			{
+				if (tile == -1)
+				{
+					break;
+				}
+				if (!adjTiles[tile])
+				{
+					return false;
+				}
+			}
+			foreach (Item ingredient in recipe.requiredItem)
+			{
+				if (ingredient.type == 0)
+				{
+					break;
+				}
+				int stack = ingredient.stack;
+				bool useRecipeGroup = false;
+				foreach (int type in itemCounts.Keys)
+				{
+					if (recipe.useWood(type, ingredient.type) || recipe.useSand(type, ingredient.type) || recipe.useIronBar(type, ingredient.type) || recipe.useFragment(type, ingredient.type) || recipe.AcceptedByItemGroups(type, ingredient.type) || recipe.usePressurePlate(type, ingredient.type))
+					{
+						stack -= itemCounts[type];
+						useRecipeGroup = true;
+					}
+				}
+				if (!useRecipeGroup && itemCounts.ContainsKey(ingredient.netID))
+				{
+					stack -= itemCounts[ingredient.netID];
+				}
+				if (stack > 0)
+				{
+					return false;
+				}
+			}
+			if (recipe.needWater && !adjWater && !adjTiles[TileID.Sinks])
+			{
+				return false;
+			}
+			if (recipe.needLava && !adjLava)
+			{
+				return false;
+			}
+			if (recipe.needHoney && !adjHoney)
+			{
+				return false;
+			}
+			if (recipe.needSnowBiome && !zoneSnow)
+			{
+				return false;
+			}
+			try
+			{
+				BlockRecipes.active = false;
+				if (!RecipeHooks.RecipeAvailable(recipe))
+				{
+					return false;
+				}
+			}
+			finally
+			{
+				BlockRecipes.active = true;
+			}
+			return true;
 		}
 
 		private static void HoverStation(int slot, ref int hoverSlot)
