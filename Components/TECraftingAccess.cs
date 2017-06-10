@@ -17,7 +17,7 @@ namespace MagicStorage.Components
 
 		public TECraftingAccess()
 		{
-			for (int k = 0; k < stations.Length; k++)
+			for (int k = 0; k < 10; k++)
 			{
 				stations[k] = new Item();
 			}
@@ -79,6 +79,16 @@ namespace MagicStorage.Components
 			if (Main.netMode == 1)
 			{
 				return new Item();
+			}
+			if (!item.IsAir)
+			{
+				for (int k = 0; k < stations.Length; k++)
+				{
+					if (k != slot && stations[k].type == item.type)
+					{
+						return item;
+					}
+				}
 			}
 			if ((item.IsAir || item.stack == 1) && !stations[slot].IsAir)
 			{

@@ -115,17 +115,33 @@ namespace MagicStorage
 			{
 				return false;
 			}
+			int oldType = item.type;
 			int oldStack = item.stack;
-			if (Main.netMode == 0)
+			if (StorageCrafting())
 			{
-				GetStorageHeart().DepositItem(item);
+				if (Main.netMode == 0)
+				{
+					GetCraftingAccess().TryDepositStation(item);
+				}
+				else
+				{
+					NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
+					item.SetDefaults(0, true);
+				}
 			}
 			else
 			{
-				NetHelper.SendDeposit(GetStorageHeart().ID, item);
-				item.SetDefaults(0, true);
+				if (Main.netMode == 0)
+				{
+					GetStorageHeart().DepositItem(item);
+				}
+				else
+				{
+					NetHelper.SendDeposit(GetStorageHeart().ID, item);
+					item.SetDefaults(0, true);
+				}
 			}
-			if (item.stack != oldStack)
+			if (item.type != oldType || item.stack != oldStack)
 			{
 				Main.PlaySound(7, -1, -1, 1, 1f, 0f);
 				StorageGUI.RefreshItems();
@@ -151,6 +167,15 @@ namespace MagicStorage
 				return null;
 			}
 			return ((StorageAccess)modTile).GetHeart(storageAccess.X, storageAccess.Y);
+		}
+
+		public TECraftingAccess GetCraftingAccess()
+		{
+			if (storageAccess.X < 0 || storageAccess.Y < 0 || !TileEntity.ByPosition.ContainsKey(storageAccess))
+			{
+				return null;
+			}
+			return TileEntity.ByPosition[storageAccess] as TECraftingAccess;
 		}
 
 		public bool StorageCrafting()

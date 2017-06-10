@@ -89,6 +89,10 @@ namespace MagicStorage
 			text = CreateTranslation("FilterMisc");
 			text.SetDefault("Filter Misc");
 			AddTranslation(text);
+
+			text = CreateTranslation("CraftingStations");
+			text.SetDefault("Crafting Stations");
+			AddTranslation(text);
 		}
 
 		public override void PostSetupContent()

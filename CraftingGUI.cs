@@ -44,8 +44,8 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
 
-		private static UIElement stationZone = new UIElement();
-		private static UIText stationText = new UIText("Crafting Stations");
+		private static UIText stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation);
 		private static UIElement slotZone = new UIElement();
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -111,11 +111,14 @@ namespace MagicStorage
 			searchBar2.Height.Set(0f, 1f);
 			topBar2.Append(searchBar2);
 
+			stationText.Top.Set(76f, 0f);
+			basePanel.Append(stationText);
+
 			stationZone.Width.Set(0f, 1f);
-			stationZone.Top.Set(76f, 0f);
+			stationZone.Top.Set(100f, 0f);
 			stationZone.Height.Set(70f, 0f);
+			stationZone.SetDimensions(numColumns, 1);
 			basePanel.Append(stationZone);
-			stationZone.Append(stationText);
 
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(136f, 0f);
@@ -229,7 +232,6 @@ namespace MagicStorage
 			{
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
-				UpdateItemSlots();
 			}
 			else
 			{
@@ -249,27 +251,19 @@ namespace MagicStorage
 				InterfaceHelper.HideItemIconCache();
 			}
 			basePanel.Draw(Main.spriteBatch);
-			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
-			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
-			Vector2 slotZonePos = slotZone.GetDimensions().Position();
-			float oldScale = Main.inventoryScale;
-			Main.inventoryScale = inventoryScale;
-			Item[] temp = new Item[11];
-			Item[] craftingStations = GetCraftingStations();
-			for (int k = 0; k < numColumns; k++)
-			{
-				temp[10] = craftingStations[k];
-				Vector2 drawPos = GetCraftSlotPos(k);
-				ItemSlot.Draw(Main.spriteBatch, temp, 0, 10, drawPos);
-			}
-			if (hoverSlot >= 0 && hoverSlot < craftingStations.Length)
-			{
-				Main.HoverItem = craftingStations[hoverSlot].Clone();
-				Main.instance.MouseText(string.Empty);
-			}
+			stationZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
-			Main.inventoryScale = oldScale;
+		}
+
+		private static Item GetStation(int slot)
+		{
+			Item[] stations = GetCraftingStations();
+			if (stations == null || slot >= stations.Length)
+			{
+				return new Item();
+			}
+			return stations[slot];
 		}
 
 		private static void UpdateScrollBar()
@@ -321,13 +315,8 @@ namespace MagicStorage
 		private static TECraftingAccess GetCraftingEntity()
 		{
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
-			Point16 pos = modPlayer.ViewingStorage();
-			if (pos.X < 0 || pos.Y < 0 || !TileEntity.ByPosition.ContainsKey(pos))
-			{
-				return null;
-			}
-			return TileEntity.ByPosition[pos] as TECraftingAccess;
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			return modPlayer.GetCraftingAccess();
 		}
 
 		private static Item[] GetCraftingStations()
@@ -397,49 +386,83 @@ namespace MagicStorage
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 		}
 
-		private static void UpdateItemSlots()
+		private static void HoverStation(int slot, ref int hoverSlot)
 		{
-			hoverSlot = -1;
-			TryHoverSlot();
-		}
-
-		private static void TryHoverSlot()
-		{
-			Vector2 slotOrigin = stationZone.GetDimensions().Position();
-			if (curMouse.X <= slotOrigin.X || curMouse.Y <= slotOrigin.Y)
+			TECraftingAccess ent = GetCraftingEntity();
+			if (ent == null || slot >= ent.stations.Length)
 			{
 				return;
 			}
-			int itemSlotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale);
-			int itemSlotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale);
-			int slotX = (curMouse.X - (int)slotOrigin.X) / (itemSlotWidth + padding);
-			int slotY = (curMouse.Y - (int)slotOrigin.Y) / (itemSlotHeight + padding);
-			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= displayRows)
+
+			Player player = Main.player[Main.myPlayer];
+			if (MouseClicked)
 			{
-				return;
+				bool changed = false;
+				if (!ent.stations[slot].IsAir && ItemSlot.ShiftInUse)
+				{
+					Item result = player.GetItem(Main.myPlayer, DoWithdraw(slot), false, true);
+					if (!result.IsAir && Main.mouseItem.IsAir)
+					{
+						Main.mouseItem = result;
+						result = new Item();
+					}
+					if (!result.IsAir && Main.mouseItem.type == result.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
+					{
+						Main.mouseItem.stack += result.stack;
+						result = new Item();
+					}
+					if (!result.IsAir)
+					{
+						player.QuickSpawnClonedItem(result);
+					}
+					changed = true;
+				}
+				else
+				{
+					int oldType = Main.mouseItem.type;
+					int oldStack = Main.mouseItem.stack;
+					Main.mouseItem = DoStationSwap(Main.mouseItem, slot);
+					if (oldType != Main.mouseItem.type || oldStack != Main.mouseItem.stack)
+					{
+						changed = true;
+					}
+				}
+				if (changed)
+				{
+					RefreshItems();
+					Main.PlaySound(7, -1, -1, 1);
+				}
 			}
-			Vector2 slotPos = slotOrigin + new Vector2(slotX * (itemSlotWidth + padding), slotY * (itemSlotHeight + padding));
-			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + itemSlotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + itemSlotHeight)
+			
+			hoverSlot = slot;
+		}
+
+		private static Item DoWithdraw(int slot)
+		{
+			TECraftingAccess access = GetCraftingEntity();
+			if (Main.netMode == 0)
 			{
-				//HoverItemSlot(slotX + numColumns * slotY);
+				return access.TryWithdrawStation(slot);
+			}
+			else
+			{
+				NetHelper.SendWithdrawStation(access.ID, slot);
+				return new Item();
 			}
 		}
 
-		public static Vector2 GetSlotSize()
+		private static Item DoStationSwap(Item item, int slot)
 		{
-			return new Vector2(Main.inventoryBackTexture.Width, Main.inventoryBackTexture.Height) * inventoryScale;
-		}
-
-		public static Vector2 GetCraftSlotPos(int slot)
-		{
-			Vector2 slotSize = GetSlotSize();
-			if (slot < numColumns)
+			TECraftingAccess access = GetCraftingEntity();
+			if (Main.netMode == 0)
 			{
-				CalculatedStyle dim = stationZone.GetDimensions();
-				Vector2 origin = new Vector2(dim.X, dim.Y + dim.Height - slotSize.Y);
-				return origin + new Vector2(slot * (slotSize.X + padding), 0f);
+				return access.DoStationSwap(item, slot);
 			}
-			return Vector2.Zero;
+			else
+			{
+				NetHelper.SendStationSlotClick(access.ID, item, slot);
+				return new Item();
+			}
 		}
 	}
 }
