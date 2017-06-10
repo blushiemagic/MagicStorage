@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Microsoft.Xna.Framework;
+using Terraria.Localization;
 
 namespace MagicStorage
 {
@@ -33,70 +34,87 @@ namespace MagicStorage
 			ModTranslation text = CreateTranslation("DepositAll");
 			text.SetDefault("Deposit All");
 			AddTranslation(text);
+			text.AddTranslation(GameCulture.Russian, "Переместить всё");
 
 			text = CreateTranslation("Search");
 			text.SetDefault("Search");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Поиск");
+			
 			text = CreateTranslation("SearchName");
 			text.SetDefault("Search Name");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Поиск по имени");
+			
 			text = CreateTranslation("SearchMod");
 			text.SetDefault("Search Mod");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Поиск по моду");
+			
 			text = CreateTranslation("SortDefault");
 			text.SetDefault("Default Sorting");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Стандартная сортировка");
+			
 			text = CreateTranslation("SortID");
 			text.SetDefault("Sort by ID");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Сортировка по ID");
+			
 			text = CreateTranslation("SortName");
 			text.SetDefault("Sort by Name");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Сортировка по имени");
+			
 			text = CreateTranslation("SortStack");
 			text.SetDefault("Sort by Stacks");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
+			
 			text = CreateTranslation("FilterAll");
 			text.SetDefault("Filter All");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Всё)");
+			
 			text = CreateTranslation("FilterWeapons");
 			text.SetDefault("Filter Weapons");
 			AddTranslation(text);
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Оружия)");
 
 			text = CreateTranslation("FilterTools");
 			text.SetDefault("Filter Tools");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Инструменты)");
+			
 			text = CreateTranslation("FilterEquips");
 			text.SetDefault("Filter Equipment");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Снаряжения)");
+			
 			text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
+			
 			text = CreateTranslation("FilterTiles");
 			text.SetDefault("Filter Placeables");
 			AddTranslation(text);
-
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Размещаемое)");
+			
 			text = CreateTranslation("FilterMisc");
 			text.SetDefault("Filter Misc");
 			AddTranslation(text);
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Разное)");			
 
 			text = CreateTranslation("CraftingStations");
 			text.SetDefault("Crafting Stations");
 			AddTranslation(text);
+			text.AddTranslation(GameCulture.Russian, "Станции создания");			
 
 			text = CreateTranslation("Recipes");
 			text.SetDefault("Recipes");
 			AddTranslation(text);
+			text.AddTranslation(GameCulture.Russian, "Рецепты");			
 		}
 
 		public override void PostSetupContent()
