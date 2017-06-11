@@ -40,7 +40,7 @@ namespace MagicStorage.Items
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 
-			Mod otherMod = ModLoader.GetMod("Bluemagic");
+			Mod otherMod = MagicStorage.bluemagicMod;
 			if (otherMod != null)
 			{
 				recipe = new ModRecipe(mod);

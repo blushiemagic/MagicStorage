@@ -13,6 +13,7 @@ namespace MagicStorage
 	public class MagicStorage : Mod
 	{
 		public static MagicStorage Instance;
+		public static Mod bluemagicMod;
 		public static Mod legendMod;
 
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
@@ -26,6 +27,7 @@ namespace MagicStorage
 			Instance = this;
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
+			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
 		}
 
@@ -34,6 +36,10 @@ namespace MagicStorage
 			ModTranslation text = CreateTranslation("SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
+			AddTranslation(text);
+
+			text = CreateTranslation("SnowBiomeBlock");
+			text.SetDefault("Snow Biome Block");
 			AddTranslation(text);
 
 			text = CreateTranslation("DepositAll");
@@ -171,6 +177,12 @@ namespace MagicStorage
 			ItemID.MeteoriteChest,
 			ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
+			group = new RecipeGroup(() => Lang.misc[37].Value + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
+			if (bluemagicMod != null)
+			{
+				group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
+			}
+			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
 			group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
 			if (legendMod != null)
 			{

@@ -514,8 +514,12 @@ namespace MagicStorage
 				{
 					adjHoney = true;
 				}
-				//TODO - zoneSnow
+				if (item.type == MagicStorage.Instance.ItemType("SnowBiomeEmulator"))
+				{
+					zoneSnow = true;
+				}
 			}
+			adjTiles[MagicStorage.Instance.TileType("CraftingAccess")] = true;
 		}
 
 		private static bool IsAvailable(Recipe recipe)
