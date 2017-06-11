@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Hallowed Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Святой блок хранения");
+			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Święcona)");
 		}
 
 		public override void SetDefaults()

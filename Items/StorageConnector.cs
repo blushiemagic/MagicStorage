@@ -11,6 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Соединитель хранилищ");
+			DisplayName.AddTranslation(GameCulture.Polish, "Łącznik");
 		}	
 	
 		public override void SetDefaults()

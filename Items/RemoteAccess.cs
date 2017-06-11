@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Remote Storage Access");
 			DisplayName.AddTranslation(GameCulture.Russian, "Дистанционный доступ к хранилищу");
+			DisplayName.AddTranslation(GameCulture.Polish, "bezprzewodowe okno dostępu");
 		}
 
 		public override void SetDefaults()

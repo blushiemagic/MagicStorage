@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -11,9 +11,12 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			Tooltip.SetDefault("'Shines with a dazzling light'");
 			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая драгоценность");
+			DisplayName.AddTranslation(GameCulture.Polish, "Promieniejący klejnot");
+
+			Tooltip.SetDefault("'Shines with a dazzling light'");
 			Tooltip.AddTranslation(GameCulture.Russian, "'Блестит ослепительным светом'");
+			Tooltip.AddTranslation(GameCulture.Polish, "'Świeci oślepiającym światłem'");
 		}
 
 		public override void SetDefaults()

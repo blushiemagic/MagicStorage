@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -24,11 +24,15 @@ namespace MagicStorage.Items
 
 		public override void SetStaticDefaults()
 		{
+			DisplayName.AddTranslation(GameCulture.Russian, "Локатор");
+			DisplayName.AddTranslation(GameCulture.Polish, "Lokalizator");
+
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\n<right> Remote Storage Access to set it");
-			DisplayName.AddTranslation(GameCulture.Russian, "Локатор");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> по сердцу хранилища чтобы сохранить локацию"
-			        + "\n<right> по дистанционному доступу к хранилищу чтобы установить его");	
+			        + "\n<right> по дистанционному доступу к хранилищу чтобы установить его");
+			Tooltip.AddTranslation(GameCulture.Polish, "<right> na serce jednostki magazynującej, aby zapisać jej lokalizację"
+				+ "\n<right> na bezprzewodowe okno dostępu aby je ustawić");	
 		}
 
 		public override void SetDefaults()
@@ -47,7 +51,7 @@ namespace MagicStorage.Items
 			{
 				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0")
 				{
-					lines[k].text = "Set to: X=" + location.X + ", Y=" + location.Y;
+					lines[k].text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
 				}
 				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
 				{

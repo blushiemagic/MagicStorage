@@ -11,11 +11,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Crimtane Storage Upgrade");
+			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановое улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Karmazynit)");
+
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
 				+ "\n<right> a Storage Unit to use");
-			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановое улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 80 вместимости"
 			        + "\n<right> по  блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 80 miejsc"
+				+ "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
 		}
 
 		public override void SetDefaults()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Demonite Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовый блок хранения");
+			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Demonit)");
 		}
 
 		public override void SetDefaults()

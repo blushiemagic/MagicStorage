@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -31,90 +31,95 @@ namespace MagicStorage
 
 		private void AddTranslations()
 		{
-			ModTranslation text = CreateTranslation("DepositAll");
-			text.SetDefault("Deposit All");
+			ModTranslation text = CreateTranslation("SetTo");
+			text.SetDefault("Set to: X={0}, Y={1}");
+			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
 			AddTranslation(text);
+
+			text = CreateTranslation("DepositAll");
+			text.SetDefault("Deposit All");
 			text.AddTranslation(GameCulture.Russian, "Переместить всё");
+			AddTranslation(text);
 
 			text = CreateTranslation("Search");
 			text.SetDefault("Search");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Поиск");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SearchName");
 			text.SetDefault("Search Name");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Поиск по имени");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SearchMod");
 			text.SetDefault("Search Mod");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Поиск по моду");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SortDefault");
 			text.SetDefault("Default Sorting");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Стандартная сортировка");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SortID");
 			text.SetDefault("Sort by ID");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Сортировка по ID");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SortName");
 			text.SetDefault("Sort by Name");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Сортировка по имени");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("SortStack");
 			text.SetDefault("Sort by Stacks");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterAll");
 			text.SetDefault("Filter All");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Всё)");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterWeapons");
 			text.SetDefault("Filter Weapons");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Оружия)");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterTools");
 			text.SetDefault("Filter Tools");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Инструменты)");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterEquips");
 			text.SetDefault("Filter Equipment");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Снаряжения)");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterTiles");
 			text.SetDefault("Filter Placeables");
-			AddTranslation(text);
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Размещаемое)");
-			
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterMisc");
 			text.SetDefault("Filter Misc");
+			text.AddTranslation(GameCulture.Russian, "Фильтр (Разное)");
 			AddTranslation(text);
-			text.AddTranslation(GameCulture.Russian, "Фильтр (Разное)");			
 
 			text = CreateTranslation("CraftingStations");
 			text.SetDefault("Crafting Stations");
+			text.AddTranslation(GameCulture.Russian, "Станции создания");
 			AddTranslation(text);
-			text.AddTranslation(GameCulture.Russian, "Станции создания");			
 
 			text = CreateTranslation("Recipes");
 			text.SetDefault("Recipes");
+			text.AddTranslation(GameCulture.Russian, "Рецепты");
 			AddTranslation(text);
-			text.AddTranslation(GameCulture.Russian, "Рецепты");			
 		}
 
 		public override void PostSetupContent()

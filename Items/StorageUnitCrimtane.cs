@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Crimtane Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановый блок хранения");
+			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Karmazynium)");
 		}
 
 		public override void SetDefaults()

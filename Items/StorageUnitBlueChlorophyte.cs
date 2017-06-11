@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.SetDefault("Blue Chlorophyte Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Синий хлорофитовый улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Niebieski Chlorofit)");
 		}
 
 		public override void SetDefaults()

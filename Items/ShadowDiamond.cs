@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -11,9 +11,12 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			Tooltip.SetDefault("Traces of light still linger inside");
 			DisplayName.AddTranslation(GameCulture.Russian, "Теневой алмаз");
+			DisplayName.AddTranslation(GameCulture.Polish, "Diament cienia");
+
+			Tooltip.SetDefault("Traces of light still linger inside");
 			Tooltip.AddTranslation(GameCulture.Russian, "Следы света все еще мелькают внутри");
+			Tooltip.AddTranslation(GameCulture.Polish, "Ślady światła wciąż pozostają w środku");
 		}
 		
 

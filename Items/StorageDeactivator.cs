@@ -13,9 +13,12 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Storage Unit Wand");
-			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
 			DisplayName.AddTranslation(GameCulture.Russian, "Посох блока хранения");
+			DisplayName.AddTranslation(GameCulture.Polish, "Różdżka jednostki magazynującej");
+
+			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Блоку Хранения для переключения между Включенным/Выключенным состоянием");
+			Tooltip.AddTranslation(GameCulture.Polish, "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
 		}
 
 		public override void SetDefaults()

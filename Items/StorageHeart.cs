@@ -11,6 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Сердце хранилища");
+			DisplayName.AddTranslation(GameCulture.Polish, "Serce Jednostki Magazynującej");
 		}
 		
 		public override void SetDefaults()

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -11,13 +11,18 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Locator Drive");
+			DisplayName.AddTranslation(GameCulture.Russian, "Привод локатора");
+			DisplayName.AddTranslation(GameCulture.Polish, "Dysk lokalizatora");
+
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\n<right> Remote Storage Access to set it"
 				+ "\nDoes not get destroyed upon use");
-			DisplayName.AddTranslation(GameCulture.Russian, "Привод локатора");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> по сердцу хранилища чтобы сохранить локацию"
 			        + "\n<Right> по дистанционному доступу к хранилищу чтобы установить его"
-				+ "\nНе разрушается при использовании");	
+				+ "\nНе разрушается при использовании");
+			Tooltip.AddTranslation(GameCulture.Polish, "<right> na serce jednostki magazynującej, aby zapisać jej lokalizację"
+				+ "\n<right> na bezprzewodowe okno dostępu aby je ustawić"
+				+ "\nNie niszczy się po użyciu");	
 		}
 
 		public override void SetDefaults()

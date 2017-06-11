@@ -11,11 +11,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Hellstone Storage Upgrade");
+			DisplayName.AddTranslation(GameCulture.Russian, "Адское улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Piekielny kamień)");
+
 			Tooltip.SetDefault("Upgrades Storage Unit to 120 capacity"
 				+ "\n<right> a Demonite/Crimtane Storage Unit to use");
-			DisplayName.AddTranslation(GameCulture.Russian, "Адское улучшение хранилища");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 120 вместимости"
-			        + "\n<right> по демонитовому/кримтановому блоку хранения для использования");	
+			        + "\n<right> по демонитовому/кримтановому блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 120 miejsc"
+				+ "\n<right> na Jednostkę magazynującą (Karmazynit/Demonit), aby użyć");	
 		}
 
 		public override void SetDefaults()
