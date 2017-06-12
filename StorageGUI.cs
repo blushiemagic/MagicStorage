@@ -44,7 +44,7 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
 
-		private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem);
+		private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
 		private static int slotFocus = -1;
 		private static int rightClickTimer = 0;
 		private const int startMaxRightClickTimer = 20;

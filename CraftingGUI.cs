@@ -9,6 +9,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
@@ -20,8 +21,9 @@ namespace MagicStorage
 	{
 		private const int padding = 4;
 		private const int numColumns = 10;
+		private const int numColumns2 = 7;
 		private const float inventoryScale = 0.85f;
-		private const float recipeScale = 0.7f;
+		private const float smallScale = 0.7f;
 
 		public static MouseState curMouse;
 		public static MouseState oldMouse;
@@ -47,9 +49,9 @@ namespace MagicStorage
 		internal static UISearchBar searchBar2;
 
 		private static UIText stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
-		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation);
+		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale);
 		private static UIText recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
-		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe);
+		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
 		private static bool scrollBarFocus = false;
@@ -68,6 +70,7 @@ namespace MagicStorage
 		private static bool alchemyTable = false;
 		private static List<Recipe> recipes = new List<Recipe>();
 		private static List<bool> recipeAvailable = new List<bool>();
+		private static Recipe selectedRecipe = null;
 		private static int numRows;
 		private static int displayRows;
 		private static int hoverSlot = -1;
@@ -79,11 +82,26 @@ namespace MagicStorage
 		private static UIElement bottomBar = new UIElement();
 		private static UIText capacityText = new UIText("Items");
 
+		private static UIPanel recipePanel = new UIPanel();
+		private static float recipeTop;
+		private static float recipeLeft;
+		private static float recipeWidth;
+		private static float recipeHeight;
+
+		private static UIText recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
+		private static UIText ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
+		private static UISlotZone ingredientZone = new UISlotZone(HoverItem, GetIngredient, smallScale);
+		private static UIText reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+		private static UIText reqObjText2 = new UIText("");
+		//LegacyMisc.72
+
 		public static void Initialize()
 		{
 			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
+			float smallSlotWidth = Main.inventoryBackTexture.Width * smallScale;
+			float smallSlotHeight = Main.inventoryBackTexture.Height * smallScale;
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
@@ -96,6 +114,17 @@ namespace MagicStorage
 			basePanel.Width.Set(panelWidth, 0f);
 			basePanel.Height.Set(panelHeight, 0f);
 			basePanel.Recalculate();
+
+			recipeTop = panelTop;
+			recipeLeft = panelLeft + panelWidth;
+			recipeWidth = numColumns2 * (smallSlotWidth + padding) + 20f + padding;
+			recipeWidth += recipePanel.PaddingLeft + recipePanel.PaddingRight;
+			recipeHeight = panelHeight;
+			recipePanel.Left.Set(recipeLeft, 0f);
+			recipePanel.Top.Set(recipeTop, 0f);
+			recipePanel.Width.Set(recipeWidth, 0f);
+			recipePanel.Height.Set(recipeHeight, 0f);
+			recipePanel.Recalculate();
 
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
@@ -178,6 +207,21 @@ namespace MagicStorage
 			}
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
+
+			recipePanel.Append(recipePanelHeader);
+			ingredientText.Top.Set(30f, 0f);
+			recipePanel.Append(ingredientText);
+
+			ingredientZone.SetDimensions(numColumns2, 2);
+			ingredientZone.Top.Set(54f, 0f);
+			ingredientZone.Width.Set(0f, 1f);
+			ingredientZone.Height.Set(60f, 0f);
+			recipePanel.Append(ingredientZone);
+
+			reqObjText.Top.Set(136f, 0f);
+			recipePanel.Append(reqObjText);
+			reqObjText2.Top.Set(160f, 0f);
+			recipePanel.Append(reqObjText2);
 		}
 
 		private static void InitLangStuff()
@@ -245,11 +289,14 @@ namespace MagicStorage
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 			{
 				basePanel.Update(gameTime);
+				recipePanel.Update(gameTime);
+				UpdateRecipeText();
 				UpdateScrollBar();
 			}
 			else
 			{
 				scrollBarFocus = false;
+				selectedRecipe = null;
 			}
 		}
 
@@ -258,15 +305,17 @@ namespace MagicStorage
 			Player player = Main.player[Main.myPlayer];
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
 			Initialize();
-			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
+			if (Main.mouseX > panelLeft && Main.mouseX < recipeLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 			{
 				player.mouseInterface = true;
 				player.showItemIcon = false;
 				InterfaceHelper.HideItemIconCache();
 			}
 			basePanel.Draw(Main.spriteBatch);
+			recipePanel.Draw(Main.spriteBatch);
 			stationZone.DrawText();
 			recipeZone.DrawText();
+			ingredientZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
 		}
@@ -290,6 +339,82 @@ namespace MagicStorage
 				context = 3;
 			}
 			return item;
+		}
+
+		private static Item GetIngredient(int slot, ref int context)
+		{
+			if (selectedRecipe == null || slot >= selectedRecipe.requiredItem.Length)
+			{
+				return new Item();
+			}
+			return selectedRecipe.requiredItem[slot];
+		}
+
+		private static void UpdateRecipeText()
+		{
+			if (selectedRecipe == null)
+			{
+				reqObjText2.SetText("");
+			}
+			else
+			{
+				bool isEmpty = true;
+				string text = "";
+				for (int k = 0; k < selectedRecipe.requiredTile.Length; k++)
+				{
+					if (selectedRecipe.requiredTile[k] == -1)
+					{
+						break;
+					}
+					if (!isEmpty)
+					{
+						text += ", ";
+					}
+					text += Lang.GetMapObjectName(MapHelper.TileToLookup(selectedRecipe.requiredTile[k], 0));
+					isEmpty = false;
+				}
+				if (selectedRecipe.needWater)
+				{
+					if (!isEmpty)
+					{
+						text += ", ";
+					}
+					text += Language.GetTextValue("LegacyInterface.53");
+					isEmpty = false;
+				}
+				if (selectedRecipe.needHoney)
+				{
+					if (!isEmpty)
+					{
+						text += ", ";
+					}
+					text += Language.GetTextValue("LegacyInterface.58");
+					isEmpty = false;
+				}
+				if (selectedRecipe.needLava)
+				{
+					if (!isEmpty)
+					{
+						text += ", ";
+					}
+					text += Language.GetTextValue("LegacyInterface.56");
+					isEmpty = false;
+				}
+				if (selectedRecipe.needSnowBiome)
+				{
+					if (!isEmpty)
+					{
+						text += ", ";
+					}
+					text += Language.GetTextValue("LegacyInterface.123");
+					isEmpty = false;
+				}
+				if (isEmpty)
+				{
+					text = Language.GetTextValue("LegacyInterface.23");
+				}
+				reqObjText2.SetText(text);
+			}
 		}
 
 		private static void UpdateScrollBar()
@@ -648,8 +773,17 @@ namespace MagicStorage
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			if (slot < recipes.Count)
 			{
+				if (MouseClicked)
+				{
+					selectedRecipe = recipes[slot];
+				}
 				hoverSlot = visualSlot;
 			}
+		}
+
+		private static void HoverItem(int slot, ref int hoverSlot)
+		{
+			hoverSlot = slot;
 		}
 
 		private static Item DoWithdraw(int slot)

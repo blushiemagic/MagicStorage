@@ -14,20 +14,21 @@ namespace MagicStorage
 		public delegate void HoverItemSlot(int slot, ref int hoverSlot);
 		public delegate Item GetItem(int slot, ref int context);
 
-		private const float inventoryScale = 0.85f;
 		private const int padding = 4;
 		private int numColumns = 10;
 		private int numRows = 4;
 		private int hoverSlot = -1;
 		private HoverItemSlot onHover;
 		private GetItem getItem;
+		private float inventoryScale;
 
 		private static Item[] temp = new Item[11];
 
-		public UISlotZone(HoverItemSlot onHover, GetItem getItem)
+		public UISlotZone(HoverItemSlot onHover, GetItem getItem, float scale)
 		{
 			this.onHover = onHover;
 			this.getItem = getItem;
+			this.inventoryScale = scale;
 		}
 
 		public void SetDimensions(int columns, int rows)
@@ -72,7 +73,7 @@ namespace MagicStorage
 			{
 				int context = 0;
 				Item item = getItem(k, ref context);
-				Vector2 drawPos = origin + new Vector2((slotWidth + padding) * (k % 10), (slotHeight + padding) * (k / 10));
+				Vector2 drawPos = origin + new Vector2((slotWidth + padding) * (k % numColumns), (slotHeight + padding) * (k / numColumns));
 				temp[10] = item;
 				ItemSlot.Draw(Main.spriteBatch, temp, context, 10, drawPos);
 			}

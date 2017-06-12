@@ -126,6 +126,14 @@ namespace MagicStorage
 			text.SetDefault("Recipes");
 			text.AddTranslation(GameCulture.Russian, "Рецепты");
 			AddTranslation(text);
+
+			text = CreateTranslation("SelectedRecipe");
+			text.SetDefault("Selected Recipe");
+			AddTranslation(text);
+
+			text = CreateTranslation("Ingredients");
+			text.SetDefault("Ingredients");
+			AddTranslation(text);
 		}
 
 		public override void PostSetupContent()
