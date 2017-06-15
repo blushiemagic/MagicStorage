@@ -101,6 +101,11 @@ namespace MagicStorage
 		private static float scrollBar2MaxViewSize = 2f;
 
 		internal static UITextPanel<LocalizedText> craftButton;
+		private static Item result = null;
+		private static UISlotZone resultZone = new UISlotZone(HoverItem, GetResult, inventoryScale);
+		private static int craftTimer = 0;
+		private const int startMaxCraftTimer = 20;
+		private static int maxCraftTimer = startMaxCraftTimer;
 
 		public static void Initialize()
 		{
@@ -256,6 +261,13 @@ namespace MagicStorage
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
+
+			resultZone.SetDimensions(1, 1);
+			resultZone.Left.Set(-itemSlotWidth, 1f);
+			resultZone.Top.Set(-itemSlotHeight, 1f);
+			resultZone.Width.Set(itemSlotWidth, 0f);
+			resultZone.Height.Set(itemSlotHeight, 0f);
+			recipePanel.Append(resultZone);
 		}
 
 		private static void InitLangStuff()
@@ -330,11 +342,14 @@ namespace MagicStorage
 				recipePanel.Update(gameTime);
 				UpdateRecipeText();
 				UpdateScrollBar();
+				UpdateCraftButton();
 			}
 			else
 			{
 				scrollBarFocus = 0;
 				selectedRecipe = null;
+				craftTimer = 0;
+				maxCraftTimer = startMaxCraftTimer;
 			}
 		}
 
@@ -355,6 +370,7 @@ namespace MagicStorage
 			recipeZone.DrawText();
 			ingredientZone.DrawText();
 			storageZone.DrawText();
+			resultZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
 		}
@@ -373,9 +389,13 @@ namespace MagicStorage
 		{
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
+			if (!item.IsAir && recipes[index] == selectedRecipe)
+			{
+				context = 6;
+			}
 			if (!item.IsAir && !recipeAvailable[index])
 			{
-				context = 3;
+				context = recipes[index] == selectedRecipe ? 4 : 3;
 			}
 			return item;
 		}
@@ -393,6 +413,11 @@ namespace MagicStorage
 		{
 			int index = slot + numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
 			return index < storageItems.Count ? storageItems[index] : new Item();
+		}
+
+		private static Item GetResult(int slot, ref int context)
+		{
+			return slot == 0 && result != null ? result : new Item();
 		}
 
 		private static void UpdateRecipeText()
@@ -514,6 +539,49 @@ namespace MagicStorage
 			{
 				int difference = oldMouse.ScrollWheelValue / 250 - curMouse.ScrollWheelValue / 250;
 				scrollBar.ViewPosition += difference;
+			}
+		}
+
+		private static void UpdateCraftButton()
+		{
+			CalculatedStyle dim = craftButton.GetDimensions();
+			bool flag = false;
+			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+			{
+				craftButton.BackgroundColor = new Color(73, 94, 171);
+				if (curMouse.LeftButton == ButtonState.Pressed)
+				{
+					if (selectedRecipe != null && IsAvailable(selectedRecipe))
+					{
+						if (craftTimer <= 0)
+						{
+							craftTimer = maxCraftTimer;
+							maxCraftTimer = maxCraftTimer * 3 / 4;
+							if (maxCraftTimer <= 0)
+							{
+								maxCraftTimer = 1;
+							}
+							TryCraft();
+							RefreshItems();
+							Main.PlaySound(7, -1, -1, 1);
+						}
+						craftTimer--;
+						flag = true;
+					}
+				}
+			}
+			else
+			{
+				craftButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			}
+			if (selectedRecipe == null || !IsAvailable(selectedRecipe))
+			{
+				craftButton.BackgroundColor = new Color(30, 40, 100) * 0.7f;
+			}
+			if (!flag)
+			{
+				craftTimer = 0;
+				maxCraftTimer = startMaxCraftTimer;
 			}
 		}
 
@@ -781,6 +849,7 @@ namespace MagicStorage
 		private static void RefreshStorageItems()
 		{
 			storageItems.Clear();
+			result = null;
 			if (selectedRecipe != null)
 			{
 				foreach (Item item in items)
@@ -796,6 +865,16 @@ namespace MagicStorage
 							storageItems.Add(item);
 						}
 					}
+					if (item.type == selectedRecipe.createItem.type)
+					{
+						result = item;
+					}
+				}
+				if (result == null)
+				{
+					result = new Item();
+					result.SetDefaults(selectedRecipe.createItem.type);
+					result.stack = 0;
 				}
 			}
 		}
@@ -902,6 +981,107 @@ namespace MagicStorage
 				NetHelper.SendStationSlotClick(access.ID, item, slot);
 				return new Item();
 			}
+		}
+
+		private static void TryCraft()
+		{
+			List<Item> availableItems = new List<Item>(storageItems.Select(item => item.Clone()));
+			List<Item> toWithdraw = new List<Item>();
+			for (int k = 0; k < selectedRecipe.requiredItem.Length; k++)
+			{
+				Item item = selectedRecipe.requiredItem[k];
+				if (item.type == 0)
+				{
+					break;
+				}
+				int stack = item.stack;
+				ModRecipe modRecipe = selectedRecipe as ModRecipe;
+				if (modRecipe != null)
+				{
+					stack = modRecipe.ConsumeItem(item.type, item.stack);
+				}
+				if (selectedRecipe.alchemy && alchemyTable)
+				{
+					int save = 0;
+					for (int j = 0; j < stack; j++)
+					{
+						if (Main.rand.Next(3) == 0)
+						{
+							save++;
+						}
+					}
+					stack -= save;
+				}
+				if (stack > 0)
+				{
+					foreach (Item tryItem in availableItems)
+					{
+						if (item.type == tryItem.type || RecipeGroupMatch(selectedRecipe, item.type, tryItem.type))
+						{
+							if (tryItem.stack > stack)
+							{
+								Item temp = tryItem.Clone();
+								temp.stack = stack;
+								toWithdraw.Add(temp);
+								tryItem.stack -= stack;
+								stack = 0;
+							}
+							else
+							{
+								toWithdraw.Add(tryItem.Clone());
+								stack -= tryItem.stack;
+								tryItem.stack = 0;
+								tryItem.type = 0;
+							}
+						}
+					}
+				}
+			}
+			Item resultItem = selectedRecipe.createItem.Clone();
+			if (Main.netMode == 0)
+			{
+				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItem))
+				{
+					Main.player[Main.myPlayer].QuickSpawnClonedItem(item, item.stack);
+				}
+			}
+			else if (Main.netMode == 1)
+			{
+				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItem);
+			}
+		}
+
+		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, Item result)
+		{
+			List<Item> items = new List<Item>();
+			foreach (Item tryWithdraw in toWithdraw)
+			{
+				Item withdrawn = heart.TryWithdraw(tryWithdraw);
+				if (!withdrawn.IsAir)
+				{
+					items.Add(withdrawn);
+				}
+				if (withdrawn.stack < tryWithdraw.stack)
+				{
+					for (int k = 0; k < items.Count; k++)
+					{
+						heart.DepositItem(items[k]);
+						if (items[k].IsAir)
+						{
+							items.RemoveAt(k);
+							k--;
+						}
+					}
+					return items;
+				}
+			}
+			items.Clear();
+			heart.DepositItem(result);
+			if (!result.IsAir)
+			{
+				items.Add(result);
+			}
+			return items;
 		}
 	}
 }
