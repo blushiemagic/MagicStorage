@@ -54,7 +54,7 @@ namespace MagicStorage
 		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
-		private static bool scrollBarFocus = false;
+		private static int scrollBarFocus = 0;
 		private static int scrollBarFocusMouseStart;
 		private static float scrollBarFocusPositionStart;
 		private static float scrollBarViewSize = 1f;
@@ -73,11 +73,7 @@ namespace MagicStorage
 		private static Recipe selectedRecipe = null;
 		private static int numRows;
 		private static int displayRows;
-		private static int hoverSlot = -1;
 		private static int slotFocus = -1;
-		private static int rightClickTimer = 0;
-		private const int startMaxRightClickTimer = 20;
-		private static int maxRightClickTimer = startMaxRightClickTimer;
 
 		private static UIElement bottomBar = new UIElement();
 		private static UIText capacityText = new UIText("Items");
@@ -93,7 +89,18 @@ namespace MagicStorage
 		private static UISlotZone ingredientZone = new UISlotZone(HoverItem, GetIngredient, smallScale);
 		private static UIText reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
 		private static UIText reqObjText2 = new UIText("");
-		//LegacyMisc.72
+		private static UIText storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+
+		private static UISlotZone storageZone = new UISlotZone(HoverItem, GetStorage, smallScale);
+		private static int numRows2;
+		private static int displayRows2;
+		private static List<Item> storageItems = new List<Item>();
+
+		internal static UIScrollbar scrollBar2 = new UIScrollbar();
+		private static float scrollBar2ViewSize = 1f;
+		private static float scrollBar2MaxViewSize = 2f;
+
+		internal static UITextPanel<LocalizedText> craftButton;
 
 		public static void Initialize()
 		{
@@ -222,6 +229,33 @@ namespace MagicStorage
 			recipePanel.Append(reqObjText);
 			reqObjText2.Top.Set(160f, 0f);
 			recipePanel.Append(reqObjText2);
+			storedItemsText.Top.Set(190f, 0f);
+			recipePanel.Append(storedItemsText);
+
+			storageZone.Top.Set(214f, 0f);
+			storageZone.Width.Set(0f, 1f);
+			storageZone.Height.Set(-214f - 36, 1f);
+			recipePanel.Append(storageZone);
+			numRows2 = (storageItems.Count + numColumns2 - 1) / numColumns2;
+			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + padding);
+			storageZone.SetDimensions(numColumns2, displayRows2);
+			int noDisplayRows2 = numRows2 - displayRows2;
+			if (noDisplayRows2 < 0)
+			{
+				noDisplayRows2 = 0;
+			}
+			scrollBar2MaxViewSize = 1 + noDisplayRows2;
+			scrollBar2.Height.Set(displayRows2 * (smallSlotHeight + padding), 0f);
+			scrollBar2.Left.Set(-20f, 1f);
+			scrollBar2.SetView(scrollBar2ViewSize, scrollBar2MaxViewSize);
+			storageZone.Append(scrollBar2);
+
+			craftButton.Top.Set(-32f, 1f);
+			craftButton.Width.Set(100f, 0f);
+			craftButton.Height.Set(24f, 0f);
+			craftButton.PaddingTop = 8f;
+			craftButton.PaddingBottom = 8f;
+			recipePanel.Append(craftButton);
 		}
 
 		private static void InitLangStuff()
@@ -233,6 +267,10 @@ namespace MagicStorage
 			if (searchBar2 == null)
 			{
 				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
+			}
+			if (craftButton == null)
+			{
+				craftButton = new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"), 1f);
 			}
 		}
 
@@ -295,7 +333,7 @@ namespace MagicStorage
 			}
 			else
 			{
-				scrollBarFocus = false;
+				scrollBarFocus = 0;
 				selectedRecipe = null;
 			}
 		}
@@ -316,6 +354,7 @@ namespace MagicStorage
 			stationZone.DrawText();
 			recipeZone.DrawText();
 			ingredientZone.DrawText();
+			storageZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
 		}
@@ -348,6 +387,12 @@ namespace MagicStorage
 				return new Item();
 			}
 			return selectedRecipe.requiredItem[slot];
+		}
+
+		private static Item GetStorage(int slot, ref int context)
+		{
+			int index = slot + numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
+			return index < storageItems.Count ? storageItems[index] : new Item();
 		}
 
 		private static void UpdateRecipeText()
@@ -421,35 +466,51 @@ namespace MagicStorage
 		{
 			if (slotFocus >= 0)
 			{
-				scrollBarFocus = false;
+				scrollBarFocus = 0;
 				return;
 			}
 			CalculatedStyle dim = scrollBar.GetInnerDimensions();
 			Vector2 boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
 			float boxWidth = 20f;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
-			if (scrollBarFocus)
+			CalculatedStyle dim2 = scrollBar2.GetInnerDimensions();
+			Vector2 box2Pos = new Vector2(dim2.X, dim2.Y + dim2.Height * (scrollBar2.ViewPosition / scrollBar2MaxViewSize));
+			float box2Height = dim2.Height * (scrollBar2ViewSize / scrollBar2MaxViewSize);
+			if (scrollBarFocus > 0)
 			{
 				if (curMouse.LeftButton == ButtonState.Released)
 				{
-					scrollBarFocus = false;
+					scrollBarFocus = 0;
 				}
 				else
 				{
 					int difference = curMouse.Y - scrollBarFocusMouseStart;
-					scrollBar.ViewPosition = scrollBarFocusPositionStart + (float)difference / boxHeight;
+					if (scrollBarFocus == 1)
+					{
+						scrollBar.ViewPosition = scrollBarFocusPositionStart + (float)difference / boxHeight;
+					}
+					else if (scrollBarFocus == 2)
+					{
+						scrollBar2.ViewPosition = scrollBarFocusPositionStart + (float)difference / box2Height;
+					}
 				}
 			}
 			else if (MouseClicked)
 			{
 				if (curMouse.X > boxPos.X && curMouse.X < boxPos.X + boxWidth && curMouse.Y > boxPos.Y - 3f && curMouse.Y < boxPos.Y + boxHeight + 4f)
 				{
-					scrollBarFocus = true;
+					scrollBarFocus = 1;
 					scrollBarFocusMouseStart = curMouse.Y;
 					scrollBarFocusPositionStart = scrollBar.ViewPosition;
 				}
+				else if (curMouse.X > box2Pos.X && curMouse.X < box2Pos.X + boxWidth && curMouse.Y > box2Pos.Y - 3f && curMouse.Y < box2Pos.Y + box2Height + 4f)
+				{
+					scrollBarFocus = 2;
+					scrollBarFocusMouseStart = curMouse.Y;
+					scrollBarFocusPositionStart = scrollBar2.ViewPosition;
+				}
 			}
-			if (!scrollBarFocus)
+			if (scrollBarFocus == 0)
 			{
 				int difference = oldMouse.ScrollWheelValue / 250 - curMouse.ScrollWheelValue / 250;
 				scrollBar.ViewPosition += difference;
@@ -537,6 +598,7 @@ namespace MagicStorage
 			}
 			recipes.AddRange(ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text));
 			recipeAvailable.AddRange(recipes.Select(recipe => IsAvailable(recipe)));
+			RefreshStorageItems();
 		}
 
 		private static void AnalyzeIngredients()
@@ -670,7 +732,7 @@ namespace MagicStorage
 				bool useRecipeGroup = false;
 				foreach (int type in itemCounts.Keys)
 				{
-					if (recipe.useWood(type, ingredient.type) || recipe.useSand(type, ingredient.type) || recipe.useIronBar(type, ingredient.type) || recipe.useFragment(type, ingredient.type) || recipe.AcceptedByItemGroups(type, ingredient.type) || recipe.usePressurePlate(type, ingredient.type))
+					if (RecipeGroupMatch(recipe, type, ingredient.type))
 					{
 						stack -= itemCounts[type];
 						useRecipeGroup = true;
@@ -714,6 +776,33 @@ namespace MagicStorage
 				BlockRecipes.active = true;
 			}
 			return true;
+		}
+
+		private static void RefreshStorageItems()
+		{
+			storageItems.Clear();
+			if (selectedRecipe != null)
+			{
+				foreach (Item item in items)
+				{
+					for (int k = 0; k < selectedRecipe.requiredItem.Length; k++)
+					{
+						if (selectedRecipe.requiredItem[k].type == 0)
+						{
+							break;
+						}
+						if (item.type == selectedRecipe.requiredItem[k].type || RecipeGroupMatch(selectedRecipe, selectedRecipe.requiredItem[k].type, item.type))
+						{
+							storageItems.Add(item);
+						}
+					}
+				}
+			}
+		}
+
+		private static bool RecipeGroupMatch(Recipe recipe, int type1, int type2)
+		{
+			return recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
 		}
 
 		private static void HoverStation(int slot, ref int hoverSlot)
@@ -776,6 +865,7 @@ namespace MagicStorage
 				if (MouseClicked)
 				{
 					selectedRecipe = recipes[slot];
+					RefreshStorageItems();
 				}
 				hoverSlot = visualSlot;
 			}
