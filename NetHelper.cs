@@ -405,6 +405,16 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
+			Point16 pos = access.Position;
+			StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
+			if (modTile != null)
+			{
+				TEStorageHeart heart = modTile.GetHeart(pos.X, pos.Y);
+				if (heart != null)
+				{
+					SendRefreshNetworkItems(heart.ID);
+				}
+			}
 		}
 
 		public static void ReceiveStationResult(BinaryReader reader)

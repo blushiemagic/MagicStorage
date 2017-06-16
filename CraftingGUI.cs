@@ -960,7 +960,9 @@ namespace MagicStorage
 			TECraftingAccess access = GetCraftingEntity();
 			if (Main.netMode == 0)
 			{
-				return access.TryWithdrawStation(slot);
+				Item result = access.TryWithdrawStation(slot);
+				RefreshItems();
+				return result;
 			}
 			else
 			{
@@ -974,7 +976,9 @@ namespace MagicStorage
 			TECraftingAccess access = GetCraftingEntity();
 			if (Main.netMode == 0)
 			{
-				return access.DoStationSwap(item, slot);
+				Item result = access.DoStationSwap(item, slot);
+				RefreshItems();
+				return result;
 			}
 			else
 			{
