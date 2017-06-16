@@ -513,6 +513,7 @@ namespace MagicStorage
 				}
 				packet.Send(sender);
 			}
+			SendRefreshNetworkItems(ent);
 		}
 
 		public static void ReceiveCraftResult(BinaryReader reader)
