@@ -494,11 +494,11 @@ namespace MagicStorage
 				scrollBarFocus = 0;
 				return;
 			}
-			CalculatedStyle dim = scrollBar.GetInnerDimensions();
+			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
 			Vector2 boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
-			float boxWidth = 20f;
+			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
-			CalculatedStyle dim2 = scrollBar2.GetInnerDimensions();
+			Rectangle dim2 = scrollBar2.GetClippingRectangle(Main.spriteBatch);
 			Vector2 box2Pos = new Vector2(dim2.X, dim2.Y + dim2.Height * (scrollBar2.ViewPosition / scrollBar2MaxViewSize));
 			float box2Height = dim2.Height * (scrollBar2ViewSize / scrollBar2MaxViewSize);
 			if (scrollBarFocus > 0)
@@ -544,7 +544,7 @@ namespace MagicStorage
 
 		private static void UpdateCraftButton()
 		{
-			CalculatedStyle dim = craftButton.GetDimensions();
+			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 			bool flag = false;
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{

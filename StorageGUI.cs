@@ -282,9 +282,9 @@ namespace MagicStorage
 				scrollBarFocus = false;
 				return;
 			}
-			CalculatedStyle dim = scrollBar.GetInnerDimensions();
+			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
 			Vector2 boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
-			float boxWidth = 20f;
+			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
 			if (scrollBarFocus)
 			{
@@ -394,7 +394,7 @@ namespace MagicStorage
 
 		private static void UpdateDepositButton()
 		{
-			CalculatedStyle dim = depositButton.GetDimensions();
+			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				depositButton.BackgroundColor = new Color(73, 94, 171);

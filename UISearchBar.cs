@@ -56,7 +56,7 @@ namespace MagicStorage
 
 			if (StorageGUI.MouseClicked && Parent != null)
 			{
-				CalculatedStyle dim = GetDimensions();
+				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 				MouseState mouse = StorageGUI.curMouse;
 				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
 				if (!hasFocus && mouseOver)
@@ -73,7 +73,7 @@ namespace MagicStorage
 			}
 			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus)
 			{
-				CalculatedStyle dim = GetDimensions();
+				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 				MouseState mouse = StorageGUI.curMouse;
 				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
 				if (!mouseOver)
