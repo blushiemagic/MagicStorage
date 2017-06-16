@@ -37,5 +37,26 @@ namespace MagicStorage.Components
 			}
 			return ((TEStorageCenter)heart).GetHeart();
 		}
+
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
+		{
+			if (Main.tile[i, j].frameX > 0)
+			{
+				i--;
+			}
+			if (Main.tile[i, j].frameY > 0)
+			{
+				j--;
+			}
+			TECraftingAccess access = (TECraftingAccess)TileEntity.ByPosition[new Point16(i, j)];
+			foreach (Item item in access.stations)
+			{
+				if (!item.IsAir)
+				{
+					fail = true;
+					break;
+				}
+			}
+		}
 	}
 }
