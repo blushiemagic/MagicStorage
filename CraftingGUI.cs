@@ -48,9 +48,9 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
 
-		private static UIText stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+		private static UIText stationText;
 		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale);
-		private static UIText recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
+		private static UIText recipeText;
 		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -84,12 +84,12 @@ namespace MagicStorage
 		private static float recipeWidth;
 		private static float recipeHeight;
 
-		private static UIText recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
-		private static UIText ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
+		private static UIText recipePanelHeader;
+		private static UIText ingredientText;
 		private static UISlotZone ingredientZone = new UISlotZone(HoverItem, GetIngredient, smallScale);
-		private static UIText reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+		private static UIText reqObjText;
 		private static UIText reqObjText2 = new UIText("");
-		private static UIText storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+		private static UIText storedItemsText;
 
 		private static UISlotZone storageZone = new UISlotZone(HoverItem, GetStorage, smallScale);
 		private static int numRows2;
@@ -279,6 +279,30 @@ namespace MagicStorage
 			if (searchBar2 == null)
 			{
 				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
+			}
+			if (stationText == null)
+			{
+				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+			}
+			if (recipeText == null)
+			{
+				recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
+			}
+			if (recipePanelHeader == null)
+			{
+				recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
+			}
+			if (ingredientText == null)
+			{
+				ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
+			}
+			if (reqObjText == null)
+			{
+				reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+			}
+			if (storedItemsText == null)
+			{
+				storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
 			}
 			if (craftButton == null)
 			{
