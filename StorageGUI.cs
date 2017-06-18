@@ -477,8 +477,6 @@ namespace MagicStorage
 			if (slotFocus >= items.Count || (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)))
 			{
 				ResetSlotFocus();
-				rightClickTimer = 0;
-				maxRightClickTimer = startMaxRightClickTimer;
 			}
 			else
 			{

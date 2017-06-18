@@ -73,7 +73,7 @@ namespace MagicStorage
 		private static Recipe selectedRecipe = null;
 		private static int numRows;
 		private static int displayRows;
-		private static int slotFocus = -1;
+		private static bool slotFocus = false;
 
 		private static UIElement bottomBar = new UIElement();
 		private static UIText capacityText = new UIText("Items");
@@ -102,10 +102,13 @@ namespace MagicStorage
 
 		internal static UITextPanel<LocalizedText> craftButton;
 		private static Item result = null;
-		private static UISlotZone resultZone = new UISlotZone(HoverItem, GetResult, inventoryScale);
+		private static UISlotZone resultZone = new UISlotZone(HoverResult, GetResult, inventoryScale);
 		private static int craftTimer = 0;
 		private const int startMaxCraftTimer = 20;
 		private static int maxCraftTimer = startMaxCraftTimer;
+		private static int rightClickTimer = 0;
+		private const int startMaxRightClickTimer = 20;
+		private static int maxRightClickTimer = startMaxRightClickTimer;
 
 		public static void Initialize()
 		{
@@ -362,6 +365,10 @@ namespace MagicStorage
 			curMouse = StorageGUI.curMouse;
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 			{
+				if (curMouse.RightButton == ButtonState.Released)
+				{
+					ResetSlotFocus();
+				}
 				basePanel.Update(gameTime);
 				recipePanel.Update(gameTime);
 				UpdateRecipeText();
@@ -374,6 +381,7 @@ namespace MagicStorage
 				selectedRecipe = null;
 				craftTimer = 0;
 				maxCraftTimer = startMaxCraftTimer;
+				ResetSlotFocus();
 			}
 		}
 
@@ -513,7 +521,7 @@ namespace MagicStorage
 
 		private static void UpdateScrollBar()
 		{
-			if (slotFocus >= 0)
+			if (slotFocus)
 			{
 				scrollBarFocus = 0;
 				return;
@@ -955,7 +963,7 @@ namespace MagicStorage
 					Main.PlaySound(7, -1, -1, 1);
 				}
 			}
-			
+
 			hoverSlot = slot;
 		}
 
@@ -977,6 +985,101 @@ namespace MagicStorage
 		private static void HoverItem(int slot, ref int hoverSlot)
 		{
 			hoverSlot = slot;
+		}
+
+		private static void HoverResult(int slot, ref int hoverSlot)
+		{
+			if (slot != 0)
+			{
+				return;
+			}
+
+			if (MouseClicked)
+			{
+				bool changed = false;
+				if (!Main.mouseItem.IsAir && Main.mouseItem.type == result.type)
+				{
+					if (TryDepositResult(Main.mouseItem))
+					{
+						changed = true;
+					}
+				}
+				else if (Main.mouseItem.IsAir && result != null && !result.IsAir)
+				{
+					Item toWithdraw = result.Clone();
+					if (toWithdraw.stack > toWithdraw.maxStack)
+					{
+						toWithdraw.stack = toWithdraw.maxStack;
+					}
+					Main.mouseItem = DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
+					if (ItemSlot.ShiftInUse)
+					{
+						Player player = Main.player[Main.myPlayer];
+						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+					}
+					changed = true;
+				}
+				if (changed)
+				{
+					RefreshItems();
+					Main.PlaySound(7, -1, -1, 1);
+				}
+			}
+
+			if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released && result != null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			{
+				slotFocus = true;
+			}
+
+			hoverSlot = slot;
+
+			if (slotFocus)
+			{
+				SlotFocusLogic();
+			}
+		}
+
+		private static void SlotFocusLogic()
+		{
+			if (result == null || result.IsAir || (!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack)))
+			{
+				ResetSlotFocus();
+			}
+			else
+			{
+				if (rightClickTimer <= 0)
+				{
+					rightClickTimer = maxRightClickTimer;
+					maxRightClickTimer = maxRightClickTimer * 3 / 4;
+					if (maxRightClickTimer <= 0)
+					{
+						maxRightClickTimer = 1;
+					}
+					Item toWithdraw = result.Clone();
+					toWithdraw.stack = 1;
+					Item withdrawn = DoWithdrawResult(toWithdraw);
+					if (Main.mouseItem.IsAir)
+					{
+						Main.mouseItem = withdrawn;
+					}
+					else
+					{
+						Main.mouseItem.stack += withdrawn.stack;
+					}
+					Main.soundInstanceMenuTick.Stop();
+					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
+					Main.PlaySound(12, -1, -1, 1);
+					RefreshItems();
+				}
+				rightClickTimer--;
+			}
+		}
+
+		private static void ResetSlotFocus()
+		{
+			slotFocus = false;
+			rightClickTimer = 0;
+			maxRightClickTimer = startMaxRightClickTimer;
 		}
 
 		private static Item DoWithdraw(int slot)
@@ -1110,6 +1213,41 @@ namespace MagicStorage
 				items.Add(result);
 			}
 			return items;
+		}
+
+		private static bool TryDepositResult(Item item)
+		{
+			int oldStack = item.stack;
+			DoDepositResult(item);
+			return oldStack != item.stack;
+		}
+
+		private static void DoDepositResult(Item item)
+		{
+			TEStorageHeart heart = GetHeart();
+			if (Main.netMode == 0)
+			{
+				heart.DepositItem(item);
+			}
+			else
+			{
+				NetHelper.SendDeposit(heart.ID, item);
+				item.SetDefaults(0, true);
+			}
+		}
+
+		private static Item DoWithdrawResult(Item item, bool toInventory = false)
+		{
+			TEStorageHeart heart = GetHeart();
+			if (Main.netMode == 0)
+			{
+				return heart.TryWithdraw(item);
+			}
+			else
+			{
+				NetHelper.SendWithdraw(heart.ID, item, toInventory);
+				return new Item();
+			}
 		}
 	}
 }
