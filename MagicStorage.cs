@@ -138,6 +138,14 @@ namespace MagicStorage
 			text = CreateTranslation("StoredItems");
 			text.SetDefault("Stored Ingredients");
 			AddTranslation(text);
+
+			text = CreateTranslation("RecipeAvailable");
+			text.SetDefault("Show available recipes");
+			AddTranslation(text);
+
+			text = CreateTranslation("RecipeAll");
+			text.SetDefault("Show all recipes");
+			AddTranslation(text);
 		}
 
 		public override void PostSetupContent()

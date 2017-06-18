@@ -44,6 +44,7 @@ namespace MagicStorage
 		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
+		private static UIButtonChoice recipeButtons;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
@@ -148,9 +149,14 @@ namespace MagicStorage
 			InitSortButtons();
 			topBar.Append(sortButtons);
 			float sortButtonsRight = sortButtons.GetDimensions().Width + padding;
+			InitRecipeButtons();
+			float recipeButtonsLeft = sortButtonsRight + 32f + 3 * padding;
+			recipeButtons.Left.Set(recipeButtonsLeft, 0f);
+			topBar.Append(recipeButtons);
+			float recipeButtonsRight = recipeButtonsLeft + recipeButtons.GetDimensions().Width + padding;
 
-			searchBar.Left.Set(sortButtonsRight + padding, 0f);
-			searchBar.Width.Set(-sortButtonsRight - 2 * padding, 1f);
+			searchBar.Left.Set(recipeButtonsRight + padding, 0f);
+			searchBar.Width.Set(-recipeButtonsRight - 2 * padding, 1f);
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
@@ -332,6 +338,23 @@ namespace MagicStorage
 			}
 		}
 
+		private static void InitRecipeButtons()
+		{
+			if (recipeButtons == null)
+			{
+				recipeButtons = new UIButtonChoice(new Texture2D[]
+				{
+					MagicStorage.Instance.GetTexture("RecipeAvailable"),
+					MagicStorage.Instance.GetTexture("RecipeAll")
+				},
+				new LocalizedText[]
+				{
+					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
+					Language.GetText("Mods.MagicStorage.RecipeAll")
+				});
+			}
+		}
+
 		private static void InitFilterButtons()
 		{
 			if (filterButtons == null)
@@ -404,6 +427,7 @@ namespace MagicStorage
 			storageZone.DrawText();
 			resultZone.DrawText();
 			sortButtons.DrawText();
+			recipeButtons.DrawText();
 			filterButtons.DrawText();
 		}
 
@@ -651,6 +675,7 @@ namespace MagicStorage
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
+			InitRecipeButtons();
 			InitFilterButtons();
 			SortMode sortMode;
 			switch (sortButtons.Choice)
@@ -696,8 +721,17 @@ namespace MagicStorage
 				filterMode = FilterMode.All;
 				break;
 			}
-			recipes.AddRange(ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text));
-			recipeAvailable.AddRange(recipes.Select(recipe => IsAvailable(recipe)));
+			var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
+			if (recipeButtons.Choice == 0)
+			{
+				recipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
+				recipeAvailable.AddRange(recipes.Select(recipe => true));
+			}
+			else
+			{
+				recipes.AddRange(temp);
+				recipeAvailable.AddRange(recipes.Select(recipe => IsAvailable(recipe)));
+			}
 			RefreshStorageItems();
 		}
 
