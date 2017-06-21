@@ -48,13 +48,21 @@ namespace MagicStorage.Components
 			{
 				j--;
 			}
-			TECraftingAccess access = (TECraftingAccess)TileEntity.ByPosition[new Point16(i, j)];
-			foreach (Item item in access.stations)
+			Point16 pos = new Point16(i, j);
+			if (!TileEntity.ByPosition.ContainsKey(pos))
 			{
-				if (!item.IsAir)
+				return;
+			}
+			TECraftingAccess access = TileEntity.ByPosition[new Point16(i, j)] as TECraftingAccess;
+			if (access != null)
+			{
+				foreach (Item item in access.stations)
 				{
-					fail = true;
-					break;
+					if (!item.IsAir)
+					{
+						fail = true;
+						break;
+					}
 				}
 			}
 		}
