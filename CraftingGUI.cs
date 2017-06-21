@@ -981,7 +981,7 @@ namespace MagicStorage
 					}
 					changed = true;
 				}
-				else
+				else if (player.itemAnimation == 0 && player.itemTime == 0)
 				{
 					int oldType = Main.mouseItem.type;
 					int oldStack = Main.mouseItem.stack;
@@ -1028,10 +1028,11 @@ namespace MagicStorage
 				return;
 			}
 
+			Player player = Main.player[Main.myPlayer];
 			if (MouseClicked)
 			{
 				bool changed = false;
-				if (!Main.mouseItem.IsAir && Main.mouseItem.type == result.type)
+				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && Main.mouseItem.type == result.type)
 				{
 					if (TryDepositResult(Main.mouseItem))
 					{
@@ -1048,7 +1049,6 @@ namespace MagicStorage
 					Main.mouseItem = DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
 					if (ItemSlot.ShiftInUse)
 					{
-						Player player = Main.player[Main.myPlayer];
 						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
 					}
 					changed = true;

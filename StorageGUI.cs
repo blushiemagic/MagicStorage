@@ -428,7 +428,7 @@ namespace MagicStorage
 			if (MouseClicked)
 			{
 				bool changed = false;
-				if (!Main.mouseItem.IsAir)
+				if (!Main.mouseItem.IsAir && (player.itemAnimation == 0 && player.itemTime == 0))
 				{
 					if (TryDeposit(Main.mouseItem))
 					{
