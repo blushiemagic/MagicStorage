@@ -13,8 +13,8 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Hellstone Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Адский блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Piekielny kamień)");
-		    	DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Infernale)");
-        	}
+			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Infernale)");
+		}
 
 		public override void SetDefaults()
 		{
