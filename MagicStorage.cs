@@ -35,141 +35,141 @@ namespace MagicStorage
 		{
 			ModTranslation text = CreateTranslation("SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
-            		text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
-            		text.AddTranslation(GameCulture.French, "Mis à: X={0}, Y={1}");
-		    	AddTranslation(text);
+			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
+			text.AddTranslation(GameCulture.French, "Mis à: X={0}, Y={1}");
+			AddTranslation(text);
 
 			text = CreateTranslation("SnowBiomeBlock");
 			text.SetDefault("Snow Biome Block");
-            		text.AddTranslation(GameCulture.French, "Bloc de biome de neige");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Bloc de biome de neige");
+			AddTranslation(text);
 
 			text = CreateTranslation("DepositAll");
 			text.SetDefault("Deposit All");
 			text.AddTranslation(GameCulture.Russian, "Переместить всё");
-            		text.AddTranslation(GameCulture.French, "Déposer tout");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Déposer tout");
+			AddTranslation(text);
 
 			text = CreateTranslation("Search");
 			text.SetDefault("Search");
 			text.AddTranslation(GameCulture.Russian, "Поиск");
-            		text.AddTranslation(GameCulture.French, "Rechercher");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Rechercher");
+			AddTranslation(text);
 
 			text = CreateTranslation("SearchName");
 			text.SetDefault("Search Name");
 			text.AddTranslation(GameCulture.Russian, "Поиск по имени");
-            		text.AddTranslation(GameCulture.French, "Recherche par nom");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Recherche par nom");
+			AddTranslation(text);
 
 			text = CreateTranslation("SearchMod");
 			text.SetDefault("Search Mod");
 			text.AddTranslation(GameCulture.Russian, "Поиск по моду");
-            		text.AddTranslation(GameCulture.French, "Recherche par mod");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Recherche par mod");
+			AddTranslation(text);
 
 			text = CreateTranslation("SortDefault");
 			text.SetDefault("Default Sorting");
 			text.AddTranslation(GameCulture.Russian, "Стандартная сортировка");
-            		text.AddTranslation(GameCulture.French, "Tri Standard");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Tri Standard");
+			AddTranslation(text);
 
 			text = CreateTranslation("SortID");
 			text.SetDefault("Sort by ID");
 			text.AddTranslation(GameCulture.Russian, "Сортировка по ID");
-            		text.AddTranslation(GameCulture.French, "Trier par ID");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Trier par ID");
+			AddTranslation(text);
 
 			text = CreateTranslation("SortName");
 			text.SetDefault("Sort by Name");
 			text.AddTranslation(GameCulture.Russian, "Сортировка по имени");
-            		text.AddTranslation(GameCulture.French, "Trier par nom");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Trier par nom");
+			AddTranslation(text);
 
 			text = CreateTranslation("SortStack");
 			text.SetDefault("Sort by Stacks");
 			text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
-            		text.AddTranslation(GameCulture.French, "Trier par piles");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Trier par piles");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterAll");
 			text.SetDefault("Filter All");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Всё)");
-            		text.AddTranslation(GameCulture.French, "Filtrer tout");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer tout");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterWeapons");
 			text.SetDefault("Filter Weapons");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Оружия)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par armes");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par armes");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterTools");
 			text.SetDefault("Filter Tools");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Инструменты)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par outils");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par outils");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterEquips");
 			text.SetDefault("Filter Equipment");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Снаряжения)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par Équipement");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par Équipement");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par potions");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par potions");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterTiles");
 			text.SetDefault("Filter Placeables");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Размещаемое)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par placeable");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par placeable");
+			AddTranslation(text);
 
 			text = CreateTranslation("FilterMisc");
 			text.SetDefault("Filter Misc");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Разное)");
-            		text.AddTranslation(GameCulture.French, "Filtrer par miscellanées");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Filtrer par miscellanées");
+			AddTranslation(text);
 
 			text = CreateTranslation("CraftingStations");
 			text.SetDefault("Crafting Stations");
 			text.AddTranslation(GameCulture.Russian, "Станции создания");
-            		text.AddTranslation(GameCulture.French, "Stations d'artisanat");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Stations d'artisanat");
+			AddTranslation(text);
 
 			text = CreateTranslation("Recipes");
 			text.SetDefault("Recipes");
 			text.AddTranslation(GameCulture.Russian, "Рецепты");
-            		text.AddTranslation(GameCulture.French, "Recettes");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Recettes");
+			AddTranslation(text);
 
 			text = CreateTranslation("SelectedRecipe");
 			text.SetDefault("Selected Recipe");
-            		text.AddTranslation(GameCulture.French, "Recette sélectionnée");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Recette sélectionnée");
+			AddTranslation(text);
 
 			text = CreateTranslation("Ingredients");
 			text.SetDefault("Ingredients");
-            		text.AddTranslation(GameCulture.French, "Ingrédients");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Ingrédients");
+			AddTranslation(text);
 
 			text = CreateTranslation("StoredItems");
 			text.SetDefault("Stored Ingredients");
-            		text.AddTranslation(GameCulture.French, "Ingrédients Stockés");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Ingrédients Stockés");
+			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAvailable");
 			text.SetDefault("Show available recipes");
-            		text.AddTranslation(GameCulture.French, "Afficher les recettes disponibles");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Afficher les recettes disponibles");
+			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAll");
 			text.SetDefault("Show all recipes");
-            		text.AddTranslation(GameCulture.French, "Afficher toutes les recettes");
-            		AddTranslation(text);
+			text.AddTranslation(GameCulture.French, "Afficher toutes les recettes");
+			AddTranslation(text);
 		}
 
 		public override void PostSetupContent()
