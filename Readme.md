@@ -16,3 +16,4 @@ A full description and discussion concerning this mod can be found at the [Terra
 * Crafting Interface
 * Money Compactor
 * Wait for bug reports
+"# MagicStorage" 

@@ -13,7 +13,8 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Crimtane Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановый блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Karmazynium)");
-		}
+            DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Carmitane)");
+        }
 
 		public override void SetDefaults()
 		{
