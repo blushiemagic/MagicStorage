@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca");
+			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage");
 		}
 		public override void SetDefaults()
 		{

@@ -13,6 +13,7 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Terra Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Блок хранения Терры");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Terra)");
+			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Terra)");
 		}
 
 		public override void SetDefaults()

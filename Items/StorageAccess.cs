@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Магическое хранилище");
 			DisplayName.AddTranslation(GameCulture.Polish, "Okno dostępu do magazynu");
+			DisplayName.AddTranslation(GameCulture.French, "Access de Stockage");
 		}
 		
 		public override void SetDefaults()
