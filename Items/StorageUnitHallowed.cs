@@ -13,8 +13,8 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Hallowed Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Святой блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Święcona)");
-            		DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Sacré)");
-        	}
+			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Sacré)");
+		}
 
 		public override void SetDefaults()
 		{
