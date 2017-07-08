@@ -11,11 +11,11 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-            DisplayName.AddTranslation(GameCulture.French, "Emulateur de biome de neige");
+            		DisplayName.AddTranslation(GameCulture.French, "Emulateur de biome de neige");
 
-            Tooltip.SetDefault("Allows the Storage Crafting Interface to craft snow biome recipes");
-            Tooltip.AddTranslation(GameCulture.French, "Permet à L'interface de Stockage Artisanat de créer des recettes de biome de neige");
-        }
+            		Tooltip.SetDefault("Allows the Storage Crafting Interface to craft snow biome recipes");
+            		Tooltip.AddTranslation(GameCulture.French, "Permet à L'interface de Stockage Artisanat de créer des recettes de biome de neige");
+        	}
 
 		public override void SetDefaults()
 		{
