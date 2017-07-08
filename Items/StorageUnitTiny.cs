@@ -13,8 +13,8 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Tiny Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Маленький блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Mała jednostka magazynująca");
-            DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Miniscule");
-        }
+            		DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Miniscule");
+        	}
 
 		public override void SetDefaults()
 		{
