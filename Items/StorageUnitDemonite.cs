@@ -14,6 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовый блок хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Demonit)");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Démonite)");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Endemoniado)");
 		}
 
 		public override void SetDefaults()
