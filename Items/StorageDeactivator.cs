@@ -15,12 +15,14 @@ namespace MagicStorage.Items
 			DisplayName.SetDefault("Storage Unit Wand");
 			DisplayName.AddTranslation(GameCulture.Russian, "Посох блока хранения");
 			DisplayName.AddTranslation(GameCulture.Polish, "Różdżka jednostki magazynującej");
-			DisplayName.AddTranslation(GameCulture.French, "Baguetter d'unité de stockage");
+			DisplayName.AddTranslation(GameCulture.French, "Baguette d'unité de stockage");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Varita de unidad de almacenamiento");
 
 			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Блоку Хранения для переключения между Включенным/Выключенным состоянием");
 			Tooltip.AddTranslation(GameCulture.Polish, "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
 			Tooltip.AddTranslation(GameCulture.French, "<right> pour changer l'unité de stockage actif/inactif");
+			Tooltip.AddTranslation(GameCulture.Spanish, "<right> para cambiar el unidad de almacenamiento activo/inactivo");
 		}
 
 		public override void SetDefaults()
