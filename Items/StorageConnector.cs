@@ -13,6 +13,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Соединитель хранилищ");
 			DisplayName.AddTranslation(GameCulture.Polish, "Łącznik");
 			DisplayName.AddTranslation(GameCulture.French, "Connecteur de Stockage");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Conector de Almacenamiento");
 		}	
 	
 		public override void SetDefaults()
