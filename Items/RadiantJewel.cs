@@ -14,7 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая драгоценность");
 			DisplayName.AddTranslation(GameCulture.Polish, "Promieniejący klejnot");
 			DisplayName.AddTranslation(GameCulture.French, "Bijou Rayonnant");
-			DisplayName.AddTranslation(GameCulture.French, "Joya Radiante");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Joya Radiante");
 
 			Tooltip.SetDefault("'Shines with a dazzling light'");
 			Tooltip.AddTranslation(GameCulture.Russian, "'Блестит ослепительным светом'");
