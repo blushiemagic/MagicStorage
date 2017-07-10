@@ -14,6 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Святое улучшение хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Święcone)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Sacré)");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Sagrado)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 160 capacity"
 				+ "\n<right> a Hellstone Storage Unit to use");
@@ -23,6 +24,8 @@ namespace MagicStorage.Items
 				+ "\n<right> na Jednostkę magazynującą (Piekielny kamień), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 160"
 				+ "\n<right> l'unité de stockage (Infernale) pour utiliser");
+			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 160"
+				+ "\n<right> en la unidad de almacenamiento (Piedra Infernal) para utilizar");
 		}
 
 		public override void SetDefaults()
