@@ -15,7 +15,8 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "bezprzewodowe okno dostępu");
 			DisplayName.AddTranslation(GameCulture.French, "Fenêtre d'accès éloigné");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Acceso a Almacenamiento Remoto");
-		}
+
+		}	
 
 		public override void SetDefaults()
 		{

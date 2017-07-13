@@ -39,6 +39,7 @@ namespace MagicStorage.Items
 				+ "\n<right> le Stockage Éloigné pour le mettre en place");
 			Tooltip.AddTranslation(GameCulture.Spanish, "<right> el Corazón de Almacenamiento para registrar su ubicación"
 				+ "\n<right> el Acceso de Almacenamiento Remoto para establecerlo");
+				+ "\n<right> Stockage Éloigné pour le mettre en place");
 		}
 
 		public override void SetDefaults()

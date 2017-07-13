@@ -19,7 +19,7 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("'Shines with a dazzling light'");
 			Tooltip.AddTranslation(GameCulture.Russian, "'Блестит ослепительным светом'");
 			Tooltip.AddTranslation(GameCulture.Polish, "'Świeci oślepiającym światłem'");
-			Tooltip.AddTranslation(GameCulture.French, "'Il brille avec une lumière aveuglante'");
+			Tooltip.AddTranslation(GameCulture.French, "'Il brille avec une lumière aveuglante'")
 			Tooltip.AddTranslation(GameCulture.Spanish, "'Brilla con una luz deslumbrante'");
 		}
 

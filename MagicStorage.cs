@@ -38,6 +38,7 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.French, "Mis à: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.Spanish, "Ajustado a: X={0}, Y={1}");
+
 			AddTranslation(text);
 
 			text = CreateTranslation("SnowBiomeBlock");
