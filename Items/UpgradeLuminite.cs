@@ -13,6 +13,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое улучшение хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Luminowany)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Luminite)");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Luminita)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 320 capacity"
 				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
@@ -22,6 +23,8 @@ namespace MagicStorage.Items
 				+ "\n<right> na Jednostkę magazynującą (Niebieski Chlorofit), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 320"
 				+ "\n<right> l'unité de stockage (Chlorophylle Bleu) pour utiliser");
+			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 320"
+				+ "\n<right> en la unidad de almacenamiento (Clorofita Azul) para utilizar");
 		}
 
 		public override void SetDefaults()

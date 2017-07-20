@@ -14,11 +14,13 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Теневой алмаз");
 			DisplayName.AddTranslation(GameCulture.Polish, "Diament cienia");
 			DisplayName.AddTranslation(GameCulture.French, "Diamant sombre");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Diamante sombreado");
 
 			Tooltip.SetDefault("Traces of light still linger inside");
 			Tooltip.AddTranslation(GameCulture.Russian, "Следы света все еще мелькают внутри");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ślady światła wciąż pozostają w środku");
 			Tooltip.AddTranslation(GameCulture.French, "Des traces de lumière s'attarde encore à l'intérieur");
+			Tooltip.AddTranslation(GameCulture.Spanish, "Sigue habiendo huellas de luz en el interior");
 		}
 		
 

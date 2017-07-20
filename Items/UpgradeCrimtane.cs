@@ -14,6 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Russian, "Кримтановое улучшение хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Karmazynit)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Carmitane)");
+			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Carmesí)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
 				+ "\n<right> a Storage Unit to use");
@@ -23,6 +24,8 @@ namespace MagicStorage.Items
 				+ "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 80"
 				+ "\n<right> l'unité de stockage pour utiliser");
+			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 80"
+				+ "\n<right> en la unidad de almacenamiento para utilizar");
 		}
 
 		public override void SetDefaults()
