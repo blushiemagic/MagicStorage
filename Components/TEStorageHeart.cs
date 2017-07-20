@@ -216,7 +216,7 @@ namespace MagicStorage.Components
 		public bool PackItems()
 		{
 			TEStorageUnit unitWithSpace = null;
-			foreach (TEStorageUnit abstractStorageUnit in GetStorageUnits())
+			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
 				if (!(abstractStorageUnit is TEStorageUnit))
 				{
