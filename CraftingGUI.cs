@@ -751,6 +751,7 @@ namespace MagicStorage
 			adjLava = false;
 			adjHoney = false;
 			zoneSnow = false;
+			alchemyTable = false;
 
 			foreach (Item item in items)
 			{
