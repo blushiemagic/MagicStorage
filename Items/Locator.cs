@@ -38,7 +38,7 @@ namespace MagicStorage.Items
 			Tooltip.AddTranslation(GameCulture.French, "<right> le Cœur de Stockage pour enregistrer son emplacement"
 				+ "\n<right> le Stockage Éloigné pour le mettre en place");
 			Tooltip.AddTranslation(GameCulture.Spanish, "<right> el Corazón de Almacenamiento para registrar su ubicación"
-				+ "\n<right> el Acceso de Almacenamiento Remoto para establecerlo");
+				+ "\n<right> el Acceso de Almacenamiento Remoto para establecerlo"
 				+ "\n<right> Stockage Éloigné pour le mettre en place");
 		}
 
