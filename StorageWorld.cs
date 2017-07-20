@@ -77,7 +77,7 @@ namespace MagicStorage
 			mechBoss3Diamond = tag.GetBool("mechBoss3Diamond");
 			plantBossDiamond = tag.GetBool("plantBossDiamond");
 			golemBossDiamond = tag.GetBool("golemBossDiamond");
-			fishronDiamond = tag.GetBool("fishronBossDiamond");
+			fishronDiamond = tag.GetBool("fishronDiamond");
 			ancientCultistDiamond = tag.GetBool("ancientCultistDiamond");
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 		}
