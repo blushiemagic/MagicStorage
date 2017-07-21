@@ -1100,7 +1100,7 @@ namespace MagicStorage
 			if (MouseClicked)
 			{
 				bool changed = false;
-				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && Main.mouseItem.type == result.type)
+				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && result != null && Main.mouseItem.type == result.type)
 				{
 					if (TryDepositResult(Main.mouseItem))
 					{
