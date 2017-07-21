@@ -92,10 +92,11 @@ namespace MagicStorage
 		private static UIText reqObjText2 = new UIText("");
 		private static UIText storedItemsText;
 
-		private static UISlotZone storageZone = new UISlotZone(HoverItem, GetStorage, smallScale);
+		private static UISlotZone storageZone = new UISlotZone(HoverStorage, GetStorage, smallScale);
 		private static int numRows2;
 		private static int displayRows2;
 		private static List<Item> storageItems = new List<Item>();
+		private static List<ItemData> blockStorageItems = new List<ItemData>();
 
 		internal static UIScrollbar scrollBar2 = new UIScrollbar();
 		private static float scrollBar2ViewSize = 1f;
@@ -468,7 +469,12 @@ namespace MagicStorage
 		private static Item GetStorage(int slot, ref int context)
 		{
 			int index = slot + numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
-			return index < storageItems.Count ? storageItems[index] : new Item();
+			Item item = index < storageItems.Count ? storageItems[index] : new Item();
+			if (blockStorageItems.Contains(new ItemData(item)))
+			{
+				context = 3;
+			}
+			return item;
 		}
 
 		private static Item GetResult(int slot, ref int context)
@@ -607,7 +613,7 @@ namespace MagicStorage
 				craftButton.BackgroundColor = new Color(73, 94, 171);
 				if (curMouse.LeftButton == ButtonState.Pressed)
 				{
-					if (selectedRecipe != null && IsAvailable(selectedRecipe))
+					if (selectedRecipe != null && IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe))
 					{
 						if (craftTimer <= 0)
 						{
@@ -630,7 +636,7 @@ namespace MagicStorage
 			{
 				craftButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
 			}
-			if (selectedRecipe == null || !IsAvailable(selectedRecipe))
+			if (selectedRecipe == null || !IsAvailable(selectedRecipe) || !PassesBlock(selectedRecipe))
 			{
 				craftButton.BackgroundColor = new Color(30, 40, 100) * 0.7f;
 			}
@@ -913,6 +919,44 @@ namespace MagicStorage
 			return true;
 		}
 
+		private static bool PassesBlock(Recipe recipe)
+		{
+			foreach (Item ingredient in recipe.requiredItem)
+			{
+				if (ingredient.type == 0)
+				{
+					break;
+				}
+				int stack = ingredient.stack;
+				bool useRecipeGroup = false;
+				foreach (Item item in storageItems)
+				{
+					ItemData data = new ItemData(item);
+					if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.netID, ingredient.type))
+					{
+						stack -= item.stack;
+						useRecipeGroup = true;
+					}
+				}
+				if (!useRecipeGroup)
+				{
+					foreach (Item item in storageItems)
+					{
+						ItemData data = new ItemData(item);
+						if (!blockStorageItems.Contains(data) && item.netID == ingredient.netID)
+						{
+							stack -= item.stack;
+						}
+					}
+				}
+				if (stack > 0)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		private static void RefreshStorageItems()
 		{
 			storageItems.Clear();
@@ -1012,6 +1056,7 @@ namespace MagicStorage
 				{
 					selectedRecipe = recipes[slot];
 					RefreshStorageItems();
+					blockStorageItems.Clear();
 				}
 				hoverSlot = visualSlot;
 			}
@@ -1020,6 +1065,28 @@ namespace MagicStorage
 		private static void HoverItem(int slot, ref int hoverSlot)
 		{
 			hoverSlot = slot;
+		}
+
+		private static void HoverStorage(int slot, ref int hoverSlot)
+		{
+			int visualSlot = slot;
+			slot += numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
+			if (slot < storageItems.Count)
+			{
+				if (MouseClicked)
+				{
+					ItemData data = new ItemData(storageItems[slot]);
+					if (blockStorageItems.Contains(data))
+					{
+						blockStorageItems.Remove(data);
+					}
+					else
+					{
+						blockStorageItems.Add(data);
+					}
+				}
+				hoverSlot = visualSlot;
+			}
 		}
 
 		private static void HoverResult(int slot, ref int hoverSlot)
@@ -1151,7 +1218,7 @@ namespace MagicStorage
 
 		private static void TryCraft()
 		{
-			List<Item> availableItems = new List<Item>(storageItems.Select(item => item.Clone()));
+			List<Item> availableItems = new List<Item>(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
 			List<Item> toWithdraw = new List<Item>();
 			for (int k = 0; k < selectedRecipe.requiredItem.Length; k++)
 			{
