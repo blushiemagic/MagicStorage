@@ -1,4 +1,4 @@
-author = bluemagic123
+author = blushiemagic
 version = 0.4.0.2
 displayName = Magic Storage
 homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
