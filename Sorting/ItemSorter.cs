@@ -132,7 +132,7 @@ namespace MagicStorage.Sorting
 			string modName = "Terraria";
 			if (item.modItem != null)
 			{
-				modName = item.modItem.mod.Name;
+				modName = item.modItem.mod.DisplayName;
 			}
 			return modName.ToLowerInvariant().IndexOf(modFilter) >= 0 && item.Name.ToLowerInvariant().IndexOf(filter) >= 0;
 		}
