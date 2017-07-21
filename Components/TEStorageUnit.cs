@@ -14,6 +14,8 @@ namespace MagicStorage.Components
 	public class TEStorageUnit : TEAbstractStorageUnit
 	{
 		private IList<Item> items = new List<Item>();
+		private Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
+		private bool receiving = false;
 
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
@@ -130,7 +132,7 @@ namespace MagicStorage.Components
 
 		public override void DepositItem(Item toDeposit, bool locked = false)
 		{
-			if (Main.netMode == 1)
+			if (Main.netMode == 1 && !receiving)
 			{
 				return;
 			}
@@ -140,6 +142,7 @@ namespace MagicStorage.Components
 			}
 			try
 			{
+				Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
 				foreach (Item item in items)
@@ -173,8 +176,12 @@ namespace MagicStorage.Components
 					hasChange = true;
 					finished = true;
 				}
-				if (hasChange)
+				if (hasChange && Main.netMode != 1)
 				{
+					if (Main.netMode == 2)
+					{
+						netQueue.Enqueue(UnitOperation.Deposit.Create(original));
+					}
 					PostChangeContents();
 				}
 			}
@@ -189,7 +196,7 @@ namespace MagicStorage.Components
 
 		public override Item TryWithdraw(Item lookFor, bool locked = false)
 		{
-			if (Main.netMode == 1)
+			if (Main.netMode == 1 && !receiving)
 			{
 				return new Item();
 			}
@@ -199,6 +206,7 @@ namespace MagicStorage.Components
 			}
 			try
 			{
+				Item original = lookFor.Clone();
 				Item result = lookFor.Clone();
 				result.stack = 0;
 				for (int k = 0; k < items.Count; k++)
@@ -217,7 +225,14 @@ namespace MagicStorage.Components
 						lookFor.stack -= withdraw;
 						if (lookFor.stack <= 0)
 						{
-							PostChangeContents();
+							if (Main.netMode != 1)
+							{
+								if (Main.netMode == 2)
+								{
+									netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
+								}
+								PostChangeContents();
+							}
 							return result;
 						}
 					}
@@ -226,7 +241,14 @@ namespace MagicStorage.Components
 				{
 					return new Item();
 				}
-				PostChangeContents();
+				if (Main.netMode != 1)
+				{
+					if (Main.netMode == 2)
+					{
+						netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
+					}
+					PostChangeContents();
+				}
 				return result;
 			}
 			finally
@@ -295,6 +317,13 @@ namespace MagicStorage.Components
 			dict = unit1.hasItem;
 			unit1.hasItem = unit2.hasItem;
 			unit2.hasItem = dict;
+			if (Main.netMode == 2)
+			{
+				unit1.netQueue.Clear();
+				unit2.netQueue.Clear();
+				unit1.netQueue.Enqueue(UnitOperation.FullSync.Create());
+				unit2.netQueue.Enqueue(UnitOperation.FullSync.Create());
+			}
 			unit1.PostChangeContents();
 			unit2.PostChangeContents();
 		}
@@ -302,9 +331,20 @@ namespace MagicStorage.Components
 		//precondition: lock is already taken
 		internal Item WithdrawStack()
 		{
+			if (Main.netMode == 1 && !receiving)
+			{
+				return new Item();
+			}
 			Item item = items[items.Count - 1];
 			items.RemoveAt(items.Count - 1);
-			PostChangeContents();
+			if (Main.netMode != 1)
+			{
+				if (Main.netMode == 2)
+				{
+					netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
+				}
+				PostChangeContents();
+			}
 			return item;
 		}
 
@@ -335,34 +375,52 @@ namespace MagicStorage.Components
 				}
 				hasItem.Add(data);
 			}
+			if (Main.netMode == 2)
+			{
+				netQueue.Enqueue(UnitOperation.FullSync.Create());
+			}
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)
 		{
 			base.NetSend(writer, lightSend);
-			writer.Write(items.Count);
-			foreach (Item item in items)
+			if (netQueue.Count > Capacity / 2 || !lightSend)
 			{
-				ItemIO.Send(item, writer, true, false);
+				netQueue.Clear();
+				netQueue.Enqueue(UnitOperation.FullSync.Create());
+			}
+			writer.Write((ushort)netQueue.Count);
+			while (netQueue.Count > 0)
+			{
+				netQueue.Dequeue().Send(writer, this);
 			}
 		}
 
 		public override void NetReceive(BinaryReader reader, bool lightReceive)
 		{
 			base.NetReceive(reader, lightReceive);
-			ClearItemsData();
-			int count = reader.ReadInt32();
+			if (TileEntity.ByPosition.ContainsKey(Position) && TileEntity.ByPosition[Position] is TEStorageUnit)
+			{
+				TEStorageUnit other = (TEStorageUnit)TileEntity.ByPosition[Position];
+				items = other.items;
+				hasSpaceInStack = other.hasSpaceInStack;
+				hasItem = other.hasItem;
+			}
+			receiving = true;
+			int count = reader.ReadUInt16();
+			bool flag = false;
 			for (int k = 0; k < count; k++)
 			{
-				Item item = ItemIO.Receive(reader, true, false);
-				items.Add(item);
-				ItemData data = new ItemData(item);
-				if (item.stack < item.maxStack)
+				if (UnitOperation.Receive(reader, this))
 				{
-					hasSpaceInStack.Add(data);
+					flag = true;
 				}
-				hasItem.Add(data);
 			}
+			if (flag)
+			{
+				RepairMetadata();
+			}
+			receiving = false;
 		}
 
 		private void ClearItemsData()
@@ -392,6 +450,133 @@ namespace MagicStorage.Components
 			RepairMetadata();
 			UpdateTileFrameWithNetSend(true);
 			NetHelper.SendTEUpdate(ID, Position);
+		}
+
+		abstract class UnitOperation
+		{
+			public static readonly UnitOperation FullSync = new FullSync();
+			public static readonly UnitOperation Deposit = new DepositOperation();
+			public static readonly UnitOperation Withdraw = new WithdrawOperation();
+			public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
+			private static List<UnitOperation> types = new List<UnitOperation>();
+
+			static UnitOperation()
+			{
+				types.Add(FullSync);
+				types.Add(Deposit);
+				types.Add(Withdraw);
+				types.Add(WithdrawStack);
+				for (int k = 0; k < types.Count; k++)
+				{
+					types[k].id = (byte)k;
+				}
+			}
+
+			protected byte id;
+			protected Item data;
+
+			public UnitOperation Create()
+			{
+				return (UnitOperation)MemberwiseClone();
+			}
+
+			public UnitOperation Create(Item item)
+			{
+				UnitOperation clone = Create();
+				clone.data = item;
+				return clone;
+			}
+
+			public void Send(BinaryWriter writer, TEStorageUnit unit)
+			{
+				writer.Write(id);
+				SendData(writer, unit);
+			}
+
+			protected abstract void SendData(BinaryWriter writer, TEStorageUnit unit);
+
+			public static bool Receive(BinaryReader reader, TEStorageUnit unit)
+			{
+				byte id = reader.ReadByte();
+				if (id >= 0 && id < types.Count)
+				{
+					return types[id].ReceiveData(reader, unit);
+				}
+				return false;
+			}
+
+			protected abstract bool ReceiveData(BinaryReader reader, TEStorageUnit unit);
+		}
+
+		class FullSync : UnitOperation
+		{
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
+				writer.Write(unit.items.Count);
+				foreach (Item item in unit.items)
+				{
+					ItemIO.Send(item, writer, true, false);
+				}
+			}
+
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
+				unit.ClearItemsData();
+				int count = reader.ReadInt32();
+				for (int k = 0; k < count; k++)
+				{
+					Item item = ItemIO.Receive(reader, true, false);
+					unit.items.Add(item);
+					ItemData data = new ItemData(item);
+					if (item.stack < item.maxStack)
+					{
+						unit.hasSpaceInStack.Add(data);
+					}
+					unit.hasItem.Add(data);
+				}
+				return false;
+			}
+		}
+
+		class DepositOperation : UnitOperation
+		{
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
+				ItemIO.Send(data, writer, true, false);
+			}
+
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
+				unit.DepositItem(ItemIO.Receive(reader, true, false));
+				return true;
+			}
+		}
+
+		class WithdrawOperation : UnitOperation
+		{
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
+				ItemIO.Send(data, writer, true, false);
+			}
+
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
+				unit.TryWithdraw(ItemIO.Receive(reader, true, false));
+				return true;
+			}
+		}
+
+		class WithdrawStackOperation : UnitOperation
+		{
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
+			}
+
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
+				unit.WithdrawStack();
+				return true;
+			}
 		}
 	}
 }
