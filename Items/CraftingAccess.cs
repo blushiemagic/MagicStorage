@@ -37,14 +37,14 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 5);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			if (MagicStorage.legendMod == null)
 			{
-				recipe.AddIngredient(ItemID.Sapphire, 10);
+				recipe.AddIngredient(ItemID.Sapphire, 7);
 			}
 			else
 			{
-				recipe.AddRecipeGroup("MagicStorage:AnySapphire", 10);
+				recipe.AddRecipeGroup("MagicStorage:AnySapphire", 7);
 			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
