@@ -12,7 +12,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Теневой алмаз");
-			DisplayName.AddTranslation(GameCulture.Polish, "Diament cienia");
+			DisplayName.AddTranslation(GameCulture.Polish, "Mroczny Diament");
 			DisplayName.AddTranslation(GameCulture.French, "Diamant sombre");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Diamante sombreado");
 
