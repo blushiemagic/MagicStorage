@@ -16,7 +16,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Spanish, "Emulador de bioma de la nieve");
 
 			Tooltip.SetDefault("Allows the Storage Crafting Interface to craft snow biome recipes");
-			Tooltip.AddTranslation(GameCulter.Polish, "Dodaje funkcje do Interfejsu Rzemieślniczego, pozwalającą na wytwarzanie przedmiotów dostępnych jedynie w Śnieżnym Biomie");
+			Tooltip.AddTranslation(GameCulture.Polish, "Dodaje funkcje do Interfejsu Rzemieślniczego, pozwalającą na wytwarzanie przedmiotów dostępnych jedynie w Śnieżnym Biomie");
 			Tooltip.AddTranslation(GameCulture.French, "Permet à L'interface de Stockage Artisanat de créer des recettes de biome de neige");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Permite la Interfaz de Elaboración de almacenamiento a hacer de recetas de bioma de la nieve");
 		}

@@ -15,11 +15,18 @@ namespace MagicStorage
 
 		public override void UpdateDead()
 		{
-			CloseStorage();
+			if (player.whoAmI == Main.myPlayer)
+			{
+				CloseStorage();
+			}
 		}
 
 		public override void ResetEffects()
 		{
+			if (player.whoAmI != Main.myPlayer)
+			{
+				return;
+			}
 			if (timeSinceOpen < 1)
 			{
 				player.talkNPC = -1;
