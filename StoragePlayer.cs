@@ -12,6 +12,7 @@ namespace MagicStorage
 	{
 		public int timeSinceOpen = 1;
 		private Point16 storageAccess = new Point16(-1, -1);
+		public bool remoteAccess = false;
 
 		public override void UpdateDead()
 		{
@@ -42,7 +43,7 @@ namespace MagicStorage
 			{
 				int playerX = (int)(player.Center.X / 16f);
 				int playerY = (int)(player.Center.Y / 16f);
-				if (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1)
+				if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1))
 				{
 					Main.PlaySound(11, -1, -1, 1);
 					CloseStorage();
@@ -57,9 +58,10 @@ namespace MagicStorage
 			}
 		}
 
-		public void OpenStorage(Point16 point)
+		public void OpenStorage(Point16 point, bool remote = false)
 		{
 			storageAccess = point;
+			remoteAccess = remote;
 			StorageGUI.RefreshItems();
 		}
 
