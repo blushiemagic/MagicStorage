@@ -31,6 +31,13 @@ namespace MagicStorage
 			AddTranslations();
 		}
 
+		public override void Unload()
+		{
+			Instance = null;
+			bluemagicMod = null;
+			legendMod = null;
+		}
+
 		private void AddTranslations()
 		{
 			ModTranslation text = CreateTranslation("SetTo");
