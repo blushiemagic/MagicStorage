@@ -463,7 +463,33 @@ namespace MagicStorage
 			{
 				return new Item();
 			}
-			return selectedRecipe.requiredItem[slot];
+			Item item = selectedRecipe.requiredItem[slot].Clone();
+			if (selectedRecipe.anyWood && item.type == ItemID.Wood)
+			{
+				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Wood));
+			}
+			if (selectedRecipe.anySand && item.type == ItemID.SandBlock)
+			{
+				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.SandBlock));
+			}
+			if (selectedRecipe.anyIronBar && item.type == ItemID.IronBar)
+			{
+				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.IronBar));
+			}
+			if (selectedRecipe.anyFragment && item.type == ItemID.FragmentSolar)
+			{
+				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[51].Value);
+			}
+			if (selectedRecipe.anyPressurePlate && item.type == ItemID.GrayPressurePlate)
+			{
+				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[38].Value);
+			}
+			string nameOverride;
+			if (selectedRecipe.ProcessGroupsForText(item.type, out nameOverride))
+			{
+				item.SetNameOverride(nameOverride);
+			}
+			return item;
 		}
 
 		private static Item GetStorage(int slot, ref int context)
