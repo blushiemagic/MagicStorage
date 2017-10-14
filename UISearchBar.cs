@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using ReLogic.Graphics;
 using Terraria;
 using Terraria.Localization;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -86,26 +87,19 @@ namespace MagicStorage
 
 			if (hasFocus)
 			{
-				for (int k = (int)Keys.A; k <= (int)Keys.Z; k++)
+				PlayerInput.WritingText = true;
+				Main.instance.HandleIME();
+				string newString = Main.GetInputText(text);
+				if (!newString.Equals(text))
 				{
-					if (KeyTyped((Keys)k))
-					{
-						InsertKey((char)(k - (int)Keys.A + 'a'));
-					}
+					text = newString;
+					cursorPosition = text.Length;
+					StorageGUI.RefreshItems();
 				}
-				for (int k = (int)Keys.D0; k <= (int)Keys.D9; k++)
+				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
 				{
-					if (KeyTyped((Keys)k))
-					{
-						InsertKey((char)(k - (int)Keys.D0 + '0'));
-					}
-				}
-				foreach (Keys key in keyMap.Keys)
-				{
-					if (KeyTyped(key))
-					{
-						InsertKey(keyMap[key]);
-					}
+					hasFocus = false;
+					CheckBlockInput();
 				}
 			}
 			base.Update(gameTime);
@@ -154,49 +148,6 @@ namespace MagicStorage
 		{
 			return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
 		}
-
-		private void InsertKey(char letter)
-		{
-			if ((letter >= 'a' && letter <= 'z') || (letter >= '0' && letter <= '9') || letter == ' ' || letter == '-' || letter == '.')
-			{
-				text = text.Substring(0, cursorPosition) + letter + text.Substring(cursorPosition);
-				cursorPosition++;
-				StorageGUI.RefreshItems();
-			}
-			else if (letter == '\b' && cursorPosition > 0)
-			{
-				text = text.Substring(0, cursorPosition - 1) + text.Substring(cursorPosition);
-				cursorPosition--;
-				StorageGUI.RefreshItems();
-			}
-			else if (letter == '<' && cursorPosition > 0)
-			{
-				cursorPosition--;
-			}
-			else if (letter == '>' && cursorPosition < text.Length)
-			{
-				cursorPosition++;
-			}
-			else if (letter == '\n' || letter == '\t')
-			{
-				hasFocus = false;
-				CheckBlockInput();
-			}
-			cursorTimer = 0;
-		}
-
-		private static Dictionary<Keys, char> keyMap = new Dictionary<Keys, char>()
-		{
-			{ Keys.Space, ' ' },
-			{ Keys.OemMinus, '-' },
-			{ Keys.OemPeriod, '.' },
-			{ Keys.Back, '\b' },
-			{ Keys.Left, '<' },
-			{ Keys.Right, '>' },
-			{ Keys.Enter, '\n' },
-			{ Keys.Escape, '\n' },
-			{ Keys.Tab, '\t' }
-		};
 
 		private static void CheckBlockInput()
 		{

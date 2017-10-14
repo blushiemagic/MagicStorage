@@ -6,6 +6,5 @@ The magic storage scales as you progress in your playthrough. It is accessible v
 
 TODO:
 Money Compactor
-Portable Remote Access
 Blacklist/Whitelist for specific accesses
 Wait for bug reports
