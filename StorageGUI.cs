@@ -63,7 +63,7 @@ namespace MagicStorage
 		private static int displayRows;
 
 		private static UIElement bottomBar = new UIElement();
-		private static UIText capacityText = new UIText("Items");
+		private static UIText capacityText;
 
 		public static void Initialize()
 		{
@@ -173,6 +173,10 @@ namespace MagicStorage
 			if (searchBar2 == null)
 			{
 				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
+			}
+			if (capacityText == null)
+			{
+				capacityText = new UIText("Items");
 			}
 		}
 

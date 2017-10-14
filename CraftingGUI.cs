@@ -77,7 +77,7 @@ namespace MagicStorage
 		private static bool slotFocus = false;
 
 		private static UIElement bottomBar = new UIElement();
-		private static UIText capacityText = new UIText("Items");
+		private static UIText capacityText;
 
 		private static UIPanel recipePanel = new UIPanel();
 		private static float recipeTop;
@@ -89,7 +89,7 @@ namespace MagicStorage
 		private static UIText ingredientText;
 		private static UISlotZone ingredientZone = new UISlotZone(HoverItem, GetIngredient, smallScale);
 		private static UIText reqObjText;
-		private static UIText reqObjText2 = new UIText("");
+		private static UIText reqObjText2;
 		private static UIText storedItemsText;
 
 		private static UISlotZone storageZone = new UISlotZone(HoverStorage, GetStorage, smallScale);
@@ -298,6 +298,10 @@ namespace MagicStorage
 			{
 				recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
 			}
+			if (capacityText == null)
+			{
+				capacityText = new UIText("Items");
+			}
 			if (recipePanelHeader == null)
 			{
 				recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
@@ -309,6 +313,10 @@ namespace MagicStorage
 			if (reqObjText == null)
 			{
 				reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+			}
+			if (reqObjText2 == null)
+			{
+				reqObjText2 = new UIText("");
 			}
 			if (storedItemsText == null)
 			{
