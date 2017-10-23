@@ -411,7 +411,7 @@ namespace MagicStorage
 		}
 
 		public static void Update(GameTime gameTime)
-		{
+		{try{
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
@@ -433,11 +433,11 @@ namespace MagicStorage
 				craftTimer = 0;
 				maxCraftTimer = startMaxCraftTimer;
 				ResetSlotFocus();
-			}
+			}}catch(Exception e){Main.NewTextMultiline(e.ToString());}
 		}
 
 		public static void Draw(TEStorageHeart heart)
-		{
+		{try{
 			Player player = Main.player[Main.myPlayer];
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
 			Initialize();
@@ -461,7 +461,7 @@ namespace MagicStorage
 			resultZone.DrawText();
 			sortButtons.DrawText();
 			recipeButtons.DrawText();
-			filterButtons.DrawText();
+			filterButtons.DrawText();}catch(Exception e){Main.NewTextMultiline(e.ToString());}
 		}
 
 		private static Item GetStation(int slot, ref int context)
@@ -805,7 +805,7 @@ namespace MagicStorage
 		private static void RefreshRecipes()
 		{
 			while (true)
-			{
+			{try{
 				SortMode sortMode;
 				FilterMode filterMode;
 				lock (threadLock)
@@ -833,6 +833,9 @@ namespace MagicStorage
 				catch (InvalidOperationException)
 				{
 				}
+				catch (KeyNotFoundException)
+				{
+				}
 				lock (recipeLock)
 				{
 					nextRecipes = new List<Recipe>();
@@ -848,7 +851,7 @@ namespace MagicStorage
 						threadRunning = false;
 						return;
 					}
-				}
+				}}catch(Exception e){Main.NewTextMultiline(e.ToString());}
 			}
 		}
 
