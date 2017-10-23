@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -112,8 +113,26 @@ namespace MagicStorage
 		private const int startMaxRightClickTimer = 20;
 		private static int maxRightClickTimer = startMaxRightClickTimer;
 
+		private static Object threadLock = new Object();
+		private static Object recipeLock = new Object();
+		private static Object itemsLock = new Object();
+		private static bool threadRunning = false;
+		internal static bool threadNeedsRestart = false;
+		private static SortMode threadSortMode;
+		private static FilterMode threadFilterMode;
+		private static List<Recipe> threadRecipes = new List<Recipe>();
+		private static List<bool> threadRecipeAvailable = new List<bool>();
+		private static List<Recipe> nextRecipes = new List<Recipe>();
+		private static List<bool> nextRecipeAvailable = new List<bool>();
+
 		public static void Initialize()
 		{
+			lock (recipeLock)
+			{
+				recipes = nextRecipes;
+				recipeAvailable = nextRecipeAvailable;
+			}
+
 			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
@@ -430,6 +449,11 @@ namespace MagicStorage
 			}
 			basePanel.Draw(Main.spriteBatch);
 			recipePanel.Draw(Main.spriteBatch);
+			Vector2 pos = recipeZone.GetDimensions().Position();
+			if (threadRunning)
+			{
+				Utils.DrawBorderString(Main.spriteBatch, "Loading", pos + new Vector2(8f, 8f), Color.White);
+			}
 			stationZone.DrawText();
 			recipeZone.DrawText();
 			ingredientZone.DrawText();
@@ -452,6 +476,10 @@ namespace MagicStorage
 
 		private static Item GetRecipe(int slot, ref int context)
 		{
+			if (threadRunning)
+			{
+				return new Item();
+			}
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
 			if (!item.IsAir && recipes[index] == selectedRecipe)
@@ -704,8 +732,6 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			items.Clear();
-			recipes.Clear();
-			recipeAvailable.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 			{
@@ -761,18 +787,69 @@ namespace MagicStorage
 				filterMode = FilterMode.All;
 				break;
 			}
-			var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
-			if (recipeButtons.Choice == 0)
-			{
-				recipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
-				recipeAvailable.AddRange(recipes.Select(recipe => true));
-			}
-			else
-			{
-				recipes.AddRange(temp);
-				recipeAvailable.AddRange(recipes.Select(recipe => IsAvailable(recipe)));
-			}
 			RefreshStorageItems();
+			lock (threadLock)
+			{
+				threadNeedsRestart = true;
+				threadSortMode = sortMode;
+				threadFilterMode = filterMode;
+				if (!threadRunning)
+				{
+					threadRunning = true;
+					Thread thread = new Thread(RefreshRecipes);
+					thread.Start();
+				}
+			}
+		}
+
+		private static void RefreshRecipes()
+		{
+			while (true)
+			{
+				SortMode sortMode;
+				FilterMode filterMode;
+				lock (threadLock)
+				{
+					threadNeedsRestart = false;
+					sortMode = threadSortMode;
+					filterMode = threadFilterMode;
+				}
+				var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
+				threadRecipes.Clear();
+				threadRecipeAvailable.Clear();
+				try
+				{
+					if (recipeButtons.Choice == 0)
+					{
+						threadRecipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
+						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
+					}
+					else
+					{
+						threadRecipes.AddRange(temp);
+						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+					}
+				}
+				catch (InvalidOperationException)
+				{
+				}
+				lock (recipeLock)
+				{
+					nextRecipes = new List<Recipe>();
+					nextRecipeAvailable = new List<bool>();
+					nextRecipes.AddRange(threadRecipes);
+					nextRecipeAvailable.AddRange(threadRecipeAvailable);
+					
+				}
+				lock (threadLock)
+				{
+					if (!threadNeedsRestart)
+					{
+						threadRunning = false;
+						return;
+					}
+				}
+			}
 		}
 
 		private static void AnalyzeIngredients()

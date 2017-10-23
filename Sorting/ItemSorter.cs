@@ -123,6 +123,10 @@ namespace MagicStorage.Sorting
 			foreach (Recipe recipe in filteredRecipes)
 			{
 				sortedTree.Insert(recipe);
+				if (CraftingGUI.threadNeedsRestart)
+				{
+					return new List<Recipe>();
+				}
 			}
 			return sortedTree.GetSortedItems();
 		}
