@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
@@ -11,6 +12,7 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
+			DisplayName.SetDefault("Broken Snowglobe");
 			DisplayName.AddTranslation(GameCulture.Polish, "Emulator Śnieżnego Biomu");
 			DisplayName.AddTranslation(GameCulture.French, "Emulateur de biome de neige");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Emulador de bioma de la nieve");
@@ -19,6 +21,7 @@ namespace MagicStorage.Items
 			Tooltip.AddTranslation(GameCulture.Polish, "Dodaje funkcje do Interfejsu Rzemieślniczego, pozwalającą na wytwarzanie przedmiotów dostępnych jedynie w Śnieżnym Biomie");
 			Tooltip.AddTranslation(GameCulture.French, "Permet à L'interface de Stockage Artisanat de créer des recettes de biome de neige");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Permite la Interfaz de Elaboración de almacenamiento a hacer de recetas de bioma de la nieve");
+			Main.RegisterItemAnimation(item.type, new DrawAnimationVertical(8, 8));
 		}
 
 		public override void SetDefaults()
