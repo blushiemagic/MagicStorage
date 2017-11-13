@@ -138,7 +138,7 @@ namespace MagicStorage.Sorting
 			{
 				modName = item.modItem.mod.DisplayName;
 			}
-			return modName.ToLowerInvariant().IndexOf(modFilter) >= 0 && item.Name.ToLowerInvariant().IndexOf(filter) >= 0;
+			return modName.ToLowerInvariant().IndexOf(modFilter) >= 0 && item.Name.ToLowerInvariant().IndexOf(filter.ToLowerInvariant()) >= 0;
 		}
 	}
 }
