@@ -1386,6 +1386,10 @@ namespace MagicStorage
 			}
 			Item resultItem = selectedRecipe.createItem.Clone();
 			resultItem.Prefix(-1);
+
+			RecipeHooks.OnCraft(resultItem, selectedRecipe);
+			ItemLoader.OnCraft(resultItem, selectedRecipe);
+
 			if (Main.netMode == 0)
 			{
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItem))
