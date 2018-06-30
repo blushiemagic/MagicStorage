@@ -23,6 +23,11 @@ namespace MagicStorage.Components
 			return mod.ItemType("CraftingAccess");
 		}
 
+		public override bool HasSmartInteract()
+		{
+			return true;
+		}
+
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));

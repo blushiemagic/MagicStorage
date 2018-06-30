@@ -5,12 +5,16 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 using Microsoft.Xna.Framework;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
 	public class StorageComponent : ModTile
 	{
 		public static Point16 killTile = new Point16(-1, -1);
+
+		// Use StorageComponent_Highlight as the default highlight mask for subclasses
+		public override string HighlightTexture { get { return typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight"; } }
 
 		public override void SetDefaults()
 		{
@@ -40,6 +44,7 @@ namespace MagicStorage.Components
 			AddMapEntry(new Color(153, 107, 61), text);
 			dustType = 7;
 			disableSmartCursor = true;
+			TileID.Sets.HasOutlines[Type] = HasSmartInteract();
 		}
 
 		public virtual void ModifyObjectData()
