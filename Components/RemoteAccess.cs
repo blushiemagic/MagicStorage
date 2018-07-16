@@ -23,6 +23,11 @@ namespace MagicStorage.Components
 			return mod.ItemType("RemoteAccess");
 		}
 
+		public override bool HasSmartInteract()
+		{
+			return true;
+		}
+
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			TileEntity ent = TileEntity.ByPosition[new Point16(i, j)];
