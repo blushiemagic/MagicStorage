@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Storage Crafting Interface");
-			DisplayName.AddTranslation(GameCulture.Russian, "Интерфейс создания хранилищ");
+			DisplayName.AddTranslation(GameCulture.Russian, "Интерфейс Крафта");
 			DisplayName.AddTranslation(GameCulture.Polish, "Interfejs Rzemieślniczy Magazynu");
 			DisplayName.AddTranslation(GameCulture.French, "Interface de Stockage Artisanat");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Interfaz de Elaboración de almacenamiento");
