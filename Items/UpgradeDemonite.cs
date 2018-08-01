@@ -10,15 +10,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Demonite Storage Upgrade");
-			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовое улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовый Апгрейд Ячейки");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Demonit)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Démonite)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Endemoniado)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
 				+ "\n<right> a Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 80 вместимости"
-				+ "\n<right> по блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Ячейку до 80 слотов."
+				+ "\nИспользуйте <right> на Ячейке для использования.");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 80 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 80"
