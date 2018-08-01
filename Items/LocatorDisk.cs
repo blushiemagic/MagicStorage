@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Locator Drive");
-			DisplayName.AddTranslation(GameCulture.Russian, "Привод локатора");
+			DisplayName.AddTranslation(GameCulture.Russian, "Локатор с Приводом");
 			DisplayName.AddTranslation(GameCulture.Polish, "Dysk lokalizatora");
 			DisplayName.AddTranslation(GameCulture.French, "Disque Localisateur");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Disco Locador");
@@ -19,8 +19,8 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\n<right> Remote Storage Access to set it"
 				+ "\nDoes not get destroyed upon use");
-			Tooltip.AddTranslation(GameCulture.Russian, "<right> по сердцу хранилища чтобы сохранить локацию"
-				+ "\n<Right> по дистанционному доступу к хранилищу чтобы установить его"
+			Tooltip.AddTranslation(GameCulture.Russian, "Используйте <right> на Сердце Хранилища, что бы сохранить его местоположение"
+				+ "\nИспользуйте <right> на Модуль Удаленного Доступа, что бы записать в него местоположение Сердце Хранилища"
 				+ "\nНе разрушается при использовании");
 			Tooltip.AddTranslation(GameCulture.Polish, "<right> na serce jednostki magazynującej, aby zapisać jej lokalizację"
 				+ "\n<right> na bezprzewodowe okno dostępu aby je ustawić"
