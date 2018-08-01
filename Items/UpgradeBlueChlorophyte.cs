@@ -18,8 +18,8 @@ namespace MagicStorage.Items
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 240 capacity"
 				+ "\n<right> a Hallowed Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает ячейку до 240 слотов."
-				+ "\nИспользуйте <right> на Святую Ячейку.");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает ячейку до 240 слотов"
+				+ "\nИспользуйте <right> на Святую Ячейку для применения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 240 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Święconą), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 240"
