@@ -11,15 +11,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Terra Storage Upgrade");
-			DisplayName.AddTranslation(GameCulture.Russian, "Улучшение Терры");
+			DisplayName.AddTranslation(GameCulture.Russian, "Терра Апгрейд Ячейки");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Terra)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Terra)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Tierra)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity"
 				+ "\n<right> a Luminite Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 640 вместимости"
-				+ "\n<right> по люминитовому блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает Ячейку до 640 слотов"
+				+ "\nИспользуйте <right> на Люминитовой Ячейке для применения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 640 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Luminowaną), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 640"
