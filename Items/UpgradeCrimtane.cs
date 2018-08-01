@@ -19,7 +19,7 @@ namespace MagicStorage.Items
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
 				+ "\n<right> a Storage Unit to use");
 			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает ячейку до 80 слотов"
-				+ "\nИспользуйте <right> на Ячейку для использования");
+				+ "\nИспользуйте <right> на Ячейку для применения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 80 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 80"
