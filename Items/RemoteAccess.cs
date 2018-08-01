@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Remote Storage Access");
-			DisplayName.AddTranslation(GameCulture.Russian, "Дистанционный доступ к хранилищу");
+			DisplayName.AddTranslation(GameCulture.Russian, "Модуль Удаленного Доступа");
 			DisplayName.AddTranslation(GameCulture.Polish, "Zdalna Jednostka Dostępu");
 			DisplayName.AddTranslation(GameCulture.French, "Fenêtre d'accès éloigné");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Acceso a Almacenamiento Remoto");
