@@ -11,15 +11,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Hallowed Storage Upgrade");
-			DisplayName.AddTranslation(GameCulture.Russian, "Святое улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Russian, "Святое Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Święcone)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Sacré)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Sagrado)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 160 capacity"
 				+ "\n<right> a Hellstone Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает блок хранения до 160 вместимости"
-				+ "\n<right> по адскому блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Russian, "Увеличивает количество слотов в Ячейке Хранилища до 160"
+				+ "\n<right> на Адской Ячейке Хранилища для улучшения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 160 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Piekielny kamień), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 160"
