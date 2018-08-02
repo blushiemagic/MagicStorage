@@ -10,7 +10,7 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.Russian, "Компонент хранилища");
+			DisplayName.AddTranslation(GameCulture.Russian, "Компонент Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Komponent Magazynu");
 			DisplayName.AddTranslation(GameCulture.French, "Composant de Stockage");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Componente de Almacenamiento");
