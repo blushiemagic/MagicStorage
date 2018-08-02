@@ -15,10 +15,14 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Portable Remote Storage Access");
+			DisplayName.AddTranslation(GameCulture.Russian, "Портативный Модуль Удаленного Доступа к Хранилищу");
 
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\nCurrently not set to any location"
 				+ "\nUse item to access your storage");
+			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Cердцу Хранилища чтобы запомнить его местоположение"
+				+ "\nВ данный момент Сердце Хранилища не привязанно
+				+ "\nИспользуйте что бы получить доступ к вашему Хранилищу");
 		}
 
 		public override void SetDefaults()
