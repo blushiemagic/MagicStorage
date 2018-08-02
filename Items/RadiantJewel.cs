@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая драгоценность");
+			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая Драгоценность");
 			DisplayName.AddTranslation(GameCulture.Polish, "Promieniejący klejnot");
 			DisplayName.AddTranslation(GameCulture.French, "Bijou Rayonnant");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Joya Radiante");
