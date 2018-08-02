@@ -10,15 +10,15 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Luminite Storage Upgrade");
-			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое улучшение хранилища");
+			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Luminowany)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Luminite)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Luminita)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 320 capacity"
 				+ "\n<right> a Blue Chlorophyte Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.Russian, "Улучшает бБлок хранения до 320 вместимости"
-				+ "\n<right> по синему хлорофитовому блоку хранения для использования");
+			Tooltip.AddTranslation(GameCulture.Russian, "Увеличивает количество слотов в Ячейке Хранилища до 320"
+				+ "\n<right> на Синей Хлорофитовой Ячейке Хранилища для улучшения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 320 miejsc"
 				+ "\n<right> na Jednostkę magazynującą (Niebieski Chlorofit), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 320"
