@@ -31,8 +31,8 @@ namespace MagicStorage.Items
 
 			Tooltip.SetDefault("<right> Storage Heart to store location"
 				+ "\n<right> Remote Storage Access to set it");
-			Tooltip.AddTranslation(GameCulture.Russian, "<right> по сердцу хранилища чтобы сохранить локацию"
-				+ "\n<right> по дистанционному доступу к хранилищу чтобы установить его");
+			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Cердцу Хранилища чтобы запомнить его местоположение"
+				+ "\n<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища");
 			Tooltip.AddTranslation(GameCulture.Polish, "<right> na serce jednostki magazynującej, aby zapisać jej lokalizację"
 				+ "\n<right> na bezprzewodowe okno dostępu aby je ustawić");
 			Tooltip.AddTranslation(GameCulture.French, "<right> le Cœur de Stockage pour enregistrer son emplacement"
