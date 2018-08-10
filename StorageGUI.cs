@@ -30,17 +30,17 @@ namespace MagicStorage
 			}
 		}
 
-		private static UIPanel basePanel = new UIPanel();
+		private static UIPanel basePanel;
 		private static float panelTop;
 		private static float panelLeft;
 		private static float panelWidth;
 		private static float panelHeight;
 
-		private static UIElement topBar = new UIElement();
+		private static UIElement topBar;
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		internal static UITextPanel<LocalizedText> depositButton;
-		private static UIElement topBar2 = new UIElement();
+		private static UIElement topBar2;
 		private static UIButtonChoice filterButtons;
 		internal static UISearchBar searchBar2;
 
@@ -73,6 +73,7 @@ namespace MagicStorage
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
+			basePanel = new UIPanel();
 			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
@@ -83,6 +84,7 @@ namespace MagicStorage
 			basePanel.Height.Set(panelHeight, 0f);
 			basePanel.Recalculate();
 
+			topBar = new UIElement();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
 			basePanel.Append(topBar);
@@ -103,6 +105,7 @@ namespace MagicStorage
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
 			topBar2.Height.Set(32f, 0f);
 			topBar2.Top.Set(36f, 0f);
@@ -178,6 +181,12 @@ namespace MagicStorage
 			{
 				capacityText = new UIText("Items");
 			}
+		}
+
+		internal static void Unload()
+		{
+			sortButtons = null;
+			filterButtons = null;
 		}
 
 		private static void InitSortButtons()
