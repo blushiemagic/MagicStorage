@@ -135,7 +135,40 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Spanish, "Filtrar por equipamiento");
 			AddTranslation(text);
 
-			text = CreateTranslation("FilterPotions");
+			text = CreateTranslation("FilterWeaponsMelee");
+			text.SetDefault("Filter Melee Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsRanged");
+			text.SetDefault("Filter Ranged Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsMagic");
+			text.SetDefault("Filter Magic Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsSummon");
+			text.SetDefault("Filter Summons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsThrown");
+			text.SetDefault("Filter Throwing Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterAmmo");
+			text.SetDefault("Filter Ammo");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterArmor");
+			text.SetDefault("Filter Armor");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterVanity");
+			text.SetDefault("Filter Vanity Items");
+			AddTranslation(text);
+
+
+            text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
 			text.AddTranslation(GameCulture.French, "Filtrer par potions");

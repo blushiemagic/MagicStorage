@@ -205,30 +205,49 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-				filterButtons = new UIButtonChoice(new Texture2D[]
-				{
-					MagicStorage.Instance.GetTexture("FilterAll"),
-					MagicStorage.Instance.GetTexture("FilterMelee"),
-					MagicStorage.Instance.GetTexture("FilterPickaxe"),
-					MagicStorage.Instance.GetTexture("FilterArmor"),
-					MagicStorage.Instance.GetTexture("FilterPotion"),
-					MagicStorage.Instance.GetTexture("FilterTile"),
-					MagicStorage.Instance.GetTexture("FilterMisc"),
-				},
-				new LocalizedText[]
-				{
-					Language.GetText("Mods.MagicStorage.FilterAll"),
-					Language.GetText("Mods.MagicStorage.FilterWeapons"),
-					Language.GetText("Mods.MagicStorage.FilterTools"),
-					Language.GetText("Mods.MagicStorage.FilterEquips"),
-					Language.GetText("Mods.MagicStorage.FilterPotions"),
-					Language.GetText("Mods.MagicStorage.FilterTiles"),
-					Language.GetText("Mods.MagicStorage.FilterMisc")
-				});
+				filterButtons = MakeFilterButtons();
 			}
 		}
 
-		public static void Update(GameTime gameTime)
+	    public static UIButtonChoice MakeFilterButtons()
+	    {
+	        return new UIButtonChoice(new Texture2D[]
+	                                  {
+	                                      MagicStorage.Instance.GetTexture("FilterAll"),
+	                                      MagicStorage.Instance.GetTexture("FilterMelee"),
+	                                      MagicStorage.Instance.GetTexture("FilterRanged"),
+	                                      MagicStorage.Instance.GetTexture("FilterMagic"),
+	                                      MagicStorage.Instance.GetTexture("FilterSummon"),
+	                                      MagicStorage.Instance.GetTexture("FilterThrowing"),
+	                                      MagicStorage.Instance.GetTexture("FilterThrowing"),
+	                                      MagicStorage.Instance.GetTexture("FilterPickaxe"),
+	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
+	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
+	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
+	                                      MagicStorage.Instance.GetTexture("FilterPotion"),
+	                                      MagicStorage.Instance.GetTexture("FilterTile"),
+	                                      MagicStorage.Instance.GetTexture("FilterMisc"),
+	                                  },
+	            new LocalizedText[]
+	            {
+	                Language.GetText("Mods.MagicStorage.FilterAll"),
+	                Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
+	                Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
+	                Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
+	                Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
+	                Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
+	                Language.GetText("Mods.MagicStorage.FilterAmmo"),
+	                Language.GetText("Mods.MagicStorage.FilterTools"),
+	                Language.GetText("Mods.MagicStorage.FilterArmor"),
+	                Language.GetText("Mods.MagicStorage.FilterEquips"),
+	                Language.GetText("Mods.MagicStorage.FilterVanity"),
+	                Language.GetText("Mods.MagicStorage.FilterPotions"),
+	                Language.GetText("Mods.MagicStorage.FilterTiles"),
+	                Language.GetText("Mods.MagicStorage.FilterMisc")
+	            }, 15);
+	    }
+
+	    public static void Update(GameTime gameTime)
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
@@ -361,35 +380,9 @@ namespace MagicStorage
 				sortMode = SortMode.Default;
 				break;
 			}
-			FilterMode filterMode;
-			switch (filterButtons.Choice)
-			{
-			case 0:
-				filterMode = FilterMode.All;
-				break;
-			case 1:
-				filterMode = FilterMode.Weapons;
-				break;
-			case 2:
-				filterMode = FilterMode.Tools;
-				break;
-			case 3:
-				filterMode = FilterMode.Equipment;
-				break;
-			case 4:
-				filterMode = FilterMode.Potions;
-				break;
-			case 5:
-				filterMode = FilterMode.Placeables;
-				break;
-			case 6:
-				filterMode = FilterMode.Misc;
-				break;
-			default:
-				filterMode = FilterMode.All;
-				break;
-			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
+
+		    FilterMode filterMode = (FilterMode)filterButtons.Choice;
+            items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 			for (int k = 0; k < items.Count; k++)
 			{
 				didMatCheck.Add(false);

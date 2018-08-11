@@ -27,7 +27,7 @@ namespace MagicStorage
 			}
 		}
 
-		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names)
+		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = buttonSize)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 			{

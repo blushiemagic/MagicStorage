@@ -201,7 +201,7 @@ namespace MagicStorage
 
 			InitFilterButtons();
 			float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
-			topBar2.Append(filterButtons);
+            topBar2.Append(filterButtons);
 			searchBar2.Left.Set(filterButtonsRight + padding, 0f);
 			searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
 			searchBar2.Height.Set(0f, 1f);
@@ -406,26 +406,7 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-				filterButtons = new UIButtonChoice(new Texture2D[]
-				{
-					MagicStorage.Instance.GetTexture("FilterAll"),
-					MagicStorage.Instance.GetTexture("FilterMelee"),
-					MagicStorage.Instance.GetTexture("FilterPickaxe"),
-					MagicStorage.Instance.GetTexture("FilterArmor"),
-					MagicStorage.Instance.GetTexture("FilterPotion"),
-					MagicStorage.Instance.GetTexture("FilterTile"),
-					MagicStorage.Instance.GetTexture("FilterMisc"),
-				},
-				new LocalizedText[]
-				{
-					Language.GetText("Mods.MagicStorage.FilterAll"),
-					Language.GetText("Mods.MagicStorage.FilterWeapons"),
-					Language.GetText("Mods.MagicStorage.FilterTools"),
-					Language.GetText("Mods.MagicStorage.FilterEquips"),
-					Language.GetText("Mods.MagicStorage.FilterPotions"),
-					Language.GetText("Mods.MagicStorage.FilterTiles"),
-					Language.GetText("Mods.MagicStorage.FilterMisc")
-				});
+                filterButtons = StorageGUI.MakeFilterButtons();
 			}
 		}
 
@@ -784,34 +765,8 @@ namespace MagicStorage
 				sortMode = SortMode.Default;
 				break;
 			}
-			FilterMode filterMode;
-			switch (filterButtons.Choice)
-			{
-			case 0:
-				filterMode = FilterMode.All;
-				break;
-			case 1:
-				filterMode = FilterMode.Weapons;
-				break;
-			case 2:
-				filterMode = FilterMode.Tools;
-				break;
-			case 3:
-				filterMode = FilterMode.Equipment;
-				break;
-			case 4:
-				filterMode = FilterMode.Potions;
-				break;
-			case 5:
-				filterMode = FilterMode.Placeables;
-				break;
-			case 6:
-				filterMode = FilterMode.Misc;
-				break;
-			default:
-				filterMode = FilterMode.All;
-				break;
-			}
+            FilterMode filterMode = (FilterMode)filterButtons.Choice;
+			
 			RefreshStorageItems();
 
 		    if (_checkListMod == null)

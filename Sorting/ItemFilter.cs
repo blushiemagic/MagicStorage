@@ -30,31 +30,33 @@ namespace MagicStorage.Sorting
 		}
 	}
 
-	public class FilterMelee : ItemFilter
+	public class FilterWeaponMelee : ItemFilter
 	{
 		public override bool Passes(Item item)
 		{
-			return item.melee && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+			return item.melee && item.pick == 0 && item.axe == 0 && item.hammer == 0 && item.damage > 0;
 		}
 	}
 
-	public class FilterRanged : ItemFilter
+	public class FilterWeaponRanged : ItemFilter
+	{
+        readonly FilterWeaponThrown _thrown = new FilterWeaponThrown();
+
+		public override bool Passes(Item item)
+		{
+			return item.ranged && item.damage > 0 && !_thrown.Passes(item);
+		}
+	}
+
+	public class FilterWeaponMagic : ItemFilter
 	{
 		public override bool Passes(Item item)
 		{
-			return item.ranged;
+			return item.magic && item.damage > 0;
 		}
 	}
 
-	public class FilterMagic : ItemFilter
-	{
-		public override bool Passes(Item item)
-		{
-			return item.magic;
-		}
-	}
-
-	public class FilterSummon : ItemFilter
+	public class FilterWeaponSummon : ItemFilter
 	{
 		public override bool Passes(Item item)
 		{
@@ -62,11 +64,27 @@ namespace MagicStorage.Sorting
 		}
 	}
 
-	public class FilterThrown : ItemFilter
+	public class FilterWeaponThrown : ItemFilter
 	{
 		public override bool Passes(Item item)
 		{
-			return item.thrown;
+			return item.thrown && item.consumable && item.damage > 0;
+		}
+	}
+
+	public class FilterAmmo : ItemFilter
+	{
+		public override bool Passes(Item item)
+		{
+			return item.ammo > 0;
+		}
+	}
+
+	public class FilterVanity : ItemFilter
+	{
+		public override bool Passes(Item item)
+		{
+			return item.vanity;
 		}
 	}
 
@@ -82,7 +100,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.damage > 0 && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+			return !(item.consumable && item.thrown) && item.damage > 0 && item.pick == 0 && item.axe == 0 && item.hammer == 0;
 		}
 	}
 
@@ -118,11 +136,19 @@ namespace MagicStorage.Sorting
 		}
 	}
 
+	public class FilterArmor : ItemFilter
+	{
+		public override bool Passes(Item item)
+		{
+			return !item.vanity && (item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0);
+		}
+	}
+
 	public class FilterEquipment : ItemFilter
 	{
 		public override bool Passes(Item item)
 		{
-			return item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || (item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType]));
+			return !item.vanity && (item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || (item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType])));
 		}
 	}
 
@@ -145,8 +171,16 @@ namespace MagicStorage.Sorting
 	public class FilterMisc : ItemFilter
 	{
 		private static List<ItemFilter> blacklist = new List<ItemFilter> {
-			new FilterWeapon(),
+			new FilterWeaponMelee(),
+			new FilterWeaponRanged(),
+			new FilterWeaponMagic(),
+			new FilterWeaponSummon(),
+			new FilterWeaponThrown(),
+            new FilterAmmo(),
+            new FilterWeaponThrown(),
+            new FilterVanity(),
 			new FilterTool(),
+			new FilterArmor(),
 			new FilterEquipment(),
 			new FilterPotion(),
 			new FilterPlaceable()

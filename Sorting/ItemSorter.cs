@@ -9,34 +9,7 @@ namespace MagicStorage.Sorting
 	{
 		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
 		{
-			ItemFilter filter;
-			switch (filterMode)
-			{
-			case FilterMode.All:
-				filter = new FilterAll();
-				break;
-			case FilterMode.Weapons:
-				filter = new FilterWeapon();
-				break;
-			case FilterMode.Tools:
-				filter = new FilterTool();
-				break;
-			case FilterMode.Equipment:
-				filter = new FilterEquipment();
-				break;
-			case FilterMode.Potions:
-				filter = new FilterPotion();
-				break;
-			case FilterMode.Placeables:
-				filter = new FilterPlaceable();
-				break;
-			case FilterMode.Misc:
-				filter = new FilterMisc();
-				break;
-			default:
-				filter = new FilterAll();
-				break;
-			}
+            ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
 			CompareFunction func;
 			switch (sortMode)
@@ -61,35 +34,8 @@ namespace MagicStorage.Sorting
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
 		{
-			ItemFilter filter;
-			switch (filterMode)
-			{
-			case FilterMode.All:
-				filter = new FilterAll();
-				break;
-			case FilterMode.Weapons:
-				filter = new FilterWeapon();
-				break;
-			case FilterMode.Tools:
-				filter = new FilterTool();
-				break;
-			case FilterMode.Equipment:
-				filter = new FilterEquipment();
-				break;
-			case FilterMode.Potions:
-				filter = new FilterPotion();
-				break;
-			case FilterMode.Placeables:
-				filter = new FilterPlaceable();
-				break;
-			case FilterMode.Misc:
-				filter = new FilterMisc();
-				break;
-			default:
-				filter = new FilterAll();
-				break;
-			}
-			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
+		    var filter = MakeFilter(filterMode);
+		    IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
 			CompareFunction func;
 			switch (sortMode)
 			{
@@ -111,7 +57,62 @@ namespace MagicStorage.Sorting
 		    return filteredRecipes.OrderBy(x => x.createItem, func);
         }
 
-		private static bool FilterName(Item item, string modFilter, string filter)
+	    static ItemFilter MakeFilter(FilterMode filterMode)
+	    {
+	        ItemFilter filter;
+	        switch (filterMode)
+	        {
+	            case FilterMode.All:
+	                filter = new FilterAll();
+	                break;
+	            case FilterMode.WeaponsMelee:
+	                filter = new FilterWeaponMelee();
+	                break;
+	            case FilterMode.WeaponsRanged:
+	                filter = new FilterWeaponRanged();
+	                break;
+	            case FilterMode.WeaponsMagic:
+	                filter = new FilterWeaponMagic();
+	                break;
+	            case FilterMode.WeaponsSummon:
+	                filter = new FilterWeaponSummon();
+	                break;
+	            case FilterMode.Ammo:
+	                filter = new FilterAmmo();
+	                break;
+	            case FilterMode.WeaponsThrown:
+	                filter = new FilterWeaponThrown();
+	                break;
+	            case FilterMode.Tools:
+	                filter = new FilterTool();
+	                break;
+	            case FilterMode.Armor:
+	                filter = new FilterArmor();
+	                break;
+	            case FilterMode.Vanity:
+	                filter = new FilterVanity();
+	                break;
+	            case FilterMode.Equipment:
+	                filter = new FilterEquipment();
+	                break;
+	            case FilterMode.Potions:
+	                filter = new FilterPotion();
+	                break;
+	            case FilterMode.Placeables:
+	                filter = new FilterPlaceable();
+	                break;
+	            case FilterMode.Misc:
+	                filter = new FilterMisc();
+	                break;
+	            default:
+	                filter = new FilterAll();
+	                break;
+	        }
+
+	        return filter;
+	    }
+
+	    private static bool FilterName(Item item, string modFilter, string filter)
 		{
 			string modName = "Terraria";
 			if (item.modItem != null)
