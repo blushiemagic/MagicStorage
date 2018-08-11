@@ -50,7 +50,7 @@ namespace MagicStorage.Sorting
 	{
 		public override int Compare(Item item1, Item item2)
 		{
-            return item2.value - item1.value;
+            return item1.value - item2.value;
 		}
 	}
 }
