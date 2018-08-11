@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{162C8AA5-FF1C-4357-AEED-FAF522C56FEE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MagicStorage</RootNamespace>
+    <AssemblyName>MagicStorage</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ReLogic">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Terraria\References\ReLogic.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Terraria">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Terraria\Terraria.exe</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework" />
+    <Reference Include="Microsoft.Xna.Framework.Game" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BlankClass.cs" />
+    <Compile Include="BlockRecipes.cs" />
+    <Compile Include="Components\CraftingAccess.cs" />
+    <Compile Include="Components\CreativeStorageUnit.cs" />
+    <Compile Include="Components\RemoteAccess.cs" />
+    <Compile Include="Components\StorageAccess.cs" />
+    <Compile Include="Components\StorageComponent.cs" />
+    <Compile Include="Components\StorageConnector.cs" />
+    <Compile Include="Components\StorageHeart.cs" />
+    <Compile Include="Components\StorageUnit.cs" />
+    <Compile Include="Components\TEAbstractStorageUnit.cs" />
+    <Compile Include="Components\TECraftingAccess.cs" />
+    <Compile Include="Components\TECreativeStorageUnit.cs" />
+    <Compile Include="Components\TERemoteAccess.cs" />
+    <Compile Include="Components\TEStorageCenter.cs" />
+    <Compile Include="Components\TEStorageComponent.cs" />
+    <Compile Include="Components\TEStorageHeart.cs" />
+    <Compile Include="Components\TEStoragePoint.cs" />
+    <Compile Include="Components\TEStorageUnit.cs" />
+    <Compile Include="CraftingGUI.cs" />
+    <Compile Include="InterfaceHelper.cs" />
+    <Compile Include="ItemData.cs" />
+    <Compile Include="Items\CraftingAccess.cs" />
+    <Compile Include="Items\CreativeStorageUnit.cs" />
+    <Compile Include="Items\Locator.cs" />
+    <Compile Include="Items\LocatorDisk.cs" />
+    <Compile Include="Items\PortableAccess.cs" />
+    <Compile Include="Items\RadiantJewel.cs" />
+    <Compile Include="Items\RadiantJewelBag.cs" />
+    <Compile Include="Items\RadiantJewelDrop.cs" />
+    <Compile Include="Items\RemoteAccess.cs" />
+    <Compile Include="Items\ShadowDiamond.cs" />
+    <Compile Include="Items\ShadowDiamondDrop.cs" />
+    <Compile Include="Items\SnowBiomeEmulator.cs" />
+    <Compile Include="Items\StorageAccess.cs" />
+    <Compile Include="Items\StorageComponent.cs" />
+    <Compile Include="Items\StorageConnector.cs" />
+    <Compile Include="Items\StorageDeactivator.cs" />
+    <Compile Include="Items\StorageHeart.cs" />
+    <Compile Include="Items\StorageUnit.cs" />
+    <Compile Include="Items\StorageUnitBlueChlorophyte.cs" />
+    <Compile Include="Items\StorageUnitCrimtane.cs" />
+    <Compile Include="Items\StorageUnitDemonite.cs" />
+    <Compile Include="Items\StorageUnitHallowed.cs" />
+    <Compile Include="Items\StorageUnitHellstone.cs" />
+    <Compile Include="Items\StorageUnitLuminite.cs" />
+    <Compile Include="Items\StorageUnitTerra.cs" />
+    <Compile Include="Items\StorageUnitTiny.cs" />
+    <Compile Include="Items\UpgradeBlueChlorophyte.cs" />
+    <Compile Include="Items\UpgradeCrimtane.cs" />
+    <Compile Include="Items\UpgradeDemonite.cs" />
+    <Compile Include="Items\UpgradeHallowed.cs" />
+    <Compile Include="Items\UpgradeHellstone.cs" />
+    <Compile Include="Items\UpgradeLuminite.cs" />
+    <Compile Include="Items\UpgradeTerra.cs" />
+    <Compile Include="MagicStorage.cs" />
+    <Compile Include="NetHelper.cs" />
+    <Compile Include="ItemHideList.cs" />
+    <Compile Include="Sorting\BTree.cs" />
+    <Compile Include="Sorting\CompareFunction.cs" />
+    <Compile Include="Sorting\DefaultSorting.cs" />
+    <Compile Include="Sorting\FilterMode.cs" />
+    <Compile Include="Sorting\ItemFilter.cs" />
+    <Compile Include="Sorting\ItemSorter.cs" />
+    <Compile Include="Sorting\SortMode.cs" />
+    <Compile Include="StorageGUI.cs" />
+    <Compile Include="StoragePlayer.cs" />
+    <Compile Include="StorageWorld.cs" />
+    <Compile Include="UIButtonChoice.cs" />
+    <Compile Include="UISearchBar.cs" />
+    <Compile Include="UISlotZone.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>"C:\Program Files (x86)\Steam\steamapps\common\Terraria\tModLoaderServer.exe" -build "$(ProjectDir.TrimEnd('\'))"</PostBuildEvent>
+  </PropertyGroup>
+</Project>
