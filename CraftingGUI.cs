@@ -26,6 +26,9 @@ namespace MagicStorage
 		private const float inventoryScale = 0.85f;
 		private const float smallScale = 0.7f;
 
+	    static bool[] threadCheckListFoundItems;
+        static Mod _checkListMod;
+
 		public static MouseState curMouse;
 		public static MouseState oldMouse;
 		public static bool MouseClicked
@@ -33,6 +36,14 @@ namespace MagicStorage
 			get
 			{
 				return curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
+			}
+		}
+
+	    public static bool RightMouseClicked
+		{
+			get
+			{
+				return curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 			}
 		}
 
@@ -133,7 +144,7 @@ namespace MagicStorage
 				recipeAvailable = nextRecipeAvailable;
 			}
 
-			InitLangStuff();
+		    InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
 			float smallSlotWidth = Main.inventoryBackTexture.Width * smallScale;
@@ -283,14 +294,14 @@ namespace MagicStorage
 			scrollBar2.Left.Set(-20f, 1f);
 			scrollBar2.SetView(scrollBar2ViewSize, scrollBar2MaxViewSize);
 			storageZone.Append(scrollBar2);
-
+            
 			craftButton.Top.Set(-32f, 1f);
 			craftButton.Width.Set(100f, 0f);
 			craftButton.Height.Set(24f, 0f);
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
-
+            
 			resultZone.SetDimensions(1, 1);
 			resultZone.Left.Set(-itemSlotWidth, 1f);
 			resultZone.Top.Set(-itemSlotHeight, 1f);
@@ -691,6 +702,9 @@ namespace MagicStorage
 						}
 						craftTimer--;
 						flag = true;
+					    StoragePlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
+					    if (modPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
+					        RefreshItems();
 					}
 				}
 			}
@@ -788,74 +802,117 @@ namespace MagicStorage
 				break;
 			}
 			RefreshStorageItems();
-			lock (threadLock)
+
+		    if (_checkListMod == null)
+		        _checkListMod = ModLoader.GetMod("ItemChecklist");
+
+            var foundItems = _checkListMod != null ? _checkListMod.Call("RequestFoundItems") as bool[] : null;
+
+		    StoragePlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
+            var hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
+            var craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
+
+            lock (threadLock)
 			{
 				threadNeedsRestart = true;
 				threadSortMode = sortMode;
 				threadFilterMode = filterMode;
+                threadCheckListFoundItems = foundItems;
 				if (!threadRunning)
 				{
 					threadRunning = true;
-					Thread thread = new Thread(RefreshRecipes);
+				    Thread thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes));
 					thread.Start();
 				}
 			}
 		}
 
-		private static void RefreshRecipes()
-		{
-			while (true)
-			{try{
-				SortMode sortMode;
-				FilterMode filterMode;
-				lock (threadLock)
-				{
-					threadNeedsRestart = false;
-					sortMode = threadSortMode;
-					filterMode = threadFilterMode;
-				}
-				var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
-				threadRecipes.Clear();
-				threadRecipeAvailable.Clear();
-				try
-				{
-					if (recipeButtons.Choice == 0)
-					{
-						threadRecipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
-						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
-					}
-					else
-					{
-						threadRecipes.AddRange(temp);
-						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
-					}
-				}
-				catch (InvalidOperationException)
-				{
-				}
-				catch (KeyNotFoundException)
-				{
-				}
-				lock (recipeLock)
-				{
-					nextRecipes = new List<Recipe>();
-					nextRecipeAvailable = new List<bool>();
-					nextRecipes.AddRange(threadRecipes);
-					nextRecipeAvailable.AddRange(threadRecipeAvailable);
-					
-				}
-				lock (threadLock)
-				{
-					if (!threadNeedsRestart)
-					{
-						threadRunning = false;
-						return;
-					}
-				}}catch(Exception e){Main.NewTextMultiline(e.ToString());}
-			}
-		}
+        private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes)
+        {
+            while (true)
+            {
+                try
+                {
+                    SortMode sortMode;
+                    FilterMode filterMode;
+                    lock (threadLock)
+                    {
+                        threadNeedsRestart = false;
+                        sortMode = threadSortMode;
+                        filterMode = threadFilterMode;
+                    }
 
-		private static void AnalyzeIngredients()
+                    
+                    var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text)
+                        .Where(x => x != null)
+                        .Where(x => (recipeButtons.Choice != 0) || !craftedRecipes.Contains(x.createItem.type))
+                        .Where(x => !hiddenRecipes.Contains(x.createItem.type))
+                        .Where(x => RecipeFilterMethod(x, craftedRecipes));
+
+                    threadRecipes.Clear();
+                    threadRecipeAvailable.Clear();
+                    try
+                    {
+                        threadRecipes.AddRange(temp);
+                        threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
+                    catch (KeyNotFoundException)
+                    {
+                    }
+                    lock (recipeLock)
+                    {
+                        nextRecipes = new List<Recipe>();
+                        nextRecipeAvailable = new List<bool>();
+                        nextRecipes.AddRange(threadRecipes);
+                        nextRecipeAvailable.AddRange(threadRecipeAvailable);
+
+                    }
+                    lock (threadLock)
+                    {
+                        if (!threadNeedsRestart)
+                        {
+                            threadRunning = false;
+                            return;
+                        }
+                    }
+                }
+                catch (Exception e) { Main.NewTextMultiline(e.ToString()); }
+            }
+
+
+
+        }
+        
+	    static bool RecipeFilterMethod(Recipe recipe, HashSet<int> craftedSet)
+	    {
+	        if (threadCheckListFoundItems == null) return true;
+	        if (recipeButtons.Choice == 0)
+	        {
+	            // first - only new
+	            var t = recipe.createItem.type;
+	            if (threadCheckListFoundItems[t] || craftedSet.Contains(t))
+	            {
+	                // already encountered
+	                return false;
+	            }
+	        }
+	        else
+	        {
+	            // second button
+	        }
+	        for (int i = 0; i < Recipe.maxRequirements; i++)
+	        {
+	            var t = recipe.requiredItem[i].type;
+	            if (t > 0 && !threadCheckListFoundItems[t] && !craftedSet.Contains(t))
+	                return false;
+	        }
+	        return true;
+	    }
+
+        private static void AnalyzeIngredients()
 		{
 			Player player = Main.player[Main.myPlayer];
 			itemCounts.Clear();
@@ -1166,17 +1223,23 @@ namespace MagicStorage
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			if (slot < recipes.Count)
 			{
-				if (MouseClicked)
-				{
-					selectedRecipe = recipes[slot];
-					RefreshStorageItems();
-					blockStorageItems.Clear();
-				}
+                if (MouseClicked)
+                {
+                    selectedRecipe = recipes[slot];
+                    RefreshStorageItems();
+                    blockStorageItems.Clear();
+                }
+                else if (RightMouseClicked)
+                {
+                    StoragePlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
+                    if (modPlayer.AddToHiddenRecipes(recipes[slot].createItem))
+                        RefreshItems();
+                }
 				hoverSlot = visualSlot;
 			}
 		}
 
-		private static void HoverItem(int slot, ref int hoverSlot)
+	    private static void HoverItem(int slot, ref int hoverSlot)
 		{
 			hoverSlot = slot;
 		}

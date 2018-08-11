@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
@@ -14,7 +16,38 @@ namespace MagicStorage
 		private Point16 storageAccess = new Point16(-1, -1);
 		public bool remoteAccess = false;
 
-		public override void UpdateDead()
+        ItemHideList _hiddenRecipes = new ItemHideList("HiddenItems");
+        ItemHideList _craftedRecipes = new ItemHideList("CraftedRecipes");
+        
+        public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
+        public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
+
+        public bool AddToHiddenRecipes(Item item)
+        {
+            return _hiddenRecipes.Add(item);
+        }
+
+        public bool AddToCraftedRecipes(Item item)
+        {
+            return _craftedRecipes.Add(item);
+        }
+
+	    public override TagCompound Save()
+	    {
+            var c = new TagCompound();
+            _hiddenRecipes.Save(c);
+            _craftedRecipes.Save(c);
+            return c;
+	    }
+
+	    public override void Load(TagCompound tag)
+	    {
+            _hiddenRecipes.Load(tag);
+            _craftedRecipes.Load(tag);
+
+	    }
+
+        public override void UpdateDead()
 		{
 			if (player.whoAmI == Main.myPlayer)
 			{
