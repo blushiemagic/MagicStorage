@@ -189,6 +189,10 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Spanish, "Filtrar por otros");
 			AddTranslation(text);
 
+			text = CreateTranslation("FilterRecent");
+			text.SetDefault("Filter New Recently Added Items");
+			AddTranslation(text);
+
 			text = CreateTranslation("CraftingStations");
 			text.SetDefault("Crafting Stations");
 			text.AddTranslation(GameCulture.Russian, "Станции создания");

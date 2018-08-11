@@ -256,7 +256,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-	    ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory ");
+	    ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory");
 	    public IEnumerable<Item> UniqueItemsPutHistory { get { return _uniqueItemsPutHistory.Items; } }
         
         public void DepositItem(Item toDeposit)
@@ -268,6 +268,7 @@ namespace MagicStorage.Components
 			int oldStack = toDeposit.stack;
 			try
 			{
+                var remember = toDeposit.Clone();
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit, true))
@@ -286,7 +287,7 @@ namespace MagicStorage.Components
 						storageUnit.DepositItem(toDeposit, true);
 						if (toDeposit.IsAir)
 						{
-                            _uniqueItemsPutHistory.Add(toDeposit);
+                            _uniqueItemsPutHistory.Add(remember);
                             return;
 						}
 					}

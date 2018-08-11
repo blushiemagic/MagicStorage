@@ -27,7 +27,7 @@ namespace MagicStorage
 			}
 		}
 
-		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = 16, int buttonPadding = 4)
+		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 			{
@@ -84,8 +84,8 @@ namespace MagicStorage
 				Texture2D texture = k == choice ? backTextureActive : backTexture;
 				Vector2 drawPos = new Vector2(dim.X + k * (buttonSize + buttonPadding), dim.Y);
 				Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k) ? Color.Silver : Color.White;
-				Main.spriteBatch.Draw(texture, drawPos, color);
-				Main.spriteBatch.Draw(buttons[k], drawPos + new Vector2(1f), Color.White);
+				Main.spriteBatch.Draw(texture, new Rectangle((int)drawPos.X,(int)drawPos.Y,buttonSize,buttonSize), color);
+			    Main.spriteBatch.Draw(buttons[k], new Rectangle((int)drawPos.X + 1, (int)drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
 			}
 		}
 

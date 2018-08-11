@@ -42,10 +42,10 @@ namespace MagicStorage.Sorting
 	public class FilterWeaponRanged : ItemFilter
 	{
         readonly FilterWeaponThrown _thrown = new FilterWeaponThrown();
-
+        
 		public override bool Passes(Item item)
 		{
-			return item.ranged && item.damage > 0 && !_thrown.Passes(item);
+			return item.ranged && item.damage > 0 && item.ammo <= 0 && !_thrown.Passes(item);
 		}
 	}
 
@@ -77,7 +77,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.ammo > 0;
+			return item.ammo > 0 && item.damage > 0;
 		}
 	}
 

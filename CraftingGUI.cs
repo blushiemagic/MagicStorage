@@ -139,7 +139,7 @@ namespace MagicStorage
 		private static List<bool> threadRecipeAvailable = new List<bool>();
 		private static List<Recipe> nextRecipes = new List<Recipe>();
 		private static List<bool> nextRecipeAvailable = new List<bool>();
-
+        
 		public static void Initialize()
 		{
 			lock (recipeLock)
@@ -366,7 +366,7 @@ namespace MagicStorage
 		{
 			if (sortButtons == null)
 			{
-                sortButtons = StorageGUI.MakeSortButtons();
+                sortButtons = GUIHelpers.MakeSortButtons();
 			}
 		}
 
@@ -393,12 +393,13 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-                filterButtons = StorageGUI.MakeFilterButtons(false);
+                filterButtons = GUIHelpers.MakeFilterButtons(false);
 			}
 		}
 
 		public static void Update(GameTime gameTime)
-		{try{
+		{
+		    try {
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
@@ -417,7 +418,6 @@ namespace MagicStorage
 			{
 				scrollBarFocus = 0;
 				selectedRecipe = null;
-                UpdateRecipeText();
 				craftTimer = 0;
 				maxCraftTimer = startMaxCraftTimer;
 				ResetSlotFocus();
@@ -537,7 +537,6 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 			{
 				reqObjText2.SetText("");
-
 			    recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
             }
 			else
@@ -598,7 +597,12 @@ namespace MagicStorage
 					text = Language.GetTextValue("LegacyInterface.23");
 				}
 				reqObjText2.SetText(text);
-			    recipePanelHeader.SetText(selectedRecipe.createItem.Name);
+                var item = selectedRecipe.createItem;
+			    var headerText = selectedRecipe.createItem.Name;
+                var dps = CompareDps.GetDps(item);
+                if (dps >= 1f)
+                    headerText += " (" + dps.ToString("F0") + " DPS)";
+                recipePanelHeader.SetText(headerText);
             }
 		}
 
