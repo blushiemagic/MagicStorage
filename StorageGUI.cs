@@ -206,7 +206,7 @@ namespace MagicStorage
 	                Language.GetText("Mods.MagicStorage.SortName"),
 	                Language.GetText("Mods.MagicStorage.SortStack"),
 	                Language.GetText("Mods.MagicStorage.SortDps")
-	            },20);
+	            });
 	    }
 
 	    private static void InitFilterButtons()
@@ -258,7 +258,7 @@ namespace MagicStorage
                 textures.Add(MagicStorage.Instance.GetTexture("FilterAll"));
                 texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
             }
-	        return new UIButtonChoice(textures.ToArray(), texts.ToArray(), 15);
+	        return new UIButtonChoice(textures.ToArray(), texts.ToArray());
 	    }
 
 	    public static void Update(GameTime gameTime)

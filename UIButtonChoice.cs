@@ -12,8 +12,8 @@ namespace MagicStorage
 {
 	public class UIButtonChoice : UIElement
 	{
-		private const int buttonSize = 32;
-		private const int buttonPadding = 8;
+		private int buttonSize;
+		private int buttonPadding;
 
 		private Texture2D[] buttons;
 		private LocalizedText[] names;
@@ -27,12 +27,14 @@ namespace MagicStorage
 			}
 		}
 
-		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = buttonSize)
+		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = 16, int buttonPadding = 4)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 			{
 				throw new ArgumentException();
 			}
+            this.buttonSize = buttonSize;
+            this.buttonPadding = buttonPadding;
 			this.buttons = buttons;
 			this.names = names;
 			int width = buttonSize * buttons.Length + buttonPadding * (buttons.Length - 1);
