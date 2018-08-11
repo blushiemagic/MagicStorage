@@ -860,7 +860,7 @@ namespace MagicStorage
                         .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !craftedRecipes.Contains(x.createItem.type))
                         // show only blacklisted recipes only if choice = 2, otherwise show all other
                         .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
-                        .Where(x => FilterKnownRecipesMethod(x, craftedRecipes));
+                        .Where(x => FilterKnownRecipesMethod(x, hiddenRecipes, craftedRecipes));
 
                     threadRecipes.Clear();
                     threadRecipeAvailable.Clear();
@@ -899,7 +899,7 @@ namespace MagicStorage
 
         }
         
-	    static bool FilterKnownRecipesMethod(Recipe recipe, HashSet<int> craftedSet)
+	    static bool FilterKnownRecipesMethod(Recipe recipe, HashSet<int> hiddenSet, HashSet<int> craftedSet)
 	    {
 	        if (threadCheckListFoundItems == null) return true;
 	        if (recipeButtons.Choice == RecipeButtonsNewChoice)
@@ -919,7 +919,7 @@ namespace MagicStorage
 	        for (int i = 0; i < Recipe.maxRequirements; i++)
 	        {
 	            var t = recipe.requiredItem[i].type;
-	            if (t > 0 && !threadCheckListFoundItems[t] && !craftedSet.Contains(t))
+	            if (t > 0 && !threadCheckListFoundItems[t] && !craftedSet.Contains(t) && !hiddenSet.Contains(t))
 	                return false;
 	        }
 	        return true;
