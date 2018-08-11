@@ -130,7 +130,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0);
+			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion);
 		}
 	}
 
