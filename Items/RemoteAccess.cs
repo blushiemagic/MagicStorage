@@ -40,11 +40,11 @@ namespace MagicStorage.Items
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			if (MagicStorage.legendMod == null)
 			{
-				recipe.AddIngredient(ItemID.Ruby, 7);
+				recipe.AddIngredient(ItemID.Ruby, 3);
 			}
 			else
 			{
-				recipe.AddRecipeGroup("MagicStorage:AnyRuby", 7);
+				recipe.AddRecipeGroup("MagicStorage:AnyRuby", 3);
 			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);

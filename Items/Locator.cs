@@ -72,7 +72,7 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.MeteoriteBar, 10);
-			recipe.AddIngredient(ItemID.Amber, 5);
+			recipe.AddIngredient(ItemID.Amber, 2);
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
