@@ -5,13 +5,14 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
-    public class ItemHideList
+    public class ItemTypeOrderedSet
     {
         readonly string _name;
         List<Item> _items = new List<Item>();
         HashSet<int> _set = new HashSet<int>();
+        public int Count { get { return _items.Count; } }
 
-        public ItemHideList(string name)
+        public ItemTypeOrderedSet(string name)
         {
             _name = name;
         }
@@ -33,6 +34,17 @@ namespace MagicStorage
             if (_set.Remove(item.type))
             {
                 _items.RemoveAll(x => x.type == item.type);
+                return true;
+            }
+            return false;
+        }
+        
+        public bool RemoveAt(int index)
+        {
+            var item = _items[index];
+            if (_set.Remove(item.type))
+            {
+                _items.RemoveAt(index);
                 return true;
             }
             return false;

@@ -256,7 +256,10 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public void DepositItem(Item toDeposit)
+	    ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory ");
+	    public IEnumerable<Item> UniqueItemsPutHistory { get { return _uniqueItemsPutHistory.Items; } }
+        
+        public void DepositItem(Item toDeposit)
 		{
 			if (Main.netMode == 2)
 			{
@@ -276,14 +279,15 @@ namespace MagicStorage.Components
 						}
 					}
 				}
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+                foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{
 						storageUnit.DepositItem(toDeposit, true);
 						if (toDeposit.IsAir)
 						{
-							return;
+                            _uniqueItemsPutHistory.Add(toDeposit);
+                            return;
 						}
 					}
 				}
@@ -352,6 +356,30 @@ namespace MagicStorage.Components
 			}
 		}
 
+		public bool HasItem(Item lookFor)
+		{
+			if (Main.netMode == 2)
+			{
+				EnterReadLock();
+			}
+			try
+			{
+				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				{
+				    if (storageUnit.HasItem(lookFor, true))
+				        return true;
+				}
+				return false;
+			}
+			finally
+			{
+				if (Main.netMode == 2)
+				{
+                    ExitReadLock();
+				}
+			}
+		}
+
 		public override TagCompound Save()
 		{
 			TagCompound tag = base.Save();
@@ -364,6 +392,7 @@ namespace MagicStorage.Components
 				tagRemotes.Add(tagRemote);
 			}
 			tag.Set("RemoteAccesses", tagRemotes);
+            _uniqueItemsPutHistory.Save(tag);
 			return tag;
 		}
 
@@ -374,6 +403,7 @@ namespace MagicStorage.Components
 			{
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			}
+            _uniqueItemsPutHistory.Load(tag);
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)

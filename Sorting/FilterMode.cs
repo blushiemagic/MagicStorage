@@ -17,6 +17,7 @@ namespace MagicStorage.Sorting
 	    Vanity,
         Potions,
 		Placeables,
-		Misc
+		Misc,
+        Recent
 	}
 }

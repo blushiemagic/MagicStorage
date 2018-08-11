@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -212,46 +213,52 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-				filterButtons = MakeFilterButtons();
+				filterButtons = MakeFilterButtons(true);
 			}
 		}
 
-	    public static UIButtonChoice MakeFilterButtons()
+	    public static UIButtonChoice MakeFilterButtons(bool withHistory)
 	    {
-	        return new UIButtonChoice(new Texture2D[]
-	                                  {
-	                                      MagicStorage.Instance.GetTexture("FilterAll"),
-	                                      MagicStorage.Instance.GetTexture("FilterMelee"),
-	                                      MagicStorage.Instance.GetTexture("FilterRanged"),
-	                                      MagicStorage.Instance.GetTexture("FilterMagic"),
-	                                      MagicStorage.Instance.GetTexture("FilterSummon"),
-	                                      MagicStorage.Instance.GetTexture("FilterThrowing"),
-	                                      MagicStorage.Instance.GetTexture("FilterThrowing"),
-	                                      MagicStorage.Instance.GetTexture("FilterPickaxe"),
-	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
-	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
-	                                      MagicStorage.Instance.GetTexture("FilterArmor"),
-	                                      MagicStorage.Instance.GetTexture("FilterPotion"),
-	                                      MagicStorage.Instance.GetTexture("FilterTile"),
-	                                      MagicStorage.Instance.GetTexture("FilterMisc"),
-	                                  },
-	            new LocalizedText[]
-	            {
-	                Language.GetText("Mods.MagicStorage.FilterAll"),
-	                Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
-	                Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
-	                Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
-	                Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
-	                Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
-	                Language.GetText("Mods.MagicStorage.FilterAmmo"),
-	                Language.GetText("Mods.MagicStorage.FilterTools"),
-	                Language.GetText("Mods.MagicStorage.FilterArmor"),
-	                Language.GetText("Mods.MagicStorage.FilterEquips"),
-	                Language.GetText("Mods.MagicStorage.FilterVanity"),
-	                Language.GetText("Mods.MagicStorage.FilterPotions"),
-	                Language.GetText("Mods.MagicStorage.FilterTiles"),
-	                Language.GetText("Mods.MagicStorage.FilterMisc")
-	            }, 15);
+	        var textures = new List<Texture2D>
+	                         {
+	                             MagicStorage.Instance.GetTexture("FilterAll"),
+	                             MagicStorage.Instance.GetTexture("FilterMelee"),
+	                             MagicStorage.Instance.GetTexture("FilterRanged"),
+	                             MagicStorage.Instance.GetTexture("FilterMagic"),
+	                             MagicStorage.Instance.GetTexture("FilterSummon"),
+	                             MagicStorage.Instance.GetTexture("FilterThrowing"),
+	                             MagicStorage.Instance.GetTexture("FilterThrowing"),
+	                             MagicStorage.Instance.GetTexture("FilterPickaxe"),
+	                             MagicStorage.Instance.GetTexture("FilterArmor"),
+	                             MagicStorage.Instance.GetTexture("FilterArmor"),
+	                             MagicStorage.Instance.GetTexture("FilterArmor"),
+	                             MagicStorage.Instance.GetTexture("FilterPotion"),
+	                             MagicStorage.Instance.GetTexture("FilterTile"),
+	                             MagicStorage.Instance.GetTexture("FilterMisc"),
+	                         };
+	        var texts = new List<LocalizedText>
+	                             {
+	                                 Language.GetText("Mods.MagicStorage.FilterAll"),
+	                                 Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
+	                                 Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
+	                                 Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
+	                                 Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
+	                                 Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
+	                                 Language.GetText("Mods.MagicStorage.FilterAmmo"),
+	                                 Language.GetText("Mods.MagicStorage.FilterTools"),
+	                                 Language.GetText("Mods.MagicStorage.FilterArmor"),
+	                                 Language.GetText("Mods.MagicStorage.FilterEquips"),
+	                                 Language.GetText("Mods.MagicStorage.FilterVanity"),
+	                                 Language.GetText("Mods.MagicStorage.FilterPotions"),
+	                                 Language.GetText("Mods.MagicStorage.FilterTiles"),
+	                                 Language.GetText("Mods.MagicStorage.FilterMisc")
+	                             };
+            if (withHistory)
+            {
+                textures.Add(MagicStorage.Instance.GetTexture("FilterAll"));
+                texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
+            }
+	        return new UIButtonChoice(textures.ToArray(), texts.ToArray(), 15);
 	    }
 
 	    public static void Update(GameTime gameTime)
@@ -370,8 +377,14 @@ namespace MagicStorage
 			InitFilterButtons();
 		    SortMode sortMode = (SortMode)sortButtons.Choice;
 
-            FilterMode filterMode = (FilterMode)filterButtons.Choice;
-            items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
+		    FilterMode filterMode = (FilterMode) filterButtons.Choice;
+		    IEnumerable<Item> itemsLocal;
+		    if (filterMode == FilterMode.Recent)
+		        itemsLocal = ItemSorter.SortAndFilter(heart.UniqueItemsPutHistory.Where(x => heart.HasItem(x)).Take(30).ToArray(), sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
+		            FilterMode.All, searchBar2.Text, searchBar.Text);
+		    else
+		        itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text);
+		    items.AddRange(itemsLocal);
 			for (int k = 0; k < items.Count; k++)
 			{
 				didMatCheck.Add(false);

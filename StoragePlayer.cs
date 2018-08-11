@@ -16,8 +16,8 @@ namespace MagicStorage
 		private Point16 storageAccess = new Point16(-1, -1);
 		public bool remoteAccess = false;
 
-        ItemHideList _hiddenRecipes = new ItemHideList("HiddenItems");
-        ItemHideList _craftedRecipes = new ItemHideList("CraftedRecipes");
+        ItemTypeOrderedSet _hiddenRecipes = new ItemTypeOrderedSet("HiddenItems");
+        ItemTypeOrderedSet _craftedRecipes = new ItemTypeOrderedSet("CraftedRecipes");
         
         public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
         public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
@@ -49,7 +49,6 @@ namespace MagicStorage
 	    {
             _hiddenRecipes.Load(tag);
             _craftedRecipes.Load(tag);
-
 	    }
 
         public override void UpdateDead()

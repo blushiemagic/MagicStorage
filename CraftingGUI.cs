@@ -94,6 +94,7 @@ namespace MagicStorage
 		private static UIText capacityText;
 
 		private static UIPanel recipePanel = new UIPanel();
+		
 		private static float recipeTop;
 		private static float recipeLeft;
 		private static float recipeWidth;
@@ -263,7 +264,7 @@ namespace MagicStorage
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
 
-			recipePanel.Append(recipePanelHeader);
+            recipePanel.Append(recipePanelHeader);
 			ingredientText.Top.Set(30f, 0f);
 			recipePanel.Append(ingredientText);
 
@@ -392,7 +393,7 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-                filterButtons = StorageGUI.MakeFilterButtons();
+                filterButtons = StorageGUI.MakeFilterButtons(false);
 			}
 		}
 
@@ -416,6 +417,7 @@ namespace MagicStorage
 			{
 				scrollBarFocus = 0;
 				selectedRecipe = null;
+                UpdateRecipeText();
 				craftTimer = 0;
 				maxCraftTimer = startMaxCraftTimer;
 				ResetSlotFocus();
@@ -535,10 +537,12 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 			{
 				reqObjText2.SetText("");
-			}
+
+			    recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
+            }
 			else
 			{
-				bool isEmpty = true;
+                bool isEmpty = true;
 				string text = "";
 				for (int k = 0; k < selectedRecipe.requiredTile.Length; k++)
 				{
@@ -594,7 +598,8 @@ namespace MagicStorage
 					text = Language.GetTextValue("LegacyInterface.23");
 				}
 				reqObjText2.SetText(text);
-			}
+			    recipePanelHeader.SetText(selectedRecipe.createItem.Name);
+            }
 		}
 
 		private static void UpdateScrollBar()
