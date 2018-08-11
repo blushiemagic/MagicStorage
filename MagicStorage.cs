@@ -193,14 +193,14 @@ namespace MagicStorage
 
 			text = CreateTranslation("RecipeAvailable");
 			text.SetDefault("Show new recipes");
-			text.AddTranslation(GameCulture.French, "Afficher les recettes disponibles");
-			text.AddTranslation(GameCulture.Spanish, "Mostrar recetas disponibles");
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAll");
 			text.SetDefault("Show all known recipes");
-			text.AddTranslation(GameCulture.French, "Afficher toutes les recettes");
-			text.AddTranslation(GameCulture.Spanish, "Mostrar todas las recetas");
+			AddTranslation(text);
+
+			text = CreateTranslation("RecipeBlacklist");
+			text.SetDefault("Show hidden recipes");
 			AddTranslation(text);
 		}
 

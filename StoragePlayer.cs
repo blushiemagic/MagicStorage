@@ -27,6 +27,11 @@ namespace MagicStorage
             return _hiddenRecipes.Add(item);
         }
 
+        public bool RemoveFromHiddenRecipes(Item item)
+        {
+            return _hiddenRecipes.Remove(item);
+        }
+
         public bool AddToCraftedRecipes(Item item)
         {
             return _craftedRecipes.Add(item);

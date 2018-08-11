@@ -28,6 +28,16 @@ namespace MagicStorage
             return false;
         }
 
+        public bool Remove(Item item)
+        {
+            if (_set.Remove(item.type))
+            {
+                _items.RemoveAll(x => x.type == item.type);
+                return true;
+            }
+            return false;
+        }
+
         public void Save(TagCompound c)
         {
             c.Add(_name, _items.Select(ItemIO.Save).ToList());

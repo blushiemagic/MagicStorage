@@ -20,7 +20,9 @@ namespace MagicStorage
 {
 	public static class CraftingGUI
 	{
-		private const int padding = 4;
+	    const int RecipeButtonsNewChoice = 0;
+        const int RecipeButtonsBlacklistChoice = 2;
+        private const int padding = 4;
 		private const int numColumns = 10;
 		private const int numColumns2 = 7;
 		private const float inventoryScale = 0.85f;
@@ -122,7 +124,8 @@ namespace MagicStorage
 		private static int maxCraftTimer = startMaxCraftTimer;
 		private static int rightClickTimer = 0;
 		private const int startMaxRightClickTimer = 20;
-		private static int maxRightClickTimer = startMaxRightClickTimer;
+	    
+	    private static int maxRightClickTimer = startMaxRightClickTimer;
 
 		private static Object threadLock = new Object();
 		private static Object recipeLock = new Object();
@@ -181,7 +184,7 @@ namespace MagicStorage
 			topBar.Append(sortButtons);
 			float sortButtonsRight = sortButtons.GetDimensions().Width + padding;
 			InitRecipeButtons();
-			float recipeButtonsLeft = sortButtonsRight + 32f + 3 * padding;
+			float recipeButtonsLeft = sortButtonsRight + 3 * padding;
 			recipeButtons.Left.Set(recipeButtonsLeft, 0f);
 			topBar.Append(recipeButtons);
 			float recipeButtonsRight = recipeButtonsLeft + recipeButtons.GetDimensions().Width + padding;
@@ -384,13 +387,15 @@ namespace MagicStorage
 				recipeButtons = new UIButtonChoice(new Texture2D[]
 				{
 					MagicStorage.Instance.GetTexture("RecipeAvailable"),
-					MagicStorage.Instance.GetTexture("RecipeAll")
+					MagicStorage.Instance.GetTexture("RecipeAll"),
+					MagicStorage.Instance.GetTexture("RecipeAll"),
 				},
 				new LocalizedText[]
 				{
 					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
-					Language.GetText("Mods.MagicStorage.RecipeAll")
-				});
+					Language.GetText("Mods.MagicStorage.RecipeAll"),
+				    Language.GetText("Mods.MagicStorage.RecipeBlacklist")
+                });
 			}
 		}
 
@@ -844,10 +849,12 @@ namespace MagicStorage
 
                     
                     var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text)
-                        .Where(x => x != null)
-                        .Where(x => (recipeButtons.Choice != 0) || !craftedRecipes.Contains(x.createItem.type))
-                        .Where(x => !hiddenRecipes.Contains(x.createItem.type))
-                        .Where(x => RecipeFilterMethod(x, craftedRecipes));
+                        .Where(x => x != null) 
+                        // only new recipes (not crafted previously) filter (new - button choice = 0)
+                        .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !craftedRecipes.Contains(x.createItem.type))
+                        // show only blacklisted recipes only if choice = 2, otherwise show all other
+                        .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
+                        .Where(x => FilterKnownRecipesMethod(x, craftedRecipes));
 
                     threadRecipes.Clear();
                     threadRecipeAvailable.Clear();
@@ -886,10 +893,10 @@ namespace MagicStorage
 
         }
         
-	    static bool RecipeFilterMethod(Recipe recipe, HashSet<int> craftedSet)
+	    static bool FilterKnownRecipesMethod(Recipe recipe, HashSet<int> craftedSet)
 	    {
 	        if (threadCheckListFoundItems == null) return true;
-	        if (recipeButtons.Choice == 0)
+	        if (recipeButtons.Choice == RecipeButtonsNewChoice)
 	        {
 	            // first - only new
 	            var t = recipe.createItem.type;
@@ -1232,8 +1239,16 @@ namespace MagicStorage
                 else if (RightMouseClicked)
                 {
                     StoragePlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
-                    if (modPlayer.AddToHiddenRecipes(recipes[slot].createItem))
-                        RefreshItems();
+                    if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
+                    {
+                        if (modPlayer.RemoveFromHiddenRecipes(recipes[slot].createItem))
+                            RefreshItems();
+                    }
+                    else
+                    {
+                        if (modPlayer.AddToHiddenRecipes(recipes[slot].createItem))
+                            RefreshItems();
+                    }
                 }
 				hoverSlot = visualSlot;
 			}
