@@ -50,27 +50,13 @@ namespace MagicStorage.Sorting
 			case SortMode.Name:
 				func = new CompareName();
 				break;
-			case SortMode.Quantity:
-				func = new CompareID();
-				break;
+			case SortMode.Value:
+			    func = new CompareValue();
+                break;
 			default:
 				return filteredItems;
 			}
-			BTree<Item> sortedTree = new BTree<Item>(func);
-			foreach (Item item in filteredItems)
-			{
-				sortedTree.Insert(item);
-			}
-			if (sortMode == SortMode.Quantity)
-			{
-				BTree<Item> oldTree = sortedTree;
-				sortedTree = new BTree<Item>(new CompareQuantity());
-				foreach (Item item in oldTree.GetSortedItems())
-				{
-					sortedTree.Insert(item);
-				}
-			}
-			return sortedTree.GetSortedItems();
+            return filteredItems.OrderBy(x => x, func);
 		}
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
@@ -116,20 +102,14 @@ namespace MagicStorage.Sorting
 			case SortMode.Name:
 				func = new CompareName();
 				break;
-			default:
+			case SortMode.Value:
+			    func = new CompareValue();
+			    break;
+                default:
 				return filteredRecipes;
-			}
-			BTree<Recipe> sortedTree = new BTree<Recipe>(func);
-			foreach (Recipe recipe in filteredRecipes)
-			{
-				sortedTree.Insert(recipe);
-				if (CraftingGUI.threadNeedsRestart)
-				{
-					return new List<Recipe>();
-				}
-			}
-			return sortedTree.GetSortedItems();
-		}
+		    }
+		    return filteredRecipes.OrderBy(x => x.createItem, func);
+        }
 
 		private static bool FilterName(Item item, string modFilter, string filter)
 		{

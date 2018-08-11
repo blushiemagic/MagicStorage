@@ -415,7 +415,7 @@ namespace MagicStorage.Sorting
 			return ItemID.Sets.SortingPriorityExtractibles[item2.type] - ItemID.Sets.SortingPriorityExtractibles[item1.type];
 		}
 
-		private static int CompareMisc(Item item1, Item item2)
+		public static int CompareMisc(Item item1, Item item2)
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)

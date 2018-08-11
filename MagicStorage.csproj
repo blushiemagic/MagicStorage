@@ -107,7 +107,6 @@
     <Compile Include="MagicStorage.cs" />
     <Compile Include="NetHelper.cs" />
     <Compile Include="ItemHideList.cs" />
-    <Compile Include="Sorting\BTree.cs" />
     <Compile Include="Sorting\CompareFunction.cs" />
     <Compile Include="Sorting\DefaultSorting.cs" />
     <Compile Include="Sorting\FilterMode.cs" />

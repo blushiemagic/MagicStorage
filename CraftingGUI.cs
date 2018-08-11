@@ -369,14 +369,17 @@ namespace MagicStorage
 				{
 					Main.inventorySortTexture[0],
 					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName")
+					MagicStorage.Instance.GetTexture("SortName"),
+					MagicStorage.Instance.GetTexture("SortNumber")
 				},
 				new LocalizedText[]
 				{
 					Language.GetText("Mods.MagicStorage.SortDefault"),
 					Language.GetText("Mods.MagicStorage.SortID"),
-					Language.GetText("Mods.MagicStorage.SortName")
-				});
+					Language.GetText("Mods.MagicStorage.SortName"),
+				    Language.GetText("Mods.MagicStorage.SortStack"),
+
+                });
 			}
 		}
 
@@ -773,6 +776,9 @@ namespace MagicStorage
 				break;
 			case 2:
 				sortMode = SortMode.Name;
+				break;
+			case 3:
+				sortMode = SortMode.Value;
 				break;
 			default:
 				sortMode = SortMode.Default;

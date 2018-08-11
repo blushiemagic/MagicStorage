@@ -355,7 +355,7 @@ namespace MagicStorage
 				sortMode = SortMode.Name;
 				break;
 			case 3:
-				sortMode = SortMode.Quantity;
+				sortMode = SortMode.Value;
 				break;
 			default:
 				sortMode = SortMode.Default;

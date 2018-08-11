@@ -4,7 +4,7 @@ using Terraria;
 
 namespace MagicStorage.Sorting
 {
-	public abstract class CompareFunction
+    public abstract class CompareFunction : IComparer<Item>
 	{
 		public abstract int Compare(Item item1, Item item2);
 
@@ -43,6 +43,14 @@ namespace MagicStorage.Sorting
 		public override int Compare(Item item1, Item item2)
 		{
 			return (int)Math.Ceiling((float)item2.stack / (float)item2.maxStack) - (int)Math.Ceiling((float)item1.stack / (float)item1.maxStack);
+		}
+	}
+
+	public class CompareValue : CompareFunction
+	{
+		public override int Compare(Item item1, Item item2)
+		{
+            return item2.value - item1.value;
 		}
 	}
 }

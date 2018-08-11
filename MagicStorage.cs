@@ -104,10 +104,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("SortStack");
-			text.SetDefault("Sort by Stacks");
-			text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
-			text.AddTranslation(GameCulture.French, "Trier par piles");
-			text.AddTranslation(GameCulture.Spanish, "Ordenar por pilas");
+			text.SetDefault("Sort by Value");
 			AddTranslation(text);
 
 			text = CreateTranslation("FilterAll");
