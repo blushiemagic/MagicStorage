@@ -64,7 +64,7 @@ namespace MagicStorage
 		internal static UISearchBar searchBar2;
 
 		private static UIText stationText;
-		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale);
+		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale / 1.55f);
 		private static UIText recipeText;
 		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
@@ -212,8 +212,8 @@ namespace MagicStorage
 
 			stationZone.Width.Set(0f, 1f);
 			stationZone.Top.Set(100f, 0f);
-			stationZone.Height.Set(70f, 0f);
-			stationZone.SetDimensions(numColumns, 1);
+			stationZone.Height.Set(90f, 0f);
+			stationZone.SetDimensions(15, 2);
 			basePanel.Append(stationZone);
 
 			recipeText.Top.Set(152f, 0f);

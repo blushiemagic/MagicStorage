@@ -13,11 +13,11 @@ namespace MagicStorage.Components
 {
 	public class TECraftingAccess : TEStorageComponent
 	{
-		public Item[] stations = new Item[10];
+		public Item[] stations = new Item[30];
 
 		public TECraftingAccess()
 		{
-			for (int k = 0; k < 10; k++)
+			for (int k = 0; k < 30; k++)
 			{
 				stations[k] = new Item();
 			}
@@ -132,8 +132,11 @@ namespace MagicStorage.Components
 			{
 				for (int k = 0; k < stations.Length; k++)
 				{
-					stations[k] = ItemIO.Load(listStations[k]);
-				}
+                    if (k < listStations.Count)
+                        stations[k] = ItemIO.Load(listStations[k]);
+                    else
+                        stations[k] = new Item();
+                }
 			}
 		}
 
