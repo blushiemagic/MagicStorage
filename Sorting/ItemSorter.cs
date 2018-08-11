@@ -11,24 +11,8 @@ namespace MagicStorage.Sorting
 		{
             ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
-			CompareFunction func;
-			switch (sortMode)
-			{
-			case SortMode.Default:
-				func = new CompareDefault();
-				break;
-			case SortMode.Id:
-				func = new CompareID();
-				break;
-			case SortMode.Name:
-				func = new CompareName();
-				break;
-			case SortMode.Value:
-			    func = new CompareValue();
-                break;
-			default:
-				return filteredItems;
-			}
+		    var func = MakeSortFunction(sortMode);
+		    if (func == null) return filteredItems;
             return filteredItems.OrderBy(x => x, func);
 		}
 
@@ -36,26 +20,38 @@ namespace MagicStorage.Sorting
 		{
 		    var filter = MakeFilter(filterMode);
 		    IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
-			CompareFunction func;
-			switch (sortMode)
-			{
-			case SortMode.Default:
-				func = new CompareDefault();
-				break;
-			case SortMode.Id:
-				func = new CompareID();
-				break;
-			case SortMode.Name:
-				func = new CompareName();
-				break;
-			case SortMode.Value:
-			    func = new CompareValue();
-			    break;
-                default:
-				return filteredRecipes;
-		    }
+			var func = MakeSortFunction(sortMode);
+		    if (func == null) return filteredRecipes;
 		    return filteredRecipes.OrderBy(x => x.createItem, func);
         }
+
+	    static CompareFunction MakeSortFunction(SortMode sortMode)
+	    {
+	        CompareFunction func;
+	        switch (sortMode)
+	        {
+	            case SortMode.Default:
+	                func = new CompareDefault();
+	                break;
+	            case SortMode.Id:
+	                func = new CompareID();
+	                break;
+	            case SortMode.Name:
+	                func = new CompareName();
+	                break;
+	            case SortMode.Value:
+	                func = new CompareValue();
+	                break;
+	            case SortMode.Dps:
+	                func = new CompareDps();
+	                break;
+	            default:
+	                func = null;
+	                break;
+	        }
+
+	        return func;
+	    }
 
 	    static ItemFilter MakeFilter(FilterMode filterMode)
 	    {

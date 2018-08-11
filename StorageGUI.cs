@@ -184,24 +184,31 @@ namespace MagicStorage
 		{
 			if (sortButtons == null)
 			{
-				sortButtons = new UIButtonChoice(new Texture2D[]
-				{
-					Main.inventorySortTexture[0],
-					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName"),
-					MagicStorage.Instance.GetTexture("SortNumber")
-				},
-				new LocalizedText[]
-				{
-					Language.GetText("Mods.MagicStorage.SortDefault"),
-					Language.GetText("Mods.MagicStorage.SortID"),
-					Language.GetText("Mods.MagicStorage.SortName"),
-					Language.GetText("Mods.MagicStorage.SortStack")
-				});
+				sortButtons = MakeSortButtons();
 			}
 		}
 
-		private static void InitFilterButtons()
+	    public static UIButtonChoice MakeSortButtons()
+	    {
+	        return new UIButtonChoice(new Texture2D[]
+	                                  {
+	                                      Main.inventorySortTexture[0],
+	                                      MagicStorage.Instance.GetTexture("SortID"),
+	                                      MagicStorage.Instance.GetTexture("SortName"),
+	                                      MagicStorage.Instance.GetTexture("SortNumber"),
+	                                      MagicStorage.Instance.GetTexture("SortNumber")
+	                                  },
+	            new LocalizedText[]
+	            {
+	                Language.GetText("Mods.MagicStorage.SortDefault"),
+	                Language.GetText("Mods.MagicStorage.SortID"),
+	                Language.GetText("Mods.MagicStorage.SortName"),
+	                Language.GetText("Mods.MagicStorage.SortStack"),
+	                Language.GetText("Mods.MagicStorage.SortDps")
+	            },20);
+	    }
+
+	    private static void InitFilterButtons()
 		{
 			if (filterButtons == null)
 			{
@@ -361,27 +368,9 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			SortMode sortMode;
-			switch (sortButtons.Choice)
-			{
-			case 0:
-				sortMode = SortMode.Default;
-				break;
-			case 1:
-				sortMode = SortMode.Id;
-				break;
-			case 2:
-				sortMode = SortMode.Name;
-				break;
-			case 3:
-				sortMode = SortMode.Value;
-				break;
-			default:
-				sortMode = SortMode.Default;
-				break;
-			}
+		    SortMode sortMode = (SortMode)sortButtons.Choice;
 
-		    FilterMode filterMode = (FilterMode)filterButtons.Choice;
+            FilterMode filterMode = (FilterMode)filterButtons.Choice;
             items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 			for (int k = 0; k < items.Count; k++)
 			{

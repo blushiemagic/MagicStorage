@@ -53,4 +53,17 @@ namespace MagicStorage.Sorting
             return item1.value - item2.value;
 		}
 	}
+
+	public class CompareDps : CompareFunction
+	{
+        public override int Compare(Item item1, Item item2)
+        {
+            return (int)((GetDps(item1) - GetDps(item2)) * 100);
+        }
+
+        static float GetDps(Item item1)
+        {
+            return item1.damage / (float)Math.Max(item1.useTime, 1);
+        }
+	}
 }
