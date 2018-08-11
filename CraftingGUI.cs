@@ -823,6 +823,12 @@ namespace MagicStorage
             var hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
             var craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
 
+            if (_productToRecipes == null)
+            {
+                var allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, "", "").Where(x => x != null && x.createItem != null && x.createItem.type > 0).ToArray();
+                _productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
+            }
+
             lock (threadLock)
 			{
 				threadNeedsRestart = true;
@@ -838,6 +844,38 @@ namespace MagicStorage
 			}
 		}
 
+        static Dictionary<int, List<Recipe>> _productToRecipes;
+
+        /// <summary>
+        /// Checks all crafting tree until it finds already available ingredients
+        /// </summary>
+        static bool IsAvailableRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree)
+        {
+            if (availableSet.Contains(recipe.createItem.type)) return true;
+            for (int i = 0; i < Recipe.maxRequirements; i++)
+            {
+                var t = recipe.requiredItem[i].type;
+                if (t <= 0) continue;
+                if (!availableSet.Contains(t))
+                {
+                    if (recursionTree.Contains(t)) return false;
+                    recursionTree.Add(t);
+                    try
+                    {
+                        List<Recipe> ingredientRecipes;
+                        if (!_productToRecipes.TryGetValue(t, out ingredientRecipes)) return false;
+                        if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsAvailableRecursively(x, availableSet, recursionTree))) return false;
+                    }
+                    finally
+                    {
+                        recursionTree.Remove(t);
+                    }
+                }
+            }
+            availableSet.Add(recipe.createItem.type);
+            return true;
+        }
+
         private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes)
         {
             while (true)
@@ -846,27 +884,40 @@ namespace MagicStorage
                 {
                     SortMode sortMode;
                     FilterMode filterMode;
+                    bool[] foundItems;
                     lock (threadLock)
                     {
                         threadNeedsRestart = false;
                         sortMode = threadSortMode;
                         filterMode = threadFilterMode;
+                        foundItems = threadCheckListFoundItems;
                     }
 
-                    
-                    var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text)
-                        .Where(x => x != null) 
+                    if (foundItems == null) foundItems = new bool[0];
+
+                    var availableItemsMutable = new HashSet<int>(hiddenRecipes
+                        .Concat(craftedRecipes)
+                        .Concat(foundItems.Select((v, type) => new {WasFound = v, type}).Where(x => x.WasFound).Select(x => x.type)));
+
+                    var availableItemsOriginal = new HashSet<int>(availableItemsMutable);
+
+                    var temp = new HashSet<int>();
+
+                    var recipes = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text).Where(x => x != null)
                         // only new recipes (not crafted previously) filter (new - button choice = 0)
                         .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !craftedRecipes.Contains(x.createItem.type))
                         // show only blacklisted recipes only if choice = 2, otherwise show all other
                         .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
-                        .Where(x => FilterKnownRecipesMethod(x, hiddenRecipes, craftedRecipes));
+                        // show only new items if selected
+                        .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !availableItemsOriginal.Contains(x.createItem.type))
+                        // hard check if this item can be crafted from available items and their recursive products
+                        .Where(x => IsAvailableRecursively(x, availableItemsMutable, temp));
 
                     threadRecipes.Clear();
                     threadRecipeAvailable.Clear();
                     try
                     {
-                        threadRecipes.AddRange(temp);
+                        threadRecipes.AddRange(recipes);
                         threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
                     }
                     catch (InvalidOperationException)
@@ -894,36 +945,7 @@ namespace MagicStorage
                 }
                 catch (Exception e) { Main.NewTextMultiline(e.ToString()); }
             }
-
-
-
         }
-        
-	    static bool FilterKnownRecipesMethod(Recipe recipe, HashSet<int> hiddenSet, HashSet<int> craftedSet)
-	    {
-	        if (threadCheckListFoundItems == null) return true;
-	        if (recipeButtons.Choice == RecipeButtonsNewChoice)
-	        {
-	            // first - only new
-	            var t = recipe.createItem.type;
-	            if (threadCheckListFoundItems[t] || craftedSet.Contains(t))
-	            {
-	                // already encountered
-	                return false;
-	            }
-	        }
-	        else
-	        {
-	            // second button
-	        }
-	        for (int i = 0; i < Recipe.maxRequirements; i++)
-	        {
-	            var t = recipe.requiredItem[i].type;
-	            if (t > 0 && !threadCheckListFoundItems[t] && !craftedSet.Contains(t) && !hiddenSet.Contains(t))
-	                return false;
-	        }
-	        return true;
-	    }
 
         private static void AnalyzeIngredients()
 		{
