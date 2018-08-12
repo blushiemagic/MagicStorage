@@ -185,32 +185,32 @@ namespace MagicStorage.Sorting
 			return Main.projHook[item.shoot];
 		}
 
-		private static bool Mount(Item item)
+		public static bool Mount(Item item)
 		{
 			return item.mountType != -1 && !MountID.Sets.Cart[item.mountType];
 		}
 
-		private static bool Cart(Item item)
+	    public static bool Cart(Item item)
 		{
 			return item.mountType != -1 && MountID.Sets.Cart[item.mountType];
 		}
 
-		private static bool LightPet(Item item)
+	    public static bool LightPet(Item item)
 		{
 			return item.buffType > 0 && Main.lightPet[item.buffType];
 		}
 
-		private static bool VanityPet(Item item)
+	    public static bool VanityPet(Item item)
 		{
 			return item.buffType > 0 && Main.vanityPet[item.buffType];
 		}
 
-		private static bool Dye(Item item)
+	    public static bool Dye(Item item)
 		{
 			return item.dye > 0;
 		}
 
-		private static bool HairDye(Item item)
+	    public static bool HairDye(Item item)
 		{
 			return item.hairDye >= 0;
 		}
@@ -235,7 +235,7 @@ namespace MagicStorage.Sorting
 			return item.consumable && item.buffType > 0;
 		}
 
-		private static bool BossSpawn(Item item)
+		public static bool BossSpawn(Item item)
 		{
 			return ItemID.Sets.SortingPriorityBossSpawns[item.type] >= 0;
 		}

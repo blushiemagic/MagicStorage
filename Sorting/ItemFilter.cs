@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using MagicStorage.Components;
 using Terraria;
+using Terraria.ID;
+using Terraria.UI;
 
 namespace MagicStorage.Sorting
 {
@@ -35,7 +37,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.melee && item.pick == 0 && item.axe == 0 && item.hammer == 0 && item.damage > 0;
+			return (item.melee || (item.thrown && !item.consumable)) && item.pick == 0 && item.axe == 0 && item.hammer == 0 && item.damage > 0;
 		}
 	}
 
@@ -53,7 +55,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.magic && item.damage > 0;
+		    return item.magic && (item.damage > 0 || (item.healLife > 0 && item.mana > 0)) && !item.consumable;
 		}
 	}
 
@@ -61,7 +63,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.summon;
+			return item.summon || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item);
 		}
 	}
 
@@ -77,7 +79,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.ammo > 0 && item.damage > 0;
+			return item.ammo > 0 && item.damage > 0 && item.ammo != AmmoID.Coin;
 		}
 	}
 
@@ -85,7 +87,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.vanity;
+			return item.vanity || SortClassList.Dye(item) || SortClassList.HairDye(item) || SortClassList.VanityPet(item);
 		}
 	}
 
@@ -100,9 +102,9 @@ namespace MagicStorage.Sorting
 	public class FilterWeapon : ItemFilter
 	{
 		public override bool Passes(Item item)
-		{
-			return !(item.consumable && item.thrown) && item.damage > 0 && item.pick == 0 && item.axe == 0 && item.hammer == 0;
-		}
+	    {
+	        return !(item.consumable && item.thrown) && (item.damage > 0 || (item.magic && item.healLife > 0 && item.mana > 0)) && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+	    }
 	}
 
 	public class FilterPickaxe : ItemFilter
@@ -157,7 +159,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion);
+			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion || item.Name.ToLowerInvariant().Contains("potion") || item.Name.ToLowerInvariant().Contains("elixit"));
 		}
 	}
 

@@ -88,11 +88,16 @@ namespace MagicStorage
 			{
 				PlayerInput.WritingText = true;
 				Main.instance.HandleIME();
-				string newString = Main.GetInputText(text);
-				if (!newString.Equals(text))
+                string prev = text;
+                if (cursorPosition < text.Length && text.Length > 0)
+                    prev = prev.Remove(cursorPosition);
+				string newString = Main.GetInputText(prev);
+				if (!newString.Equals(prev))
 				{
-					text = newString;
-					cursorPosition = text.Length;
+                    int newStringLength = newString.Length;
+                    if (prev != text) newString += text.Substring(cursorPosition);
+                    text = newString;
+					cursorPosition = newStringLength;
 					StorageGUI.RefreshItems();
 				}
                 if (KeyTyped(Keys.Delete))
