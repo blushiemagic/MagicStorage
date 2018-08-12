@@ -63,7 +63,7 @@ namespace MagicStorage.Sorting
 
         public static float GetDps(Item item)
         {
-            return item.damage / Math.Max((item.useTime + item.reuseDelay) / 60f, 1f);
+            return item.damage / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f);
         }
 	}
 
