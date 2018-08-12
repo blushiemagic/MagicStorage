@@ -21,24 +21,49 @@ namespace MagicStorage
 
         public bool Add(Item item)
         {
+            return Add(item.type);
+        }
+
+        public bool Add(int type)
+        {
+            var item = new Item();
+            item.SetDefaults(type);
             if (_set.Add(item.type))
             {
                 _items.Add(item);
                 return true;
             }
+
             return false;
+        }
+
+        public bool Contains(int type)
+        {
+            return _set.Contains(type);
+        }
+
+        public bool Contains(Item item)
+        {
+            return _set.Contains(item.type);
         }
 
         public bool Remove(Item item)
         {
-            if (_set.Remove(item.type))
+            var type = item.type;
+            return Remove(type);
+        }
+
+        public bool Remove(int type)
+        {
+            if (_set.Remove(type))
             {
-                _items.RemoveAll(x => x.type == item.type);
+                _items.RemoveAll(x => x.type == type);
                 return true;
             }
+
             return false;
         }
-        
+
         public bool RemoveAt(int index)
         {
             var item = _items[index];
@@ -47,18 +72,40 @@ namespace MagicStorage
                 _items.RemoveAt(index);
                 return true;
             }
+
             return false;
         }
 
+        const string Suffix = "~v2";
+
         public void Save(TagCompound c)
         {
-            c.Add(_name, _items.Select(ItemIO.Save).ToList());
+            c.Add(_name + Suffix, _items.Select(x => (int) x.type).ToList());
         }
 
         public void Load(TagCompound tag)
         {
             var list = tag.GetList<TagCompound>(_name);
-            _items = list != null ? list.Select(ItemIO.Load).ToList() : new List<Item>();
+            if (list != null && list.Count > 0)
+                _items = list.Select(ItemIO.Load).ToList();
+            else
+            {
+                var listV2 = tag.GetList<int>(_name + Suffix);
+                if (listV2 != null)
+                {
+                    _items = listV2
+                        .Select(x =>
+                                {
+                                    var item = new Item();
+                                    item.SetDefaults(x);
+                                    item.type = x;
+                                    return item;
+                                }).ToList();
+                }
+                else
+                    _items = new List<Item>();
+            }
+
             _set = new HashSet<int>(_items.Select(x => x.type));
         }
     }
