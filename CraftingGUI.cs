@@ -918,7 +918,7 @@ namespace MagicStorage
                         .Concat(craftedRecipes)
                         .Concat(foundItems));
 
-                    var availableItemsOriginal = new HashSet<int>(availableItemsMutable);
+                    var notNewItems = new HashSet<int>(availableItemsMutable);
 
                     var temp = new HashSet<int>();
 
@@ -929,12 +929,10 @@ namespace MagicStorage
                     Action doFiltering = () =>
                     {
                         filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text).Where(x => x != null)
-                            // only new recipes (not crafted previously) filter (new - button choice = 0)
-                            .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !craftedRecipes.Contains(x.createItem.type))
                             // show only blacklisted recipes only if choice = 2, otherwise show all other
                             .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
                             // show only new items if selected
-                            .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !availableItemsOriginal.Contains(x.createItem.type))
+                            .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !notNewItems.Contains(x.createItem.type))
                             // hard check if this item can be crafted from available items and their recursive products
                             .Where(x => IsKnownRecursively(x, availableItemsMutable, temp));
 
@@ -957,17 +955,17 @@ namespace MagicStorage
 
                     // now if nothing found we disable filters one by one
 
+                    if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsNewChoice)
+                    {
+                        // search old recipes too
+                        notNewItems = new HashSet<int>();
+                        doFiltering();
+                    }
+
                     if (threadRecipes.Count == 0 && searchBar.Text.Length > 0)
                     {
                         // search hidden recipes too
                         hiddenRecipes = new HashSet<int>();
-                        doFiltering();
-                    }
-
-                    if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsNewChoice)
-                    {
-                        // search old recipes too
-                        craftedRecipes = new HashSet<int>();
                         doFiltering();
                     }
 
