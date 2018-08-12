@@ -63,6 +63,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
+            if (item.type == 109 || item.type == 29) return false; // mana or heart crystal
 			return item.summon || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item);
 		}
 	}
@@ -71,7 +72,17 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.thrown && item.consumable && item.damage > 0;
+		    switch (item.type)
+		    {
+                case 167: // dynamite
+                case 3547: 
+                case 2896: 
+                case 166: // bomb
+                case 235: 
+                case 3115:
+                    return true;
+		    }
+			return (item.thrown && item.damage > 0) || (item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating"));
 		}
 	}
 
@@ -159,7 +170,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion || item.Name.ToLowerInvariant().Contains("potion") || item.Name.ToLowerInvariant().Contains("elixit"));
+			return item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion || item.Name.ToLowerInvariant().Contains("potion") || item.Name.ToLowerInvariant().Contains("elixir"));
 		}
 	}
 

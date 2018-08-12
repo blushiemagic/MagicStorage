@@ -18,7 +18,8 @@ namespace MagicStorage
 
 		private const int padding = 4;
 		private LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
-		private string text = string.Empty;
+	    readonly Action _clearedEvent;
+	    private string text = string.Empty;
 		private int cursorPosition = 0;
 		private bool hasFocus = false;
 		private int cursorTimer = 0;
@@ -29,9 +30,10 @@ namespace MagicStorage
 			searchBars.Add(this);
 		}
 
-		public UISearchBar(LocalizedText defaultText) : this()
+		public UISearchBar(LocalizedText defaultText, Action clearedEvent) : this()
 		{
-			this.defaultText = defaultText;
+		    this.defaultText = defaultText;
+		    _clearedEvent = clearedEvent;
 		}
 
 		public string Text
@@ -80,8 +82,12 @@ namespace MagicStorage
             }
             else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && mouseOver)
             {
-                text = string.Empty;
-                cursorPosition = 0;
+                if (text.Length > 0)
+                {
+                    text = string.Empty;
+                    cursorPosition = 0;
+                    _clearedEvent?.Invoke();
+                }
             }
 
             if (hasFocus)
@@ -102,7 +108,7 @@ namespace MagicStorage
 				}
                 if (KeyTyped(Keys.Delete))
                 {
-                    if (text.Length > 0 && cursorPosition < text.Length - 1)
+                    if (text.Length > 0 && cursorPosition < text.Length)
                         text = text.Remove(cursorPosition, 1);
                 }
                 if (KeyTyped(Keys.Left))

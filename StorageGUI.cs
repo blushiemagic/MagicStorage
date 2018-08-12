@@ -175,7 +175,7 @@ namespace MagicStorage
 			}
 			if (searchBar == null)
 			{
-				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"));
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			}
             modSearchBox.InitLangStuff();
 			if (capacityText == null)
@@ -325,7 +325,7 @@ namespace MagicStorage
 
                 var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
                 itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
-                    FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 30);
+                    FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 100);
             }
             else
                 itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text);
