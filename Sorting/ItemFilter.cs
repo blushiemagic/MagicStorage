@@ -55,7 +55,7 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-		    return item.magic && (item.damage > 0 || (item.healLife > 0 && item.mana > 0)) && !item.consumable;
+		    return (item.magic || item.mana > 0) && !item.summon && !item.consumable;
 		}
 	}
 
