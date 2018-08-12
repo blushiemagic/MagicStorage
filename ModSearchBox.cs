@@ -31,11 +31,11 @@ namespace MagicStorage
         void SetSearchMod(int index, bool silent)
         {
             if (ModIndex == index) return;
-            var allMods = MagicStorage.Instance.AllMods;
             ModIndex = index;
             if (_modButton != null)
                 _modButton.SetText(MakeModButtonText());
-            ModName = index == -1 ? "" : ModName;
+            ModName = "";
+            if (index > -1) ModName = MagicStorage.Instance.AllMods[index];
             if (!silent) OnChanged?.Invoke();
         }
 
@@ -44,14 +44,14 @@ namespace MagicStorage
             SetSearchMod(ModIndexAll, silent);
         }
 
-        public const int ModIndexBaseGame = -2;
-        public const int ModIndexAll = -1;
+        public const int ModIndexBaseGame = -1;
+        public const int ModIndexAll = -2;
 
         string MakeModButtonText()
         {
-            if (ModIndex == -2)
+            if (ModIndex == ModIndexAll)
                 return "All mods";
-            else if (ModIndex == -1)
+            else if (ModIndex == ModIndexBaseGame)
             {
                 return "Terraria";
             }
@@ -71,7 +71,7 @@ namespace MagicStorage
                 {
                     index++;
                     if (index >= allMods.Length)
-                        index = -2;
+                        index = ModIndexAll;
                 }
                 else if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released)
                 {
