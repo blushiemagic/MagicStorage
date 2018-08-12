@@ -6,4 +6,5 @@ hideCode = false
 hideResources = false
 includeSource = true
 includePDB = true
+languageVersion = 6
 buildIgnore = OldArt\*, .git\*, obj\*

@@ -43,9 +43,10 @@ namespace MagicStorage
 		internal static UITextPanel<LocalizedText> depositButton;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-		internal static UISearchBar searchBar2;
 
-		private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
+	    public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
+
+        private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
 		private static int slotFocus = -1;
 		private static int rightClickTimer = 0;
 		private const int startMaxRightClickTimer = 20;
@@ -113,11 +114,13 @@ namespace MagicStorage
 
 		    float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
 		    topBar2.Append(filterButtons);
-		    searchBar2.Left.Set(filterButtonsRight + padding, 0f);
-		    searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
-		    searchBar2.Height.Set(0f, 1f);
-		    topBar2.Append(searchBar2);
-            
+
+		    modSearchBox.Button.Left.Set(filterButtonsRight + padding, 0f);
+		    modSearchBox.Button.Width.Set(-filterButtonsRight - 2 * padding, 1f);
+		    modSearchBox.Button.Height.Set(0f, 1f);
+		    modSearchBox.Button.OverflowHidden = true;
+		    topBar2.Append(modSearchBox.Button);
+
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(76f, 0f);
 			slotZone.Height.Set(-116f, 1f);
@@ -174,10 +177,7 @@ namespace MagicStorage
 			{
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"));
 			}
-			if (searchBar2 == null)
-			{
-				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
-			}
+            modSearchBox.InitLangStuff();
 			if (capacityText == null)
 			{
 				capacityText = new UIText("Items");
@@ -213,6 +213,7 @@ namespace MagicStorage
 				basePanel.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
+                modSearchBox.Update(curMouse, oldMouse);
 			}
 			else
 			{
@@ -324,10 +325,10 @@ namespace MagicStorage
 
                 var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
                 itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
-                    FilterMode.All, searchBar2.Text, searchBar.Text, 30);
+                    FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 30);
             }
             else
-                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text);
+                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text);
 		    items.AddRange(itemsLocal);
 			for (int k = 0; k < items.Count; k++)
 			{

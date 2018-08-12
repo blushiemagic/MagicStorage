@@ -110,18 +110,12 @@ namespace MagicStorage
 			{
 				StorageGUI.searchBar.Reset();
 			}
-			if (StorageGUI.searchBar2 != null)
-			{
-				StorageGUI.searchBar2.Reset();
-			}
 			if (CraftingGUI.searchBar != null)
 			{
 				CraftingGUI.searchBar.Reset();
 			}
-			if (CraftingGUI.searchBar2 != null)
-			{
-				CraftingGUI.searchBar2.Reset();
-			}
+            CraftingGUI.modSearchBox.Reset(true);
+		    StorageGUI.modSearchBox.Reset(true);
 		}
 
 		public Point16 ViewingStorage()
