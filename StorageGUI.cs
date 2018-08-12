@@ -40,7 +40,9 @@ namespace MagicStorage
 		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
+		private static UIToggleButton favoritedOnlyButton;
 		internal static UITextPanel<LocalizedText> depositButton;
+		internal static UITextPanel<LocalizedText> restockButton;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
 
@@ -92,14 +94,22 @@ namespace MagicStorage
 			InitSortButtons();
 			topBar.Append(sortButtons);
 
-			depositButton.Left.Set(sortButtons.GetDimensions().Width + 2 * padding, 0f);
+		    var x = sortButtons.GetDimensions().Width + 2 * padding;
+            favoritedOnlyButton.Left.Set(x, 0f);
+		    topBar.Append(favoritedOnlyButton);
+
+		    x += favoritedOnlyButton.GetDimensions().Width + 2 * padding;
+
+		    depositButton.Left.Set(x, 0f);
 			depositButton.Width.Set(128f, 0f);
 			depositButton.Height.Set(-2 * padding, 1f);
 			depositButton.PaddingTop = 8f;
 			depositButton.PaddingBottom = 8f;
 			topBar.Append(depositButton);
 
-			float depositButtonRight = sortButtons.GetDimensions().Width + 2 * padding + depositButton.GetDimensions().Width;
+		    x += depositButton.GetDimensions().Width;
+            
+            float depositButtonRight = x;
 			searchBar.Left.Set(depositButtonRight + padding, 0f);
 			searchBar.Width.Set(-depositButtonRight - 2 * padding, 1f);
 			searchBar.Height.Set(0f, 1f);
@@ -188,7 +198,11 @@ namespace MagicStorage
 		{
 			if (sortButtons == null)
 			{
-				sortButtons = GUIHelpers.MakeSortButtons();
+				sortButtons = GUIHelpers.MakeSortButtons(StorageGUI.RefreshItems);
+			}
+			if (favoritedOnlyButton == null)
+			{
+			    favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorage.Instance.GetTexture("FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 			}
 		}
 
@@ -196,7 +210,7 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-			    filterButtons = GUIHelpers.MakeFilterButtons(true);
+			    filterButtons = GUIHelpers.MakeFilterButtons(true, StorageGUI.RefreshItems);
 			}
 		}
 
@@ -237,7 +251,9 @@ namespace MagicStorage
 			basePanel.Draw(Main.spriteBatch);
 			slotZone.DrawText();
 			sortButtons.DrawText();
+			favoritedOnlyButton.DrawText();
 			filterButtons.DrawText();
+            DrawDepositButton();
 		}
 
 		private static Item GetItem(int slot, ref int context)
@@ -328,8 +344,8 @@ namespace MagicStorage
                     FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 100);
             }
             else
-                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text);
-		    items.AddRange(itemsLocal);
+		        itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text);
+            items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
 			for (int k = 0; k < items.Count; k++)
 			{
 				didMatCheck.Add(false);
@@ -350,11 +366,28 @@ namespace MagicStorage
 						Main.PlaySound(7, -1, -1, 1);
 					}
 				}
+                else if (CraftingGUI.RightMouseClicked)
+				{
+				    if (TryRestock())
+				    {
+				        RefreshItems();
+				        Main.PlaySound(7, -1, -1, 1);
+				    }
+                }
 			}
 			else
 			{
 				depositButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
 			}
+		}
+        
+		private static void DrawDepositButton()
+		{
+			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
+            if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+            {
+                Main.instance.MouseText(Language.GetText("Mods.MagicStorage.DepositTooltip").Value);
+            }
 		}
 
 		private static void ResetSlotFocus()
@@ -369,7 +402,8 @@ namespace MagicStorage
 			Player player = Main.player[Main.myPlayer];
 			int visualSlot = slot;
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
-			if (MouseClicked)
+            
+            if (MouseClicked)
 			{
 				bool changed = false;
 				if (!Main.mouseItem.IsAir && (player.itemAnimation == 0 && player.itemTime == 0))
@@ -381,17 +415,22 @@ namespace MagicStorage
 				}
 				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
 				{
-					Item toWithdraw = items[slot].Clone();
-					if (toWithdraw.stack > toWithdraw.maxStack)
-					{
-						toWithdraw.stack = toWithdraw.maxStack;
-					}
-					Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
-					if (ItemSlot.ShiftInUse)
-					{
-						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
-					}
-					changed = true;
+                    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+                        items[slot].favorited = !items[slot].favorited;
+                    else
+                    {
+                        Item toWithdraw = items[slot].Clone();
+                        if (toWithdraw.stack > toWithdraw.maxStack)
+                        {
+                            toWithdraw.stack = toWithdraw.maxStack;
+                        }
+                        Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
+                        if (ItemSlot.ShiftInUse)
+                        {
+                            Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+                        }
+                        changed = true;
+                    }
 				}
 				if (changed)
 				{
@@ -408,7 +447,9 @@ namespace MagicStorage
 			if (slot < items.Count && !items[slot].IsAir)
 			{
 				hoverSlot = visualSlot;
-			}
+                items[slot].newAndShiny = false;
+
+            }
 
 			if (slotFocus >= 0)
 			{
@@ -513,16 +554,42 @@ namespace MagicStorage
 			return changed;
 		}
 
-		private static Item DoWithdraw(Item item, bool toInventory = false)
+        private static bool TryRestock()
+        {
+            Player player = Main.player[Main.myPlayer];
+            TEStorageHeart heart = GetHeart();
+            bool changed = false;
+
+            for (int k = 10; k < 50; k++)
+            {
+                var item = player.inventory[k];
+                if (!item.IsAir && item.stack < item.maxStack)
+                {
+                    var toWithdraw = item.Clone();
+                    toWithdraw.stack = item.maxStack - item.stack;
+                    toWithdraw = DoWithdraw(toWithdraw, true, true);
+                    if (!toWithdraw.IsAir)
+                    {
+                        item.stack += toWithdraw.stack;
+                        toWithdraw.TurnToAir();
+                        changed = true;
+                    }
+                }
+
+            }
+            return changed;
+        }
+
+		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == 0)
 			{
-				return heart.TryWithdraw(item);
+				return heart.TryWithdraw(item, keepOneIfFavorite);
 			}
 			else
 			{
-				NetHelper.SendWithdraw(heart.ID, item, toInventory);
+				NetHelper.SendWithdraw(heart.ID, item, toInventory, keepOneIfFavorite);
 				return new Item();
 			}
 		}

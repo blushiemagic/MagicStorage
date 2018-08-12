@@ -375,7 +375,7 @@ namespace MagicStorage
 		{
 			if (sortButtons == null)
 			{
-                sortButtons = GUIHelpers.MakeSortButtons();
+                sortButtons = GUIHelpers.MakeSortButtons(CraftingGUI.RefreshItems);
 			}
 		}
 
@@ -383,7 +383,7 @@ namespace MagicStorage
 		{
 			if (recipeButtons == null)
 			{
-				recipeButtons = new UIButtonChoice(new Texture2D[]
+			    recipeButtons = new UIButtonChoice(CraftingGUI.RefreshItems, new Texture2D[]
 				{
 					MagicStorage.Instance.GetTexture("RecipeAvailable"),
 					MagicStorage.Instance.GetTexture("RecipeAll"),
@@ -402,7 +402,7 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-                filterButtons = GUIHelpers.MakeFilterButtons(false);
+                filterButtons = GUIHelpers.MakeFilterButtons(false, CraftingGUI.RefreshItems);
 			}
 		}
 
@@ -1619,7 +1619,7 @@ namespace MagicStorage
 			List<Item> items = new List<Item>();
 			foreach (Item tryWithdraw in toWithdraw)
 			{
-				Item withdrawn = heart.TryWithdraw(tryWithdraw);
+				Item withdrawn = heart.TryWithdraw(tryWithdraw, false);
 				if (!withdrawn.IsAir)
 				{
 					items.Add(withdrawn);
@@ -1673,7 +1673,7 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == 0)
 			{
-				return heart.TryWithdraw(item);
+				return heart.TryWithdraw(item, false);
 			}
 			else
 			{

@@ -12,13 +12,15 @@ namespace MagicStorage
 {
 	public class UIButtonChoice : UIElement
 	{
-		private int buttonSize;
+	    readonly Action _onChanged;
+	    private int buttonSize;
 		private int buttonPadding;
 
 		private Texture2D[] buttons;
 		private LocalizedText[] names;
-		private int choice = 0;
-
+        
+	    private int choice = 0;
+        
 		public int Choice
 		{
 			get
@@ -27,13 +29,15 @@ namespace MagicStorage
 			}
 		}
 
-		public UIButtonChoice(Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
+		public UIButtonChoice(Action onChanged, Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 			{
 				throw new ArgumentException();
 			}
-            this.buttonSize = buttonSize;
+
+		    _onChanged = onChanged;
+		    this.buttonSize = buttonSize;
             this.buttonPadding = buttonPadding;
 			this.buttons = buttons;
 			this.names = names;
@@ -60,7 +64,7 @@ namespace MagicStorage
 			}
 			if (oldChoice != choice)
 			{
-				StorageGUI.RefreshItems();
+                _onChanged?.Invoke();
 			}
 		}
 

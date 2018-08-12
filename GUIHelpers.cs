@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Localization;
@@ -8,9 +9,9 @@ namespace MagicStorage
     public class GUIHelpers
     {
 
-        public static UIButtonChoice MakeSortButtons()
+        public static UIButtonChoice MakeSortButtons(Action onChanged)
         {
-            return new UIButtonChoice(new Texture2D[]
+            return new UIButtonChoice(onChanged, new Texture2D[]
                                       {
                                           Main.inventorySortTexture[0],
                                           MagicStorage.Instance.GetTexture("SortID"),
@@ -28,7 +29,7 @@ namespace MagicStorage
                 });
         }
 
-        public static UIButtonChoice MakeFilterButtons(bool withHistory)
+        public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged)
         {
             var textures = new List<Texture2D>
                              {
@@ -69,7 +70,7 @@ namespace MagicStorage
                 textures.Add(MagicStorage.Instance.GetTexture("FilterAll"));
                 texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
             }
-            return new UIButtonChoice(textures.ToArray(), texts.ToArray());
+            return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray());
         }
 
     }

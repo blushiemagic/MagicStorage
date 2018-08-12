@@ -157,6 +157,10 @@ namespace MagicStorage.Components
 							newStack = item.maxStack;
 						}
 						item.stack = newStack;
+
+					    if (toDeposit.favorited) item.favorited = true;
+                        if (toDeposit.newAndShiny) item.newAndShiny = true;
+
 						hasChange = true;
 						toDeposit.stack = total - newStack;
 						if (toDeposit.stack <= 0)
@@ -170,8 +174,6 @@ namespace MagicStorage.Components
 				if (!finished && !IsFull)
 				{
 					Item item = toDeposit.Clone();
-					item.newAndShiny = false;
-					item.favorited = false;
 					items.Add(item);
 					toDeposit.SetDefaults(0, true);
 					hasChange = true;
@@ -195,7 +197,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false)
+		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Main.netMode == 1 && !receiving)
 			{
@@ -215,7 +217,10 @@ namespace MagicStorage.Components
 					Item item = items[k];
 					if (ItemData.Matches(lookFor, item))
 					{
-						int withdraw = Math.Min(lookFor.stack, item.stack);
+                        int maxToTake = item.stack;
+					    if (item.stack > 0 && item.favorited && keepOneIfFavorite)
+					        maxToTake -= 1;
+					    int withdraw = Math.Min(lookFor.stack, maxToTake);
 						item.stack -= withdraw;
 						if (item.stack <= 0)
 						{
@@ -606,7 +611,8 @@ namespace MagicStorage.Components
 
 			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
 			{
-				unit.TryWithdraw(ItemIO.Receive(reader, true, false));
+                bool keepOneIfFavorite = reader.ReadBoolean();
+				unit.TryWithdraw(ItemIO.Receive(reader, true, false), keepOneIfFavorite: keepOneIfFavorite);
 				return true;
 			}
 		}

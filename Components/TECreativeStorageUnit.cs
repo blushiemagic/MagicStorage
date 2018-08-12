@@ -43,7 +43,7 @@ namespace MagicStorage.Components
 		{
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false)
+		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Inactive)
 			{

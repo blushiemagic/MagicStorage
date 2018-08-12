@@ -62,7 +62,7 @@ namespace MagicStorage.Components
 
 		public abstract void DepositItem(Item toDeposit, bool locked = false);
 
-		public abstract Item TryWithdraw(Item lookFor, bool locked = false);
+		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 
 		public override TagCompound Save()
 		{

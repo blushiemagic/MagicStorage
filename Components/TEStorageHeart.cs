@@ -268,7 +268,7 @@ namespace MagicStorage.Components
 			int oldStack = toDeposit.stack;
 			try
 			{
-                var remember = toDeposit.Clone();
+                var remember = toDeposit.type;
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit, true))
@@ -280,18 +280,21 @@ namespace MagicStorage.Components
 						}
 					}
 				}
+                var prevNewAndShiny = toDeposit.newAndShiny;
+                toDeposit.newAndShiny = !_uniqueItemsPutHistory.Contains(toDeposit);
                 foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{
-						storageUnit.DepositItem(toDeposit, true);
-						if (toDeposit.IsAir)
-						{
+                        storageUnit.DepositItem(toDeposit, true);
+                        if (toDeposit.IsAir)
+                        {
                             _uniqueItemsPutHistory.Add(remember);
                             return;
-						}
+                        }
 					}
 				}
+                toDeposit.newAndShiny = prevNewAndShiny;
 			}
 			finally
 			{
@@ -306,7 +309,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public Item TryWithdraw(Item lookFor)
+		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite)
 		{
 			if (Main.netMode == 1)
 			{
@@ -323,7 +326,7 @@ namespace MagicStorage.Components
 				{
 					if (storageUnit.HasItem(lookFor, true))
 					{
-						Item withdrawn = storageUnit.TryWithdraw(lookFor, true);
+						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
 						if (!withdrawn.IsAir)
 						{
 							if (result.IsAir)

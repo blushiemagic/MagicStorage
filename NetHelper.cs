@@ -153,11 +153,12 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SendWithdraw(int ent, Item item, bool toInventory = false)
+		public static void SendWithdraw(int ent, Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
 			if (Main.netMode == 1)
 			{
 				ModPacket packet = PrepareStorageOperation(ent, (byte)(toInventory ? 3 : 1));
+                packet.Write(keepOneIfFavorite);
 				ItemIO.Send(item, packet, true);
 				packet.Send();
 			}
@@ -203,9 +204,10 @@ namespace MagicStorage
 			}
 			else if (op == 1 || op == 3)
 			{
+                var keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true);
-				item = heart.TryWithdraw(item);
-				if (!item.IsAir)
+				item = heart.TryWithdraw(item, keepOneIfFavorite);
+                if (!item.IsAir)
 				{
 					ModPacket packet = PrepareOperationResult(op);
 					ItemIO.Send(item, packet, true);

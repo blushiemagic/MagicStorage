@@ -57,7 +57,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("DepositAll");
-			text.SetDefault("Deposit All");
+			text.SetDefault("Transfer All");
 			text.AddTranslation(GameCulture.Russian, "Переместить всё");
 			text.AddTranslation(GameCulture.French, "Déposer tout");
 			text.AddTranslation(GameCulture.Spanish, "Depositar todo");
@@ -241,6 +241,14 @@ namespace MagicStorage
 
 			text = CreateTranslation("SortDps");
 			text.SetDefault("Sort by DPS");
+			AddTranslation(text);
+            
+			text = CreateTranslation("ShowOnlyFavorited");
+			text.SetDefault("Only Favorited");
+			AddTranslation(text);
+
+			text = CreateTranslation("DepositTooltip");
+			text.SetDefault("Left click to Deposit All non favorited items, right click to Restock from storage");
 			AddTranslation(text);
 		}
 
