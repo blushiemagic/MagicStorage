@@ -1390,9 +1390,9 @@ namespace MagicStorage
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			if (slot < recipes.Count)
 			{
-                if (MouseClicked || RightMouseClicked)
+                var recipe = recipes[slot];
+                if (MouseClicked)
                 {
-                    var recipe = recipes[slot];
                     if (Main.keyState.IsKeyDown(Keys.LeftAlt))
                     {
                         if (!ModPlayer.FavoritedRecipes.Add(recipe.createItem))
@@ -1402,17 +1402,22 @@ namespace MagicStorage
                     {
                         if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
                         {
-                            if (ModPlayer.RemoveFromHiddenRecipes(recipes[slot].createItem))
+                            if (ModPlayer.RemoveFromHiddenRecipes(recipe.createItem))
                                 RefreshItems();
                         }
                         else
                         {
-                            if (ModPlayer.AddToHiddenRecipes(recipes[slot].createItem))
+                            if (ModPlayer.AddToHiddenRecipes(recipe.createItem))
                                 RefreshItems();
                         }
                     }
                     else
                         SetSelectedRecipe(recipe);
+                }
+                else if (RightMouseClicked && recipeButtons.Choice == RecipeButtonsNewChoice && !ModPlayer.IsRecipeHidden(recipe.createItem))
+                {
+                    if (ModPlayer.AddToCraftedRecipes(recipe.createItem))
+                        RefreshItems();
                 }
 				hoverSlot = visualSlot;
 			}

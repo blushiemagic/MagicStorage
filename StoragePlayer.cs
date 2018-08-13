@@ -25,6 +25,11 @@ namespace MagicStorage
 
 	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
 
+	    public bool IsRecipeHidden(Item item)
+	    {
+	        return _hiddenRecipes.Contains(item);
+	    }
+
         public bool AddToHiddenRecipes(Item item)
         {
             return _hiddenRecipes.Add(item);

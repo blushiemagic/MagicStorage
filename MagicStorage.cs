@@ -229,7 +229,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAvailable");
-			text.SetDefault("Show new recipes");
+			text.SetDefault("Show new recipes (right click to remove \"new\" flag)");
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAll");
