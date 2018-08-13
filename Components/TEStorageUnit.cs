@@ -143,6 +143,7 @@ namespace MagicStorage.Components
 			}
 			try
 			{
+                if (CraftingGUI.IsTestItem(toDeposit)) return;
 				Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;

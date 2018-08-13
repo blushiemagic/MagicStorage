@@ -72,6 +72,7 @@
     <Compile Include="GUIHelpers.cs" />
     <Compile Include="InterfaceHelper.cs" />
     <Compile Include="ItemData.cs" />
+    <Compile Include="ItemSaveLoadHook.cs" />
     <Compile Include="Items\CraftingAccess.cs" />
     <Compile Include="Items\CreativeStorageUnit.cs" />
     <Compile Include="Items\Locator.cs" />

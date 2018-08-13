@@ -31,6 +31,7 @@ namespace MagicStorage
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
+		    AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
 		}
 
 		public override void Unload()
@@ -249,6 +250,14 @@ namespace MagicStorage
 
 			text = CreateTranslation("DepositTooltip");
 			text.SetDefault("Left click to Deposit All non favorited items, right click to Restock from storage");
+			AddTranslation(text);
+
+			text = CreateTranslation("CraftTooltip");
+			text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
+			AddTranslation(text);
+
+			text = CreateTranslation("TestItemSuffix");
+			text.SetDefault(" !UNTIL RESPAWN!");
 			AddTranslation(text);
 		}
 

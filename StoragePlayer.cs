@@ -6,6 +6,7 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
+using Terraria.ID;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage
@@ -22,7 +23,7 @@ namespace MagicStorage
         public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
         public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
 
-        public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
+	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
 
         public bool AddToHiddenRecipes(Item item)
         {
@@ -248,5 +249,39 @@ namespace MagicStorage
 		{
 			return Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
 		}
+
+	    public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
+	    {
+	        foreach (var item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
+	        {
+	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+	            {
+	                damage *= 5;
+                    break;
+	            }
+	        }
+	    }
+
+	    public override bool CanHitPvp(Item item, Player target)
+	    {
+	        if (CraftingGUI.IsTestItem(item)) return false;
+	        return base.CanHitPvp(item, target);
+	    }
+
+	    public override void OnRespawn(Player player)
+	    {
+	        foreach (var item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
+	        {
+	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+	                item.TurnToAir();
+	        }
+
+	        {
+	            var item = player.trashItem;
+	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+	                item.TurnToAir();
+	        }
+	        base.OnRespawn(player);
+	    }
 	}
 }
