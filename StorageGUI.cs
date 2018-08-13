@@ -560,10 +560,9 @@ namespace MagicStorage
             TEStorageHeart heart = GetHeart();
             bool changed = false;
 
-            for (int k = 10; k < 50; k++)
+            foreach (var item in player.inventory)
             {
-                var item = player.inventory[k];
-                if (!item.IsAir && item.stack < item.maxStack)
+                if (item != null && !item.IsAir && item.stack < item.maxStack)
                 {
                     var toWithdraw = item.Clone();
                     toWithdraw.stack = item.maxStack - item.stack;
