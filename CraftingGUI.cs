@@ -1398,9 +1398,11 @@ namespace MagicStorage
 			slot += numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
 			if (slot < storageItems.Count)
 			{
-				if (MouseClicked)
+			    var item = storageItems[slot];
+                item.newAndShiny = false;
+                if (MouseClicked)
 				{
-					ItemData data = new ItemData(storageItems[slot]);
+				    ItemData data = new ItemData(item);
 					if (blockStorageItems.Contains(data))
 					{
 						blockStorageItems.Remove(data);
@@ -1421,7 +1423,10 @@ namespace MagicStorage
 				return;
 			}
 
-			Player player = Main.player[Main.myPlayer];
+		    if (Main.mouseItem.IsAir && result != null && !result.IsAir)
+		        result.newAndShiny = false;
+
+		    Player player = Main.player[Main.myPlayer];
 			if (MouseClicked)
 			{
 				bool changed = false;
@@ -1434,17 +1439,22 @@ namespace MagicStorage
 				}
 				else if (Main.mouseItem.IsAir && result != null && !result.IsAir)
 				{
-					Item toWithdraw = result.Clone();
-					if (toWithdraw.stack > toWithdraw.maxStack)
-					{
-						toWithdraw.stack = toWithdraw.maxStack;
-					}
-					Main.mouseItem = DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
-					if (ItemSlot.ShiftInUse)
-					{
-						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
-					}
-					changed = true;
+                    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+                        result.favorited = !result.favorited;
+                    else
+                    {
+                        Item toWithdraw = result.Clone();
+                        if (toWithdraw.stack > toWithdraw.maxStack)
+                        {
+                            toWithdraw.stack = toWithdraw.maxStack;
+                        }
+                        Main.mouseItem = DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
+                        if (ItemSlot.ShiftInUse)
+                        {
+                            Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+                        }
+                        changed = true;
+                    }
 				}
 				if (changed)
 				{
