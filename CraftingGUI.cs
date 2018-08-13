@@ -22,7 +22,8 @@ namespace MagicStorage
     public static class CraftingGUI
 	{
 	    const int RecipeButtonsNewChoice = 0;
-        const int RecipeButtonsBlacklistChoice = 2;
+        const int RecipeButtonsBlacklistChoice = 3;
+        const int RecipeButtonsFavoritesChoice = 2;
         private const int padding = 4;
 		private const int numColumns = 10;
 		private const int numColumns2 = 7;
@@ -387,13 +388,16 @@ namespace MagicStorage
 				{
 					MagicStorage.Instance.GetTexture("RecipeAvailable"),
 					MagicStorage.Instance.GetTexture("RecipeAll"),
-					MagicStorage.Instance.GetTexture("RecipeAll"),
-				},
+				    MagicStorage.Instance.GetTexture("FilterMisc"),
+                    MagicStorage.Instance.GetTexture("RecipeAll"),
+                },
 				new LocalizedText[]
 				{
 					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
 					Language.GetText("Mods.MagicStorage.RecipeAll"),
-				    Language.GetText("Mods.MagicStorage.RecipeBlacklist")
+				    Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
+                    Language.GetText("Mods.MagicStorage.RecipeBlacklist"),
+				    
                 });
 			}
 		}
@@ -489,6 +493,11 @@ namespace MagicStorage
 			{
 				context = recipes[index] == selectedRecipe ? 4 : 3;
 			}
+            if (!item.IsAir && ModPlayer.FavoritedRecipes.Contains(item))
+            {
+                item = item.Clone();
+                item.favorited = true;
+            }
 			return item;
 		}
 
@@ -777,6 +786,8 @@ namespace MagicStorage
 		    HashSet<int> craftedRecipes;
 		    GetKnownItems(out foundItems, out hiddenRecipes, out craftedRecipes);
 
+            var favoritesCopy = new HashSet<int>(ModPlayer.FavoritedRecipes.Items.Select(x => x.type));
+
 		    EnsureProductToRecipesInited();
 
             lock (threadLock)
@@ -785,12 +796,12 @@ namespace MagicStorage
 				threadSortMode = sortMode;
 				threadFilterMode = filterMode;
                 threadCheckListFoundItems = foundItems;
-				if (!threadRunning)
-				{
-					threadRunning = true;
-				    Thread thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes));
-					thread.Start();
-				}
+			    if (!threadRunning)
+			    {
+			        threadRunning = true;
+			        Thread thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
+			        thread.Start();
+			    }
 			}
 		}
 
@@ -897,7 +908,7 @@ namespace MagicStorage
 	        return true;
 	    }
 
-	    private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes)
+	    private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes, HashSet<int> favorited)
         {
             while (true)
             {
@@ -933,6 +944,8 @@ namespace MagicStorage
                             .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
                             // show only new items if selected
                             .Where(x => (recipeButtons.Choice != RecipeButtonsNewChoice) || !notNewItems.Contains(x.createItem.type))
+                            // show only favorited items if selected
+                            .Where(x => (recipeButtons.Choice != RecipeButtonsFavoritesChoice) || favorited.Contains(x.createItem.type))
                             // hard check if this item can be crafted from available items and their recursive products
                             .Where(x => IsKnownRecursively(x, availableItemsMutable, temp));
 
@@ -959,6 +972,13 @@ namespace MagicStorage
                     {
                         // search old recipes too
                         notNewItems = new HashSet<int>();
+                        doFiltering();
+                    }
+
+                    if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsFavoritesChoice)
+                    {
+                        // search non favorited recipes too
+                        favorited = new HashSet<int>();
                         doFiltering();
                     }
 
@@ -1315,24 +1335,29 @@ namespace MagicStorage
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			if (slot < recipes.Count)
 			{
-                if (MouseClicked)
+                if (MouseClicked || RightMouseClicked)
                 {
                     var recipe = recipes[slot];
-                    SetSelectedRecipe(recipe);
-                }
-                else if (RightMouseClicked)
-                {
-                    StoragePlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
-                    if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
+                    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
                     {
-                        if (modPlayer.RemoveFromHiddenRecipes(recipes[slot].createItem))
-                            RefreshItems();
+                        if (!ModPlayer.FavoritedRecipes.Add(recipe.createItem))
+                            ModPlayer.FavoritedRecipes.Remove(recipe.createItem);
+                    }
+                    else if (Main.keyState.IsKeyDown(Keys.LeftControl))
+                    {
+                        if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
+                        {
+                            if (ModPlayer.RemoveFromHiddenRecipes(recipes[slot].createItem))
+                                RefreshItems();
+                        }
+                        else
+                        {
+                            if (ModPlayer.AddToHiddenRecipes(recipes[slot].createItem))
+                                RefreshItems();
+                        }
                     }
                     else
-                    {
-                        if (modPlayer.AddToHiddenRecipes(recipes[slot].createItem))
-                            RefreshItems();
-                    }
+                        SetSelectedRecipe(recipe);
                 }
 				hoverSlot = visualSlot;
 			}

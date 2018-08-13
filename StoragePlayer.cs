@@ -22,6 +22,8 @@ namespace MagicStorage
         public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
         public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
 
+        public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
+
         public bool AddToHiddenRecipes(Item item)
         {
             return _hiddenRecipes.Add(item);
@@ -42,6 +44,7 @@ namespace MagicStorage
             var c = new TagCompound();
             _hiddenRecipes.Save(c);
             _craftedRecipes.Save(c);
+            FavoritedRecipes.Save(c);
             return c;
 	    }
 
@@ -49,6 +52,7 @@ namespace MagicStorage
 	    {
             _hiddenRecipes.Load(tag);
             _craftedRecipes.Load(tag);
+            FavoritedRecipes.Load(tag);
 	    }
 
         public override void UpdateDead()

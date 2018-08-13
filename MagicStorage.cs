@@ -236,7 +236,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeBlacklist");
-			text.SetDefault("Show hidden recipes");
+			text.SetDefault("Show hidden recipes (ctrl+click on recipe to (un)hide)");
 			AddTranslation(text);
 
 			text = CreateTranslation("SortDps");
