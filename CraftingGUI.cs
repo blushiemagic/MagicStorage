@@ -1018,42 +1018,44 @@ namespace MagicStorage
                     };
 
                     doFiltering();
-
+                    
                     // now if nothing found we disable filters one by one
-
-                    if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsNewChoice)
+                    if (searchBar.Text.Length > 0)
                     {
-                        // search old recipes too
-                        notNewItems = new HashSet<int>();
-                        doFiltering();
-                    }
+                        if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsNewChoice)
+                        {
+                            // search old recipes too
+                            notNewItems = new HashSet<int>();
+                            doFiltering();
+                        }
 
-                    if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsFavoritesChoice)
-                    {
-                        // search non favorited recipes too
-                        favorited = new HashSet<int>();
-                        doFiltering();
-                    }
+                        if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsFavoritesChoice)
+                        {
+                            // search non favorited recipes too
+                            favorited = new HashSet<int>();
+                            doFiltering();
+                        }
 
-                    if (threadRecipes.Count == 0 && searchBar.Text.Length > 0)
-                    {
-                        // search hidden recipes too
-                        hiddenRecipes = new HashSet<int>();
-                        doFiltering();
-                    }
+                        if (threadRecipes.Count == 0 && hiddenRecipes.Count > 0)
+                        {
+                            // search hidden recipes too
+                            hiddenRecipes = new HashSet<int>();
+                            doFiltering();
+                        }
 
-                    if (threadRecipes.Count == 0 && filterMode != FilterMode.All)
-                    {
-                        // any category
-                        filterMode = FilterMode.All;
-                        doFiltering();
-                    }
+                        if (threadRecipes.Count == 0 && filterMode != FilterMode.All)
+                        {
+                            // any category
+                            filterMode = FilterMode.All;
+                            doFiltering();
+                        }
 
-                    if (threadRecipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
-                    {
-                        // search all mods
-                        modFilterIndex = ModSearchBox.ModIndexAll;
-                        doFiltering();
+                        if (threadRecipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+                        {
+                            // search all mods
+                            modFilterIndex = ModSearchBox.ModIndexAll;
+                            doFiltering();
+                        }
                     }
 
                     lock (recipeLock)
