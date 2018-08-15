@@ -151,7 +151,7 @@ namespace MagicStorage
 				recipes = nextRecipes;
 				recipeAvailable = nextRecipeAvailable;
 			}
-
+            
 		    InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
@@ -738,20 +738,12 @@ namespace MagicStorage
 			        var item = selectedRecipe.createItem;
 			        if (CanItemBeTakenForTest(item))
 			        {
-			            HashSet<int> found;
-			            HashSet<int> hidden;
-			            HashSet<int> crafted;
-			            HashSet<int> asKnownRecipes;
-			            GetKnownItems(out found, out hidden, out crafted, out asKnownRecipes);
 			            var type = item.type;
-			            if (!found.Contains(type) && !crafted.Contains(type))
-			            {
-			                var testItem = new Item();
-			                testItem.SetDefaults(type, true);
-			                MarkAsTestItem(testItem);
-                            Main.mouseItem = testItem;
-			                ModPlayer.AddToCraftedRecipes(selectedRecipe.createItem);
-			            }
+			            var testItem = new Item();
+			            testItem.SetDefaults(type, true);
+			            MarkAsTestItem(testItem);
+			            Main.mouseItem = testItem;
+			            ModPlayer.TestedRecipes.Add(selectedRecipe.createItem);
 			        }
 			    }
                 else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe))
@@ -796,7 +788,8 @@ namespace MagicStorage
 	            && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee
 	                || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot]
 	                || item.pick > 0 || item.axe > 0 || item.hammer > 0)
-	            && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None;
+	            && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None
+	            && !ModPlayer.TestedRecipes.Contains(item);
 	    }
 
 	    public static void MarkAsTestItem(Item testItem)
@@ -835,6 +828,11 @@ namespace MagicStorage
 
 		public static void RefreshItems()
 		{
+		    if (ModPlayer.SeenRecipes.Count == 0)
+		    {
+		        foreach (var item in GetKnownItems())
+		            ModPlayer.SeenRecipes.Add(item);
+		    }
 			items.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
@@ -925,28 +923,39 @@ namespace MagicStorage
 	    /// </summary>
 	    static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet)
 	    {
-	        return IsKnownRecursively(recipe, availableSet, new HashSet<int>());
+	        return IsKnownRecursively(recipe, availableSet, new HashSet<int>(), new Dictionary<Recipe, bool>());
 	    }
 
 	    /// <summary>
         /// Checks all crafting tree until it finds already available ingredients
         /// </summary>
-        static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree)
+        static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
         {
-            if (availableSet.Contains(recipe.createItem.type)) return true;
+            bool v;
+            if (cache.TryGetValue(recipe, out v)) return v;
+            int ingredients = 0;
             for (int i = 0; i < Recipe.maxRequirements; i++)
             {
                 var t = recipe.requiredItem[i].type;
                 if (t <= 0) continue;
-                if (IsKnownRecursively_CheckIngredient(availableSet, recursionTree, t)) continue;
-                if (IsKnownRecursively_CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, t)) continue;
+                ingredients++;
+                if (IsKnownRecursively_CheckIngredient(t, availableSet, recursionTree, cache)) continue;
+                if (IsKnownRecursively_CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, t)) continue;
+                cache[recipe] = false;
                 return false;
             }
-            availableSet.Add(recipe.createItem.type);
-            return true;
+
+            if (ingredients > 0)
+            {
+                cache[recipe] = true;
+                return true;
+            }
+
+            cache[recipe] = false;
+            return false;
         }
 
-	    static bool IsKnownRecursively_CheckAcceptedGroupsForIngredient(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, int t)
+	    static bool IsKnownRecursively_CheckAcceptedGroupsForIngredient(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache, int t)
 	    {
 	        foreach (var g in recipe.acceptedGroups.Select(j => RecipeGroup.recipeGroups[j]))
 	        {
@@ -954,7 +963,7 @@ namespace MagicStorage
 	            {
 	                foreach (var groupItemType in g.ValidItems)
 	                {
-	                    if (groupItemType != t && IsKnownRecursively_CheckIngredient(availableSet, recursionTree, groupItemType))
+	                    if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
 	                    {
                             return true;
 	                    }
@@ -964,16 +973,15 @@ namespace MagicStorage
             return false;
 	    }
 
-	    static bool IsKnownRecursively_CheckIngredient(HashSet<int> availableSet, HashSet<int> recursionTree, int t)
+	    static bool IsKnownRecursively_CheckIngredient(int t, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
 	    {
 	        if (availableSet.Contains(t)) return true;
-	        if (recursionTree.Contains(t)) return false;
-	        recursionTree.Add(t);
+	        if (!recursionTree.Add(t)) return false;
 	        try
 	        {
 	            List<Recipe> ingredientRecipes;
 	            if (!_productToRecipes.TryGetValue(t, out ingredientRecipes)) return false;
-	            if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsKnownRecursively(x, availableSet, recursionTree))) return false;
+	            if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsKnownRecursively(x, availableSet, recursionTree, cache))) return false;
 	        }
 	        finally
 	        {
@@ -1007,6 +1015,7 @@ namespace MagicStorage
                     var notNewItems = new HashSet<int>(availableItemsMutable);
 
                     var temp = new HashSet<int>();
+                    var tempCache = new Dictionary<Recipe, bool>();
 
                     var modFilterIndex = modSearchBox.ModIndex;
 
@@ -1022,7 +1031,7 @@ namespace MagicStorage
                             // show only favorited items if selected
                             .Where(x => (recipeButtons.Choice != RecipeButtonsFavoritesChoice) || favorited.Contains(x.createItem.type))
                             // hard check if this item can be crafted from available items and their recursive products
-                            .Where(x => IsKnownRecursively(x, availableItemsMutable, temp));
+                            .Where(x => IsKnownRecursively(x, availableItemsMutable, temp, tempCache));
 
                         threadRecipes.Clear();
                         threadRecipeAvailable.Clear();
@@ -1436,12 +1445,18 @@ namespace MagicStorage
                     else
                         SetSelectedRecipe(recipe);
                 }
-                else if (RightMouseClicked)
+			    else if (RightMouseClicked && (recipe == selectedRecipe || recipeButtons.Choice != RecipeButtonsNewChoice))
 			    {
-			        if (!ModPlayer.AsKnownRecipes.Add(recipe.createItem)) ModPlayer.AsKnownRecipes.Remove(recipe.createItem);
-			        RefreshItems();
-                }
-				hoverSlot = visualSlot;
+			        if (recipeButtons.Choice == RecipeButtonsNewChoice)
+			        {
+			            ModPlayer.AsKnownRecipes.Add(recipe.createItem);
+			            RefreshItems();
+			        }
+			        else
+			            ModPlayer.AsKnownRecipes.Remove(recipe.createItem);
+			    }
+
+			    hoverSlot = visualSlot;
 			}
 		}
 
@@ -1480,11 +1495,13 @@ namespace MagicStorage
                     if (_productToRecipes.TryGetValue(item.type, out itemRecipes))
                     {
                         var knownItems = GetKnownItems();
-                        var dummy = new HashSet<int>();
+                        
+                        var recursionTree = new HashSet<int>();
+                        var cache = new Dictionary<Recipe, bool>();
 
                         Recipe selected = null;
 
-                        foreach (var r in itemRecipes.Where(x => IsKnownRecursively(x, knownItems, dummy)))
+                        foreach (var r in itemRecipes.Where(x => IsKnownRecursively(x, knownItems, recursionTree, cache)))
                         {
                             if (selected == null) selected = r;
                             if (IsAvailable(r))
