@@ -503,19 +503,29 @@ namespace MagicStorage
 			}
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
-			if (!item.IsAir && recipes[index] == selectedRecipe)
+			if (!item.IsAir)
 			{
-				context = 6;
+			    if (recipes[index] == selectedRecipe)
+			    {
+			        context = 6;
+			    }
+			    if (!recipeAvailable[index])
+			    {
+			        context = recipes[index] == selectedRecipe ? 4 : 3;
+			    }
+                if (ModPlayer.FavoritedRecipes.Contains(item))
+                {
+                    item = item.Clone();
+                    item.favorited = true;
+                }
+
+			    if (!ModPlayer.SeenRecipes.Contains(item))
+			    {
+			        item = item.Clone();
+			        item.newAndShiny = true;
+			    }
 			}
-			if (!item.IsAir && !recipeAvailable[index])
-			{
-				context = recipes[index] == selectedRecipe ? 4 : 3;
-			}
-            if (!item.IsAir && ModPlayer.FavoritedRecipes.Contains(item))
-            {
-                item = item.Clone();
-                item.favorited = true;
-            }
+
 			return item;
 		}
 
@@ -1391,7 +1401,7 @@ namespace MagicStorage
 			if (slot < recipes.Count)
 			{
                 var recipe = recipes[slot];
-                if (MouseClicked)
+			    if (MouseClicked)
                 {
                     if (Main.keyState.IsKeyDown(Keys.LeftAlt))
                     {
@@ -1425,6 +1435,7 @@ namespace MagicStorage
 
 	    static void SetSelectedRecipe(Recipe recipe)
 	    {
+	        if (recipe != null) ModPlayer.SeenRecipes.Add(recipe.createItem);
 	        selectedRecipe = recipe;
 	        RefreshStorageItems();
 	        blockStorageItems.Clear();
