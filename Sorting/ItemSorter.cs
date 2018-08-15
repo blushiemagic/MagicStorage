@@ -14,7 +14,7 @@ namespace MagicStorage.Sorting
             if (takeCount != null) filteredItems = filteredItems.Take(takeCount.Value);
 		    var func = MakeSortFunction(sortMode);
 		    if (func == null) return filteredItems;
-            return filteredItems.OrderBy(x => x, func);
+		    return filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
 		}
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
@@ -23,8 +23,8 @@ namespace MagicStorage.Sorting
 		    IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 			var func = MakeSortFunction(sortMode);
 		    if (func == null) return filteredRecipes;
-		    return filteredRecipes.OrderBy(x => x.createItem, func);
-        }
+		    return filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
+		}
 
 	    static CompareFunction MakeSortFunction(SortMode sortMode)
 	    {

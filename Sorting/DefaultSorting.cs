@@ -56,13 +56,13 @@ namespace MagicStorage.Sorting
 			{
 				return;
 			}
-			classes.Add(new DefaultSortClass(MeleeWeapon, CompareRarity));
-			classes.Add(new DefaultSortClass(RangedWeapon, CompareRarity));
-			classes.Add(new DefaultSortClass(MagicWeapon, CompareRarity));
-			classes.Add(new DefaultSortClass(SummonWeapon, CompareRarity));
-			classes.Add(new DefaultSortClass(ThrownWeapon, CompareRarity));
-			classes.Add(new DefaultSortClass(Weapon, CompareRarity));
-			classes.Add(new DefaultSortClass(Ammo, CompareRarity));
+			classes.Add(new DefaultSortClass(MeleeWeapon, CompareDps));
+			classes.Add(new DefaultSortClass(RangedWeapon, CompareDps));
+			classes.Add(new DefaultSortClass(MagicWeapon, CompareDps));
+			classes.Add(new DefaultSortClass(SummonWeapon, CompareValue));
+			classes.Add(new DefaultSortClass(ThrownWeapon, CompareDps));
+			classes.Add(new DefaultSortClass(Weapon, CompareDps));
+			classes.Add(new DefaultSortClass(Ammo, CompareValue));
 			classes.Add(new DefaultSortClass(Picksaw, ComparePicksaw));
 			classes.Add(new DefaultSortClass(Hamaxe, CompareHamaxe));
 			classes.Add(new DefaultSortClass(Pickaxe, ComparePickaxe));
@@ -282,10 +282,23 @@ namespace MagicStorage.Sorting
 
 		private static int CompareRarity(Item item1, Item item2)
 		{
-			return item2.rare - item1.rare;
+			return item1.rare - item2.rare;
 		}
 
-		private static int ComparePicksaw(Item item1, Item item2)
+		private static int CompareValue(Item item1, Item item2)
+		{
+			return item1.value - item2.value;
+		}
+
+	    static readonly CompareDps _dps = new Sorting.CompareDps();
+
+	    private static int CompareDps(Item item1, Item item2)
+	    {
+	        int r = _dps.Compare(item1, item2);
+	        return r != 0 ? r : CompareValue(item1, item2);
+	    }
+
+	    private static int ComparePicksaw(Item item1, Item item2)
 		{
 			int result = item1.pick - item2.pick;
 			if (result == 0)
@@ -330,7 +343,7 @@ namespace MagicStorage.Sorting
 			int result = item1.vanity.CompareTo(item2.vanity);
 			if (result == 0)
 			{
-				result = CompareRarity(item1, item2);
+				result = CompareValue(item1, item2);
 			}
 			return result;
 		}
