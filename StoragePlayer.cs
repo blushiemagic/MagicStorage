@@ -22,9 +22,11 @@ namespace MagicStorage
         
         public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
         public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
-
+        
 	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
 	    public ItemTypeOrderedSet SeenRecipes { get; private set; } = new ItemTypeOrderedSet("SeenRecipes");
+	    public ItemTypeOrderedSet TestedRecipes { get; private set; } = new ItemTypeOrderedSet("TestedRecipes");
+	    public ItemTypeOrderedSet AsKnownRecipes { get; private set; } = new ItemTypeOrderedSet("AsKnownRecipes");
 
 	    public bool IsRecipeHidden(Item item)
 	    {
@@ -53,6 +55,8 @@ namespace MagicStorage
             _craftedRecipes.Save(c);
             FavoritedRecipes.Save(c);
 	        SeenRecipes.Save(c);
+	        TestedRecipes.Save(c);
+	        AsKnownRecipes.Save(c);
             return c;
 	    }
 
@@ -62,6 +66,8 @@ namespace MagicStorage
             _craftedRecipes.Load(tag);
             FavoritedRecipes.Load(tag);
 	        SeenRecipes.Load(tag);
+	        TestedRecipes.Load(tag);
+	        AsKnownRecipes.Load(tag);
 	    }
 
         public override void UpdateDead()

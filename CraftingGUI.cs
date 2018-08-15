@@ -479,10 +479,12 @@ namespace MagicStorage
 	    private static void DrawCraftButton()
 	    {
 	        Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
-	        if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-	        {
-	            Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
-	        }
+
+            if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height
+                && selectedRecipe != null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
+            {
+                Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
+            }
 	    }
 
 	    private static Item GetStation(int slot, ref int context)
@@ -734,16 +736,13 @@ namespace MagicStorage
 			    if (RightMouseClicked && selectedRecipe != null && Main.mouseItem.IsAir)
 			    {
 			        var item = selectedRecipe.createItem;
-			        if (Main.netMode == NetmodeID.SinglePlayer 
-			            && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee
-			                || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot]
-			                || item.pick > 0 || item.axe > 0 || item.hammer > 0)
-			            && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None)
+			        if (CanItemBeTakenForTest(item))
 			        {
 			            HashSet<int> found;
 			            HashSet<int> hidden;
 			            HashSet<int> crafted;
-			            GetKnownItems(out found,out hidden, out crafted);
+			            HashSet<int> asKnownRecipes;
+			            GetKnownItems(out found, out hidden, out crafted, out asKnownRecipes);
 			            var type = item.type;
 			            if (!found.Contains(type) && !crafted.Contains(type))
 			            {
@@ -790,6 +789,15 @@ namespace MagicStorage
 				maxCraftTimer = startMaxCraftTimer;
 			}
 		}
+
+	    static bool CanItemBeTakenForTest(Item item)
+	    {
+	        return Main.netMode == NetmodeID.SinglePlayer 
+	            && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee
+	                || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot]
+	                || item.pick > 0 || item.axe > 0 || item.hammer > 0)
+	            && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None;
+	    }
 
 	    public static void MarkAsTestItem(Item testItem)
 	    {
@@ -847,7 +855,9 @@ namespace MagicStorage
 		    HashSet<int> foundItems;
 		    HashSet<int> hiddenRecipes;
 		    HashSet<int> craftedRecipes;
-		    GetKnownItems(out foundItems, out hiddenRecipes, out craftedRecipes);
+		    HashSet<int> asKnownRecipes;
+		    GetKnownItems(out foundItems, out hiddenRecipes, out craftedRecipes, out asKnownRecipes);
+		    foundItems.UnionWith(asKnownRecipes);
 
             var favoritesCopy = new HashSet<int>(ModPlayer.FavoritedRecipes.Items.Select(x => x.type));
 
@@ -870,20 +880,22 @@ namespace MagicStorage
 
         static HashSet<int> GetKnownItems()
         {
-            HashSet<int> a, b, c;
-            GetKnownItems(out a, out b, out c);
+            HashSet<int> a, b, c, d;
+            GetKnownItems(out a, out b, out c, out d);
             a.UnionWith(b);
             a.UnionWith(c);
+            a.UnionWith(d);
             return a;
         }
 
-	    static void GetKnownItems(out HashSet<int> foundItems, out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes)
+	    static void GetKnownItems(out HashSet<int> foundItems, out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes)
 	    {
 	        foundItems = new HashSet<int>(RetrieveFoundItemsCheckList());
 
 	        StoragePlayer modPlayer = ModPlayer;
 	        hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
 	        craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
+	        asKnownRecipes = new HashSet<int>(modPlayer.AsKnownRecipes.Items.Select(x => x.type));
 	    }
 
 	    static StoragePlayer ModPlayer { get { return Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(); } }
@@ -1424,10 +1436,10 @@ namespace MagicStorage
                     else
                         SetSelectedRecipe(recipe);
                 }
-                else if (RightMouseClicked && recipeButtons.Choice == RecipeButtonsNewChoice && !ModPlayer.IsRecipeHidden(recipe.createItem))
-                {
-                    if (ModPlayer.AddToCraftedRecipes(recipe.createItem))
-                        RefreshItems();
+                else if (RightMouseClicked)
+			    {
+			        if (!ModPlayer.AsKnownRecipes.Add(recipe.createItem)) ModPlayer.AsKnownRecipes.Remove(recipe.createItem);
+			        RefreshItems();
                 }
 				hoverSlot = visualSlot;
 			}
