@@ -66,12 +66,4 @@ namespace MagicStorage.Sorting
             return item.damage / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f);
         }
 	}
-
-	public class AsIs : CompareFunction
-	{
-        public override int Compare(Item item1, Item item2)
-        {
-            return 0;
-        }
-	}
 }

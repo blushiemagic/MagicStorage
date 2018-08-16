@@ -46,9 +46,6 @@ namespace MagicStorage.Sorting
 	            case SortMode.Dps:
 	                func = new CompareDps();
 	                break;
-	            case SortMode.AsIs:
-	                func = new AsIs();
-	                break;
 	            default:
 	                func = null;
 	                break;
