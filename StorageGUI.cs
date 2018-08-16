@@ -390,7 +390,7 @@ namespace MagicStorage
 				depositButton.BackgroundColor = new Color(73, 94, 171);
 				if (MouseClicked)
 				{
-					if (TryDepositAll())
+					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl)))
 					{
 						RefreshItems();
 						Main.PlaySound(7, -1, -1, 1);
@@ -544,20 +544,22 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool TryDepositAll()
+		private static bool TryDepositAll(bool quickStack)
 		{
 			Player player = Main.player[Main.myPlayer];
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
+		    Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item));
 			if (Main.netMode == 0)
 			{
 				for (int k = 10; k < 50; k++)
 				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
+				    var item = player.inventory[k];
+				    if (filter(item))
 					{
-						int oldStack = player.inventory[k].stack;
-						heart.DepositItem(player.inventory[k]);
-						if (oldStack != player.inventory[k].stack)
+						int oldStack = item.stack;
+                        heart.DepositItem(item);
+						if (oldStack != item.stack)
 						{
 							changed = true;
 						}
@@ -569,9 +571,10 @@ namespace MagicStorage
 				List<Item> items = new List<Item>();
 				for (int k = 10; k < 50; k++)
 				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
+				    var item = player.inventory[k];
+					if (filter(item))
 					{
-						items.Add(player.inventory[k]);
+					    items.Add(item);
 					}
 				}
 				NetHelper.SendDepositAll(heart.ID, items);

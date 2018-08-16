@@ -249,7 +249,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("DepositTooltip");
-			text.SetDefault("Left click to Deposit All non favorited items, right click to Restock from storage");
+		    text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
 			AddTranslation(text);
 
 			text = CreateTranslation("CraftTooltip");
