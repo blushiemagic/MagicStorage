@@ -841,8 +841,7 @@ namespace MagicStorage
 				return;
 			}
 
-		    items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "")
-		        .OrderBy(x => modPlayer.FavoritedRecipes.Contains(x.type) ? 0 : 1));
+		    items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
@@ -1034,7 +1033,8 @@ namespace MagicStorage
                             // show only favorited items if selected
                             .Where(x => (recipeButtons.Choice != RecipeButtonsFavoritesChoice) || favorited.Contains(x.createItem.type))
                             // hard check if this item can be crafted from available items and their recursive products
-                            .Where(x => IsKnownRecursively(x, availableItemsMutable, temp, tempCache));
+                            .Where(x => IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
+                            .OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1);
 
                         threadRecipes.Clear();
                         threadRecipeAvailable.Clear();
