@@ -828,10 +828,11 @@ namespace MagicStorage
 
 		public static void RefreshItems()
 		{
-		    if (ModPlayer.SeenRecipes.Count == 0)
+		    var modPlayer = ModPlayer;
+		    if (modPlayer.SeenRecipes.Count == 0)
 		    {
 		        foreach (var item in GetKnownItems())
-		            ModPlayer.SeenRecipes.Add(item);
+		            modPlayer.SeenRecipes.Add(item);
 		    }
 			items.Clear();
 			TEStorageHeart heart = GetHeart();
@@ -839,7 +840,9 @@ namespace MagicStorage
 			{
 				return;
 			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+
+		    items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "")
+		        .OrderBy(x => modPlayer.FavoritedRecipes.Contains(x.type) ? 0 : 1));
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
@@ -857,7 +860,7 @@ namespace MagicStorage
 		    GetKnownItems(out foundItems, out hiddenRecipes, out craftedRecipes, out asKnownRecipes);
 		    foundItems.UnionWith(asKnownRecipes);
 
-            var favoritesCopy = new HashSet<int>(ModPlayer.FavoritedRecipes.Items.Select(x => x.type));
+            var favoritesCopy = new HashSet<int>(modPlayer.FavoritedRecipes.Items.Select(x => x.type));
 
 		    EnsureProductToRecipesInited();
 

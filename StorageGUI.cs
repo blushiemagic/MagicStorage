@@ -344,7 +344,7 @@ namespace MagicStorage
                     FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 100);
             }
             else
-		        itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text);
+		        itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text).OrderBy(x => x.favorited ? 0 : 1);
             items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
 			for (int k = 0; k < items.Count; k++)
 			{
