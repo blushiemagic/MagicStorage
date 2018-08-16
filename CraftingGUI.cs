@@ -1063,13 +1063,6 @@ namespace MagicStorage
                             doFiltering();
                         }
 
-                        if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsFavoritesChoice)
-                        {
-                            // search non favorited recipes too
-                            favorited = new HashSet<int>();
-                            doFiltering();
-                        }
-
                         if (threadRecipes.Count == 0 && hiddenRecipes.Count > 0)
                         {
                             // search hidden recipes too

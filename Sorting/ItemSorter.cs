@@ -9,7 +9,7 @@ namespace MagicStorage.Sorting
 	{
 		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
 		{
-            ItemFilter filter = MakeFilter(filterMode);
+		    ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
             if (takeCount != null) filteredItems = filteredItems.Take(takeCount.Value);
 		    var func = MakeSortFunction(sortMode);
@@ -114,7 +114,8 @@ namespace MagicStorage.Sorting
 
         static bool FilterName(Item item, string filter)
         {
-            return item.Name.ToLowerInvariant().IndexOf(filter.ToLowerInvariant()) >= 0;
+            if (filter.Trim().Length == 0) filter = string.Empty;
+            return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant()) >= 0;
         }
 
 	    static bool FilterMod(Item item, int modFilterIndex)

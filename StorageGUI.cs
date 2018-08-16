@@ -314,45 +314,75 @@ namespace MagicStorage
 			return modPlayer.GetStorageHeart();
 		}
 
-		public static void RefreshItems()
-		{
-			if (StoragePlayer.IsStorageCrafting())
-			{
-				CraftingGUI.RefreshItems();
-				return;
-			}
-			items.Clear();
-			didMatCheck.Clear();
-			TEStorageHeart heart = GetHeart();
-			if (heart == null)
-			{
-				return;
-			}
-			InitLangStuff();
-			InitSortButtons();
-			InitFilterButtons();
-		    SortMode sortMode = (SortMode)sortButtons.Choice;
+	    public static void RefreshItems()
+	    {
+	        if (StoragePlayer.IsStorageCrafting())
+	        {
+	            CraftingGUI.RefreshItems();
+	            return;
+	        }
 
-		    FilterMode filterMode = (FilterMode) filterButtons.Choice;
-		    IEnumerable<Item> itemsLocal;
-            if (filterMode == FilterMode.Recent)
-            {
-                var stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+	        items.Clear();
+	        didMatCheck.Clear();
+	        TEStorageHeart heart = GetHeart();
+	        if (heart == null)
+	        {
+	            return;
+	        }
 
-                var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
-                itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
-                    FilterMode.All, modSearchBox.ModIndex, searchBar.Text, 100);
-            }
-            else
-		        itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modSearchBox.ModIndex, searchBar.Text).OrderBy(x => x.favorited ? 0 : 1);
-            items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
-			for (int k = 0; k < items.Count; k++)
-			{
-				didMatCheck.Add(false);
-			}
-		}
+	        InitLangStuff();
+	        InitSortButtons();
+	        InitFilterButtons();
+	        SortMode sortMode = (SortMode) sortButtons.Choice;
 
-		private static void UpdateDepositButton()
+	        FilterMode filterMode = (FilterMode) filterButtons.Choice;
+            var modFilterIndex = modSearchBox.ModIndex;
+
+	        Action doFiltering = () =>
+	        {
+	            IEnumerable<Item> itemsLocal;
+	            if (filterMode == FilterMode.Recent)
+	            {
+	                var stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+
+	                var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
+	                itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
+	                    FilterMode.All, modFilterIndex, searchBar.Text, 100);
+	            }
+	            else
+	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilterIndex, searchBar.Text)
+	                    .OrderBy(x => x.favorited ? 0 : 1);
+
+	            items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
+	        };
+
+	        doFiltering();
+
+	        // now if nothing found we disable filters one by one
+	        if (searchBar.Text.Trim().Length > 0)
+	        {
+	            if (items.Count == 0 && filterMode != FilterMode.All)
+	            {
+                    // search all categories
+	                filterMode = FilterMode.All;
+	                doFiltering();
+	            }
+                
+	            if (items.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+	            {
+	                // search all mods
+	                modFilterIndex = ModSearchBox.ModIndexAll;
+	                doFiltering();
+	            }
+	        }
+
+	        for (int k = 0; k < items.Count; k++)
+	        {
+	            didMatCheck.Add(false);
+	        }
+	    }
+
+	    private static void UpdateDepositButton()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
