@@ -87,7 +87,7 @@ namespace MagicStorage.Sorting
             else
                 defence = 8;
 
-            return Math.Max(item.damage - defence * 0.5f, 1) / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f);
+            return Math.Max(item.damage - defence * 0.5f, 1) / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f) * (1f + item.crit / 100f);
         }
 	}
 }
