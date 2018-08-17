@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
@@ -63,7 +64,30 @@ namespace MagicStorage.Sorting
 
         public static float GetDps(Item item)
         {
-            return item.damage / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f);
+            if (item.damage <= 0) return 0f;
+            int defence;
+            if (NPC.downedMoonlord)
+                defence = 50;
+            else if (NPC.downedAncientCultist)
+                defence = 43;
+            else if (NPC.downedGolemBoss)
+                defence = 38;
+            else if (NPC.downedPlantBoss)
+                defence = 32;
+            else if (NPC.downedMechBossAny)
+                defence = 26;
+            else if (Main.hardMode)
+                defence = 22;
+            else if (NPC.downedBoss3)
+                defence = 16;
+            else if (NPC.downedBoss2)
+                defence = 14;
+            else if (NPC.downedBoss1)
+                defence = 10;
+            else
+                defence = 8;
+
+            return Math.Max(item.damage - defence * 0.5f, 1) / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f);
         }
 	}
 }

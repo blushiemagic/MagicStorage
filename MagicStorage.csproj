@@ -69,6 +69,7 @@
     <Compile Include="Components\TEStoragePoint.cs" />
     <Compile Include="Components\TEStorageUnit.cs" />
     <Compile Include="CraftingGUI.cs" />
+    <Compile Include="DpsTooltips.cs" />
     <Compile Include="GUIHelpers.cs" />
     <Compile Include="InterfaceHelper.cs" />
     <Compile Include="ItemData.cs" />
