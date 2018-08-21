@@ -56,7 +56,7 @@ namespace MagicStorage.Components
 
 		public abstract bool HasSpaceInStackFor(Item check, bool locked = false);
 
-		public abstract  bool HasItem(Item check, bool locked = false);
+		public abstract  bool HasItem(Item check, bool locked = false, bool ignorePrefix = false);
 
 		public abstract IEnumerable<Item> GetItems();
 

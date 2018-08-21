@@ -549,7 +549,7 @@ namespace MagicStorage
 			Player player = Main.player[Main.myPlayer];
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
-		    Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item));
+		    Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			if (Main.netMode == 0)
 			{
 				for (int k = 10; k < 50; k++)

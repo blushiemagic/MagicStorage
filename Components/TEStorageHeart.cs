@@ -360,7 +360,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public bool HasItem(Item lookFor)
+		public bool HasItem(Item lookFor, bool ignorePrefix = false)
 		{
 			if (Main.netMode == 2)
 			{
@@ -370,7 +370,7 @@ namespace MagicStorage.Components
 			{
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
-				    if (storageUnit.HasItem(lookFor, true))
+				    if (storageUnit.HasItem(lookFor, true, ignorePrefix))
 				        return true;
 				}
 				return false;
