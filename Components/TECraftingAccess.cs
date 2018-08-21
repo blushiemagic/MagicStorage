@@ -13,11 +13,15 @@ namespace MagicStorage.Components
 {
 	public class TECraftingAccess : TEStorageComponent
 	{
-		public Item[] stations = new Item[30];
+	    public const int Rows = 3;
+	    public const int ItemsPerRow = 15;
+	    public const int ItemsTotal = Rows * ItemsPerRow;
+
+		public Item[] stations = new Item[ItemsTotal];
 
 		public TECraftingAccess()
 		{
-			for (int k = 0; k < 30; k++)
+			for (int k = 0; k < ItemsTotal; k++)
 			{
 				stations[k] = new Item();
 			}

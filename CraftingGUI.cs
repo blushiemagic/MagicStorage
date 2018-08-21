@@ -67,7 +67,6 @@ namespace MagicStorage
 		
 		private static UIText stationText;
 		private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale / 1.55f);
-		private static UIText recipeText;
 		private static UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
 		internal static UIScrollbar scrollBar = new UIScrollbar();
@@ -220,16 +219,13 @@ namespace MagicStorage
 
 			stationZone.Width.Set(0f, 1f);
 			stationZone.Top.Set(100f, 0f);
-			stationZone.Height.Set(90f, 0f);
-			stationZone.SetDimensions(15, 2);
+			stationZone.Height.Set(110f, 0f);
+			stationZone.SetDimensions(15, 3);
 			basePanel.Append(stationZone);
-
-			recipeText.Top.Set(152f, 0f);
-			basePanel.Append(recipeText);
-
+            
 			recipeZone.Width.Set(0f, 1f);
-			recipeZone.Top.Set(176f, 0f);
-			recipeZone.Height.Set(-216f, 1f);
+			recipeZone.Top.Set(196f, 0f);
+			recipeZone.Height.Set(-196f, 1f);
 			basePanel.Append(recipeZone);
 
 			numRows = (recipes.Count + numColumns - 1) / numColumns;
@@ -337,10 +333,6 @@ namespace MagicStorage
 			if (stationText == null)
 			{
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
-			}
-			if (recipeText == null)
-			{
-				recipeText = new UIText(Language.GetText("Mods.MagicStorage.Recipes"));
 			}
 			if (capacityText == null)
 			{

@@ -180,15 +180,18 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
-				if (Main.netMode == 0)
-				{
-					GetCraftingAccess().TryDepositStation(item);
-				}
-				else
-				{
-					NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
-					item.SetDefaults(0, true);
-				}
+			    if (false)
+			    {
+			        if (Main.netMode == 0)
+			        {
+			            GetCraftingAccess().TryDepositStation(item);
+			        }
+			        else
+			        {
+			            NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
+			            item.SetDefaults(0, true);
+			        }
+			    }
 			}
 			else
 			{
