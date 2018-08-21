@@ -125,16 +125,6 @@ namespace MagicStorage
 		{
 			storageAccess = new Point16(-1, -1);
 			Main.blockInput = false;
-			if (StorageGUI.searchBar != null)
-			{
-				StorageGUI.searchBar.Reset();
-			}
-			if (CraftingGUI.searchBar != null)
-			{
-				CraftingGUI.searchBar.Reset();
-			}
-            CraftingGUI.modSearchBox.Reset(true);
-		    StorageGUI.modSearchBox.Reset(true);
 		}
 
 		public Point16 ViewingStorage()
