@@ -27,6 +27,10 @@ namespace MagicStorage
 			{
 				return choice;
 			}
+		    set
+		    {
+		        choice = value;
+		    }
 		}
 
 		public UIButtonChoice(Action onChanged, Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)

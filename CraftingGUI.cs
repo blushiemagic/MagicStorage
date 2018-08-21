@@ -32,6 +32,7 @@ namespace MagicStorage
 
 	    static HashSet<int> threadCheckListFoundItems;
         static Mod _checkListMod;
+	    static volatile bool wasItemChecklistRetrieved;
 
 		public static MouseState curMouse;
 		public static MouseState oldMouse;
@@ -398,7 +399,7 @@ namespace MagicStorage
 				    Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
                     Language.GetText("Mods.MagicStorage.RecipeBlacklist"),
 				    
-                });
+                }) { Choice = 1 };
 			}
 		}
 
@@ -906,7 +907,8 @@ namespace MagicStorage
 	            _checkListMod = ModLoader.GetMod("ItemChecklist");
 
 	        var foundItems = _checkListMod != null ? _checkListMod.Call("RequestFoundItems") as bool[] : new bool[0];
-	        return foundItems.Select((v, type) => new { WasFound = v, type }).Where(x => x.WasFound).Select(x => x.type);
+	        if (foundItems.Length > 0) wasItemChecklistRetrieved = true;
+	        return  foundItems.Select((v, type) => new { WasFound = v, type }).Where(x => x.WasFound).Select(x => x.type);
         }
 
 	    static void EnsureProductToRecipesInited()
@@ -1033,7 +1035,7 @@ namespace MagicStorage
                             // show only favorited items if selected
                             .Where(x => (recipeButtons.Choice != RecipeButtonsFavoritesChoice) || favorited.Contains(x.createItem.type))
                             // hard check if this item can be crafted from available items and their recursive products
-                            .Where(x => IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
+                            .Where(x => !wasItemChecklistRetrieved || IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
                             .OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1);
 
                         threadRecipes.Clear();
