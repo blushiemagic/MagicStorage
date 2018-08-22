@@ -63,7 +63,17 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item)
 		{
-            if (item.type == 109 || item.type == 29) return false; // mana or heart crystal
+		    switch (item.type)
+		    {
+                case 109:// mana or heart crystal
+                case 29:
+                case ItemID.CellPhone:
+                case ItemID.PDA:
+                case ItemID.MagicMirror:
+                case ItemID.IceMirror:
+                    return false; 
+		    }
+            
 			return item.summon || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item) || item.sentry;
 		}
 	}
