@@ -247,7 +247,8 @@ namespace MagicStorage
 				{
 					ResetSlotFocus();
 				}
-				basePanel.Update(gameTime);
+				if(basePanel != null)
+					basePanel.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
 			}
