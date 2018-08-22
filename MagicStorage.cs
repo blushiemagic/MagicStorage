@@ -295,6 +295,10 @@ namespace MagicStorage
 
 		public override void PostUpdateInput()
 		{
+			if (!Main.instance.IsActive)
+			{
+				return;
+			}
 			StorageGUI.Update(null);
 			CraftingGUI.Update(null);
 		}
