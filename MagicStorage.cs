@@ -260,7 +260,7 @@ namespace MagicStorage
 			text.SetDefault(" !UNTIL RESPAWN!");
 			AddTranslation(text);
 		}
-
+        
         public override void PostSetupContent()
 		{
 

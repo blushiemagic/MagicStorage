@@ -929,6 +929,24 @@ namespace MagicStorage
         {
             bool v;
             if (cache.TryGetValue(recipe, out v)) return v;
+
+
+            foreach (int tile in recipe.requiredTile)
+            {
+                if (tile == -1)
+                    break;
+
+                List<int> possibleItems;
+                if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out possibleItems))
+                    continue;
+
+                if (!possibleItems.Any(x => IsKnownRecursively_CheckIngredient(x, availableSet, recursionTree, cache)))
+                {
+                    cache[recipe] = false;
+                    return false;
+                }
+            }
+
             int ingredients = 0;
             for (int i = 0; i < Recipe.maxRequirements; i++)
             {
