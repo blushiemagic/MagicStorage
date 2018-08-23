@@ -17,6 +17,7 @@ namespace MagicStorage
 		public static MagicStorage Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
+	    public static ModHotKey IsItemKnownHotKey { get; private set; }
 
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
 
@@ -32,6 +33,7 @@ namespace MagicStorage
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
 		    AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
+		    IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
 		}
 
 		public override void Unload()
@@ -354,11 +356,11 @@ namespace MagicStorage
 			InterfaceHelper.ModifyInterfaceLayers(layers);
 		}
 
-		public override void PostUpdateInput()
-		{
-			StorageGUI.Update(null);
-			CraftingGUI.Update(null);
-		}
+	    public override void PostUpdateInput()
+	    {
+	        StorageGUI.Update(null);
+	        CraftingGUI.Update(null);
+	    }
 	}
 }
 

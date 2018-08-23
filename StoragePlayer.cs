@@ -6,6 +6,7 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 

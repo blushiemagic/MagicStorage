@@ -405,6 +405,16 @@ namespace MagicStorage
 
 		public static void Update(GameTime gameTime)
 		{
+		    try
+		    {
+		        if (MagicStorage.IsItemKnownHotKey != null && MagicStorage.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir)
+		            Main.NewTextMultiline(Main.HoverItem.Name + " is " + (CraftingGUI.GetKnownItems().Contains(Main.HoverItem.type) ? "known" : "new"));
+		    }
+		    catch (KeyNotFoundException)
+		    {
+		        // ignore
+		    }
+
 		    try {
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
@@ -871,7 +881,7 @@ namespace MagicStorage
 			}
 		}
 
-        static HashSet<int> GetKnownItems()
+        public static HashSet<int> GetKnownItems()
         {
             HashSet<int> a, b, c, d;
             GetKnownItems(out a, out b, out c, out d);
