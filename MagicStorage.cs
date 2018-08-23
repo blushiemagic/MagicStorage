@@ -356,11 +356,15 @@ namespace MagicStorage
 			InterfaceHelper.ModifyInterfaceLayers(layers);
 		}
 
-	    public override void PostUpdateInput()
-	    {
-	        StorageGUI.Update(null);
-	        CraftingGUI.Update(null);
-	    }
+		public override void PostUpdateInput()
+		{
+			if (!Main.instance.IsActive)
+			{
+				return;
+			}
+			StorageGUI.Update(null);
+			CraftingGUI.Update(null);
+		}
 	}
 }
 
