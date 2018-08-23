@@ -20,8 +20,8 @@ namespace MagicStorage
 
         ItemTypeOrderedSet _hiddenRecipes = new ItemTypeOrderedSet("HiddenItems");
         ItemTypeOrderedSet _craftedRecipes = new ItemTypeOrderedSet("CraftedRecipes");
-        
-        public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
+	    
+	    public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
         public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
         
 	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
@@ -114,11 +114,14 @@ namespace MagicStorage
 				}
 			}
 		}
+        
+	    TEStorageHeart _latestAccessedStorage;
+	    public TEStorageHeart LatestAccessedStorage => _latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
 
-		public void OpenStorage(Point16 point, bool remote = false)
+	    public void OpenStorage(Point16 point, bool remote = false)
 		{
-			storageAccess = point;
-			remoteAccess = remote;
+			storageAccess = point;remoteAccess = remote;
+            _latestAccessedStorage = GetStorageHeart();
 			StorageGUI.RefreshItems();
 		}
 

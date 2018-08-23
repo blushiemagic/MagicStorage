@@ -20,7 +20,14 @@ namespace MagicStorage.Components
 		private int updateTimer = 60;
 		private int compactStage = 0;
 
-		public override bool ValidTile(Tile tile)
+	    public bool IsAlive { get; private set; } = true;
+
+	    public override void OnKill()
+	    {
+	        IsAlive = false;
+	    }
+
+	    public override bool ValidTile(Tile tile)
 		{
 			return tile.type == mod.TileType("StorageHeart") && tile.frameX == 0 && tile.frameY == 0;
 		}
