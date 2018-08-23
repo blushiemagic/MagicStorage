@@ -148,7 +148,7 @@ namespace MagicStorage.Components
 		{
 			foreach (Item item in stations)
 			{
-				ItemIO.Send(item, writer, true, false);
+				ItemIO.Send(item, writer, true, true);
 			}
 		}
 
@@ -156,7 +156,7 @@ namespace MagicStorage.Components
 		{
 			for (int k = 0; k < stations.Length; k++)
 			{
-				stations[k] = ItemIO.Receive(reader, true, false);
+				stations[k] = ItemIO.Receive(reader, true, true);
 			}
 		}
 	}

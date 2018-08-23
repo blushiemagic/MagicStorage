@@ -148,7 +148,7 @@ namespace MagicStorage
 			if (Main.netMode == 1)
 			{
 				ModPacket packet = PrepareStorageOperation(ent, 0);
-				ItemIO.Send(item, packet, true);
+				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 			}
 		}
@@ -159,7 +159,7 @@ namespace MagicStorage
 			{
 				ModPacket packet = PrepareStorageOperation(ent, (byte)(toInventory ? 3 : 1));
                 packet.Write(keepOneIfFavorite);
-				ItemIO.Send(item, packet, true);
+				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 			}
 		}
@@ -172,7 +172,7 @@ namespace MagicStorage
 				packet.Write((byte)items.Count);
 				foreach (Item item in items)
 				{
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 				}
 				packet.Send();
 			}
@@ -193,24 +193,24 @@ namespace MagicStorage
 			byte op = reader.ReadByte();
 			if (op == 0)
 			{
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				heart.DepositItem(item);
 				if (!item.IsAir)
 				{
 					ModPacket packet = PrepareOperationResult(op);
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
 				}
 			}
 			else if (op == 1 || op == 3)
 			{
                 var keepOneIfFavorite = reader.ReadBoolean();
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				item = heart.TryWithdraw(item, keepOneIfFavorite);
                 if (!item.IsAir)
 				{
 					ModPacket packet = PrepareOperationResult(op);
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
 				}
 			}
@@ -221,7 +221,7 @@ namespace MagicStorage
 				StartUpdateQueue();
 				for (int k = 0; k < count; k++)
 				{
-					Item item = ItemIO.Receive(reader, true);
+					Item item = ItemIO.Receive(reader, true, true);
 					heart.DepositItem(item);
 					if (!item.IsAir)
 					{
@@ -235,7 +235,7 @@ namespace MagicStorage
 					packet.Write((byte)items.Count);
 					foreach (Item item in items)
 					{
-						ItemIO.Send(item, packet, true);
+						ItemIO.Send(item, packet, true, true);
 					}
 					packet.Send(sender);
 				}
@@ -253,7 +253,7 @@ namespace MagicStorage
 			byte op = reader.ReadByte();
 			if (op == 0 || op == 1 || op == 3)
 			{
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				StoragePlayer.GetItem(item, op != 3);
 			}
 			else if (op == 2)
@@ -261,7 +261,7 @@ namespace MagicStorage
 				int count = reader.ReadByte();
 				for (int k = 0; k < count; k++)
 				{
-					Item item = ItemIO.Receive(reader, true);
+					Item item = ItemIO.Receive(reader, true, true);
 					StoragePlayer.GetItem(item, false);
 				}
 			}
@@ -333,7 +333,7 @@ namespace MagicStorage
 			if (Main.netMode == 1)
 			{
 				ModPacket packet = PrepareStationOperation(ent, 0);
-				ItemIO.Send(item, packet, true);
+				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 			}
 		}
@@ -353,7 +353,7 @@ namespace MagicStorage
 			if (Main.netMode == 1)
 			{
 				ModPacket packet = PrepareStationOperation(ent, 2);
-				ItemIO.Send(item, packet, true);
+				ItemIO.Send(item, packet, true, true);
 				packet.Write((byte)slot);
 				packet.Send();
 			}
@@ -375,12 +375,12 @@ namespace MagicStorage
 			byte op = reader.ReadByte();
 			if (op == 0)
 			{
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				access.TryDepositStation(item);
 				if (item.stack > 0)
 				{
 					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
 				}
 			}
@@ -391,19 +391,19 @@ namespace MagicStorage
 				if (!item.IsAir)
 				{
 					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
 				}
 			}
 			else if (op == 2)
 			{
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				int slot = reader.ReadByte();
 				item = access.DoStationSwap(item, slot);
 				if (!item.IsAir)
 				{
 					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
 				}
 			}
@@ -427,7 +427,7 @@ namespace MagicStorage
 			}
 			Player player = Main.player[Main.myPlayer];
 			byte op = reader.ReadByte();
-			Item item = ItemIO.Receive(reader, true);
+			Item item = ItemIO.Receive(reader, true, true);
 			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
 			{
 				Main.mouseItem = item;
@@ -487,9 +487,9 @@ namespace MagicStorage
 				packet.Write(toWithdraw.Count);
 				foreach (Item item in toWithdraw)
 				{
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 				}
-				ItemIO.Send(result, packet, true);
+				ItemIO.Send(result, packet, true, true);
 				packet.Send();
 			}
 		}
@@ -510,9 +510,9 @@ namespace MagicStorage
 			List<Item> toWithdraw = new List<Item>();
 			for (int k = 0; k < count; k++)
 			{
-				toWithdraw.Add(ItemIO.Receive(reader, true));
+				toWithdraw.Add(ItemIO.Receive(reader, true, true));
 			}
-			Item result = ItemIO.Receive(reader, true);
+			Item result = ItemIO.Receive(reader, true, true);
 			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, result);
 			if (items.Count > 0)
 			{
@@ -521,7 +521,7 @@ namespace MagicStorage
 				packet.Write(items.Count);
 				foreach (Item item in items)
 				{
-					ItemIO.Send(item, packet, true);
+					ItemIO.Send(item, packet, true, true);
 				}
 				packet.Send(sender);
 			}
@@ -534,7 +534,7 @@ namespace MagicStorage
 			int count = reader.ReadInt32();
 			for (int k = 0; k < count; k++)
 			{
-				Item item = ItemIO.Receive(reader, true);
+				Item item = ItemIO.Receive(reader, true, true);
 				player.QuickSpawnClonedItem(item, item.stack);
 			}
 		}

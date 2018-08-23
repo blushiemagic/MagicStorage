@@ -12,6 +12,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
 using MagicStorage.Sorting;
+using Terraria.ID;
 
 namespace MagicStorage
 {
@@ -444,9 +445,17 @@ namespace MagicStorage
 				}
 				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
 				{
-                    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
-                        items[slot].favorited = !items[slot].favorited;
-                    else
+				    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+				    {
+				        if (Main.netMode == NetmodeID.SinglePlayer)
+				            items[slot].favorited = !items[slot].favorited;
+				        else
+				            Main.NewTextMultiline("TOggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
+                        // there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
+                        // a workaropund would be to withdraw and deposit it back with changed favorite flag
+                        // but it still might look ugly for the player that initiates operation
+				    }
+				    else
                     {
                         Item toWithdraw = items[slot].Clone();
                         if (toWithdraw.stack > toWithdraw.maxStack)

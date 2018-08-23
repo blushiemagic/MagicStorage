@@ -238,7 +238,9 @@ namespace MagicStorage.Components
 							{
 								if (Main.netMode == 2)
 								{
-									netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
+								    var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+								    op.SendKeepOneIfFavorite = keepOneIfFavorite;
+								    netQueue.Enqueue(op);
 								}
 								PostChangeContents();
 							}
@@ -254,7 +256,9 @@ namespace MagicStorage.Components
 				{
 					if (Main.netMode == 2)
 					{
-						netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
+					    var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+					    op.SendKeepOneIfFavorite = keepOneIfFavorite;
+					    netQueue.Enqueue(op);
 					}
 					PostChangeContents();
 				}
@@ -576,7 +580,7 @@ namespace MagicStorage.Components
 				writer.Write(unit.items.Count);
 				foreach (Item item in unit.items)
 				{
-					ItemIO.Send(item, writer, true, false);
+					ItemIO.Send(item, writer, true, true);
 				}
 			}
 
@@ -586,7 +590,7 @@ namespace MagicStorage.Components
 				int count = reader.ReadInt32();
 				for (int k = 0; k < count; k++)
 				{
-					Item item = ItemIO.Receive(reader, true, false);
+					Item item = ItemIO.Receive(reader, true, true);
 					unit.items.Add(item);
 					ItemData data = new ItemData(item);
 					if (item.stack < item.maxStack)
@@ -604,27 +608,30 @@ namespace MagicStorage.Components
 		{
 			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
 			{
-				ItemIO.Send(data, writer, true, false);
+				ItemIO.Send(data, writer, true, true);
 			}
 
 			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
 			{
-				unit.DepositItem(ItemIO.Receive(reader, true, false));
+				unit.DepositItem(ItemIO.Receive(reader, true, true));
 				return true;
 			}
 		}
 
 		class WithdrawOperation : UnitOperation
 		{
+            public bool SendKeepOneIfFavorite { get; set; }
+
 			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
 			{
-				ItemIO.Send(data, writer, true, false);
+			    writer.Write(SendKeepOneIfFavorite);
+				ItemIO.Send(data, writer, true, true);
 			}
 
 			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
 			{
                 bool keepOneIfFavorite = reader.ReadBoolean();
-				unit.TryWithdraw(ItemIO.Receive(reader, true, false), keepOneIfFavorite: keepOneIfFavorite);
+				unit.TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
 				return true;
 			}
 		}
