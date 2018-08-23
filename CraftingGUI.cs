@@ -434,7 +434,6 @@ namespace MagicStorage
 			else
 			{
 				scrollBarFocus = 0;
-				selectedRecipe = null;
 				craftTimer = 0;
 				maxCraftTimer = startMaxCraftTimer;
 				ResetSlotFocus();
