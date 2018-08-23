@@ -232,7 +232,6 @@ namespace MagicStorage
 			else
 			{
 				scrollBarFocus = false;
-				scrollBar.ViewPosition = 0f;
 				ResetSlotFocus();
 			}
 		}
