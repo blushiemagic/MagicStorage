@@ -36,8 +36,6 @@ namespace MagicStorage
 			Instance = null;
 			bluemagicMod = null;
 			legendMod = null;
-			StorageGUI.Unload();
-			CraftingGUI.Unload();
 		}
 
 		private void AddTranslations()
