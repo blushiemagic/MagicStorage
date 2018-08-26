@@ -592,7 +592,6 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 			{
 				reqObjText2.SetText("");
-			    recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
             }
 			else
 			{
@@ -652,12 +651,6 @@ namespace MagicStorage
 					text = Language.GetTextValue("LegacyInterface.23");
 				}
 				reqObjText2.SetText(text);
-                var item = selectedRecipe.createItem;
-			    var dps = CompareDps.GetDps(item);
-                if (dps >= 1f)
-                    recipePanelHeader.SetText("DPS = " + dps.ToString("F0"));
-                else
-                    recipePanelHeader.SetText("");
             }
 		}
 
