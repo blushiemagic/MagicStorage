@@ -134,7 +134,7 @@ namespace MagicStorage.Items
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			recipe.AddIngredient(ItemID.Ruby, 3);
+			recipe.AddIngredient(ItemID.Ruby, 7);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
@@ -146,7 +146,7 @@ namespace MagicStorage.Items
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 3);
+				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
 				recipe.AddRecipe();
@@ -159,7 +159,7 @@ namespace MagicStorage.Items
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 3);
+				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);
 				recipe.AddRecipe();
@@ -167,4 +167,3 @@ namespace MagicStorage.Items
 		}
 	}
 }
-

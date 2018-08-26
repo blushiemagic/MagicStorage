@@ -46,11 +46,10 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.MartianConduitPlating, 25);
-			recipe.AddIngredient(ItemID.LunarBar, 2);
+			recipe.AddIngredient(ItemID.LunarBar, 5);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 		}
 	}
 }
-

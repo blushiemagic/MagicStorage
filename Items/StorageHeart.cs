@@ -39,11 +39,11 @@ namespace MagicStorage.Items
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			if (MagicStorage.legendMod == null)
 			{
-				recipe.AddIngredient(ItemID.Emerald, 3);
+				recipe.AddIngredient(ItemID.Emerald, 7);
 			}
 			else
 			{
-				recipe.AddRecipeGroup("MagicStorage:AnyEmerald", 3);
+				recipe.AddRecipeGroup("MagicStorage:AnyEmerald", 7);
 			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
