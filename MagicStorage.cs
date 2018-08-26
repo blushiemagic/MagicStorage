@@ -104,9 +104,16 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.French, "Trier par nom");
 			text.AddTranslation(GameCulture.Spanish, "Ordenar por nombre");
 			AddTranslation(text);
+            
+		    text = CreateTranslation("SortStack");
+		    text.SetDefault("Sort by Stacks");
+		    text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
+		    text.AddTranslation(GameCulture.French, "Trier par piles");
+		    text.AddTranslation(GameCulture.Spanish, "Ordenar por pilas");
+		    AddTranslation(text);
 
-			text = CreateTranslation("SortStack");
-			text.SetDefault("Sort by Value");
+			text = CreateTranslation("SortValue");
+			text.SetDefault("Sort by Price");
 			AddTranslation(text);
 
 			text = CreateTranslation("FilterAll");
