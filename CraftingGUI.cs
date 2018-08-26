@@ -487,23 +487,11 @@ namespace MagicStorage
 	            sortButtons.DrawText();
 	            recipeButtons.DrawText();
 	            filterButtons.DrawText();
-	            DrawCraftButton();
 	        }
 	        catch (Exception e)
 	        {
 	            Main.NewTextMultiline(e.ToString());
 	        }
-	    }
-
-	    private static void DrawCraftButton()
-	    {
-	        Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
-
-            if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height
-                && selectedRecipe != null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
-            {
-                Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
-            }
 	    }
 
 	    private static Item GetStation(int slot, ref int context)
@@ -752,20 +740,7 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				craftButton.BackgroundColor = new Color(73, 94, 171);
-			    if (RightMouseClicked && selectedRecipe != null && Main.mouseItem.IsAir)
-			    {
-			        var item = selectedRecipe.createItem;
-			        if (CanItemBeTakenForTest(item))
-			        {
-			            var type = item.type;
-			            var testItem = new Item();
-			            testItem.SetDefaults(type, true);
-			            MarkAsTestItem(testItem);
-			            Main.mouseItem = testItem;
-			            ModPlayer.TestedRecipes.Add(selectedRecipe.createItem);
-			        }
-			    }
-                else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe))
+			    if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe))
 				{
 				    if (craftTimer <= 0)
 				    {
@@ -800,30 +775,6 @@ namespace MagicStorage
 				maxCraftTimer = startMaxCraftTimer;
 			}
 		}
-
-	    static bool CanItemBeTakenForTest(Item item)
-	    {
-	        return Main.netMode == NetmodeID.SinglePlayer 
-	            && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee
-	                || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot]
-	                || item.pick > 0 || item.axe > 0 || item.hammer > 0)
-	            && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None
-	            && !ModPlayer.TestedRecipes.Contains(item);
-	    }
-
-	    public static void MarkAsTestItem(Item testItem)
-	    {
-	        testItem.value = 0;
-	        testItem.shopCustomPrice = 0;
-	        testItem.material = false;
-	        testItem.rare = -11;
-	        testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-	    }
-
-	    public static bool IsTestItem(Item item)
-	    {
-	        return item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-	    }
 
 	    private static TEStorageHeart GetHeart()
 		{

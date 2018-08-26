@@ -32,7 +32,6 @@ namespace MagicStorage
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
-		    AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
 		    IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
 		}
 

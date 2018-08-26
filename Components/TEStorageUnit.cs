@@ -145,8 +145,7 @@ namespace MagicStorage.Components
 			}
 			try
 			{
-                if (CraftingGUI.IsTestItem(toDeposit)) return;
-				Item original = toDeposit.Clone();
+                Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
 				foreach (Item item in items)

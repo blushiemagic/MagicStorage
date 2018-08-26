@@ -26,7 +26,6 @@ namespace MagicStorage
         
 	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
 	    public ItemTypeOrderedSet SeenRecipes { get; private set; } = new ItemTypeOrderedSet("SeenRecipes");
-	    public ItemTypeOrderedSet TestedRecipes { get; private set; } = new ItemTypeOrderedSet("TestedRecipes");
 	    public ItemTypeOrderedSet AsKnownRecipes { get; private set; } = new ItemTypeOrderedSet("AsKnownRecipes");
 
 	    public bool IsRecipeHidden(Item item)
@@ -56,7 +55,6 @@ namespace MagicStorage
             _craftedRecipes.Save(c);
             FavoritedRecipes.Save(c);
 	        SeenRecipes.Save(c);
-	        TestedRecipes.Save(c);
 	        AsKnownRecipes.Save(c);
             return c;
 	    }
@@ -67,7 +65,6 @@ namespace MagicStorage
             _craftedRecipes.Load(tag);
             FavoritedRecipes.Load(tag);
 	        SeenRecipes.Load(tag);
-	        TestedRecipes.Load(tag);
 	        AsKnownRecipes.Load(tag);
 	    }
 
@@ -260,39 +257,5 @@ namespace MagicStorage
 		{
 			return Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
 		}
-
-	    public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
-	    {
-	        foreach (var item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-	        {
-	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
-	            {
-	                damage *= 5;
-                    break;
-	            }
-	        }
-	    }
-
-	    public override bool CanHitPvp(Item item, Player target)
-	    {
-	        if (CraftingGUI.IsTestItem(item)) return false;
-	        return base.CanHitPvp(item, target);
-	    }
-
-	    public override void OnRespawn(Player player)
-	    {
-	        foreach (var item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-	        {
-	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
-	                item.TurnToAir();
-	        }
-
-	        {
-	            var item = player.trashItem;
-	            if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
-	                item.TurnToAir();
-	        }
-	        base.OnRespawn(player);
-	    }
 	}
 }
