@@ -1,15 +1,8 @@
 author = blushiemagic
-author = blushiemagic and wvlad
 version = 0.4.3.3
-version = 0.4.100.2
-displayName = Magic Storage
 displayName = Magic Storage
 homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
-homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
-hideCode = false
 hideCode = false
 hideResources = false
-hideResources = false
-includeSource = true
 includeSource = true
 buildIgnore = OldArt\*, .git\*
