@@ -17,6 +17,7 @@ namespace MagicStorage
                                           MagicStorage.Instance.GetTexture("SortID"),
                                           MagicStorage.Instance.GetTexture("SortName"),
                                           MagicStorage.Instance.GetTexture("SortNumber"),
+                                          MagicStorage.Instance.GetTexture("SortNumber"),
                                           MagicStorage.Instance.GetTexture("SortNumber")
                                       },
                 new LocalizedText[]
@@ -25,7 +26,8 @@ namespace MagicStorage
                     Language.GetText("Mods.MagicStorage.SortID"),
                     Language.GetText("Mods.MagicStorage.SortName"),
                     Language.GetText("Mods.MagicStorage.SortStack"),
-                    Language.GetText("Mods.MagicStorage.SortDps")
+                    Language.GetText("Mods.MagicStorage.SortStack"),
+                    Language.GetText("Mods.MagicStorage.SortDps"),
                 });
         }
 
