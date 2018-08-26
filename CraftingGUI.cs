@@ -413,29 +413,6 @@ namespace MagicStorage
 
 		public static void Update(GameTime gameTime)
 		{
-		    try
-		    {
-		        if (MagicStorage.IsItemKnownHotKey != null && MagicStorage.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir)
-		        {
-		            var s = Main.HoverItem.Name + " is ";
-		            var t = Main.HoverItem.type;
-		            if (GetKnownItems().Contains(t))
-		            {
-		                s += "known";
-		                var sum = ModPlayer.LatestAccessedStorage?.GetStoredItems().Where(x => x.type == t).Select(x => x.stack).DefaultIfEmpty().Sum() ?? 0;
-		                if (sum > 0)
-		                    s += $" ({sum} in l.a.s.)";
-		            }
-		            else
-		                s += "new";
-		            Main.NewTextMultiline(s);
-		        }
-		    }
-		    catch (KeyNotFoundException)
-		    {
-		        // ignore
-		    }
-
 		    try {
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;

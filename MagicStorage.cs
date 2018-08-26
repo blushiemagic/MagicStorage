@@ -17,8 +17,7 @@ namespace MagicStorage
 		public static MagicStorage Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
-	    public static ModHotKey IsItemKnownHotKey { get; private set; }
-
+	    
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
 
 		public override void Load()
@@ -31,8 +30,7 @@ namespace MagicStorage
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
-			AddTranslations();
-		    IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
+			AddTranslations();		    
 		}
 
 		public override void Unload()
