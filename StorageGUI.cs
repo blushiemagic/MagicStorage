@@ -46,9 +46,8 @@ namespace MagicStorage
 		internal static UITextPanel<LocalizedText> restockButton;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-
-	    public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
-
+	    internal static UISearchBar searchBar2;
+        
         private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
 		private static int slotFocus = -1;
 		private static int rightClickTimer = 0;
@@ -125,12 +124,10 @@ namespace MagicStorage
 
 		    float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
 		    topBar2.Append(filterButtons);
-
-		    modSearchBox.Button.Left.Set(filterButtonsRight + padding, 0f);
-		    modSearchBox.Button.Width.Set(-filterButtonsRight - 2 * padding, 1f);
-		    modSearchBox.Button.Height.Set(0f, 1f);
-		    modSearchBox.Button.OverflowHidden = true;
-		    topBar2.Append(modSearchBox.Button);
+		    searchBar2.Left.Set(filterButtonsRight + padding, 0f);
+		    searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
+		    searchBar2.Height.Set(0f, 1f);
+		    topBar2.Append(searchBar2);
 
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(76f, 0f);
@@ -188,7 +185,10 @@ namespace MagicStorage
 			{
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			}
-            modSearchBox.InitLangStuff();
+		    if (searchBar2 == null)
+		    {
+		        searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"), RefreshItems);
+		    }
 			if (capacityText == null)
 			{
 				capacityText = new UIText("Items");
@@ -229,7 +229,6 @@ namespace MagicStorage
 					basePanel.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
-                modSearchBox.Update(curMouse, oldMouse);
 			}
 			else
 			{
@@ -337,7 +336,7 @@ namespace MagicStorage
 	        SortMode sortMode = (SortMode) sortButtons.Choice;
 
 	        FilterMode filterMode = (FilterMode) filterButtons.Choice;
-            var modFilterIndex = modSearchBox.ModIndex;
+            var modFilter = searchBar2.Text;
 
 	        Action doFiltering = () =>
 	        {
@@ -348,10 +347,10 @@ namespace MagicStorage
 
 	                var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
 	                itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
-	                    FilterMode.All, modFilterIndex, searchBar.Text, 100);
+	                    FilterMode.All, modFilter, searchBar.Text, 100);
 	            }
 	            else
-	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilterIndex, searchBar.Text)
+	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilter, searchBar.Text)
 	                    .OrderBy(x => x.favorited ? 0 : 1);
 
 	            items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
@@ -369,10 +368,10 @@ namespace MagicStorage
 	                doFiltering();
 	            }
                 
-	            if (items.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+	            if (items.Count == 0 && modFilter != "")
 	            {
 	                // search all mods
-	                modFilterIndex = ModSearchBox.ModIndexAll;
+	                modFilter = "";
 	                doFiltering();
 	            }
 	        }

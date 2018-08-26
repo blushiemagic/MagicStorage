@@ -7,20 +7,20 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter, int? takeCount = null)
 		{
 		    ItemFilter filter = MakeFilter(filterMode);
-			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
+		    IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
             if (takeCount != null) filteredItems = filteredItems.Take(takeCount.Value);
 		    var func = MakeSortFunction(sortMode);
 		    if (func == null) return filteredItems;
 		    return filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
 		}
 
-		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
+		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
 		{
 		    var filter = MakeFilter(filterMode);
-		    IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+		    IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
 			var func = MakeSortFunction(sortMode);
 		    if (func == null) return filteredRecipes;
 		    return filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
@@ -117,18 +117,16 @@ namespace MagicStorage.Sorting
             if (filter.Trim().Length == 0) filter = string.Empty;
             return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant()) >= 0;
         }
-
-	    static bool FilterMod(Item item, int modFilterIndex)
-		{
-            if (modFilterIndex == ModSearchBox.ModIndexAll) return true;
-            var allMods = MagicStorage.Instance.AllMods;
-            int index = ModSearchBox.ModIndexBaseGame;
-			if (item.modItem != null)
-			{
-			    index = Array.IndexOf(allMods, item.modItem.mod.Name);
-			}
-            return index == modFilterIndex;
-		}
+        
+	    private static bool FilterName(Item item, string modFilter, string filter)
+	    {
+	        string modName = "Terraria";
+	        if (item.modItem != null)
+	        {
+	            modName = item.modItem.mod.DisplayName;
+	        }
+	        return modName.ToLowerInvariant().IndexOf(modFilter.ToLowerInvariant()) >= 0 && item.Name.ToLowerInvariant().IndexOf(filter.ToLowerInvariant()) >= 0;
+	    }
 	}
 }
 

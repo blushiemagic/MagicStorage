@@ -260,18 +260,7 @@ namespace MagicStorage
 			AddTranslation(text);
 		}
         
-        public override void PostSetupContent()
-		{
-
-		    var type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
-		    FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
-
-		    AllMods = ModLoader.GetLoadedMods().Where(x => ((Dictionary<string, ModItem>)loadModsField.GetValue(ModLoader.GetMod(x))).Count > 0).ToArray();
-        }
-
-        public string[] AllMods { get; private set; }
-
-		public override void AddRecipeGroups()
+        public override void AddRecipeGroups()
 		{
 			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Chest",
 			ItemID.Chest,

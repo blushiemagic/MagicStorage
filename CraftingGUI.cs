@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -64,6 +63,7 @@ namespace MagicStorage
 		private static UIButtonChoice recipeButtons;
 		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
+	    internal static UISearchBar searchBar2;
 		
 		private static UIText stationText;
 	    private static UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale);
@@ -121,9 +121,7 @@ namespace MagicStorage
 		private static float scrollBar2MaxViewSize = 2f;
 
 		internal static UITextPanel<LocalizedText> craftButton;
-	    public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
-
-		private static Item result = null;
+	    private static Item result = null;
 		private static UISlotZone resultZone = new UISlotZone(HoverResult, GetResult, inventoryScale);
 		private static int craftTimer = 0;
 		private const int startMaxCraftTimer = 20;
@@ -208,12 +206,10 @@ namespace MagicStorage
 			InitFilterButtons();
 			float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
             topBar2.Append(filterButtons);
-
-		    modSearchBox.Button.Left.Set(filterButtonsRight + padding, 0f);
-		    modSearchBox.Button.Width.Set(-filterButtonsRight - 2 * padding, 1f);
-		    modSearchBox.Button.Height.Set(0f, 1f);
-		    modSearchBox.Button.OverflowHidden = true;
-			topBar2.Append(modSearchBox.Button);
+            searchBar2.Left.Set(filterButtonsRight + padding, 0f);
+		    searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
+		    searchBar2.Height.Set(0f, 1f);
+		    topBar2.Append(searchBar2);
 
 			stationText.Top.Set(76f, 0f);
 			basePanel.Append(stationText);
@@ -334,6 +330,10 @@ namespace MagicStorage
 			{
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			}
+		    if (searchBar2 == null)
+		    {
+		        searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"), RefreshItems);
+		    }
 			if (stationText == null)
 			{
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
@@ -370,7 +370,6 @@ namespace MagicStorage
 			{
 				craftButton = new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"), 1f);
 			}
-            modSearchBox.InitLangStuff();
 		}
 
 		private static void InitSortButtons()
@@ -431,7 +430,6 @@ namespace MagicStorage
 				UpdateRecipeText();
 				UpdateScrollBar();
 				UpdateCraftButton();
-                modSearchBox.Update(curMouse, oldMouse);
 			}
 			else
 			{
@@ -796,7 +794,7 @@ namespace MagicStorage
 				return;
 			}
 
-		    items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+		    items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, searchBar2.Text, ""));
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
@@ -869,7 +867,7 @@ namespace MagicStorage
 	    {
 	        if (_productToRecipes == null)
 	        {
-	            var allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "").Where(x => x != null && x.createItem != null && x.createItem.type > 0).ToArray();
+	            var allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, "", "").Where(x => x != null && x.createItem != null && x.createItem.type > 0).ToArray();
 	            _productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 	        }
 	    }
@@ -993,13 +991,13 @@ namespace MagicStorage
                     var temp = new HashSet<int>();
                     var tempCache = new Dictionary<Recipe, bool>();
 
-                    var modFilterIndex = modSearchBox.ModIndex;
+                    var modFilter = searchBar2.Text;
 
                     IEnumerable<Recipe> filteredRecipes = null;
 
                     Action doFiltering = () =>
                     {
-                        filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text).Where(x => x != null)
+                        filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilter, searchBar.Text).Where(x => x != null)
                             // show only blacklisted recipes only if choice = 2, otherwise show all other
                             .Where(x => (recipeButtons.Choice == RecipeButtonsBlacklistChoice) == hiddenRecipes.Contains(x.createItem.type))
                             // show only new items if selected
@@ -1051,10 +1049,10 @@ namespace MagicStorage
                             doFiltering();
                         }
 
-                        if (threadRecipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+                        if (threadRecipes.Count == 0 && modFilter != "")
                         {
                             // search all mods
-                            modFilterIndex = ModSearchBox.ModIndexAll;
+                            modFilter = "";
                             doFiltering();
                         }
                     }

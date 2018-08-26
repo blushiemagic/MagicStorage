@@ -107,7 +107,6 @@
     <Compile Include="Items\UpgradeLuminite.cs" />
     <Compile Include="Items\UpgradeTerra.cs" />
     <Compile Include="MagicStorage.cs" />
-    <Compile Include="ModSearchBox.cs" />
     <Compile Include="NetHelper.cs" />
     <Compile Include="ItemTypeOrderedSet.cs" />
     <Compile Include="Sorting\CompareFunction.cs" />
