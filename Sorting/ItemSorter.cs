@@ -43,6 +43,9 @@ namespace MagicStorage.Sorting
 	            case SortMode.Value:
 	                func = new CompareValue();
 	                break;
+	            case SortMode.Quantity:
+	                func = new CompareQuantity();
+	                break;
 	            case SortMode.Dps:
 	                func = new CompareDps();
 	                break;
