@@ -181,6 +181,7 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
+                // I suggest to not use shift clicking for this because I often misused it trying to put things into a storage while crafting window is open
 			    if (false)
 			    {
 			        if (Main.netMode == 0)

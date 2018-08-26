@@ -13,9 +13,7 @@ namespace MagicStorage.Components
 {
 	public class TECraftingAccess : TEStorageComponent
 	{
-	    public const int Rows = 3;
-	    public const int ItemsPerRow = 15;
-	    public const int ItemsTotal = Rows * ItemsPerRow;
+	    public const int ItemsTotal = 10;
 
 		public Item[] stations = new Item[ItemsTotal];
 
@@ -136,10 +134,7 @@ namespace MagicStorage.Components
 			{
 				for (int k = 0; k < stations.Length; k++)
 				{
-                    if (k < listStations.Count)
-                        stations[k] = ItemIO.Load(listStations[k]);
-                    else
-                        stations[k] = new Item();
+                    stations[k] = ItemIO.Load(listStations[k]);
                 }
 			}
 		}
