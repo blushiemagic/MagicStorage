@@ -330,3 +330,8 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+.gitignore
+*.sln
+*.csproj
+Properties/AssemblyInfo.cs
