@@ -159,10 +159,7 @@ namespace MagicStorage.Components
 							newStack = item.maxStack;
 						}
 						item.stack = newStack;
-
-					    if (toDeposit.favorited) item.favorited = true;
                         if (toDeposit.newAndShiny) item.newAndShiny = true;
-
 						hasChange = true;
 						toDeposit.stack = total - newStack;
 						if (toDeposit.stack <= 0)
@@ -176,6 +173,8 @@ namespace MagicStorage.Components
 				if (!finished && !IsFull)
 				{
 					Item item = toDeposit.Clone();
+					item.newAndShiny = false;
+					item.favorited = false;
 					items.Add(item);
 					toDeposit.SetDefaults(0, true);
 					hasChange = true;
@@ -199,7 +198,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
+		public override Item TryWithdraw(Item lookFor, bool locked = false)
 		{
 			if (Main.netMode == 1 && !receiving)
 			{
@@ -219,10 +218,7 @@ namespace MagicStorage.Components
 					Item item = items[k];
 					if (ItemData.Matches(lookFor, item))
 					{
-                        int maxToTake = item.stack;
-					    if (item.stack > 0 && item.favorited && keepOneIfFavorite)
-					        maxToTake -= 1;
-					    int withdraw = Math.Min(lookFor.stack, maxToTake);
+						int withdraw = Math.Min(lookFor.stack, item.stack);
 						item.stack -= withdraw;
 						if (item.stack <= 0)
 						{
@@ -237,9 +233,7 @@ namespace MagicStorage.Components
 							{
 								if (Main.netMode == 2)
 								{
-								    var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
-								    op.SendKeepOneIfFavorite = keepOneIfFavorite;
-								    netQueue.Enqueue(op);
+									netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
 								}
 								PostChangeContents();
 							}
@@ -255,9 +249,7 @@ namespace MagicStorage.Components
 				{
 					if (Main.netMode == 2)
 					{
-					    var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
-					    op.SendKeepOneIfFavorite = keepOneIfFavorite;
-					    netQueue.Enqueue(op);
+						netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
 					}
 					PostChangeContents();
 				}
@@ -579,7 +571,7 @@ namespace MagicStorage.Components
 				writer.Write(unit.items.Count);
 				foreach (Item item in unit.items)
 				{
-					ItemIO.Send(item, writer, true, true);
+					ItemIO.Send(item, writer, true, false);
 				}
 			}
 
@@ -589,7 +581,7 @@ namespace MagicStorage.Components
 				int count = reader.ReadInt32();
 				for (int k = 0; k < count; k++)
 				{
-					Item item = ItemIO.Receive(reader, true, true);
+					Item item = ItemIO.Receive(reader, true, false);
 					unit.items.Add(item);
 					ItemData data = new ItemData(item);
 					if (item.stack < item.maxStack)
@@ -607,30 +599,26 @@ namespace MagicStorage.Components
 		{
 			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
 			{
-				ItemIO.Send(data, writer, true, true);
+				ItemIO.Send(data, writer, true, false);
 			}
 
 			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
 			{
-				unit.DepositItem(ItemIO.Receive(reader, true, true));
+				unit.DepositItem(ItemIO.Receive(reader, true, false));
 				return true;
 			}
 		}
 
 		class WithdrawOperation : UnitOperation
 		{
-            public bool SendKeepOneIfFavorite { get; set; }
-
 			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
 			{
-			    writer.Write(SendKeepOneIfFavorite);
-				ItemIO.Send(data, writer, true, true);
+				ItemIO.Send(data, writer, true, false);
 			}
 
 			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
 			{
-                bool keepOneIfFavorite = reader.ReadBoolean();
-				unit.TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+				unit.TryWithdraw(ItemIO.Receive(reader, true, false));
 				return true;
 			}
 		}

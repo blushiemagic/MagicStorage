@@ -257,14 +257,6 @@ namespace MagicStorage
 			text = CreateTranslation("DepositTooltip");
 		    text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
 			AddTranslation(text);
-
-			text = CreateTranslation("CraftTooltip");
-			text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
-			AddTranslation(text);
-
-			text = CreateTranslation("TestItemSuffix");
-			text.SetDefault(" !UNTIL RESPAWN!");
-			AddTranslation(text);
 		}
         
         public override void AddRecipeGroups()

@@ -134,7 +134,7 @@ namespace MagicStorage.Components
 			{
 				for (int k = 0; k < stations.Length; k++)
 				{
-                    stations[k] = ItemIO.Load(listStations[k]);
+                        stations[k] = ItemIO.Load(listStations[k]);
                 }
 			}
 		}
@@ -143,7 +143,7 @@ namespace MagicStorage.Components
 		{
 			foreach (Item item in stations)
 			{
-				ItemIO.Send(item, writer, true, true);
+				ItemIO.Send(item, writer, true, false);
 			}
 		}
 
@@ -151,7 +151,7 @@ namespace MagicStorage.Components
 		{
 			for (int k = 0; k < stations.Length; k++)
 			{
-				stations[k] = ItemIO.Receive(reader, true, true);
+				stations[k] = ItemIO.Receive(reader, true, false);
 			}
 		}
 	}
