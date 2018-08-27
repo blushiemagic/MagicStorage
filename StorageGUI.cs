@@ -12,7 +12,6 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
 using MagicStorage.Sorting;
-using Terraria.ID;
 
 namespace MagicStorage
 {
@@ -41,7 +40,6 @@ namespace MagicStorage
 		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
-		private static UIToggleButton favoritedOnlyButton;
 		internal static UITextPanel<LocalizedText> depositButton;
 		internal static UITextPanel<LocalizedText> restockButton;
 		private static UIElement topBar2 = new UIElement();
@@ -94,11 +92,7 @@ namespace MagicStorage
 			InitSortButtons();
 			topBar.Append(sortButtons);
 
-		    var x = sortButtons.GetDimensions().Width + 2 * padding;
-            favoritedOnlyButton.Left.Set(x, 0f);
-		    topBar.Append(favoritedOnlyButton);
-
-		    x += favoritedOnlyButton.GetDimensions().Width + 2 * padding;
+			var x = sortButtons.GetDimensions().Width + 2 * padding;
 
 		    depositButton.Left.Set(x, 0f);
 			depositButton.Width.Set(128f, 0f);
@@ -107,8 +101,8 @@ namespace MagicStorage
 			depositButton.PaddingBottom = 8f;
 			topBar.Append(depositButton);
 
-		    x += depositButton.GetDimensions().Width;
-            
+		    x += depositButton.GetDimensions().Width;           
+
             float depositButtonRight = x;
 			searchBar.Left.Set(depositButtonRight + padding, 0f);
 			searchBar.Width.Set(-depositButtonRight - 2 * padding, 1f);
@@ -199,11 +193,7 @@ namespace MagicStorage
 		{
 			if (sortButtons == null)
 			{
-				sortButtons = GUIHelpers.MakeSortButtons(StorageGUI.RefreshItems);
-			}
-			if (favoritedOnlyButton == null)
-			{
-			    favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorage.Instance.GetTexture("FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
 			}
 		}
 
@@ -211,7 +201,7 @@ namespace MagicStorage
 		{
 			if (filterButtons == null)
 			{
-			    filterButtons = GUIHelpers.MakeFilterButtons(true, StorageGUI.RefreshItems);
+			    filterButtons = GUIHelpers.MakeFilterButtons(true, RefreshItems);
 			}
 		}
 
@@ -251,7 +241,6 @@ namespace MagicStorage
 			basePanel.Draw(Main.spriteBatch);
 			slotZone.DrawText();
 			sortButtons.DrawText();
-			favoritedOnlyButton.DrawText();
 			filterButtons.DrawText();
             DrawDepositButton();
 		}
@@ -350,10 +339,9 @@ namespace MagicStorage
 	                    FilterMode.All, modFilter, searchBar.Text, 100);
 	            }
 	            else
-	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilter, searchBar.Text)
-	                    .OrderBy(x => x.favorited ? 0 : 1);
+	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilter, searchBar.Text);
 
-	            items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
+	            items.AddRange(itemsLocal);
 	        };
 
 	        doFiltering();
@@ -445,18 +433,6 @@ namespace MagicStorage
 				}
 				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
 				{
-				    if (Main.keyState.IsKeyDown(Keys.LeftAlt))
-				    {
-				        if (Main.netMode == NetmodeID.SinglePlayer)
-				            items[slot].favorited = !items[slot].favorited;
-				        else
-				            Main.NewTextMultiline("TOggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
-                        // there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
-                        // a workaropund would be to withdraw and deposit it back with changed favorite flag
-                        // but it still might look ugly for the player that initiates operation
-				    }
-				    else
-                    {
                         Item toWithdraw = items[slot].Clone();
                         if (toWithdraw.stack > toWithdraw.maxStack)
                         {
@@ -468,7 +444,6 @@ namespace MagicStorage
                             Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
                         }
                         changed = true;
-                    }
 				}
 				if (changed)
 				{
@@ -607,7 +582,7 @@ namespace MagicStorage
                 {
                     var toWithdraw = item.Clone();
                     toWithdraw.stack = item.maxStack - item.stack;
-                    toWithdraw = DoWithdraw(toWithdraw, true, true);
+                    toWithdraw = DoWithdraw(toWithdraw, true);
                     if (!toWithdraw.IsAir)
                     {
                         item.stack += toWithdraw.stack;
@@ -620,16 +595,16 @@ namespace MagicStorage
             return changed;
         }
 
-		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
+		private static Item DoWithdraw(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == 0)
 			{
-				return heart.TryWithdraw(item, keepOneIfFavorite);
+				return heart.TryWithdraw(item);
 			}
 			else
 			{
-				NetHelper.SendWithdraw(heart.ID, item, toInventory, keepOneIfFavorite);
+				NetHelper.SendWithdraw(heart.ID, item, toInventory);
 				return new Item();
 			}
 		}

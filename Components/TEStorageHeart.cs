@@ -293,12 +293,12 @@ namespace MagicStorage.Components
 				{
 					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{
-                        storageUnit.DepositItem(toDeposit, true);
-                        if (toDeposit.IsAir)
-                        {
+						storageUnit.DepositItem(toDeposit, true);
+						if (toDeposit.IsAir)
+						{
                             _uniqueItemsPutHistory.Add(remember);
                             return;
-                        }
+						}
 					}
 				}
                 toDeposit.newAndShiny = prevNewAndShiny;
@@ -316,7 +316,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite)
+		public Item TryWithdraw(Item lookFor)
 		{
 			if (Main.netMode == 1)
 			{
@@ -333,7 +333,7 @@ namespace MagicStorage.Components
 				{
 					if (storageUnit.HasItem(lookFor, true))
 					{
-						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
+						Item withdrawn = storageUnit.TryWithdraw(lookFor, true);
 						if (!withdrawn.IsAir)
 						{
 							if (result.IsAir)
