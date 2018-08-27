@@ -205,7 +205,7 @@ namespace MagicStorage
 			{
 				Item item = ItemIO.Receive(reader, true);
 				item = heart.TryWithdraw(item);
-                if (!item.IsAir)
+				if (!item.IsAir)
 				{
 					ModPacket packet = PrepareOperationResult(op);
 					ItemIO.Send(item, packet, true);
