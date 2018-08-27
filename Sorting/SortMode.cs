@@ -7,6 +7,9 @@ namespace MagicStorage.Sorting
 		Default,
 		Id,
 		Name,
-		Quantity
+        Value,
+        Quantity,
+        Dps,
+        AsIs
 	}
 }

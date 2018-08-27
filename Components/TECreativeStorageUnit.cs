@@ -29,7 +29,7 @@ namespace MagicStorage.Components
 			return false;
 		}
 
-		public override bool HasItem(Item check, bool locked = false)
+		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false)
 		{
 			return !Inactive;
 		}

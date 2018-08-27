@@ -6,3 +6,4 @@ hideCode = false
 hideResources = false
 includeSource = true
 buildIgnore = OldArt\*, .git\*
+languageVersion = 6

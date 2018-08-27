@@ -4,12 +4,20 @@ namespace MagicStorage.Sorting
 {
 	public enum FilterMode
 	{
-		All,
-		Weapons,
-		Tools,
+		All = 0,
+		WeaponsMelee,
+		WeaponsRanged,
+		WeaponsMagic,
+	    WeaponsSummon,
+        WeaponsThrown,
+        Ammo,
+        Tools,
+        Armor,
 		Equipment,
-		Potions,
+	    Vanity,
+        Potions,
 		Placeables,
-		Misc
+		Misc,
+        Recent
 	}
 }

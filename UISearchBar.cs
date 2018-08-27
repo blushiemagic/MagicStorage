@@ -18,7 +18,8 @@ namespace MagicStorage
 
 		private const int padding = 4;
 		private LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
-		private string text = string.Empty;
+	    readonly Action _clearedEvent;
+	    private string text = string.Empty;
 		private int cursorPosition = 0;
 		private bool hasFocus = false;
 		private int cursorTimer = 0;
@@ -29,9 +30,10 @@ namespace MagicStorage
 			searchBars.Add(this);
 		}
 
-		public UISearchBar(LocalizedText defaultText) : this()
+		public UISearchBar(LocalizedText defaultText, Action clearedEvent) : this()
 		{
-			this.defaultText = defaultText;
+		    this.defaultText = defaultText;
+		    _clearedEvent = clearedEvent;
 		}
 
 		public string Text
@@ -55,54 +57,89 @@ namespace MagicStorage
 			cursorTimer++;
 			cursorTimer %= 60;
 
-			if (StorageGUI.MouseClicked && Parent != null)
-			{
-				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
-				MouseState mouse = StorageGUI.curMouse;
-				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
-				if (!hasFocus && mouseOver)
-				{
-					hasFocus = true;
-					CheckBlockInput();
-				}
-				else if (hasFocus && !mouseOver)
-				{
-					hasFocus = false;
-					CheckBlockInput();
-					cursorPosition = text.Length;
-				}
-			}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus)
-			{
-				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
-				MouseState mouse = StorageGUI.curMouse;
-				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
-				if (!mouseOver)
-				{
-					hasFocus = false;
-					cursorPosition = text.Length;
-					CheckBlockInput();
-				}
-			}
+		    Rectangle dim = InterfaceHelper.GetFullRectangle(this);
+		    MouseState mouse = StorageGUI.curMouse;
+            bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+            if (StorageGUI.MouseClicked && Parent != null)
+            {
+                if (!hasFocus && mouseOver)
+                {
+                    hasFocus = true;
+                    CheckBlockInput();
+                }
+                else if (hasFocus && !mouseOver)
+                {
+                    hasFocus = false;
+                    CheckBlockInput();
+                    cursorPosition = text.Length;
+                }
+            }
+            else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus && !mouseOver)
+            {
+                hasFocus = false;
+                cursorPosition = text.Length;
+                CheckBlockInput();
+            }
+            else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && mouseOver)
+            {
+                if (text.Length > 0)
+                {
+                    text = string.Empty;
+                    cursorPosition = 0;
+                    _clearedEvent?.Invoke();
+                }
+            }
 
-			if (hasFocus)
+            if (hasFocus)
 			{
 				PlayerInput.WritingText = true;
 				Main.instance.HandleIME();
-				string newString = Main.GetInputText(text);
-				if (!newString.Equals(text))
+                string prev = text;
+                if (cursorPosition < text.Length && text.Length > 0)
+                    prev = prev.Remove(cursorPosition);
+				string newString = Main.GetInputText(prev);
+			    bool changed = false;
+				if (!newString.Equals(prev))
 				{
-					text = newString;
-					cursorPosition = text.Length;
-					StorageGUI.RefreshItems();
+                    int newStringLength = newString.Length;
+                    if (prev != text) newString += text.Substring(cursorPosition);
+                    text = newString;
+					cursorPosition = newStringLength;
+				    changed = true;
 				}
-				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
-				{
-					hasFocus = false;
-					CheckBlockInput();
-				}
-			}
-			base.Update(gameTime);
+                if (KeyTyped(Keys.Delete))
+                {
+                    if (text.Length > 0 && cursorPosition < text.Length)
+                    {
+                        text = text.Remove(cursorPosition, 1);
+                        changed = true;
+                    }
+                }
+                if (KeyTyped(Keys.Left))
+                {
+                    if (cursorPosition > 0) cursorPosition--;
+                }
+                if (KeyTyped(Keys.Right))
+                {
+                    if (cursorPosition < text.Length) cursorPosition++;
+                }
+                if (KeyTyped(Keys.Home))
+                {
+                    cursorPosition = 0;
+                }
+                if (KeyTyped(Keys.End))
+                {
+                    cursorPosition = text.Length;
+                }
+                if (changed) StorageGUI.RefreshItems();
+			    if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
+			    {
+			        hasFocus = false;
+			        CheckBlockInput();
+			    }
+
+}
+            base.Update(gameTime);
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)

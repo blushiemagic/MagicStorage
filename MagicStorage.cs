@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,7 +17,7 @@ namespace MagicStorage
 		public static MagicStorage Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
-
+	    
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
 
 		public override void Load()
@@ -28,7 +30,7 @@ namespace MagicStorage
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
-			AddTranslations();
+			AddTranslations();		    
 		}
 
 		public override void Unload()
@@ -36,8 +38,6 @@ namespace MagicStorage
 			Instance = null;
 			bluemagicMod = null;
 			legendMod = null;
-			StorageGUI.Unload();
-			CraftingGUI.Unload();
 		}
 
 		private void AddTranslations()
@@ -57,7 +57,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("DepositAll");
-			text.SetDefault("Deposit All");
+			text.SetDefault("Transfer All");
 			text.AddTranslation(GameCulture.Russian, "Переместить всё");
 			text.AddTranslation(GameCulture.French, "Déposer tout");
 			text.AddTranslation(GameCulture.Spanish, "Depositar todo");
@@ -104,12 +104,16 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.French, "Trier par nom");
 			text.AddTranslation(GameCulture.Spanish, "Ordenar por nombre");
 			AddTranslation(text);
+            
+		    text = CreateTranslation("SortStack");
+		    text.SetDefault("Sort by Stacks");
+		    text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
+		    text.AddTranslation(GameCulture.French, "Trier par piles");
+		    text.AddTranslation(GameCulture.Spanish, "Ordenar por pilas");
+		    AddTranslation(text);
 
-			text = CreateTranslation("SortStack");
-			text.SetDefault("Sort by Stacks");
-			text.AddTranslation(GameCulture.Russian, "Сортировка по стакам");
-			text.AddTranslation(GameCulture.French, "Trier par piles");
-			text.AddTranslation(GameCulture.Spanish, "Ordenar por pilas");
+			text = CreateTranslation("SortValue");
+			text.SetDefault("Sort by Price");
 			AddTranslation(text);
 
 			text = CreateTranslation("FilterAll");
@@ -140,7 +144,40 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Spanish, "Filtrar por equipamiento");
 			AddTranslation(text);
 
-			text = CreateTranslation("FilterPotions");
+			text = CreateTranslation("FilterWeaponsMelee");
+			text.SetDefault("Filter Melee Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsRanged");
+			text.SetDefault("Filter Ranged Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsMagic");
+			text.SetDefault("Filter Magic Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsSummon");
+			text.SetDefault("Filter Summons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterWeaponsThrown");
+			text.SetDefault("Filter Throwing Weapons");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterAmmo");
+			text.SetDefault("Filter Ammo");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterArmor");
+			text.SetDefault("Filter Armor");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterVanity");
+			text.SetDefault("Filter Vanity Items");
+			AddTranslation(text);
+
+
+            text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
 			text.AddTranslation(GameCulture.French, "Filtrer par potions");
@@ -159,6 +196,10 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Разное)");
 			text.AddTranslation(GameCulture.French, "Filtrer par miscellanées");
 			text.AddTranslation(GameCulture.Spanish, "Filtrar por otros");
+			AddTranslation(text);
+
+			text = CreateTranslation("FilterRecent");
+			text.SetDefault("Filter New Recently Added Items");
 			AddTranslation(text);
 
 			text = CreateTranslation("CraftingStations");
@@ -194,24 +235,31 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAvailable");
-			text.SetDefault("Show available recipes");
-			text.AddTranslation(GameCulture.French, "Afficher les recettes disponibles");
-			text.AddTranslation(GameCulture.Spanish, "Mostrar recetas disponibles");
+			text.SetDefault("Show new recipes (right click to remove \"new\" flag)");
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAll");
-			text.SetDefault("Show all recipes");
-			text.AddTranslation(GameCulture.French, "Afficher toutes les recettes");
-			text.AddTranslation(GameCulture.Spanish, "Mostrar todas las recetas");
+			text.SetDefault("Show all known recipes");
+			AddTranslation(text);
+
+			text = CreateTranslation("RecipeBlacklist");
+			text.SetDefault("Show hidden recipes (ctrl+click on recipe to (un)hide)");
+			AddTranslation(text);
+
+			text = CreateTranslation("SortDps");
+			text.SetDefault("Sort by DPS");
+			AddTranslation(text);
+            
+			text = CreateTranslation("ShowOnlyFavorited");
+			text.SetDefault("Only Favorited");
+			AddTranslation(text);
+
+			text = CreateTranslation("DepositTooltip");
+		    text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
 			AddTranslation(text);
 		}
-
-		public override void PostSetupContent()
-		{
-			
-		}
-
-		public override void AddRecipeGroups()
+        
+        public override void AddRecipeGroups()
 		{
 			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Chest",
 			ItemID.Chest,
@@ -304,4 +352,5 @@ namespace MagicStorage
 		}
 	}
 }
+
 

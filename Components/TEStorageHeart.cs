@@ -20,7 +20,14 @@ namespace MagicStorage.Components
 		private int updateTimer = 60;
 		private int compactStage = 0;
 
-		public override bool ValidTile(Tile tile)
+	    public bool IsAlive { get; private set; } = true;
+
+	    public override void OnKill()
+	    {
+	        IsAlive = false;
+	    }
+
+	    public override bool ValidTile(Tile tile)
 		{
 			return tile.type == mod.TileType("StorageHeart") && tile.frameX == 0 && tile.frameY == 0;
 		}
@@ -256,7 +263,10 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public void DepositItem(Item toDeposit)
+	    ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory");
+	    public IEnumerable<Item> UniqueItemsPutHistory { get { return _uniqueItemsPutHistory.Items; } }
+        
+        public void DepositItem(Item toDeposit)
 		{
 			if (Main.netMode == 2)
 			{
@@ -265,6 +275,7 @@ namespace MagicStorage.Components
 			int oldStack = toDeposit.stack;
 			try
 			{
+                var remember = toDeposit.type;
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit, true))
@@ -276,17 +287,21 @@ namespace MagicStorage.Components
 						}
 					}
 				}
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+                var prevNewAndShiny = toDeposit.newAndShiny;
+                toDeposit.newAndShiny = !_uniqueItemsPutHistory.Contains(toDeposit);
+                foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				{
 					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{
 						storageUnit.DepositItem(toDeposit, true);
 						if (toDeposit.IsAir)
 						{
-							return;
+                            _uniqueItemsPutHistory.Add(remember);
+                            return;
 						}
 					}
 				}
+                toDeposit.newAndShiny = prevNewAndShiny;
 			}
 			finally
 			{
@@ -352,6 +367,30 @@ namespace MagicStorage.Components
 			}
 		}
 
+		public bool HasItem(Item lookFor, bool ignorePrefix = false)
+		{
+			if (Main.netMode == 2)
+			{
+				EnterReadLock();
+			}
+			try
+			{
+				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				{
+				    if (storageUnit.HasItem(lookFor, true, ignorePrefix))
+				        return true;
+				}
+				return false;
+			}
+			finally
+			{
+				if (Main.netMode == 2)
+				{
+                    ExitReadLock();
+				}
+			}
+		}
+
 		public override TagCompound Save()
 		{
 			TagCompound tag = base.Save();
@@ -364,6 +403,7 @@ namespace MagicStorage.Components
 				tagRemotes.Add(tagRemote);
 			}
 			tag.Set("RemoteAccesses", tagRemotes);
+            _uniqueItemsPutHistory.Save(tag);
 			return tag;
 		}
 
@@ -374,6 +414,7 @@ namespace MagicStorage.Components
 			{
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			}
+            _uniqueItemsPutHistory.Load(tag);
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)

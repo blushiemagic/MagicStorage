@@ -21,6 +21,7 @@ namespace MagicStorage.Components
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
 		private HashSet<ItemData> hasItem = new HashSet<ItemData>();
+		private HashSet<int> hasItemNoPrefix = new HashSet<int>();
 
 		public int Capacity
 		{
@@ -106,7 +107,7 @@ namespace MagicStorage.Components
 			return !IsFull || HasSpaceInStackFor(check, locked);
 		}
 
-		public override bool HasItem(Item check, bool locked = false)
+		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false)
 		{
 			if (Main.netMode == 2 && !locked)
 			{
@@ -114,8 +115,9 @@ namespace MagicStorage.Components
 			}
 			try
 			{
+			    if (ignorePrefix) return hasItemNoPrefix.Contains(check.type);
 				ItemData data = new ItemData(check);
-				return hasItem.Contains(data);
+                return hasItem.Contains(data);
 			}
 			finally
 			{
@@ -143,7 +145,7 @@ namespace MagicStorage.Components
 			}
 			try
 			{
-				Item original = toDeposit.Clone();
+                Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
 				foreach (Item item in items)
@@ -157,6 +159,7 @@ namespace MagicStorage.Components
 							newStack = item.maxStack;
 						}
 						item.stack = newStack;
+                        if (toDeposit.newAndShiny) item.newAndShiny = true;
 						hasChange = true;
 						toDeposit.stack = total - newStack;
 						if (toDeposit.stack <= 0)
@@ -316,8 +319,11 @@ namespace MagicStorage.Components
 			unit1.hasSpaceInStack = unit2.hasSpaceInStack;
 			unit2.hasSpaceInStack = dict;
 			dict = unit1.hasItem;
-			unit1.hasItem = unit2.hasItem;
-			unit2.hasItem = dict;
+		    unit1.hasItem = unit2.hasItem;
+		    unit2.hasItem = dict;
+		    var temp = unit1.hasItemNoPrefix;
+		    unit1.hasItemNoPrefix = unit2.hasItemNoPrefix;
+		    unit2.hasItemNoPrefix = temp;
 			if (Main.netMode == 2)
 			{
 				unit1.netQueue.Clear();
@@ -375,6 +381,7 @@ namespace MagicStorage.Components
 					hasSpaceInStack.Add(data);
 				}
 				hasItem.Add(data);
+			    hasItemNoPrefix.Add(data.Type);
 			}
 			if (Main.netMode == 2)
 			{
@@ -447,6 +454,7 @@ namespace MagicStorage.Components
 				items = other.items;
 				hasSpaceInStack = other.hasSpaceInStack;
 				hasItem = other.hasItem;
+			    hasItemNoPrefix = other.hasItemNoPrefix;
 			}
 			receiving = true;
 			int count = reader.ReadUInt16();
@@ -473,12 +481,14 @@ namespace MagicStorage.Components
 			items.Clear();
 			hasSpaceInStack.Clear();
 			hasItem.Clear();
+		    hasItemNoPrefix.Clear();
 		}
 
 		private void RepairMetadata()
 		{
 			hasSpaceInStack.Clear();
 			hasItem.Clear();
+		    hasItemNoPrefix.Clear();
 			foreach (Item item in items)
 			{
 				ItemData data = new ItemData(item);
@@ -487,6 +497,7 @@ namespace MagicStorage.Components
 					hasSpaceInStack.Add(data);
 				}
 				hasItem.Add(data);
+			    hasItemNoPrefix.Add(data.Type);
 			}
 		}
 
@@ -578,6 +589,7 @@ namespace MagicStorage.Components
 						unit.hasSpaceInStack.Add(data);
 					}
 					unit.hasItem.Add(data);
+				    unit.hasItemNoPrefix.Add(data.Type);
 				}
 				return false;
 			}
@@ -625,3 +637,4 @@ namespace MagicStorage.Components
 		}
 	}
 }
+

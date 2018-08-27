@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,21 +31,22 @@ namespace MagicStorage
 			}
 		}
 
-		private static UIPanel basePanel;
+		private static UIPanel basePanel = new UIPanel();
 		private static float panelTop;
 		private static float panelLeft;
 		private static float panelWidth;
 		private static float panelHeight;
 
-		private static UIElement topBar;
+		private static UIElement topBar = new UIElement();
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		internal static UITextPanel<LocalizedText> depositButton;
-		private static UIElement topBar2;
+		internal static UITextPanel<LocalizedText> restockButton;
+		private static UIElement topBar2 = new UIElement();
 		private static UIButtonChoice filterButtons;
-		internal static UISearchBar searchBar2;
-
-		private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
+	    internal static UISearchBar searchBar2;
+        
+        private static UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
 		private static int slotFocus = -1;
 		private static int rightClickTimer = 0;
 		private const int startMaxRightClickTimer = 20;
@@ -64,7 +66,7 @@ namespace MagicStorage
 
 		private static UIElement bottomBar = new UIElement();
 		private static UIText capacityText;
-
+        
 		public static void Initialize()
 		{
 			InitLangStuff();
@@ -73,7 +75,6 @@ namespace MagicStorage
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
-			basePanel = new UIPanel();
 			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
@@ -84,7 +85,6 @@ namespace MagicStorage
 			basePanel.Height.Set(panelHeight, 0f);
 			basePanel.Recalculate();
 
-			topBar = new UIElement();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
 			basePanel.Append(topBar);
@@ -92,31 +92,36 @@ namespace MagicStorage
 			InitSortButtons();
 			topBar.Append(sortButtons);
 
-			depositButton.Left.Set(sortButtons.GetDimensions().Width + 2 * padding, 0f);
+			var x = sortButtons.GetDimensions().Width + 2 * padding;
+
+		    depositButton.Left.Set(x, 0f);
 			depositButton.Width.Set(128f, 0f);
 			depositButton.Height.Set(-2 * padding, 1f);
 			depositButton.PaddingTop = 8f;
 			depositButton.PaddingBottom = 8f;
 			topBar.Append(depositButton);
 
-			float depositButtonRight = sortButtons.GetDimensions().Width + 2 * padding + depositButton.GetDimensions().Width;
+		    x += depositButton.GetDimensions().Width;           
+
+            float depositButtonRight = x;
 			searchBar.Left.Set(depositButtonRight + padding, 0f);
 			searchBar.Width.Set(-depositButtonRight - 2 * padding, 1f);
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
-			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
 			topBar2.Height.Set(32f, 0f);
 			topBar2.Top.Set(36f, 0f);
 			basePanel.Append(topBar2);
 
 			InitFilterButtons();
-			topBar2.Append(filterButtons);
-			searchBar2.Left.Set(depositButtonRight + padding, 0f);
-			searchBar2.Width.Set(-depositButtonRight - 2 * padding, 1f);
-			searchBar2.Height.Set(0f, 1f);
-			topBar2.Append(searchBar2);
+
+		    float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
+		    topBar2.Append(filterButtons);
+		    searchBar2.Left.Set(filterButtonsRight + padding, 0f);
+		    searchBar2.Width.Set(-filterButtonsRight - 2 * padding, 1f);
+		    searchBar2.Height.Set(0f, 1f);
+		    topBar2.Append(searchBar2);
 
 			slotZone.Width.Set(0f, 1f);
 			slotZone.Top.Set(76f, 0f);
@@ -161,7 +166,8 @@ namespace MagicStorage
 			}
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
-		}
+
+        }
 
 		private static void InitLangStuff()
 		{
@@ -171,73 +177,35 @@ namespace MagicStorage
 			}
 			if (searchBar == null)
 			{
-				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"));
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			}
-			if (searchBar2 == null)
-			{
-				searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"));
-			}
+		    if (searchBar2 == null)
+		    {
+		        searchBar2 = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchMod"), RefreshItems);
+		    }
 			if (capacityText == null)
 			{
 				capacityText = new UIText("Items");
 			}
 		}
 
-		internal static void Unload()
-		{
-			sortButtons = null;
-			filterButtons = null;
-		}
-
 		private static void InitSortButtons()
 		{
 			if (sortButtons == null)
 			{
-				sortButtons = new UIButtonChoice(new Texture2D[]
-				{
-					Main.inventorySortTexture[0],
-					MagicStorage.Instance.GetTexture("SortID"),
-					MagicStorage.Instance.GetTexture("SortName"),
-					MagicStorage.Instance.GetTexture("SortNumber")
-				},
-				new LocalizedText[]
-				{
-					Language.GetText("Mods.MagicStorage.SortDefault"),
-					Language.GetText("Mods.MagicStorage.SortID"),
-					Language.GetText("Mods.MagicStorage.SortName"),
-					Language.GetText("Mods.MagicStorage.SortStack")
-				});
+				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
 			}
 		}
 
-		private static void InitFilterButtons()
+	    private static void InitFilterButtons()
 		{
 			if (filterButtons == null)
 			{
-				filterButtons = new UIButtonChoice(new Texture2D[]
-				{
-					MagicStorage.Instance.GetTexture("FilterAll"),
-					MagicStorage.Instance.GetTexture("FilterMelee"),
-					MagicStorage.Instance.GetTexture("FilterPickaxe"),
-					MagicStorage.Instance.GetTexture("FilterArmor"),
-					MagicStorage.Instance.GetTexture("FilterPotion"),
-					MagicStorage.Instance.GetTexture("FilterTile"),
-					MagicStorage.Instance.GetTexture("FilterMisc"),
-				},
-				new LocalizedText[]
-				{
-					Language.GetText("Mods.MagicStorage.FilterAll"),
-					Language.GetText("Mods.MagicStorage.FilterWeapons"),
-					Language.GetText("Mods.MagicStorage.FilterTools"),
-					Language.GetText("Mods.MagicStorage.FilterEquips"),
-					Language.GetText("Mods.MagicStorage.FilterPotions"),
-					Language.GetText("Mods.MagicStorage.FilterTiles"),
-					Language.GetText("Mods.MagicStorage.FilterMisc")
-				});
+			    filterButtons = GUIHelpers.MakeFilterButtons(true, RefreshItems);
 			}
 		}
 
-		public static void Update(GameTime gameTime)
+	    public static void Update(GameTime gameTime)
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
@@ -255,7 +223,6 @@ namespace MagicStorage
 			else
 			{
 				scrollBarFocus = false;
-				scrollBar.ViewPosition = 0f;
 				ResetSlotFocus();
 			}
 		}
@@ -275,6 +242,7 @@ namespace MagicStorage
 			slotZone.DrawText();
 			sortButtons.DrawText();
 			filterButtons.DrawText();
+            DrawDepositButton();
 		}
 
 		private static Item GetItem(int slot, ref int context)
@@ -335,78 +303,74 @@ namespace MagicStorage
 			return modPlayer.GetStorageHeart();
 		}
 
-		public static void RefreshItems()
-		{
-			if (StoragePlayer.IsStorageCrafting())
-			{
-				CraftingGUI.RefreshItems();
-				return;
-			}
-			items.Clear();
-			didMatCheck.Clear();
-			TEStorageHeart heart = GetHeart();
-			if (heart == null)
-			{
-				return;
-			}
-			InitLangStuff();
-			InitSortButtons();
-			InitFilterButtons();
-			SortMode sortMode;
-			switch (sortButtons.Choice)
-			{
-			case 0:
-				sortMode = SortMode.Default;
-				break;
-			case 1:
-				sortMode = SortMode.Id;
-				break;
-			case 2:
-				sortMode = SortMode.Name;
-				break;
-			case 3:
-				sortMode = SortMode.Quantity;
-				break;
-			default:
-				sortMode = SortMode.Default;
-				break;
-			}
-			FilterMode filterMode;
-			switch (filterButtons.Choice)
-			{
-			case 0:
-				filterMode = FilterMode.All;
-				break;
-			case 1:
-				filterMode = FilterMode.Weapons;
-				break;
-			case 2:
-				filterMode = FilterMode.Tools;
-				break;
-			case 3:
-				filterMode = FilterMode.Equipment;
-				break;
-			case 4:
-				filterMode = FilterMode.Potions;
-				break;
-			case 5:
-				filterMode = FilterMode.Placeables;
-				break;
-			case 6:
-				filterMode = FilterMode.Misc;
-				break;
-			default:
-				filterMode = FilterMode.All;
-				break;
-			}
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
-			for (int k = 0; k < items.Count; k++)
-			{
-				didMatCheck.Add(false);
-			}
-		}
+	    public static void RefreshItems()
+	    {
+	        if (StoragePlayer.IsStorageCrafting())
+	        {
+	            CraftingGUI.RefreshItems();
+	            return;
+	        }
 
-		private static void UpdateDepositButton()
+	        items.Clear();
+	        didMatCheck.Clear();
+	        TEStorageHeart heart = GetHeart();
+	        if (heart == null)
+	        {
+	            return;
+	        }
+
+	        InitLangStuff();
+	        InitSortButtons();
+	        InitFilterButtons();
+	        SortMode sortMode = (SortMode) sortButtons.Choice;
+
+	        FilterMode filterMode = (FilterMode) filterButtons.Choice;
+            var modFilter = searchBar2.Text;
+
+	        Action doFiltering = () =>
+	        {
+	            IEnumerable<Item> itemsLocal;
+	            if (filterMode == FilterMode.Recent)
+	            {
+	                var stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+
+	                var toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
+	                itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode,
+	                    FilterMode.All, modFilter, searchBar.Text, 100);
+	            }
+	            else
+	                itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilter, searchBar.Text);
+
+	            items.AddRange(itemsLocal);
+	        };
+
+	        doFiltering();
+
+	        // now if nothing found we disable filters one by one
+	        if (searchBar.Text.Trim().Length > 0)
+	        {
+	            if (items.Count == 0 && filterMode != FilterMode.All)
+	            {
+                    // search all categories
+	                filterMode = FilterMode.All;
+	                doFiltering();
+	            }
+                
+	            if (items.Count == 0 && modFilter != "")
+	            {
+	                // search all mods
+	                modFilter = "";
+	                doFiltering();
+	            }
+	        }
+
+	        for (int k = 0; k < items.Count; k++)
+	        {
+	            didMatCheck.Add(false);
+	        }
+	    }
+
+	    private static void UpdateDepositButton()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
@@ -414,17 +378,34 @@ namespace MagicStorage
 				depositButton.BackgroundColor = new Color(73, 94, 171);
 				if (MouseClicked)
 				{
-					if (TryDepositAll())
+					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl)))
 					{
 						RefreshItems();
 						Main.PlaySound(7, -1, -1, 1);
 					}
 				}
+                else if (CraftingGUI.RightMouseClicked)
+				{
+				    if (TryRestock())
+				    {
+				        RefreshItems();
+				        Main.PlaySound(7, -1, -1, 1);
+				    }
+                }
 			}
 			else
 			{
 				depositButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
 			}
+		}
+        
+		private static void DrawDepositButton()
+		{
+			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
+            if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+            {
+                Main.instance.MouseText(Language.GetText("Mods.MagicStorage.DepositTooltip").Value);
+            }
 		}
 
 		private static void ResetSlotFocus()
@@ -439,7 +420,8 @@ namespace MagicStorage
 			Player player = Main.player[Main.myPlayer];
 			int visualSlot = slot;
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
-			if (MouseClicked)
+            
+            if (MouseClicked)
 			{
 				bool changed = false;
 				if (!Main.mouseItem.IsAir && (player.itemAnimation == 0 && player.itemTime == 0))
@@ -451,17 +433,17 @@ namespace MagicStorage
 				}
 				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
 				{
-					Item toWithdraw = items[slot].Clone();
-					if (toWithdraw.stack > toWithdraw.maxStack)
-					{
-						toWithdraw.stack = toWithdraw.maxStack;
-					}
-					Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
-					if (ItemSlot.ShiftInUse)
-					{
-						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
-					}
-					changed = true;
+                        Item toWithdraw = items[slot].Clone();
+                        if (toWithdraw.stack > toWithdraw.maxStack)
+                        {
+                            toWithdraw.stack = toWithdraw.maxStack;
+                        }
+                        Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
+                        if (ItemSlot.ShiftInUse)
+                        {
+                            Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+                        }
+                        changed = true;
 				}
 				if (changed)
 				{
@@ -478,7 +460,9 @@ namespace MagicStorage
 			if (slot < items.Count && !items[slot].IsAir)
 			{
 				hoverSlot = visualSlot;
-			}
+                items[slot].newAndShiny = false;
+
+            }
 
 			if (slotFocus >= 0)
 			{
@@ -543,20 +527,22 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool TryDepositAll()
+		private static bool TryDepositAll(bool quickStack)
 		{
 			Player player = Main.player[Main.myPlayer];
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
+		    Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			if (Main.netMode == 0)
 			{
 				for (int k = 10; k < 50; k++)
 				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
+				    var item = player.inventory[k];
+				    if (filter(item))
 					{
-						int oldStack = player.inventory[k].stack;
-						heart.DepositItem(player.inventory[k]);
-						if (oldStack != player.inventory[k].stack)
+						int oldStack = item.stack;
+                        heart.DepositItem(item);
+						if (oldStack != item.stack)
 						{
 							changed = true;
 						}
@@ -568,9 +554,10 @@ namespace MagicStorage
 				List<Item> items = new List<Item>();
 				for (int k = 10; k < 50; k++)
 				{
-					if (!player.inventory[k].IsAir && !player.inventory[k].favorited)
+				    var item = player.inventory[k];
+					if (filter(item))
 					{
-						items.Add(player.inventory[k]);
+					    items.Add(item);
 					}
 				}
 				NetHelper.SendDepositAll(heart.ID, items);
@@ -582,6 +569,31 @@ namespace MagicStorage
 			}
 			return changed;
 		}
+
+        private static bool TryRestock()
+        {
+            Player player = Main.player[Main.myPlayer];
+            TEStorageHeart heart = GetHeart();
+            bool changed = false;
+
+            foreach (var item in player.inventory)
+            {
+                if (item != null && !item.IsAir && item.stack < item.maxStack)
+                {
+                    var toWithdraw = item.Clone();
+                    toWithdraw.stack = item.maxStack - item.stack;
+                    toWithdraw = DoWithdraw(toWithdraw, true);
+                    if (!toWithdraw.IsAir)
+                    {
+                        item.stack += toWithdraw.stack;
+                        toWithdraw.TurnToAir();
+                        changed = true;
+                    }
+                }
+
+            }
+            return changed;
+        }
 
 		private static Item DoWithdraw(Item item, bool toInventory = false)
 		{
@@ -596,5 +608,6 @@ namespace MagicStorage
 				return new Item();
 			}
 		}
+
 	}
 }

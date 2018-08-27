@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
+using Terraria.GameInput;
+using Terraria.ID;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
@@ -14,7 +18,57 @@ namespace MagicStorage
 		private Point16 storageAccess = new Point16(-1, -1);
 		public bool remoteAccess = false;
 
-		public override void UpdateDead()
+        ItemTypeOrderedSet _hiddenRecipes = new ItemTypeOrderedSet("HiddenItems");
+        ItemTypeOrderedSet _craftedRecipes = new ItemTypeOrderedSet("CraftedRecipes");
+	    
+	    public IEnumerable<Item> HiddenRecipes { get { return _hiddenRecipes.Items; } }
+        public IEnumerable<Item> CraftedRecipes { get { return _craftedRecipes.Items; } }
+        
+	    public ItemTypeOrderedSet FavoritedRecipes { get; private set; } = new ItemTypeOrderedSet("FavoritedRecipes");
+	    public ItemTypeOrderedSet SeenRecipes { get; private set; } = new ItemTypeOrderedSet("SeenRecipes");
+	    public ItemTypeOrderedSet AsKnownRecipes { get; private set; } = new ItemTypeOrderedSet("AsKnownRecipes");
+
+	    public bool IsRecipeHidden(Item item)
+	    {
+	        return _hiddenRecipes.Contains(item);
+	    }
+
+        public bool AddToHiddenRecipes(Item item)
+        {
+            return _hiddenRecipes.Add(item);
+        }
+
+        public bool RemoveFromHiddenRecipes(Item item)
+        {
+            return _hiddenRecipes.Remove(item);
+        }
+
+        public bool AddToCraftedRecipes(Item item)
+        {
+            return _craftedRecipes.Add(item);
+        }
+
+	    public override TagCompound Save()
+	    {
+            var c = new TagCompound();
+            _hiddenRecipes.Save(c);
+            _craftedRecipes.Save(c);
+            FavoritedRecipes.Save(c);
+	        SeenRecipes.Save(c);
+	        AsKnownRecipes.Save(c);
+            return c;
+	    }
+
+	    public override void Load(TagCompound tag)
+	    {
+            _hiddenRecipes.Load(tag);
+            _craftedRecipes.Load(tag);
+            FavoritedRecipes.Load(tag);
+	        SeenRecipes.Load(tag);
+	        AsKnownRecipes.Load(tag);
+	    }
+
+        public override void UpdateDead()
 		{
 			if (player.whoAmI == Main.myPlayer)
 			{
@@ -57,11 +111,14 @@ namespace MagicStorage
 				}
 			}
 		}
+        
+	    TEStorageHeart _latestAccessedStorage;
+	    public TEStorageHeart LatestAccessedStorage => _latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
 
-		public void OpenStorage(Point16 point, bool remote = false)
+	    public void OpenStorage(Point16 point, bool remote = false)
 		{
-			storageAccess = point;
-			remoteAccess = remote;
+			storageAccess = point;remoteAccess = remote;
+            _latestAccessedStorage = GetStorageHeart();
 			StorageGUI.RefreshItems();
 		}
 
@@ -69,22 +126,6 @@ namespace MagicStorage
 		{
 			storageAccess = new Point16(-1, -1);
 			Main.blockInput = false;
-			if (StorageGUI.searchBar != null)
-			{
-				StorageGUI.searchBar.Reset();
-			}
-			if (StorageGUI.searchBar2 != null)
-			{
-				StorageGUI.searchBar2.Reset();
-			}
-			if (CraftingGUI.searchBar != null)
-			{
-				CraftingGUI.searchBar.Reset();
-			}
-			if (CraftingGUI.searchBar2 != null)
-			{
-				CraftingGUI.searchBar2.Reset();
-			}
 		}
 
 		public Point16 ViewingStorage()
@@ -140,15 +181,19 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
-				if (Main.netMode == 0)
-				{
-					GetCraftingAccess().TryDepositStation(item);
-				}
-				else
-				{
-					NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
-					item.SetDefaults(0, true);
-				}
+                // I suggest to not use shift clicking for this because I often misused it trying to put things into a storage while crafting window is open
+			    if (false)
+			    {
+			        if (Main.netMode == 0)
+			        {
+			            GetCraftingAccess().TryDepositStation(item);
+			        }
+			        else
+			        {
+			            NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
+			            item.SetDefaults(0, true);
+			        }
+			    }
 			}
 			else
 			{
