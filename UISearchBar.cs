@@ -98,18 +98,22 @@ namespace MagicStorage
                 if (cursorPosition < text.Length && text.Length > 0)
                     prev = prev.Remove(cursorPosition);
 				string newString = Main.GetInputText(prev);
+			    bool changed = false;
 				if (!newString.Equals(prev))
 				{
                     int newStringLength = newString.Length;
                     if (prev != text) newString += text.Substring(cursorPosition);
                     text = newString;
 					cursorPosition = newStringLength;
-					StorageGUI.RefreshItems();
+				    changed = true;
 				}
                 if (KeyTyped(Keys.Delete))
                 {
                     if (text.Length > 0 && cursorPosition < text.Length)
+                    {
                         text = text.Remove(cursorPosition, 1);
+                        changed = true;
+                    }
                 }
                 if (KeyTyped(Keys.Left))
                 {
@@ -127,6 +131,7 @@ namespace MagicStorage
                 {
                     cursorPosition = text.Length;
                 }
+                if (changed) StorageGUI.RefreshItems();
 			    if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
 			    {
 			        hasFocus = false;
