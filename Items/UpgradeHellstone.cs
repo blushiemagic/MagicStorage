@@ -15,6 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Piekielny kamień)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Infernale)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Piedra Infernal)");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储升级珠(狱岩)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 120 capacity"
 				+ "\n<right> a Demonite/Crimtane Storage Unit to use");
@@ -26,6 +27,8 @@ namespace MagicStorage.Items
 				+ "\n<right> l'unité de stockage (Démonite/Carmitane) pour utiliser");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 120"
 				+ "\n<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar");
+			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至120容量"
+				+ "\n<right>一个存储单元(血腥/魔金)可镶嵌");
 		}
 
 		public override void SetDefaults()

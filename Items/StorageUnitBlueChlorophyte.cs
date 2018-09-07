@@ -15,6 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Niebieski Chlorofit)");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Chlorophylle Bleu)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Clorofita Azul)");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(蓝色叶绿)");
 		}
 
 		public override void SetDefaults()

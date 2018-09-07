@@ -8,13 +8,13 @@ namespace MagicStorage.Items
 {
 	public class CreativeStorageUnit : ModItem
 	{
-	
 		public override void SetStaticDefaults()
 		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Креативная Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Kreatywna Jednostka Magazynująca");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Créatif");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Creativa");
+			DisplayName.AddTranslation(GameCulture.Chinese, "创造储存单元");
 		}
 		
 		public override void SetDefaults()

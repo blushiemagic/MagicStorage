@@ -15,6 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Terra)");
 			DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Terra)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Tierra)");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储升级珠(泰拉)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity"
 				+ "\n<right> a Luminite Storage Unit to use");
@@ -26,6 +27,8 @@ namespace MagicStorage.Items
 				+ "\n<right> l'unité de stockage (Luminite) pour utiliser");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 640"
 				+ "\n<right> en la unidad de almacenamiento (Luminita) para utilizar");
+			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至640容量"
+				+ "\n<right>一个存储单元(泰拉)可镶嵌");
 		}
 
 		public override void SetDefaults()
