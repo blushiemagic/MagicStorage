@@ -14,6 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Serce Jednostki Magazynującej");
 			DisplayName.AddTranslation(GameCulture.French, "Cœur de Stockage");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Corazón de Almacenamiento");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储核心");
 		}
 		
 		public override void SetDefaults()

@@ -15,6 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Mała jednostka magazynująca");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Miniscule");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Minúsculo");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(小)");
 		}
 
 		public override void SetDefaults()
