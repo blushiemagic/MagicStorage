@@ -16,7 +16,7 @@ namespace MagicStorage
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
 
-		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
+		public static readonly Version requiredVersion = new Version(0, 11);
 
 		public override void Load()
 		{
