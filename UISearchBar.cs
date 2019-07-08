@@ -72,16 +72,21 @@ namespace MagicStorage
 					cursorPosition = text.Length;
 				}
 			}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus)
+			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released)
 			{
 				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 				MouseState mouse = StorageGUI.curMouse;
 				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
-				if (!mouseOver)
+				if (!mouseOver && Parent != null && hasFocus)
 				{
 					hasFocus = false;
 					cursorPosition = text.Length;
 					CheckBlockInput();
+				}
+				if (mouseOver) {
+					Reset();
+					StorageGUI.RefreshItems();
+					hasFocus = true;
 				}
 			}
 
@@ -90,6 +95,10 @@ namespace MagicStorage
 				PlayerInput.WritingText = true;
 				Main.instance.HandleIME();
 				string newString = Main.GetInputText(text);
+				if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
+				{
+					newString = string.Empty;
+				}
 				if (!newString.Equals(text))
 				{
 					text = newString;
