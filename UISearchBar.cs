@@ -102,7 +102,7 @@ namespace MagicStorage
 					StorageGUI.RefreshItems();
 				}
 
-				if (KeyTyped(Keys.Delete) && text.Length > 0 && cursorPosition < text.Length - 1)
+				if (KeyTyped(Keys.Delete) && text.Length > 0 && cursorPosition <= text.Length - 1)
 					text = text.Remove(cursorPosition, 1);
 
 				if (KeyTyped(Keys.Left) && cursorPosition > 0)
