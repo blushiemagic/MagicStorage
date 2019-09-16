@@ -94,17 +94,30 @@ namespace MagicStorage
 				Main.instance.HandleIME();
 				string newString = Main.GetInputText(text);
 				if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
-				{
 					newString = string.Empty;
-				}
-				if (!newString.Equals(text))
-				{
+
+				if (!newString.Equals(text)) {
 					text = newString;
 					cursorPosition = text.Length;
 					StorageGUI.RefreshItems();
 				}
-				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
-				{
+
+				if (KeyTyped(Keys.Delete) && text.Length > 0 && cursorPosition < text.Length - 1)
+					text = text.Remove(cursorPosition, 1);
+
+				if (KeyTyped(Keys.Left) && cursorPosition > 0)
+					cursorPosition--;
+
+				if (KeyTyped(Keys.Right) && cursorPosition < text.Length)
+					cursorPosition++;
+
+				if (KeyTyped(Keys.Home))
+					cursorPosition = 0;
+
+				if (KeyTyped(Keys.End))
+					cursorPosition = text.Length;
+
+				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape)) {
 					hasFocus = false;
 					CheckBlockInput();
 				}
