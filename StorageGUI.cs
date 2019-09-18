@@ -352,53 +352,9 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			SortMode sortMode;
-			switch (sortButtons.Choice)
-			{
-			case 0:
-				sortMode = SortMode.Default;
-				break;
-			case 1:
-				sortMode = SortMode.Id;
-				break;
-			case 2:
-				sortMode = SortMode.Name;
-				break;
-			case 3:
-				sortMode = SortMode.Quantity;
-				break;
-			default:
-				sortMode = SortMode.Default;
-				break;
-			}
-			FilterMode filterMode;
-			switch (filterButtons.Choice)
-			{
-			case 0:
-				filterMode = FilterMode.All;
-				break;
-			case 1:
-				filterMode = FilterMode.Weapons;
-				break;
-			case 2:
-				filterMode = FilterMode.Tools;
-				break;
-			case 3:
-				filterMode = FilterMode.Equipment;
-				break;
-			case 4:
-				filterMode = FilterMode.Potions;
-				break;
-			case 5:
-				filterMode = FilterMode.Placeables;
-				break;
-			case 6:
-				filterMode = FilterMode.Misc;
-				break;
-			default:
-				filterMode = FilterMode.All;
-				break;
-			}
+			SortMode sortMode = (SortMode)sortButtons.Choice;
+			FilterMode filterMode = (FilterMode)filterButtons.Choice;
+
 			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchBar2.Text, searchBar.Text));
 			for (int k = 0; k < items.Count; k++)
 			{

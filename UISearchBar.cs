@@ -73,18 +73,14 @@ namespace MagicStorage
 					cursorPosition = text.Length;
 				}
 			}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released)
-			{
-				if (!mouseOver && Parent != null && hasFocus)
-				{
-					hasFocus = false;
-					cursorPosition = text.Length;
-					CheckBlockInput();
-				}
-				if (mouseOver) {
-					Reset();
-					StorageGUI.RefreshItems();
-					hasFocus = true;
+			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus && !mouseOver) {
+				hasFocus = false;
+				cursorPosition = text.Length;
+				CheckBlockInput();
+			} else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && mouseOver) {
+				if (text.Length > 0) {
+					text = string.Empty;
+					cursorPosition = 0;
 				}
 			}
 
@@ -92,18 +88,26 @@ namespace MagicStorage
 			{
 				PlayerInput.WritingText = true;
 				Main.instance.HandleIME();
-				string newString = Main.GetInputText(text);
-				if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
-					newString = string.Empty;
+				string prev = text;
 
-				if (!newString.Equals(text)) {
+				if (cursorPosition < text.Length && text.Length > 0)
+					prev = prev.Remove(cursorPosition);
+
+				string newString = Main.GetInputText(prev);
+				bool changed = false;
+
+				if (!newString.Equals(prev)) {
+					int newStringLength = newString.Length;
+					if (prev != text) newString += text.Substring(cursorPosition);
 					text = newString;
-					cursorPosition = text.Length;
-					StorageGUI.RefreshItems();
+					cursorPosition = newStringLength;
+					changed = true;
 				}
 
-				if (KeyTyped(Keys.Delete) && text.Length > 0 && cursorPosition <= text.Length - 1)
+				if (KeyTyped(Keys.Delete) && text.Length > 0 && cursorPosition <= text.Length - 1) {
 					text = text.Remove(cursorPosition, 1);
+					changed = true;
+				}
 
 				if (KeyTyped(Keys.Left) && cursorPosition > 0)
 					cursorPosition--;
@@ -116,6 +120,9 @@ namespace MagicStorage
 
 				if (KeyTyped(Keys.End))
 					cursorPosition = text.Length;
+
+				if (changed)
+					StorageGUI.RefreshItems();
 
 				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape)) {
 					hasFocus = false;
