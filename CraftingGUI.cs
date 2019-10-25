@@ -435,7 +435,10 @@ namespace MagicStorage
                 {
                     basePanel.Update(gameTime);
                 }
-                recipePanel.Update(gameTime);
+                if (recipePanel != null)
+                {
+                    recipePanel.Update(gameTime);
+                }
                 UpdateRecipeText();
                 UpdateScrollBar();
                 UpdateCraftButton();
