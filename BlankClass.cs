@@ -5,8 +5,8 @@ using Terraria.ModLoader;
 
 namespace MagicStorage
 {
-	public class BlankClass
-	{
-		
-	}
+    public class BlankClass
+    {
+        
+    }
 }
