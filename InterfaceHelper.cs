@@ -34,7 +34,7 @@ namespace MagicStorage
 		public static bool DrawStorageGUI()
 		{
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Point16 storageAccess = modPlayer.ViewingStorage();
 			if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
 			{

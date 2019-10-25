@@ -67,7 +67,7 @@ namespace MagicStorage.Items
 
 		private void OpenStorage(Player player)
 		{
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(mod);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1)
 			{
 				Main.PlaySound(11, -1, -1, 1);

@@ -33,7 +33,7 @@ namespace MagicStorage.Components
 			return (TEStorageHeart)TileEntity.ByPosition[new Point16(i, j)];
 		}
 
-		public override void RightClick(int i, int j)
+		public override bool NewRightClick(int i, int j)
 		{
 			Player player = Main.player[Main.myPlayer];
 			Item item = player.inventory[player.selectedItem];
@@ -47,7 +47,6 @@ namespace MagicStorage.Components
 				{
 					j--;
 				}
-				player.tileInteractionHappened = true;
 				Locator locator = (Locator)item.modItem;
 				locator.location = new Point16(i, j);
 				if (player.selectedItem == 58)
@@ -55,10 +54,11 @@ namespace MagicStorage.Components
 					Main.mouseItem = item.Clone();
 				}
 				Main.NewText("Locator successfully set to: X=" + i + ", Y=" + j);
+                return true;
 			}
 			else
 			{
-				base.RightClick(i, j);
+				return base.NewRightClick(i, j);
 			}
 		}
 	}

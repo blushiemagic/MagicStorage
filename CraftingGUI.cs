@@ -425,7 +425,7 @@ namespace MagicStorage
 		{try{
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
+			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
 				{
@@ -453,7 +453,7 @@ namespace MagicStorage
 		public static void Draw(TEStorageHeart heart)
 		{try{
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(MagicStorage.Instance);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Initialize();
 			if (Main.mouseX > panelLeft && Main.mouseX < recipeLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 			{

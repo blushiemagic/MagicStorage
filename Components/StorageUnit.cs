@@ -78,7 +78,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override void RightClick(int i, int j)
+		public override bool NewRightClick(int i, int j)
 		{
 			if (Main.tile[i, j].frameX % 36 == 18)
 			{
@@ -90,14 +90,14 @@ namespace MagicStorage.Components
 			}
 			if (TryUpgrade(i, j))
 			{
-				Main.player[Main.myPlayer].tileInteractionHappened = true;
-				return;
+				return true;
 			}
 			TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 			Main.player[Main.myPlayer].tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
 			Main.NewText(activeString + ", " + fullnessString);
+            return base.NewRightClick(i, j);
 		}
 
 		private bool TryUpgrade(int i, int j)
