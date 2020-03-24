@@ -35,7 +35,7 @@ namespace MagicStorage
             if (_modButton != null)
                 _modButton.SetText(MakeModButtonText());
             ModName = "";
-            if (index > -1) ModName = MagicStorage.Instance.AllMods[index];
+            if (index > -1) ModName = MagicStorage.Instance.AllMods[index].Name;
             if (!silent) OnChanged?.Invoke();
         }
 
@@ -56,7 +56,7 @@ namespace MagicStorage
                 return "Terraria";
             }
             else
-                return MagicStorage.Instance.AllMods[ModIndex];
+                return MagicStorage.Instance.AllMods[ModIndex].Name;
         }
 
         public void Update(MouseState curMouse, MouseState oldMouse)

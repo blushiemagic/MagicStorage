@@ -268,11 +268,10 @@ namespace MagicStorage
 
 		    var type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
 		    FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
-
-		    AllMods = ModLoader.GetLoadedMods().Where(x => ((Dictionary<string, ModItem>)loadModsField.GetValue(ModLoader.GetMod(x))).Count > 0).ToArray();
+			AllMods = ModLoader.Mods.Where(x =>  ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
         }
 
-        public string[] AllMods { get; private set; }
+        public Mod[] AllMods { get; private set; }
 
 		public override void AddRecipeGroups()
 		{

@@ -94,7 +94,7 @@ namespace MagicStorage
 	        {
 	            #region Initialize TileToCreatingItem
                 
-	            var tileToCreatingItem = Enumerable.Range(0, 10000 + MagicStorage.Instance.ItemType<CraftingAccess>()).Select((x, i) =>
+	            var tileToCreatingItem = Enumerable.Range(0, 10000 + ModContent.ItemType<CraftingAccess>()).Select((x, i) =>
 	                {
 	                    var item = new Item();
 	                    // provide items

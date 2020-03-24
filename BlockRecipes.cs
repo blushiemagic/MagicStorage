@@ -19,7 +19,7 @@ namespace MagicStorage
 			try
 			{
 				Player player = Main.player[Main.myPlayer];
-				StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(mod);
+				StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 				Point16 storageAccess = modPlayer.ViewingStorage();
 				return storageAccess.X < 0 || storageAccess.Y < 0;
 			}

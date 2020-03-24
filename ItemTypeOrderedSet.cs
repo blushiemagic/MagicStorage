@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage
@@ -95,12 +96,16 @@ namespace MagicStorage
                 {
                     _items = listV2
                         .Select(x =>
-                                {
-                                    var item = new Item();
-                                    item.SetDefaults(x);
-                                    item.type = x;
-                                    return item;
-                                }).ToList();
+                        {
+                            if ((x >= ItemLoader.ItemCount) && (ItemLoader.GetItem(x) == null))
+                                return null;
+                            var item = new Item();
+                            item.SetDefaults(x);
+                            item.type = x;
+                            return item;
+                        })
+                        .Where(x => x != null)
+                        .ToList();
                 }
                 else
                     _items = new List<Item>();

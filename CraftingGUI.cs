@@ -52,17 +52,17 @@ namespace MagicStorage
 			}
 		}
 
-		private static UIPanel basePanel = new UIPanel();
+		private static UIPanel basePanel;
 		private static float panelTop;
 		private static float panelLeft;
 		private static float panelWidth;
 		private static float panelHeight;
 
-		private static UIElement topBar = new UIElement();
+		private static UIElement topBar;
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		private static UIButtonChoice recipeButtons;
-		private static UIElement topBar2 = new UIElement();
+		private static UIElement topBar2;
 		private static UIButtonChoice filterButtons;
 		
 		private static UIText stationText;
@@ -151,7 +151,11 @@ namespace MagicStorage
 				recipes = nextRecipes;
 				recipeAvailable = nextRecipeAvailable;
 			}
-            
+
+            topBar2 = new UIElement();
+            topBar = new UIElement();
+            basePanel = new UIPanel();
+
 		    InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
@@ -431,7 +435,7 @@ namespace MagicStorage
 		    try {
 			oldMouse = StorageGUI.oldMouse;
 			curMouse = StorageGUI.curMouse;
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>(MagicStorage.Instance).ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
+			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
 				{

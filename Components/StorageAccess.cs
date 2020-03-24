@@ -65,7 +65,7 @@ namespace MagicStorage.Components
 				Main.NewText("This access is not connected to a Storage Heart!");
 				return;
 			}
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>(mod);
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			player.tileInteractionHappened = true;
 			Main.mouseRightRelease = false;
 			if (player.sign > -1)
