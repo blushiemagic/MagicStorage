@@ -125,7 +125,7 @@ namespace MagicStorage.Sorting
             int index = ModSearchBox.ModIndexBaseGame;
 			if (item.modItem != null)
 			{
-			    index = Array.IndexOf(allMods, item.modItem.mod.Name);
+			    index = Array.IndexOf(allMods, item.modItem.mod);
 			}
             return index == modFilterIndex;
 		}

@@ -36,7 +36,7 @@ namespace MagicStorage.Items
 		{
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 1);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 2);
 			if (MagicStorage.legendMod == null)
 			{
 				recipe.AddIngredient(ItemID.Emerald, 3);

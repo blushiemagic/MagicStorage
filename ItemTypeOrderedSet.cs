@@ -65,6 +65,12 @@ namespace MagicStorage
             return false;
         }
 
+        public void Clear()
+        {
+            _set.Clear();
+            _items.Clear();
+        }
+
         public bool RemoveAt(int index)
         {
             var item = _items[index];

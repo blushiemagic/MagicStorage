@@ -41,7 +41,8 @@ namespace MagicStorage
 			Instance = null;
 			bluemagicMod = null;
 			legendMod = null;
-		}
+            IsItemKnownHotKey = null;
+        }
 
 		private void AddTranslations()
 		{
@@ -265,10 +266,13 @@ namespace MagicStorage
         
         public override void PostSetupContent()
 		{
-
-		    var type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
+			var type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
 		    FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
-			AllMods = ModLoader.Mods.Where(x =>  ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
+
+			AllMods = ModLoader.Mods
+                .Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
+                .Where(x => x.Name != "ModLoader")
+                .Where(x => ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
         }
 
         public Mod[] AllMods { get; private set; }

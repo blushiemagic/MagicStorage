@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
@@ -13,8 +14,10 @@ using Terraria.ModLoader.IO;
 namespace MagicStorage
 {
 	public class StoragePlayer : ModPlayer
-	{
-		public int timeSinceOpen = 1;
+    {
+        public override bool CloneNewInstances => false;
+
+        public int timeSinceOpen = 1;
 		private Point16 storageAccess = new Point16(-1, -1);
 		public bool remoteAccess = false;
 
@@ -52,12 +55,14 @@ namespace MagicStorage
 	    public override TagCompound Save()
 	    {
             var c = new TagCompound();
+
             _hiddenRecipes.Save(c);
             _craftedRecipes.Save(c);
             FavoritedRecipes.Save(c);
 	        SeenRecipes.Save(c);
 	        TestedRecipes.Save(c);
 	        AsKnownRecipes.Save(c);
+            
             return c;
 	    }
 
@@ -70,7 +75,7 @@ namespace MagicStorage
 	        TestedRecipes.Load(tag);
 	        AsKnownRecipes.Load(tag);
 	    }
-
+		
         public override void UpdateDead()
 		{
 			if (player.whoAmI == Main.myPlayer)
