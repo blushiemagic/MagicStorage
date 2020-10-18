@@ -1,62 +1,40 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
 	public abstract class TEAbstractStorageUnit : TEStorageComponent
 	{
-		private bool inactive;
 		private Point16 center;
 
-		public bool Inactive
-		{
-			get
-			{
-				return inactive;
-			}
-			set
-			{
-				inactive = value;
-			}
-		}
+		public bool Inactive { get; set; }
 
-		public abstract bool IsFull
-		{
+		public abstract bool IsFull {
 			get;
 		}
 
-		public bool Link(Point16 pos)
-		{
+		public bool Link(Point16 pos) {
 			bool changed = pos != center;
 			center = pos;
 			return changed;
 		}
 
-		public bool Unlink()
-		{
+		public bool Unlink() {
 			return Link(new Point16(-1, -1));
 		}
 
-		public TEStorageHeart GetHeart()
-		{
-			if (center != new Point16(-1, -1) && TileEntity.ByPosition.ContainsKey(center) && TileEntity.ByPosition[center] is TEStorageCenter)
-			{
-				return ((TEStorageCenter)TileEntity.ByPosition[center]).GetHeart();
-			}
+		public TEStorageHeart GetHeart() {
+			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter)
+				return ((TEStorageCenter)ByPosition[center]).GetHeart();
 			return null;
 		}
 
 		public abstract bool HasSpaceInStackFor(Item check, bool locked = false);
 
-		public abstract  bool HasItem(Item check, bool locked = false, bool ignorePrefix = false);
+		public abstract bool HasItem(Item check, bool locked = false, bool ignorePrefix = false);
 
 		public abstract IEnumerable<Item> GetItems();
 
@@ -64,10 +42,9 @@ namespace MagicStorage.Components
 
 		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 
-		public override TagCompound Save()
-		{
+		public override TagCompound Save() {
 			TagCompound tag = new TagCompound();
-			tag.Set("Inactive", inactive);
+			tag.Set("Inactive", Inactive);
 			TagCompound tagCenter = new TagCompound();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
@@ -75,23 +52,20 @@ namespace MagicStorage.Components
 			return tag;
 		}
 
-		public override void Load(TagCompound tag)
-		{
-			inactive = tag.GetBool("Inactive");
+		public override void Load(TagCompound tag) {
+			Inactive = tag.GetBool("Inactive");
 			TagCompound tagCenter = tag.GetCompound("Center");
 			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
-		{
-			writer.Write(inactive);
+		public override void NetSend(BinaryWriter writer, bool lightSend) {
+			writer.Write(Inactive);
 			writer.Write(center.X);
 			writer.Write(center.Y);
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
-		{
-			inactive = reader.ReadBoolean();
+		public override void NetReceive(BinaryReader reader, bool lightReceive) {
+			Inactive = reader.ReadBoolean();
 			center = new Point16(reader.ReadInt16(), reader.ReadInt16());
 		}
 	}

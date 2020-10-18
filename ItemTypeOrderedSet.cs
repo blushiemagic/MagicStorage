@@ -6,118 +6,99 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
-    public class ItemTypeOrderedSet
-    {
-        readonly string _name;
-        List<Item> _items = new List<Item>();
-        HashSet<int> _set = new HashSet<int>();
-        public int Count { get { return _items.Count; } }
+	public class ItemTypeOrderedSet
+	{
 
-        public ItemTypeOrderedSet(string name)
-        {
-            _name = name;
-        }
+		private const string Suffix = "~v2";
+		private readonly string _name;
+		private List<Item> _items = new List<Item>();
+		private HashSet<int> _set = new HashSet<int>();
 
-        public IEnumerable<Item> Items { get { return _items; } }
+		public ItemTypeOrderedSet(string name) {
+			_name = name;
+		}
 
-        public bool Add(Item item)
-        {
-            return Add(item.type);
-        }
+		public int Count => _items.Count;
 
-        public bool Add(int type)
-        {
-            var item = new Item();
-            item.SetDefaults(type);
-            if (_set.Add(item.type))
-            {
-                _items.Add(item);
-                return true;
-            }
+		public IEnumerable<Item> Items => _items;
 
-            return false;
-        }
+		public bool Add(Item item) {
+			return Add(item.type);
+		}
 
-        public bool Contains(int type)
-        {
-            return _set.Contains(type);
-        }
+		public bool Add(int type) {
+			Item item = new Item();
+			item.SetDefaults(type);
+			if (_set.Add(item.type)) {
+				_items.Add(item);
+				return true;
+			}
 
-        public bool Contains(Item item)
-        {
-            return _set.Contains(item.type);
-        }
+			return false;
+		}
 
-        public bool Remove(Item item)
-        {
-            var type = item.type;
-            return Remove(type);
-        }
+		public bool Contains(int type) {
+			return _set.Contains(type);
+		}
 
-        public bool Remove(int type)
-        {
-            if (_set.Remove(type))
-            {
-                _items.RemoveAll(x => x.type == type);
-                return true;
-            }
+		public bool Contains(Item item) {
+			return _set.Contains(item.type);
+		}
 
-            return false;
-        }
+		public bool Remove(Item item) {
+			int type = item.type;
+			return Remove(type);
+		}
 
-        public void Clear()
-        {
-            _set.Clear();
-            _items.Clear();
-        }
+		public bool Remove(int type) {
+			if (_set.Remove(type)) {
+				_items.RemoveAll(x => x.type == type);
+				return true;
+			}
 
-        public bool RemoveAt(int index)
-        {
-            var item = _items[index];
-            if (_set.Remove(item.type))
-            {
-                _items.RemoveAt(index);
-                return true;
-            }
+			return false;
+		}
 
-            return false;
-        }
+		public void Clear() {
+			_set.Clear();
+			_items.Clear();
+		}
 
-        const string Suffix = "~v2";
+		public bool RemoveAt(int index) {
+			Item item = _items[index];
+			if (_set.Remove(item.type)) {
+				_items.RemoveAt(index);
+				return true;
+			}
 
-        public void Save(TagCompound c)
-        {
-            c.Add(_name + Suffix, _items.Select(x => (int) x.type).ToList());
-        }
+			return false;
+		}
 
-        public void Load(TagCompound tag)
-        {
-            var list = tag.GetList<TagCompound>(_name);
-            if (list != null && list.Count > 0)
-                _items = list.Select(ItemIO.Load).ToList();
-            else
-            {
-                var listV2 = tag.GetList<int>(_name + Suffix);
-                if (listV2 != null)
-                {
-                    _items = listV2
-                        .Select(x =>
-                        {
-                            if ((x >= ItemLoader.ItemCount) && (ItemLoader.GetItem(x) == null))
-                                return null;
-                            var item = new Item();
-                            item.SetDefaults(x);
-                            item.type = x;
-                            return item;
-                        })
-                        .Where(x => x != null)
-                        .ToList();
-                }
-                else
-                    _items = new List<Item>();
-            }
+		public void Save(TagCompound c) {
+			c.Add(_name + Suffix, _items.Select(x => x.type).ToList());
+		}
 
-            _set = new HashSet<int>(_items.Select(x => x.type));
-        }
-    }
+		public void Load(TagCompound tag) {
+			IList<TagCompound> list = tag.GetList<TagCompound>(_name);
+			if (list != null && list.Count > 0) {
+				_items = list.Select(ItemIO.Load).ToList();
+			}
+			else {
+				IList<int> listV2 = tag.GetList<int>(_name + Suffix);
+				if (listV2 != null)
+					_items = listV2.Select(x => {
+						if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
+							return null;
+						Item item = new Item();
+						item.SetDefaults(x);
+						item.type = x;
+						return item;
+					}).Where(x => x != null).ToList();
+				else
+					_items = new List<Item>();
+			}
+
+			_set = new HashSet<int>(_items.Select(x => x.type));
+		}
+	}
 }

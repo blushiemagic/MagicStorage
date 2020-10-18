@@ -1,5 +1,3 @@
-using System;
-
 namespace MagicStorage.Sorting
 {
 	public enum FilterMode
@@ -8,16 +6,16 @@ namespace MagicStorage.Sorting
 		WeaponsMelee,
 		WeaponsRanged,
 		WeaponsMagic,
-	    WeaponsSummon,
-        WeaponsThrown,
-        Ammo,
-        Tools,
-        Armor,
+		WeaponsSummon,
+		WeaponsThrown,
+		Ammo,
+		Tools,
+		Armor,
 		Equipment,
-	    Vanity,
-        Potions,
+		Vanity,
+		Potions,
 		Placeables,
 		Misc,
-        Recent
+		Recent
 	}
 }

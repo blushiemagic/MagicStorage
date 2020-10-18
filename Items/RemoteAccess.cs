@@ -1,24 +1,21 @@
-﻿using System;
-using Terraria;
+﻿using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class RemoteAccess : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.SetDefault("Remote Storage Access");
 			DisplayName.AddTranslation(GameCulture.Russian, "Модуль Удаленного Доступа к Хранилищу");
 			DisplayName.AddTranslation(GameCulture.Polish, "Zdalna Jednostka Dostępu");
 			DisplayName.AddTranslation(GameCulture.French, "Fenêtre d'accès éloigné");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Acceso a Almacenamiento Remoto");
-		}	
+		}
 
-		public override void SetDefaults()
-		{
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -33,23 +30,17 @@ namespace MagicStorage.Items
 			item.createTile = mod.TileType("RemoteAccess");
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			if (MagicStorage.legendMod == null)
-			{
 				recipe.AddIngredient(ItemID.Ruby, 3);
-			}
 			else
-			{
 				recipe.AddRecipeGroup("MagicStorage:AnyRuby", 3);
-			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 		}
 	}
 }
-

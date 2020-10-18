@@ -4,29 +4,24 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
-    public class ItemSaveLoadHook : GlobalItem
-    {
-        public override TagCompound Save(Item item)
-        {
-            if (CraftingGUI.IsTestItem(item))
-            {
-                return new TagCompound() {{"TestItem", true}};
-            }
+	public class ItemSaveLoadHook : GlobalItem
+	{
+		public override TagCompound Save(Item item) {
+			if (CraftingGUI.IsTestItem(item))
+				return new TagCompound { { "TestItem", true } };
 
-            return null;
-        }
+			return null;
+		}
 
-        public override void Load(Item item, TagCompound tag)
-        {
-            if (tag != null && tag.ContainsKey("TestItem"))
-                CraftingGUI.MarkAsTestItem(item);
+		public override void Load(Item item, TagCompound tag) {
+			if (tag != null && tag.ContainsKey("TestItem"))
+				CraftingGUI.MarkAsTestItem(item);
 
-            base.Load(item, tag);
-        }
+			base.Load(item, tag);
+		}
 
-        public override bool NeedsSaving(Item item)
-        {
-            return CraftingGUI.IsTestItem(item);
-        }
-    }
+		public override bool NeedsSaving(Item item) {
+			return CraftingGUI.IsTestItem(item);
+		}
+	}
 }

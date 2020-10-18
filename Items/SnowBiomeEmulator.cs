@@ -1,17 +1,13 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using Terraria;
+﻿using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class SnowBiomeEmulator : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.SetDefault("Broken Snowglobe");
 			DisplayName.AddTranslation(GameCulture.Russian, "Сломанная Снежная Сфера");
 			DisplayName.AddTranslation(GameCulture.Polish, "Emulator Śnieżnego Biomu");
@@ -26,15 +22,13 @@ namespace MagicStorage.Items
 			Main.RegisterItemAnimation(item.type, new DrawAnimationVertical(8, 8));
 		}
 
-		public override void SetDefaults()
-		{
+		public override void SetDefaults() {
 			item.width = 30;
 			item.height = 30;
 			item.rare = 1;
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddRecipeGroup("MagicStorage:AnySnowBiomeBlock", 300);
 			recipe.AddTile(null, "CraftingAccess");

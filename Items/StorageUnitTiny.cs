@@ -1,15 +1,12 @@
-﻿using System;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
+﻿using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class StorageUnitTiny : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.SetDefault("Tiny Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Малая Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Mała jednostka magazynująca");
@@ -17,8 +14,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Minúsculo");
 		}
 
-		public override void SetDefaults()
-		{
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -29,7 +25,7 @@ namespace MagicStorage.Items
 			item.useStyle = 1;
 			item.consumable = true;
 			item.rare = 0;
-			item.value = Item.sellPrice(0, 0, 6, 0);
+			item.value = Item.sellPrice(0, 0, 6);
 			item.createTile = mod.TileType("StorageUnit");
 			item.placeStyle = 8;
 		}

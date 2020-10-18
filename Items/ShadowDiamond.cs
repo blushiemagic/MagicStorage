@@ -1,16 +1,13 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class ShadowDiamond : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.AddTranslation(GameCulture.Russian, "Теневой Алмаз");
 			DisplayName.AddTranslation(GameCulture.Polish, "Mroczny Diament");
 			DisplayName.AddTranslation(GameCulture.French, "Diamant sombre");
@@ -22,19 +19,17 @@ namespace MagicStorage.Items
 			Tooltip.AddTranslation(GameCulture.French, "Des traces de lumière s'attarde encore à l'intérieur");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Sigue habiendo huellas de luz en el interior");
 		}
-		
 
-		public override void SetDefaults()
-		{
+
+		public override void SetDefaults() {
 			item.width = 16;
 			item.height = 16;
 			item.maxStack = 99;
 			item.rare = 1;
-			item.value = Item.sellPrice(0, 1, 0, 0);
+			item.value = Item.sellPrice(0, 1);
 		}
 
-		public override Color? GetAlpha(Color lightColor)
-		{
+		public override Color? GetAlpha(Color lightColor) {
 			return Color.White;
 		}
 	}

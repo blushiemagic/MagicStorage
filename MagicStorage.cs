@@ -5,10 +5,9 @@ using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Microsoft.Xna.Framework;
-using Terraria.Localization;
 
 namespace MagicStorage
 {
@@ -17,35 +16,33 @@ namespace MagicStorage
 		public static MagicStorage Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
-	    public static ModHotKey IsItemKnownHotKey { get; private set; }
 
 		public static readonly Version requiredVersion = new Version(0, 9, 2, 2);
 
-		public override void Load()
-		{
+		public static ModHotKey IsItemKnownHotKey { get; private set; }
+
+		public Mod[] AllMods { get; private set; }
+
+		public override void Load() {
 			if (ModLoader.version < requiredVersion)
-			{
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
-			}
 			Instance = this;
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
-		    AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
-		    IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
+			AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
+			IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
 		}
 
-		public override void Unload()
-		{
+		public override void Unload() {
 			Instance = null;
 			bluemagicMod = null;
 			legendMod = null;
-            IsItemKnownHotKey = null;
-        }
+			IsItemKnownHotKey = null;
+		}
 
-		private void AddTranslations()
-		{
+		private void AddTranslations() {
 			ModTranslation text = CreateTranslation("SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
@@ -173,8 +170,7 @@ namespace MagicStorage
 			text.SetDefault("Filter Vanity Items");
 			AddTranslation(text);
 
-
-            text = CreateTranslation("FilterPotions");
+			text = CreateTranslation("FilterPotions");
 			text.SetDefault("Filter Potions");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Зелья)");
 			text.AddTranslation(GameCulture.French, "Filtrer par potions");
@@ -246,13 +242,13 @@ namespace MagicStorage
 			text = CreateTranslation("SortDps");
 			text.SetDefault("Sort by DPS");
 			AddTranslation(text);
-            
+
 			text = CreateTranslation("ShowOnlyFavorited");
 			text.SetDefault("Only Favorited");
 			AddTranslation(text);
 
 			text = CreateTranslation("DepositTooltip");
-		    text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
+			text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
 			AddTranslation(text);
 
 			text = CreateTranslation("CraftTooltip");
@@ -263,79 +259,28 @@ namespace MagicStorage
 			text.SetDefault(" !UNTIL RESPAWN!");
 			AddTranslation(text);
 		}
-        
-        public override void PostSetupContent()
-		{
-			var type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
-		    FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
 
-			AllMods = ModLoader.Mods
-                .Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
-                .Where(x => x.Name != "ModLoader")
-                .Where(x => ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
-        }
+		public override void PostSetupContent() {
+			Type type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
+			FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        public Mod[] AllMods { get; private set; }
+			AllMods = ModLoader.Mods.Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase)).Where(x => x.Name != "ModLoader").Where(x => ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
+		}
 
-		public override void AddRecipeGroups()
-		{
-			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Chest",
-			ItemID.Chest,
-			ItemID.GoldChest,
-			ItemID.ShadowChest,
-			ItemID.EbonwoodChest,
-			ItemID.RichMahoganyChest,
-			ItemID.PearlwoodChest,
-			ItemID.IvyChest,
-			ItemID.IceChest,
-			ItemID.LivingWoodChest,
-			ItemID.SkywareChest,
-			ItemID.ShadewoodChest,
-			ItemID.WebCoveredChest,
-			ItemID.LihzahrdChest,
-			ItemID.WaterChest,
-			ItemID.JungleChest,
-			ItemID.CorruptionChest,
-			ItemID.CrimsonChest,
-			ItemID.HallowedChest,
-			ItemID.FrozenChest,
-			ItemID.DynastyChest,
-			ItemID.HoneyChest,
-			ItemID.SteampunkChest,
-			ItemID.PalmWoodChest,
-			ItemID.MushroomChest,
-			ItemID.BorealWoodChest,
-			ItemID.SlimeChest,
-			ItemID.GreenDungeonChest,
-			ItemID.PinkDungeonChest,
-			ItemID.BlueDungeonChest,
-			ItemID.BoneChest,
-			ItemID.CactusChest,
-			ItemID.FleshChest,
-			ItemID.ObsidianChest,
-			ItemID.PumpkinChest,
-			ItemID.SpookyChest,
-			ItemID.GlassChest,
-			ItemID.MartianChest,
-			ItemID.GraniteChest,
-			ItemID.MeteoriteChest,
-			ItemID.MarbleChest);
+		public override void AddRecipeGroups() {
+			RecipeGroup group = new RecipeGroup(() => Lang.misc[37] + " Chest", ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest, ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest, ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest, ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest, ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest, ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			group = new RecipeGroup(() => Lang.misc[37].Value + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 			if (bluemagicMod != null)
-			{
-				group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
-			}
+				@group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
 			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
 			group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
-			if (legendMod != null)
-			{
+			if (legendMod != null) {
 				group.ValidItems.Add(legendMod.ItemType("GemChrysoberyl"));
 				group.ValidItems.Add(legendMod.ItemType("GemAlexandrite"));
 			}
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
-			if (legendMod != null)
-			{
+			if (legendMod != null) {
 				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Amethyst), ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
 				RecipeGroup.RegisterGroup("MagicStorage:AnyAmethyst", group);
 				group = new RecipeGroup(() => Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Topaz), ItemID.Topaz, legendMod.ItemType("GemGarnet"));
@@ -349,26 +294,19 @@ namespace MagicStorage
 			}
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI)
-		{
+		public override void HandlePacket(BinaryReader reader, int whoAmI) {
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-		{
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
 			InterfaceHelper.ModifyInterfaceLayers(layers);
 		}
 
-		public override void PostUpdateInput()
-		{
+		public override void PostUpdateInput() {
 			if (!Main.instance.IsActive)
-			{
 				return;
-			}
 			StorageGUI.Update(null);
 			CraftingGUI.Update(null);
 		}
 	}
 }
-
-

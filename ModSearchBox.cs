@@ -1,91 +1,78 @@
 ﻿using System;
-using Microsoft.Win32.SafeHandles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ModLoader;
 
 namespace MagicStorage
 {
-    public class ModSearchBox
-    {
-        UITextPanel<string> _modButton;
-        public int ModIndex { get; private set; } = ModIndexAll;
-        public string ModName { get; private set; }
-        public Action OnChanged;
+	public class ModSearchBox
+	{
 
-        public ModSearchBox(Action onChanged)
-        {
-            OnChanged = onChanged;
-        }
+		public const int ModIndexBaseGame = -1;
+		public const int ModIndexAll = -2;
+		private UITextPanel<string> _modButton;
+		public Action OnChanged;
 
-        public UIPanel Button => _modButton;
+		public ModSearchBox(Action onChanged) {
+			OnChanged = onChanged;
+		}
 
-        public void InitLangStuff()
-        {
-            if (_modButton == null)
-            {
-                _modButton = new UITextPanel<string>(MakeModButtonText(), 0.8f);
-            }
-        }
+		public int ModIndex { get; private set; } = ModIndexAll;
 
-        void SetSearchMod(int index, bool silent)
-        {
-            if (ModIndex == index) return;
-            ModIndex = index;
-            if (_modButton != null)
-                _modButton.SetText(MakeModButtonText());
-            ModName = "";
-            if (index > -1) ModName = MagicStorage.Instance.AllMods[index].Name;
-            if (!silent) OnChanged?.Invoke();
-        }
+		public string ModName { get; private set; }
 
-        public void Reset(bool silent)
-        {
-            SetSearchMod(ModIndexAll, silent);
-        }
+		public UIPanel Button => _modButton;
 
-        public const int ModIndexBaseGame = -1;
-        public const int ModIndexAll = -2;
+		public void InitLangStuff() {
+			if (_modButton == null)
+				_modButton = new UITextPanel<string>(MakeModButtonText(), 0.8f);
+		}
 
-        string MakeModButtonText()
-        {
-            if (ModIndex == ModIndexAll)
-                return "All mods";
-            else if (ModIndex == ModIndexBaseGame)
-            {
-                return "Terraria";
-            }
-            else
-                return MagicStorage.Instance.AllMods[ModIndex].Name;
-        }
+		private void SetSearchMod(int index, bool silent) {
+			if (ModIndex == index) return;
+			ModIndex = index;
+			if (_modButton != null)
+				_modButton.SetText(MakeModButtonText());
+			ModName = "";
+			if (index > -1) ModName = MagicStorage.Instance.AllMods[index].Name;
+			if (!silent) OnChanged?.Invoke();
+		}
 
-        public void Update(MouseState curMouse, MouseState oldMouse)
-        {
-            Rectangle dim = InterfaceHelper.GetFullRectangle(_modButton);
-            if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-            {
-                _modButton.BackgroundColor = new Color(73, 94, 171);
-                var allMods = MagicStorage.Instance.AllMods;
-                int index = ModIndex;
-                if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
-                {
-                    index++;
-                    if (index >= allMods.Length)
-                        index = ModIndexAll;
-                }
-                else if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released)
-                {
-                    index--;
-                    if (index < -2)
-                        index = allMods.Length - 1;
-                }
+		public void Reset(bool silent) {
+			SetSearchMod(ModIndexAll, silent);
+		}
 
-                SetSearchMod(index, false);
-            }
-            else
-            {
-                _modButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
-            }
-        }
-    }
+		private string MakeModButtonText() {
+			if (ModIndex == ModIndexAll)
+				return "All mods";
+			if (ModIndex == ModIndexBaseGame)
+				return "Terraria";
+			return MagicStorage.Instance.AllMods[ModIndex].Name;
+		}
+
+		public void Update(MouseState curMouse, MouseState oldMouse) {
+			Rectangle dim = InterfaceHelper.GetFullRectangle(_modButton);
+			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height) {
+				_modButton.BackgroundColor = new Color(73, 94, 171);
+				Mod[] allMods = MagicStorage.Instance.AllMods;
+				int index = ModIndex;
+				if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released) {
+					index++;
+					if (index >= allMods.Length)
+						index = ModIndexAll;
+				}
+				else if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released) {
+					index--;
+					if (index < -2)
+						index = allMods.Length - 1;
+				}
+
+				SetSearchMod(index, false);
+			}
+			else {
+				_modButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			}
+		}
+	}
 }

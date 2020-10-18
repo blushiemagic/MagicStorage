@@ -1,22 +1,20 @@
-﻿using System;
-using Terraria;
+﻿using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class StorageUnit : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.AddTranslation(GameCulture.Russian, "Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento");
 		}
-		public override void SetDefaults()
-		{
+
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -27,12 +25,11 @@ namespace MagicStorage.Items
 			item.useStyle = 1;
 			item.consumable = true;
 			item.rare = 0;
-			item.value = Item.sellPrice(0, 0, 6, 0);
+			item.value = Item.sellPrice(0, 0, 6);
 			item.createTile = mod.TileType("StorageUnit");
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageComponent"));
 			recipe.AddRecipeGroup("MagicStorage:AnyChest");

@@ -1,24 +1,19 @@
-﻿using System;
-using Terraria;
-using Terraria.ID;
+﻿using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.Localization;
 
 namespace MagicStorage.Items
 {
 	public class CreativeStorageUnit : ModItem
 	{
-	
-		public override void SetStaticDefaults()
-		{
+
+		public override void SetStaticDefaults() {
 			DisplayName.AddTranslation(GameCulture.Russian, "Креативная Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Kreatywna Jednostka Magazynująca");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Créatif");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Creativa");
 		}
-		
-		public override void SetDefaults()
-		{
+
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

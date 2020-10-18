@@ -1,15 +1,13 @@
-﻿using System;
-using Terraria;
+﻿using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class CraftingAccess : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.SetDefault("Storage Crafting Interface");
 			DisplayName.AddTranslation(GameCulture.Russian, "Модуль Создания Предметов");
 			DisplayName.AddTranslation(GameCulture.Polish, "Interfejs Rzemieślniczy Magazynu");
@@ -17,8 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Spanish, "Interfaz de Elaboración de almacenamiento");
 		}
 
-		public override void SetDefaults()
-		{
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -33,23 +30,17 @@ namespace MagicStorage.Items
 			item.createTile = mod.TileType("CraftingAccess");
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 1);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 			if (MagicStorage.legendMod == null)
-			{
 				recipe.AddIngredient(ItemID.Sapphire, 3);
-			}
 			else
-			{
 				recipe.AddRecipeGroup("MagicStorage:AnySapphire", 5);
-			}
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 		}
 	}
 }
-

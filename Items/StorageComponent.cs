@@ -1,23 +1,20 @@
-﻿using System;
-using Terraria;
+﻿using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class StorageComponent : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
+		public override void SetStaticDefaults() {
 			DisplayName.AddTranslation(GameCulture.Russian, "Компонент Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Komponent Magazynu");
 			DisplayName.AddTranslation(GameCulture.French, "Composant de Stockage");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Componente de Almacenamiento");
 		}
-		
-		public override void SetDefaults()
-		{
+
+		public override void SetDefaults() {
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -28,12 +25,11 @@ namespace MagicStorage.Items
 			item.useStyle = 1;
 			item.consumable = true;
 			item.rare = 0;
-			item.value = Item.sellPrice(0, 0, 1, 0);
+			item.value = Item.sellPrice(0, 0, 1);
 			item.createTile = mod.TileType("StorageComponent");
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.Wood, 10);
 			recipe.AddIngredient(ItemID.IronBar, 2);

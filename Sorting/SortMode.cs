@@ -1,5 +1,3 @@
-using System;
-
 namespace MagicStorage.Sorting
 {
 	public enum SortMode
@@ -7,8 +5,8 @@ namespace MagicStorage.Sorting
 		Default,
 		Id,
 		Name,
-        Value,
-        Dps,
-        AsIs
+		Value,
+		Dps,
+		AsIs
 	}
 }

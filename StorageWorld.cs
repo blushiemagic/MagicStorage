@@ -1,8 +1,6 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using MagicStorage.Items;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -13,24 +11,23 @@ namespace MagicStorage
 	public class StorageWorld : ModWorld
 	{
 		private const int saveVersion = 0;
-		public static bool kingSlimeDiamond = false;
-		public static bool boss1Diamond = false;
-		public static bool boss2Diamond = false;
-		public static bool boss3Diamond = false;
-		public static bool queenBeeDiamond = false;
-		public static bool hardmodeDiamond = false;
-		public static bool mechBoss1Diamond = false;
-		public static bool mechBoss2Diamond = false;
-		public static bool mechBoss3Diamond = false;
-		public static bool plantBossDiamond = false;
-		public static bool golemBossDiamond = false;
-		public static bool fishronDiamond = false;
-		public static bool ancientCultistDiamond = false;
-		public static bool moonlordDiamond = false;
-	    public static Dictionary<int, List<int>> TileToCreatingItem = new Dictionary<int, List<int>>();
+		public static bool kingSlimeDiamond;
+		public static bool boss1Diamond;
+		public static bool boss2Diamond;
+		public static bool boss3Diamond;
+		public static bool queenBeeDiamond;
+		public static bool hardmodeDiamond;
+		public static bool mechBoss1Diamond;
+		public static bool mechBoss2Diamond;
+		public static bool mechBoss3Diamond;
+		public static bool plantBossDiamond;
+		public static bool golemBossDiamond;
+		public static bool fishronDiamond;
+		public static bool ancientCultistDiamond;
+		public static bool moonlordDiamond;
+		public static Dictionary<int, List<int>> TileToCreatingItem = new Dictionary<int, List<int>>();
 
-		public override void Initialize()
-		{
+		public override void Initialize() {
 			kingSlimeDiamond = false;
 			boss1Diamond = false;
 			boss2Diamond = false;
@@ -47,8 +44,7 @@ namespace MagicStorage
 			moonlordDiamond = false;
 		}
 
-		public override TagCompound Save()
-		{
+		public override TagCompound Save() {
 			TagCompound tag = new TagCompound();
 			tag["saveVersion"] = saveVersion;
 			tag["kingSlimeDiamond"] = kingSlimeDiamond;
@@ -67,9 +63,8 @@ namespace MagicStorage
 			tag["moonlordDiamond"] = moonlordDiamond;
 			return tag;
 		}
-        
-	    public override void Load(TagCompound tag)
-		{
+
+		public override void Load(TagCompound tag) {
 			kingSlimeDiamond = tag.GetBool("kingSlimeDiamond");
 			boss1Diamond = tag.GetBool("boss1Diamond");
 			boss2Diamond = tag.GetBool("boss2Diamond");
@@ -85,74 +80,54 @@ namespace MagicStorage
 			ancientCultistDiamond = tag.GetBool("ancientCultistDiamond");
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 
-		    Volatile.Write(ref TileToCreatingItem, new Dictionary<int, List<int>>()); // used from threaded RefreshRecipes
+			Volatile.Write(ref TileToCreatingItem, new Dictionary<int, List<int>>()); // used from threaded RefreshRecipes
 		}
 
-	    public override void PostUpdate()
-	    {
-	        if (TileToCreatingItem.Count == 0)
-	        {
-	            #region Initialize TileToCreatingItem
-                
-	            var tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount)
-                    .Select((x, i) =>
-	                {
-						var item = new Item();
-	                    // provide items
-	                    try
-	                    {
-	                        item.SetDefaults(i, true);
-	                    }
-	                    catch
-                        {
-                            return null;
-                        }
+		public override void PostUpdate() {
+			if (TileToCreatingItem.Count == 0) {
+				#region Initialize TileToCreatingItem
+				Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) => {
+						Item item = new Item();
+						// provide items
+						try {
+							item.SetDefaults(i, true);
+						}
+						catch {
+							return null;
+						}
 
-	                    return item;
-	                })
-					.Where(x => x?.type > 0 && x.createTile >= 0)
-	                .Select(x =>
-	                {
-	                    // provide item and its tiles
-	                    var tiles = new List<int> { x.createTile };
-	                    if (x.createTile == TileID.GlassKiln || x.createTile == TileID.Hellforge || x.createTile == TileID.AdamantiteForge)
-	                    {
-	                        tiles.Add(TileID.Furnaces);
-	                    }
+						return item;
+					}).Where(x => x?.type > 0 && x.createTile >= 0).Select(x => {
+						// provide item and its tiles
+						var tiles = new List<int> { x.createTile };
+						if (x.createTile == TileID.GlassKiln || x.createTile == TileID.Hellforge || x.createTile == TileID.AdamantiteForge)
+							tiles.Add(TileID.Furnaces);
 
-	                    if (x.createTile == TileID.AdamantiteForge)
-	                    {
-	                        tiles.Add(TileID.Hellforge);
-	                    }
+						if (x.createTile == TileID.AdamantiteForge)
+							tiles.Add(TileID.Hellforge);
 
-	                    if (x.createTile == TileID.MythrilAnvil)
-	                    {
-	                        tiles.Add(TileID.Anvils);
-	                    }
+						if (x.createTile == TileID.MythrilAnvil)
+							tiles.Add(TileID.Anvils);
 
-	                    if (x.createTile == TileID.BewitchingTable || x.createTile == TileID.Tables2)
-	                    {
-	                        tiles.Add(TileID.Tables);
-	                    }
+						if (x.createTile == TileID.BewitchingTable || x.createTile == TileID.Tables2)
+							tiles.Add(TileID.Tables);
 
-	                    if (x.createTile == TileID.AlchemyTable)
-	                    {
-	                        tiles.Add(TileID.Bottles);
-	                        tiles.Add(TileID.Tables);
-	                    }
+						if (x.createTile == TileID.AlchemyTable) {
+							tiles.Add(TileID.Bottles);
+							tiles.Add(TileID.Tables);
+						}
 
-	                    return new { item = x, tiles = tiles };
-	                })
-	                // flatten - tile, item
-	                .SelectMany(x => x.tiles.Select(t => new { tile = t, x.item }))
-	                .GroupBy(x => x.tile)
-	                .ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
+						return new {
+							item = x,
+							tiles
+						};
+					})
+					// flatten - tile, item
+					.SelectMany(x => x.tiles.Select(t => new { tile = t, x.item })).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
 
-	            Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
-
-	            #endregion
-	        }
-	    }
+				Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
+				#endregion
+			}
+		}
 	}
 }
-
