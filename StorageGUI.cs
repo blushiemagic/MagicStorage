@@ -23,19 +23,19 @@ namespace MagicStorage
 		public static MouseState curMouse;
 		public static MouseState oldMouse;
 
-		private static readonly UIPanel basePanel = new UIPanel();
+		private static UIPanel basePanel;
 		private static float panelTop;
 		private static float panelLeft;
 		private static float panelWidth;
 		private static float panelHeight;
 
-		private static readonly UIElement topBar = new UIElement();
+		private static UIElement topBar;
 		internal static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		private static UIToggleButton favoritedOnlyButton;
 		internal static UITextPanel<LocalizedText> depositButton;
 		internal static UITextPanel<LocalizedText> restockButton;
-		private static readonly UIElement topBar2 = new UIElement();
+		private static UIElement topBar2;
 		private static UIButtonChoice filterButtons;
 
 		public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
@@ -57,7 +57,7 @@ namespace MagicStorage
 		private static int numRows;
 		private static int displayRows;
 
-		private static readonly UIElement bottomBar = new UIElement();
+		private static UIElement bottomBar;
 		private static UIText capacityText;
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
@@ -69,6 +69,7 @@ namespace MagicStorage
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
+			basePanel = new UIPanel();
 			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
@@ -79,6 +80,7 @@ namespace MagicStorage
 			basePanel.Height.Set(panelHeight, 0f);
 			basePanel.Recalculate();
 
+			topBar = new UIElement();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
 			basePanel.Append(topBar);
@@ -107,6 +109,7 @@ namespace MagicStorage
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
 			topBar2.Height.Set(32f, 0f);
 			topBar2.Top.Set(36f, 0f);
@@ -140,6 +143,7 @@ namespace MagicStorage
 			scrollBar.SetView(scrollBarViewSize, scrollBarMaxViewSize);
 			slotZone.Append(scrollBar);
 
+			bottomBar = new UIElement();
 			bottomBar.Width.Set(0f, 1f);
 			bottomBar.Height.Set(32f, 0f);
 			bottomBar.Top.Set(-32f, 1f);
@@ -170,6 +174,12 @@ namespace MagicStorage
 			if (capacityText == null)
 				capacityText = new UIText("Items");
 		}
+
+		internal static void Unload() {
+			sortButtons = null;
+			filterButtons = null;
+		}
+
 
 		private static void InitSortButtons() {
 			if (sortButtons == null)

@@ -78,7 +78,7 @@ namespace MagicStorage
 		private static readonly UIElement bottomBar = new UIElement();
 		private static UIText capacityText;
 
-		private static readonly UIPanel recipePanel = new UIPanel();
+		private static UIPanel recipePanel;
 
 		private static float recipeTop;
 		private static float recipeLeft;
@@ -140,10 +140,6 @@ namespace MagicStorage
 				recipeAvailable = nextRecipeAvailable;
 			}
 
-			topBar2 = new UIElement();
-			topBar = new UIElement();
-			basePanel = new UIPanel();
-
 			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
@@ -152,6 +148,7 @@ namespace MagicStorage
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
+			basePanel = new UIPanel();
 			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
@@ -162,6 +159,7 @@ namespace MagicStorage
 			basePanel.Height.Set(panelHeight, 0f);
 			basePanel.Recalculate();
 
+			recipePanel = new UIPanel();
 			recipeTop = panelTop;
 			recipeLeft = panelLeft + panelWidth;
 			recipeWidth = numColumns2 * (smallSlotWidth + padding) + 20f + padding;
@@ -173,6 +171,7 @@ namespace MagicStorage
 			recipePanel.Height.Set(recipeHeight, 0f);
 			recipePanel.Recalculate();
 
+			topBar = new UIElement();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
 			basePanel.Append(topBar);
@@ -191,6 +190,7 @@ namespace MagicStorage
 			searchBar.Height.Set(0f, 1f);
 			topBar.Append(searchBar);
 
+			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
 			topBar2.Height.Set(32f, 0f);
 			topBar2.Top.Set(36f, 0f);
@@ -327,6 +327,12 @@ namespace MagicStorage
 			if (craftButton == null)
 				craftButton = new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"));
 			modSearchBox.InitLangStuff();
+		}
+
+		internal static void Unload() {
+			sortButtons = null;
+			filterButtons = null;
+			recipeButtons = null;
 		}
 
 		private static void InitSortButtons() {
