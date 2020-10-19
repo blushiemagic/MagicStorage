@@ -388,9 +388,8 @@ namespace MagicStorage
 					if (curMouse.RightButton == ButtonState.Released)
 						ResetSlotFocus();
 
-					if (basePanel != null)
-						basePanel.Update(gameTime);
-					recipePanel.Update(gameTime);
+					basePanel?.Update(gameTime);
+					recipePanel?.Update(gameTime);
 					UpdateRecipeText();
 					UpdateScrollBar();
 					UpdateCraftButton();
