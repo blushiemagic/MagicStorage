@@ -24,8 +24,7 @@ namespace MagicStorage.Components
 			return ((TERemoteAccess)ent).GetHeart();
 		}
 
-		public override bool NewRightClick(int i, int j)
-		{
+		public override bool NewRightClick(int i, int j) {
 			Player player = Main.player[Main.myPlayer];
 			Item item = player.inventory[player.selectedItem];
 			if (item.type == mod.ItemType("Locator") || item.type == mod.ItemType("LocatorDisk")) {
@@ -46,9 +45,7 @@ namespace MagicStorage.Components
 				Main.NewText(message);
 				return true;
 			}
-			else {
-				return base.NewRightClick(i, j);
-			}
+			return base.NewRightClick(i, j);
 		}
 	}
 }

@@ -27,33 +27,33 @@ namespace MagicStorage.Components
 			int style = frameY / 36;
 			int type;
 			switch (style) {
-			case 1:
-				type = mod.ItemType("StorageUnitDemonite");
-				break;
-			case 2:
-				type = mod.ItemType("StorageUnitCrimtane");
-				break;
-			case 3:
-				type = mod.ItemType("StorageUnitHellstone");
-				break;
-			case 4:
-				type = mod.ItemType("StorageUnitHallowed");
-				break;
-			case 5:
-				type = mod.ItemType("StorageUnitBlueChlorophyte");
-				break;
-			case 6:
-				type = mod.ItemType("StorageUnitLuminite");
-				break;
-			case 7:
-				type = mod.ItemType("StorageUnitTerra");
-				break;
-			case 8:
-				type = mod.ItemType("StorageUnitTiny");
-				break;
-			default:
-				type = mod.ItemType("StorageUnit");
-				break;
+				case 1:
+					type = mod.ItemType("StorageUnitDemonite");
+					break;
+				case 2:
+					type = mod.ItemType("StorageUnitCrimtane");
+					break;
+				case 3:
+					type = mod.ItemType("StorageUnitHellstone");
+					break;
+				case 4:
+					type = mod.ItemType("StorageUnitHallowed");
+					break;
+				case 5:
+					type = mod.ItemType("StorageUnitBlueChlorophyte");
+					break;
+				case 6:
+					type = mod.ItemType("StorageUnitLuminite");
+					break;
+				case 7:
+					type = mod.ItemType("StorageUnitTerra");
+					break;
+				case 8:
+					type = mod.ItemType("StorageUnitTiny");
+					break;
+				default:
+					type = mod.ItemType("StorageUnit");
+					break;
 			}
 			return type;
 		}
@@ -65,22 +65,21 @@ namespace MagicStorage.Components
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem) {
 			if (Main.tile[i, j].frameX / 36 % 3 != 0)
 				fail = true;
-			}
+		}
 
 		public override bool NewRightClick(int i, int j) {
 			if (Main.tile[i, j].frameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].frameY % 36 == 18)
 				j--;
-			if (TryUpgrade(i, j)) {
+			if (TryUpgrade(i, j))
 				return true;
-			}
 			TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 			Main.player[Main.myPlayer].tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
 			Main.NewText(activeString + ", " + fullnessString);
-            return base.NewRightClick(i, j);
+			return base.NewRightClick(i, j);
 		}
 
 		private bool TryUpgrade(int i, int j) {
@@ -126,13 +125,13 @@ namespace MagicStorage.Components
 						heart.ResetCompactStage();
 					else if (Main.netMode == 1)
 						NetHelper.SendResetCompactStage(heart.ID);
-					}
+				}
 				item.stack--;
 				if (item.stack <= 0)
 					item.SetDefaults();
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
-				}
+			}
 			return success;
 		}
 
