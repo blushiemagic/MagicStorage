@@ -46,9 +46,9 @@ namespace MagicStorage
 			cursorTimer++;
 			cursorTimer %= 60;
 
-				Rectangle dim = InterfaceHelper.GetFullRectangle(this);
-				MouseState mouse = StorageGUI.curMouse;
-				bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
+			MouseState mouse = StorageGUI.curMouse;
+			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
 			if (StorageGUI.MouseClicked && Parent != null) {
 				if (!hasFocus && mouseOver) {
 					hasFocus = true;
@@ -60,13 +60,13 @@ namespace MagicStorage
 					cursorPosition = Text.Length;
 				}
 			}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && Parent != null && hasFocus && !mouseOver) {
+			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released) {
+				if (!mouseOver && Parent != null && hasFocus) {
 					hasFocus = false;
-				cursorPosition = Text.Length;
+					cursorPosition = Text.Length;
 					CheckBlockInput();
 				}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released && mouseOver) {
-				if (Text.Length > 0) {
+				else if (mouseOver && Text.Length > 0) {
 					Text = string.Empty;
 					cursorPosition = 0;
 					_clearedEvent?.Invoke();
@@ -80,6 +80,11 @@ namespace MagicStorage
 				if (cursorPosition < Text.Length && Text.Length > 0)
 					prev = prev.Remove(cursorPosition);
 				string newString = Main.GetInputText(prev);
+				if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back)) {
+					string trimmed = newString.TrimEnd();
+					int index = trimmed.LastIndexOf(" ", trimmed.Length, StringComparison.Ordinal);
+					newString = index != -1 ? trimmed.Substring(0, index) : string.Empty;
+				}
 				bool changed = false;
 				if (!newString.Equals(prev)) {
 					int newStringLength = newString.Length;
@@ -88,22 +93,20 @@ namespace MagicStorage
 					cursorPosition = newStringLength;
 					changed = true;
 				}
-				if (KeyTyped(Keys.Delete))
-					if (Text.Length > 0 && cursorPosition < Text.Length) {
-						Text = Text.Remove(cursorPosition, 1);
-						changed = true;
-					}
-				if (KeyTyped(Keys.Left))
-					if (cursorPosition > 0)
-						cursorPosition--;
-				if (KeyTyped(Keys.Right))
-					if (cursorPosition < Text.Length)
-						cursorPosition++;
+				if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length) {
+					Text = Text.Remove(cursorPosition, 1);
+					changed = true;
+				}
+				if (KeyTyped(Keys.Left) && cursorPosition > 0)
+					cursorPosition--;
+				if (KeyTyped(Keys.Right) && cursorPosition < Text.Length)
+					cursorPosition++;
 				if (KeyTyped(Keys.Home))
 					cursorPosition = 0;
 				if (KeyTyped(Keys.End))
 					cursorPosition = Text.Length;
-				if (changed) StorageGUI.RefreshItems();
+				if (changed)
+					StorageGUI.RefreshItems();
 				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape)) {
 					hasFocus = false;
 					CheckBlockInput();
@@ -156,7 +159,7 @@ namespace MagicStorage
 				if (searchBar.hasFocus) {
 					Main.blockInput = true;
 					break;
-			}
+				}
 		}
 	}
 }
