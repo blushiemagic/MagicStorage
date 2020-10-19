@@ -24,7 +24,8 @@ namespace MagicStorage.Components
 			return ((TERemoteAccess)ent).GetHeart();
 		}
 
-		public override void RightClick(int i, int j) {
+		public override bool NewRightClick(int i, int j)
+		{
 			Player player = Main.player[Main.myPlayer];
 			Item item = player.inventory[player.selectedItem];
 			if (item.type == mod.ItemType("Locator") || item.type == mod.ItemType("LocatorDisk")) {
@@ -32,7 +33,6 @@ namespace MagicStorage.Components
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
-				player.tileInteractionHappened = true;
 				TERemoteAccess ent = (TERemoteAccess)TileEntity.ByPosition[new Point16(i, j)];
 				Locator locator = (Locator)item.modItem;
 				string message;
@@ -45,9 +45,10 @@ namespace MagicStorage.Components
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
 				Main.NewText(message);
+				return true;
 			}
 			else {
-				base.RightClick(i, j);
+				return base.NewRightClick(i, j);
 			}
 		}
 	}

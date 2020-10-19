@@ -36,19 +36,18 @@ namespace MagicStorage.Components
 			player.noThrow = 2;
 		}
 
-		public override void RightClick(int i, int j) {
+		public override bool NewRightClick(int i, int j)
+		{
 			if (Main.tile[i, j].frameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].frameY % 36 == 18)
 				j--;
 			Player player = Main.player[Main.myPlayer];
 			if (GetHeart(i, j) == null) {
-				player.tileInteractionHappened = true;
 				Main.NewText("This access is not connected to a Storage Heart!");
-				return;
+				return true;
 			}
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
-			player.tileInteractionHappened = true;
 			Main.mouseRightRelease = false;
 			if (player.sign > -1) {
 				Main.PlaySound(11);
@@ -90,6 +89,7 @@ namespace MagicStorage.Components
 				Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
 				Recipe.FindRecipes();
 			}
+            return true;
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch) {

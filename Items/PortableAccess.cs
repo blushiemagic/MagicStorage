@@ -38,7 +38,7 @@ namespace MagicStorage.Items
 						Main.NewText("Storage Heart is missing!");
 					else
 						OpenStorage(player);
-				}
+					}
 				else {
 					Main.NewText("Locator is not set to any Storage Heart");
 				}
@@ -99,7 +99,7 @@ namespace MagicStorage.Items
 					lines.RemoveAt(k);
 					k--;
 				}
-		}
+			}
 
 		public override void AddRecipes() {
 			ModRecipe recipe = new ModRecipe(mod);
