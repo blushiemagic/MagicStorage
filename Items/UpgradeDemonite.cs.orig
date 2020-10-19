@@ -1,7 +1,10 @@
 ﻿using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
+<<<<<<< HEAD
 using Terraria.ModLoader;
+=======
+>>>>>>> e4d6a67... Add Chinese translation (#64)
 
 namespace MagicStorage.Items
 {
@@ -15,12 +18,26 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Endemoniado)");
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储升级珠(魔金)");
 
+<<<<<<< HEAD
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity" + "\n<right> a Storage Unit to use");
 			Tooltip.AddTranslation(GameCulture.Russian, "Увеличивает количество слотов в Ячейке Хранилища до 80" + "\n<right> на Ячейке Хранилища для улучшения");
 			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 80 miejsc" + "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
 			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 80" + "\n<right> l'unité de stockage pour utiliser");
 			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 80" + "\n<right> en la unidad de almacenamiento para utilizar");
-			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至80容量" + "\n<right>一个存储单元(魔金)可镶嵌");
+=======
+			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
+				+ "\n<right> a Storage Unit to use");
+			Tooltip.AddTranslation(GameCulture.Russian, "Увеличивает количество слотов в Ячейке Хранилища до 80"
+				+ "\n<right> на Ячейке Хранилища для улучшения");
+			Tooltip.AddTranslation(GameCulture.Polish, "Ulepsza jednostkę magazynującą do 80 miejsc"
+				+ "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
+			Tooltip.AddTranslation(GameCulture.French, "améliore la capacité de unité de stockage à 80"
+				+ "\n<right> l'unité de stockage pour utiliser");
+			Tooltip.AddTranslation(GameCulture.Spanish, "Capacidad de unidad de almacenamiento mejorada a 80"
+				+ "\n<right> en la unidad de almacenamiento para utilizar");
+			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至80容量"
+				+ "\n<right>一个存储单元(魔金)可镶嵌");
+>>>>>>> e4d6a67... Add Chinese translation (#64)
 		}
 
 		public override void SetDefaults() {

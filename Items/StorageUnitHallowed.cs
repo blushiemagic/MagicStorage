@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Święcona)");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Sacré)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Sagrado)");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(神圣)");
 		}
 
 		public override void SetDefaults() {

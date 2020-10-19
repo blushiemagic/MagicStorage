@@ -12,9 +12,11 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults() {
 			DisplayName.SetDefault("Portable Remote Storage Access");
 			DisplayName.AddTranslation(GameCulture.Russian, "Портативный Модуль Удаленного Доступа к Хранилищу");
+			DisplayName.AddTranslation(GameCulture.Chinese, "便携式远程存储装置");
 
 			Tooltip.SetDefault("<right> Storage Heart to store location" + "\nCurrently not set to any location" + "\nUse item to access your storage");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Cердцу Хранилища чтобы запомнить его местоположение" + "\nВ данный момент Сердце Хранилища не привязанно" + "\nИспользуйте что бы получить доступ к вашему Хранилищу");
+			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
 		}
 
 		public override void SetDefaults() {
@@ -104,7 +106,7 @@ namespace MagicStorage.Items
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			recipe.AddIngredient(ItemID.Ruby, 3);
+			recipe.AddIngredient(ItemID.Ruby, 7);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
@@ -115,7 +117,7 @@ namespace MagicStorage.Items
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 3);
+				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
 				recipe.AddRecipe();
@@ -127,7 +129,7 @@ namespace MagicStorage.Items
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 3);
+				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);
 				recipe.AddRecipe();

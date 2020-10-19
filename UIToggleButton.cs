@@ -9,12 +9,12 @@ namespace MagicStorage
 {
 	public class UIToggleButton : UIElement
 	{
-		private readonly Action onChanged;
 		private readonly Texture2D _button;
 		private readonly LocalizedText _name;
+		private readonly int buttonSize;
+		private readonly Action onChanged;
 
 		private int buttonPadding;
-		private readonly int buttonSize;
 
 		public UIToggleButton(Action onChanged, Texture2D button, LocalizedText name, int buttonSize = 21, int buttonPadding = 1) {
 			this.buttonSize = buttonSize;

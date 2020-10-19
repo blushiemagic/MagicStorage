@@ -54,8 +54,8 @@ namespace MagicStorage.Components
 
 	internal class CreativeEnumerator : IEnumerator<Item>
 	{
-		private int id;
 		private readonly bool inactive;
+		private int id;
 
 		internal CreativeEnumerator(bool inactive) {
 			this.inactive = inactive;

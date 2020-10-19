@@ -15,11 +15,11 @@ namespace MagicStorage
 
 		private static Item[] temp = new Item[11];
 		private readonly GetItem getItem;
-		private int hoverSlot = -1;
 		private readonly float inventoryScale;
+		private readonly HoverItemSlot onHover;
+		private int hoverSlot = -1;
 		private int numColumns = 10;
 		private int numRows = 4;
-		private readonly HoverItemSlot onHover;
 
 		public UISlotZone(HoverItemSlot onHover, GetItem getItem, float scale) {
 			this.onHover = onHover;

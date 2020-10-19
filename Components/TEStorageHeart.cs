@@ -12,8 +12,8 @@ namespace MagicStorage.Components
 	{
 
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory");
-		private int compactStage;
 		private readonly ReaderWriterLockSlim itemsLock = new ReaderWriterLockSlim();
+		private int compactStage;
 		public List<Point16> remoteAccesses = new List<Point16>();
 		private int updateTimer = 60;
 

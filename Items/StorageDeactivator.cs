@@ -16,12 +16,14 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.French, "Baguette d'unité de stockage");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Varita de unidad de almacenamiento");
 			DisplayName.AddTranslation(GameCulture.French, "Baguetter d'unité de stockage");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元魔杖");
 
 			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
 			Tooltip.AddTranslation(GameCulture.Russian, "<right> на Ячейке Хранилища что бы активировать/деактивировать ее");
 			Tooltip.AddTranslation(GameCulture.Polish, "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
 			Tooltip.AddTranslation(GameCulture.French, "<right> pour changer l'unité de stockage actif/inactif");
 			Tooltip.AddTranslation(GameCulture.Spanish, "<right> para cambiar el unidad de almacenamiento activo/inactivo");
+			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储单元使其切换启用/禁用");
 		}
 
 		public override void SetDefaults() {

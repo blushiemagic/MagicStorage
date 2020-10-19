@@ -12,6 +12,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Luminowana)");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Luminite)");
 			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Luminita)");
+			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(夜明)");
 		}
 
 		public override void SetDefaults() {

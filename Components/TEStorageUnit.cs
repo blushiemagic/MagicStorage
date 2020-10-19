@@ -9,13 +9,13 @@ namespace MagicStorage.Components
 {
 	public class TEStorageUnit : TEAbstractStorageUnit
 	{
+		private readonly Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
 		private HashSet<ItemData> hasItem = new HashSet<ItemData>();
 		private HashSet<int> hasItemNoPrefix = new HashSet<int>();
 
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
 		private IList<Item> items = new List<Item>();
-		private readonly Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
 		private bool receiving;
 
 		public int Capacity {
