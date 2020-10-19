@@ -506,8 +506,7 @@ namespace MagicStorage
 				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[51].Value);
 			if (selectedRecipe.anyPressurePlate && item.type == ItemID.GrayPressurePlate)
 				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[38].Value);
-			string nameOverride;
-			if (selectedRecipe.ProcessGroupsForText(item.type, out nameOverride))
+			if (selectedRecipe.ProcessGroupsForText(item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 			return item;
 		}
@@ -716,11 +715,7 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			HashSet<int> foundItems;
-			HashSet<int> hiddenRecipes;
-			HashSet<int> craftedRecipes;
-			HashSet<int> asKnownRecipes;
-			GetKnownItems(out foundItems, out hiddenRecipes, out craftedRecipes, out asKnownRecipes);
+			GetKnownItems(out HashSet<int> foundItems, out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes);
 			foundItems.UnionWith(asKnownRecipes);
 
 			var favoritesCopy = new HashSet<int>(modPlayer.FavoritedRecipes.Items.Select(x => x.type));
@@ -741,8 +736,7 @@ namespace MagicStorage
 		}
 
 		public static HashSet<int> GetKnownItems() {
-			HashSet<int> a, b, c, d;
-			GetKnownItems(out a, out b, out c, out d);
+			GetKnownItems(out HashSet<int> a, out HashSet<int> b, out HashSet<int> c, out HashSet<int> d);
 			a.UnionWith(b);
 			a.UnionWith(c);
 			a.UnionWith(d);
@@ -785,15 +779,13 @@ namespace MagicStorage
 		///     Checks all crafting tree until it finds already available ingredients
 		/// </summary>
 		private static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache) {
-			bool v;
-			if (cache.TryGetValue(recipe, out v)) return v;
+			if (cache.TryGetValue(recipe, out bool v)) return v;
 
 			foreach (int tile in recipe.requiredTile) {
 				if (tile == -1)
 					break;
 
-				List<int> possibleItems;
-				if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out possibleItems))
+				if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out List<int> possibleItems))
 					continue;
 
 				if (!possibleItems.Any(x => IsKnownRecursively_CheckIngredient(x, availableSet, recursionTree, cache))) {
@@ -835,8 +827,7 @@ namespace MagicStorage
 			if (availableSet.Contains(t)) return true;
 			if (!recursionTree.Add(t)) return false;
 			try {
-				List<Recipe> ingredientRecipes;
-				if (!_productToRecipes.TryGetValue(t, out ingredientRecipes)) return false;
+				if (!_productToRecipes.TryGetValue(t, out List<Recipe> ingredientRecipes)) return false;
 				if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsKnownRecursively(x, availableSet, recursionTree, cache))) return false;
 			}
 			finally {
@@ -1202,8 +1193,7 @@ namespace MagicStorage
 				if (RightMouseClicked) {
 					Item item = selectedRecipe.requiredItem[slot];
 					EnsureProductToRecipesInited();
-					List<Recipe> itemRecipes;
-					if (_productToRecipes.TryGetValue(item.type, out itemRecipes)) {
+					if (_productToRecipes.TryGetValue(item.type, out List<Recipe> itemRecipes)) {
 						HashSet<int> knownItems = GetKnownItems();
 
 						var recursionTree = new HashSet<int>();
