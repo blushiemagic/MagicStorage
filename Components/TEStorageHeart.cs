@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader.IO;
 using Terraria.ID;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {

@@ -3,10 +3,10 @@ using System.Linq;
 using MagicStorage.Components;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
-using Terraria.ID;
 
 namespace MagicStorage
 {

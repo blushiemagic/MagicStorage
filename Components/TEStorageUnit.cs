@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using Terraria;
-using Terraria.ModLoader.IO;
 using Terraria.ID;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
