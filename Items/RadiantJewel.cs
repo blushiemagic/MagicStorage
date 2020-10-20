@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ID;
 
 namespace MagicStorage.Items
 {
@@ -26,7 +27,7 @@ namespace MagicStorage.Items
 			item.width = 14;
 			item.height = 14;
 			item.maxStack = 99;
-			item.rare = 11;
+			item.rare = ItemRarityID.Purple;
 			item.value = Item.sellPrice(0, 10);
 		}
 

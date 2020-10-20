@@ -5,6 +5,7 @@ using System.Threading;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -63,12 +64,12 @@ namespace MagicStorage.Components
 					remoteAccesses.RemoveAt(k);
 					k--;
 				}
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return;
 			updateTimer++;
 			if (updateTimer >= 60) {
 				updateTimer = 0;
-				if (Main.netMode != 2 || itemsLock.TryEnterWriteLock(2))
+				if (Main.netMode != NetmodeID.Server || itemsLock.TryEnterWriteLock(2))
 					try {
 						CompactOne();
 					}

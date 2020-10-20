@@ -93,7 +93,7 @@ namespace MagicStorage.Components
 				tileEntity.Kill(i, j);
 			}
 			else {
-				if (Main.netMode == 1)
+				if (Main.netMode == NetmodeID.MultiplayerClient)
 					NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
 				else
 					TEStorageComponent.SearchAndRefreshNetwork(killTile);

@@ -49,13 +49,13 @@ namespace MagicStorage.Components
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Main.mouseRightRelease = false;
 			if (player.sign > -1) {
-				Main.PlaySound(11);
+				Main.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
 			}
 			if (Main.editChest) {
-				Main.PlaySound(12);
+				Main.PlaySound(SoundID.MenuTick);
 				Main.editChest = false;
 				Main.npcChatText = string.Empty;
 			}
@@ -75,7 +75,7 @@ namespace MagicStorage.Components
 			Point16 prevOpen = modPlayer.ViewingStorage();
 			if (prevOpen == toOpen) {
 				modPlayer.CloseStorage();
-				Main.PlaySound(11);
+				Main.PlaySound(SoundID.MenuClose);
 				Recipe.FindRecipes();
 			}
 			else {

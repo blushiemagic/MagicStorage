@@ -97,7 +97,7 @@ namespace MagicStorage
 						}
 
 						return item;
-					}).Where(x => x?.type > 0 && x.createTile >= 0).Select(x => {
+					}).Where(x => x?.type > 0 && x.createTile >= TileID.Dirt).Select(x => {
 						// provide item and its tiles
 						var tiles = new List<int> { x.createTile };
 						if (x.createTile == TileID.GlassKiln || x.createTile == TileID.Hellforge || x.createTile == TileID.AdamantiteForge)

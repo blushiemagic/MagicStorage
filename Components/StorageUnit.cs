@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -121,9 +122,9 @@ namespace MagicStorage.Components
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 2, 2);
 				TEStorageHeart heart = storageUnit.GetHeart();
 				if (heart != null) {
-					if (Main.netMode == 0)
+					if (Main.netMode == NetmodeID.SinglePlayer)
 						heart.ResetCompactStage();
-					else if (Main.netMode == 1)
+					else if (Main.netMode == NetmodeID.MultiplayerClient)
 						NetHelper.SendResetCompactStage(heart.ID);
 				}
 				item.stack--;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.ModLoader.IO;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -23,7 +24,7 @@ namespace MagicStorage.Components
 		}
 
 		public void TryDepositStation(Item item) {
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return;
 			foreach (Item station in stations)
 				if (station.type == item.type)
@@ -41,7 +42,7 @@ namespace MagicStorage.Components
 		}
 
 		public Item TryWithdrawStation(int slot) {
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return new Item();
 			if (!stations[slot].IsAir) {
 				Item item = stations[slot];
@@ -53,7 +54,7 @@ namespace MagicStorage.Components
 		}
 
 		public Item DoStationSwap(Item item, int slot) {
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return new Item();
 			if (!item.IsAir)
 				for (int k = 0; k < stations.Length; k++)

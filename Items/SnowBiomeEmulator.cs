@@ -2,6 +2,7 @@
 using Terraria.DataStructures;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ID;
 
 namespace MagicStorage.Items
 {
@@ -28,7 +29,7 @@ namespace MagicStorage.Items
 		public override void SetDefaults() {
 			item.width = 30;
 			item.height = 30;
-			item.rare = 1;
+			item.rare = ItemRarityID.Blue;
 		}
 
 		public override void AddRecipes() {

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using Terraria;
 using Terraria.ModLoader.IO;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -47,14 +48,14 @@ namespace MagicStorage.Components
 		}
 
 		public override bool HasSpaceInStackFor(Item check, bool locked = false) {
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterReadLock();
 			try {
 				ItemData data = new ItemData(check);
 				return hasSpaceInStack.Contains(data);
 			}
 			finally {
-				if (Main.netMode == 2 && !locked)
+				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitReadLock();
 			}
 		}
@@ -64,7 +65,7 @@ namespace MagicStorage.Components
 		}
 
 		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) {
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterReadLock();
 			try {
 				if (ignorePrefix) return hasItemNoPrefix.Contains(check.type);
@@ -72,7 +73,7 @@ namespace MagicStorage.Components
 				return hasItem.Contains(data);
 			}
 			finally {
-				if (Main.netMode == 2 && !locked)
+				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitReadLock();
 			}
 		}
@@ -82,9 +83,9 @@ namespace MagicStorage.Components
 		}
 
 		public override void DepositItem(Item toDeposit, bool locked = false) {
-			if (Main.netMode == 1 && !receiving)
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterWriteLock();
 			try {
 				if (CraftingGUI.IsTestItem(toDeposit)) return;
@@ -117,22 +118,22 @@ namespace MagicStorage.Components
 					hasChange = true;
 					finished = true;
 				}
-				if (hasChange && Main.netMode != 1) {
-					if (Main.netMode == 2)
+				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient) {
+					if (Main.netMode == NetmodeID.Server)
 						netQueue.Enqueue(UnitOperation.Deposit.Create(original));
 					PostChangeContents();
 				}
 			}
 			finally {
-				if (Main.netMode == 2 && !locked)
+				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitWriteLock();
 			}
 		}
 
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false) {
-			if (Main.netMode == 1 && !receiving)
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return new Item();
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterWriteLock();
 			try {
 				Item original = lookFor.Clone();
@@ -153,8 +154,8 @@ namespace MagicStorage.Components
 						result.stack += withdraw;
 						lookFor.stack -= withdraw;
 						if (lookFor.stack <= 0) {
-							if (Main.netMode != 1) {
-								if (Main.netMode == 2) {
+							if (Main.netMode != NetmodeID.MultiplayerClient) {
+								if (Main.netMode == NetmodeID.Server) {
 									WithdrawOperation op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
 									op.SendKeepOneIfFavorite = keepOneIfFavorite;
 									netQueue.Enqueue(op);
@@ -167,8 +168,8 @@ namespace MagicStorage.Components
 				}
 				if (result.stack == 0)
 					return new Item();
-				if (Main.netMode != 1) {
-					if (Main.netMode == 2) {
+				if (Main.netMode != NetmodeID.MultiplayerClient) {
+					if (Main.netMode == NetmodeID.Server) {
 						WithdrawOperation op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
 						op.SendKeepOneIfFavorite = keepOneIfFavorite;
 						netQueue.Enqueue(op);
@@ -178,7 +179,7 @@ namespace MagicStorage.Components
 				return result;
 			}
 			finally {
-				if (Main.netMode == 2 && !locked)
+				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitWriteLock();
 			}
 		}
@@ -187,7 +188,7 @@ namespace MagicStorage.Components
 			Tile topLeft = Main.tile[Position.X, Position.Y];
 			int oldFrame = topLeft.frameX;
 			int style;
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterReadLock();
 			if (IsEmpty)
 				style = 0;
@@ -195,7 +196,7 @@ namespace MagicStorage.Components
 				style = 2;
 			else
 				style = 1;
-			if (Main.netMode == 2 && !locked)
+			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().ExitReadLock();
 			if (Inactive)
 				style += 3;
@@ -226,7 +227,7 @@ namespace MagicStorage.Components
 			HashSet<int> temp = unit1.hasItemNoPrefix;
 			unit1.hasItemNoPrefix = unit2.hasItemNoPrefix;
 			unit2.hasItemNoPrefix = temp;
-			if (Main.netMode == 2) {
+			if (Main.netMode == NetmodeID.Server) {
 				unit1.netQueue.Clear();
 				unit2.netQueue.Clear();
 				unit1.netQueue.Enqueue(UnitOperation.FullSync.Create());
@@ -238,12 +239,12 @@ namespace MagicStorage.Components
 
 		//precondition: lock is already taken
 		internal Item WithdrawStack() {
-			if (Main.netMode == 1 && !receiving)
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return new Item();
 			Item item = items[items.Count - 1];
 			items.RemoveAt(items.Count - 1);
-			if (Main.netMode != 1) {
-				if (Main.netMode == 2)
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				if (Main.netMode == NetmodeID.Server)
 					netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
 				PostChangeContents();
 			}
@@ -271,7 +272,7 @@ namespace MagicStorage.Components
 				hasItem.Add(data);
 				hasItemNoPrefix.Add(data.Type);
 			}
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
 		}
 

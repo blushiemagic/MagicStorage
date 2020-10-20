@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -55,7 +56,7 @@ namespace MagicStorage.Components
 		}
 
 		public static int Hook_AfterPlacement(int i, int j, int type, int style, int direction) {
-			if (Main.netMode == 1) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 1, 1);
 				NetHelper.SendSearchAndRefresh(i, j);
 				return 0;
@@ -84,7 +85,7 @@ namespace MagicStorage.Components
 			if (fail || effectOnly)
 				return;
 			StorageComponent.killTile = new Point16(i, j);
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendSearchAndRefresh(StorageComponent.killTile.X, StorageComponent.killTile.Y);
 			else
 				TEStorageComponent.SearchAndRefreshNetwork(StorageComponent.killTile);

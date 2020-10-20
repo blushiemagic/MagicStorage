@@ -1,6 +1,7 @@
 ﻿using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ID;
 
 namespace MagicStorage.Items
 {
@@ -23,9 +24,9 @@ namespace MagicStorage.Items
 			item.autoReuse = true;
 			item.useAnimation = 15;
 			item.useTime = 10;
-			item.useStyle = 1;
+			item.useStyle = ItemUseStyleID.SwingThrow;
 			item.consumable = true;
-			item.rare = 7;
+			item.rare = ItemRarityID.Lime;
 			item.value = Item.sellPrice(0, 1, 60);
 			item.createTile = mod.TileType("StorageUnit");
 			item.placeStyle = 5;

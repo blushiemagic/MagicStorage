@@ -23,8 +23,8 @@ namespace MagicStorage.Items
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
-			item.rare = 11;
-			item.useStyle = 1;
+			item.rare = ItemRarityID.Purple;
+			item.useStyle = ItemUseStyleID.SwingThrow;
 			item.useAnimation = 28;
 			item.useTime = 28;
 			item.value = Item.sellPrice(0, 10);
@@ -49,13 +49,13 @@ namespace MagicStorage.Items
 		private void OpenStorage(Player player) {
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1) {
-				Main.PlaySound(11);
+				Main.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
 			}
 			if (Main.editChest) {
-				Main.PlaySound(12);
+				Main.PlaySound(SoundID.MenuTick);
 				Main.editChest = false;
 				Main.npcChatText = string.Empty;
 			}
@@ -75,7 +75,7 @@ namespace MagicStorage.Items
 			Point16 prevOpen = modPlayer.ViewingStorage();
 			if (prevOpen == toOpen) {
 				modPlayer.CloseStorage();
-				Main.PlaySound(11);
+				Main.PlaySound(SoundID.MenuClose);
 				Recipe.FindRecipes();
 			}
 			else {

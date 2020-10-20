@@ -100,7 +100,7 @@ namespace MagicStorage.Sorting
 		}
 
 		private static bool ThrownWeapon(Item item) {
-			return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > 0 && item.thrown;
+			return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.thrown;
 		}
 
 		private static bool Weapon(Item item) {
@@ -220,15 +220,15 @@ namespace MagicStorage.Sorting
 		}
 
 		private static bool Misc(Item item) {
-			return item.createTile < 0 && item.createWall < 1;
+			return item.createTile < TileID.Dirt && item.createWall < 1;
 		}
 
 		private static bool FrameImportantTile(Item item) {
-			return item.createTile >= 0 && Main.tileFrameImportant[item.createTile];
+			return item.createTile >= TileID.Dirt && Main.tileFrameImportant[item.createTile];
 		}
 
 		private static bool CommonTile(Item item) {
-			return item.createTile >= 0 || item.createWall > 0;
+			return item.createTile >= TileID.Dirt || item.createWall > 0;
 		}
 
 		private static int CompareRarity(Item item1, Item item2) {

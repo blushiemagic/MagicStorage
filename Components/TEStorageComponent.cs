@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.ID;
 
 namespace MagicStorage.Components
 {
@@ -34,7 +35,7 @@ namespace MagicStorage.Components
 		public abstract bool ValidTile(Tile tile);
 
 		public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction) {
-			if (Main.netMode == 1) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.SendComponentPlace(i - 1, j - 1, Type);
 				return -1;
 			}
@@ -44,7 +45,7 @@ namespace MagicStorage.Components
 		}
 
 		public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction) {
-			if (Main.netMode == 1) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetMessage.SendTileRange(Main.myPlayer, i - 1, j - 1, 2, 2);
 				NetHelper.SendSearchAndRefresh(i - 1, j - 1);
 				return 0;
@@ -58,7 +59,7 @@ namespace MagicStorage.Components
 		}
 
 		public override void OnKill() {
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendSearchAndRefresh(Position.X, Position.Y);
 			else
 				SearchAndRefreshNetwork(Position);

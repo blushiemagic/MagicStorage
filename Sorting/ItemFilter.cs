@@ -160,7 +160,7 @@ namespace MagicStorage.Sorting
 	public class FilterPlaceable : ItemFilter
 	{
 		public override bool Passes(Item item) {
-			return item.createTile >= 0 || item.createWall > 0;
+			return item.createTile >= TileID.Dirt || item.createWall > 0;
 		}
 	}
 

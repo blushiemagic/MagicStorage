@@ -496,15 +496,15 @@ namespace MagicStorage
 
 			Item item = selectedRecipe.requiredItem[slot].Clone();
 			if (selectedRecipe.anyWood && item.type == ItemID.Wood)
-				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.Wood));
+				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Wood));
 			if (selectedRecipe.anySand && item.type == ItemID.SandBlock)
-				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.SandBlock));
+				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.SandBlock));
 			if (selectedRecipe.anyIronBar && item.type == ItemID.IronBar)
-				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.GetItemNameValue(ItemID.IronBar));
+				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.IronBar));
 			if (selectedRecipe.anyFragment && item.type == ItemID.FragmentSolar)
-				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[51].Value);
+				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Language.GetText("LegacyMisc.51").Value);
 			if (selectedRecipe.anyPressurePlate && item.type == ItemID.GrayPressurePlate)
-				item.SetNameOverride(Lang.misc[37].Value + " " + Lang.misc[38].Value);
+				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Language.GetText("LegacyMisc.38").Value);
 			if (selectedRecipe.ProcessGroupsForText(item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 			return item;
@@ -640,7 +640,7 @@ namespace MagicStorage
 							maxCraftTimer = 1;
 						TryCraft();
 						RefreshItems();
-						Main.PlaySound(7);
+						Main.PlaySound(SoundID.Grab);
 					}
 					craftTimer--;
 					flag = true;
@@ -661,7 +661,7 @@ namespace MagicStorage
 		}
 
 		private static bool CanItemBeTakenForTest(Item item) {
-			return Main.netMode == NetmodeID.SinglePlayer && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.pick > 0 || item.axe > 0 || item.hammer > 0) && !item.summon && item.createTile < 0 && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None && !ModPlayer.TestedRecipes.Contains(item);
+			return Main.netMode == NetmodeID.SinglePlayer && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.pick > 0 || item.axe > 0 || item.hammer > 0) && !item.summon && item.createTile < TileID.Dirt && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None && !ModPlayer.TestedRecipes.Contains(item);
 		}
 
 		public static void MarkAsTestItem(Item testItem) {
@@ -762,7 +762,7 @@ namespace MagicStorage
 
 		private static void EnsureProductToRecipesInited() {
 			if (_productToRecipes == null) {
-				Recipe[] allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "").Where(x => x != null && x.createItem != null && x.createItem.type > 0).ToArray();
+				Recipe[] allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "").Where(x => x != null && x.createItem != null && x.createItem.type > ItemID.None).ToArray();
 				_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 			}
 		}
@@ -947,7 +947,7 @@ namespace MagicStorage
 				else
 					itemCounts[item.netID] = item.stack;
 			foreach (Item item in GetCraftingStations()) {
-				if (item.createTile >= 0) {
+				if (item.createTile >= TileID.Dirt) {
 					adjTiles[item.createTile] = true;
 					if (item.createTile == TileID.GlassKiln || item.createTile == TileID.Hellforge || item.createTile == TileID.AdamantiteForge)
 						adjTiles[TileID.Furnaces] = true;
@@ -1007,7 +1007,7 @@ namespace MagicStorage
 					return false;
 			}
 			foreach (Item ingredient in recipe.requiredItem) {
-				if (ingredient.type == 0)
+				if (ingredient.type == ItemID.None)
 					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
@@ -1042,7 +1042,7 @@ namespace MagicStorage
 
 		private static bool PassesBlock(Recipe recipe) {
 			foreach (Item ingredient in recipe.requiredItem) {
-				if (ingredient.type == 0)
+				if (ingredient.type == ItemID.None)
 					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
@@ -1071,7 +1071,7 @@ namespace MagicStorage
 			if (selectedRecipe != null) {
 				foreach (Item item in items) {
 					for (int k = 0; k < selectedRecipe.requiredItem.Length; k++) {
-						if (selectedRecipe.requiredItem[k].type == 0)
+						if (selectedRecipe.requiredItem[k].type == ItemID.None)
 							break;
 						if (item.type == selectedRecipe.requiredItem[k].type || RecipeGroupMatch(selectedRecipe, selectedRecipe.requiredItem[k].type, item.type))
 							storageItems.Add(item);
@@ -1122,7 +1122,7 @@ namespace MagicStorage
 				}
 				if (changed) {
 					RefreshItems();
-					Main.PlaySound(7);
+					Main.PlaySound(SoundID.Grab);
 				}
 			}
 
@@ -1185,7 +1185,7 @@ namespace MagicStorage
 			}
 			int visualSlot = slot;
 			slot += numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
-			int count = selectedRecipe.requiredItem.Select((x, i) => new { x, i }).First(x => x.x.type == 0).i + 1;
+			int count = selectedRecipe.requiredItem.Select((x, i) => new { x, i }).First(x => x.x.type == ItemID.None).i + 1;
 
 			if (slot < count) {
 				// select ingredient recipe by right clicking
@@ -1261,7 +1261,7 @@ namespace MagicStorage
 				}
 				if (changed) {
 					RefreshItems();
-					Main.PlaySound(7);
+					Main.PlaySound(SoundID.Grab);
 				}
 			}
 
@@ -1293,7 +1293,7 @@ namespace MagicStorage
 						Main.mouseItem.stack += withdrawn.stack;
 					Main.soundInstanceMenuTick.Stop();
 					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
-					Main.PlaySound(12);
+					Main.PlaySound(SoundID.MenuTick);
 					RefreshItems();
 				}
 				rightClickTimer--;
@@ -1308,7 +1308,7 @@ namespace MagicStorage
 
 		private static Item DoWithdraw(int slot) {
 			TECraftingAccess access = GetCraftingEntity();
-			if (Main.netMode == 0) {
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				Item result = access.TryWithdrawStation(slot);
 				RefreshItems();
 				return result;
@@ -1319,7 +1319,7 @@ namespace MagicStorage
 
 		private static Item DoStationSwap(Item item, int slot) {
 			TECraftingAccess access = GetCraftingEntity();
-			if (Main.netMode == 0) {
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				Item result = access.DoStationSwap(item, slot);
 				RefreshItems();
 				return result;
@@ -1333,7 +1333,7 @@ namespace MagicStorage
 			var toWithdraw = new List<Item>();
 			for (int k = 0; k < selectedRecipe.requiredItem.Length; k++) {
 				Item item = selectedRecipe.requiredItem[k];
-				if (item.type == 0)
+				if (item.type == ItemID.None)
 					break;
 				int stack = item.stack;
 				ModRecipe modRecipe = selectedRecipe as ModRecipe;
@@ -1360,7 +1360,7 @@ namespace MagicStorage
 								toWithdraw.Add(tryItem.Clone());
 								stack -= tryItem.stack;
 								tryItem.stack = 0;
-								tryItem.type = 0;
+								tryItem.type = ItemID.None;
 							}
 						}
 			}
@@ -1370,10 +1370,10 @@ namespace MagicStorage
 			RecipeHooks.OnCraft(resultItem, selectedRecipe);
 			ItemLoader.OnCraft(resultItem, selectedRecipe);
 
-			if (Main.netMode == 0)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItem))
 					Main.player[Main.myPlayer].QuickSpawnClonedItem(item, item.stack);
-			else if (Main.netMode == 1)
+			else if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItem);
 		}
 
@@ -1409,7 +1409,7 @@ namespace MagicStorage
 
 		private static void DoDepositResult(Item item) {
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0) {
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				heart.DepositItem(item);
 			}
 			else {
@@ -1420,7 +1420,7 @@ namespace MagicStorage
 
 		private static Item DoWithdrawResult(Item item, bool toInventory = false) {
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 				return heart.TryWithdraw(item, false);
 			NetHelper.SendWithdraw(heart.ID, item, toInventory);
 			return new Item();

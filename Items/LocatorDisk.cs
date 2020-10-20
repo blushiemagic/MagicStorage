@@ -27,7 +27,7 @@ namespace MagicStorage.Items
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
-			item.rare = 10;
+			item.rare = ItemRarityID.Red;
 			item.value = Item.sellPrice(0, 5);
 		}
 

@@ -338,13 +338,13 @@ namespace MagicStorage
 				if (MouseClicked) {
 					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl))) {
 						RefreshItems();
-						Main.PlaySound(7);
+						Main.PlaySound(SoundID.Grab);
 					}
 				}
 				else if (CraftingGUI.RightMouseClicked) {
 					if (TryRestock()) {
 						RefreshItems();
-						Main.PlaySound(7);
+						Main.PlaySound(SoundID.Grab);
 					}
 				}
 			}
@@ -398,7 +398,7 @@ namespace MagicStorage
 				}
 				if (changed) {
 					RefreshItems();
-					Main.PlaySound(7);
+					Main.PlaySound(SoundID.Grab);
 				}
 			}
 
@@ -433,7 +433,7 @@ namespace MagicStorage
 						Main.mouseItem.stack += result.stack;
 					Main.soundInstanceMenuTick.Stop();
 					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
-					Main.PlaySound(12);
+					Main.PlaySound(SoundID.MenuTick);
 					RefreshItems();
 				}
 				rightClickTimer--;
@@ -448,7 +448,7 @@ namespace MagicStorage
 
 		private static void DoDeposit(Item item) {
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0) {
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				heart.DepositItem(item);
 			}
 			else {
@@ -462,7 +462,7 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 			Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
-			if (Main.netMode == 0) {
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				for (int k = 10; k < 50; k++) {
 					Item item = player.inventory[k];
 					if (filter(item)) {
@@ -509,7 +509,7 @@ namespace MagicStorage
 
 		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false) {
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == 0)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 				return heart.TryWithdraw(item, keepOneIfFavorite);
 			NetHelper.SendWithdraw(heart.ID, item, toInventory, keepOneIfFavorite);
 			return new Item();

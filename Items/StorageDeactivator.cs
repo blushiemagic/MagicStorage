@@ -33,9 +33,9 @@ namespace MagicStorage.Items
 			item.autoReuse = true;
 			item.useAnimation = 15;
 			item.useTime = 15;
-			item.useStyle = 1;
+			item.useStyle = ItemUseStyleID.SwingThrow;
 			item.tileBoost = 20;
-			item.rare = 1;
+			item.rare = ItemRarityID.Blue;
 			item.value = Item.sellPrice(0, 0, 40);
 		}
 
@@ -56,7 +56,7 @@ namespace MagicStorage.Items
 					NetHelper.ClientSendTEUpdate(storageUnit.ID);
 					if (storageUnit is TEStorageUnit) {
 						((TEStorageUnit)storageUnit).UpdateTileFrameWithNetSend();
-						if (Main.netMode == 0)
+						if (Main.netMode == NetmodeID.SinglePlayer)
 							storageUnit.GetHeart().ResetCompactStage();
 					}
 				}
