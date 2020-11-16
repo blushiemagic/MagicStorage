@@ -15,6 +15,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Créatif");
             DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Creativa");
             DisplayName.AddTranslation(GameCulture.Chinese, "创造储存单元");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Unidade de Armazenamento Criativa");
         }
         
         public override void SetDefaults()

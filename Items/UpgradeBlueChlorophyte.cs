@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Chlorophylle Bleu)");
             DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Clorofita Azul)");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储升级珠(蓝色叶绿)");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Melhoria de Armazenamento (Clorofita Azul)");
 
             Tooltip.SetDefault("Upgrades Storage Unit to 240 capacity"
                 + "\n<right> a Hallowed Storage Unit to use");
@@ -29,6 +30,8 @@ namespace MagicStorage.Items
                 + "\n<right> en la unidad de almacenamiento (Sagrado) para utilizar");
             Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至240容量"
                 + "\n<right>一个存储单元(神圣)可镶嵌");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "Melhora a unidade de armazenamento para abrigar até 240 itens diferentes"
+                + "\n<right> uma Unidade de Armazenamento Consagrada para usar");
         }
 
         public override void SetDefaults()
