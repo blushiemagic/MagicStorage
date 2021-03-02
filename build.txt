@@ -1,5 +1,5 @@
 author = blushiemagic and wvlad
-version = 0.4.200.3
+version = 0.4.200.5
 displayName = Magic Storage
 homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
 hideCode = false
