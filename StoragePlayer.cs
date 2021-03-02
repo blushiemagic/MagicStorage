@@ -55,7 +55,7 @@ namespace MagicStorage
 		}
 
 		public override TagCompound Save() {
-			TagCompound c = new TagCompound();
+			var c = new TagCompound();
 
 			_hiddenRecipes.Save(c);
 			_craftedRecipes.Save(c);
@@ -191,9 +191,7 @@ namespace MagicStorage
 				return null;
 			int tileType = tile.type;
 			ModTile modTile = TileLoader.GetTile(tileType);
-			if (modTile == null || !(modTile is StorageAccess))
-				return null;
-			return ((StorageAccess)modTile).GetHeart(storageAccess.X, storageAccess.Y);
+			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
 		}
 
 		public TECraftingAccess GetCraftingAccess() {

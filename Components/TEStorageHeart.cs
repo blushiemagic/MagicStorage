@@ -74,7 +74,7 @@ namespace MagicStorage.Components
 						CompactOne();
 					}
 					finally {
-						if (Main.netMode == 2)
+						if (Main.netMode == NetmodeID.Server)
 							itemsLock.ExitWriteLock();
 					}
 			}
@@ -96,7 +96,7 @@ namespace MagicStorage.Components
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
 				if (!(abstractStorageUnit is TEStorageUnit))
 					continue;
-				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (storageUnit.Inactive && !storageUnit.IsEmpty)
 					inactiveUnit = storageUnit;
 			}
@@ -107,7 +107,7 @@ namespace MagicStorage.Components
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
 				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
 					continue;
-				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (storageUnit.IsEmpty && inactiveUnit.NumItems <= storageUnit.Capacity) {
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
 					NetHelper.SendRefreshNetworkItems(ID);
@@ -120,7 +120,7 @@ namespace MagicStorage.Components
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
 				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
 					continue;
-				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir) {
 					storageUnit.DepositItem(tryMove, true);
 					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
@@ -144,7 +144,7 @@ namespace MagicStorage.Components
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
 				if (!(abstractStorageUnit is TEStorageUnit))
 					continue;
-				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (emptyUnit == null && storageUnit.IsEmpty && !storageUnit.Inactive) {
 					emptyUnit = storageUnit;
 				}
@@ -164,7 +164,7 @@ namespace MagicStorage.Components
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
 				if (!(abstractStorageUnit is TEStorageUnit))
 					continue;
-				TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (unitWithSpace == null && !storageUnit.IsFull && !storageUnit.Inactive) {
 					unitWithSpace = storageUnit;
 				}
@@ -191,7 +191,7 @@ namespace MagicStorage.Components
 		}
 
 		public void DepositItem(Item toDeposit) {
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 				EnterWriteLock();
 			int oldStack = toDeposit.stack;
 			try {
@@ -217,18 +217,18 @@ namespace MagicStorage.Components
 			finally {
 				if (oldStack != toDeposit.stack)
 					ResetCompactStage();
-				if (Main.netMode == 2)
+				if (Main.netMode == NetmodeID.Server)
 					ExitWriteLock();
 			}
 		}
 
 		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite) {
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return new Item();
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 				EnterWriteLock();
 			try {
-				Item result = new Item();
+				var result = new Item();
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 					if (storageUnit.HasItem(lookFor, true)) {
 						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
@@ -248,13 +248,13 @@ namespace MagicStorage.Components
 				return result;
 			}
 			finally {
-				if (Main.netMode == 2)
+				if (Main.netMode == NetmodeID.Server)
 					ExitWriteLock();
 			}
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false) {
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 				EnterReadLock();
 			try {
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -263,7 +263,7 @@ namespace MagicStorage.Components
 				return false;
 			}
 			finally {
-				if (Main.netMode == 2)
+				if (Main.netMode == NetmodeID.Server)
 					ExitReadLock();
 			}
 		}
@@ -272,7 +272,7 @@ namespace MagicStorage.Components
 			TagCompound tag = base.Save();
 			var tagRemotes = new List<TagCompound>();
 			foreach (Point16 remoteAccess in remoteAccesses) {
-				TagCompound tagRemote = new TagCompound();
+				var tagRemote = new TagCompound();
 				tagRemote.Set("X", remoteAccess.X);
 				tagRemote.Set("Y", remoteAccess.Y);
 				tagRemotes.Add(tagRemote);

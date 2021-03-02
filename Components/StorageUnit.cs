@@ -75,7 +75,7 @@ namespace MagicStorage.Components
 				j--;
 			if (TryUpgrade(i, j))
 				return true;
-			TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
+			var storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 			Main.player[Main.myPlayer].tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
@@ -117,7 +117,7 @@ namespace MagicStorage.Components
 				success = true;
 			}
 			if (success) {
-				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
+				var storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
 				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileRange(Main.myPlayer, i, j, 2, 2);
 				TEStorageHeart heart = storageUnit.GetHeart();
@@ -147,7 +147,7 @@ namespace MagicStorage.Components
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
-			Rectangle frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
+			var frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(Color.White, lightColor, 0.5f);
 			spriteBatch.Draw(mod.GetTexture("Components/StorageUnit_Glow"), drawPos, frame, color);

@@ -54,7 +54,7 @@ namespace MagicStorage
 			Texture2D backTextureActive = MagicStorage.Instance.GetTexture("SortButtonBackgroundActive");
 			CalculatedStyle dim = GetDimensions();
 			Texture2D texture = Value ? backTextureActive : backTexture;
-			Vector2 drawPos = new Vector2(dim.X, dim.Y);
+			var drawPos = new Vector2(dim.X, dim.Y);
 			Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y) ? Color.Silver : Color.White;
 			Main.spriteBatch.Draw(texture, new Rectangle((int)drawPos.X, (int)drawPos.Y, buttonSize, buttonSize), color);
 			Main.spriteBatch.Draw(_button, new Rectangle((int)drawPos.X + 1, (int)drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);

@@ -33,10 +33,10 @@ namespace MagicStorage.Components
 				i--;
 			if (Main.tile[i, j].frameY > 0)
 				j--;
-			Point16 pos = new Point16(i, j);
+			var pos = new Point16(i, j);
 			if (!TileEntity.ByPosition.ContainsKey(pos))
 				return;
-			TECraftingAccess access = TileEntity.ByPosition[new Point16(i, j)] as TECraftingAccess;
+			var access = TileEntity.ByPosition[new Point16(i, j)] as TECraftingAccess;
 			if (access != null)
 				foreach (Item item in access.stations)
 					if (!item.IsAir) {

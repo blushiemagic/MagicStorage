@@ -80,7 +80,7 @@ namespace MagicStorage.Components
 		}
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
+			var tag = new TagCompound();
 			IList<TagCompound> listStations = new List<TagCompound>();
 			foreach (Item item in stations)
 				listStations.Add(ItemIO.Save(item));

@@ -62,7 +62,7 @@ namespace MagicStorage.Components
 			if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
 				count++;
 
-			Point16 startSearch = new Point16(i - 1, j - 1);
+			var startSearch = new Point16(i - 1, j - 1);
 			var explored = new HashSet<Point16>();
 			explored.Add(startSearch);
 			var toExplore = new Queue<Point16>();

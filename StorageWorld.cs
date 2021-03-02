@@ -45,7 +45,7 @@ namespace MagicStorage
 		}
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
+			var tag = new TagCompound();
 			tag["saveVersion"] = saveVersion;
 			tag["kingSlimeDiamond"] = kingSlimeDiamond;
 			tag["boss1Diamond"] = boss1Diamond;
@@ -87,7 +87,7 @@ namespace MagicStorage
 			if (TileToCreatingItem.Count == 0) {
 				#region Initialize TileToCreatingItem
 				Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) => {
-						Item item = new Item();
+						var item = new Item();
 						// provide items
 						try {
 							item.SetDefaults(i, true);
@@ -100,21 +100,26 @@ namespace MagicStorage
 					}).Where(x => x?.type > 0 && x.createTile >= TileID.Dirt).Select(x => {
 						// provide item and its tiles
 						var tiles = new List<int> { x.createTile };
-						if (x.createTile == TileID.GlassKiln || x.createTile == TileID.Hellforge || x.createTile == TileID.AdamantiteForge)
-							tiles.Add(TileID.Furnaces);
-
-						if (x.createTile == TileID.AdamantiteForge)
-							tiles.Add(TileID.Hellforge);
-
-						if (x.createTile == TileID.MythrilAnvil)
-							tiles.Add(TileID.Anvils);
-
-						if (x.createTile == TileID.BewitchingTable || x.createTile == TileID.Tables2)
-							tiles.Add(TileID.Tables);
-
-						if (x.createTile == TileID.AlchemyTable) {
-							tiles.Add(TileID.Bottles);
-							tiles.Add(TileID.Tables);
+						switch (x.createTile) {
+							case TileID.GlassKiln:
+							case TileID.Hellforge:
+								tiles.Add(TileID.Furnaces);
+								break;
+							case TileID.AdamantiteForge:
+								tiles.Add(TileID.Furnaces);
+								tiles.Add(TileID.Hellforge);
+								break;
+							case TileID.MythrilAnvil:
+								tiles.Add(TileID.Anvils);
+								break;
+							case TileID.BewitchingTable:
+							case TileID.Tables2:
+								tiles.Add(TileID.Tables);
+								break;
+							case TileID.AlchemyTable:
+								tiles.Add(TileID.Bottles);
+								tiles.Add(TileID.Tables);
+								break;
 						}
 
 						return new {

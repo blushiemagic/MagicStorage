@@ -27,7 +27,7 @@ namespace MagicStorage
 		}
 
 		public bool Add(int type) {
-			Item item = new Item();
+			var item = new Item();
 			item.SetDefaults(type);
 			if (_set.Add(item.type)) {
 				_items.Add(item);
@@ -89,7 +89,7 @@ namespace MagicStorage
 					_items = listV2.Select(x => {
 						if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
 							return null;
-						Item item = new Item();
+						var item = new Item();
 						item.SetDefaults(x);
 						item.type = x;
 						return item;

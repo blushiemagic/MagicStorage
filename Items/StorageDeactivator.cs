@@ -47,9 +47,9 @@ namespace MagicStorage.Items
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
-				Point16 point = new Point16(i, j);
+				var point = new Point16(i, j);
 				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit) {
-					TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[point];
+					var storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[point];
 					storageUnit.Inactive = !storageUnit.Inactive;
 					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
 					Main.NewText("Storage Unit has been " + activeText);
@@ -65,7 +65,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.ActuationRod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddTile(TileID.Anvils);

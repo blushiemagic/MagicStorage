@@ -46,7 +46,7 @@ namespace MagicStorage.Components
 				Main.NewText("This access is not connected to a Storage Heart!");
 				return true;
 			}
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Main.mouseRightRelease = false;
 			if (player.sign > -1) {
 				Main.PlaySound(SoundID.MenuClose);
@@ -71,7 +71,7 @@ namespace MagicStorage.Components
 			bool hadChestOpen = player.chest != -1;
 			player.chest = -1;
 			Main.stackSplit = 600;
-			Point16 toOpen = new Point16(i, j);
+			var toOpen = new Point16(i, j);
 			Point16 prevOpen = modPlayer.ViewingStorage();
 			if (prevOpen == toOpen) {
 				modPlayer.CloseStorage();
@@ -95,7 +95,7 @@ namespace MagicStorage.Components
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
-			Rectangle frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
+			var frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(lightColor, Color.White, Main.essScale);
 			spriteBatch.Draw(mod.GetTexture("Components/" + Name + "_Glow"), drawPos, frame, color);

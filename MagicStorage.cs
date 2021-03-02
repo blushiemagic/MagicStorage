@@ -124,6 +124,14 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.Chinese, "按堆栈排序");
 			AddTranslation(text);
 
+			text = CreateTranslation("SortValue");
+			text.SetDefault("Sort by Value");
+			text.AddTranslation(GameCulture.Russian, "Сортировать по значению");
+			text.AddTranslation(GameCulture.French, "Trier par valeur");
+			text.AddTranslation(GameCulture.Spanish, "Ordenar por valor");
+			text.AddTranslation(GameCulture.Chinese, "按值排序");
+			AddTranslation(text);
+
 			text = CreateTranslation("FilterAll");
 			text.SetDefault("Filter All");
 			text.AddTranslation(GameCulture.Russian, "Фильтр (Всё)");
@@ -254,7 +262,7 @@ namespace MagicStorage
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAvailable");
-			text.SetDefault("Show new recipes (right click to remove \"new\" flag)");
+			text.SetDefault("Show craftable recipes");
 			AddTranslation(text);
 
 			text = CreateTranslation("RecipeAll");
@@ -294,7 +302,7 @@ namespace MagicStorage
 		}
 
 		public override void AddRecipeGroups() {
-			RecipeGroup group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest", ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest, ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest, ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest, ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest, ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest, ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest);
+			var group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest", ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest, ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest, ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest, ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest, ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest, ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 			if (bluemagicMod != null)

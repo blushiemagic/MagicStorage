@@ -9,11 +9,14 @@ namespace MagicStorage.Sorting
 		public abstract int Compare(Item item1, Item item2);
 
 		public int Compare(object object1, object object2) {
-			if (object1 is Item && object2 is Item)
-				return Compare((Item)object1, (Item)object2);
-			if (object1 is Recipe && object2 is Recipe)
-				return Compare(((Recipe)object1).createItem, ((Recipe)object2).createItem);
-			return 0;
+			switch (object1) {
+				case Item item1 when object2 is Item item2:
+					return Compare(item1, item2);
+				case Recipe recipe1 when object2 is Recipe recipe2:
+					return Compare(recipe1.createItem, recipe2.createItem);
+				default:
+					return 0;
+			}
 		}
 	}
 
@@ -41,18 +44,18 @@ namespace MagicStorage.Sorting
 	public class CompareValue : CompareFunction
 	{
 		public override int Compare(Item item1, Item item2) {
-			return item1.value - item2.value;
+			return item2.value - item1.value;
 		}
 	}
 
 	public class CompareDps : CompareFunction
 	{
 		public override int Compare(Item item1, Item item2) {
-			return (int)((GetDps(item1) - GetDps(item2)) * 100);
+			return (int)((GetDps(item2) - GetDps(item1)) * 100);
 		}
 
-		public static float GetDps(Item item) {
-			if (item.damage <= 0) return 0f;
+		public static double GetDps(Item item) {
+			if (item.damage <= 0) return 0d;
 			int defence;
 			if (NPC.downedMoonlord)
 				defence = 50;
@@ -75,7 +78,7 @@ namespace MagicStorage.Sorting
 			else
 				defence = 8;
 
-			return Math.Max(item.damage - defence * 0.5f, 1) / Math.Max((item.useTime + item.reuseDelay) / 60f, 0.001f) * (1f + item.crit / 100f);
+			return Math.Max(item.damage - defence * 0.5d, 1) / Math.Max((item.useTime + item.reuseDelay) / 60d, 0.001d) * (1d + item.crit / 100d);
 		}
 	}
 }

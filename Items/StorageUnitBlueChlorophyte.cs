@@ -33,7 +33,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageUnitHallowed"));
 			recipe.AddIngredient(mod.ItemType("UpgradeBlueChlorophyte"));
 			recipe.SetResult(this);

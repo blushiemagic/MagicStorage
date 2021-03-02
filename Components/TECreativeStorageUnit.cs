@@ -63,7 +63,7 @@ namespace MagicStorage.Components
 
 		public Item Current {
 			get {
-				Item item = new Item();
+				var item = new Item();
 				item.SetDefaults(id, true);
 				item.stack = item.maxStack;
 				return item;

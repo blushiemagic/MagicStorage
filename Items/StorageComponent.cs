@@ -31,7 +31,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.Wood, 10);
 			recipe.AddIngredient(ItemID.IronBar, 2);
 			recipe.anyWood = true;

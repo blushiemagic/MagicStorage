@@ -83,12 +83,12 @@ namespace MagicStorage.Components
 						checkX--;
 					if (tile.frameY % 36 == 18)
 						checkY--;
-					Point16 check = new Point16(checkX, checkY);
+					var check = new Point16(checkX, checkY);
 					if (!points.Contains(check))
 						points.Add(check);
 				}
 				else if (tile.type == MagicStorage.Instance.TileType("StorageConnector")) {
-					Point16 check = new Point16(checkX, checkY);
+					var check = new Point16(checkX, checkY);
 					if (!points.Contains(check))
 						points.Add(check);
 				}
@@ -124,7 +124,7 @@ namespace MagicStorage.Components
 		public static void SearchAndRefreshNetwork(Point16 position) {
 			Point16 center = FindStorageCenter(position);
 			if (center.X >= 0 && center.Y >= 0) {
-				TEStorageCenter centerEnt = (TEStorageCenter)ByPosition[center];
+				var centerEnt = (TEStorageCenter)ByPosition[center];
 				centerEnt.ResetAndSearch();
 			}
 		}

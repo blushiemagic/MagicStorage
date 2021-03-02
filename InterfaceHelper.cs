@@ -28,7 +28,7 @@ namespace MagicStorage
 
 		public static bool DrawStorageGUI() {
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Point16 storageAccess = modPlayer.ViewingStorage();
 			if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
 				return true;
@@ -50,11 +50,11 @@ namespace MagicStorage
 		}
 
 		public static Rectangle GetFullRectangle(UIElement element) {
-			Vector2 vector = new Vector2(element.GetDimensions().X, element.GetDimensions().Y);
+			var vector = new Vector2(element.GetDimensions().X, element.GetDimensions().Y);
 			Vector2 position = new Vector2(element.GetDimensions().Width, element.GetDimensions().Height) + vector;
 			vector = Vector2.Transform(vector, Main.UIScaleMatrix);
 			position = Vector2.Transform(position, Main.UIScaleMatrix);
-			Rectangle result = new Rectangle((int)vector.X, (int)vector.Y, (int)(position.X - vector.X), (int)(position.Y - vector.Y));
+			var result = new Rectangle((int)vector.X, (int)vector.Y, (int)(position.X - vector.X), (int)(position.Y - vector.Y));
 			int width = Main.spriteBatch.GraphicsDevice.Viewport.Width;
 			int height = Main.spriteBatch.GraphicsDevice.Viewport.Height;
 			result.X = Utils.Clamp(result.X, 0, width);

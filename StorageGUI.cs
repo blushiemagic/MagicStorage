@@ -157,7 +157,7 @@ namespace MagicStorage
 			if (heart != null)
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
 					if (abstractStorageUnit is TEStorageUnit) {
-						TEStorageUnit storageUnit = (TEStorageUnit)abstractStorageUnit;
+						var storageUnit = (TEStorageUnit)abstractStorageUnit;
 						numItems += storageUnit.NumItems;
 						capacity += storageUnit.Capacity;
 					}
@@ -199,8 +199,7 @@ namespace MagicStorage
 			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting()) {
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
-				if (basePanel != null)
-					basePanel.Update(gameTime);
+				basePanel?.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
 				modSearchBox.Update(curMouse, oldMouse);
@@ -213,7 +212,7 @@ namespace MagicStorage
 
 		public static void Draw(TEStorageHeart heart) {
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Initialize();
 			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
 				player.mouseInterface = true;
@@ -244,7 +243,7 @@ namespace MagicStorage
 				return;
 			}
 			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
-			Vector2 boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
+			var boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
 			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
 			if (scrollBarFocus) {
@@ -271,7 +270,7 @@ namespace MagicStorage
 
 		private static TEStorageHeart GetHeart() {
 			Player player = Main.player[Main.myPlayer];
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetStorageHeart();
 		}
 
@@ -290,12 +289,12 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			SortMode sortMode = (SortMode)sortButtons.Choice;
+			var sortMode = (SortMode)sortButtons.Choice;
 
-			FilterMode filterMode = (FilterMode)filterButtons.Choice;
+			var filterMode = (FilterMode)filterButtons.Choice;
 			int modFilterIndex = modSearchBox.ModIndex;
 
-			Action doFiltering = () => {
+			void DoFiltering() {
 				IEnumerable<Item> itemsLocal;
 				if (filterMode == FilterMode.Recent) {
 					Dictionary<int, Item> stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
@@ -308,22 +307,22 @@ namespace MagicStorage
 				}
 
 				items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
-			};
+			}
 
-			doFiltering();
+			DoFiltering();
 
 			// now if nothing found we disable filters one by one
 			if (searchBar.Text.Trim().Length > 0) {
 				if (items.Count == 0 && filterMode != FilterMode.All) {
 					// search all categories
 					filterMode = FilterMode.All;
-					doFiltering();
+					DoFiltering();
 				}
 
 				if (items.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll) {
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
-					doFiltering();
+					DoFiltering();
 				}
 			}
 
@@ -381,7 +380,7 @@ namespace MagicStorage
 						if (Main.netMode == NetmodeID.SinglePlayer)
 							items[slot].favorited = !items[slot].favorited;
 						else
-							Main.NewTextMultiline("TOggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
+							Main.NewTextMultiline("Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
 						// there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
 						// a workaropund would be to withdraw and deposit it back with changed favorite flag
 						// but it still might look ugly for the player that initiates operation
@@ -461,7 +460,11 @@ namespace MagicStorage
 			Player player = Main.player[Main.myPlayer];
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
-			Predicate<Item> filter = item => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
+
+			bool filter(Item item) {
+				return !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
+			}
+
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				for (int k = 10; k < 50; k++) {
 					Item item = player.inventory[k];

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 
@@ -9,11 +10,14 @@ namespace MagicStorage.Sorting
 		public abstract bool Passes(Item item);
 
 		public bool Passes(object obj) {
-			if (obj is Item)
-				return Passes((Item)obj);
-			if (obj is Recipe)
-				return Passes(((Recipe)obj).createItem);
-			return false;
+			switch (obj) {
+				case Item item:
+					return Passes(item);
+				case Recipe recipe:
+					return Passes(recipe.createItem);
+				default:
+					return false;
+			}
 		}
 	}
 
@@ -51,8 +55,8 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item) {
 			switch (item.type) {
-				case 109: // mana or heart crystal
-				case 29:
+				case ItemID.LifeCrystal:
+				case ItemID.ManaCrystal:
 				case ItemID.CellPhone:
 				case ItemID.PDA:
 				case ItemID.MagicMirror:
@@ -68,12 +72,12 @@ namespace MagicStorage.Sorting
 	{
 		public override bool Passes(Item item) {
 			switch (item.type) {
-				case 167: // dynamite
-				case 3547:
-				case 2896:
-				case 166: // bomb
-				case 235:
-				case 3115:
+				case ItemID.Dynamite:
+				case ItemID.StickyDynamite:
+				case ItemID.BouncyDynamite:
+				case ItemID.Bomb:
+				case ItemID.StickyBomb:
+				case ItemID.BouncyBomb:
 					return true;
 			}
 			return item.thrown && item.damage > 0 || item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating");
@@ -183,10 +187,7 @@ namespace MagicStorage.Sorting
 		};
 
 		public override bool Passes(Item item) {
-			foreach (ItemFilter filter in blacklist)
-				if (filter.Passes(item))
-					return false;
-			return true;
+			return blacklist.All(filter => !filter.Passes(item));
 		}
 	}
 }

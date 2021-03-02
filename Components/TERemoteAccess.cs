@@ -42,7 +42,7 @@ namespace MagicStorage.Components
 
 		public override TagCompound Save() {
 			TagCompound tag = base.Save();
-			TagCompound tagLocator = new TagCompound();
+			var tagLocator = new TagCompound();
 			tagLocator.Set("X", locator.X);
 			tagLocator.Set("Y", locator.Y);
 			tag.Set("Locator", tagLocator);

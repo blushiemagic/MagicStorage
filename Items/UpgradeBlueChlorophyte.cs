@@ -32,7 +32,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.ShroomiteBar, 5);
 			recipe.AddIngredient(ItemID.SpectreBar, 5);
 			recipe.AddIngredient(ItemID.BeetleHusk, 2);

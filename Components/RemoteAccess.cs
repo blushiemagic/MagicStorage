@@ -32,8 +32,8 @@ namespace MagicStorage.Components
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
-				TERemoteAccess ent = (TERemoteAccess)TileEntity.ByPosition[new Point16(i, j)];
-				Locator locator = (Locator)item.modItem;
+				var ent = (TERemoteAccess)TileEntity.ByPosition[new Point16(i, j)];
+				var locator = (Locator)item.modItem;
 				if (ent.TryLocate(locator.location, out string message)) {
 					if (item.type == mod.ItemType("LocatorDisk"))
 						locator.location = new Point16(-1, -1);

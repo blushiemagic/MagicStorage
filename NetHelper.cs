@@ -16,7 +16,7 @@ namespace MagicStorage
 		private static readonly HashSet<int> updateQueueContains = new HashSet<int>();
 
 		public static void HandlePacket(BinaryReader reader, int sender) {
-			MessageType type = (MessageType)reader.ReadByte();
+			var type = (MessageType)reader.ReadByte();
 			switch (type) {
 				case MessageType.SearchAndRefreshNetwork:
 					ReceiveSearchAndRefresh(reader);
@@ -96,7 +96,7 @@ namespace MagicStorage
 		}
 
 		private static void ReceiveSearchAndRefresh(BinaryReader reader) {
-			Point16 point = new Point16(reader.ReadInt16(), reader.ReadInt16());
+			var point = new Point16(reader.ReadInt16(), reader.ReadInt16());
 			TEStorageComponent.SearchAndRefreshNetwork(point);
 		}
 
@@ -148,7 +148,7 @@ namespace MagicStorage
 			int ent = reader.ReadInt32();
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
 				return;
-			TEStorageHeart heart = (TEStorageHeart)TileEntity.ByID[ent];
+			var heart = (TEStorageHeart)TileEntity.ByID[ent];
 			byte op = reader.ReadByte();
 			if (op == 0) {
 				Item item = ItemIO.Receive(reader, true, true);
@@ -290,7 +290,7 @@ namespace MagicStorage
 			int ent = reader.ReadInt32();
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess))
 				return;
-			TECraftingAccess access = (TECraftingAccess)TileEntity.ByID[ent];
+			var access = (TECraftingAccess)TileEntity.ByID[ent];
 			Item[] stations = access.stations;
 			byte op = reader.ReadByte();
 			if (op == 0) {
@@ -322,7 +322,7 @@ namespace MagicStorage
 				}
 			}
 			Point16 pos = access.Position;
-			StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
+			var modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
 			if (modTile != null) {
 				TEStorageHeart heart = modTile.GetHeart(pos.X, pos.Y);
 				if (heart != null)
@@ -391,7 +391,7 @@ namespace MagicStorage
 			int ent = reader.ReadInt32();
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
 				return;
-			TEStorageHeart heart = (TEStorageHeart)TileEntity.ByID[ent];
+			var heart = (TEStorageHeart)TileEntity.ByID[ent];
 			int count = reader.ReadInt32();
 			var toWithdraw = new List<Item>();
 			for (int k = 0; k < count; k++)

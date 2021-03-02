@@ -13,16 +13,14 @@ namespace MagicStorage.Sorting
 			IEnumerable<Item> filteredItems = items.Where(item => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
 			if (takeCount != null) filteredItems = filteredItems.Take(takeCount.Value);
 			CompareFunction func = MakeSortFunction(sortMode);
-			if (func == null) return filteredItems;
-			return filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
+			return func == null ? filteredItems : filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
 		}
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter) {
 			ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 			CompareFunction func = MakeSortFunction(sortMode);
-			if (func == null) return filteredRecipes;
-			return filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
+			return func == null ? filteredRecipes : filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
 		}
 
 		private static CompareFunction MakeSortFunction(SortMode sortMode) {
@@ -109,7 +107,7 @@ namespace MagicStorage.Sorting
 
 		private static bool FilterName(Item item, string filter) {
 			if (filter.Trim().Length == 0) filter = string.Empty;
-			return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant()) >= 0;
+			return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant(), StringComparison.Ordinal) >= 0;
 		}
 
 		private static bool FilterMod(Item item, int modFilterIndex) {

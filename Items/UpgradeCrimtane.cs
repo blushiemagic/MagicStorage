@@ -32,7 +32,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.CrimtaneBar, 10);
 			if (MagicStorage.legendMod == null)
 				recipe.AddIngredient(ItemID.Amethyst);

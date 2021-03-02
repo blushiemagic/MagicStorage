@@ -61,8 +61,8 @@ namespace MagicStorage.Components
 		}
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
-			TagCompound tagCenter = new TagCompound();
+			var tag = new TagCompound();
+			var tagCenter = new TagCompound();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
 			tag.Set("Center", tagCenter);

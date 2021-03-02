@@ -31,7 +31,7 @@ namespace MagicStorage.Components
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
-				Locator locator = (Locator)item.modItem;
+				var locator = (Locator)item.modItem;
 				locator.location = new Point16(i, j);
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();

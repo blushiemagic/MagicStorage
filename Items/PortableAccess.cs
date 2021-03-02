@@ -47,7 +47,7 @@ namespace MagicStorage.Items
 		}
 
 		private void OpenStorage(Player player) {
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1) {
 				Main.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
@@ -102,7 +102,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);

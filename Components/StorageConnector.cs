@@ -32,7 +32,7 @@ namespace MagicStorage.Components
 		public int CanPlace(int i, int j, int type, int style, int direction) {
 			int count = 0;
 
-			Point16 startSearch = new Point16(i, j);
+			var startSearch = new Point16(i, j);
 			var explored = new HashSet<Point16>();
 			explored.Add(startSearch);
 			var toExplore = new Queue<Point16>();

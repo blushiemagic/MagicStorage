@@ -51,7 +51,7 @@ namespace MagicStorage.Items
 		}
 
 		public override void AddRecipes() {
-			ModRecipe recipe = new ModRecipe(mod);
+			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.MeteoriteBar, 10);
 			recipe.AddIngredient(ItemID.Amber, 2);
 			recipe.AddTile(TileID.Anvils);
@@ -60,7 +60,7 @@ namespace MagicStorage.Items
 		}
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
+			var tag = new TagCompound();
 			tag.Set("X", location.X);
 			tag.Set("Y", location.Y);
 			return tag;

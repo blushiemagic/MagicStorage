@@ -25,7 +25,7 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile) {
 					explored.Add(explore);
 					if (ByPosition.ContainsKey(explore) && ByPosition[explore] is TEAbstractStorageUnit) {
-						TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)ByPosition[explore];
+						var storageUnit = (TEAbstractStorageUnit)ByPosition[explore];
 						if (storageUnit.Link(Position)) {
 							NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 							changed = true;
@@ -62,7 +62,7 @@ namespace MagicStorage.Components
 
 		public override void OnKill() {
 			foreach (Point16 storageUnit in storageUnits) {
-				TEAbstractStorageUnit unit = (TEAbstractStorageUnit)ByPosition[storageUnit];
+				var unit = (TEAbstractStorageUnit)ByPosition[storageUnit];
 				unit.Unlink();
 				NetHelper.SendTEUpdate(unit.ID, unit.Position);
 			}
@@ -75,10 +75,10 @@ namespace MagicStorage.Components
 		}
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
+			var tag = new TagCompound();
 			var tagUnits = new List<TagCompound>();
 			foreach (Point16 storageUnit in storageUnits) {
-				TagCompound tagUnit = new TagCompound();
+				var tagUnit = new TagCompound();
 				tagUnit.Set("X", storageUnit.X);
 				tagUnit.Set("Y", storageUnit.Y);
 				tagUnits.Add(tagUnit);

@@ -62,7 +62,7 @@ namespace MagicStorage
 			CalculatedStyle dim = GetDimensions();
 			for (int k = 0; k < buttons.Length; k++) {
 				Texture2D texture = k == Choice ? backTextureActive : backTexture;
-				Vector2 drawPos = new Vector2(dim.X + k * (buttonSize + buttonPadding), dim.Y);
+				var drawPos = new Vector2(dim.X + k * (buttonSize + buttonPadding), dim.Y);
 				Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k) ? Color.Silver : Color.White;
 				Main.spriteBatch.Draw(texture, new Rectangle((int)drawPos.X, (int)drawPos.Y, buttonSize, buttonSize), color);
 				Main.spriteBatch.Draw(buttons[k], new Rectangle((int)drawPos.X + 1, (int)drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);

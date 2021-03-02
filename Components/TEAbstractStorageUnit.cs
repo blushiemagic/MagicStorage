@@ -43,9 +43,9 @@ namespace MagicStorage.Components
 		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 
 		public override TagCompound Save() {
-			TagCompound tag = new TagCompound();
+			var tag = new TagCompound();
 			tag.Set("Inactive", Inactive);
-			TagCompound tagCenter = new TagCompound();
+			var tagCenter = new TagCompound();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
 			tag.Set("Center", tagCenter);

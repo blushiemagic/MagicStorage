@@ -20,7 +20,7 @@ namespace MagicStorage
 				Language.GetText("Mods.MagicStorage.SortDefault"),
 				Language.GetText("Mods.MagicStorage.SortID"),
 				Language.GetText("Mods.MagicStorage.SortName"),
-				Language.GetText("Mods.MagicStorage.SortStack"),
+				Language.GetText("Mods.MagicStorage.SortValue"),
 				Language.GetText("Mods.MagicStorage.SortDps")
 			});
 		}
