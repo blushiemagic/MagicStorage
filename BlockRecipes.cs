@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class BlockRecipes : GlobalRecipe
 	{

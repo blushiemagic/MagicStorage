@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class StorageUnit : ModItem
 	{
@@ -33,7 +33,7 @@ namespace MagicStorage.Items
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageComponent"));
-			recipe.AddRecipeGroup("MagicStorage:AnyChest");
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyChest");
 			recipe.AddIngredient(ItemID.SilverBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
@@ -41,7 +41,7 @@ namespace MagicStorage.Items
 
 			recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod.ItemType("StorageComponent"));
-			recipe.AddRecipeGroup("MagicStorage:AnyChest");
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyChest");
 			recipe.AddIngredient(ItemID.TungstenBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);

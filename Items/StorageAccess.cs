@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class StorageAccess : ModItem
 	{
@@ -33,11 +33,11 @@ namespace MagicStorage.Items
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			if (MagicStorage.legendMod == null)
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
+			if (MagicStorageExtra.legendMod == null)
 				recipe.AddIngredient(ItemID.Topaz, 3);
 			else
-				recipe.AddRecipeGroup("MagicStorage:AnyTopaz", 3);
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyTopaz", 3);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

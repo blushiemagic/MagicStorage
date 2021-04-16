@@ -6,7 +6,7 @@ using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 
-namespace MagicStorage.Components
+namespace MagicStorageExtra.Components
 {
 	public class StorageAccess : StorageComponent
 	{

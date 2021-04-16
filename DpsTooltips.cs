@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
-using MagicStorage.Sorting;
+using MagicStorageExtra.Sorting;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class DpsTooltips : GlobalItem
 	{
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
 			double dps = CompareDps.GetDps(item);
 			if (dps > 1f)
-				tooltips.Add(new TooltipLine(MagicStorage.Instance, "DPS", dps.ToString("F") + " DPS"));
+				tooltips.Add(new TooltipLine(MagicStorageExtra.Instance, "DPS", dps.ToString("F") + " DPS"));
 		}
 	}
 }

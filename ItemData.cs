@@ -1,6 +1,6 @@
 using Terraria;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public struct ItemData
 	{

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 
-namespace MagicStorage.Sorting
+namespace MagicStorageExtra.Sorting
 {
 	public abstract class CompareFunction : IComparer<Item>
 	{

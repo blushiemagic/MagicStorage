@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Components
+namespace MagicStorageExtra.Components
 {
 	public class CraftingAccess : StorageAccess
 	{

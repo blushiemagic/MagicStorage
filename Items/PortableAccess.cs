@@ -5,7 +5,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class PortableAccess : Locator
 	{
@@ -93,7 +93,7 @@ namespace MagicStorage.Items
 			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
 				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1") {
-					lines[k].text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
+					lines[k].text = Language.GetTextValue("Mods.MagicStorageExtra.SetTo", location.X, location.Y);
 				}
 				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip2") {
 					lines.RemoveAt(k);
@@ -105,18 +105,18 @@ namespace MagicStorage.Items
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
 			recipe.AddIngredient(ItemID.Ruby, 7);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 
-			Mod otherMod = MagicStorage.bluemagicMod;
+			Mod otherMod = MagicStorageExtra.bluemagicMod;
 			if (otherMod != null) {
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
 				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
@@ -128,7 +128,7 @@ namespace MagicStorage.Items
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
 				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);

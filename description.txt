@@ -4,6 +4,12 @@ This mod offers a solution to storage problems once and for all. It allows you t
 
 The magic storage scales as you progress in your playthrough. It is accessible very early in the game, but with limited power. As you defeat bosses and earn more materials, you will be able to upgrade your storage to perform more functions and more easily expand the storage capacity.
 
+Added more slots to the crafting interface.
+Added more sort options.
+
+Warning:
+	"Magic Storage - Extra Slots" and "Magic Storage" are not compatible.
+
 TODO:
 Money Compactor
 Blacklist/Whitelist for specific accesses

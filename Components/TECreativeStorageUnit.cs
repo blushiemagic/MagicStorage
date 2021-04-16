@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 
-namespace MagicStorage.Components
+namespace MagicStorageExtra.Components
 {
 	public class TECreativeStorageUnit : TEAbstractStorageUnit
 	{

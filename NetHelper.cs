@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
-using MagicStorage.Components;
+using MagicStorageExtra.Components;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public static class NetHelper
 	{
@@ -87,7 +87,7 @@ namespace MagicStorage
 
 		public static void SendSearchAndRefresh(int i, int j) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.SearchAndRefreshNetwork);
 				packet.Write((short)i);
 				packet.Write((short)j);
@@ -101,7 +101,7 @@ namespace MagicStorage
 		}
 
 		private static ModPacket PrepareStorageOperation(int ent, byte op) {
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 			packet.Write((byte)MessageType.TryStorageOperation);
 			packet.Write(ent);
 			packet.Write(op);
@@ -109,7 +109,7 @@ namespace MagicStorage
 		}
 
 		private static ModPacket PrepareOperationResult(byte op) {
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 			packet.Write((byte)MessageType.StorageOperationResult);
 			packet.Write(op);
 			return packet;
@@ -211,7 +211,7 @@ namespace MagicStorage
 
 		public static void SendRefreshNetworkItems(int ent) {
 			if (Main.netMode == NetmodeID.Server) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.RefreshNetworkItems);
 				packet.Write(ent);
 				packet.Send();
@@ -220,7 +220,7 @@ namespace MagicStorage
 
 		public static void ClientSendTEUpdate(int id) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendTEUpdate);
 				packet.Write(id);
 				TileEntity.Write(packet, TileEntity.ByID[id], true);
@@ -245,7 +245,7 @@ namespace MagicStorage
 		}
 
 		private static ModPacket PrepareStationOperation(int ent, byte op) {
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 			packet.Write((byte)MessageType.TryStationOperation);
 			packet.Write(ent);
 			packet.Write(op);
@@ -253,7 +253,7 @@ namespace MagicStorage
 		}
 
 		private static ModPacket PrepareStationResult(byte op) {
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 			packet.Write((byte)MessageType.StationOperationResult);
 			packet.Write(op);
 			return packet;
@@ -357,7 +357,7 @@ namespace MagicStorage
 
 		public static void SendResetCompactStage(int ent) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.ResetCompactStage);
 				packet.Write(ent);
 				packet.Send();
@@ -374,7 +374,7 @@ namespace MagicStorage
 
 		public static void SendCraftRequest(int heart, List<Item> toWithdraw, Item result) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftRequest);
 				packet.Write(heart);
 				packet.Write(toWithdraw.Count);
@@ -399,7 +399,7 @@ namespace MagicStorage
 			Item result = ItemIO.Receive(reader, true, true);
 			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, result);
 			if (items.Count > 0) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftResult);
 				packet.Write(items.Count);
 				foreach (Item item in items)

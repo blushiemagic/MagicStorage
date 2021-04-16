@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using MagicStorage.Components;
+using MagicStorageExtra.Components;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class StoragePlayer : ModPlayer
 	{

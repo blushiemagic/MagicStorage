@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class UpgradeTerra : ModItem
 	{
@@ -34,16 +34,16 @@ namespace MagicStorage.Items
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "RadiantJewel");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 
-			Mod otherMod = MagicStorage.bluemagicMod;
+			Mod otherMod = MagicStorageExtra.bluemagicMod;
 			if (otherMod != null) {
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
 				recipe.AddRecipe();
@@ -53,7 +53,7 @@ namespace MagicStorage.Items
 			if (otherMod != null) {
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);
 				recipe.AddRecipe();

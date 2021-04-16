@@ -1,4 +1,4 @@
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class BlankClass
 	{

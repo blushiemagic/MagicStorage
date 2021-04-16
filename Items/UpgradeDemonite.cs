@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class UpgradeDemonite : ModItem
 	{
@@ -34,10 +34,10 @@ namespace MagicStorage.Items
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.DemoniteBar, 10);
-			if (MagicStorage.legendMod == null)
+			if (MagicStorageExtra.legendMod == null)
 				recipe.AddIngredient(ItemID.Amethyst);
 			else
-				recipe.AddRecipeGroup("MagicStorage:AnyAmethyst");
+				recipe.AddRecipeGroup("MagicStorageExtra:AnyAmethyst");
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

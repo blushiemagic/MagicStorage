@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class ItemTypeOrderedSet
 	{

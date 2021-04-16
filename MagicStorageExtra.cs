@@ -9,11 +9,11 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
-	public class MagicStorage : Mod
+	public class MagicStorageExtra : Mod
 	{
-		public static MagicStorage Instance;
+		public static MagicStorageExtra Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
 
@@ -31,7 +31,7 @@ namespace MagicStorage
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
 			bluemagicMod = ModLoader.GetMod("Bluemagic");
 			AddTranslations();
-			AddGlobalItem("MagicStorageItemSaveLoadHook", new ItemSaveLoadHook());
+			AddGlobalItem("MagicStorageExtraItemSaveLoadHook", new ItemSaveLoadHook());
 			IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
 		}
 
@@ -303,28 +303,28 @@ namespace MagicStorage
 
 		public override void AddRecipeGroups() {
 			var group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest", ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest, ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest, ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest, ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest, ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest, ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest);
-			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
-			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
+			RecipeGroup.RegisterGroup("MagicStorageExtra:AnyChest", group);
+			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Language.GetTextValue("Mods.MagicStorageExtra.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 			if (bluemagicMod != null)
 				group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
-			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
+			RecipeGroup.RegisterGroup("MagicStorageExtra:AnySnowBiomeBlock", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
 			if (legendMod != null) {
 				group.ValidItems.Add(legendMod.ItemType("GemChrysoberyl"));
 				group.ValidItems.Add(legendMod.ItemType("GemAlexandrite"));
 			}
-			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
+			RecipeGroup.RegisterGroup("MagicStorageExtra:AnyDiamond", group);
 			if (legendMod != null) {
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Amethyst), ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
-				RecipeGroup.RegisterGroup("MagicStorage:AnyAmethyst", group);
+				RecipeGroup.RegisterGroup("MagicStorageExtra:AnyAmethyst", group);
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Topaz), ItemID.Topaz, legendMod.ItemType("GemGarnet"));
-				RecipeGroup.RegisterGroup("MagicStorage:AnyTopaz", group);
+				RecipeGroup.RegisterGroup("MagicStorageExtra:AnyTopaz", group);
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Sapphire), ItemID.Sapphire, legendMod.ItemType("GemCharoite"));
-				RecipeGroup.RegisterGroup("MagicStorage:AnySapphire", group);
+				RecipeGroup.RegisterGroup("MagicStorageExtra:AnySapphire", group);
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Emerald), legendMod.ItemType("GemPeridot"));
-				RecipeGroup.RegisterGroup("MagicStorage:AnyEmerald", group);
+				RecipeGroup.RegisterGroup("MagicStorageExtra:AnyEmerald", group);
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Ruby), ItemID.Ruby, legendMod.ItemType("GemOpal"));
-				RecipeGroup.RegisterGroup("MagicStorage:AnyRuby", group);
+				RecipeGroup.RegisterGroup("MagicStorageExtra:AnyRuby", group);
 			}
 		}
 

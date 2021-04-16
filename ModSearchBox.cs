@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class ModSearchBox
 	{
@@ -34,7 +34,7 @@ namespace MagicStorage
 			ModIndex = index;
 			_modButton?.SetText(MakeModButtonText());
 			ModName = "";
-			if (index > -1) ModName = MagicStorage.Instance.AllMods[index].Name;
+			if (index > -1) ModName = MagicStorageExtra.Instance.AllMods[index].Name;
 			if (!silent) OnChanged?.Invoke();
 		}
 
@@ -49,7 +49,7 @@ namespace MagicStorage
 				case ModIndexBaseGame:
 					return "Terraria";
 				default:
-					return MagicStorage.Instance.AllMods[ModIndex].Name;
+					return MagicStorageExtra.Instance.AllMods[ModIndex].Name;
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace MagicStorage
 			Rectangle dim = InterfaceHelper.GetFullRectangle(_modButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height) {
 				_modButton.BackgroundColor = new Color(73, 94, 171);
-				Mod[] allMods = MagicStorage.Instance.AllMods;
+				Mod[] allMods = MagicStorageExtra.Instance.AllMods;
 				int index = ModIndex;
 				if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released) {
 					index++;

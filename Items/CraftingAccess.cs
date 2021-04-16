@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items
+namespace MagicStorageExtra.Items
 {
 	public class CraftingAccess : ModItem
 	{
@@ -34,11 +34,11 @@ namespace MagicStorage.Items
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
-			if (MagicStorage.legendMod == null)
+			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
+			if (MagicStorageExtra.legendMod == null)
 				recipe.AddIngredient(ItemID.Sapphire, 3);
 			else
-				recipe.AddRecipeGroup("MagicStorage:AnySapphire", 5);
+				recipe.AddRecipeGroup("MagicStorageExtra:AnySapphire", 5);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

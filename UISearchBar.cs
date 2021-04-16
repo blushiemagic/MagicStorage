@@ -10,7 +10,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public class UISearchBar : UIElement
 	{
@@ -18,7 +18,7 @@ namespace MagicStorage
 		private const int padding = 4;
 		private static readonly List<UISearchBar> searchBars = new List<UISearchBar>();
 		private readonly Action _clearedEvent;
-		private readonly LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
+		private readonly LocalizedText defaultText = Language.GetText("Mods.MagicStorageExtra.Search");
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
@@ -116,7 +116,7 @@ namespace MagicStorage
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			Texture2D texture = ModContent.GetTexture("MagicStorage/SearchBar");
+			Texture2D texture = ModContent.GetTexture("MagicStorageExtra/SearchBar");
 			CalculatedStyle dim = GetDimensions();
 			int innerWidth = (int)dim.Width - 2 * padding;
 			int innerHeight = (int)dim.Height - 2 * padding;

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MagicStorage.Components;
-using MagicStorage.Sorting;
+using MagicStorageExtra.Components;
+using MagicStorageExtra.Sorting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
@@ -11,7 +11,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace MagicStorage
+namespace MagicStorageExtra
 {
 	public static class StorageGUI
 	{
@@ -167,9 +167,9 @@ namespace MagicStorage
 
 		private static void InitLangStuff() {
 			if (depositButton == null)
-				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
+				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorageExtra.DepositAll"));
 			if (searchBar == null)
-				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorageExtra.SearchName"), RefreshItems);
 			modSearchBox.InitLangStuff();
 			if (capacityText == null)
 				capacityText = new UIText("Items");
@@ -185,7 +185,7 @@ namespace MagicStorage
 			if (sortButtons == null)
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
 			if (favoritedOnlyButton == null)
-				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorage.Instance.GetTexture("FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorageExtra.Instance.GetTexture("FilterMisc"), Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"));
 		}
 
 		private static void InitFilterButtons() {
@@ -355,7 +355,7 @@ namespace MagicStorage
 		private static void DrawDepositButton() {
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-				Main.instance.MouseText(Language.GetText("Mods.MagicStorage.DepositTooltip").Value);
+				Main.instance.MouseText(Language.GetText("Mods.MagicStorageExtra.DepositTooltip").Value);
 		}
 
 		private static void ResetSlotFocus() {

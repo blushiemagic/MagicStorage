@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorage.NPCs
+namespace MagicStorageExtra.NPCs
 {
 	public class ShadowDiamondDrop : GlobalNPC
 	{

@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorage.Components
+namespace MagicStorageExtra.Components
 {
 	public class TECraftingAccess : TEStorageComponent
 	{

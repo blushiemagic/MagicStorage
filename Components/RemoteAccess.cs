@@ -1,9 +1,9 @@
-using MagicStorage.Items;
+using MagicStorageExtra.Items;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Components
+namespace MagicStorageExtra.Components
 {
 	public class RemoteAccess : StorageAccess
 	{
