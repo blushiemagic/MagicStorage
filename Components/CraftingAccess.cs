@@ -11,7 +11,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override int ItemType(int frameX, int frameY) {
-			return mod.ItemType("CraftingAccess");
+			return ModContent.ItemType<Items.CraftingAccess>();
 		}
 
 		public override bool HasSmartInteract() {

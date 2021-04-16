@@ -5,6 +5,7 @@ using System.Threading;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorageExtra.Components
@@ -27,7 +28,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override bool ValidTile(Tile tile) {
-			return tile.type == mod.TileType("StorageHeart") && tile.frameX == 0 && tile.frameY == 0;
+			return tile.type == ModContent.TileType<StorageHeart>() && tile.frameX == 0 && tile.frameY == 0;
 		}
 
 		public override TEStorageHeart GetHeart() {

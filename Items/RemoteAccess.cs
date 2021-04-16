@@ -28,7 +28,7 @@ namespace MagicStorageExtra.Items
 			item.consumable = true;
 			item.rare = ItemRarityID.Blue;
 			item.value = Item.sellPrice(0, 1, 72, 50);
-			item.createTile = mod.TileType("RemoteAccess");
+			item.createTile = ModContent.TileType<Components.RemoteAccess>();
 		}
 
 		public override void AddRecipes() {

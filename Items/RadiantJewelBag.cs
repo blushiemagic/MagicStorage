@@ -8,7 +8,7 @@ namespace MagicStorageExtra.Items
 	{
 		public override void OpenVanillaBag(string context, Player player, int arg) {
 			if (context == "bossBag" && arg == ItemID.MoonLordBossBag && Main.rand.Next(10) == 0)
-				player.QuickSpawnItem(mod.ItemType("RadiantJewel"));
+				player.QuickSpawnItem(ModContent.ItemType<RadiantJewel>());
 		}
 	}
 }

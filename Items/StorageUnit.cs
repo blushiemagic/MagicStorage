@@ -27,12 +27,12 @@ namespace MagicStorageExtra.Items
 			item.consumable = true;
 			item.rare = ItemRarityID.White;
 			item.value = Item.sellPrice(0, 0, 6);
-			item.createTile = mod.TileType("StorageUnit");
+			item.createTile = ModContent.TileType<Components.StorageUnit>();
 		}
 
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod.ItemType("StorageComponent"));
+			recipe.AddIngredient(ModContent.ItemType<StorageComponent>());
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyChest");
 			recipe.AddIngredient(ItemID.SilverBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
@@ -40,7 +40,7 @@ namespace MagicStorageExtra.Items
 			recipe.AddRecipe();
 
 			recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod.ItemType("StorageComponent"));
+			recipe.AddIngredient(ModContent.ItemType<StorageComponent>());
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyChest");
 			recipe.AddIngredient(ItemID.TungstenBar, 10);
 			recipe.AddTile(TileID.WorkBenches);

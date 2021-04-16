@@ -27,7 +27,7 @@ namespace MagicStorageExtra.Items
 			item.consumable = true;
 			item.rare = ItemRarityID.White;
 			item.value = Item.sellPrice(0, 0, 0, 10);
-			item.createTile = mod.TileType("StorageConnector");
+			item.createTile = ModContent.TileType<Components.StorageConnector>();
 		}
 
 		public override void AddRecipes() {

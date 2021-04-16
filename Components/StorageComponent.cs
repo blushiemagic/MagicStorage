@@ -49,7 +49,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public virtual int ItemType(int frameX, int frameY) {
-			return mod.ItemType("StorageComponent");
+			return ModContent.ItemType<Items.StorageComponent>();
 		}
 
 		public static bool IsStorageComponent(Point16 point) {

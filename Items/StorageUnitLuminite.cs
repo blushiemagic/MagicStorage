@@ -28,14 +28,14 @@ namespace MagicStorageExtra.Items
 			item.consumable = true;
 			item.rare = ItemRarityID.Red;
 			item.value = Item.sellPrice(0, 2, 50);
-			item.createTile = mod.TileType("StorageUnit");
+			item.createTile = ModContent.TileType<Components.StorageUnit>();
 			item.placeStyle = 6;
 		}
 
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod.ItemType("StorageUnitBlueChlorophyte"));
-			recipe.AddIngredient(mod.ItemType("UpgradeLuminite"));
+			recipe.AddIngredient(ModContent.ItemType<StorageUnitBlueChlorophyte>());
+			recipe.AddIngredient(ModContent.ItemType<UpgradeLuminite>());
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 		}

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorageExtra.Components
@@ -44,7 +45,7 @@ namespace MagicStorageExtra.Components
 		public int NumItems => items.Count;
 
 		public override bool ValidTile(Tile tile) {
-			return tile.type == mod.TileType("StorageUnit") && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
+			return tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
 		}
 
 		public override bool HasSpaceInStackFor(Item check, bool locked = false) {

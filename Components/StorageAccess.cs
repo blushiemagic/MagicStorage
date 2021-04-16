@@ -5,13 +5,14 @@ using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorageExtra.Components
 {
 	public class StorageAccess : StorageComponent
 	{
 		public override int ItemType(int frameX, int frameY) {
-			return mod.ItemType("StorageAccess");
+			return ModContent.ItemType<Items.StorageAccess>();
 		}
 
 		public override bool HasSmartInteract() {

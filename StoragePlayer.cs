@@ -204,7 +204,7 @@ namespace MagicStorageExtra
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return false;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			return tile != null && tile.type == mod.TileType("CraftingAccess");
+			return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
 		}
 
 		public static bool IsStorageCrafting() {

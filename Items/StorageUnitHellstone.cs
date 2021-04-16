@@ -28,20 +28,20 @@ namespace MagicStorageExtra.Items
 			item.consumable = true;
 			item.rare = ItemRarityID.Green;
 			item.value = Item.sellPrice(0, 0, 50);
-			item.createTile = mod.TileType("StorageUnit");
+			item.createTile = ModContent.TileType<Components.StorageUnit>();
 			item.placeStyle = 3;
 		}
 
 		public override void AddRecipes() {
 			var recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod.ItemType("StorageUnitDemonite"));
-			recipe.AddIngredient(mod.ItemType("UpgradeHellstone"));
+			recipe.AddIngredient(ModContent.ItemType<StorageUnitDemonite>());
+			recipe.AddIngredient(ModContent.ItemType<UpgradeHellstone>());
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 
 			recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod.ItemType("StorageUnitCrimtane"));
-			recipe.AddIngredient(mod.ItemType("UpgradeHellstone"));
+			recipe.AddIngredient(ModContent.ItemType<StorageUnitCrimtane>());
+			recipe.AddIngredient(ModContent.ItemType<UpgradeHellstone>());
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 		}

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorageExtra.Components
 {
@@ -10,7 +11,7 @@ namespace MagicStorageExtra.Components
 		public override bool IsFull => true;
 
 		public override bool ValidTile(Tile tile) {
-			return tile.type == mod.TileType("CreativeStorageUnit") && tile.frameX == 0 && tile.frameY == 0;
+			return tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
 		}
 
 		public override bool HasSpaceInStackFor(Item check, bool locked = false) {

@@ -34,7 +34,7 @@ namespace MagicStorageExtra.Items
 			if (player.whoAmI == Main.myPlayer) {
 				if (location.X >= 0 && location.Y >= 0) {
 					Tile tile = Main.tile[location.X, location.Y];
-					if (!tile.active() || tile.type != mod.TileType("StorageHeart") || tile.frameX != 0 || tile.frameY != 0)
+					if (!tile.active() || tile.type != ModContent.TileType<Components.StorageHeart>() || tile.frameX != 0 || tile.frameY != 0)
 						Main.NewText("Storage Heart is missing!");
 					else
 						OpenStorage(player);

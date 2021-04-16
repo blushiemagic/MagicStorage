@@ -26,7 +26,7 @@ namespace MagicStorageExtra.Components
 			text.SetDefault("Magic Storage");
 			AddMapEntry(new Color(153, 107, 61), text);
 			dustType = 7;
-			drop = mod.ItemType("StorageConnector");
+			drop = ModContent.ItemType<Items.StorageConnector>();
 		}
 
 		public int CanPlace(int i, int j, int type, int style, int direction) {

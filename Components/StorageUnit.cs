@@ -1,3 +1,4 @@
+using MagicStorageExtra.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -29,31 +30,31 @@ namespace MagicStorageExtra.Components
 			int type;
 			switch (style) {
 				case 1:
-					type = mod.ItemType("StorageUnitDemonite");
+					type = ModContent.ItemType<StorageUnitDemonite>();
 					break;
 				case 2:
-					type = mod.ItemType("StorageUnitCrimtane");
+					type = ModContent.ItemType<StorageUnitCrimtane>();
 					break;
 				case 3:
-					type = mod.ItemType("StorageUnitHellstone");
+					type = ModContent.ItemType<StorageUnitHellstone>();
 					break;
 				case 4:
-					type = mod.ItemType("StorageUnitHallowed");
+					type = ModContent.ItemType<StorageUnitHallowed>();
 					break;
 				case 5:
-					type = mod.ItemType("StorageUnitBlueChlorophyte");
+					type = ModContent.ItemType<StorageUnitBlueChlorophyte>();
 					break;
 				case 6:
-					type = mod.ItemType("StorageUnitLuminite");
+					type = ModContent.ItemType<StorageUnitLuminite>();
 					break;
 				case 7:
-					type = mod.ItemType("StorageUnitTerra");
+					type = ModContent.ItemType<StorageUnitTerra>();
 					break;
 				case 8:
-					type = mod.ItemType("StorageUnitTiny");
+					type = ModContent.ItemType<StorageUnitTiny>();
 					break;
 				default:
-					type = mod.ItemType("StorageUnit");
+					type = ModContent.ItemType<Items.StorageUnit>();
 					break;
 			}
 			return type;
@@ -88,31 +89,31 @@ namespace MagicStorageExtra.Components
 			Item item = player.inventory[player.selectedItem];
 			int style = Main.tile[i, j].frameY / 36;
 			bool success = false;
-			if (style == 0 && item.type == mod.ItemType("UpgradeDemonite")) {
+			if (style == 0 && item.type == ModContent.ItemType<UpgradeDemonite>()) {
 				SetStyle(i, j, 1);
 				success = true;
 			}
-			else if (style == 0 && item.type == mod.ItemType("UpgradeCrimtane")) {
+			else if (style == 0 && item.type == ModContent.ItemType<UpgradeCrimtane>()) {
 				SetStyle(i, j, 2);
 				success = true;
 			}
-			else if ((style == 1 || style == 2) && item.type == mod.ItemType("UpgradeHellstone")) {
+			else if ((style == 1 || style == 2) && item.type == ModContent.ItemType<UpgradeHellstone>()) {
 				SetStyle(i, j, 3);
 				success = true;
 			}
-			else if (style == 3 && item.type == mod.ItemType("UpgradeHallowed")) {
+			else if (style == 3 && item.type == ModContent.ItemType<UpgradeHallowed>()) {
 				SetStyle(i, j, 4);
 				success = true;
 			}
-			else if (style == 4 && item.type == mod.ItemType("UpgradeBlueChlorophyte")) {
+			else if (style == 4 && item.type == ModContent.ItemType<UpgradeBlueChlorophyte>()) {
 				SetStyle(i, j, 5);
 				success = true;
 			}
-			else if (style == 5 && item.type == mod.ItemType("UpgradeLuminite")) {
+			else if (style == 5 && item.type == ModContent.ItemType<UpgradeLuminite>()) {
 				SetStyle(i, j, 6);
 				success = true;
 			}
-			else if (style == 6 && item.type == mod.ItemType("UpgradeTerra")) {
+			else if (style == 6 && item.type == ModContent.ItemType<UpgradeTerra>()) {
 				SetStyle(i, j, 7);
 				success = true;
 			}

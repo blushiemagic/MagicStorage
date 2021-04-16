@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorageExtra.Components
@@ -20,7 +21,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override bool ValidTile(Tile tile) {
-			return tile.type == mod.TileType("CraftingAccess") && tile.frameX == 0 && tile.frameY == 0;
+			return tile.type == ModContent.TileType<CraftingAccess>() && tile.frameX == 0 && tile.frameY == 0;
 		}
 
 		public void TryDepositStation(Item item) {

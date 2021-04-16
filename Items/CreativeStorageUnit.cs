@@ -26,7 +26,7 @@ namespace MagicStorageExtra.Items
 			item.useStyle = ItemUseStyleID.SwingThrow;
 			item.consumable = true;
 			item.rare = ItemRarityID.White;
-			item.createTile = mod.TileType("CreativeStorageUnit");
+			item.createTile = ModContent.TileType<Components.CreativeStorageUnit>();
 		}
 	}
 }

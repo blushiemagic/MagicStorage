@@ -1,3 +1,4 @@
+using MagicStorageExtra.Items;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -66,7 +67,7 @@ namespace MagicStorageExtra.NPCs
 		}
 
 		private void DropDiamond(NPC npc, int stack) {
-			Item.NewItem(npc.position, npc.width, npc.height, mod.ItemType("ShadowDiamond"), stack);
+			Item.NewItem(npc.position, npc.width, npc.height, ModContent.ItemType<ShadowDiamond>(), stack);
 		}
 	}
 }

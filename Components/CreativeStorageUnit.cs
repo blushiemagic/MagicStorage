@@ -12,7 +12,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override int ItemType(int frameX, int frameY) {
-			return mod.ItemType("CreativeStorageUnit");
+			return ModContent.ItemType<Items.CreativeStorageUnit>();
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch) {
