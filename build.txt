@@ -1,10 +1,9 @@
-author = blushiemagic and wvlad
-version = 0.4.200.5
-displayName = Magic Storage
-homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
+author = blushiemagic and wvlad and exterminator
+version = 0.4.200.6
+displayName = Magic Storage - Extra Slots
+homepage = https://github.com/ExterminatorX99/MagicStorage
 hideCode = false
 hideResources = false
 includeSource = true
 includePDB = true
-languageVersion = 6
 buildIgnore = OldArt\*, .git\*, obj\*
