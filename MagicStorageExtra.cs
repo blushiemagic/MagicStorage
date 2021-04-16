@@ -26,6 +26,8 @@ namespace MagicStorageExtra
 		public override void Load() {
 			if (ModLoader.version < requiredVersion)
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
+			if (ModLoader.GetMod("MagicStorage") != null)
+				throw new Exception("\"Magic Storage - Extra Slots\" and \"Magic Storage\" are not compatible");
 			Instance = this;
 			InterfaceHelper.Initialize();
 			legendMod = ModLoader.GetMod("LegendOfTerraria3");
