@@ -14,3 +14,5 @@ TODO:
 Money Compactor
 Blacklist/Whitelist for specific accesses
 Wait for bug reports
+
+PS. I have permission from blushiemagic(Creator of the original)
