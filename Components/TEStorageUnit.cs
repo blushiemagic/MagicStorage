@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -254,9 +255,7 @@ namespace MagicStorageExtra.Components
 
 		public override TagCompound Save() {
 			TagCompound tag = base.Save();
-			var tagItems = new List<TagCompound>();
-			foreach (Item item in items)
-				tagItems.Add(ItemIO.Save(item));
+			List<TagCompound> tagItems = items.Select(ItemIO.Save).ToList();
 			tag.Set("Items", tagItems);
 			return tag;
 		}
@@ -264,8 +263,7 @@ namespace MagicStorageExtra.Components
 		public override void Load(TagCompound tag) {
 			base.Load(tag);
 			ClearItemsData();
-			foreach (TagCompound tagItem in tag.GetList<TagCompound>("Items")) {
-				Item item = ItemIO.Load(tagItem);
+			foreach (Item item in tag.GetList<TagCompound>("Items").Select(ItemIO.Load)) {
 				items.Add(item);
 				var data = new ItemData(item);
 				if (item.stack < item.maxStack)
