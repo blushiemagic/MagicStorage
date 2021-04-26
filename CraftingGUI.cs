@@ -468,7 +468,7 @@ namespace MagicStorageExtra
 
 				if (!ModPlayer.SeenRecipes.Contains(item)) {
 					item = item.Clone();
-					item.newAndShiny = true;
+					item.newAndShiny = ModContent.GetInstance<MagicStorageConfig>().glowNewItems;
 				}
 			}
 
