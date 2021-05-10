@@ -1,6 +1,6 @@
 author = blushiemagic and wvlad and exterminator
-version = 0.5.0.5
-displayName = Magic Storage - Extra Slots
+version = 0.5.1.0
+displayName = Magic Storage - Extra
 homepage = https://github.com/ExterminatorX99/MagicStorage
 hideCode = false
 hideResources = false

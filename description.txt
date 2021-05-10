@@ -8,11 +8,14 @@ Added more slots to the crafting interface.
 Added more sort options.
 
 Warning:
-	"Magic Storage - Extra Slots" and "Magic Storage" are not compatible.
+"Magic Storage - Extra" and
+"Magic Storage" are not compatible.
+
+I recommend using Item Checklist with this mod
 
 TODO:
 Money Compactor
 Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
-PS. I have permission from blushiemagic(Creator of the original)
+PS. I have permission from blushiemagic(Creator of the original Magic Storage)
