@@ -16,6 +16,8 @@ namespace MagicStorageExtra
 
 		private int buttonPadding;
 
+		public bool Value { get; set; }
+
 		public UIToggleButton(Action onChanged, Texture2D button, LocalizedText name, int buttonSize = 21, int buttonPadding = 1) {
 			this.buttonSize = buttonSize;
 			this.buttonPadding = buttonPadding;
@@ -27,8 +29,6 @@ namespace MagicStorageExtra
 			Height.Set(buttonSize, 0f);
 			MinHeight.Set(buttonSize, 0f);
 		}
-
-		public bool Value { get; set; }
 
 		public override void Update(GameTime gameTime) {
 			bool oldValue = Value;

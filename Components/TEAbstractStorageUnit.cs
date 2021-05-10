@@ -22,9 +22,7 @@ namespace MagicStorageExtra.Components
 			return changed;
 		}
 
-		public bool Unlink() {
-			return Link(new Point16(-1, -1));
-		}
+		public bool Unlink() => Link(new Point16(-1, -1));
 
 		public TEStorageHeart GetHeart() {
 			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter)

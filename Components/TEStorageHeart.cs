@@ -27,13 +27,9 @@ namespace MagicStorageExtra.Components
 			IsAlive = false;
 		}
 
-		public override bool ValidTile(Tile tile) {
-			return tile.type == ModContent.TileType<StorageHeart>() && tile.frameX == 0 && tile.frameY == 0;
-		}
+		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<StorageHeart>() && tile.frameX == 0 && tile.frameY == 0;
 
-		public override TEStorageHeart GetHeart() {
-			return this;
-		}
+		public override TEStorageHeart GetHeart() => this;
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits() {
 			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.ContainsKey(remoteAccess) && ByPosition[remoteAccess] is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess)ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.ContainsKey(storageUnit) && ByPosition[storageUnit] is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit)ByPosition[storageUnit]);

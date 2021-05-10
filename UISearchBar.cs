@@ -23,6 +23,8 @@ namespace MagicStorageExtra
 		private int cursorTimer;
 		private bool hasFocus;
 
+		public string Text { get; private set; } = string.Empty;
+
 		public UISearchBar() {
 			SetPadding(padding);
 			searchBars.Add(this);
@@ -32,8 +34,6 @@ namespace MagicStorageExtra
 			this.defaultText = defaultText;
 			_clearedEvent = clearedEvent;
 		}
-
-		public string Text { get; private set; } = string.Empty;
 
 		public void Reset() {
 			Text = string.Empty;
@@ -149,9 +149,7 @@ namespace MagicStorageExtra
 			}
 		}
 
-		public bool KeyTyped(Keys key) {
-			return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
-		}
+		public bool KeyTyped(Keys key) => Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
 
 		private static void CheckBlockInput() {
 			Main.blockInput = false;

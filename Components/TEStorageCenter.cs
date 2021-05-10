@@ -70,9 +70,7 @@ namespace MagicStorageExtra.Components
 
 		public abstract TEStorageHeart GetHeart();
 
-		public static bool IsStorageCenter(Point16 point) {
-			return ByPosition.ContainsKey(point) && ByPosition[point] is TEStorageCenter;
-		}
+		public static bool IsStorageCenter(Point16 point) => ByPosition.ContainsKey(point) && ByPosition[point] is TEStorageCenter;
 
 		public override TagCompound Save() {
 			var tag = new TagCompound();

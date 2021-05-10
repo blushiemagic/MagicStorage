@@ -7,13 +7,9 @@ namespace MagicStorageExtra.Components
 {
 	public class CreativeStorageUnit : StorageComponent
 	{
-		public override ModTileEntity GetTileEntity() {
-			return mod.GetTileEntity("TECreativeStorageUnit");
-		}
+		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TECreativeStorageUnit");
 
-		public override int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.CreativeStorageUnit>();
-		}
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CreativeStorageUnit>();
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch) {
 			Tile tile = Main.tile[i, j];

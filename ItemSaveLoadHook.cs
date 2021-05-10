@@ -20,8 +20,6 @@ namespace MagicStorageExtra
 			base.Load(item, tag);
 		}
 
-		public override bool NeedsSaving(Item item) {
-			return CraftingGUI.IsTestItem(item);
-		}
+		public override bool NeedsSaving(Item item) => CraftingGUI.IsTestItem(item);
 	}
 }

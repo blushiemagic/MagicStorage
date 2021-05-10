@@ -461,9 +461,7 @@ namespace MagicStorageExtra
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 
-			bool filter(Item item) {
-				return !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
-			}
+			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				for (int k = 10; k < 50; k++) {

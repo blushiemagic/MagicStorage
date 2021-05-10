@@ -44,13 +44,9 @@ namespace MagicStorageExtra.Components
 		public virtual void ModifyObjectData() {
 		}
 
-		public virtual ModTileEntity GetTileEntity() {
-			return null;
-		}
+		public virtual ModTileEntity GetTileEntity() => null;
 
-		public virtual int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.StorageComponent>();
-		}
+		public virtual int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageComponent>();
 
 		public static bool IsStorageComponent(Point16 point) {
 			Tile tile = Main.tile[point.X, point.Y];

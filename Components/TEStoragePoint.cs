@@ -46,9 +46,7 @@ namespace MagicStorageExtra.Components
 			return changed;
 		}
 
-		public bool Unlink() {
-			return Link(new Point16(-1, -1));
-		}
+		public bool Unlink() => Link(new Point16(-1, -1));
 
 		public TEStorageHeart GetHeart() {
 			if (center != new Point16(-1, -1))
@@ -56,9 +54,7 @@ namespace MagicStorageExtra.Components
 			return null;
 		}
 
-		public static bool IsStoragePoint(Point16 point) {
-			return ByPosition.ContainsKey(point) && ByPosition[point] is TEStoragePoint;
-		}
+		public static bool IsStoragePoint(Point16 point) => ByPosition.ContainsKey(point) && ByPosition[point] is TEStoragePoint;
 
 		public override TagCompound Save() {
 			var tag = new TagCompound();

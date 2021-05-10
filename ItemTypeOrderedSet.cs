@@ -14,17 +14,15 @@ namespace MagicStorageExtra
 		private List<Item> _items = new List<Item>();
 		private HashSet<int> _set = new HashSet<int>();
 
-		public ItemTypeOrderedSet(string name) {
-			_name = name;
-		}
-
 		public int Count => _items.Count;
 
 		public IEnumerable<Item> Items => _items;
 
-		public bool Add(Item item) {
-			return Add(item.type);
+		public ItemTypeOrderedSet(string name) {
+			_name = name;
 		}
+
+		public bool Add(Item item) => Add(item.type);
 
 		public bool Add(int type) {
 			var item = new Item();
@@ -37,13 +35,9 @@ namespace MagicStorageExtra
 			return false;
 		}
 
-		public bool Contains(int type) {
-			return _set.Contains(type);
-		}
+		public bool Contains(int type) => _set.Contains(type);
 
-		public bool Contains(Item item) {
-			return _set.Contains(item.type);
-		}
+		public bool Contains(Item item) => _set.Contains(item.type);
 
 		public bool Remove(Item item) {
 			int type = item.type;

@@ -36,23 +36,16 @@ namespace MagicStorageExtra
 
 		public ItemTypeOrderedSet AsKnownRecipes { get; } = new ItemTypeOrderedSet("AsKnownRecipes");
 
-		public TEStorageHeart LatestAccessedStorage => _latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
+		public TEStorageHeart LatestAccessedStorage =>
+			_latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
 
-		public bool IsRecipeHidden(Item item) {
-			return _hiddenRecipes.Contains(item);
-		}
+		public bool IsRecipeHidden(Item item) => _hiddenRecipes.Contains(item);
 
-		public bool AddToHiddenRecipes(Item item) {
-			return _hiddenRecipes.Add(item);
-		}
+		public bool AddToHiddenRecipes(Item item) => _hiddenRecipes.Add(item);
 
-		public bool RemoveFromHiddenRecipes(Item item) {
-			return _hiddenRecipes.Remove(item);
-		}
+		public bool RemoveFromHiddenRecipes(Item item) => _hiddenRecipes.Remove(item);
 
-		public bool AddToCraftedRecipes(Item item) {
-			return _craftedRecipes.Add(item);
-		}
+		public bool AddToCraftedRecipes(Item item) => _craftedRecipes.Add(item);
 
 		public override TagCompound Save() {
 			var c = new TagCompound();
@@ -121,9 +114,7 @@ namespace MagicStorageExtra
 			Main.blockInput = false;
 		}
 
-		public Point16 ViewingStorage() {
-			return storageAccess;
-		}
+		public Point16 ViewingStorage() => storageAccess;
 
 		public static void GetItem(Item item, bool toMouse) {
 			Player player = Main.player[Main.myPlayer];
@@ -207,9 +198,7 @@ namespace MagicStorageExtra
 			return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
 		}
 
-		public static bool IsStorageCrafting() {
-			return Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
-		}
+		public static bool IsStorageCrafting() => Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit) {
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))

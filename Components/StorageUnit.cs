@@ -17,9 +17,7 @@ namespace MagicStorageExtra.Components
 			TileObjectData.newTile.StyleWrapLimit = 6;
 		}
 
-		public override ModTileEntity GetTileEntity() {
-			return mod.GetTileEntity("TEStorageUnit");
-		}
+		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TEStorageUnit");
 
 		public override void MouseOver(int i, int j) {
 			Main.LocalPlayer.noThrow = 2;
@@ -60,9 +58,7 @@ namespace MagicStorageExtra.Components
 			return type;
 		}
 
-		public override bool CanKillTile(int i, int j, ref bool blockDamage) {
-			return Main.tile[i, j].frameX / 36 % 3 == 0;
-		}
+		public override bool CanKillTile(int i, int j, ref bool blockDamage) => Main.tile[i, j].frameX / 36 % 3 == 0;
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem) {
 			if (Main.tile[i, j].frameX / 36 % 3 != 0)

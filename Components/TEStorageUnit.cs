@@ -45,9 +45,8 @@ namespace MagicStorageExtra.Components
 
 		public int NumItems => items.Count;
 
-		public override bool ValidTile(Tile tile) {
-			return tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
-		}
+		public override bool ValidTile(Tile tile) =>
+			tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
 
 		public override bool HasSpaceInStackFor(Item check, bool locked = false) {
 			if (Main.netMode == NetmodeID.Server && !locked)
@@ -62,9 +61,7 @@ namespace MagicStorageExtra.Components
 			}
 		}
 
-		public bool HasSpaceFor(Item check, bool locked = false) {
-			return !IsFull || HasSpaceInStackFor(check, locked);
-		}
+		public bool HasSpaceFor(Item check, bool locked = false) => !IsFull || HasSpaceInStackFor(check, locked);
 
 		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) {
 			if (Main.netMode == NetmodeID.Server && !locked)
@@ -80,9 +77,7 @@ namespace MagicStorageExtra.Components
 			}
 		}
 
-		public override IEnumerable<Item> GetItems() {
-			return items;
-		}
+		public override IEnumerable<Item> GetItems() => items;
 
 		public override void DepositItem(Item toDeposit, bool locked = false) {
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
@@ -403,9 +398,7 @@ namespace MagicStorageExtra.Components
 					types[k].id = (byte)k;
 			}
 
-			public UnitOperation Create() {
-				return (UnitOperation)MemberwiseClone();
-			}
+			public UnitOperation Create() => (UnitOperation)MemberwiseClone();
 
 			public UnitOperation Create(Item item) {
 				UnitOperation clone = Create();

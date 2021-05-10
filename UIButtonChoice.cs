@@ -17,6 +17,8 @@ namespace MagicStorageExtra
 
 		private readonly LocalizedText[] names;
 
+		public int Choice { get; set; }
+
 		public UIButtonChoice(Action onChanged, Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1) {
 			if (buttons.Length != names.Length || buttons.Length == 0)
 				throw new ArgumentException();
@@ -32,8 +34,6 @@ namespace MagicStorageExtra
 			Height.Set(buttonSize, 0f);
 			MinHeight.Set(buttonSize, 0f);
 		}
-
-		public int Choice { get; set; }
 
 		public override void Update(GameTime gameTime) {
 			int oldChoice = Choice;

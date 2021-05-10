@@ -6,17 +6,11 @@ namespace MagicStorageExtra.Components
 {
 	public class CraftingAccess : StorageAccess
 	{
-		public override ModTileEntity GetTileEntity() {
-			return mod.GetTileEntity("TECraftingAccess");
-		}
+		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TECraftingAccess");
 
-		public override int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.CraftingAccess>();
-		}
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CraftingAccess>();
 
-		public override bool HasSmartInteract() {
-			return true;
-		}
+		public override bool HasSmartInteract() => true;
 
 		public override TEStorageHeart GetHeart(int i, int j) {
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));

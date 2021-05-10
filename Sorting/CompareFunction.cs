@@ -22,37 +22,28 @@ namespace MagicStorageExtra.Sorting
 
 	public class CompareID : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) {
-			return item1.type - item2.type;
-		}
+		public override int Compare(Item item1, Item item2) => item1.type - item2.type;
 	}
 
 	public class CompareName : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) {
-			return string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
-		}
+		public override int Compare(Item item1, Item item2) => string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 	}
 
 	public class CompareQuantity : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) {
-			return (int)Math.Ceiling(item2.stack / (float)item2.maxStack) - (int)Math.Ceiling(item1.stack / (float)item1.maxStack);
-		}
+		public override int Compare(Item item1, Item item2) =>
+			(int)Math.Ceiling(item2.stack / (float)item2.maxStack) - (int)Math.Ceiling(item1.stack / (float)item1.maxStack);
 	}
 
 	public class CompareValue : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) {
-			return item2.value - item1.value;
-		}
+		public override int Compare(Item item1, Item item2) => item2.value - item1.value;
 	}
 
 	public class CompareDps : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) {
-			return (int)((GetDps(item2) - GetDps(item1)) * 100);
-		}
+		public override int Compare(Item item1, Item item2) => (int)((GetDps(item2) - GetDps(item1)) * 100);
 
 		public static double GetDps(Item item) {
 			if (item.damage <= 0) return 0d;

@@ -32,8 +32,6 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 1);
 		}
 
-		public override Color? GetAlpha(Color lightColor) {
-			return Color.White;
-		}
+		public override Color? GetAlpha(Color lightColor) => Color.White;
 	}
 }

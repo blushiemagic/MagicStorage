@@ -7,21 +7,13 @@ namespace MagicStorageExtra.Components
 {
 	public class StorageHeart : StorageAccess
 	{
-		public override ModTileEntity GetTileEntity() {
-			return mod.GetTileEntity("TEStorageHeart");
-		}
+		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TEStorageHeart");
 
-		public override int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.StorageHeart>();
-		}
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageHeart>();
 
-		public override bool HasSmartInteract() {
-			return true;
-		}
+		public override bool HasSmartInteract() => true;
 
-		public override TEStorageHeart GetHeart(int i, int j) {
-			return (TEStorageHeart)TileEntity.ByPosition[new Point16(i, j)];
-		}
+		public override TEStorageHeart GetHeart(int i, int j) => (TEStorageHeart)TileEntity.ByPosition[new Point16(i, j)];
 
 		public override bool NewRightClick(int i, int j) {
 			Player player = Main.player[Main.myPlayer];

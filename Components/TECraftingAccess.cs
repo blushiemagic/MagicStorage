@@ -20,9 +20,7 @@ namespace MagicStorageExtra.Components
 				stations[k] = new Item();
 		}
 
-		public override bool ValidTile(Tile tile) {
-			return tile.type == ModContent.TileType<CraftingAccess>() && tile.frameX == 0 && tile.frameY == 0;
-		}
+		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<CraftingAccess>() && tile.frameX == 0 && tile.frameY == 0;
 
 		public void TryDepositStation(Item item) {
 			if (Main.netMode == NetmodeID.MultiplayerClient)

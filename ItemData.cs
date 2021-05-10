@@ -23,17 +23,11 @@ namespace MagicStorageExtra
 			return Matches(this, (ItemData)other);
 		}
 
-		public override int GetHashCode() {
-			return 100 * Type + Prefix;
-		}
+		public override int GetHashCode() => 100 * Type + Prefix;
 
-		public static bool Matches(Item item1, Item item2) {
-			return Matches(new ItemData(item1), new ItemData(item2));
-		}
+		public static bool Matches(Item item1, Item item2) => Matches(new ItemData(item1), new ItemData(item2));
 
-		public static bool Matches(ItemData data1, ItemData data2) {
-			return data1.Type == data2.Type && data1.Prefix == data2.Prefix;
-		}
+		public static bool Matches(ItemData data1, ItemData data2) => data1.Type == data2.Type && data1.Prefix == data2.Prefix;
 
 		public static int Compare(Item item1, Item item2) {
 			var data1 = new ItemData(item1);

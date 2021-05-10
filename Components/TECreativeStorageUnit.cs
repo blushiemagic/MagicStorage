@@ -10,21 +10,13 @@ namespace MagicStorageExtra.Components
 	{
 		public override bool IsFull => true;
 
-		public override bool ValidTile(Tile tile) {
-			return tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
-		}
+		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
 
-		public override bool HasSpaceInStackFor(Item check, bool locked = false) {
-			return false;
-		}
+		public override bool HasSpaceInStackFor(Item check, bool locked = false) => false;
 
-		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) {
-			return !Inactive;
-		}
+		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) => !Inactive;
 
-		public override IEnumerable<Item> GetItems() {
-			return new CreativeEnumerable(Inactive);
-		}
+		public override IEnumerable<Item> GetItems() => new CreativeEnumerable(Inactive);
 
 		public override void DepositItem(Item toDeposit, bool locked = false) {
 		}
@@ -44,13 +36,9 @@ namespace MagicStorageExtra.Components
 			this.inactive = inactive;
 		}
 
-		public IEnumerator<Item> GetEnumerator() {
-			return new CreativeEnumerator(inactive);
-		}
+		public IEnumerator<Item> GetEnumerator() => new CreativeEnumerator(inactive);
 
-		IEnumerator IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 
 	internal class CreativeEnumerator : IEnumerator<Item>

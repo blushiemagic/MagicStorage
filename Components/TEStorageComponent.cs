@@ -65,9 +65,7 @@ namespace MagicStorageExtra.Components
 				SearchAndRefreshNetwork(Position);
 		}
 
-		public IEnumerable<Point16> AdjacentComponents() {
-			return AdjacentComponents(Position);
-		}
+		public IEnumerable<Point16> AdjacentComponents() => AdjacentComponents(Position);
 
 		public static IEnumerable<Point16> AdjacentComponents(Point16 point) {
 			var points = new List<Point16>();

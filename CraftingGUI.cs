@@ -343,17 +343,19 @@ namespace MagicStorageExtra
 
 		private static void InitRecipeButtons() {
 			if (recipeButtons == null)
-				recipeButtons = new UIButtonChoice(RefreshItems, new[] {
-					MagicStorageExtra.Instance.GetTexture("RecipeAvailable"),
-					MagicStorageExtra.Instance.GetTexture("RecipeAll"),
-					MagicStorageExtra.Instance.GetTexture("FilterMisc"),
-					MagicStorageExtra.Instance.GetTexture("RecipeAll")
-				}, new[] {
-					Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),
-					Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
-					Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
-					Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
-				}) { Choice = 1 };
+				recipeButtons = new UIButtonChoice(RefreshItems,
+					new[] {
+						MagicStorageExtra.Instance.GetTexture("RecipeAvailable"),
+						MagicStorageExtra.Instance.GetTexture("RecipeAll"),
+						MagicStorageExtra.Instance.GetTexture("FilterMisc"),
+						MagicStorageExtra.Instance.GetTexture("RecipeAll")
+					},
+					new[] {
+						Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),
+						Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
+						Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
+						Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
+					}) { Choice = 1 };
 		}
 
 		private static void InitFilterButtons() {
@@ -514,11 +516,9 @@ namespace MagicStorageExtra
 
 			foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values) {
 				int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
-				if (item.type == iconicItemType) {
-					foreach (int type in rec.ValidItems) {
+				if (item.type == iconicItemType)
+					foreach (int type in rec.ValidItems)
 						totalGroupStack += (storageItems.FirstOrDefault(i => i.type == type) ?? new Item()).stack;
-					}
-				}
 			}
 
 			if (!item.IsAir) {
@@ -539,9 +539,7 @@ namespace MagicStorageExtra
 			return item;
 		}
 
-		private static Item GetResult(int slot, ref int context) {
-			return slot == 0 && result != null ? result : new Item();
-		}
+		private static Item GetResult(int slot, ref int context) => slot == 0 && result != null ? result : new Item();
 
 		private static void UpdateRecipeText() {
 			if (selectedRecipe == null) {
@@ -683,9 +681,7 @@ namespace MagicStorageExtra
 			}
 		}
 
-		private static bool CanItemBeTakenForTest(Item item) {
-			return Main.netMode == NetmodeID.SinglePlayer && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.pick > 0 || item.axe > 0 || item.hammer > 0) && !item.summon && item.createTile < TileID.Dirt && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None && !ModPlayer.TestedRecipes.Contains(item);
-		}
+		private static bool CanItemBeTakenForTest(Item item) => Main.netMode == NetmodeID.SinglePlayer && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.pick > 0 || item.axe > 0 || item.hammer > 0) && !item.summon && item.createTile < TileID.Dirt && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None && !ModPlayer.TestedRecipes.Contains(item);
 
 		public static void MarkAsTestItem(Item testItem) {
 			testItem.value = 0;
@@ -695,9 +691,7 @@ namespace MagicStorageExtra
 			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
 		}
 
-		public static bool IsTestItem(Item item) {
-			return item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
-		}
+		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
 
 		private static TEStorageHeart GetHeart() {
 			Player player = Main.player[Main.myPlayer];
@@ -794,9 +788,8 @@ namespace MagicStorageExtra
 		/// <summary>
 		///     Checks all crafting tree until it finds already available ingredients
 		/// </summary>
-		private static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet) {
-			return IsKnownRecursively(recipe, availableSet, new HashSet<int>(), new Dictionary<Recipe, bool>());
-		}
+		private static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet) =>
+			IsKnownRecursively(recipe, availableSet, new HashSet<int>(), new Dictionary<Recipe, bool>());
 
 		/// <summary>
 		///     Checks all crafting tree until it finds already available ingredients
@@ -886,7 +879,7 @@ namespace MagicStorageExtra
 							// show only blacklisted recipes only if choice = 2, otherwise show all other
 							.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
 							// show only new items if selected
-							//.Where(x => recipeButtons.Choice != RecipeButtonsNewChoice || !notNewItems.Contains(x.createItem.type))
+							.Where(x => recipeButtons.Choice != RecipeButtonsNewChoice || !notNewItems.Contains(x.createItem.type))
 							// show only favorited items if selected
 							.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
 							// hard check if this item can be crafted from available items and their recursive products
@@ -1126,9 +1119,7 @@ namespace MagicStorageExtra
 			}
 		}
 
-		private static bool RecipeGroupMatch(Recipe recipe, int type1, int type2) {
-			return recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
-		}
+		private static bool RecipeGroupMatch(Recipe recipe, int type1, int type2) => recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
 
 		private static void HoverStation(int slot, ref int hoverSlot) {
 			TECraftingAccess ent = GetCraftingEntity();

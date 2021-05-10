@@ -11,13 +11,9 @@ namespace MagicStorageExtra.Components
 {
 	public class StorageAccess : StorageComponent
 	{
-		public override int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.StorageAccess>();
-		}
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageAccess>();
 
-		public override bool HasSmartInteract() {
-			return true;
-		}
+		public override bool HasSmartInteract() => true;
 
 		public virtual TEStorageHeart GetHeart(int i, int j) {
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));

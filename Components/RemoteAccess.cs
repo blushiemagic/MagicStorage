@@ -7,17 +7,11 @@ namespace MagicStorageExtra.Components
 {
 	public class RemoteAccess : StorageAccess
 	{
-		public override ModTileEntity GetTileEntity() {
-			return mod.GetTileEntity("TERemoteAccess");
-		}
+		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TERemoteAccess");
 
-		public override int ItemType(int frameX, int frameY) {
-			return ModContent.ItemType<Items.RemoteAccess>();
-		}
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.RemoteAccess>();
 
-		public override bool HasSmartInteract() {
-			return true;
-		}
+		public override bool HasSmartInteract() => true;
 
 		public override TEStorageHeart GetHeart(int i, int j) {
 			TileEntity ent = TileEntity.ByPosition[new Point16(i, j)];
