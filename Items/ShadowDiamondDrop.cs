@@ -1,68 +1,77 @@
-using MagicStorageExtra.Items;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.NPCs
+namespace MagicStorageExtra.Items
 {
 	public class ShadowDiamondDrop : GlobalNPC
 	{
 		public override void NPCLoot(NPC npc) {
-			if (npc.type == NPCID.KingSlime && !StorageWorld.kingSlimeDiamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.kingSlimeDiamond = true;
-			}
-			else if (npc.type == NPCID.EyeofCthulhu && !StorageWorld.boss1Diamond) {
-				DropDiamond(npc, Main.expertMode ? 2 : 1);
-				StorageWorld.boss1Diamond = true;
-			}
-			else if ((npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.EaterofWorldsBody || npc.type == NPCID.EaterofWorldsTail || npc.type == NPCID.BrainofCthulhu) && !StorageWorld.boss2Diamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.boss2Diamond = true;
-			}
-			else if (npc.type == NPCID.SkeletronHead && !StorageWorld.boss3Diamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.boss3Diamond = true;
-			}
-			else if (npc.type == NPCID.QueenBee && !StorageWorld.queenBeeDiamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.queenBeeDiamond = true;
-			}
-			else if (npc.type == NPCID.WallofFlesh && !StorageWorld.hardmodeDiamond) {
-				DropDiamond(npc, 2);
-				StorageWorld.hardmodeDiamond = true;
-			}
-			else if (npc.type == NPCID.TheDestroyer && !StorageWorld.mechBoss1Diamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.mechBoss1Diamond = true;
-			}
-			else if ((npc.type == NPCID.Retinazer || npc.type == NPCID.Spazmatism) && !StorageWorld.mechBoss2Diamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.mechBoss2Diamond = true;
-			}
-			else if (npc.type == NPCID.SkeletronPrime && !StorageWorld.mechBoss3Diamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.mechBoss3Diamond = true;
-			}
-			else if (npc.type == NPCID.Plantera && !StorageWorld.plantBossDiamond) {
-				DropDiamond(npc, Main.expertMode ? 2 : 1);
-				StorageWorld.plantBossDiamond = true;
-			}
-			else if (npc.type == NPCID.Golem && !StorageWorld.golemBossDiamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.golemBossDiamond = true;
-			}
-			else if (npc.type == NPCID.DukeFishron && !StorageWorld.fishronDiamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.fishronDiamond = true;
-			}
-			else if (npc.type == NPCID.CultistBoss && !StorageWorld.ancientCultistDiamond) {
-				DropDiamond(npc, 1);
-				StorageWorld.ancientCultistDiamond = true;
-			}
-			else if (npc.type == NPCID.MoonLordCore && !StorageWorld.moonlordDiamond) {
-				DropDiamond(npc, Main.expertMode ? 3 : 2);
-				StorageWorld.moonlordDiamond = true;
+			switch (npc.type) {
+				case NPCID.KingSlime when !StorageWorld.kingSlimeDiamond:
+					DropDiamond(npc, 1);
+					StorageWorld.kingSlimeDiamond = true;
+					break;
+				case NPCID.EyeofCthulhu when !StorageWorld.boss1Diamond:
+					DropDiamond(npc, Main.expertMode ? 2 : 1);
+					StorageWorld.boss1Diamond = true;
+					break;
+				case NPCID.EaterofWorldsHead:
+				case NPCID.EaterofWorldsBody:
+				case NPCID.EaterofWorldsTail:
+				case NPCID.BrainofCthulhu:
+					if (!StorageWorld.boss2Diamond) {
+						DropDiamond(npc, 1);
+						StorageWorld.boss2Diamond = true;
+					}
+					break;
+				case NPCID.SkeletronHead when !StorageWorld.boss3Diamond:
+					DropDiamond(npc, 1);
+					StorageWorld.boss3Diamond = true;
+					break;
+				case NPCID.QueenBee when !StorageWorld.queenBeeDiamond:
+					DropDiamond(npc, 1);
+					StorageWorld.queenBeeDiamond = true;
+					break;
+				case NPCID.WallofFlesh when !StorageWorld.hardmodeDiamond:
+					DropDiamond(npc, 2);
+					StorageWorld.hardmodeDiamond = true;
+					break;
+				case NPCID.TheDestroyer when !StorageWorld.mechBoss1Diamond:
+					DropDiamond(npc, 1);
+					StorageWorld.mechBoss1Diamond = true;
+					break;
+				case NPCID.Retinazer:
+				case NPCID.Spazmatism:
+					if (!StorageWorld.mechBoss2Diamond) {
+						DropDiamond(npc, 1);
+						StorageWorld.mechBoss2Diamond = true;
+					}
+					break;
+				case NPCID.SkeletronPrime when !StorageWorld.mechBoss3Diamond:
+					DropDiamond(npc, 1);
+					StorageWorld.mechBoss3Diamond = true;
+					break;
+				case NPCID.Plantera when !StorageWorld.plantBossDiamond:
+					DropDiamond(npc, Main.expertMode ? 2 : 1);
+					StorageWorld.plantBossDiamond = true;
+					break;
+				case NPCID.Golem when !StorageWorld.golemBossDiamond:
+					DropDiamond(npc, 1);
+					StorageWorld.golemBossDiamond = true;
+					break;
+				case NPCID.DukeFishron when !StorageWorld.fishronDiamond:
+					DropDiamond(npc, 1);
+					StorageWorld.fishronDiamond = true;
+					break;
+				case NPCID.CultistBoss when !StorageWorld.ancientCultistDiamond:
+					DropDiamond(npc, 1);
+					StorageWorld.ancientCultistDiamond = true;
+					break;
+				case NPCID.MoonLordCore when !StorageWorld.moonlordDiamond:
+					DropDiamond(npc, Main.expertMode ? 3 : 2);
+					StorageWorld.moonlordDiamond = true;
+					break;
 			}
 		}
 
