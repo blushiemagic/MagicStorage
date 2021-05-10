@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using MagicStorageExtra.Components;
+using MagicStorageExtra.Items;
 using MagicStorageExtra.Sorting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -13,6 +14,7 @@ using Terraria.Localization;
 using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
+using CraftingAccess = MagicStorageExtra.Components.CraftingAccess;
 
 namespace MagicStorageExtra
 {
@@ -506,6 +508,26 @@ namespace MagicStorageExtra
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Language.GetText("LegacyMisc.38").Value);
 			if (selectedRecipe.ProcessGroupsForText(item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
+
+			Item storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
+			int totalGroupStack = 0;
+
+			foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values) {
+				int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
+				if (item.type == iconicItemType) {
+					foreach (int type in rec.ValidItems) {
+						totalGroupStack += (storageItems.FirstOrDefault(i => i.type == type) ?? new Item()).stack;
+					}
+				}
+			}
+
+			if (!item.IsAir) {
+				if (storageItem.IsAir && totalGroupStack == 0)
+					context = 3;
+				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
+					context = 4;
+			}
+
 			return item;
 		}
 
@@ -1013,10 +1035,10 @@ namespace MagicStorageExtra
 						adjHoney = true;
 						break;
 				}
-				if (item.type == MagicStorageExtra.Instance.ItemType("SnowBiomeEmulator"))
+				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
 					zoneSnow = true;
 			}
-			adjTiles[MagicStorageExtra.Instance.TileType("CraftingAccess")] = true;
+			adjTiles[ModContent.TileType<CraftingAccess>()] = true;
 		}
 
 		private static bool IsAvailable(Recipe recipe) {
