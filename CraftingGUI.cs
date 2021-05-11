@@ -514,7 +514,7 @@ namespace MagicStorageExtra
 			Item storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
 			int totalGroupStack = 0;
 
-			foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values) {
+			foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values.Where(r => r.ValidItems.Count > 0)) {
 				int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
 				if (item.type == iconicItemType)
 					foreach (int type in rec.ValidItems)
