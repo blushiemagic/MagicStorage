@@ -9,14 +9,11 @@ namespace MagicStorageExtra.Sorting
 		public abstract int Compare(Item item1, Item item2);
 
 		public int Compare(object object1, object object2) {
-			switch (object1) {
-				case Item item1 when object2 is Item item2:
-					return Compare(item1, item2);
-				case Recipe recipe1 when object2 is Recipe recipe2:
-					return Compare(recipe1.createItem, recipe2.createItem);
-				default:
-					return 0;
-			}
+			if (object1 is Item item1 && object2 is Item item2)
+				return Compare(item1, item2);
+			if (object1 is Recipe recipe1 && object2 is Recipe recipe2)
+				return Compare(recipe1.createItem, recipe2.createItem);
+			return 0;
 		}
 	}
 
@@ -46,7 +43,9 @@ namespace MagicStorageExtra.Sorting
 		public override int Compare(Item item1, Item item2) => (int)((GetDps(item2) - GetDps(item1)) * 100);
 
 		public static double GetDps(Item item) {
-			if (item.damage <= 0) return 0d;
+			if (item.damage <= 0)
+				return 0d;
+
 			int defence;
 			if (NPC.downedMoonlord)
 				defence = 50;
