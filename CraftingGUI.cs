@@ -412,7 +412,7 @@ namespace MagicStorageExtra
 				Player player = Main.player[Main.myPlayer];
 				var modPlayer = player.GetModPlayer<StoragePlayer>();
 				Initialize();
-				if (Main.mouseX > panelLeft && Main.mouseX < recipeLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
+				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
 					player.mouseInterface = true;
 					player.showItemIcon = false;
 					InterfaceHelper.HideItemIconCache();
