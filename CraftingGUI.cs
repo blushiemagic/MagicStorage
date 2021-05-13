@@ -879,7 +879,7 @@ namespace MagicStorageExtra
 							// show only blacklisted recipes only if choice = 2, otherwise show all other
 							.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
 							// show only new items if selected
-							.Where(x => recipeButtons.Choice != RecipeButtonsNewChoice || !notNewItems.Contains(x.createItem.type))
+							//.Where(x => recipeButtons.Choice != RecipeButtonsNewChoice || !notNewItems.Contains(x.createItem.type))
 							// show only favorited items if selected
 							.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
 							// hard check if this item can be crafted from available items and their recursive products
