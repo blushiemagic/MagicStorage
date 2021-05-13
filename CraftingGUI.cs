@@ -14,7 +14,6 @@ using Terraria.Localization;
 using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
-using CraftingAccess = MagicStorageExtra.Components.CraftingAccess;
 
 namespace MagicStorageExtra
 {
@@ -1031,7 +1030,7 @@ namespace MagicStorageExtra
 				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
 					zoneSnow = true;
 			}
-			adjTiles[ModContent.TileType<CraftingAccess>()] = true;
+			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 		}
 
 		private static bool IsAvailable(Recipe recipe) {

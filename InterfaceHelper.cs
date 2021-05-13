@@ -33,12 +33,12 @@ namespace MagicStorageExtra
 			if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
 				return true;
 			ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type);
-			if (modTile == null || !(modTile is StorageAccess))
+			if (!(modTile is StorageAccess access))
 				return true;
-			TEStorageHeart heart = ((StorageAccess)modTile).GetHeart(storageAccess.X, storageAccess.Y);
+			TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
 			if (heart == null)
 				return true;
-			if (modTile is CraftingAccess)
+			if (access is CraftingAccess)
 				CraftingGUI.Draw(heart);
 			else
 				StorageGUI.Draw(heart);
