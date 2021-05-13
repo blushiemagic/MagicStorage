@@ -1046,7 +1046,7 @@ namespace MagicStorageExtra
 					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
-				foreach (int type in itemCounts.Keys)
+				foreach (int type in itemCounts.Keys.ToList())
 					if (RecipeGroupMatch(recipe, type, ingredient.type)) {
 						stack -= itemCounts[type];
 						useRecipeGroup = true;

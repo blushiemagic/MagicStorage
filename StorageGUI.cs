@@ -178,6 +178,7 @@ namespace MagicStorageExtra
 		internal static void Unload() {
 			sortButtons = null;
 			filterButtons = null;
+			favoritedOnlyButton = null;
 		}
 
 
