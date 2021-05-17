@@ -82,7 +82,7 @@ namespace MagicStorageExtra.Components
 				if (PlayerInput.GrappleAndInteractAreShared)
 					PlayerInput.Triggers.JustPressed.Grapple = false;
 				Main.recBigList = false;
-				Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
+				Main.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
 				Recipe.FindRecipes();
 			}
 			return true;

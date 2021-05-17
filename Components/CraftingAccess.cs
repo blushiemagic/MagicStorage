@@ -30,8 +30,7 @@ namespace MagicStorageExtra.Components
 			var pos = new Point16(i, j);
 			if (!TileEntity.ByPosition.ContainsKey(pos))
 				return;
-			var access = TileEntity.ByPosition[new Point16(i, j)] as TECraftingAccess;
-			if (access != null)
+			if (TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access)
 				foreach (Item item in access.stations)
 					if (!item.IsAir) {
 						fail = true;
