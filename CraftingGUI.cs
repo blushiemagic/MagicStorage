@@ -63,12 +63,6 @@ namespace MagicStorageExtra
 
 		private static readonly List<Item> items = new List<Item>();
 		private static readonly Dictionary<int, int> itemCounts = new Dictionary<int, int>();
-		private static bool[] adjTiles = new bool[TileLoader.TileCount];
-		private static bool adjWater;
-		private static bool adjLava;
-		private static bool adjHoney;
-		private static bool zoneSnow;
-		private static bool alchemyTable;
 		private static List<Recipe> recipes = new List<Recipe>();
 		private static List<bool> recipeAvailable = new List<bool>();
 		private static Recipe selectedRecipe;
@@ -128,6 +122,18 @@ namespace MagicStorageExtra
 		private static List<bool> nextRecipeAvailable = new List<bool>();
 
 		private static Dictionary<int, List<Recipe>> _productToRecipes;
+
+		public static bool[] adjTiles { get; private set; } = new bool[TileLoader.TileCount];
+
+		public static bool adjWater { get; private set; }
+
+		public static bool adjLava { get; private set; }
+
+		public static bool adjHoney { get; private set; }
+
+		public static bool zoneSnow { get; private set; }
+
+		public static bool alchemyTable { get; private set; }
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 
@@ -950,8 +956,11 @@ namespace MagicStorageExtra
 		private static void AnalyzeIngredients() {
 			Player player = Main.player[Main.myPlayer];
 			itemCounts.Clear();
-			if (adjTiles.Length != player.adjTile.Length)
-				Array.Resize(ref adjTiles, player.adjTile.Length);
+			if (adjTiles.Length != player.adjTile.Length) {
+				bool[] temp = adjTiles;
+				Array.Resize(ref temp, player.adjTile.Length);
+				adjTiles = temp;
+			}
 			for (int k = 0; k < adjTiles.Length; k++)
 				adjTiles[k] = false;
 			adjWater = false;
@@ -961,10 +970,12 @@ namespace MagicStorageExtra
 			alchemyTable = false;
 
 			foreach (Item item in items)
-				if (itemCounts.ContainsKey(item.netID))
-					itemCounts[item.netID] += item.stack;
-				else
-					itemCounts[item.netID] = item.stack;
+				lock (itemCounts) {
+					if (itemCounts.ContainsKey(item.netID))
+						itemCounts[item.netID] += item.stack;
+					else
+						itemCounts[item.netID] = item.stack;
+				}
 			foreach (Item item in GetCraftingStations()) {
 				if (item.createTile >= TileID.Dirt) {
 					adjTiles[item.createTile] = true;
@@ -1045,15 +1056,17 @@ namespace MagicStorageExtra
 					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
-				foreach (int type in itemCounts.Keys.ToList())
-					if (RecipeGroupMatch(recipe, type, ingredient.type)) {
-						stack -= itemCounts[type];
-						useRecipeGroup = true;
-					}
-				if (!useRecipeGroup && itemCounts.ContainsKey(ingredient.netID))
-					stack -= itemCounts[ingredient.netID];
-				if (stack > 0)
-					return false;
+				lock (itemCounts) {
+					foreach (int type in itemCounts.Keys)
+						if (RecipeGroupMatch(recipe, type, ingredient.type)) {
+							stack -= itemCounts[type];
+							useRecipeGroup = true;
+						}
+					if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.netID, out int amount))
+						stack -= amount;
+					if (stack > 0)
+						return false;
+				}
 			}
 			if (recipe.needWater && !adjWater && !adjTiles[TileID.Sinks])
 				return false;
@@ -1063,14 +1076,15 @@ namespace MagicStorageExtra
 				return false;
 			if (recipe.needSnowBiome && !zoneSnow)
 				return false;
-			try {
-				BlockRecipes.active = false;
-				if (!RecipeHooks.RecipeAvailable(recipe))
-					return false;
-			}
-			finally {
-				BlockRecipes.active = true;
-			}
+			lock (BlockRecipes.activeLock)
+				try {
+					BlockRecipes.active = false;
+					if (!RecipeHooks.RecipeAvailable(recipe))
+						return false;
+				}
+				finally {
+					BlockRecipes.active = true;
+				}
 			return true;
 		}
 

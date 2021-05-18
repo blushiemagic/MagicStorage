@@ -7,15 +7,11 @@ The magic storage scales as you progress in your playthrough. It is accessible v
 Added more slots to the crafting interface.
 Added more sort options.
 
-Warning:
-"Magic Storage - Extra" and
-"Magic Storage" are not compatible.
-
-I recommend using Item Checklist with this mod
-
 TODO:
 Money Compactor
 Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
-PS. I have permission from blushiemagic(Creator of the original Magic Storage)
+Changelog:
+5.2.0:
+Added integration with the RecursiveCraft mod

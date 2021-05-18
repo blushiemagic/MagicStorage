@@ -7,6 +7,7 @@ namespace MagicStorageExtra
 	public class BlockRecipes : GlobalRecipe
 	{
 		public static bool active = true;
+		public static object activeLock = new object();
 
 		public override bool RecipeAvailable(Recipe recipe) {
 			if (!active)

@@ -35,6 +35,7 @@ namespace MagicStorageExtra
 			AddTranslations();
 			AddGlobalItem("MagicStorageExtraItemSaveLoadHook", new ItemSaveLoadHook());
 			IsItemKnownHotKey = RegisterHotKey("Is This Item Known?", "");
+			RecursiveCraftIntegration.Load();
 		}
 
 		public override void Unload() {
@@ -44,6 +45,7 @@ namespace MagicStorageExtra
 			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+			RecursiveCraftIntegration.Unload();
 		}
 
 		private void AddTranslations() {
