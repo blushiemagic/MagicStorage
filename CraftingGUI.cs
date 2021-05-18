@@ -370,7 +370,7 @@ namespace MagicStorageExtra
 
 		public static void Update(GameTime gameTime) {
 			try {
-				if (MagicStorageExtra.IsItemKnownHotKey != null && MagicStorageExtra.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir) {
+				if (MagicStorageExtra.IsItemKnownHotKey != null && MagicStorageExtra.IsItemKnownHotKey.GetAssignedKeys().Count > 0 && MagicStorageExtra.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir) {
 					string s = Main.HoverItem.Name + " is ";
 					int t = Main.HoverItem.type;
 					if (GetKnownItems().Contains(t)) {
@@ -870,8 +870,6 @@ namespace MagicStorageExtra
 
 					var availableItemsMutable = new HashSet<int>(hiddenRecipes.Concat(craftedRecipes).Concat(foundItems));
 
-					var notNewItems = new HashSet<int>(availableItemsMutable);
-
 					var temp = new HashSet<int>();
 					var tempCache = new Dictionary<Recipe, bool>();
 
@@ -883,8 +881,6 @@ namespace MagicStorageExtra
 						filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text).Where(x => x != null)
 							// show only blacklisted recipes only if choice = 2, otherwise show all other
 							.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
-							// show only new items if selected
-							//.Where(x => recipeButtons.Choice != RecipeButtonsNewChoice || !notNewItems.Contains(x.createItem.type))
 							// show only favorited items if selected
 							.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
 							// hard check if this item can be crafted from available items and their recursive products
@@ -912,23 +908,17 @@ namespace MagicStorageExtra
 
 					// now if nothing found we disable filters one by one
 					if (searchBar.Text.Length > 0) {
-						if (threadRecipes.Count == 0 && recipeButtons.Choice == RecipeButtonsNewChoice) {
-							// search old recipes too
-							notNewItems = new HashSet<int>();
-							DoFiltering();
-						}
-
 						if (threadRecipes.Count == 0 && hiddenRecipes.Count > 0) {
 							// search hidden recipes too
 							hiddenRecipes = new HashSet<int>();
 							DoFiltering();
 						}
 
-						if (threadRecipes.Count == 0 && filterMode != FilterMode.All) {
-							// any category
-							filterMode = FilterMode.All;
-							DoFiltering();
-						}
+						//if (threadRecipes.Count == 0 && filterMode != FilterMode.All) {
+						//	// any category
+						//	filterMode = FilterMode.All;
+						//	DoFiltering();
+						//}
 
 						if (threadRecipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll) {
 							// search all mods
@@ -955,7 +945,9 @@ namespace MagicStorageExtra
 
 		private static void AnalyzeIngredients() {
 			Player player = Main.LocalPlayer;
-			itemCounts.Clear();
+			lock (itemCounts) {
+				itemCounts.Clear();
+			}
 			if (adjTiles.Length != player.adjTile.Length) {
 				bool[] temp = adjTiles;
 				Array.Resize(ref temp, player.adjTile.Length);
@@ -969,13 +961,13 @@ namespace MagicStorageExtra
 			zoneSnow = false;
 			alchemyTable = false;
 
-			foreach (Item item in items)
-				lock (itemCounts) {
+			lock (itemCounts) {
+				foreach (Item item in items)
 					if (itemCounts.ContainsKey(item.netID))
 						itemCounts[item.netID] += item.stack;
 					else
 						itemCounts[item.netID] = item.stack;
-				}
+			}
 			foreach (Item item in GetCraftingStations()) {
 				if (item.createTile >= TileID.Dirt) {
 					adjTiles[item.createTile] = true;
@@ -1076,7 +1068,7 @@ namespace MagicStorageExtra
 				return false;
 			if (recipe.needSnowBiome && !zoneSnow)
 				return false;
-			lock (BlockRecipes.activeLock)
+			lock (BlockRecipes.activeLock) {
 				try {
 					BlockRecipes.active = false;
 					if (!RecipeHooks.RecipeAvailable(recipe))
@@ -1085,6 +1077,7 @@ namespace MagicStorageExtra
 				finally {
 					BlockRecipes.active = true;
 				}
+			}
 			return true;
 		}
 
