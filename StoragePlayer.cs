@@ -84,8 +84,9 @@ namespace MagicStorageExtra
 			}
 			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1)) {
 				CloseStorage();
-				lock (BlockRecipes.activeLock)
+				lock (BlockRecipes.activeLock) {
 					Recipe.FindRecipes();
+				}
 			}
 			else if (storageAccess.X >= 0 && storageAccess.Y >= 0) {
 				int playerX = (int)(player.Center.X / 16f);
@@ -93,14 +94,16 @@ namespace MagicStorageExtra
 				if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1)) {
 					Main.PlaySound(SoundID.MenuClose);
 					CloseStorage();
-					lock (BlockRecipes.activeLock)
+					lock (BlockRecipes.activeLock) {
 						Recipe.FindRecipes();
+					}
 				}
 				else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess)) {
 					Main.PlaySound(SoundID.MenuClose);
 					CloseStorage();
-					lock (BlockRecipes.activeLock)
+					lock (BlockRecipes.activeLock) {
 						Recipe.FindRecipes();
+					}
 				}
 			}
 		}

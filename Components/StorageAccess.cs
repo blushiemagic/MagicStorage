@@ -73,8 +73,9 @@ namespace MagicStorageExtra.Components
 			if (prevOpen == toOpen) {
 				modPlayer.CloseStorage();
 				Main.PlaySound(SoundID.MenuClose);
-				lock (BlockRecipes.activeLock)
+				lock (BlockRecipes.activeLock) {
 					Recipe.FindRecipes();
+				}
 			}
 			else {
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
@@ -84,8 +85,9 @@ namespace MagicStorageExtra.Components
 					PlayerInput.Triggers.JustPressed.Grapple = false;
 				Main.recBigList = false;
 				Main.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
-				lock (BlockRecipes.activeLock)
+				lock (BlockRecipes.activeLock) {
 					Recipe.FindRecipes();
+				}
 			}
 			return true;
 		}
