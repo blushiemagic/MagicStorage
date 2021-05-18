@@ -139,7 +139,7 @@ namespace MagicStorageExtra
 
 		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 
-		private static StoragePlayer ModPlayer => Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
+		private static StoragePlayer ModPlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 
 		public static void Initialize() {
 			lock (recipeLock) {
@@ -392,7 +392,7 @@ namespace MagicStorageExtra
 			try {
 				oldMouse = StorageGUI.oldMouse;
 				curMouse = StorageGUI.curMouse;
-				if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting()) {
+				if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting()) {
 					if (curMouse.RightButton == ButtonState.Released)
 						ResetSlotFocus();
 
@@ -415,7 +415,7 @@ namespace MagicStorageExtra
 
 		public static void Draw(TEStorageHeart heart) {
 			try {
-				Player player = Main.player[Main.myPlayer];
+				Player player = Main.LocalPlayer;
 				var modPlayer = player.GetModPlayer<StoragePlayer>();
 				Initialize();
 				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
@@ -670,7 +670,7 @@ namespace MagicStorageExtra
 					}
 					craftTimer--;
 					flag = true;
-					var modPlayer = Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>();
+					var modPlayer = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 					if (modPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
 						RefreshItems();
 				}
@@ -699,13 +699,13 @@ namespace MagicStorageExtra
 		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
 
 		private static TEStorageHeart GetHeart() {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetStorageHeart();
 		}
 
 		private static TECraftingAccess GetCraftingEntity() {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetCraftingAccess();
 		}
@@ -954,7 +954,7 @@ namespace MagicStorageExtra
 		}
 
 		private static void AnalyzeIngredients() {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			itemCounts.Clear();
 			if (adjTiles.Length != player.adjTile.Length) {
 				bool[] temp = adjTiles;
@@ -1139,7 +1139,7 @@ namespace MagicStorageExtra
 			if (ent == null || slot >= ent.stations.Length)
 				return;
 
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			if (MouseClicked) {
 				bool changed = false;
 				if (!ent.stations[slot].IsAir && ItemSlot.ShiftInUse) {
@@ -1283,7 +1283,7 @@ namespace MagicStorageExtra
 			if (Main.mouseItem.IsAir && result != null && !result.IsAir)
 				result.newAndShiny = false;
 
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			if (MouseClicked) {
 				bool changed = false;
 				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && result != null && Main.mouseItem.type == result.type) {
@@ -1415,7 +1415,7 @@ namespace MagicStorageExtra
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItem))
-					Main.player[Main.myPlayer].QuickSpawnClonedItem(item, item.stack);
+					Main.LocalPlayer.QuickSpawnClonedItem(item, item.stack);
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItem);
 		}

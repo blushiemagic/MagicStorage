@@ -197,7 +197,7 @@ namespace MagicStorageExtra
 		public static void Update(GameTime gameTime) {
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting()) {
+			if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting()) {
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
 				basePanel?.Update(gameTime);
@@ -212,7 +212,7 @@ namespace MagicStorageExtra
 		}
 
 		public static void Draw(TEStorageHeart heart) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Initialize();
 			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
@@ -270,7 +270,7 @@ namespace MagicStorageExtra
 		}
 
 		private static TEStorageHeart GetHeart() {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetStorageHeart();
 		}
@@ -366,7 +366,7 @@ namespace MagicStorageExtra
 		}
 
 		private static void HoverItemSlot(int slot, ref int hoverSlot) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			int visualSlot = slot;
 			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
@@ -458,7 +458,7 @@ namespace MagicStorageExtra
 		}
 
 		private static bool TryDepositAll(bool quickStack) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 
@@ -491,7 +491,7 @@ namespace MagicStorageExtra
 		}
 
 		private static bool TryRestock() {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 

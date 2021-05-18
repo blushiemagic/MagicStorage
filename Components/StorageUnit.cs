@@ -73,7 +73,7 @@ namespace MagicStorageExtra.Components
 			if (TryUpgrade(i, j))
 				return true;
 			var storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
-			Main.player[Main.myPlayer].tileInteractionHappened = true;
+			Main.LocalPlayer.tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
 			Main.NewText(activeString + ", " + fullnessString);
@@ -81,7 +81,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		private bool TryUpgrade(int i, int j) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			Item item = player.inventory[player.selectedItem];
 			int style = Main.tile[i, j].frameY / 36;
 			bool success = false;

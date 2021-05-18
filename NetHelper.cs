@@ -194,7 +194,7 @@ namespace MagicStorageExtra
 		public static void ReceiveOperationResult(BinaryReader reader) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			byte op = reader.ReadByte();
 			if (op == 0 || op == 1 || op == 3) {
 				Item item = ItemIO.Receive(reader, true, true);
@@ -333,7 +333,7 @@ namespace MagicStorageExtra
 		public static void ReceiveStationResult(BinaryReader reader) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			byte op = reader.ReadByte();
 			Item item = ItemIO.Receive(reader, true, true);
 			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir) {
@@ -410,7 +410,7 @@ namespace MagicStorageExtra
 		}
 
 		public static void ReceiveCraftResult(BinaryReader reader) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			int count = reader.ReadInt32();
 			for (int k = 0; k < count; k++) {
 				Item item = ItemIO.Receive(reader, true, true);

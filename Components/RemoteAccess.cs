@@ -19,7 +19,7 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override bool NewRightClick(int i, int j) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			Item item = player.inventory[player.selectedItem];
 			if (item.type == ModContent.ItemType<Locator>() || item.type == ModContent.ItemType<LocatorDisk>()) {
 				if (Main.tile[i, j].frameX % 36 == 18)

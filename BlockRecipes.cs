@@ -13,7 +13,7 @@ namespace MagicStorageExtra
 			if (!active)
 				return true;
 			try {
-				Player player = Main.player[Main.myPlayer];
+				Player player = Main.LocalPlayer;
 				var modPlayer = player.GetModPlayer<StoragePlayer>();
 				Point16 storageAccess = modPlayer.ViewingStorage();
 				return storageAccess.X < 0 || storageAccess.Y < 0;

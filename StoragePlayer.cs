@@ -120,7 +120,7 @@ namespace MagicStorageExtra
 		public Point16 ViewingStorage() => storageAccess;
 
 		public static void GetItem(Item item, bool toMouse) {
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir) {
 				Main.mouseItem = item;
 				item = new Item();
@@ -201,7 +201,7 @@ namespace MagicStorageExtra
 			return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
 		}
 
-		public static bool IsStorageCrafting() => Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().StorageCrafting();
+		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit) {
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))

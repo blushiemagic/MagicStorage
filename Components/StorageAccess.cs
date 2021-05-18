@@ -38,7 +38,7 @@ namespace MagicStorageExtra.Components
 				i--;
 			if (Main.tile[i, j].frameY % 36 == 18)
 				j--;
-			Player player = Main.player[Main.myPlayer];
+			Player player = Main.LocalPlayer;
 			if (GetHeart(i, j) == null) {
 				Main.NewText("This access is not connected to a Storage Heart!");
 				return true;
