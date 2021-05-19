@@ -13,5 +13,9 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+5.2.2:
+Temporarily disable integration with the RecursiveCraft mod due to bugs
+5.2.1:
+Fix search bug
 5.2.0:
 Added integration with the RecursiveCraft mod
