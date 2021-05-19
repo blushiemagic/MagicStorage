@@ -38,6 +38,11 @@ namespace MagicStorageExtra
 			RecursiveCraftIntegration.Load();
 		}
 
+		public override void PostAddRecipes() {
+			if (RecursiveCraftIntegration.Enabled)
+				RecursiveCraftIntegration.InitRecipes();
+		}
+
 		public override void Unload() {
 			Instance = null;
 			bluemagicMod = null;

@@ -17,6 +17,8 @@ namespace MagicStorageExtra
 
 		private static RecursiveCraftIntegrationMembers members;
 
+		private static Recipe[] recipes;
+
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
 		public static bool Enabled => RecursiveCraftMod != null;
 
@@ -39,10 +41,15 @@ namespace MagicStorageExtra
 			};
 		}
 
+		public static void InitRecipes() {
+			recipes = Main.recipe.ToArray();
+		}
+
 		public static void Unload() {
 			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
 				Unload_Inner(); // Once again we must separate out this logic.
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
+			recipes = null;
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -64,51 +71,60 @@ namespace MagicStorageExtra
 			return flatItems.ToDictionary(item => item.type, item => item.stack);
 		}
 
-		public static void Test() {
-			Player player = Main.player[Main.myPlayer];
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
-			List<Item> storedItems = modPlayer.GetStorageHeart().GetStoredItems().ToList();
-
-			RecursiveSearch(FlatDict(storedItems));
-		}
-
 		// Make sure to extract the .dll from the .tmod and then add them to your .csproj as references.
 		// As a convention, I rename the .dll file ModName_v1.2.3.4.dll and place them in Mod Sources/Mods/lib. 
 		// I do this for organization and so the .csproj loads properly for others using the GitHub repository. 
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
-		public static IEnumerable<(int recipeId, Recipe recipe)> RecursiveRecipes() {
-			Player player = Main.player[Main.myPlayer];
+		public static Recipe[] RecursiveRecipes() {
+			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			List<Item> storedItems = modPlayer.GetStorageHeart().GetStoredItems().ToList();
 
 			Dictionary<int, int> storedItemsDict = FlatDict(storedItems);
 
-			bool[] oldAdjTile = player.adjTile;
-			bool oldAdjWater = player.adjWater;
-			bool oldAdjLava = player.adjLava;
-			bool oldAdjHoney = player.adjHoney;
-			bool oldAlchemyTable = player.alchemyTable;
-			bool oldZoneSnow = player.ZoneSnow;
-
-			player.adjTile = CraftingGUI.adjTiles;
-			player.adjWater = CraftingGUI.adjWater;
-			player.adjLava = CraftingGUI.adjLava;
-			player.adjHoney = CraftingGUI.adjHoney;
-			player.alchemyTable = CraftingGUI.alchemyTable;
-			player.ZoneSnow = CraftingGUI.zoneSnow;
 			lock (BlockRecipes.activeLock) {
-				BlockRecipes.active = false;
-				RecursiveSearch(storedItemsDict);
-				BlockRecipes.active = true;
-			}
-			player.adjTile = oldAdjTile;
-			player.adjWater = oldAdjWater;
-			player.adjLava = oldAdjLava;
-			player.adjHoney = oldAdjHoney;
-			player.alchemyTable = oldAlchemyTable;
-			player.ZoneSnow = oldZoneSnow;
+				Reset();
 
-			return members.compoundRecipes.Select(recipe => (recipe.recipeId, recipe.currentRecipe));
+				bool[] oldAdjTile = player.adjTile;
+				bool oldAdjWater = player.adjWater;
+				bool oldAdjLava = player.adjLava;
+				bool oldAdjHoney = player.adjHoney;
+				bool oldAlchemyTable = player.alchemyTable;
+				bool oldZoneSnow = player.ZoneSnow;
+
+				player.adjTile = CraftingGUI.adjTiles;
+				player.adjWater = CraftingGUI.adjWater;
+				player.adjLava = CraftingGUI.adjLava;
+				player.adjHoney = CraftingGUI.adjHoney;
+				player.alchemyTable = CraftingGUI.alchemyTable;
+				player.ZoneSnow = CraftingGUI.zoneSnow;
+				BlockRecipes.active = false;
+
+				RecursiveSearch(storedItemsDict);
+
+				BlockRecipes.active = true;
+				player.adjTile = oldAdjTile;
+				player.adjWater = oldAdjWater;
+				player.adjLava = oldAdjLava;
+				player.adjHoney = oldAdjHoney;
+				player.alchemyTable = oldAlchemyTable;
+				player.ZoneSnow = oldZoneSnow;
+
+				Apply();
+			}
+
+			return recipes;
+			//return members.compoundRecipes.Select(recipe => (recipe.recipeId, recipe.currentRecipe));
+		}
+
+		private static void Apply() {
+			foreach (CompoundRecipe compoundRecipe in members.compoundRecipes)
+				recipes[compoundRecipe.recipeId] = compoundRecipe.currentRecipe;
+		}
+
+		private static void Reset() {
+			foreach (CompoundRecipe compoundRecipe in members.compoundRecipes)
+				recipes[compoundRecipe.recipeId] = compoundRecipe.overridenRecipe;
 		}
 
 		private static void RecursiveSearch(Dictionary<int, int> inventory) {
@@ -135,10 +151,7 @@ namespace MagicStorageExtra
 				}
 
 				members.compoundRecipes.Add(new CompoundRecipe(i, usedItems));
-				return;
 			}
-
-			members.compoundRecipes.Add(new CompoundRecipe(i, FlatDict(recipe.requiredItem)));
 		}
 
 		private class RecursiveCraftIntegrationMembers
