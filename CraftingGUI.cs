@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using MagicStorageExtra.Components;
 using MagicStorageExtra.Items;
@@ -839,26 +840,16 @@ namespace MagicStorageExtra
 					foreach (int groupItemType in g.ValidItems)
 						if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
 							return true;
-			if (recipe.anyWood)
-				foreach (int groupItemType in RecipeGroup.recipeGroups[RecipeGroupID.Wood].ValidItems)
+
+			MethodInfo getAcceptedGroups = typeof(RecipeFinder).GetMethod("GetAcceptedGroups", BindingFlags.NonPublic | BindingFlags.Static);
+			List<int> recipeAcceptedGroups = (List<int>) getAcceptedGroups.Invoke(null, new object[] { recipe });
+
+			foreach (int acceptedGroup in recipeAcceptedGroups) {
+				foreach (int groupItemType in RecipeGroup.recipeGroups[acceptedGroup].ValidItems)
 					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
 						return true;
-			if (recipe.anyIronBar)
-				foreach (int groupItemType in RecipeGroup.recipeGroups[RecipeGroupID.IronBar].ValidItems)
-					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
-						return true;
-			if (recipe.anyPressurePlate)
-				foreach (int groupItemType in RecipeGroup.recipeGroups[RecipeGroupID.PressurePlate].ValidItems)
-					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
-						return true;
-			if (recipe.anySand)
-				foreach (int groupItemType in RecipeGroup.recipeGroups[RecipeGroupID.Sand].ValidItems)
-					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
-						return true;
-			if (recipe.anyFragment)
-				foreach (int groupItemType in RecipeGroup.recipeGroups[RecipeGroupID.Fragment].ValidItems)
-					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
-						return true;
+			}
+
 			return false;
 		}
 
