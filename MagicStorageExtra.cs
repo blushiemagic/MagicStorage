@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using MagicStorageExtra.RecursiveCraft;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -40,7 +41,7 @@ namespace MagicStorageExtra
 
 		public override void PostAddRecipes() {
 			if (RecursiveCraftIntegration.Enabled)
-				RecursiveCraftIntegration.InitRecipes();
+				RecursiveCraftIntegration.InitRecipe();
 		}
 
 		public override void Unload() {

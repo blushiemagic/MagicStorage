@@ -372,7 +372,7 @@ namespace MagicStorageExtra
 			}
 		}
 
-		public static void SendCraftRequest(int heart, List<Item> toWithdraw, Item result) {
+		public static void SendCraftRequest(int heart, List<Item> toWithdraw, List<Item> results) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftRequest);
@@ -380,7 +380,9 @@ namespace MagicStorageExtra
 				packet.Write(toWithdraw.Count);
 				foreach (Item item in toWithdraw)
 					ItemIO.Send(item, packet, true, true);
-				ItemIO.Send(result, packet, true, true);
+				packet.Write(results.Count);
+				foreach (Item result in results)
+					ItemIO.Send(result, packet, true, true);
 				packet.Send();
 			}
 		}
@@ -392,12 +394,18 @@ namespace MagicStorageExtra
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
 				return;
 			var heart = (TEStorageHeart)TileEntity.ByID[ent];
-			int count = reader.ReadInt32();
+
+			int withdrawCount = reader.ReadInt32();
 			var toWithdraw = new List<Item>();
-			for (int k = 0; k < count; k++)
+			for (int k = 0; k < withdrawCount; k++)
 				toWithdraw.Add(ItemIO.Receive(reader, true, true));
-			Item result = ItemIO.Receive(reader, true, true);
-			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, result);
+
+			int resultsCount = reader.ReadInt32();
+			var results = new List<Item>();
+			for (int k = 0; k < resultsCount; k++)
+				results.Add(ItemIO.Receive(reader, true, true));
+
+			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, results);
 			if (items.Count > 0) {
 				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftResult);

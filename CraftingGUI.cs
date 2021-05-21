@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using MagicStorageExtra.Components;
 using MagicStorageExtra.Items;
+using MagicStorageExtra.RecursiveCraft;
 using MagicStorageExtra.Sorting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -124,6 +125,8 @@ namespace MagicStorageExtra
 		private static List<bool> nextRecipeAvailable = new List<bool>();
 
 		private static Dictionary<int, List<Recipe>> _productToRecipes;
+		public static bool compoundCrafting;
+		public static List<Item> compoundCraftSurplus = new List<Item>();
 
 		public static bool[] adjTiles { get; private set; } = new bool[TileLoader.TileCount];
 
@@ -668,6 +671,8 @@ namespace MagicStorageExtra
 							maxCraftTimer = 1;
 						TryCraft();
 						RefreshItems();
+						if (RecursiveCraftIntegration.Enabled)
+							SetSelectedRecipe(RecursiveCraftIntegration.RefreshRecipe(selectedRecipe));
 						Main.PlaySound(SoundID.Grab);
 					}
 					craftTimer--;
@@ -1381,6 +1386,7 @@ namespace MagicStorageExtra
 		private static void TryCraft() {
 			var availableItems = new List<Item>(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
 			var toWithdraw = new List<Item>();
+
 			foreach (Item item in selectedRecipe.requiredItem) {
 				if (item.type == ItemID.None)
 					break;
@@ -1414,18 +1420,30 @@ namespace MagicStorageExtra
 			}
 			Item resultItem = selectedRecipe.createItem.Clone();
 			resultItem.Prefix(-1);
+			var resultItems = new List<Item> { resultItem };
+
+			bool isCompound = RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompound(selectedRecipe);
+			if (isCompound) {
+				compoundCrafting = true;
+				compoundCraftSurplus.Clear();
+			}
 
 			RecipeHooks.OnCraft(resultItem, selectedRecipe);
 			ItemLoader.OnCraft(resultItem, selectedRecipe);
 
+			if (isCompound) {
+				compoundCrafting = false;
+				resultItems.AddRange(compoundCraftSurplus);
+			}
+
 			if (Main.netMode == NetmodeID.SinglePlayer)
-				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItem))
+				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
 					Main.LocalPlayer.QuickSpawnClonedItem(item, item.stack);
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
-				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItem);
+				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
 		}
 
-		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, Item result) {
+		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results) {
 			var items = new List<Item>();
 			foreach (Item tryWithdraw in toWithdraw) {
 				Item withdrawn = heart.TryWithdraw(tryWithdraw, false);
@@ -1443,9 +1461,12 @@ namespace MagicStorageExtra
 				}
 			}
 			items.Clear();
-			heart.DepositItem(result);
-			if (!result.IsAir)
-				items.Add(result);
+			foreach (Item result in results) {
+				heart.DepositItem(result);
+				if (!result.IsAir)
+					items.Add(result);
+			}
+
 			return items;
 		}
 

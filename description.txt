@@ -4,8 +4,10 @@ This mod offers a solution to storage problems once and for all. It allows you t
 
 The magic storage scales as you progress in your playthrough. It is accessible very early in the game, but with limited power. As you defeat bosses and earn more materials, you will be able to upgrade your storage to perform more functions and more easily expand the storage capacity.
 
+Changes from original:
 Added more slots to the crafting interface.
 Added more sort options.
+Added RecursiveCraft support
 
 TODO:
 Money Compactor
@@ -13,8 +15,12 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+5.2.5:
+Functional RecursiveCraft support
+5.2.4:
+Fix vanilla recipe groups not being processed
 5.2.2:
-Temporarily disable integration with the RecursiveCraft mod due to bugs
+Temporarily disable integration with RecursiveCraft due to bugs
 5.2.1:
 Fix search bug
 5.2.0:
