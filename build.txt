@@ -7,4 +7,4 @@ hideResources = false
 includeSource = true
 includePDB = true
 buildIgnore = OldArt\*
-weakReferences = RecursiveCraft@1.0
+weakReferences = RecursiveCraft@1.3
