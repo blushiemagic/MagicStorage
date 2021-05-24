@@ -30,18 +30,18 @@ namespace MagicStorageExtra
 			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Point16 storageAccess = modPlayer.ViewingStorage();
-			if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
-				return true;
-			ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type);
-			if (!(modTile is StorageAccess access))
-				return true;
-			TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
-			if (heart == null)
-				return true;
-			if (access is CraftingAccess)
-				CraftingGUI.Draw(heart);
-			else
-				StorageGUI.Draw(heart);
+			if (Main.playerInventory && storageAccess.X >= 0 && storageAccess.Y >= 0) {
+				ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type);
+				if (modTile is StorageAccess access) {
+					TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
+					if (heart != null) {
+						if (access is CraftingAccess)
+							CraftingGUI.Draw(heart);
+						else
+							StorageGUI.Draw(heart);
+					}
+				}
+			}
 			return true;
 		}
 
