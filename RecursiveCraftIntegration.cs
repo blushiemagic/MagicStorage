@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using MagicStorageExtra.Components;
 using RecursiveCraft;
@@ -66,7 +65,7 @@ namespace MagicStorageExtra
 			orig(self, type, stack);
 		}
 
-		private static Dictionary<int, int> FlatDict(ICollection<Item> items) {
+		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items) {
 			var dictionary = new Dictionary<int, int>();
 			foreach (Item item in items)
 				if (dictionary.ContainsKey(item.netID))
@@ -88,7 +87,7 @@ namespace MagicStorageExtra
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
 			if (heart == null)
 				return;
-			List<Item> storedItems = heart.GetStoredItems().ToList();
+			IEnumerable<Item> storedItems = heart.GetStoredItems();
 
 			Dictionary<int, int> storedItemsDict = FlatDict(storedItems);
 
