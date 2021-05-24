@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using MagicStorageExtra.Components;
 using MagicStorageExtra.Items;
-using MagicStorageExtra.RecursiveCraft;
 using MagicStorageExtra.Sorting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;

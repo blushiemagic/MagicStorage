@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using MagicStorageExtra.RecursiveCraft;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;

@@ -8,10 +8,9 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
-using static RecursiveCraft.RecursiveCraft;
 using OnPlayer = On.Terraria.Player;
 
-namespace MagicStorageExtra.RecursiveCraft
+namespace MagicStorageExtra
 {
 	public static class RecursiveCraftIntegration
 	{
@@ -107,7 +106,7 @@ namespace MagicStorageExtra.RecursiveCraft
 				Recipe recipe = Main.recipe[n];
 				if (recipe is CompoundRecipe compoundRecipe)
 					recipe = compoundRecipe.OverridenRecipe;
-				RecipeInfo recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
+				RecipeInfo recipeInfo = RecursiveCraft.RecursiveCraft.FindIngredientsForRecipe(inventory, craftingSource, recipe);
 				if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
 					Members.recipeCache.Add(recipe, recipeInfo);
 			}
@@ -140,6 +139,21 @@ namespace MagicStorageExtra.RecursiveCraft
 			public static Dictionary<Recipe, RecipeInfo> recipeCache;
 			public static CompoundRecipe compoundRecipe;
 			public static CompoundRecipe threadCompoundRecipe;
+		}
+
+		private class GuiAsCraftingSource : CraftingSource
+		{
+			public override bool[] AdjTile => CraftingGUI.adjTiles;
+
+			public override bool AdjWater => CraftingGUI.adjWater;
+
+			public override bool AdjHoney => CraftingGUI.adjHoney;
+
+			public override bool AdjLava => CraftingGUI.adjLava;
+
+			public override bool ZoneSnow => CraftingGUI.zoneSnow;
+
+			public override bool AlchemyTable => CraftingGUI.alchemyTable;
 		}
 	}
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MagicStorageExtra.RecursiveCraft;
 using Terraria;
 using Terraria.ModLoader;
 
