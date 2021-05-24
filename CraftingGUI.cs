@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -22,7 +21,7 @@ namespace MagicStorageExtra
 {
 	public static class CraftingGUI
 	{
-		private const int RecipeButtonsNewChoice = 0;
+		private const int RecipeButtonsAvailableChoice = 0;
 		private const int RecipeButtonsBlacklistChoice = 3;
 		private const int RecipeButtonsFavoritesChoice = 2;
 		private const int padding = 4;
@@ -37,8 +36,8 @@ namespace MagicStorageExtra
 		private static Mod _checkListMod;
 		private static volatile bool wasItemChecklistRetrieved;
 
-		public static MouseState curMouse;
-		public static MouseState oldMouse;
+		private static MouseState curMouse;
+		private static MouseState oldMouse;
 
 		private static UIPanel basePanel;
 		private static float panelTop;
@@ -47,7 +46,7 @@ namespace MagicStorageExtra
 		private static float panelHeight;
 
 		private static UIElement topBar;
-		internal static UISearchBar searchBar;
+		private static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		private static UIButtonChoice recipeButtons;
 		private static UIElement topBar2;
@@ -57,7 +56,7 @@ namespace MagicStorageExtra
 		private static readonly UISlotZone stationZone = new UISlotZone(HoverStation, GetStation, inventoryScale / 1.55f);
 		private static readonly UISlotZone recipeZone = new UISlotZone(HoverRecipe, GetRecipe, inventoryScale);
 
-		internal static UIScrollbar scrollBar = new UIScrollbar();
+		private static UIScrollbar scrollBar = new UIScrollbar();
 		private static int scrollBarFocus;
 		private static int scrollBarFocusMouseStart;
 		private static float scrollBarFocusPositionStart;
@@ -97,12 +96,12 @@ namespace MagicStorageExtra
 		private static readonly List<Item> storageItems = new List<Item>();
 		private static readonly List<ItemData> blockStorageItems = new List<ItemData>();
 
-		internal static UIScrollbar scrollBar2 = new UIScrollbar();
+		private static UIScrollbar scrollBar2 = new UIScrollbar();
 		private static readonly float scrollBar2ViewSize = 1f;
 		private static float scrollBar2MaxViewSize = 2f;
 
-		internal static UITextPanel<LocalizedText> craftButton;
-		public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
+		private static UITextPanel<LocalizedText> craftButton;
+		private static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
 
 		private static Item result;
 		private static readonly UISlotZone resultZone = new UISlotZone(HoverResult, GetResult, inventoryScale);
@@ -114,9 +113,8 @@ namespace MagicStorageExtra
 
 		private static readonly object threadLock = new object();
 		private static readonly object recipeLock = new object();
-		private static object itemsLock = new object();
 		private static bool threadRunning;
-		internal static bool threadNeedsRestart;
+		private static bool threadNeedsRestart;
 		private static SortMode threadSortMode;
 		private static FilterMode threadFilterMode;
 		private static readonly List<Recipe> threadRecipes = new List<Recipe>();
@@ -140,6 +138,8 @@ namespace MagicStorageExtra
 
 		public static bool alchemyTable { get; private set; }
 
+		private static Thread thread { get; set; }
+
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 
 		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
@@ -161,7 +161,6 @@ namespace MagicStorageExtra
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
 			basePanel = new UIPanel();
-			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
 			panelHeight = Main.screenHeight - panelTop - 40f;
@@ -344,6 +343,8 @@ namespace MagicStorageExtra
 			sortButtons = null;
 			filterButtons = null;
 			recipeButtons = null;
+			if (thread != null && thread.IsAlive)
+				thread.Abort();
 		}
 
 		private static void InitSortButtons() {
@@ -421,7 +422,6 @@ namespace MagicStorageExtra
 		public static void Draw(TEStorageHeart heart) {
 			try {
 				Player player = Main.LocalPlayer;
-				var modPlayer = player.GetModPlayer<StoragePlayer>();
 				Initialize();
 				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
 					player.mouseInterface = true;
@@ -521,14 +521,17 @@ namespace MagicStorageExtra
 			if (selectedRecipe.ProcessGroupsForText(item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 
-			Item storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
+			Item storageItem;
 			int totalGroupStack = 0;
+			lock (storageItems) {
+				storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
 
-			foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values.Where(r => r.ValidItems.Count > 0)) {
-				int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
-				if (item.type == iconicItemType)
-					foreach (int type in rec.ValidItems)
-						totalGroupStack += (storageItems.FirstOrDefault(i => i.type == type) ?? new Item()).stack;
+				foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values.Where(r => r.ValidItems.Count > 0)) {
+					int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
+					if (item.type == iconicItemType)
+						foreach (int type in rec.ValidItems)
+							totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
+				}
 			}
 
 			if (!item.IsAir) {
@@ -544,8 +547,10 @@ namespace MagicStorageExtra
 		private static Item GetStorage(int slot, ref int context) {
 			int index = slot + numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
-			if (blockStorageItems.Contains(new ItemData(item)))
-				context = 3;
+			lock (blockStorageItems) {
+				if (blockStorageItems.Contains(new ItemData(item)))
+					context = 3;
+			}
 			return item;
 		}
 
@@ -671,14 +676,11 @@ namespace MagicStorageExtra
 							maxCraftTimer = 1;
 						TryCraft();
 						RefreshItems();
-						if (RecursiveCraftIntegration.Enabled)
-							SetSelectedRecipe(RecursiveCraftIntegration.RefreshRecipe(selectedRecipe));
 						Main.PlaySound(SoundID.Grab);
 					}
 					craftTimer--;
 					flag = true;
-					var modPlayer = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
-					if (modPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
+					if (ModPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
 						RefreshItems();
 				}
 			}
@@ -705,17 +707,9 @@ namespace MagicStorageExtra
 
 		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
 
-		private static TEStorageHeart GetHeart() {
-			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
-			return modPlayer.GetStorageHeart();
-		}
+		private static TEStorageHeart GetHeart() => ModPlayer.GetStorageHeart();
 
-		private static TECraftingAccess GetCraftingEntity() {
-			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
-			return modPlayer.GetCraftingAccess();
-		}
+		private static TECraftingAccess GetCraftingEntity() => ModPlayer.GetCraftingAccess();
 
 		private static Item[] GetCraftingStations() {
 			TECraftingAccess ent = GetCraftingEntity();
@@ -727,12 +721,14 @@ namespace MagicStorageExtra
 			if (modPlayer.SeenRecipes.Count == 0)
 				foreach (int item in GetKnownItems())
 					modPlayer.SeenRecipes.Add(item);
-			items.Clear();
-			TEStorageHeart heart = GetHeart();
-			if (heart == null)
-				return;
+			lock (items) {
+				items.Clear();
+				TEStorageHeart heart = GetHeart();
+				if (heart == null)
+					return;
 
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+				items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+			}
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
@@ -757,7 +753,7 @@ namespace MagicStorageExtra
 				threadCheckListFoundItems = foundItems;
 				if (!threadRunning) {
 					threadRunning = true;
-					var thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
+					thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
 					thread.Start();
 				}
 			}
@@ -847,7 +843,7 @@ namespace MagicStorageExtra
 							return true;
 
 			MethodInfo getAcceptedGroups = typeof(RecipeFinder).GetMethod("GetAcceptedGroups", BindingFlags.NonPublic | BindingFlags.Static);
-			List<int> recipeAcceptedGroups = (List<int>) getAcceptedGroups.Invoke(null, new object[] { recipe });
+			var recipeAcceptedGroups = (List<int>)getAcceptedGroups.Invoke(null, new object[] { recipe });
 
 			foreach (int acceptedGroup in recipeAcceptedGroups) {
 				foreach (int groupItemType in RecipeGroup.recipeGroups[acceptedGroup].ValidItems)
@@ -906,13 +902,13 @@ namespace MagicStorageExtra
 						threadRecipes.Clear();
 						threadRecipeAvailable.Clear();
 						try {
-							if (recipeButtons.Choice == RecipeButtonsNewChoice) {
-								threadRecipes.AddRange(filteredRecipes.Where(IsAvailable));
+							if (recipeButtons.Choice == RecipeButtonsAvailableChoice) {
+								threadRecipes.AddRange(filteredRecipes.Where(recipe => IsAvailable(recipe)));
 								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
 							}
 							else {
 								threadRecipes.AddRange(filteredRecipes);
-								threadRecipeAvailable.AddRange(threadRecipes.Select(IsAvailable));
+								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
 							}
 						}
 						catch (InvalidOperationException) {
@@ -944,7 +940,37 @@ namespace MagicStorageExtra
 						}
 					}
 
+					void GuttedSetSelectedRecipe(Recipe recipe, int index) {
+						Recipe compound = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
+						if (index != -1)
+							threadRecipes[index] = compound;
+
+						selectedRecipe = compound;
+						RefreshStorageItems();
+						lock (blockStorageItems) {
+							blockStorageItems.Clear();
+						}
+					}
+
 					lock (recipeLock) {
+						if (RecursiveCraftIntegration.Enabled)
+							if (selectedRecipe != null) {
+								// If the selected recipe is compound, replace the overridden recipe with the compound one so it shows as selected in the UI
+								if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe)) {
+									Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe();
+									int index = threadRecipes.IndexOf(overridden);
+									if (index != -1 && threadRecipeAvailable[index])
+										GuttedSetSelectedRecipe(overridden, index);
+									else
+										GuttedSetSelectedRecipe(overridden, index);
+								}
+								// If the selectedRecipe(which isn't compound) is uncraftable but is in the available list, this means it's compound version is craftable
+								else if (!IsAvailable(selectedRecipe, false)) {
+									int index = threadRecipes.IndexOf(selectedRecipe);
+									if (index != -1 && threadRecipeAvailable[index])
+										GuttedSetSelectedRecipe(selectedRecipe, index);
+								}
+							}
 						nextRecipes = new List<Recipe>();
 						nextRecipeAvailable = new List<bool>();
 						nextRecipes.AddRange(threadRecipes);
@@ -1053,7 +1079,10 @@ namespace MagicStorageExtra
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 		}
 
-		private static bool IsAvailable(Recipe recipe) {
+		public static bool IsAvailable(Recipe recipe, bool compound = true) {
+			if (RecursiveCraftIntegration.Enabled && compound)
+				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+
 			foreach (int tile in recipe.requiredTile) {
 				if (tile == -1)
 					break;
@@ -1104,19 +1133,23 @@ namespace MagicStorageExtra
 					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
-				foreach (Item item in storageItems) {
-					var data = new ItemData(item);
-					if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.netID, ingredient.type)) {
-						stack -= item.stack;
-						useRecipeGroup = true;
+				lock (storageItems) {
+					lock (blockStorageItems) {
+						foreach (Item item in storageItems) {
+							var data = new ItemData(item);
+							if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.netID, ingredient.type)) {
+								stack -= item.stack;
+								useRecipeGroup = true;
+							}
+						}
+						if (!useRecipeGroup)
+							foreach (Item item in storageItems) {
+								var data = new ItemData(item);
+								if (!blockStorageItems.Contains(data) && item.netID == ingredient.netID)
+									stack -= item.stack;
+							}
 					}
 				}
-				if (!useRecipeGroup)
-					foreach (Item item in storageItems) {
-						var data = new ItemData(item);
-						if (!blockStorageItems.Contains(data) && item.netID == ingredient.netID)
-							stack -= item.stack;
-					}
 				if (stack > 0)
 					return false;
 			}
@@ -1124,20 +1157,27 @@ namespace MagicStorageExtra
 		}
 
 		private static void RefreshStorageItems() {
-			storageItems.Clear();
-			result = null;
-			if (selectedRecipe != null) {
-				foreach (Item item in items) {
-					foreach (Item reqItem in selectedRecipe.requiredItem.TakeWhile(reqItem => reqItem.type != ItemID.None))
-						if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, reqItem.type, item.type))
-							storageItems.Add(item);
-					if (item.type == selectedRecipe.createItem.type)
-						result = item;
-				}
-				if (result == null) {
-					result = new Item();
-					result.SetDefaults(selectedRecipe.createItem.type);
-					result.stack = 0;
+			lock (storageItems) {
+				storageItems.Clear();
+				result = null;
+				if (selectedRecipe != null) {
+					lock (items) {
+						foreach (Item item in items) {
+							foreach (Item reqItem in selectedRecipe.requiredItem) {
+								if (reqItem.type == ItemID.None)
+									break;
+								if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, reqItem.type, item.type))
+									storageItems.Add(item);
+							}
+							if (item.type == selectedRecipe.createItem.type)
+								result = item;
+						}
+					}
+					if (result == null) {
+						result = new Item();
+						result.SetDefaults(selectedRecipe.createItem.type);
+						result.stack = 0;
+					}
 				}
 			}
 		}
@@ -1207,8 +1247,8 @@ namespace MagicStorageExtra
 					}
 				}
 				else if (RightMouseClicked) {
-					if (recipe == selectedRecipe || recipeButtons.Choice != RecipeButtonsNewChoice) {
-						if (recipeButtons.Choice == RecipeButtonsNewChoice) {
+					if (recipe == selectedRecipe || recipeButtons.Choice != RecipeButtonsAvailableChoice) {
+						if (recipeButtons.Choice == RecipeButtonsAvailableChoice) {
 							ModPlayer.AsKnownRecipes.Add(recipe.createItem);
 							RefreshItems();
 						}
@@ -1224,9 +1264,24 @@ namespace MagicStorageExtra
 
 		private static void SetSelectedRecipe(Recipe recipe) {
 			if (recipe != null) ModPlayer.SeenRecipes.Add(recipe.createItem);
+
+			if (RecursiveCraftIntegration.Enabled) {
+				int index;
+				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe) {
+					index = recipes.IndexOf(selectedRecipe);
+					if (index != -1)
+						recipes[index] = RecursiveCraftIntegration.GetOverriddenRecipe();
+				}
+				index = recipes.IndexOf(recipe);
+				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
+				recipes[index] = recipe;
+			}
+
 			selectedRecipe = recipe;
 			RefreshStorageItems();
-			blockStorageItems.Clear();
+			lock (blockStorageItems) {
+				blockStorageItems.Clear();
+			}
 		}
 
 		private static void HoverHeader(int slot, ref int hoverSlot) {
@@ -1277,10 +1332,12 @@ namespace MagicStorageExtra
 				item.newAndShiny = false;
 				if (MouseClicked) {
 					var data = new ItemData(item);
-					if (blockStorageItems.Contains(data))
-						blockStorageItems.Remove(data);
-					else
-						blockStorageItems.Add(data);
+					lock (blockStorageItems) {
+						if (blockStorageItems.Contains(data))
+							blockStorageItems.Remove(data);
+						else
+							blockStorageItems.Add(data);
+					}
 				}
 				hoverSlot = visualSlot;
 			}
@@ -1320,7 +1377,7 @@ namespace MagicStorageExtra
 				}
 			}
 
-			if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released && result != null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			if (RightMouseClicked && result != null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 				slotFocus = true;
 
 			hoverSlot = slot;
@@ -1384,8 +1441,13 @@ namespace MagicStorageExtra
 		}
 
 		private static void TryCraft() {
-			var availableItems = new List<Item>(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
+			var availableItems = new List<Item>();
 			var toWithdraw = new List<Item>();
+			lock (storageItems) {
+				lock (blockStorageItems) {
+					availableItems.AddRange(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
+				}
+			}
 
 			foreach (Item item in selectedRecipe.requiredItem) {
 				if (item.type == ItemID.None)
@@ -1422,7 +1484,7 @@ namespace MagicStorageExtra
 			resultItem.Prefix(-1);
 			var resultItems = new List<Item> { resultItem };
 
-			bool isCompound = RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompound(selectedRecipe);
+			bool isCompound = RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe);
 			if (isCompound) {
 				compoundCrafting = true;
 				compoundCraftSurplus.Clear();

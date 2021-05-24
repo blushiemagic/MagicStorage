@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using MagicStorageExtra.Components;
 using RecursiveCraft;
 using Terraria;
 using Terraria.ID;
@@ -12,13 +13,11 @@ using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorageExtra.RecursiveCraft
 {
-	public class RecursiveCraftIntegration
+	public static class RecursiveCraftIntegration
 	{
 		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things. 
-		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ShadowDiamond")
+		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
 		private static Mod RecursiveCraftMod;
-
-		private static RecursiveCraftIntegrationMembers members;
 
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
 		public static bool Enabled => RecursiveCraftMod != null;
@@ -34,16 +33,13 @@ namespace MagicStorageExtra.RecursiveCraft
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void Initialize() {
 			// This method will only be called when Enable is true, preventing TypeInitializationException
-			members = new RecursiveCraftIntegrationMembers();
+			Members.recipeCache = new Dictionary<Recipe, RecipeInfo>();
 			OnPlayer.QuickSpawnItem_int_int += OnPlayerOnQuickSpawnItem_int_int;
 		}
 
 		public static void InitRecipe() {
-			members.compoundRecipes = new CompoundRecipe[Recipe.maxRecipes];
-			for (int i = 0; i < Recipe.maxRecipes; i++) {
-				Mod mod = Main.recipe[i].createItem.modItem?.mod;
-				members.compoundRecipes[i] = new CompoundRecipe(mod);
-			}
+			Members.compoundRecipe = new CompoundRecipe(RecursiveCraftMod);
+			Members.threadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 		}
 
 		public static void Unload() {
@@ -54,8 +50,9 @@ namespace MagicStorageExtra.RecursiveCraft
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void Unload_Inner() {
-			//RecursiveCraftIntegrationMembers.compoundRecipes = null;
-			members = null;
+			Members.recipeCache = null;
+			Members.compoundRecipe = null;
+			Members.threadCompoundRecipe = null;
 			OnPlayer.QuickSpawnItem_int_int -= OnPlayerOnQuickSpawnItem_int_int;
 		}
 
@@ -89,7 +86,10 @@ namespace MagicStorageExtra.RecursiveCraft
 				Main.rand = new UnifiedRandom((int)DateTime.UtcNow.Ticks);
 			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
-			List<Item> storedItems = modPlayer.GetStorageHeart().GetStoredItems().ToList();
+			TEStorageHeart heart = modPlayer.GetStorageHeart();
+			if (heart == null)
+				return;
+			List<Item> storedItems = heart.GetStoredItems().ToList();
 
 			Dictionary<int, int> storedItemsDict = FlatDict(storedItems);
 
@@ -101,30 +101,45 @@ namespace MagicStorageExtra.RecursiveCraft
 		}
 
 		private static void RecursiveSearch(Dictionary<int, int> inventory) {
+			Members.recipeCache.Clear();
 			CraftingSource craftingSource = new GuiAsCraftingSource();
 			for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++) {
 				Recipe recipe = Main.recipe[n];
-				if (recipe is CompoundRecipe compoundRecipe) {
+				if (recipe is CompoundRecipe compoundRecipe)
 					recipe = compoundRecipe.OverridenRecipe;
-					Main.recipe[n] = recipe;
-				}
 				RecipeInfo recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
-				if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1) {
-					members.compoundRecipes[n].Apply(n, recipeInfo);
-					Main.recipe[n] = members.compoundRecipes[n];
-				}
+				if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
+					Members.recipeCache.Add(recipe, recipeInfo);
 			}
 		}
 
-		public static bool IsCompound(Recipe recipe) => recipe is CompoundRecipe;
+		public static bool IsCompoundRecipe(Recipe recipe) => recipe is CompoundRecipe;
 
-		public static Recipe RefreshRecipe(Recipe selectedRecipe) {
-			return selectedRecipe;
+		public static Recipe GetOverriddenRecipe() => Members.compoundRecipe.OverridenRecipe;
+
+		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
+			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
+				int index = Array.IndexOf(Main.recipe, recipe);
+				Members.compoundRecipe.Apply(index, recipeInfo);
+				return Members.compoundRecipe;
+			}
+			return recipe;
 		}
 
-		private class RecursiveCraftIntegrationMembers
+		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe) {
+			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
+				int index = Array.IndexOf(Main.recipe, recipe);
+				Members.threadCompoundRecipe.Apply(index, recipeInfo);
+				return Members.threadCompoundRecipe;
+			}
+			return recipe;
+		}
+
+		private static class Members
 		{
-			public CompoundRecipe[] compoundRecipes;
+			public static Dictionary<Recipe, RecipeInfo> recipeCache;
+			public static CompoundRecipe compoundRecipe;
+			public static CompoundRecipe threadCompoundRecipe;
 		}
 	}
 }
