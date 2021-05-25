@@ -7,6 +7,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using static RecursiveCraft.RecursiveSearch;
 using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorageExtra
@@ -35,7 +36,13 @@ namespace MagicStorageExtra
 			OnPlayer.QuickSpawnItem_int_int += OnPlayerOnQuickSpawnItem_int_int;
 		}
 
-		public static void InitRecipe() {
+		public static void InitRecipes() {
+			if (Enabled)
+				InitRecipes_Inner();
+		}
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static void InitRecipes_Inner() {
 			Members.compoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 			Members.threadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 		}
@@ -82,33 +89,41 @@ namespace MagicStorageExtra
 		public static void RecursiveRecipes() {
 			if (Main.rand == null)
 				Main.rand = new UnifiedRandom((int)DateTime.UtcNow.Ticks);
+
+			Dictionary<int, int> storedItems = GetStoredItems();
+			if (storedItems == null)
+				return;
+
+			lock (BlockRecipes.activeLock) {
+				Members.recipeCache.Clear();
+				for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++)
+					SingleSearch(storedItems, Main.recipe[n]);
+			}
+		}
+
+		private static Dictionary<int, int> GetStoredItems() {
 			Player player = Main.LocalPlayer;
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
 			if (heart == null)
-				return;
-			IEnumerable<Item> storedItems = heart.GetStoredItems();
-
-			Dictionary<int, int> storedItemsDict = FlatDict(storedItems);
-
-			lock (BlockRecipes.activeLock) {
-				BlockRecipes.active = false;
-				RecursiveSearch(storedItemsDict);
-				BlockRecipes.active = true;
-			}
+				return null;
+			return FlatDict(heart.GetStoredItems());
 		}
 
-		private static void RecursiveSearch(Dictionary<int, int> inventory) {
-			Members.recipeCache.Clear();
-			CraftingSource craftingSource = new GuiAsCraftingSource();
-			for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++) {
-				Recipe recipe = Main.recipe[n];
-				if (recipe is CompoundRecipe compoundRecipe)
-					recipe = compoundRecipe.OverridenRecipe;
-				RecipeInfo recipeInfo = RecursiveCraft.RecursiveCraft.FindIngredientsForRecipe(inventory, craftingSource, recipe);
-				if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
-					Members.recipeCache.Add(recipe, recipeInfo);
-			}
+		private static void SingleSearch(Dictionary<int, int> inventory, Recipe recipe) {
+			var craftingSource = new CraftingSource {
+				AdjTile = CraftingGUI.adjTiles,
+				AdjWater = CraftingGUI.adjWater,
+				AdjHoney = CraftingGUI.adjHoney,
+				AdjLava = CraftingGUI.adjLava,
+				ZoneSnow = CraftingGUI.zoneSnow,
+				AlchemyTable = CraftingGUI.alchemyTable
+			};
+			BlockRecipes.active = false;
+			RecipeInfo recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
+			BlockRecipes.active = true;
+			if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
+				Members.recipeCache.Add(recipe, recipeInfo);
 		}
 
 		public static bool IsCompoundRecipe(Recipe recipe) => recipe is CompoundRecipe;
@@ -116,11 +131,23 @@ namespace MagicStorageExtra
 		public static Recipe GetOverriddenRecipe() => Members.compoundRecipe.OverridenRecipe;
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
+			// If compound, get overriden
+			if (recipe is CompoundRecipe) 
+				recipe = Members.compoundRecipe.OverridenRecipe;
+			// Preemptive search to prevent hitting old cache (fixes crafting hiccup when there's excess items)
+			lock (BlockRecipes.activeLock) {
+				Members.recipeCache.Remove(recipe);
+				Dictionary<int, int> storedItems = GetStoredItems();
+				if (storedItems != null)
+					SingleSearch(storedItems, recipe);
+			}
+			// Hit cache
 			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
 				int index = Array.IndexOf(Main.recipe, recipe);
 				Members.compoundRecipe.Apply(index, recipeInfo);
 				return Members.compoundRecipe;
 			}
+			// Compound not available
 			return recipe;
 		}
 
@@ -138,21 +165,6 @@ namespace MagicStorageExtra
 			public static Dictionary<Recipe, RecipeInfo> recipeCache;
 			public static CompoundRecipe compoundRecipe;
 			public static CompoundRecipe threadCompoundRecipe;
-		}
-
-		private class GuiAsCraftingSource : CraftingSource
-		{
-			public override bool[] AdjTile => CraftingGUI.adjTiles;
-
-			public override bool AdjWater => CraftingGUI.adjWater;
-
-			public override bool AdjHoney => CraftingGUI.adjHoney;
-
-			public override bool AdjLava => CraftingGUI.adjLava;
-
-			public override bool ZoneSnow => CraftingGUI.zoneSnow;
-
-			public override bool AlchemyTable => CraftingGUI.alchemyTable;
 		}
 	}
 }

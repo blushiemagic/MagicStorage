@@ -674,6 +674,7 @@ namespace MagicStorageExtra
 						if (maxCraftTimer <= 0)
 							maxCraftTimer = 1;
 						TryCraft();
+						SetSelectedRecipe(selectedRecipe);
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);
 					}
@@ -1273,7 +1274,8 @@ namespace MagicStorageExtra
 				}
 				index = recipes.IndexOf(recipe);
 				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-				recipes[index] = recipe;
+				if (index != -1)
+					recipes[index] = recipe;
 			}
 
 			selectedRecipe = recipe;

@@ -39,8 +39,7 @@ namespace MagicStorageExtra
 		}
 
 		public override void PostAddRecipes() {
-			if (RecursiveCraftIntegration.Enabled)
-				RecursiveCraftIntegration.InitRecipe();
+			RecursiveCraftIntegration.InitRecipes();
 		}
 
 		public override void Unload() {

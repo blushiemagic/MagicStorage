@@ -15,7 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="RecursiveCraft">
-      <HintPath>lib\RecursiveCraft_v1.3.dll</HintPath>
+      <HintPath>lib\RecursiveCraft_v1.4.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
