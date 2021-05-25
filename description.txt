@@ -7,7 +7,7 @@ The magic storage scales as you progress in your playthrough. It is accessible v
 Changes from original:
 Added more slots to the crafting interface.
 Added more sort options.
-Added RecursiveCraft support
+Added RecursiveCraft support - version 1.4+
 
 TODO:
 Money Compactor
