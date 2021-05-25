@@ -13,12 +13,12 @@ namespace MagicStorageExtra
 		[DefaultValue(true)]
 		public bool _glowNewItems;
 
-		[Label("Whether the below filter should be used")]
-		[Tooltip("Enable to use the filter")]
+		[Label("Use default filter")]
+		[Tooltip("Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)")]
 		[DefaultValue(true)]
 		public bool _useConfigFilter;
 
-		[Label("Default to showing all recipes")]
+		[Label("Default recipe filter")]
 		[Tooltip("Enable to default to all recipes, disable to default to available recipes")]
 		[DefaultValue(true)]
 		public bool _showAllRecipes;
