@@ -23,7 +23,6 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "那道光所余留的痕迹依旧");
 		}
 
-
 		public override void SetDefaults() {
 			item.width = 16;
 			item.height = 16;

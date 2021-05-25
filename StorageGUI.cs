@@ -181,7 +181,6 @@ namespace MagicStorageExtra
 			favoritedOnlyButton = null;
 		}
 
-
 		private static void InitSortButtons() {
 			if (sortButtons == null)
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);

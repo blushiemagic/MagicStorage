@@ -107,7 +107,6 @@ namespace MagicStorageExtra.Sorting
 			return filter;
 		}
 
-
 		private static bool FilterName(Item item, string filter) {
 			if (filter.Trim().Length == 0) filter = string.Empty;
 			return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant(), StringComparison.Ordinal) >= 0;

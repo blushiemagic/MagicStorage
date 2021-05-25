@@ -132,7 +132,7 @@ namespace MagicStorageExtra
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
 			// If compound, get overriden
-			if (recipe is CompoundRecipe) 
+			if (recipe is CompoundRecipe)
 				recipe = Members.compoundRecipe.OverridenRecipe;
 			// Preemptive search to prevent hitting old cache (fixes crafting hiccup when there's excess items)
 			lock (BlockRecipes.activeLock) {
