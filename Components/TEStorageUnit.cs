@@ -98,7 +98,7 @@ namespace MagicStorageExtra.Components
 						item.stack = newStack;
 
 						if (toDeposit.favorited) item.favorited = true;
-						if (toDeposit.newAndShiny) item.newAndShiny = ModContent.GetInstance<MagicStorageConfig>().glowNewItems;
+						if (toDeposit.newAndShiny) item.newAndShiny = MagicStorageConfig.glowNewItems;
 
 						hasChange = true;
 						toDeposit.stack = total - newStack;

@@ -200,7 +200,7 @@ namespace MagicStorageExtra.Components
 							return;
 					}
 				bool prevNewAndShiny = toDeposit.newAndShiny;
-				toDeposit.newAndShiny = ModContent.GetInstance<MagicStorageConfig>().glowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
+				toDeposit.newAndShiny = MagicStorageConfig.glowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 					if (!storageUnit.Inactive && !storageUnit.IsFull) {
 						storageUnit.DepositItem(toDeposit, true);

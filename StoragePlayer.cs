@@ -112,6 +112,8 @@ namespace MagicStorageExtra
 			storageAccess = point;
 			remoteAccess = remote;
 			_latestAccessedStorage = GetStorageHeart();
+			if (MagicStorageConfig.useConfigFilter && CraftingGUI.recipeButtons != null)
+				CraftingGUI.recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
 			StorageGUI.RefreshItems();
 		}
 

@@ -47,7 +47,7 @@ namespace MagicStorageExtra
 		private static UIElement topBar;
 		private static UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
-		private static UIButtonChoice recipeButtons;
+		internal static UIButtonChoice recipeButtons;
 		private static UIElement topBar2;
 		private static UIButtonChoice filterButtons;
 
@@ -352,7 +352,7 @@ namespace MagicStorageExtra
 		}
 
 		private static void InitRecipeButtons() {
-			if (recipeButtons == null)
+			if (recipeButtons == null) {
 				recipeButtons = new UIButtonChoice(RefreshItems,
 					new[] {
 						MagicStorageExtra.Instance.GetTexture("RecipeAvailable"),
@@ -365,7 +365,10 @@ namespace MagicStorageExtra
 						Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
 						Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
 						Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
-					}) { Choice = 1 };
+					});
+				if (MagicStorageConfig.useConfigFilter)
+					recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
+			}
 		}
 
 		private static void InitFilterButtons() {
@@ -481,7 +484,7 @@ namespace MagicStorageExtra
 
 				if (!ModPlayer.SeenRecipes.Contains(item)) {
 					item = item.Clone();
-					item.newAndShiny = ModContent.GetInstance<MagicStorageConfig>().glowNewItems;
+					item.newAndShiny = MagicStorageConfig.glowNewItems;
 				}
 			}
 
