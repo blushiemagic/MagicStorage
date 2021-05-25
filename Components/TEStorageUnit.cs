@@ -136,7 +136,7 @@ namespace MagicStorageExtra.Components
 				Item original = lookFor.Clone();
 				Item result = lookFor.Clone();
 				result.stack = 0;
-				for (int k = 0; k < items.Count; k++) {
+				for (int k = items.Count - 1; k >= 0; k--) {
 					Item item = items[k];
 					if (ItemData.Matches(lookFor, item)) {
 						int maxToTake = item.stack;

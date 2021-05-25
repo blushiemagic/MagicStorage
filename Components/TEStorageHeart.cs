@@ -226,7 +226,7 @@ namespace MagicStorageExtra.Components
 				EnterWriteLock();
 			try {
 				var result = new Item();
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits().Reverse())
 					if (storageUnit.HasItem(lookFor, true)) {
 						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
 						if (!withdrawn.IsAir) {
