@@ -1033,8 +1033,8 @@ namespace MagicStorageExtra
 				Array.Resize(ref temp, player.adjTile.Length);
 				adjTiles = temp;
 			}
-			for (int k = 0; k < adjTiles.Length; k++)
-				adjTiles[k] = false;
+
+			Array.Clear(adjTiles, 0, adjTiles.Length);
 			adjWater = false;
 			adjLava = false;
 			adjHoney = false;
@@ -1480,11 +1480,11 @@ namespace MagicStorageExtra
 		}
 
 		private static void TryCraft() {
-			var availableItems = new List<Item>();
+			List<Item> availableItems;
 			var toWithdraw = new List<Item>();
 			lock (storageItems) {
 				lock (blockStorageItems) {
-					availableItems.AddRange(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
+					availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
 				}
 			}
 
