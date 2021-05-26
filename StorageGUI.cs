@@ -185,7 +185,7 @@ namespace MagicStorageExtra
 			if (sortButtons == null)
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
 			if (favoritedOnlyButton == null)
-				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorageExtra.Instance.GetTexture("FilterMisc"), Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"));
+				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"), Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"));
 		}
 
 		private static void InitFilterButtons() {

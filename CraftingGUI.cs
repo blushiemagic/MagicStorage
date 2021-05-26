@@ -355,10 +355,10 @@ namespace MagicStorageExtra
 			if (recipeButtons == null) {
 				recipeButtons = new UIButtonChoice(RefreshItems,
 					new[] {
-						MagicStorageExtra.Instance.GetTexture("RecipeAvailable"),
-						MagicStorageExtra.Instance.GetTexture("RecipeAll"),
-						MagicStorageExtra.Instance.GetTexture("FilterMisc"),
-						MagicStorageExtra.Instance.GetTexture("RecipeAll")
+						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAvailable"),
+						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll"),
+						MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"),
+						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll")
 					},
 					new[] {
 						Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),

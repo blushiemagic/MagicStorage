@@ -13,10 +13,10 @@ namespace MagicStorageExtra
 			return new UIButtonChoice(onChanged,
 				new[] {
 					Main.inventorySortTexture[0],
-					MagicStorageExtra.Instance.GetTexture("SortID"),
-					MagicStorageExtra.Instance.GetTexture("SortName"),
-					MagicStorageExtra.Instance.GetTexture("SortNumber"),
-					MagicStorageExtra.Instance.GetTexture("SortNumber")
+					MagicStorageExtra.Instance.GetTexture("Assets/SortID"),
+					MagicStorageExtra.Instance.GetTexture("Assets/SortName"),
+					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber"),
+					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber")
 				},
 				new[] {
 					Language.GetText("Mods.MagicStorageExtra.SortDefault"),
@@ -29,20 +29,20 @@ namespace MagicStorageExtra
 
 		public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged) {
 			var textures = new List<Texture2D> {
-				MagicStorageExtra.Instance.GetTexture("FilterAll"),
-				MagicStorageExtra.Instance.GetTexture("FilterMelee"),
-				MagicStorageExtra.Instance.GetTexture("FilterRanged"),
-				MagicStorageExtra.Instance.GetTexture("FilterMagic"),
-				MagicStorageExtra.Instance.GetTexture("FilterSummon"),
-				MagicStorageExtra.Instance.GetTexture("FilterThrowing"),
-				MagicStorageExtra.Instance.GetTexture("FilterAmmo"),
-				MagicStorageExtra.Instance.GetTexture("FilterPickaxe"),
-				MagicStorageExtra.Instance.GetTexture("FilterArmor"),
-				MagicStorageExtra.Instance.GetTexture("FilterEquips"),
-				MagicStorageExtra.Instance.GetTexture("FilterVanity"),
-				MagicStorageExtra.Instance.GetTexture("FilterPotion"),
-				MagicStorageExtra.Instance.GetTexture("FilterTile"),
-				MagicStorageExtra.Instance.GetTexture("FilterMisc")
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterAll"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterMelee"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterRanged"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterMagic"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterSummon"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterThrowing"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterAmmo"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterPickaxe"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterArmor"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterEquips"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterVanity"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterPotion"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterTile"),
+				MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc")
 			};
 			var texts = new List<LocalizedText> {
 				Language.GetText("Mods.MagicStorageExtra.FilterAll"),
@@ -61,7 +61,7 @@ namespace MagicStorageExtra
 				Language.GetText("Mods.MagicStorageExtra.FilterMisc")
 			};
 			if (withHistory) {
-				textures.Add(MagicStorageExtra.Instance.GetTexture("FilterAll"));
+				textures.Add(MagicStorageExtra.Instance.GetTexture("Assets/FilterAll"));
 				texts.Add(Language.GetText("Mods.MagicStorageExtra.FilterRecent"));
 			}
 			return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray());

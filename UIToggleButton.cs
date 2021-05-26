@@ -50,8 +50,8 @@ namespace MagicStorageExtra
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			Texture2D backTexture = MagicStorageExtra.Instance.GetTexture("SortButtonBackground");
-			Texture2D backTextureActive = MagicStorageExtra.Instance.GetTexture("SortButtonBackgroundActive");
+			Texture2D backTexture = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackground");
+			Texture2D backTextureActive = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackgroundActive");
 			CalculatedStyle dim = GetDimensions();
 			Texture2D texture = Value ? backTextureActive : backTexture;
 			var drawPos = new Vector2(dim.X, dim.Y);
