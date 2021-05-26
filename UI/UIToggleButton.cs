@@ -5,7 +5,7 @@ using Terraria;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace MagicStorageExtra
+namespace MagicStorageExtra.UI
 {
 	public class UIToggleButton : UIElement
 	{

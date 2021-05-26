@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MagicStorageExtra.UI;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Localization;

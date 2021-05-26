@@ -10,7 +10,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorageExtra
+namespace MagicStorageExtra.UI
 {
 	public class UISearchBar : UIElement
 	{

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MagicStorageExtra.Components;
 using MagicStorageExtra.Sorting;
+using MagicStorageExtra.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
