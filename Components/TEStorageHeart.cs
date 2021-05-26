@@ -91,9 +91,8 @@ namespace MagicStorageExtra.Components
 		public bool EmptyInactive() {
 			TEStorageUnit inactiveUnit = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
-				if (!(abstractStorageUnit is TEStorageUnit))
+				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
 					continue;
-				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (storageUnit.Inactive && !storageUnit.IsEmpty)
 					inactiveUnit = storageUnit;
 			}
@@ -102,9 +101,8 @@ namespace MagicStorageExtra.Components
 				return false;
 			}
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
-				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
+				if (!(abstractStorageUnit is TEStorageUnit storageUnit) || storageUnit.Inactive)
 					continue;
-				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (storageUnit.IsEmpty && inactiveUnit.NumItems <= storageUnit.Capacity) {
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
 					NetHelper.SendRefreshNetworkItems(ID);
@@ -115,9 +113,8 @@ namespace MagicStorageExtra.Components
 			NetHelper.StartUpdateQueue();
 			Item tryMove = inactiveUnit.WithdrawStack();
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
-				if (!(abstractStorageUnit is TEStorageUnit) || abstractStorageUnit.Inactive)
+				if (!(abstractStorageUnit is TEStorageUnit storageUnit) || storageUnit.Inactive)
 					continue;
-				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir) {
 					storageUnit.DepositItem(tryMove, true);
 					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
@@ -139,9 +136,8 @@ namespace MagicStorageExtra.Components
 		public bool Defragment() {
 			TEStorageUnit emptyUnit = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
-				if (!(abstractStorageUnit is TEStorageUnit))
+				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
 					continue;
-				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (emptyUnit == null && storageUnit.IsEmpty && !storageUnit.Inactive) {
 					emptyUnit = storageUnit;
 				}
@@ -159,9 +155,8 @@ namespace MagicStorageExtra.Components
 		public bool PackItems() {
 			TEStorageUnit unitWithSpace = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
-				if (!(abstractStorageUnit is TEStorageUnit))
+				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
 					continue;
-				var storageUnit = (TEStorageUnit)abstractStorageUnit;
 				if (unitWithSpace == null && !storageUnit.IsFull && !storageUnit.Inactive) {
 					unitWithSpace = storageUnit;
 				}

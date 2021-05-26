@@ -235,10 +235,9 @@ namespace MagicStorageExtra
 				ent.ID = id;
 				TileEntity.ByID[id] = ent;
 				TileEntity.ByPosition[ent.Position] = ent;
-				if (ent is TEStorageUnit) {
-					TEStorageHeart heart = ((TEStorageUnit)ent).GetHeart();
-					if (heart != null)
-						heart.ResetCompactStage();
+				if (ent is TEStorageUnit storageUnit) {
+					TEStorageHeart heart = storageUnit.GetHeart();
+					heart?.ResetCompactStage();
 				}
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, id, ent.Position.X, ent.Position.Y);
 			}
@@ -323,11 +322,9 @@ namespace MagicStorageExtra
 			}
 			Point16 pos = access.Position;
 			var modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
-			if (modTile != null) {
-				TEStorageHeart heart = modTile.GetHeart(pos.X, pos.Y);
-				if (heart != null)
-					SendRefreshNetworkItems(heart.ID);
-			}
+			TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
+			if (heart != null)
+				SendRefreshNetworkItems(heart.ID);
 		}
 
 		public static void ReceiveStationResult(BinaryReader reader) {

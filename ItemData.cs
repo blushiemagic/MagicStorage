@@ -17,11 +17,7 @@ namespace MagicStorageExtra
 			Prefix = item.prefix;
 		}
 
-		public override bool Equals(object other) {
-			if (!(other is ItemData))
-				return false;
-			return Matches(this, (ItemData)other);
-		}
+		public override bool Equals(object other) => other is ItemData data && Matches(this, data);
 
 		public override int GetHashCode() => 100 * Type + Prefix;
 

@@ -156,8 +156,7 @@ namespace MagicStorageExtra
 			int capacity = 0;
 			if (heart != null)
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
-					if (abstractStorageUnit is TEStorageUnit) {
-						var storageUnit = (TEStorageUnit)abstractStorageUnit;
+					if (abstractStorageUnit is TEStorageUnit storageUnit) {
 						numItems += storageUnit.NumItems;
 						capacity += storageUnit.Capacity;
 					}

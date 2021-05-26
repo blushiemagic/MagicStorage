@@ -50,8 +50,7 @@ namespace MagicStorageExtra.Components
 
 			if (changed) {
 				TEStorageHeart heart = GetHeart();
-				if (heart != null)
-					heart.ResetCompactStage();
+				heart?.ResetCompactStage();
 				NetHelper.SendTEUpdate(ID, Position);
 			}
 		}

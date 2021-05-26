@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -79,11 +80,9 @@ namespace MagicStorageExtra.Components
 		}
 
 		public override TagCompound Save() {
-			var tag = new TagCompound();
-			IList<TagCompound> listStations = new List<TagCompound>();
-			foreach (Item item in stations)
-				listStations.Add(ItemIO.Save(item));
-			tag["Stations"] = listStations;
+			var tag = new TagCompound {
+				["Stations"] = stations.Select(ItemIO.Save).ToList()
+			};
 			return tag;
 		}
 

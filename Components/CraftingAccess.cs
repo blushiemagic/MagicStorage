@@ -17,9 +17,9 @@ namespace MagicStorageExtra.Components
 			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
 				return null;
 			TileEntity heart = TileEntity.ByPosition[point];
-			if (!(heart is TEStorageCenter))
+			if (!(heart is TEStorageCenter center))
 				return null;
-			return ((TEStorageCenter)heart).GetHeart();
+			return center.GetHeart();
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem) {
