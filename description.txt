@@ -17,6 +17,10 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.2.10:
+Fix right click only working on result once
+0.5.2.9:
+Fix pulling wrong item from storage
 0.5.2.8:
 Optimizations and modular ingredient UI
 0.5.2.7:
