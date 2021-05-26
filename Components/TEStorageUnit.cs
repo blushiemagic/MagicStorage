@@ -146,7 +146,7 @@ namespace MagicStorageExtra.Components
 						item.stack -= withdraw;
 						if (item.stack <= 0) {
 							items.RemoveAt(k);
-							k--;
+							k++;
 						}
 						result.stack += withdraw;
 						lookFor.stack -= withdraw;
