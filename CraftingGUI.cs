@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
+using System.Threading.Tasks;
 using MagicStorageExtra.Components;
 using MagicStorageExtra.Items;
 using MagicStorageExtra.Sorting;
@@ -124,6 +124,7 @@ namespace MagicStorageExtra
 		private static Dictionary<int, List<Recipe>> _productToRecipes;
 		public static bool compoundCrafting;
 		public static List<Item> compoundCraftSurplus = new List<Item>();
+		private static MethodInfo _getAcceptedGroups;
 
 		public static bool[] adjTiles { get; private set; } = new bool[TileLoader.TileCount];
 
@@ -136,8 +137,6 @@ namespace MagicStorageExtra
 		public static bool zoneSnow { get; private set; }
 
 		public static bool alchemyTable { get; private set; }
-
-		private static Thread thread { get; set; }
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 
@@ -272,22 +271,37 @@ namespace MagicStorageExtra
 
 			recipePanel.Append(ingredientText);
 
-			ingredientZone.SetDimensions(numColumns2, 2);
-			ingredientZone.Top.Set(54f, 0f);
+			int itemsNeeded = selectedRecipe?.requiredItem.Count(item => !item.IsAir) ?? numColumns2 * 2;
+			int recipeRows = itemsNeeded / numColumns2;
+			int extraRow = itemsNeeded % numColumns2 != 0 ? 1 : 0;
+			int totalRows = recipeRows + extraRow;
+			if (totalRows < 2)
+				totalRows = 2;
+			const float ingredientZoneTop = 54f;
+			float ingredientZoneHeight = 30f * totalRows;
+
+			ingredientZone.SetDimensions(numColumns2, totalRows);
+			ingredientZone.Top.Set(ingredientZoneTop, 0f);
 			ingredientZone.Width.Set(0f, 1f);
-			ingredientZone.Height.Set(60f, 0f);
+			ingredientZone.Height.Set(ingredientZoneHeight, 0f);
 			recipePanel.Append(ingredientZone);
 
-			reqObjText.Top.Set(136f, 0f);
-			recipePanel.Append(reqObjText);
-			reqObjText2.Top.Set(160f, 0f);
-			recipePanel.Append(reqObjText2);
-			storedItemsText.Top.Set(190f, 0f);
-			recipePanel.Append(storedItemsText);
+			float reqObjTextTop = ingredientZoneTop + ingredientZoneHeight + 11 * totalRows;
+			float reqObjText2Top = reqObjTextTop + 24;
 
-			storageZone.Top.Set(214f, 0f);
+			reqObjText.Top.Set(reqObjTextTop, 0f);
+			recipePanel.Append(reqObjText);
+			reqObjText2.Top.Set(reqObjText2Top, 0f);
+			recipePanel.Append(reqObjText2);
+
+			int reqObjText2Rows = reqObjText2.Text.Count(c => c == '\n') + 1;
+			float storedItemsTextTop = reqObjText2Top + 30 * reqObjText2Rows;
+			float storageZoneTop = storedItemsTextTop + 24;
+			storedItemsText.Top.Set(storedItemsTextTop, 0f);
+			recipePanel.Append(storedItemsText);
+			storageZone.Top.Set(storageZoneTop, 0f);
 			storageZone.Width.Set(0f, 1f);
-			storageZone.Height.Set(-214f - 36, 1f);
+			storageZone.Height.Set(-storageZoneTop - 36, 1f);
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + numColumns2 - 1) / numColumns2;
 			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + padding);
@@ -342,8 +356,6 @@ namespace MagicStorageExtra
 			sortButtons = null;
 			filterButtons = null;
 			recipeButtons = null;
-			if (thread != null && thread.IsAlive)
-				thread.Abort();
 		}
 
 		private static void InitSortButtons() {
@@ -375,6 +387,13 @@ namespace MagicStorageExtra
 			if (filterButtons == null)
 				filterButtons = GUIHelpers.MakeFilterButtons(false, RefreshItems);
 		}
+
+		private static void InitReflection() {
+			if (_getAcceptedGroups == null)
+				_getAcceptedGroups = typeof(RecipeFinder).GetMethod("GetAcceptedGroups", BindingFlags.NonPublic | BindingFlags.Static);
+		}
+
+		private static List<int> GetAcceptedVanillaGroups(Recipe recipe) => (List<int>)_getAcceptedGroups.Invoke(null, new object[] { recipe });
 
 		public static void Update(GameTime gameTime) {
 			try {
@@ -425,6 +444,7 @@ namespace MagicStorageExtra
 			try {
 				Player player = Main.LocalPlayer;
 				Initialize();
+				InitReflection();
 				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
 					player.mouseInterface = true;
 					player.showItemIcon = false;
@@ -528,7 +548,7 @@ namespace MagicStorageExtra
 			lock (storageItems) {
 				storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
 
-				foreach (RecipeGroup rec in RecipeGroup.recipeGroups.Values.Where(r => r.ValidItems.Count > 0)) {
+				foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Union(GetAcceptedVanillaGroups(selectedRecipe)).Select(index => RecipeGroup.recipeGroups[index])) {
 					int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
 					if (item.type == iconicItemType)
 						foreach (int type in rec.ValidItems)
@@ -537,10 +557,11 @@ namespace MagicStorageExtra
 			}
 
 			if (!item.IsAir) {
-				if (storageItem.IsAir && totalGroupStack == 0)
-					context = 3;
+				bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe));
+				if (storageItem.IsAir && totalGroupStack == 0 && !craftable)
+					context = 3; // Unavailable
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
-					context = 4;
+					context = 4; // Partially in stock or craftable
 			}
 
 			return item;
@@ -566,34 +587,44 @@ namespace MagicStorageExtra
 			else {
 				bool isEmpty = true;
 				string text = "";
+				int rows = 0;
+
+				void AddText(string addText) {
+					if ((text.Length + addText.Length) / 35 > rows) {
+						text += "\n";
+						++rows;
+					}
+					text += addText;
+				}
+
 				foreach (int tile in selectedRecipe.requiredTile.TakeWhile(tile => tile != -1)) {
 					if (!isEmpty)
 						text += ", ";
-					text += Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0));
+					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 					isEmpty = false;
 				}
 				if (selectedRecipe.needWater) {
 					if (!isEmpty)
 						text += ", ";
-					text += Language.GetTextValue("LegacyInterface.53");
+					AddText(Language.GetTextValue("LegacyInterface.53"));
 					isEmpty = false;
 				}
 				if (selectedRecipe.needHoney) {
 					if (!isEmpty)
 						text += ", ";
-					text += Language.GetTextValue("LegacyInterface.58");
+					AddText(Language.GetTextValue("LegacyInterface.58"));
 					isEmpty = false;
 				}
 				if (selectedRecipe.needLava) {
 					if (!isEmpty)
 						text += ", ";
-					text += Language.GetTextValue("LegacyInterface.56");
+					AddText(Language.GetTextValue("LegacyInterface.56"));
 					isEmpty = false;
 				}
 				if (selectedRecipe.needSnowBiome) {
 					if (!isEmpty)
 						text += ", ";
-					text += Language.GetTextValue("LegacyInterface.123");
+					AddText(Language.GetTextValue("LegacyInterface.123"));
 					isEmpty = false;
 				}
 				if (isEmpty)
@@ -670,14 +701,16 @@ namespace MagicStorageExtra
 						ModPlayer.TestedRecipes.Add(selectedRecipe.createItem);
 					}
 				}
-				else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe)) {
+				else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe)) {
 					if (craftTimer <= 0) {
 						craftTimer = maxCraftTimer;
 						maxCraftTimer = maxCraftTimer * 3 / 4;
 						if (maxCraftTimer <= 0)
 							maxCraftTimer = 1;
 						TryCraft();
-						SetSelectedRecipe(selectedRecipe);
+						if (RecursiveCraftIntegration.Enabled)
+							if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
+								SetSelectedRecipe(selectedRecipe);
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);
 					}
@@ -690,7 +723,7 @@ namespace MagicStorageExtra
 			else {
 				craftButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
 			}
-			if (selectedRecipe == null || !IsAvailable(selectedRecipe) || !PassesBlock(selectedRecipe))
+			if (selectedRecipe == null || !IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
 				craftButton.BackgroundColor = new Color(30, 40, 100) * 0.7f;
 			if (!flag) {
 				craftTimer = 0;
@@ -756,8 +789,7 @@ namespace MagicStorageExtra
 				threadCheckListFoundItems = foundItems;
 				if (!threadRunning) {
 					threadRunning = true;
-					thread = new Thread(_ => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
-					thread.Start();
+					Task.Run(() => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
 				}
 			}
 		}
@@ -819,9 +851,7 @@ namespace MagicStorageExtra
 			}
 
 			int ingredients = 0;
-			for (int i = 0; i < Recipe.maxRequirements; i++) {
-				int t = recipe.requiredItem[i].type;
-				if (t <= 0) continue;
+			foreach (int t in recipe.requiredItem.Select(item => item.type).Where(t => t > 0)) {
 				ingredients++;
 				if (IsKnownRecursively_CheckIngredient(t, availableSet, recursionTree, cache)) continue;
 				if (IsKnownRecursively_CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, t)) continue;
@@ -845,8 +875,7 @@ namespace MagicStorageExtra
 						if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
 							return true;
 
-			MethodInfo getAcceptedGroups = typeof(RecipeFinder).GetMethod("GetAcceptedGroups", BindingFlags.NonPublic | BindingFlags.Static);
-			var recipeAcceptedGroups = (List<int>)getAcceptedGroups.Invoke(null, new object[] { recipe });
+			List<int> recipeAcceptedGroups = GetAcceptedVanillaGroups(recipe);
 
 			foreach (int acceptedGroup in recipeAcceptedGroups) {
 				foreach (int groupItemType in RecipeGroup.recipeGroups[acceptedGroup].ValidItems)
@@ -900,7 +929,9 @@ namespace MagicStorageExtra
 							// show only favorited items if selected
 							.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
 							// hard check if this item can be crafted from available items and their recursive products
-							.Where(x => !wasItemChecklistRetrieved || IsKnownRecursively(x, availableItemsMutable, temp, tempCache)).OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1);
+							.Where(x => !wasItemChecklistRetrieved || IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
+							// favorites first
+							.OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1);
 
 						threadRecipes.Clear();
 						threadRecipeAvailable.Clear();
@@ -920,6 +951,8 @@ namespace MagicStorageExtra
 						}
 					}
 
+					if (RecursiveCraftIntegration.Enabled)
+						RecursiveCraftIntegration.RecursiveRecipes();
 					DoFiltering();
 
 					// now if nothing found we disable filters one by one
@@ -1270,15 +1303,16 @@ namespace MagicStorageExtra
 
 			if (RecursiveCraftIntegration.Enabled) {
 				int index;
-				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe) {
+				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe && RecursiveCraftIntegration.GetOverriddenRecipe() != recipe) {
 					index = recipes.IndexOf(selectedRecipe);
 					if (index != -1)
 						recipes[index] = RecursiveCraftIntegration.GetOverriddenRecipe();
 				}
 				index = recipes.IndexOf(recipe);
-				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-				if (index != -1)
+				if (index != -1) {
+					recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 					recipes[index] = recipe;
+				}
 			}
 
 			selectedRecipe = recipe;
@@ -1299,7 +1333,7 @@ namespace MagicStorageExtra
 			}
 			int visualSlot = slot;
 			slot += numColumns2 * (int)Math.Round(scrollBar2.ViewPosition);
-			int count = selectedRecipe.requiredItem.Select((x, i) => new { x, i }).First(x => x.x.type == ItemID.None).i + 1;
+			int count = selectedRecipe.requiredItem.Select((item, i) => new { item, i }).FirstOrDefault(x => x.item.type == ItemID.None)?.i + 1 ?? selectedRecipe.requiredItem.Length;
 
 			if (slot < count) {
 				// select ingredient recipe by right clicking

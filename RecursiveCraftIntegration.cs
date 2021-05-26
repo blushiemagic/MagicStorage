@@ -87,14 +87,11 @@ namespace MagicStorageExtra
 		// I do this for organization and so the .csproj loads properly for others using the GitHub repository. 
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
 		public static void RecursiveRecipes() {
-			if (Main.rand == null)
-				Main.rand = new UnifiedRandom((int)DateTime.UtcNow.Ticks);
-
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;
 
-			lock (BlockRecipes.activeLock) {
+			lock (Members.recipeCache) {
 				Members.recipeCache.Clear();
 				for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++)
 					SingleSearch(storedItems, Main.recipe[n]);
@@ -111,6 +108,8 @@ namespace MagicStorageExtra
 		}
 
 		private static void SingleSearch(Dictionary<int, int> inventory, Recipe recipe) {
+			if (Main.rand == null)
+				Main.rand = new UnifiedRandom((int)DateTime.UtcNow.Ticks);
 			var craftingSource = new CraftingSource {
 				AdjTile = CraftingGUI.adjTiles,
 				AdjWater = CraftingGUI.adjWater,
@@ -119,9 +118,12 @@ namespace MagicStorageExtra
 				ZoneSnow = CraftingGUI.zoneSnow,
 				AlchemyTable = CraftingGUI.alchemyTable
 			};
-			BlockRecipes.active = false;
-			RecipeInfo recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
-			BlockRecipes.active = true;
+			RecipeInfo recipeInfo;
+			lock (BlockRecipes.activeLock) {
+				BlockRecipes.active = false;
+				recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
+				BlockRecipes.active = true;
+			}
 			if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
 				Members.recipeCache.Add(recipe, recipeInfo);
 		}
@@ -130,24 +132,29 @@ namespace MagicStorageExtra
 
 		public static Recipe GetOverriddenRecipe() => Members.compoundRecipe.OverridenRecipe;
 
-		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
-			// If compound, get overriden
+		public static bool UpdateRecipe(Recipe recipe) {
 			if (recipe is CompoundRecipe)
 				recipe = Members.compoundRecipe.OverridenRecipe;
-			// Preemptive search to prevent hitting old cache (fixes crafting hiccup when there's excess items)
-			lock (BlockRecipes.activeLock) {
+			else
+				return false;
+			lock (Members.recipeCache) {
 				Members.recipeCache.Remove(recipe);
 				Dictionary<int, int> storedItems = GetStoredItems();
 				if (storedItems != null)
 					SingleSearch(storedItems, recipe);
 			}
-			// Hit cache
+			return true;
+		}
+
+		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
+			if (recipe is CompoundRecipe)
+				recipe = Members.compoundRecipe.OverridenRecipe;
 			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
 				int index = Array.IndexOf(Main.recipe, recipe);
 				Members.compoundRecipe.Apply(index, recipeInfo);
 				return Members.compoundRecipe;
 			}
-			// Compound not available
+
 			return recipe;
 		}
 

@@ -18,10 +18,7 @@ namespace MagicStorageExtra.Sorting
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter) {
 			ItemFilter filter = MakeFilter(filterMode);
-			Recipe[] recipes = Main.recipe;
-			if (RecursiveCraftIntegration.Enabled)
-				RecursiveCraftIntegration.RecursiveRecipes();
-			IEnumerable<Recipe> filteredRecipes = recipes.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 			CompareFunction func = MakeSortFunction(sortMode);
 			return func == null ? filteredRecipes : filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
 		}
