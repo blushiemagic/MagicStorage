@@ -17,6 +17,8 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.2.12:
+Fix bug introduced in 0.5.2.9
 0.5.2.11:
 Some more optimizations
 0.5.2.10:
