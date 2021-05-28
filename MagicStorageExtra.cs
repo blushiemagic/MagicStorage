@@ -13,6 +13,9 @@ namespace MagicStorageExtra
 {
 	public class MagicStorageExtra : Mod
 	{
+		public static string GithubUserName => "ExterminatorX99";
+		public static string GithubProjectName => "MagicStorage";
+
 		public static MagicStorageExtra Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
