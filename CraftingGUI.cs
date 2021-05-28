@@ -357,6 +357,7 @@ namespace MagicStorageExtra
 			sortButtons = null;
 			filterButtons = null;
 			recipeButtons = null;
+			selectedRecipe = null;
 		}
 
 		private static void InitSortButtons() {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace MagicStorageExtra.Components
 	public class TECraftingAccess : TEStorageComponent
 	{
 		public const int Rows = 3;
-		public const int ItemsPerRow = 15;
-		public const int ItemsTotal = Rows * ItemsPerRow;
+		public const int Columns = 15;
+		public const int ItemsTotal = Rows * Columns;
 
 		public Item[] stations = new Item[ItemsTotal];
 
