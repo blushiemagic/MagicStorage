@@ -47,7 +47,8 @@ namespace MagicStorageExtra
 
 		public bool AddToCraftedRecipes(Item item) => _craftedRecipes.Add(item);
 
-		public override TagCompound Save() {
+		public override TagCompound Save()
+		{
 			var c = new TagCompound();
 
 			_hiddenRecipes.Save(c);
@@ -60,7 +61,8 @@ namespace MagicStorageExtra
 			return c;
 		}
 
-		public override void Load(TagCompound tag) {
+		public override void Load(TagCompound tag)
+		{
 			_hiddenRecipes.Load(tag);
 			_craftedRecipes.Load(tag);
 			FavoritedRecipes.Load(tag);
@@ -69,46 +71,58 @@ namespace MagicStorageExtra
 			AsKnownRecipes.Load(tag);
 		}
 
-		public override void UpdateDead() {
+		public override void UpdateDead()
+		{
 			if (player.whoAmI == Main.myPlayer)
 				CloseStorage();
 		}
 
-		public override void ResetEffects() {
+		public override void ResetEffects()
+		{
 			if (player.whoAmI != Main.myPlayer)
 				return;
-			if (timeSinceOpen < 1) {
+			if (timeSinceOpen < 1)
+			{
 				player.talkNPC = -1;
 				Main.playerInventory = true;
 				timeSinceOpen++;
 			}
-			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1)) {
+
+			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1))
+			{
 				CloseStorage();
-				lock (BlockRecipes.activeLock) {
+				lock (BlockRecipes.activeLock)
+				{
 					Recipe.FindRecipes();
 				}
 			}
-			else if (storageAccess.X >= 0 && storageAccess.Y >= 0) {
-				int playerX = (int)(player.Center.X / 16f);
-				int playerY = (int)(player.Center.Y / 16f);
-				if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1)) {
+			else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
+			{
+				int playerX = (int) (player.Center.X / 16f);
+				int playerY = (int) (player.Center.Y / 16f);
+				if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1))
+				{
 					Main.PlaySound(SoundID.MenuClose);
 					CloseStorage();
-					lock (BlockRecipes.activeLock) {
+					lock (BlockRecipes.activeLock)
+					{
 						Recipe.FindRecipes();
 					}
 				}
-				else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess)) {
+				else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess))
+				{
 					Main.PlaySound(SoundID.MenuClose);
 					CloseStorage();
-					lock (BlockRecipes.activeLock) {
+					lock (BlockRecipes.activeLock)
+					{
 						Recipe.FindRecipes();
 					}
 				}
 			}
 		}
 
-		public void OpenStorage(Point16 point, bool remote = false) {
+		public void OpenStorage(Point16 point, bool remote = false)
+		{
 			storageAccess = point;
 			remoteAccess = remote;
 			_latestAccessedStorage = GetStorageHeart();
@@ -117,20 +131,24 @@ namespace MagicStorageExtra
 			StorageGUI.RefreshItems();
 		}
 
-		public void CloseStorage() {
+		public void CloseStorage()
+		{
 			storageAccess = new Point16(-1, -1);
 			Main.blockInput = false;
 		}
 
 		public Point16 ViewingStorage() => storageAccess;
 
-		public static void GetItem(Item item, bool toMouse) {
+		public static void GetItem(Item item, bool toMouse)
+		{
 			Player player = Main.LocalPlayer;
-			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir) {
+			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir)
+			{
 				Main.mouseItem = item;
 				item = new Item();
 			}
-			else if (toMouse && Main.playerInventory && Main.mouseItem.type == item.type) {
+			else if (toMouse && Main.playerInventory && Main.mouseItem.type == item.type)
+			{
 				int total = Main.mouseItem.stack + item.stack;
 				if (total > Main.mouseItem.maxStack)
 					total = Main.mouseItem.maxStack;
@@ -138,14 +156,17 @@ namespace MagicStorageExtra
 				Main.mouseItem.stack = total;
 				item.stack -= difference;
 			}
-			if (!item.IsAir) {
+
+			if (!item.IsAir)
+			{
 				item = player.GetItem(Main.myPlayer, item, false, true);
 				if (!item.IsAir)
 					player.QuickSpawnClonedItem(item, item.stack);
 			}
 		}
 
-		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
+		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
+		{
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
 				return false;
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
@@ -155,34 +176,45 @@ namespace MagicStorageExtra
 				return false;
 			int oldType = item.type;
 			int oldStack = item.stack;
-			if (StorageCrafting()) {
-				if (false) {
-					if (Main.netMode == NetmodeID.SinglePlayer) {
+			if (StorageCrafting())
+			{
+				if (false)
+				{
+					if (Main.netMode == NetmodeID.SinglePlayer)
+					{
 						GetCraftingAccess().TryDepositStation(item);
 					}
-					else {
+					else
+					{
 						NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
 						item.SetDefaults(0, true);
 					}
 				}
 			}
-			else {
-				if (Main.netMode == NetmodeID.SinglePlayer) {
+			else
+			{
+				if (Main.netMode == NetmodeID.SinglePlayer)
+				{
 					GetStorageHeart().DepositItem(item);
 				}
-				else {
+				else
+				{
 					NetHelper.SendDeposit(GetStorageHeart().ID, item);
 					item.SetDefaults(0, true);
 				}
 			}
-			if (item.type != oldType || item.stack != oldStack) {
+
+			if (item.type != oldType || item.stack != oldStack)
+			{
 				Main.PlaySound(SoundID.Grab);
 				StorageGUI.RefreshItems();
 			}
+
 			return true;
 		}
 
-		public TEStorageHeart GetStorageHeart() {
+		public TEStorageHeart GetStorageHeart()
+		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
@@ -193,13 +225,15 @@ namespace MagicStorageExtra
 			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
 		}
 
-		public TECraftingAccess GetCraftingAccess() {
+		public TECraftingAccess GetCraftingAccess()
+		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0 || !TileEntity.ByPosition.ContainsKey(storageAccess))
 				return null;
 			return TileEntity.ByPosition[storageAccess] as TECraftingAccess;
 		}
 
-		public bool StorageCrafting() {
+		public bool StorageCrafting()
+		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return false;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
@@ -208,20 +242,24 @@ namespace MagicStorageExtra
 
 		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();
 
-		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit) {
+		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
+		{
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item)) {
+				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				{
 					damage *= 5;
 					break;
 				}
 		}
 
-		public override bool CanHitPvp(Item item, Player target) {
+		public override bool CanHitPvp(Item item, Player target)
+		{
 			if (CraftingGUI.IsTestItem(item)) return false;
 			return base.CanHitPvp(item, target);
 		}
 
-		public override void OnRespawn(Player player) {
+		public override void OnRespawn(Player player)
+		{
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
 				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
 					item.TurnToAir();

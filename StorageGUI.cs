@@ -63,7 +63,8 @@ namespace MagicStorageExtra
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 
-		public static void Initialize() {
+		public static void Initialize()
+		{
 			InitLangStuff();
 			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
 			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
@@ -71,7 +72,6 @@ namespace MagicStorageExtra
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
 			basePanel = new UIPanel();
-			float innerPanelLeft = panelLeft + basePanel.PaddingLeft;
 			float innerPanelWidth = numColumns * (itemSlotWidth + padding) + 20f + padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
 			panelHeight = Main.screenHeight - panelTop - 40f;
@@ -133,7 +133,7 @@ namespace MagicStorageExtra
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
-			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
+			displayRows = (int) slotZone.GetDimensions().Height / ((int) itemSlotHeight + padding);
 			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
@@ -157,15 +157,18 @@ namespace MagicStorageExtra
 			int capacity = 0;
 			if (heart != null)
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
-					if (abstractStorageUnit is TEStorageUnit storageUnit) {
+					if (abstractStorageUnit is TEStorageUnit storageUnit)
+					{
 						numItems += storageUnit.NumItems;
 						capacity += storageUnit.Capacity;
 					}
+
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
 		}
 
-		private static void InitLangStuff() {
+		private static void InitLangStuff()
+		{
 			if (depositButton == null)
 				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorageExtra.DepositAll"));
 			if (searchBar == null)
@@ -175,28 +178,33 @@ namespace MagicStorageExtra
 				capacityText = new UIText("Items");
 		}
 
-		internal static void Unload() {
+		internal static void Unload()
+		{
 			sortButtons = null;
 			filterButtons = null;
 			favoritedOnlyButton = null;
 		}
 
-		private static void InitSortButtons() {
+		private static void InitSortButtons()
+		{
 			if (sortButtons == null)
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
 			if (favoritedOnlyButton == null)
 				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"), Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"));
 		}
 
-		private static void InitFilterButtons() {
+		private static void InitFilterButtons()
+		{
 			if (filterButtons == null)
 				filterButtons = GUIHelpers.MakeFilterButtons(true, RefreshItems);
 		}
 
-		public static void Update(GameTime gameTime) {
+		public static void Update(GameTime gameTime)
+		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting()) {
+			if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
+			{
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
 				basePanel?.Update(gameTime);
@@ -204,21 +212,25 @@ namespace MagicStorageExtra
 				UpdateDepositButton();
 				modSearchBox.Update(curMouse, oldMouse);
 			}
-			else {
+			else
+			{
 				scrollBarFocus = false;
 				ResetSlotFocus();
 			}
 		}
 
-		public static void Draw(TEStorageHeart heart) {
+		public static void Draw(TEStorageHeart heart)
+		{
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			player.GetModPlayer<StoragePlayer>();
 			Initialize();
-			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight) {
+			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
+			{
 				player.mouseInterface = true;
 				player.showItemIcon = false;
 				InterfaceHelper.HideItemIconCache();
 			}
+
 			basePanel.Draw(Main.spriteBatch);
 			slotZone.DrawText();
 			sortButtons.DrawText();
@@ -227,55 +239,71 @@ namespace MagicStorageExtra
 			DrawDepositButton();
 		}
 
-		private static Item GetItem(int slot, ref int context) {
-			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
+		private static Item GetItem(int slot, ref int context)
+		{
+			int index = slot + numColumns * (int) Math.Round(scrollBar.ViewPosition);
 			Item item = index < items.Count ? items[index] : new Item();
-			if (!item.IsAir && !didMatCheck[index]) {
+			if (!item.IsAir && !didMatCheck[index])
+			{
 				item.checkMat();
 				didMatCheck[index] = true;
 			}
+
 			return item;
 		}
 
-		private static void UpdateScrollBar() {
-			if (slotFocus >= 0) {
+		private static void UpdateScrollBar()
+		{
+			if (slotFocus >= 0)
+			{
 				scrollBarFocus = false;
 				return;
 			}
+
 			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
 			var boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
 			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
-			if (scrollBarFocus) {
-				if (curMouse.LeftButton == ButtonState.Released) {
+			if (scrollBarFocus)
+			{
+				if (curMouse.LeftButton == ButtonState.Released)
+				{
 					scrollBarFocus = false;
 				}
-				else {
+				else
+				{
 					int difference = curMouse.Y - scrollBarFocusMouseStart;
 					scrollBar.ViewPosition = scrollBarFocusPositionStart + difference / boxHeight;
 				}
 			}
-			else if (MouseClicked) {
-				if (curMouse.X > boxPos.X && curMouse.X < boxPos.X + boxWidth && curMouse.Y > boxPos.Y - 3f && curMouse.Y < boxPos.Y + boxHeight + 4f) {
+			else if (MouseClicked)
+			{
+				if (curMouse.X > boxPos.X && curMouse.X < boxPos.X + boxWidth && curMouse.Y > boxPos.Y - 3f && curMouse.Y < boxPos.Y + boxHeight + 4f)
+				{
 					scrollBarFocus = true;
 					scrollBarFocusMouseStart = curMouse.Y;
 					scrollBarFocusPositionStart = scrollBar.ViewPosition;
 				}
 			}
-			if (!scrollBarFocus) {
+
+			if (!scrollBarFocus)
+			{
 				int difference = oldMouse.ScrollWheelValue / 250 - curMouse.ScrollWheelValue / 250;
 				scrollBar.ViewPosition += difference;
 			}
 		}
 
-		private static TEStorageHeart GetHeart() {
+		private static TEStorageHeart GetHeart()
+		{
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetStorageHeart();
 		}
 
-		public static void RefreshItems() {
-			if (StoragePlayer.IsStorageCrafting()) {
+		public static void RefreshItems()
+		{
+			if (StoragePlayer.IsStorageCrafting())
+			{
 				CraftingGUI.RefreshItems();
 				return;
 			}
@@ -289,20 +317,23 @@ namespace MagicStorageExtra
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			var sortMode = (SortMode)sortButtons.Choice;
+			var sortMode = (SortMode) sortButtons.Choice;
 
-			var filterMode = (FilterMode)filterButtons.Choice;
+			var filterMode = (FilterMode) filterButtons.Choice;
 			int modFilterIndex = modSearchBox.ModIndex;
 
-			void DoFiltering() {
+			void DoFiltering()
+			{
 				IEnumerable<Item> itemsLocal;
-				if (filterMode == FilterMode.Recent) {
-					Dictionary<int, Item> stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+				if (filterMode == FilterMode.Recent)
+				{
+					var stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
 
 					IEnumerable<Item> toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
 					itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode, FilterMode.All, modFilterIndex, searchBar.Text, 100);
 				}
-				else {
+				else
+				{
 					itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, modFilterIndex, searchBar.Text).OrderBy(x => x.favorited ? 0 : 1);
 				}
 
@@ -312,14 +343,17 @@ namespace MagicStorageExtra
 			DoFiltering();
 
 			// now if nothing found we disable filters one by one
-			if (searchBar.Text.Trim().Length > 0) {
-				if (items.Count == 0 && filterMode != FilterMode.All) {
+			if (searchBar.Text.Trim().Length > 0)
+			{
+				if (items.Count == 0 && filterMode != FilterMode.All)
+				{
 					// search all categories
 					filterMode = FilterMode.All;
 					DoFiltering();
 				}
 
-				if (items.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll) {
+				if (items.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+				{
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
 					DoFiltering();
@@ -330,53 +364,67 @@ namespace MagicStorageExtra
 				didMatCheck.Add(false);
 		}
 
-		private static void UpdateDepositButton() {
+		private static void UpdateDepositButton()
+		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
-			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height) {
+			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+			{
 				depositButton.BackgroundColor = new Color(73, 94, 171);
-				if (MouseClicked) {
-					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl))) {
+				if (MouseClicked)
+				{
+					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl)))
+					{
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);
 					}
 				}
-				else if (CraftingGUI.RightMouseClicked) {
-					if (TryRestock()) {
+				else if (CraftingGUI.RightMouseClicked)
+				{
+					if (TryRestock())
+					{
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);
 					}
 				}
 			}
-			else {
+			else
+			{
 				depositButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
 			}
 		}
 
-		private static void DrawDepositButton() {
+		private static void DrawDepositButton()
+		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 				Main.instance.MouseText(Language.GetText("Mods.MagicStorageExtra.DepositTooltip").Value);
 		}
 
-		private static void ResetSlotFocus() {
+		private static void ResetSlotFocus()
+		{
 			slotFocus = -1;
 			rightClickTimer = 0;
 			maxRightClickTimer = startMaxRightClickTimer;
 		}
 
-		private static void HoverItemSlot(int slot, ref int hoverSlot) {
+		private static void HoverItemSlot(int slot, ref int hoverSlot)
+		{
 			Player player = Main.LocalPlayer;
 			int visualSlot = slot;
-			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			slot += numColumns * (int) Math.Round(scrollBar.ViewPosition);
 
-			if (MouseClicked) {
+			if (MouseClicked)
+			{
 				bool changed = false;
-				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
+				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0)
+				{
 					if (TryDeposit(Main.mouseItem))
 						changed = true;
 				}
-				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir) {
-					if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
+				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
+				{
+					if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+					{
 						if (Main.netMode == NetmodeID.SinglePlayer)
 							items[slot].favorited = !items[slot].favorited;
 						else
@@ -385,7 +433,8 @@ namespace MagicStorageExtra
 						// a workaropund would be to withdraw and deposit it back with changed favorite flag
 						// but it still might look ugly for the player that initiates operation
 					}
-					else {
+					else
+					{
 						Item toWithdraw = items[slot].Clone();
 						if (toWithdraw.stack > toWithdraw.maxStack)
 							toWithdraw.stack = toWithdraw.maxStack;
@@ -395,7 +444,9 @@ namespace MagicStorageExtra
 						changed = true;
 					}
 				}
-				if (changed) {
+
+				if (changed)
+				{
 					RefreshItems();
 					Main.PlaySound(SoundID.Grab);
 				}
@@ -404,7 +455,8 @@ namespace MagicStorageExtra
 			if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 				slotFocus = slot;
 
-			if (slot < items.Count && !items[slot].IsAir) {
+			if (slot < items.Count && !items[slot].IsAir)
+			{
 				hoverSlot = visualSlot;
 				items[slot].newAndShiny = false;
 			}
@@ -413,12 +465,16 @@ namespace MagicStorageExtra
 				SlotFocusLogic();
 		}
 
-		private static void SlotFocusLogic() {
-			if (slotFocus >= items.Count || !Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
+		private static void SlotFocusLogic()
+		{
+			if (slotFocus >= items.Count || !Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			{
 				ResetSlotFocus();
 			}
-			else {
-				if (rightClickTimer <= 0) {
+			else
+			{
+				if (rightClickTimer <= 0)
+				{
 					rightClickTimer = maxRightClickTimer;
 					maxRightClickTimer = maxRightClickTimer * 3 / 4;
 					if (maxRightClickTimer <= 0)
@@ -435,38 +491,47 @@ namespace MagicStorageExtra
 					Main.PlaySound(SoundID.MenuTick);
 					RefreshItems();
 				}
+
 				rightClickTimer--;
 			}
 		}
 
-		private static bool TryDeposit(Item item) {
+		private static bool TryDeposit(Item item)
+		{
 			int oldStack = item.stack;
 			DoDeposit(item);
 			return oldStack != item.stack;
 		}
 
-		private static void DoDeposit(Item item) {
+		private static void DoDeposit(Item item)
+		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer) {
+			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
 				heart.DepositItem(item);
 			}
-			else {
+			else
+			{
 				NetHelper.SendDeposit(heart.ID, item);
 				item.SetDefaults(0, true);
 			}
 		}
 
-		private static bool TryDepositAll(bool quickStack) {
+		private static bool TryDepositAll(bool quickStack)
+		{
 			Player player = Main.LocalPlayer;
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 
 			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 
-			if (Main.netMode == NetmodeID.SinglePlayer) {
-				for (int k = 10; k < 50; k++) {
+			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
+				for (int k = 10; k < 50; k++)
+				{
 					Item item = player.inventory[k];
-					if (filter(item)) {
+					if (filter(item))
+					{
 						int oldStack = item.stack;
 						heart.DepositItem(item);
 						if (oldStack != item.stack)
@@ -474,41 +539,50 @@ namespace MagicStorageExtra
 					}
 				}
 			}
-			else {
+			else
+			{
 				var items = new List<Item>();
-				for (int k = 10; k < 50; k++) {
+				for (int k = 10; k < 50; k++)
+				{
 					Item item = player.inventory[k];
 					if (filter(item))
 						items.Add(item);
 				}
+
 				NetHelper.SendDepositAll(heart.ID, items);
 				foreach (Item item in items)
 					item.SetDefaults(0, true);
 				changed = true;
 			}
+
 			return changed;
 		}
 
-		private static bool TryRestock() {
+		private static bool TryRestock()
+		{
 			Player player = Main.LocalPlayer;
-			TEStorageHeart heart = GetHeart();
+			GetHeart();
 			bool changed = false;
 
 			foreach (Item item in player.inventory)
-				if (item != null && !item.IsAir && item.stack < item.maxStack) {
+				if (item != null && !item.IsAir && item.stack < item.maxStack)
+				{
 					Item toWithdraw = item.Clone();
 					toWithdraw.stack = item.maxStack - item.stack;
 					toWithdraw = DoWithdraw(toWithdraw, true, true);
-					if (!toWithdraw.IsAir) {
+					if (!toWithdraw.IsAir)
+					{
 						item.stack += toWithdraw.stack;
 						toWithdraw.TurnToAir();
 						changed = true;
 					}
 				}
+
 			return changed;
 		}
 
-		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false) {
+		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
+		{
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				return heart.TryWithdraw(item, keepOneIfFavorite);

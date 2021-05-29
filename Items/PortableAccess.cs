@@ -9,7 +9,8 @@ namespace MagicStorageExtra.Items
 {
 	public class PortableAccess : Locator
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Portable Remote Storage Access");
 			DisplayName.AddTranslation(GameCulture.Russian, "Портативный Модуль Удаленного Доступа к Хранилищу");
 			DisplayName.AddTranslation(GameCulture.Chinese, "便携式远程存储装置");
@@ -19,7 +20,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
@@ -30,82 +32,104 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 10);
 		}
 
-		public override bool UseItem(Player player) {
-			if (player.whoAmI == Main.myPlayer) {
-				if (location.X >= 0 && location.Y >= 0) {
+		public override bool UseItem(Player player)
+		{
+			if (player.whoAmI == Main.myPlayer)
+			{
+				if (location.X >= 0 && location.Y >= 0)
+				{
 					Tile tile = Main.tile[location.X, location.Y];
 					if (!tile.active() || tile.type != ModContent.TileType<Components.StorageHeart>() || tile.frameX != 0 || tile.frameY != 0)
 						Main.NewText("Storage Heart is missing!");
 					else
 						OpenStorage(player);
 				}
-				else {
+				else
+				{
 					Main.NewText("Locator is not set to any Storage Heart");
 				}
 			}
+
 			return true;
 		}
 
-		private void OpenStorage(Player player) {
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
-			if (player.sign > -1) {
+		private void OpenStorage(Player player)
+		{
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			if (player.sign > -1)
+			{
 				Main.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
 			}
-			if (Main.editChest) {
+
+			if (Main.editChest)
+			{
 				Main.PlaySound(SoundID.MenuTick);
 				Main.editChest = false;
 				Main.npcChatText = string.Empty;
 			}
-			if (player.editedChestName) {
+
+			if (player.editedChestName)
+			{
 				NetMessage.SendData(MessageID.SyncPlayerChest, -1, -1, NetworkText.FromLiteral(Main.chest[player.chest].name), player.chest, 1f);
 				player.editedChestName = false;
 			}
-			if (player.talkNPC > -1) {
+
+			if (player.talkNPC > -1)
+			{
 				player.talkNPC = -1;
 				Main.npcChatCornerItem = 0;
 				Main.npcChatText = string.Empty;
 			}
+
 			bool hadChestOpen = player.chest != -1;
 			player.chest = -1;
 			Main.stackSplit = 600;
 			Point16 toOpen = location;
 			Point16 prevOpen = modPlayer.ViewingStorage();
-			if (prevOpen == toOpen) {
+			if (prevOpen == toOpen)
+			{
 				modPlayer.CloseStorage();
 				Main.PlaySound(SoundID.MenuClose);
-				lock (BlockRecipes.activeLock) {
+				lock (BlockRecipes.activeLock)
+				{
 					Recipe.FindRecipes();
 				}
 			}
-			else {
+			else
+			{
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
 				modPlayer.OpenStorage(toOpen, true);
 				modPlayer.timeSinceOpen = 0;
 				Main.playerInventory = true;
 				Main.recBigList = false;
 				Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
-				lock (BlockRecipes.activeLock) {
+				lock (BlockRecipes.activeLock)
+				{
 					Recipe.FindRecipes();
 				}
 			}
 		}
 
-		public override void ModifyTooltips(List<TooltipLine> lines) {
+		public override void ModifyTooltips(List<TooltipLine> lines)
+		{
 			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
-				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1") {
+				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
+				{
 					lines[k].text = Language.GetTextValue("Mods.MagicStorageExtra.SetTo", location.X, location.Y);
 				}
-				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip2") {
+				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip2")
+				{
 					lines.RemoveAt(k);
 					k--;
 				}
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
@@ -116,7 +140,8 @@ namespace MagicStorageExtra.Items
 			recipe.AddRecipe();
 
 			Mod otherMod = MagicStorageExtra.bluemagicMod;
-			if (otherMod != null) {
+			if (otherMod != null)
+			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
@@ -128,7 +153,8 @@ namespace MagicStorageExtra.Items
 			}
 
 			otherMod = ModLoader.GetMod("CalamityMod");
-			if (otherMod != null) {
+			if (otherMod != null)
+			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);

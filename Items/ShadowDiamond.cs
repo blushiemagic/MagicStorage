@@ -8,7 +8,8 @@ namespace MagicStorageExtra.Items
 {
 	public class ShadowDiamond : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Теневой Алмаз");
 			DisplayName.AddTranslation(GameCulture.Polish, "Mroczny Diament");
 			DisplayName.AddTranslation(GameCulture.French, "Diamant sombre");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "那道光所余留的痕迹依旧");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 16;
 			item.height = 16;
 			item.maxStack = 99;

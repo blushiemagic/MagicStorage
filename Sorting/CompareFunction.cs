@@ -8,7 +8,8 @@ namespace MagicStorageExtra.Sorting
 	{
 		public abstract int Compare(Item item1, Item item2);
 
-		public int Compare(object object1, object object2) {
+		public int Compare(object object1, object object2)
+		{
 			if (object1 is Item item1 && object2 is Item item2)
 				return Compare(item1, item2);
 			if (object1 is Recipe recipe1 && object2 is Recipe recipe2)
@@ -30,7 +31,7 @@ namespace MagicStorageExtra.Sorting
 	public class CompareQuantity : CompareFunction
 	{
 		public override int Compare(Item item1, Item item2) =>
-			(int)Math.Ceiling(item2.stack / (float)item2.maxStack) - (int)Math.Ceiling(item1.stack / (float)item1.maxStack);
+			(int) Math.Ceiling(item2.stack / (float) item2.maxStack) - (int) Math.Ceiling(item1.stack / (float) item1.maxStack);
 	}
 
 	public class CompareValue : CompareFunction
@@ -40,9 +41,10 @@ namespace MagicStorageExtra.Sorting
 
 	public class CompareDps : CompareFunction
 	{
-		public override int Compare(Item item1, Item item2) => (int)((GetDps(item2) - GetDps(item1)) * 100);
+		public override int Compare(Item item1, Item item2) => (int) ((GetDps(item2) - GetDps(item1)) * 100);
 
-		public static double GetDps(Item item) {
+		public static double GetDps(Item item)
+		{
 			if (item.damage <= 0)
 				return 0d;
 

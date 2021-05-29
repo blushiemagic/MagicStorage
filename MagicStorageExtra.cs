@@ -13,20 +13,20 @@ namespace MagicStorageExtra
 {
 	public class MagicStorageExtra : Mod
 	{
-		public static string GithubUserName => "ExterminatorX99";
-		public static string GithubProjectName => "MagicStorage";
-
 		public static MagicStorageExtra Instance;
 		public static Mod bluemagicMod;
 		public static Mod legendMod;
 
 		public static readonly Version requiredVersion = new Version(0, 11);
+		public static string GithubUserName => "ExterminatorX99";
+		public static string GithubProjectName => "MagicStorage";
 
 		public static ModHotKey IsItemKnownHotKey { get; private set; }
 
 		public Mod[] AllMods { get; private set; }
 
-		public override void Load() {
+		public override void Load()
+		{
 			if (ModLoader.version < requiredVersion)
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
 			if (ModLoader.GetMod("MagicStorage") != null)
@@ -41,11 +41,13 @@ namespace MagicStorageExtra
 			RecursiveCraftIntegration.Load();
 		}
 
-		public override void PostAddRecipes() {
+		public override void PostAddRecipes()
+		{
 			RecursiveCraftIntegration.InitRecipes();
 		}
 
-		public override void Unload() {
+		public override void Unload()
+		{
 			Instance = null;
 			bluemagicMod = null;
 			legendMod = null;
@@ -55,7 +57,8 @@ namespace MagicStorageExtra
 			RecursiveCraftIntegration.Unload();
 		}
 
-		private void AddTranslations() {
+		private void AddTranslations()
+		{
 			ModTranslation text = CreateTranslation("SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.Polish, "Ustawione na: X={0}, Y={1}");
@@ -305,14 +308,16 @@ namespace MagicStorageExtra
 			AddTranslation(text);
 		}
 
-		public override void PostSetupContent() {
+		public override void PostSetupContent()
+		{
 			Type type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
 			FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
 
-			AllMods = ModLoader.Mods.Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase)).Where(x => x.Name != "ModLoader").Where(x => ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
+			AllMods = ModLoader.Mods.Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase)).Where(x => x.Name != "ModLoader").Where(x => ((IDictionary<string, ModItem>) loadModsField.GetValue(x)).Count > 0).ToArray();
 		}
 
-		public override void AddRecipeGroups() {
+		public override void AddRecipeGroups()
+		{
 			var group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest",
 				ItemID.Chest,
 				ItemID.GoldChest,
@@ -360,12 +365,15 @@ namespace MagicStorageExtra
 				group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
 			RecipeGroup.RegisterGroup("MagicStorageExtra:AnySnowBiomeBlock", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
-			if (legendMod != null) {
+			if (legendMod != null)
+			{
 				group.ValidItems.Add(legendMod.ItemType("GemChrysoberyl"));
 				group.ValidItems.Add(legendMod.ItemType("GemAlexandrite"));
 			}
+
 			RecipeGroup.RegisterGroup("MagicStorageExtra:AnyDiamond", group);
-			if (legendMod != null) {
+			if (legendMod != null)
+			{
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Amethyst), ItemID.Amethyst, legendMod.ItemType("GemOnyx"), legendMod.ItemType("GemSpinel"));
 				RecipeGroup.RegisterGroup("MagicStorageExtra:AnyAmethyst", group);
 				group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Topaz), ItemID.Topaz, legendMod.ItemType("GemGarnet"));
@@ -379,15 +387,18 @@ namespace MagicStorageExtra
 			}
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI) {
+		public override void HandlePacket(BinaryReader reader, int whoAmI)
+		{
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+		{
 			InterfaceHelper.ModifyInterfaceLayers(layers);
 		}
 
-		public override void PostUpdateInput() {
+		public override void PostUpdateInput()
+		{
 			if (!Main.instance.IsActive)
 				return;
 			StorageGUI.Update(null);

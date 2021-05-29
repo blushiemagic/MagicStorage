@@ -6,8 +6,10 @@ namespace MagicStorageExtra.Items
 {
 	public class ShadowDiamondDrop : GlobalNPC
 	{
-		public override void NPCLoot(NPC npc) {
-			switch (npc.type) {
+		public override void NPCLoot(NPC npc)
+		{
+			switch (npc.type)
+			{
 				case NPCID.KingSlime when !StorageWorld.kingSlimeDiamond:
 					DropDiamond(npc, 1);
 					StorageWorld.kingSlimeDiamond = true;
@@ -20,10 +22,12 @@ namespace MagicStorageExtra.Items
 				case NPCID.EaterofWorldsBody:
 				case NPCID.EaterofWorldsTail:
 				case NPCID.BrainofCthulhu:
-					if (!StorageWorld.boss2Diamond) {
+					if (!StorageWorld.boss2Diamond)
+					{
 						DropDiamond(npc, 1);
 						StorageWorld.boss2Diamond = true;
 					}
+
 					break;
 				case NPCID.SkeletronHead when !StorageWorld.boss3Diamond:
 					DropDiamond(npc, 1);
@@ -43,10 +47,12 @@ namespace MagicStorageExtra.Items
 					break;
 				case NPCID.Retinazer:
 				case NPCID.Spazmatism:
-					if (!StorageWorld.mechBoss2Diamond) {
+					if (!StorageWorld.mechBoss2Diamond)
+					{
 						DropDiamond(npc, 1);
 						StorageWorld.mechBoss2Diamond = true;
 					}
+
 					break;
 				case NPCID.SkeletronPrime when !StorageWorld.mechBoss3Diamond:
 					DropDiamond(npc, 1);
@@ -75,7 +81,8 @@ namespace MagicStorageExtra.Items
 			}
 		}
 
-		private void DropDiamond(NPC npc, int stack) {
+		private void DropDiamond(NPC npc, int stack)
+		{
 			Item.NewItem(npc.position, npc.width, npc.height, ModContent.ItemType<ShadowDiamond>(), stack);
 		}
 	}

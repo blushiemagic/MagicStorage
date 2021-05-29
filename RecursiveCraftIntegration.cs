@@ -21,7 +21,8 @@ namespace MagicStorageExtra
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
 		public static bool Enabled => RecursiveCraftMod != null;
 
-		public static void Load() {
+		public static void Load()
+		{
 			RecursiveCraftMod = ModLoader.GetMod("RecursiveCraft");
 			if (Enabled)
 				Initialize(); // Move that logic into another method to prevent this.
@@ -30,49 +31,58 @@ namespace MagicStorageExtra
 		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches. 
 		// To avoid TypeInitializationException (or ReflectionTypeLoadException) problems, we need to specify NoInlining on methods like this to prevent inlining (methods containing or accessing Types in the Weakly referenced assembly). 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void Initialize() {
+		private static void Initialize()
+		{
 			// This method will only be called when Enable is true, preventing TypeInitializationException
 			Members.recipeCache = new Dictionary<Recipe, RecipeInfo>();
 			OnPlayer.QuickSpawnItem_int_int += OnPlayerOnQuickSpawnItem_int_int;
 		}
 
-		public static void InitRecipes() {
+		public static void InitRecipes()
+		{
 			if (Enabled)
 				InitRecipes_Inner();
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void InitRecipes_Inner() {
+		private static void InitRecipes_Inner()
+		{
 			Members.compoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 			Members.threadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 		}
 
-		public static void Unload() {
+		public static void Unload()
+		{
 			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
 				Unload_Inner(); // Once again we must separate out this logic.
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void Unload_Inner() {
+		private static void Unload_Inner()
+		{
 			Members.recipeCache = null;
 			Members.compoundRecipe = null;
 			Members.threadCompoundRecipe = null;
 			OnPlayer.QuickSpawnItem_int_int -= OnPlayerOnQuickSpawnItem_int_int;
 		}
 
-		private static void OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack) {
-			if (CraftingGUI.compoundCrafting) {
+		private static void OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
+		{
+			if (CraftingGUI.compoundCrafting)
+			{
 				var item = new Item();
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
 				return;
 			}
+
 			orig(self, type, stack);
 		}
 
-		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items) {
+		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
+		{
 			var dictionary = new Dictionary<int, int>();
 			foreach (Item item in items)
 				if (dictionary.ContainsKey(item.netID))
@@ -86,31 +96,36 @@ namespace MagicStorageExtra
 		// As a convention, I rename the .dll file ModName_v1.2.3.4.dll and place them in Mod Sources/Mods/lib. 
 		// I do this for organization and so the .csproj loads properly for others using the GitHub repository. 
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
-		public static void RecursiveRecipes() {
+		public static void RecursiveRecipes()
+		{
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;
 
-			lock (Members.recipeCache) {
+			lock (Members.recipeCache)
+			{
 				Members.recipeCache.Clear();
 				for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++)
 					SingleSearch(storedItems, Main.recipe[n]);
 			}
 		}
 
-		private static Dictionary<int, int> GetStoredItems() {
+		private static Dictionary<int, int> GetStoredItems()
+		{
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
 			if (heart == null)
 				return null;
 			return FlatDict(heart.GetStoredItems());
 		}
 
-		private static void SingleSearch(Dictionary<int, int> inventory, Recipe recipe) {
+		private static void SingleSearch(Dictionary<int, int> inventory, Recipe recipe)
+		{
 			if (Main.rand == null)
-				Main.rand = new UnifiedRandom((int)DateTime.UtcNow.Ticks);
-			var craftingSource = new CraftingSource {
+				Main.rand = new UnifiedRandom((int) DateTime.UtcNow.Ticks);
+			var craftingSource = new CraftingSource
+			{
 				AdjTile = CraftingGUI.adjTiles,
 				AdjWater = CraftingGUI.adjWater,
 				AdjHoney = CraftingGUI.adjHoney,
@@ -119,11 +134,13 @@ namespace MagicStorageExtra
 				AlchemyTable = CraftingGUI.alchemyTable
 			};
 			RecipeInfo recipeInfo;
-			lock (BlockRecipes.activeLock) {
+			lock (BlockRecipes.activeLock)
+			{
 				BlockRecipes.active = false;
 				recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
 				BlockRecipes.active = true;
 			}
+
 			if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
 				Members.recipeCache.Add(recipe, recipeInfo);
 		}
@@ -132,24 +149,29 @@ namespace MagicStorageExtra
 
 		public static Recipe GetOverriddenRecipe() => Members.compoundRecipe.OverridenRecipe;
 
-		public static bool UpdateRecipe(Recipe recipe) {
+		public static bool UpdateRecipe(Recipe recipe)
+		{
 			if (recipe is CompoundRecipe)
 				recipe = Members.compoundRecipe.OverridenRecipe;
 			else
 				return false;
-			lock (Members.recipeCache) {
+			lock (Members.recipeCache)
+			{
 				Members.recipeCache.Remove(recipe);
 				Dictionary<int, int> storedItems = GetStoredItems();
 				if (storedItems != null)
 					SingleSearch(storedItems, recipe);
 			}
+
 			return true;
 		}
 
-		public static Recipe ApplyCompoundRecipe(Recipe recipe) {
+		public static Recipe ApplyCompoundRecipe(Recipe recipe)
+		{
 			if (recipe is CompoundRecipe)
 				recipe = Members.compoundRecipe.OverridenRecipe;
-			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
+			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			{
 				int index = Array.IndexOf(Main.recipe, recipe);
 				Members.compoundRecipe.Apply(index, recipeInfo);
 				return Members.compoundRecipe;
@@ -158,12 +180,15 @@ namespace MagicStorageExtra
 			return recipe;
 		}
 
-		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe) {
-			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo)) {
+		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
+		{
+			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			{
 				int index = Array.IndexOf(Main.recipe, recipe);
 				Members.threadCompoundRecipe.Apply(index, recipeInfo);
 				return Members.threadCompoundRecipe;
 			}
+
 			return recipe;
 		}
 

@@ -12,7 +12,8 @@ namespace MagicStorageExtra.Components
 
 		public override bool HasSmartInteract() => true;
 
-		public override TEStorageHeart GetHeart(int i, int j) {
+		public override TEStorageHeart GetHeart(int i, int j)
+		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
 			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
 				return null;
@@ -22,7 +23,8 @@ namespace MagicStorageExtra.Components
 			return center.GetHeart();
 		}
 
-		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem) {
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
+		{
 			if (Main.tile[i, j].frameX > 0)
 				i--;
 			if (Main.tile[i, j].frameY > 0)
@@ -32,7 +34,8 @@ namespace MagicStorageExtra.Components
 				return;
 			if (TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access)
 				foreach (Item item in access.stations)
-					if (!item.IsAir) {
+					if (!item.IsAir)
+					{
 						fail = true;
 						break;
 					}

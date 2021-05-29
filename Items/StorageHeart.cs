@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageHeart : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Сердце Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Serce Jednostki Magazynującej");
 			DisplayName.AddTranslation(GameCulture.French, "Cœur de Stockage");
@@ -15,7 +16,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储核心");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -30,7 +32,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.StorageHeart>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 2);

@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageUnitDemonite : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Demonite Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовая Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Demonit)");
@@ -16,7 +17,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(魔金)");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -32,7 +34,8 @@ namespace MagicStorageExtra.Items
 			item.placeStyle = 1;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ModContent.ItemType<StorageUnit>());
 			recipe.AddIngredient(ModContent.ItemType<UpgradeDemonite>());

@@ -9,17 +9,19 @@ namespace MagicStorageExtra
 {
 	public class GUIHelpers
 	{
-
-		public static UIButtonChoice MakeSortButtons(Action onChanged) {
+		public static UIButtonChoice MakeSortButtons(Action onChanged)
+		{
 			return new UIButtonChoice(onChanged,
-				new[] {
+				new[]
+				{
 					Main.inventorySortTexture[0],
 					MagicStorageExtra.Instance.GetTexture("Assets/SortID"),
 					MagicStorageExtra.Instance.GetTexture("Assets/SortName"),
 					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber"),
 					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber")
 				},
-				new[] {
+				new[]
+				{
 					Language.GetText("Mods.MagicStorageExtra.SortDefault"),
 					Language.GetText("Mods.MagicStorageExtra.SortID"),
 					Language.GetText("Mods.MagicStorageExtra.SortName"),
@@ -28,8 +30,10 @@ namespace MagicStorageExtra
 				});
 		}
 
-		public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged) {
-			var textures = new List<Texture2D> {
+		public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged)
+		{
+			var textures = new List<Texture2D>
+			{
 				MagicStorageExtra.Instance.GetTexture("Assets/FilterAll"),
 				MagicStorageExtra.Instance.GetTexture("Assets/FilterMelee"),
 				MagicStorageExtra.Instance.GetTexture("Assets/FilterRanged"),
@@ -45,7 +49,8 @@ namespace MagicStorageExtra
 				MagicStorageExtra.Instance.GetTexture("Assets/FilterTile"),
 				MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc")
 			};
-			var texts = new List<LocalizedText> {
+			var texts = new List<LocalizedText>
+			{
 				Language.GetText("Mods.MagicStorageExtra.FilterAll"),
 				Language.GetText("Mods.MagicStorageExtra.FilterWeaponsMelee"),
 				Language.GetText("Mods.MagicStorageExtra.FilterWeaponsRanged"),
@@ -61,10 +66,12 @@ namespace MagicStorageExtra
 				Language.GetText("Mods.MagicStorageExtra.FilterTiles"),
 				Language.GetText("Mods.MagicStorageExtra.FilterMisc")
 			};
-			if (withHistory) {
+			if (withHistory)
+			{
 				textures.Add(MagicStorageExtra.Instance.GetTexture("Assets/FilterAll"));
 				texts.Add(Language.GetText("Mods.MagicStorageExtra.FilterRecent"));
 			}
+
 			return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray());
 		}
 	}

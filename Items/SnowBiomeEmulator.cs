@@ -8,7 +8,8 @@ namespace MagicStorageExtra.Items
 {
 	public class SnowBiomeEmulator : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Broken Snowglobe");
 			DisplayName.AddTranslation(GameCulture.Russian, "Сломанная Снежная Сфера");
 			DisplayName.AddTranslation(GameCulture.Polish, "Emulator Śnieżnego Biomu");
@@ -26,13 +27,15 @@ namespace MagicStorageExtra.Items
 			Main.RegisterItemAnimation(item.type, new DrawAnimationVertical(8, 8));
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 30;
 			item.height = 30;
 			item.rare = ItemRarityID.Blue;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddRecipeGroup("MagicStorageExtra:AnySnowBiomeBlock", 300);
 			recipe.AddTile(null, "CraftingAccess");

@@ -9,16 +9,19 @@ namespace MagicStorageExtra
 		public static bool active = true;
 		public static object activeLock = new object();
 
-		public override bool RecipeAvailable(Recipe recipe) {
+		public override bool RecipeAvailable(Recipe recipe)
+		{
 			if (!active)
 				return true;
-			try {
+			try
+			{
 				Player player = Main.LocalPlayer;
-				var modPlayer = player.GetModPlayer<StoragePlayer>();
+				StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 				Point16 storageAccess = modPlayer.ViewingStorage();
 				return storageAccess.X < 0 || storageAccess.Y < 0;
 			}
-			catch {
+			catch
+			{
 				return true;
 			}
 		}

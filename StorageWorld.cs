@@ -27,7 +27,8 @@ namespace MagicStorageExtra
 		public static bool moonlordDiamond;
 		public static Dictionary<int, List<int>> TileToCreatingItem = new Dictionary<int, List<int>>();
 
-		public override void Initialize() {
+		public override void Initialize()
+		{
 			kingSlimeDiamond = false;
 			boss1Diamond = false;
 			boss2Diamond = false;
@@ -44,27 +45,31 @@ namespace MagicStorageExtra
 			moonlordDiamond = false;
 		}
 
-		public override TagCompound Save() {
-			var tag = new TagCompound();
-			tag["saveVersion"] = saveVersion;
-			tag["kingSlimeDiamond"] = kingSlimeDiamond;
-			tag["boss1Diamond"] = boss1Diamond;
-			tag["boss2Diamond"] = boss2Diamond;
-			tag["boss3Diamond"] = boss3Diamond;
-			tag["queenBeeDiamond"] = queenBeeDiamond;
-			tag["hardmodeDiamond"] = hardmodeDiamond;
-			tag["mechBoss1Diamond"] = mechBoss1Diamond;
-			tag["mechBoss2Diamond"] = mechBoss2Diamond;
-			tag["mechBoss3Diamond"] = mechBoss3Diamond;
-			tag["plantBossDiamond"] = plantBossDiamond;
-			tag["golemBossDiamond"] = golemBossDiamond;
-			tag["fishronDiamond"] = fishronDiamond;
-			tag["ancientCultistDiamond"] = ancientCultistDiamond;
-			tag["moonlordDiamond"] = moonlordDiamond;
+		public override TagCompound Save()
+		{
+			var tag = new TagCompound
+			{
+				["saveVersion"] = saveVersion,
+				["kingSlimeDiamond"] = kingSlimeDiamond,
+				["boss1Diamond"] = boss1Diamond,
+				["boss2Diamond"] = boss2Diamond,
+				["boss3Diamond"] = boss3Diamond,
+				["queenBeeDiamond"] = queenBeeDiamond,
+				["hardmodeDiamond"] = hardmodeDiamond,
+				["mechBoss1Diamond"] = mechBoss1Diamond,
+				["mechBoss2Diamond"] = mechBoss2Diamond,
+				["mechBoss3Diamond"] = mechBoss3Diamond,
+				["plantBossDiamond"] = plantBossDiamond,
+				["golemBossDiamond"] = golemBossDiamond,
+				["fishronDiamond"] = fishronDiamond,
+				["ancientCultistDiamond"] = ancientCultistDiamond,
+				["moonlordDiamond"] = moonlordDiamond
+			};
 			return tag;
 		}
 
-		public override void Load(TagCompound tag) {
+		public override void Load(TagCompound tag)
+		{
 			kingSlimeDiamond = tag.GetBool("kingSlimeDiamond");
 			boss1Diamond = tag.GetBool("boss1Diamond");
 			boss2Diamond = tag.GetBool("boss2Diamond");
@@ -83,24 +88,32 @@ namespace MagicStorageExtra
 			Volatile.Write(ref TileToCreatingItem, new Dictionary<int, List<int>>()); // used from threaded RefreshRecipes
 		}
 
-		public override void PostUpdate() {
-			if (TileToCreatingItem.Count == 0) {
+		public override void PostUpdate()
+		{
+			if (TileToCreatingItem.Count == 0)
+			{
 				#region Initialize TileToCreatingItem
-				Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) => {
+
+				var tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) =>
+					{
 						var item = new Item();
 						// provide items
-						try {
+						try
+						{
 							item.SetDefaults(i, true);
 						}
-						catch {
+						catch
+						{
 							return null;
 						}
 
 						return item;
-					}).Where(x => x?.type > 0 && x.createTile >= TileID.Dirt).Select(x => {
+					}).Where(x => x?.type > 0 && x.createTile >= TileID.Dirt).Select(x =>
+					{
 						// provide item and its tiles
-						var tiles = new List<int> { x.createTile };
-						switch (x.createTile) {
+						var tiles = new List<int> {x.createTile};
+						switch (x.createTile)
+						{
 							case TileID.GlassKiln:
 							case TileID.Hellforge:
 								tiles.Add(TileID.Furnaces);
@@ -122,15 +135,17 @@ namespace MagicStorageExtra
 								break;
 						}
 
-						return new {
+						return new
+						{
 							item = x,
 							tiles
 						};
 					})
 					// flatten - tile, item
-					.SelectMany(x => x.tiles.Select(t => new { tile = t, x.item })).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
+					.SelectMany(x => x.tiles.Select(t => new {tile = t, x.item})).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
 
 				Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
+
 				#endregion
 			}
 		}

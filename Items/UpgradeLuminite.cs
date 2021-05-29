@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class UpgradeLuminite : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Luminite Storage Upgrade");
 			DisplayName.AddTranslation(GameCulture.Russian, "Люминитовое Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Luminowany)");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至320容量" + "\n<right>一个存储单元(夜明)可镶嵌");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 1, 50);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.LunarBar, 10);
 			recipe.AddIngredient(ItemID.FragmentSolar, 5);

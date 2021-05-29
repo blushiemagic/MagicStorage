@@ -9,7 +9,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageDeactivator : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Storage Unit Wand");
 			DisplayName.AddTranslation(GameCulture.Russian, "Жезл Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Różdżka jednostki magazynującej");
@@ -26,7 +27,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储单元使其切换启用/禁用");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 24;
 			item.height = 28;
 			item.useTurn = true;
@@ -39,8 +41,10 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 0, 40);
 		}
 
-		public override bool UseItem(Player player) {
-			if (player.whoAmI == Main.myPlayer && player.itemAnimation > 0 && player.itemTime == 0 && player.controlUseItem) {
+		public override bool UseItem(Player player)
+		{
+			if (player.whoAmI == Main.myPlayer && player.itemAnimation > 0 && player.itemTime == 0 && player.controlUseItem)
+			{
 				int i = Player.tileTargetX;
 				int j = Player.tileTargetY;
 				if (Main.tile[i, j].frameX % 36 == 18)
@@ -48,23 +52,27 @@ namespace MagicStorageExtra.Items
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
 				var point = new Point16(i, j);
-				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit) {
-					var storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[point];
+				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit)
+				{
+					var storageUnit = (TEAbstractStorageUnit) TileEntity.ByPosition[point];
 					storageUnit.Inactive = !storageUnit.Inactive;
 					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
 					Main.NewText("Storage Unit has been " + activeText);
 					NetHelper.ClientSendTEUpdate(storageUnit.ID);
-					if (storageUnit is TEStorageUnit unit) {
+					if (storageUnit is TEStorageUnit unit)
+					{
 						unit.UpdateTileFrameWithNetSend();
 						if (Main.netMode == NetmodeID.SinglePlayer)
 							unit.GetHeart().ResetCompactStage();
 					}
 				}
 			}
+
 			return true;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.ActuationRod);
 			recipe.AddIngredient(null, "StorageComponent");

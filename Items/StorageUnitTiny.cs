@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageUnitTiny : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Tiny Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Малая Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Mała jednostka magazynująca");
@@ -16,7 +17,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(小)");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;

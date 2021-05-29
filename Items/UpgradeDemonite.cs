@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class UpgradeDemonite : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Demonite Storage Upgrade");
 			DisplayName.AddTranslation(GameCulture.Russian, "Демонитовое Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Demonit)");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至80容量" + "\n<right>一个存储单元(魔金)可镶嵌");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 0, 32);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.DemoniteBar, 10);
 			if (MagicStorageExtra.legendMod == null)

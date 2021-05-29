@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageUnitHellstone : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Hellstone Storage Unit");
 			DisplayName.AddTranslation(GameCulture.Russian, "Адская Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Piekielny kamień)");
@@ -16,7 +17,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(狱岩)");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -32,7 +34,8 @@ namespace MagicStorageExtra.Items
 			item.placeStyle = 3;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ModContent.ItemType<StorageUnitDemonite>());
 			recipe.AddIngredient(ModContent.ItemType<UpgradeHellstone>());

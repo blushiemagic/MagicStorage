@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class CraftingAccess : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Storage Crafting Interface");
 			DisplayName.AddTranslation(GameCulture.Russian, "Модуль Создания Предметов");
 			DisplayName.AddTranslation(GameCulture.Polish, "Interfejs Rzemieślniczy Magazynu");
@@ -16,7 +17,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "制作存储单元");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.CraftingAccess>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");

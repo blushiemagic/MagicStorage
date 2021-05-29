@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class LocatorDisk : Locator
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Locator Drive");
 			DisplayName.AddTranslation(GameCulture.Russian, "Локатор с CD Приводом");
 			DisplayName.AddTranslation(GameCulture.Polish, "Dysk lokalizatora");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点" + "\n<right>远程存储装置以设置其定位点" + "\n使用后不再损坏");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 5);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.MartianConduitPlating, 25);
 			recipe.AddIngredient(ItemID.LunarBar, 2);

@@ -15,13 +15,14 @@ namespace MagicStorageExtra.Components
 		// Use StorageComponent_Highlight as the default highlight mask for subclasses
 		public override string HighlightTexture => typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight";
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			Main.tileSolidTop[Type] = true;
 			Main.tileFrameImportant[Type] = true;
 			TileObjectData.newTile.Width = 2;
 			TileObjectData.newTile.Height = 2;
 			TileObjectData.newTile.Origin = new Point16(1, 1);
-			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16 };
+			TileObjectData.newTile.CoordinateHeights = new[] {16, 16};
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
 			TileObjectData.newTile.HookCheck = new PlacementHook(CanPlace, -1, 0, true);
@@ -41,59 +42,70 @@ namespace MagicStorageExtra.Components
 			TileID.Sets.HasOutlines[Type] = HasSmartInteract();
 		}
 
-		public virtual void ModifyObjectData() {
+		public virtual void ModifyObjectData()
+		{
 		}
 
 		public virtual ModTileEntity GetTileEntity() => null;
 
 		public virtual int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageComponent>();
 
-		public static bool IsStorageComponent(Point16 point) {
+		public static bool IsStorageComponent(Point16 point)
+		{
 			Tile tile = Main.tile[point.X, point.Y];
 			return tile.active() && TileLoader.GetTile(tile.type) is StorageComponent;
 		}
 
-		public int CanPlace(int i, int j, int type, int style, int direction) {
+		public int CanPlace(int i, int j, int type, int style, int direction)
+		{
 			int count = 0;
 			if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
 				count++;
 
 			var startSearch = new Point16(i - 1, j - 1);
-			var explored = new HashSet<Point16>();
-			explored.Add(startSearch);
+			var explored = new HashSet<Point16> {startSearch};
 			var toExplore = new Queue<Point16>();
 			foreach (Point16 point in TEStorageComponent.AdjacentComponents(startSearch))
 				toExplore.Enqueue(point);
 
-			while (toExplore.Count > 0) {
+			while (toExplore.Count > 0)
+			{
 				Point16 explore = toExplore.Dequeue();
-				if (!explored.Contains(explore) && explore != killTile) {
+				if (!explored.Contains(explore) && explore != killTile)
+				{
 					explored.Add(explore);
-					if (TEStorageCenter.IsStorageCenter(explore)) {
+					if (TEStorageCenter.IsStorageCenter(explore))
+					{
 						count++;
 						if (count >= 2)
 							return -1;
 					}
+
 					foreach (Point16 point in TEStorageComponent.AdjacentComponents(explore))
 						toExplore.Enqueue(point);
 				}
 			}
+
 			return count;
 		}
 
-		public override void KillMultiTile(int i, int j, int frameX, int frameY) {
+		public override void KillMultiTile(int i, int j, int frameX, int frameY)
+		{
 			Item.NewItem(i * 16, j * 16, 32, 32, ItemType(frameX, frameY));
 			killTile = new Point16(i, j);
 			ModTileEntity tileEntity = GetTileEntity();
-			if (tileEntity != null) {
+			if (tileEntity != null)
+			{
 				tileEntity.Kill(i, j);
 			}
-			else {
+			else
+			{
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
 				else
 					TEStorageComponent.SearchAndRefreshNetwork(killTile);
 			}
+
 			killTile = new Point16(-1, -1);
 		}
 	}

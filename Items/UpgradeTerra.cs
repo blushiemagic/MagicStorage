@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class UpgradeTerra : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Terra Storage Upgrade");
 			DisplayName.AddTranslation(GameCulture.Russian, "Терра Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Terra)");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至640容量" + "\n<right>一个存储单元(泰拉)可镶嵌");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 10);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "RadiantJewel");
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
@@ -40,7 +43,8 @@ namespace MagicStorageExtra.Items
 			recipe.AddRecipe();
 
 			Mod otherMod = MagicStorageExtra.bluemagicMod;
-			if (otherMod != null) {
+			if (otherMod != null)
+			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
 				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
@@ -50,7 +54,8 @@ namespace MagicStorageExtra.Items
 			}
 
 			otherMod = ModLoader.GetMod("CalamityMod");
-			if (otherMod != null) {
+			if (otherMod != null)
+			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");

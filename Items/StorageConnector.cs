@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageConnector : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Соединитель Ячеек Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Łącznik");
 			DisplayName.AddTranslation(GameCulture.French, "Connecteur de Stockage");
@@ -15,7 +16,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储连接器");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 999;
@@ -30,7 +32,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.StorageConnector>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.Wood, 16);
 			recipe.AddIngredient(ItemID.IronBar);

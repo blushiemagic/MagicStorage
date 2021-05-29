@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageComponent : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Компонент Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Komponent Magazynu");
 			DisplayName.AddTranslation(GameCulture.French, "Composant de Stockage");
@@ -15,7 +16,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储组件");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -30,7 +32,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.StorageComponent>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.Wood, 10);
 			recipe.AddIngredient(ItemID.IronBar, 2);

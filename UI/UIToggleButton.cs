@@ -14,13 +14,9 @@ namespace MagicStorageExtra.UI
 		private readonly int buttonSize;
 		private readonly Action onChanged;
 
-		private int buttonPadding;
-
-		public bool Value { get; set; }
-
-		public UIToggleButton(Action onChanged, Texture2D button, LocalizedText name, int buttonSize = 21, int buttonPadding = 1) {
+		public UIToggleButton(Action onChanged, Texture2D button, LocalizedText name, int buttonSize = 21)
+		{
 			this.buttonSize = buttonSize;
-			this.buttonPadding = buttonPadding;
 			this.onChanged = onChanged;
 			_button = button;
 			_name = name;
@@ -30,7 +26,10 @@ namespace MagicStorageExtra.UI
 			MinHeight.Set(buttonSize, 0f);
 		}
 
-		public override void Update(GameTime gameTime) {
+		public bool Value { get; set; }
+
+		public override void Update(GameTime gameTime)
+		{
 			bool oldValue = Value;
 			if (StorageGUI.MouseClicked && Parent != null)
 				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
@@ -40,7 +39,8 @@ namespace MagicStorageExtra.UI
 				onChanged?.Invoke();
 		}
 
-		private bool MouseOverButton(int mouseX, int mouseY) {
+		private bool MouseOverButton(int mouseX, int mouseY)
+		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			float left = dim.X;
 			float right = left + buttonSize * Main.UIScale;
@@ -49,18 +49,20 @@ namespace MagicStorageExtra.UI
 			return mouseX > left && mouseX < right && mouseY > top && mouseY < bottom;
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
+		protected override void DrawSelf(SpriteBatch spriteBatch)
+		{
 			Texture2D backTexture = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackground");
 			Texture2D backTextureActive = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackgroundActive");
 			CalculatedStyle dim = GetDimensions();
 			Texture2D texture = Value ? backTextureActive : backTexture;
 			var drawPos = new Vector2(dim.X, dim.Y);
 			Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y) ? Color.Silver : Color.White;
-			Main.spriteBatch.Draw(texture, new Rectangle((int)drawPos.X, (int)drawPos.Y, buttonSize, buttonSize), color);
-			Main.spriteBatch.Draw(_button, new Rectangle((int)drawPos.X + 1, (int)drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
+			Main.spriteBatch.Draw(texture, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
+			Main.spriteBatch.Draw(_button, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
 		}
 
-		public void DrawText() {
+		public void DrawText()
+		{
 			if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
 				Main.instance.MouseText(_name.Value);
 		}

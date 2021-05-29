@@ -18,10 +18,12 @@ namespace MagicStorageExtra.Components
 
 		public override IEnumerable<Item> GetItems() => new CreativeEnumerable(Inactive);
 
-		public override void DepositItem(Item toDeposit, bool locked = false) {
+		public override void DepositItem(Item toDeposit, bool locked = false)
+		{
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false) {
+		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
+		{
 			if (Inactive)
 				return new Item();
 			return lookFor.Clone();
@@ -32,7 +34,8 @@ namespace MagicStorageExtra.Components
 	{
 		private readonly bool inactive;
 
-		internal CreativeEnumerable(bool inactive) {
+		internal CreativeEnumerable(bool inactive)
+		{
 			this.inactive = inactive;
 		}
 
@@ -46,12 +49,15 @@ namespace MagicStorageExtra.Components
 		private readonly bool inactive;
 		private int id;
 
-		internal CreativeEnumerator(bool inactive) {
+		internal CreativeEnumerator(bool inactive)
+		{
 			this.inactive = inactive;
 		}
 
-		public Item Current {
-			get {
+		public Item Current
+		{
+			get
+			{
 				var item = new Item();
 				item.SetDefaults(id, true);
 				item.stack = item.maxStack;
@@ -61,20 +67,25 @@ namespace MagicStorageExtra.Components
 
 		object IEnumerator.Current => Current;
 
-		public bool MoveNext() {
+		public bool MoveNext()
+		{
 			if (inactive)
 				return false;
-			do {
+			do
+			{
 				id++;
 			} while (id < ItemID.Sets.Deprecated.Length && ItemID.Sets.Deprecated[id]);
+
 			return id < ItemID.Sets.Deprecated.Length;
 		}
 
-		public void Reset() {
+		public void Reset()
+		{
 			id = 0;
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 		}
 	}
 }

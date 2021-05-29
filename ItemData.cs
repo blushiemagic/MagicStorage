@@ -7,12 +7,14 @@ namespace MagicStorageExtra
 		public readonly int Type;
 		public readonly int Prefix;
 
-		public ItemData(int type, int prefix = 0) {
+		public ItemData(int type, int prefix = 0)
+		{
 			Type = type;
 			Prefix = prefix;
 		}
 
-		public ItemData(Item item) {
+		public ItemData(Item item)
+		{
 			Type = item.netID;
 			Prefix = item.prefix;
 		}
@@ -25,7 +27,8 @@ namespace MagicStorageExtra
 
 		public static bool Matches(ItemData data1, ItemData data2) => data1.Type == data2.Type && data1.Prefix == data2.Prefix;
 
-		public static int Compare(Item item1, Item item2) {
+		public static int Compare(Item item1, Item item2)
+		{
 			var data1 = new ItemData(item1);
 			var data2 = new ItemData(item2);
 			if (data1.Type != data2.Type)

@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class StorageUnit : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Ячейка Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca");
 			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage");
@@ -15,7 +16,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -30,7 +32,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.StorageUnit>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ModContent.ItemType<StorageComponent>());
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyChest");

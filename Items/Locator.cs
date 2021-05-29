@@ -15,7 +15,8 @@ namespace MagicStorageExtra.Items
 
 		public override bool CloneNewInstances => true;
 
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Локатор");
 			DisplayName.AddTranslation(GameCulture.Polish, "Lokalizator");
 			DisplayName.AddTranslation(GameCulture.French, "Localisateur");
@@ -30,7 +31,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点" + "\n<right>远程存储装置以设置其定位点");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 28;
 			item.height = 28;
 			item.maxStack = 1;
@@ -38,19 +40,23 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 1);
 		}
 
-		public override void ModifyTooltips(List<TooltipLine> lines) {
+		public override void ModifyTooltips(List<TooltipLine> lines)
+		{
 			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
-				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0") {
+				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0")
+				{
 					lines[k].text = Language.GetTextValue("Mods.MagicStorageExtra.SetTo", location.X, location.Y);
 				}
-				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1") {
+				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
+				{
 					lines.RemoveAt(k);
 					k--;
 				}
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.MeteoriteBar, 10);
 			recipe.AddIngredient(ItemID.Amber, 2);
@@ -59,23 +65,27 @@ namespace MagicStorageExtra.Items
 			recipe.AddRecipe();
 		}
 
-		public override TagCompound Save() {
+		public override TagCompound Save()
+		{
 			var tag = new TagCompound();
 			tag.Set("X", location.X);
 			tag.Set("Y", location.Y);
 			return tag;
 		}
 
-		public override void Load(TagCompound tag) {
+		public override void Load(TagCompound tag)
+		{
 			location = new Point16(tag.GetShort("X"), tag.GetShort("Y"));
 		}
 
-		public override void NetSend(BinaryWriter writer) {
+		public override void NetSend(BinaryWriter writer)
+		{
 			writer.Write(location.X);
 			writer.Write(location.Y);
 		}
 
-		public override void NetRecieve(BinaryReader reader) {
+		public override void NetRecieve(BinaryReader reader)
+		{
 			location = new Point16(reader.ReadInt16(), reader.ReadInt16());
 		}
 	}

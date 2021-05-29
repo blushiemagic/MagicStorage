@@ -9,8 +9,10 @@ namespace MagicStorageExtra.Sorting
 	{
 		public abstract bool Passes(Item item);
 
-		public bool Passes(object obj) {
-			switch (obj) {
+		public bool Passes(object obj)
+		{
+			switch (obj)
+			{
 				case Item item:
 					return Passes(item);
 				case Recipe recipe:
@@ -45,8 +47,10 @@ namespace MagicStorageExtra.Sorting
 
 	public class FilterWeaponSummon : ItemFilter
 	{
-		public override bool Passes(Item item) {
-			switch (item.type) {
+		public override bool Passes(Item item)
+		{
+			switch (item.type)
+			{
 				case ItemID.LifeCrystal:
 				case ItemID.ManaCrystal:
 				case ItemID.CellPhone:
@@ -62,8 +66,10 @@ namespace MagicStorageExtra.Sorting
 
 	public class FilterWeaponThrown : ItemFilter
 	{
-		public override bool Passes(Item item) {
-			switch (item.type) {
+		public override bool Passes(Item item)
+		{
+			switch (item.type)
+			{
 				case ItemID.Dynamite:
 				case ItemID.StickyDynamite:
 				case ItemID.BouncyDynamite:
@@ -72,6 +78,7 @@ namespace MagicStorageExtra.Sorting
 				case ItemID.BouncyBomb:
 					return true;
 			}
+
 			return item.thrown && item.damage > 0 || item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating");
 		}
 	}
@@ -139,7 +146,8 @@ namespace MagicStorageExtra.Sorting
 
 	public class FilterMisc : ItemFilter
 	{
-		private static readonly List<ItemFilter> blacklist = new List<ItemFilter> {
+		private static readonly List<ItemFilter> blacklist = new List<ItemFilter>
+		{
 			new FilterWeaponMelee(),
 			new FilterWeaponRanged(),
 			new FilterWeaponMagic(),
@@ -155,7 +163,8 @@ namespace MagicStorageExtra.Sorting
 			new FilterPlaceable()
 		};
 
-		public override bool Passes(Item item) {
+		public override bool Passes(Item item)
+		{
 			return blacklist.All(filter => !filter.Passes(item));
 		}
 	}

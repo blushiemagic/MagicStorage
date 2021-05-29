@@ -9,24 +9,28 @@ namespace MagicStorageExtra.Components
 	{
 		private Point16 center;
 
-		public void ResetAndSearch() {
+		public void ResetAndSearch()
+		{
 			Point16 oldCenter = center;
 			center = new Point16(-1, -1);
 
-			var explored = new HashSet<Point16>();
-			explored.Add(Position);
+			var explored = new HashSet<Point16> {Position};
 			var toExplore = new Queue<Point16>();
 			foreach (Point16 point in AdjacentComponents())
 				toExplore.Enqueue(point);
 
-			while (toExplore.Count > 0) {
+			while (toExplore.Count > 0)
+			{
 				Point16 explore = toExplore.Dequeue();
-				if (!explored.Contains(explore) && explore != StorageComponent.killTile) {
+				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
+				{
 					explored.Add(explore);
-					if (TEStorageCenter.IsStorageCenter(explore)) {
+					if (TEStorageCenter.IsStorageCenter(explore))
+					{
 						center = explore;
 						break;
 					}
+
 					foreach (Point16 point in AdjacentComponents(explore))
 						toExplore.Enqueue(point);
 				}
@@ -36,11 +40,13 @@ namespace MagicStorageExtra.Components
 				NetHelper.SendTEUpdate(ID, Position);
 		}
 
-		public override void OnPlace() {
+		public override void OnPlace()
+		{
 			ResetAndSearch();
 		}
 
-		public bool Link(Point16 pos) {
+		public bool Link(Point16 pos)
+		{
 			bool changed = pos != center;
 			center = pos;
 			return changed;
@@ -48,15 +54,17 @@ namespace MagicStorageExtra.Components
 
 		public bool Unlink() => Link(new Point16(-1, -1));
 
-		public TEStorageHeart GetHeart() {
+		public TEStorageHeart GetHeart()
+		{
 			if (center != new Point16(-1, -1))
-				return ((TEStorageCenter)ByPosition[center]).GetHeart();
+				return ((TEStorageCenter) ByPosition[center]).GetHeart();
 			return null;
 		}
 
 		public static bool IsStoragePoint(Point16 point) => ByPosition.ContainsKey(point) && ByPosition[point] is TEStoragePoint;
 
-		public override TagCompound Save() {
+		public override TagCompound Save()
+		{
 			var tag = new TagCompound();
 			var tagCenter = new TagCompound();
 			tagCenter.Set("X", center.X);
@@ -65,17 +73,20 @@ namespace MagicStorageExtra.Components
 			return tag;
 		}
 
-		public override void Load(TagCompound tag) {
+		public override void Load(TagCompound tag)
+		{
 			TagCompound tagCenter = tag.GetCompound("Center");
 			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend) {
+		public override void NetSend(BinaryWriter writer, bool lightSend)
+		{
 			writer.Write(center.X);
 			writer.Write(center.Y);
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive) {
+		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		{
 			center = new Point16(reader.ReadInt16(), reader.ReadInt16());
 		}
 	}

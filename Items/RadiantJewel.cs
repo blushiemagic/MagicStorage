@@ -8,7 +8,8 @@ namespace MagicStorageExtra.Items
 {
 	public class RadiantJewel : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.AddTranslation(GameCulture.Russian, "Сияющая Драгоценность");
 			DisplayName.AddTranslation(GameCulture.Polish, "Promieniejący klejnot");
 			DisplayName.AddTranslation(GameCulture.French, "Bijou Rayonnant");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "'闪耀着耀眼的光芒'");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 14;
 			item.height = 14;
 			item.maxStack = 99;
@@ -33,7 +35,8 @@ namespace MagicStorageExtra.Items
 
 		public override Color? GetAlpha(Color lightColor) => Color.White;
 
-		public override void PostUpdate() {
+		public override void PostUpdate()
+		{
 			Lighting.AddLight(item.position, 1f, 1f, 1f);
 		}
 	}

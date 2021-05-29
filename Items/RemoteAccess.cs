@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class RemoteAccess : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Remote Storage Access");
 			DisplayName.AddTranslation(GameCulture.Russian, "Модуль Удаленного Доступа к Хранилищу");
 			DisplayName.AddTranslation(GameCulture.Polish, "Zdalna Jednostka Dostępu");
@@ -16,7 +17,8 @@ namespace MagicStorageExtra.Items
 			DisplayName.AddTranslation(GameCulture.Chinese, "远程存储装置");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 26;
 			item.height = 26;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.createTile = ModContent.TileType<Components.RemoteAccess>();
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);

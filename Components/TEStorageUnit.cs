@@ -21,8 +21,10 @@ namespace MagicStorageExtra.Components
 		private IList<Item> items = new List<Item>();
 		private bool receiving;
 
-		public int Capacity {
-			get {
+		public int Capacity
+		{
+			get
+			{
 				int style = Main.tile[Position.X, Position.Y].frameY / 36;
 				if (style == 8)
 					return 4;
@@ -48,14 +50,17 @@ namespace MagicStorageExtra.Components
 		public override bool ValidTile(Tile tile) =>
 			tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
 
-		public override bool HasSpaceInStackFor(Item check, bool locked = false) {
+		public override bool HasSpaceInStackFor(Item check, bool locked = false)
+		{
 			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterReadLock();
-			try {
+			try
+			{
 				var data = new ItemData(check);
 				return hasSpaceInStack.Contains(data);
 			}
-			finally {
+			finally
+			{
 				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitReadLock();
 			}
@@ -63,15 +68,18 @@ namespace MagicStorageExtra.Components
 
 		public bool HasSpaceFor(Item check, bool locked = false) => !IsFull || HasSpaceInStackFor(check, locked);
 
-		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) {
+		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false)
+		{
 			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterReadLock();
-			try {
+			try
+			{
 				if (ignorePrefix) return hasItemNoPrefix.Contains(check.type);
 				var data = new ItemData(check);
 				return hasItem.Contains(data);
 			}
-			finally {
+			finally
+			{
 				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitReadLock();
 			}
@@ -79,18 +87,21 @@ namespace MagicStorageExtra.Components
 
 		public override IEnumerable<Item> GetItems() => items;
 
-		public override void DepositItem(Item toDeposit, bool locked = false) {
+		public override void DepositItem(Item toDeposit, bool locked = false)
+		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
 			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterWriteLock();
-			try {
+			try
+			{
 				if (CraftingGUI.IsTestItem(toDeposit)) return;
 				Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
 				foreach (Item item in items)
-					if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack) {
+					if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
+					{
 						int total = item.stack + toDeposit.stack;
 						int newStack = total;
 						if (newStack > item.maxStack)
@@ -102,85 +113,105 @@ namespace MagicStorageExtra.Components
 
 						hasChange = true;
 						toDeposit.stack = total - newStack;
-						if (toDeposit.stack <= 0) {
+						if (toDeposit.stack <= 0)
+						{
 							toDeposit.SetDefaults(0, true);
 							finished = true;
 							break;
 						}
 					}
-				if (!finished && !IsFull) {
+
+				if (!finished && !IsFull)
+				{
 					Item item = toDeposit.Clone();
 					items.Add(item);
 					toDeposit.SetDefaults(0, true);
 					hasChange = true;
 					finished = true;
 				}
-				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient) {
+
+				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
+				{
 					if (Main.netMode == NetmodeID.Server)
 						netQueue.Enqueue(UnitOperation.Deposit.Create(original));
 					PostChangeContents();
 				}
 			}
-			finally {
+			finally
+			{
 				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitWriteLock();
 			}
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false) {
+		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
+		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return new Item();
 			if (Main.netMode == NetmodeID.Server && !locked)
 				GetHeart().EnterWriteLock();
-			try {
+			try
+			{
 				Item original = lookFor.Clone();
 				Item result = lookFor.Clone();
 				result.stack = 0;
-				for (int k = items.Count - 1; k >= 0; k--) {
+				for (int k = items.Count - 1; k >= 0; k--)
+				{
 					Item item = items[k];
-					if (ItemData.Matches(lookFor, item)) {
+					if (ItemData.Matches(lookFor, item))
+					{
 						int maxToTake = item.stack;
 						if (item.stack > 0 && item.favorited && keepOneIfFavorite)
 							maxToTake -= 1;
 						int withdraw = Math.Min(lookFor.stack, maxToTake);
 						item.stack -= withdraw;
-						if (item.stack <= 0) {
-							items.RemoveAt(k);
-						}
+						if (item.stack <= 0) items.RemoveAt(k);
 						result.stack += withdraw;
 						lookFor.stack -= withdraw;
-						if (lookFor.stack <= 0) {
-							if (Main.netMode != NetmodeID.MultiplayerClient) {
-								if (Main.netMode == NetmodeID.Server) {
-									var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+						if (lookFor.stack <= 0)
+						{
+							if (Main.netMode != NetmodeID.MultiplayerClient)
+							{
+								if (Main.netMode == NetmodeID.Server)
+								{
+									var op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
 									op.SendKeepOneIfFavorite = keepOneIfFavorite;
 									netQueue.Enqueue(op);
 								}
+
 								PostChangeContents();
 							}
+
 							return result;
 						}
 					}
 				}
+
 				if (result.stack == 0)
 					return new Item();
-				if (Main.netMode != NetmodeID.MultiplayerClient) {
-					if (Main.netMode == NetmodeID.Server) {
-						var op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+				if (Main.netMode != NetmodeID.MultiplayerClient)
+				{
+					if (Main.netMode == NetmodeID.Server)
+					{
+						var op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
 						op.SendKeepOneIfFavorite = keepOneIfFavorite;
 						netQueue.Enqueue(op);
 					}
+
 					PostChangeContents();
 				}
+
 				return result;
 			}
-			finally {
+			finally
+			{
 				if (Main.netMode == NetmodeID.Server && !locked)
 					GetHeart().ExitWriteLock();
 			}
 		}
 
-		public bool UpdateTileFrame(bool locked = false) {
+		public bool UpdateTileFrame(bool locked = false)
+		{
 			Tile topLeft = Main.tile[Position.X, Position.Y];
 			int oldFrame = topLeft.frameX;
 			int style;
@@ -197,20 +228,22 @@ namespace MagicStorageExtra.Components
 			if (Inactive)
 				style += 3;
 			style *= 36;
-			topLeft.frameX = (short)style;
-			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
-			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
-			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
+			topLeft.frameX = (short) style;
+			Main.tile[Position.X, Position.Y + 1].frameX = (short) style;
+			Main.tile[Position.X + 1, Position.Y].frameX = (short) (style + 18);
+			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short) (style + 18);
 			return oldFrame != style;
 		}
 
-		public void UpdateTileFrameWithNetSend(bool locked = false) {
+		public void UpdateTileFrameWithNetSend(bool locked = false)
+		{
 			if (UpdateTileFrame(locked))
 				NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
 		}
 
 		//precondition: lock is already taken
-		internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2) {
+		internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2)
+		{
 			IList<Item> items = unit1.items;
 			unit1.items = unit2.items;
 			unit2.items = items;
@@ -223,41 +256,49 @@ namespace MagicStorageExtra.Components
 			HashSet<int> temp = unit1.hasItemNoPrefix;
 			unit1.hasItemNoPrefix = unit2.hasItemNoPrefix;
 			unit2.hasItemNoPrefix = temp;
-			if (Main.netMode == NetmodeID.Server) {
+			if (Main.netMode == NetmodeID.Server)
+			{
 				unit1.netQueue.Clear();
 				unit2.netQueue.Clear();
 				unit1.netQueue.Enqueue(UnitOperation.FullSync.Create());
 				unit2.netQueue.Enqueue(UnitOperation.FullSync.Create());
 			}
+
 			unit1.PostChangeContents();
 			unit2.PostChangeContents();
 		}
 
 		//precondition: lock is already taken
-		internal Item WithdrawStack() {
+		internal Item WithdrawStack()
+		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return new Item();
 			Item item = items[items.Count - 1];
 			items.RemoveAt(items.Count - 1);
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
 				if (Main.netMode == NetmodeID.Server)
 					netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
 				PostChangeContents();
 			}
+
 			return item;
 		}
 
-		public override TagCompound Save() {
+		public override TagCompound Save()
+		{
 			TagCompound tag = base.Save();
-			List<TagCompound> tagItems = items.Select(ItemIO.Save).ToList();
+			var tagItems = items.Select(ItemIO.Save).ToList();
 			tag.Set("Items", tagItems);
 			return tag;
 		}
 
-		public override void Load(TagCompound tag) {
+		public override void Load(TagCompound tag)
+		{
 			base.Load(tag);
 			ClearItemsData();
-			foreach (Item item in tag.GetList<TagCompound>("Items").Select(ItemIO.Load)) {
+			foreach (Item item in tag.GetList<TagCompound>("Items").Select(ItemIO.Load))
+			{
 				items.Add(item);
 				var data = new ItemData(item);
 				if (item.stack < item.maxStack)
@@ -265,11 +306,13 @@ namespace MagicStorageExtra.Components
 				hasItem.Add(data);
 				hasItemNoPrefix.Add(data.Type);
 			}
+
 			if (Main.netMode == NetmodeID.Server)
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
 		}
 
-		public override void NetSend(BinaryWriter trueWriter, bool lightSend) {
+		public override void NetSend(BinaryWriter trueWriter, bool lightSend)
+		{
 			/* Recreate a BinaryWriter writer */
 			var buffer = new MemoryStream(65536);
 			var compressor = new DeflateStream(buffer, CompressionMode.Compress, true);
@@ -278,11 +321,13 @@ namespace MagicStorageExtra.Components
 
 			/* Original code */
 			base.NetSend(writer, lightSend);
-			if (netQueue.Count > Capacity / 2 || !lightSend) {
+			if (netQueue.Count > Capacity / 2 || !lightSend)
+			{
 				netQueue.Clear();
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
 			}
-			writer.Write((ushort)netQueue.Count);
+
+			writer.Write((ushort) netQueue.Count);
 			while (netQueue.Count > 0)
 				netQueue.Dequeue().Send(writer, this);
 
@@ -291,11 +336,12 @@ namespace MagicStorageExtra.Components
 			compressor.Close();
 
 			/* Sends the buffer through the network */
-			trueWriter.Write((ushort)buffer.Length);
+			trueWriter.Write((ushort) buffer.Length);
 			trueWriter.Write(buffer.ToArray());
 
 			/* Compression stats and debugging code (server side) */
-			if (false) {
+			if (false)
+			{
 				var decompressedBuffer = new MemoryStream(65536);
 				var decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
 				decompressor.CopyTo(decompressedBuffer);
@@ -313,7 +359,8 @@ namespace MagicStorageExtra.Components
 			buffer.Dispose();
 		}
 
-		public override void NetReceive(BinaryReader trueReader, bool lightReceive) {
+		public override void NetReceive(BinaryReader trueReader, bool lightReceive)
+		{
 			/* Reads the buffer off the network */
 			var buffer = new MemoryStream(65536);
 			var bufferWriter = new BinaryWriter(buffer);
@@ -327,13 +374,15 @@ namespace MagicStorageExtra.Components
 
 			/* Original code */
 			base.NetReceive(reader, lightReceive);
-			if (ByPosition.ContainsKey(Position) && ByPosition[Position] is TEStorageUnit) {
-				var other = (TEStorageUnit)ByPosition[Position];
+			if (ByPosition.ContainsKey(Position) && ByPosition[Position] is TEStorageUnit)
+			{
+				var other = (TEStorageUnit) ByPosition[Position];
 				items = other.items;
 				hasSpaceInStack = other.hasSpaceInStack;
 				hasItem = other.hasItem;
 				hasItemNoPrefix = other.hasItemNoPrefix;
 			}
+
 			receiving = true;
 			int count = reader.ReadUInt16();
 			bool flag = false;
@@ -351,18 +400,21 @@ namespace MagicStorageExtra.Components
 			buffer.Dispose();
 		}
 
-		private void ClearItemsData() {
+		private void ClearItemsData()
+		{
 			items.Clear();
 			hasSpaceInStack.Clear();
 			hasItem.Clear();
 			hasItemNoPrefix.Clear();
 		}
 
-		private void RepairMetadata() {
+		private void RepairMetadata()
+		{
 			hasSpaceInStack.Clear();
 			hasItem.Clear();
 			hasItemNoPrefix.Clear();
-			foreach (Item item in items) {
+			foreach (Item item in items)
+			{
 				var data = new ItemData(item);
 				if (item.stack < item.maxStack)
 					hasSpaceInStack.Add(data);
@@ -371,7 +423,8 @@ namespace MagicStorageExtra.Components
 			}
 		}
 
-		private void PostChangeContents() {
+		private void PostChangeContents()
+		{
 			RepairMetadata();
 			UpdateTileFrameWithNetSend(true);
 			NetHelper.SendTEUpdate(ID, Position);
@@ -379,7 +432,7 @@ namespace MagicStorageExtra.Components
 
 		private abstract class UnitOperation
 		{
-			public static readonly UnitOperation FullSync = new FullSync();
+			public static readonly UnitOperation FullSync = new FullSyncOperation();
 			public static readonly UnitOperation Deposit = new DepositOperation();
 			public static readonly UnitOperation Withdraw = new WithdrawOperation();
 			public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
@@ -388,52 +441,57 @@ namespace MagicStorageExtra.Components
 
 			protected byte id;
 
-			static UnitOperation() {
+			static UnitOperation()
+			{
 				types.Add(FullSync);
 				types.Add(Deposit);
 				types.Add(Withdraw);
 				types.Add(WithdrawStack);
 				for (int k = 0; k < types.Count; k++)
-					types[k].id = (byte)k;
+					types[k].id = (byte) k;
 			}
 
-			public UnitOperation Create() => (UnitOperation)MemberwiseClone();
+			public UnitOperation Create() => (UnitOperation) MemberwiseClone();
 
-			public UnitOperation Create(Item item) {
+			public UnitOperation Create(Item item)
+			{
 				UnitOperation clone = Create();
 				clone.data = item;
 				return clone;
 			}
 
-			public void Send(BinaryWriter writer, TEStorageUnit unit) {
+			public void Send(BinaryWriter writer, TEStorageUnit unit)
+			{
 				writer.Write(id);
 				SendData(writer, unit);
 			}
 
 			protected abstract void SendData(BinaryWriter writer, TEStorageUnit unit);
 
-			public static bool Receive(BinaryReader reader, TEStorageUnit unit) {
+			public static bool Receive(BinaryReader reader, TEStorageUnit unit)
+			{
 				byte id = reader.ReadByte();
-				if (id >= 0 && id < types.Count)
-					return types[id].ReceiveData(reader, unit);
-				return false;
+				return id < types.Count && types[id].ReceiveData(reader, unit);
 			}
 
 			protected abstract bool ReceiveData(BinaryReader reader, TEStorageUnit unit);
 		}
 
-		private class FullSync : UnitOperation
+		private class FullSyncOperation : UnitOperation
 		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit) {
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
 				writer.Write(unit.items.Count);
 				foreach (Item item in unit.items)
 					ItemIO.Send(item, writer, true, true);
 			}
 
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit) {
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
 				unit.ClearItemsData();
 				int count = reader.ReadInt32();
-				for (int k = 0; k < count; k++) {
+				for (int k = 0; k < count; k++)
+				{
 					Item item = ItemIO.Receive(reader, true, true);
 					unit.items.Add(item);
 					var data = new ItemData(item);
@@ -442,17 +500,20 @@ namespace MagicStorageExtra.Components
 					unit.hasItem.Add(data);
 					unit.hasItemNoPrefix.Add(data.Type);
 				}
+
 				return false;
 			}
 		}
 
 		private class DepositOperation : UnitOperation
 		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit) {
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
 				ItemIO.Send(data, writer, true, true);
 			}
 
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit) {
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
 				unit.DepositItem(ItemIO.Receive(reader, true, true));
 				return true;
 			}
@@ -462,12 +523,14 @@ namespace MagicStorageExtra.Components
 		{
 			public bool SendKeepOneIfFavorite { get; set; }
 
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit) {
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
 				writer.Write(SendKeepOneIfFavorite);
 				ItemIO.Send(data, writer, true, true);
 			}
 
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit) {
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				unit.TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
 				return true;
@@ -476,10 +539,12 @@ namespace MagicStorageExtra.Components
 
 		private class WithdrawStackOperation : UnitOperation
 		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit) {
+			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
+			{
 			}
 
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit) {
+			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
+			{
 				unit.WithdrawStack();
 				return true;
 			}

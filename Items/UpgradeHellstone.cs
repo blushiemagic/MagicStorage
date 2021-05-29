@@ -7,7 +7,8 @@ namespace MagicStorageExtra.Items
 {
 	public class UpgradeHellstone : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Hellstone Storage Upgrade");
 			DisplayName.AddTranslation(GameCulture.Russian, "Адское Улучшение Ячейки Хранилища");
 			DisplayName.AddTranslation(GameCulture.Polish, "Ulepszenie jednostki magazynującej (Piekielny kamień)");
@@ -23,7 +24,8 @@ namespace MagicStorageExtra.Items
 			Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至120容量" + "\n<right>一个存储单元(血腥/魔金)可镶嵌");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			item.width = 12;
 			item.height = 12;
 			item.maxStack = 99;
@@ -31,7 +33,8 @@ namespace MagicStorageExtra.Items
 			item.value = Item.sellPrice(0, 0, 40);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.HellstoneBar, 10);
 			if (MagicStorageExtra.legendMod == null)

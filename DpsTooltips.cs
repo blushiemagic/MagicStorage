@@ -7,7 +7,8 @@ namespace MagicStorageExtra
 {
 	public class DpsTooltips : GlobalItem
 	{
-		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+		{
 			double dps = CompareDps.GetDps(item);
 			if (dps > 1f)
 				tooltips.Add(new TooltipLine(MagicStorageExtra.Instance, "DPS", dps.ToString("F") + " DPS"));
