@@ -4,10 +4,8 @@ using System.Runtime.CompilerServices;
 using MagicStorageExtra.Components;
 using RecursiveCraft;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
-using static RecursiveCraft.RecursiveSearch;
 using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorageExtra
@@ -98,15 +96,24 @@ namespace MagicStorageExtra
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
 		public static void RecursiveRecipes()
 		{
+			if (Main.rand == null)
+				Main.rand = new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;
 
 			lock (Members.recipeCache)
 			{
+				var recursiveSearch = new RecursiveSearch(storedItems, GuiAsCraftingSource());
 				Members.recipeCache.Clear();
-				for (int n = 0; n < Recipe.maxRecipes && Main.recipe[n].createItem.type != ItemID.None; n++)
-					SingleSearch(storedItems, Main.recipe[n]);
+				foreach (int i in RecursiveCraft.RecursiveCraft.SortedRecipeList)
+				{
+					Recipe recipe = Main.recipe[i];
+					if (recipe is CompoundRecipe compound)
+						recipe = compound.OverridenRecipe;
+
+					SingleSearch(recursiveSearch, recipe);
+				}
 			}
 		}
 
@@ -120,24 +127,23 @@ namespace MagicStorageExtra
 			return FlatDict(heart.GetStoredItems());
 		}
 
-		private static void SingleSearch(Dictionary<int, int> inventory, Recipe recipe)
+		private static CraftingSource GuiAsCraftingSource() => new CraftingSource
 		{
-			if (Main.rand == null)
-				Main.rand = new UnifiedRandom((int) DateTime.UtcNow.Ticks);
-			var craftingSource = new CraftingSource
-			{
-				AdjTile = CraftingGUI.adjTiles,
-				AdjWater = CraftingGUI.adjWater,
-				AdjHoney = CraftingGUI.adjHoney,
-				AdjLava = CraftingGUI.adjLava,
-				ZoneSnow = CraftingGUI.zoneSnow,
-				AlchemyTable = CraftingGUI.alchemyTable
-			};
+			AdjTile = CraftingGUI.adjTiles,
+			AdjWater = CraftingGUI.adjWater,
+			AdjHoney = CraftingGUI.adjHoney,
+			AdjLava = CraftingGUI.adjLava,
+			ZoneSnow = CraftingGUI.zoneSnow,
+			AlchemyTable = CraftingGUI.alchemyTable
+		};
+
+		private static void SingleSearch(RecursiveSearch recursiveSearch, Recipe recipe)
+		{
 			RecipeInfo recipeInfo;
 			lock (BlockRecipes.activeLock)
 			{
 				BlockRecipes.active = false;
-				recipeInfo = FindIngredientsForRecipe(inventory, craftingSource, recipe);
+				recipeInfo = recursiveSearch.FindIngredientsForRecipe(recipe);
 				BlockRecipes.active = true;
 			}
 
@@ -147,29 +153,30 @@ namespace MagicStorageExtra
 
 		public static bool IsCompoundRecipe(Recipe recipe) => recipe is CompoundRecipe;
 
-		public static Recipe GetOverriddenRecipe() => Members.compoundRecipe.OverridenRecipe;
+		public static Recipe GetOverriddenRecipe(Recipe recipe) => recipe is CompoundRecipe compound ? compound.OverridenRecipe : recipe;
 
 		public static bool UpdateRecipe(Recipe recipe)
 		{
-			if (recipe is CompoundRecipe)
-				recipe = Members.compoundRecipe.OverridenRecipe;
-			else
-				return false;
-			lock (Members.recipeCache)
-			{
-				Members.recipeCache.Remove(recipe);
-				Dictionary<int, int> storedItems = GetStoredItems();
-				if (storedItems != null)
-					SingleSearch(storedItems, recipe);
-			}
+			if (recipe is CompoundRecipe compound)
+				recipe = compound.OverridenRecipe;
+			else return false;
 
-			return true;
+			Dictionary<int, int> storedItems = GetStoredItems();
+			if (storedItems != null)
+				lock (Members.recipeCache)
+				{
+					Members.recipeCache.Remove(recipe);
+					var recursiveSearch = new RecursiveSearch(storedItems, GuiAsCraftingSource());
+					SingleSearch(recursiveSearch, recipe);
+				}
+
+			return Members.recipeCache.ContainsKey(recipe);
 		}
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
-			if (recipe is CompoundRecipe)
-				recipe = Members.compoundRecipe.OverridenRecipe;
+			if (recipe is CompoundRecipe compound)
+				recipe = compound.OverridenRecipe;
 			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 			{
 				int index = Array.IndexOf(Main.recipe, recipe);

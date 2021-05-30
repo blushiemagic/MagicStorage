@@ -612,6 +612,20 @@ namespace MagicStorageExtra
 			return item;
 		}
 
+		private static int AmountCraftable(Recipe recipe)
+		{
+			if (!IsAvailable(recipe))
+				return 0;
+			int craftable = 0;
+
+			if (RecursiveCraftIntegration.Enabled)
+				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+
+			throw new NotImplementedException();
+
+			return craftable;
+		}
+
 		private static Item GetStorage(int slot, ref int context)
 		{
 			int index = slot + numColumns2 * (int) Math.Round(scrollBar2.ViewPosition);
@@ -1062,6 +1076,7 @@ namespace MagicStorageExtra
 
 					if (RecursiveCraftIntegration.Enabled)
 						RecursiveCraftIntegration.RecursiveRecipes();
+
 					DoFiltering();
 
 					// now if nothing found we disable filters one by one
@@ -1110,7 +1125,7 @@ namespace MagicStorageExtra
 								// If the selected recipe is compound, replace the overridden recipe with the compound one so it shows as selected in the UI
 								if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe))
 								{
-									Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe();
+									Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
 									int index = threadRecipes.IndexOf(overridden);
 									if (index != -1 && threadRecipeAvailable[index])
 										GuttedSetSelectedRecipe(overridden, index);
@@ -1497,11 +1512,15 @@ namespace MagicStorageExtra
 			if (RecursiveCraftIntegration.Enabled)
 			{
 				int index;
-				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe && RecursiveCraftIntegration.GetOverriddenRecipe() != recipe)
+				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe)
 				{
-					index = recipes.IndexOf(selectedRecipe);
-					if (index != -1)
-						recipes[index] = RecursiveCraftIntegration.GetOverriddenRecipe();
+					Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
+					if (overridden != recipe)
+					{
+						index = recipes.IndexOf(selectedRecipe);
+						if (index != -1)
+							recipes[index] = overridden;
+					}
 				}
 
 				index = recipes.IndexOf(recipe);

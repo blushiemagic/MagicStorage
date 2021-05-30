@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnassignedField.Global
+
 namespace MagicStorageExtra
 {
 	public class MagicStorageConfig : ModConfig

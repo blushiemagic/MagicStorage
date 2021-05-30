@@ -1,5 +1,5 @@
 author = blushiemagic and wvlad and exterminator
-version = 0.5.2.13
+version = 0.5.3.0
 displayName = Magic Storage - Extra
 homepage = https://github.com/ExterminatorX99/MagicStorage
 hideCode = false
@@ -7,4 +7,4 @@ hideResources = false
 includeSource = true
 includePDB = true
 buildIgnore = OldArt\*
-weakReferences = RecursiveCraft@1.4
+weakReferences = RecursiveCraft@1.5
