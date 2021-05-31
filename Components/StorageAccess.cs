@@ -41,13 +41,19 @@ namespace MagicStorageExtra.Components
 				i--;
 			if (Main.tile[i, j].frameY % 36 == 18)
 				j--;
-			Player player = Main.LocalPlayer;
+
+			string text = "This access is not connected to a Storage Heart!";
+			if (TileEntity.ByPosition[new Point16(i, j)] is TERemoteAccess remoteAccess)
+				if (!remoteAccess.loaded)
+					text = "Storage Heart area not loaded! Try again.";
+
 			if (GetHeart(i, j) == null)
 			{
-				Main.NewText("This access is not connected to a Storage Heart!");
+				Main.NewText(text);
 				return true;
 			}
 
+			Player player = Main.LocalPlayer;
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Main.mouseRightRelease = false;
 			if (player.sign > -1)

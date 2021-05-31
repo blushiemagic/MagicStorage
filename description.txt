@@ -7,8 +7,8 @@ The magic storage scales as you progress in your playthrough. It is accessible v
 Changes from original:
 Added more station slots to the crafting interface.
 Added more sort options.
-Added RecursiveCraft support - version 1.4+
-Added quick stack and restock to Storage Heart deposit button
+Added RecursiveCraft support
+Added quick stack and restock to Storage Heart deposit button (Read tooltip)
 Added weapon DPS calculation (Not 100% accurate)
 
 TODO:
@@ -17,6 +17,8 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.3.1:
+Fix storage heart not being loaded when far away in multiplayer
 0.5.3.0:
 Update for new RecursiveCraft version
 0.5.2.13:

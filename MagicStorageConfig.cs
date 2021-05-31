@@ -13,11 +13,11 @@ namespace MagicStorageExtra
 		[Label("Display new items/recieps")] [Tooltip("Toggles whether new items in the storage will glow to indicate they're new")] [DefaultValue(true)]
 		public bool _glowNewItems;
 
-		[Label("Default recipe filter")] [Tooltip("Enable to default to all recipes, disable to default to available recipes")] [DefaultValue(true)]
-		public bool _showAllRecipes;
-
 		[Label("Use default filter")] [Tooltip("Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)")] [DefaultValue(true)]
 		public bool _useConfigFilter;
+
+		[Label("Default recipe filter")] [Tooltip("Enable to default to all recipes, disable to default to available recipes")] [DefaultValue(true)]
+		public bool _showAllRecipes;
 
 		[JsonIgnore] public static bool glowNewItems => ModContent.GetInstance<MagicStorageConfig>()._glowNewItems;
 

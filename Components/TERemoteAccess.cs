@@ -9,14 +9,30 @@ namespace MagicStorageExtra.Components
 	public class TERemoteAccess : TEStorageCenter
 	{
 		private Point16 locator = new Point16(-1, -1);
+		internal bool loaded;
 
 		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<RemoteAccess>() && tile.frameX == 0 && tile.frameY == 0;
 
 		public override TEStorageHeart GetHeart()
 		{
-			if (locator.X < 0 || locator.Y < 0 || !ByPosition.ContainsKey(locator))
+			if (locator.X < 0 || locator.Y < 0)
 				return null;
+			if (!ByPosition.ContainsKey(locator))
+			{
+				Load();
+				return null;
+			}
+
 			return ByPosition[locator] as TEStorageHeart;
+		}
+
+		private void Load()
+		{
+			if (!loaded)
+			{
+				loaded = true;
+				NetHelper.ClientRequestSection(locator);
+			}
 		}
 
 		public bool TryLocate(Point16 toLocate, out string message)

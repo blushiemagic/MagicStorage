@@ -52,9 +52,8 @@ namespace MagicStorageExtra.Items
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
 				var point = new Point16(i, j);
-				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit)
+				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit storageUnit)
 				{
-					var storageUnit = (TEAbstractStorageUnit) TileEntity.ByPosition[point];
 					storageUnit.Inactive = !storageUnit.Inactive;
 					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
 					Main.NewText("Storage Unit has been " + activeText);

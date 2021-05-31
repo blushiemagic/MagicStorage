@@ -604,9 +604,16 @@ namespace MagicStorageExtra
 			{
 				bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe));
 				if (storageItem.IsAir && totalGroupStack == 0 && !craftable)
-					context = 3; // Unavailable
+					context = 3; // Unavailable - Red
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
-					context = 4; // Partially in stock or craftable
+					context = 4; // Partially in stock - Pinkish
+
+				//if (context != 0)
+				//{
+				//	bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
+				//	if (craftable)
+				//		context = 6; // Craftable - Light green
+				//}
 			}
 
 			return item;
@@ -621,7 +628,7 @@ namespace MagicStorageExtra
 			if (RecursiveCraftIntegration.Enabled)
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
 
-			throw new NotImplementedException();
+			//TODO implement me
 
 			return craftable;
 		}

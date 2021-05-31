@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using MagicStorageExtra.Components;
@@ -50,6 +51,11 @@ namespace MagicStorageExtra
 				case MessageType.CraftResult:
 					ReceiveCraftResult(reader);
 					break;
+				case MessageType.SectionRequest:
+					ReceiveClientRequestSection(reader, sender);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 
@@ -169,9 +175,8 @@ namespace MagicStorageExtra
 			if (Main.netMode != NetmodeID.Server)
 				return;
 			int ent = reader.ReadInt32();
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
+			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
 				return;
-			var heart = (TEStorageHeart) TileEntity.ByID[ent];
 			byte op = reader.ReadByte();
 			if (op == 0)
 			{
@@ -339,9 +344,8 @@ namespace MagicStorageExtra
 			if (Main.netMode != NetmodeID.Server)
 				return;
 			int ent = reader.ReadInt32();
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess))
+			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess access))
 				return;
-			var access = (TECraftingAccess) TileEntity.ByID[ent];
 			byte op = reader.ReadByte();
 			if (op == 0)
 			{
@@ -430,8 +434,8 @@ namespace MagicStorageExtra
 			if (Main.netMode == NetmodeID.Server)
 			{
 				int ent = reader.ReadInt32();
-				if (TileEntity.ByID[ent] is TEStorageHeart)
-					((TEStorageHeart) TileEntity.ByID[ent]).ResetCompactStage();
+				if (TileEntity.ByID[ent] is TEStorageHeart heart)
+					heart.ResetCompactStage();
 			}
 		}
 
@@ -457,9 +461,8 @@ namespace MagicStorageExtra
 			if (Main.netMode != NetmodeID.Server)
 				return;
 			int ent = reader.ReadInt32();
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
+			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
 				return;
-			var heart = (TEStorageHeart) TileEntity.ByID[ent];
 
 			int withdrawCount = reader.ReadInt32();
 			var toWithdraw = new List<Item>();
@@ -495,6 +498,29 @@ namespace MagicStorageExtra
 				player.QuickSpawnClonedItem(item, item.stack);
 			}
 		}
+
+		public static void ClientRequestSection(Point16 coords)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				packet.Write((byte) MessageType.SectionRequest);
+
+				packet.Write(coords.X);
+				packet.Write(coords.Y);
+
+				packet.Send();
+			}
+		}
+
+		public static void ReceiveClientRequestSection(BinaryReader reader, int sender)
+		{
+			if (Main.netMode == NetmodeID.Server)
+			{
+				var coords = new Point16(reader.ReadInt16(), reader.ReadInt16());
+				RemoteClient.CheckSection(sender, coords.ToWorldCoordinates());
+			}
+		}
 	}
 
 	internal enum MessageType : byte
@@ -508,6 +534,7 @@ namespace MagicStorageExtra
 		StationOperationResult,
 		ResetCompactStage,
 		CraftRequest,
-		CraftResult
+		CraftResult,
+		SectionRequest
 	}
 }
