@@ -9,7 +9,14 @@ namespace MagicStorageExtra.Components
 	public class TERemoteAccess : TEStorageCenter
 	{
 		private Point16 locator = new Point16(-1, -1);
-		internal bool loaded;
+
+		private bool _loaded;
+
+		internal bool Loaded
+		{
+			get => locator.X < 0 || locator.Y < 0 || _loaded;
+			private set => _loaded = value;
+		}
 
 		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<RemoteAccess>() && tile.frameX == 0 && tile.frameY == 0;
 
@@ -28,9 +35,9 @@ namespace MagicStorageExtra.Components
 
 		private void Load()
 		{
-			if (!loaded)
+			if (!Loaded)
 			{
-				loaded = true;
+				Loaded = true;
 				NetHelper.ClientRequestSection(locator);
 			}
 		}

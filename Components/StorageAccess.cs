@@ -44,7 +44,7 @@ namespace MagicStorageExtra.Components
 
 			string text = "This access is not connected to a Storage Heart!";
 			if (TileEntity.ByPosition[new Point16(i, j)] is TERemoteAccess remoteAccess)
-				if (!remoteAccess.loaded)
+				if (!remoteAccess.Loaded)
 					text = "Storage Heart area not loaded! Try again.";
 
 			if (GetHeart(i, j) == null)
