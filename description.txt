@@ -17,6 +17,10 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.3.3:
+Show that ingredient is craftable in ingredient list
+0.5.3.2:
+Fix logic error
 0.5.3.1:
 Fix storage heart not being loaded when far away in multiplayer
 0.5.3.0:

@@ -592,45 +592,56 @@ namespace MagicStorageExtra
 				storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
 
 				foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Union(GetAcceptedVanillaGroups(selectedRecipe)).Select(index => RecipeGroup.recipeGroups[index]))
-				{
-					int iconicItemType = rec.ValidItems[rec.IconicItemIndex];
-					if (item.type == iconicItemType)
+					if (rec.ValidItems.Contains(item.type))
 						foreach (int type in rec.ValidItems)
 							totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
-				}
 			}
 
 			if (!item.IsAir)
 			{
-				bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe));
-				if (storageItem.IsAir && totalGroupStack == 0 && !craftable)
+				if (storageItem.IsAir && totalGroupStack == 0)
 					context = 3; // Unavailable - Red
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
 					context = 4; // Partially in stock - Pinkish
-
-				//if (context != 0)
-				//{
-				//	bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
-				//	if (craftable)
-				//		context = 6; // Craftable - Light green
-				//}
+				// context == 0 - Available - Default Blue
+				if (context != 0)
+				{
+					bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
+					if (craftable)
+						context = 6; // Craftable - Light green
+				}
 			}
 
 			return item;
 		}
 
+		// Calculates how many times a recipe can be crafted using available items
 		private static int AmountCraftable(Recipe recipe)
 		{
 			if (!IsAvailable(recipe))
 				return 0;
-			int craftable = 0;
+			int maxCraftable = int.MaxValue;
 
 			if (RecursiveCraftIntegration.Enabled)
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
 
-			//TODO implement me
+			lock (items)
+			{
+				foreach (Item reqItem in recipe.requiredItem)
+				{
+					int total = 0;
+					if (reqItem.type == ItemID.None)
+						break;
+					foreach (Item invItem in items)
+						if (invItem.type == reqItem.type || RecipeGroupMatch(recipe, invItem.type, reqItem.type))
+							total += invItem.stack;
+					int craftable = total / reqItem.stack;
+					if (craftable < maxCraftable)
+						maxCraftable = craftable;
+				}
+			}
 
-			return craftable;
+			return maxCraftable;
 		}
 
 		private static Item GetStorage(int slot, ref int context)
@@ -1410,7 +1421,7 @@ namespace MagicStorageExtra
 			}
 		}
 
-		private static bool RecipeGroupMatch(Recipe recipe, int type1, int type2) => recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
+		private static bool RecipeGroupMatch(Recipe recipe, int invType, int reqType) => recipe.useWood(invType, reqType) || recipe.useSand(invType, reqType) || recipe.useIronBar(invType, reqType) || recipe.useFragment(invType, reqType) || recipe.AcceptedByItemGroups(invType, reqType) || recipe.usePressurePlate(invType, reqType);
 
 		private static void HoverStation(int slot, ref int hoverSlot)
 		{
