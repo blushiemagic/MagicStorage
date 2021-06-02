@@ -17,6 +17,8 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.3.5:
+Fix storage access
 0.5.3.4:
 Fix reach extending items not working
 0.5.3.3:
