@@ -62,6 +62,7 @@ namespace MagicStorageExtra
 		private static UIText capacityText;
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
+		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 
 		public static void Initialize()
 		{
@@ -452,7 +453,7 @@ namespace MagicStorageExtra
 				}
 			}
 
-			if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			if (RightMouseClicked && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 				slotFocus = slot;
 
 			if (slot < items.Count && !items[slot].IsAir)

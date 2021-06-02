@@ -98,6 +98,10 @@ namespace MagicStorageExtra
 			text.AddTranslation(GameCulture.Chinese, "搜索名称");
 			AddTranslation(text);
 
+			text = CreateTranslation("CraftAmount");
+			text.SetDefault("Craft amount");
+			AddTranslation(text);
+
 			text = CreateTranslation("SearchMod");
 			text.SetDefault("Search Mod");
 			text.AddTranslation(GameCulture.Russian, "Поиск по моду");
