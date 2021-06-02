@@ -82,14 +82,6 @@ namespace MagicStorageExtra
 			text.AddTranslation(GameCulture.Chinese, "全部存入");
 			AddTranslation(text);
 
-			text = CreateTranslation("Search");
-			text.SetDefault("Search");
-			text.AddTranslation(GameCulture.Russian, "Поиск");
-			text.AddTranslation(GameCulture.French, "Rechercher");
-			text.AddTranslation(GameCulture.Spanish, "Buscar");
-			text.AddTranslation(GameCulture.Chinese, "搜索");
-			AddTranslation(text);
-
 			text = CreateTranslation("SearchName");
 			text.SetDefault("Search Name");
 			text.AddTranslation(GameCulture.Russian, "Поиск по имени");

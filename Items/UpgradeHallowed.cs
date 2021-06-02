@@ -39,7 +39,7 @@ namespace MagicStorageExtra.Items
 			recipe.AddIngredient(ItemID.SoulofFright);
 			recipe.AddIngredient(ItemID.SoulofMight);
 			recipe.AddIngredient(ItemID.SoulofSight);
-			if (MagicStorageExtra.legendMod == null)
+			if (MagicStorageExtra.legendMod is null)
 				recipe.AddIngredient(ItemID.Sapphire);
 			else
 				recipe.AddRecipeGroup("MagicStorageExtra:AnySapphire");

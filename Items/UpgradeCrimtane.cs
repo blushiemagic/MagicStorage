@@ -37,7 +37,7 @@ namespace MagicStorageExtra.Items
 		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.CrimtaneBar, 10);
-			if (MagicStorageExtra.legendMod == null)
+			if (MagicStorageExtra.legendMod is null)
 				recipe.AddIngredient(ItemID.Amethyst);
 			else
 				recipe.AddRecipeGroup("MagicStorageExtra:AnyAmethyst");

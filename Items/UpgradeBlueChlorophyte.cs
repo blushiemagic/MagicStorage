@@ -39,7 +39,7 @@ namespace MagicStorageExtra.Items
 			recipe.AddIngredient(ItemID.ShroomiteBar, 5);
 			recipe.AddIngredient(ItemID.SpectreBar, 5);
 			recipe.AddIngredient(ItemID.BeetleHusk, 2);
-			if (MagicStorageExtra.legendMod == null)
+			if (MagicStorageExtra.legendMod is null)
 				recipe.AddIngredient(ItemID.Emerald);
 			else
 				recipe.AddRecipeGroup("MagicStorageExtra:AnyEmerald");

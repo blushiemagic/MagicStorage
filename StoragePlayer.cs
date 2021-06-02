@@ -220,7 +220,7 @@ namespace MagicStorageExtra
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			if (tile == null)
+			if (tile is null)
 				return null;
 			int tileType = tile.type;
 			ModTile modTile = TileLoader.GetTile(tileType);

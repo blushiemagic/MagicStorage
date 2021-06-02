@@ -41,7 +41,7 @@ namespace MagicStorageExtra.Items
 			recipe.AddIngredient(ItemID.FragmentVortex, 5);
 			recipe.AddIngredient(ItemID.FragmentNebula, 5);
 			recipe.AddIngredient(ItemID.FragmentStardust, 5);
-			if (MagicStorageExtra.legendMod == null)
+			if (MagicStorageExtra.legendMod is null)
 				recipe.AddIngredient(ItemID.Ruby);
 			else
 				recipe.AddRecipeGroup("MagicStorageExtra:AnyRuby");

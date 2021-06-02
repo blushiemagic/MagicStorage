@@ -38,7 +38,7 @@ namespace MagicStorageExtra.Items
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
 			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond");
-			if (MagicStorageExtra.legendMod == null)
+			if (MagicStorageExtra.legendMod is null)
 				recipe.AddIngredient(ItemID.Sapphire, 3);
 			else
 				recipe.AddRecipeGroup("MagicStorageExtra:AnySapphire", 5);

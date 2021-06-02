@@ -112,7 +112,7 @@ namespace MagicStorageExtra.Components
 					inactiveUnit = storageUnit;
 			}
 
-			if (inactiveUnit == null)
+			if (inactiveUnit is null)
 			{
 				compactStage++;
 				return false;
@@ -164,7 +164,7 @@ namespace MagicStorageExtra.Components
 			{
 				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
 					continue;
-				if (emptyUnit == null && storageUnit.IsEmpty && !storageUnit.Inactive)
+				if (emptyUnit is null && storageUnit.IsEmpty && !storageUnit.Inactive)
 				{
 					emptyUnit = storageUnit;
 				}
@@ -188,7 +188,7 @@ namespace MagicStorageExtra.Components
 			{
 				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
 					continue;
-				if (unitWithSpace == null && !storageUnit.IsFull && !storageUnit.Inactive)
+				if (unitWithSpace is null && !storageUnit.IsFull && !storageUnit.Inactive)
 				{
 					unitWithSpace = storageUnit;
 				}
