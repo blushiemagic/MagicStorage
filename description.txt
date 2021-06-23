@@ -17,6 +17,8 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.3.6:
+Update RecursiveCraft reference
 0.5.3.5:
 Fix storage access
 0.5.3.4:
