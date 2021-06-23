@@ -83,10 +83,10 @@ namespace MagicStorageExtra
 		{
 			var dictionary = new Dictionary<int, int>();
 			foreach (Item item in items)
-				if (dictionary.ContainsKey(item.netID))
-					dictionary[item.netID] += item.stack;
+				if (dictionary.ContainsKey(item.type))
+					dictionary[item.type] += item.stack;
 				else
-					dictionary[item.netID] = item.stack;
+					dictionary[item.type] = item.stack;
 			return dictionary;
 		}
 

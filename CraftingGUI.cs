@@ -1205,10 +1205,10 @@ namespace MagicStorageExtra
 			lock (itemCounts)
 			{
 				foreach (Item item in items)
-					if (itemCounts.ContainsKey(item.netID))
-						itemCounts[item.netID] += item.stack;
+					if (itemCounts.ContainsKey(item.type))
+						itemCounts[item.type] += item.stack;
 					else
-						itemCounts[item.netID] = item.stack;
+						itemCounts[item.type] = item.stack;
 			}
 
 			foreach (Item item in GetCraftingStations())
@@ -1315,7 +1315,7 @@ namespace MagicStorageExtra
 							useRecipeGroup = true;
 						}
 
-					if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.netID, out int amount))
+					if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
 						stack -= amount;
 					if (stack > 0)
 						return false;
@@ -1362,7 +1362,7 @@ namespace MagicStorageExtra
 						foreach (Item item in storageItems)
 						{
 							var data = new ItemData(item);
-							if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.netID, ingredient.type))
+							if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.type, ingredient.type))
 							{
 								stack -= item.stack;
 								useRecipeGroup = true;
@@ -1373,7 +1373,7 @@ namespace MagicStorageExtra
 							foreach (Item item in storageItems)
 							{
 								var data = new ItemData(item);
-								if (!blockStorageItems.Contains(data) && item.netID == ingredient.netID)
+								if (!blockStorageItems.Contains(data) && item.type == ingredient.type)
 									stack -= item.stack;
 							}
 					}

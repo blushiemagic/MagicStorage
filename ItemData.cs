@@ -15,7 +15,7 @@ namespace MagicStorageExtra
 
 		public ItemData(Item item)
 		{
-			Type = item.netID;
+			Type = item.type;
 			Prefix = item.prefix;
 		}
 
