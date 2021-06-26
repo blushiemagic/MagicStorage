@@ -42,13 +42,13 @@ namespace MagicStorageExtra.Components
             if (Main.tile[i, j].frameY % 36 == 18)
                 j--;
 
+            string text = "This access is not connected to a Storage Heart!";
+            if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
+                if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
+                    text = "Storage Heart area not loaded! Try again.";
+
             if (GetHeart(i, j) == null)
             {
-                string text = "This access is not connected to a Storage Heart!";
-                if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
-                    if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
-                        text = "Storage Heart area not loaded! Try again.";
-
                 Main.NewText(text);
                 return true;
             }
