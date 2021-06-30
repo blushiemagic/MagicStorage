@@ -18,7 +18,7 @@ namespace MagicStorageExtra
         public static Mod legendMod;
 
         public static string GithubUserName => "ExterminatorX99";
-        public static string GithubProjectName => "MagicStorage";
+        public static string GithubProjectName => "MagicStorageExtra";
 
         public static ModHotKey IsItemKnownHotKey { get; private set; }
 
