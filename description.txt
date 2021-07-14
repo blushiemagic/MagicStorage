@@ -17,6 +17,11 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.4.0:
+Fixed world sections not loading due to storage systems having too many items
+Fixed bad netcode causing "read underflows"
+Fixed the crafting GUI sometimes throwing exceptions
+Fixes done by absoluteAquarian
 0.5.3.6:
 Update RecursiveCraft reference
 0.5.3.5:
