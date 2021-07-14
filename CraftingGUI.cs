@@ -748,63 +748,68 @@ namespace MagicStorage
 
         public static void RefreshItems()
         {
-            items.Clear();
-            TEStorageHeart heart = GetHeart();
-            if (heart == null)
-            {
-                return;
-            }
-            items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, "", ""));
-            AnalyzeIngredients();
-            InitLangStuff();
-            InitSortButtons();
-            InitRecipeButtons();
-            InitFilterButtons();
             SortMode sortMode;
-            switch (sortButtons.Choice)
-            {
-            case 0:
-                sortMode = SortMode.Default;
-                break;
-            case 1:
-                sortMode = SortMode.Id;
-                break;
-            case 2:
-                sortMode = SortMode.Name;
-                break;
-            default:
-                sortMode = SortMode.Default;
-                break;
-            }
             FilterMode filterMode;
-            switch (filterButtons.Choice)
+
+            lock (itemsLock)
             {
-            case 0:
-                filterMode = FilterMode.All;
-                break;
-            case 1:
-                filterMode = FilterMode.Weapons;
-                break;
-            case 2:
-                filterMode = FilterMode.Tools;
-                break;
-            case 3:
-                filterMode = FilterMode.Equipment;
-                break;
-            case 4:
-                filterMode = FilterMode.Potions;
-                break;
-            case 5:
-                filterMode = FilterMode.Placeables;
-                break;
-            case 6:
-                filterMode = FilterMode.Misc;
-                break;
-            default:
-                filterMode = FilterMode.All;
-                break;
+                items.Clear();
+                TEStorageHeart heart = GetHeart();
+                if (heart == null)
+                {
+                    return;
+                }
+                items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, "", ""));
+                AnalyzeIngredients();
+                InitLangStuff();
+                InitSortButtons();
+                InitRecipeButtons();
+                InitFilterButtons();
+                switch (sortButtons.Choice)
+                {
+                case 0:
+                    sortMode = SortMode.Default;
+                    break;
+                case 1:
+                    sortMode = SortMode.Id;
+                    break;
+                case 2:
+                    sortMode = SortMode.Name;
+                    break;
+                default:
+                    sortMode = SortMode.Default;
+                    break;
+                }
+                switch (filterButtons.Choice)
+                {
+                case 0:
+                    filterMode = FilterMode.All;
+                    break;
+                case 1:
+                    filterMode = FilterMode.Weapons;
+                    break;
+                case 2:
+                    filterMode = FilterMode.Tools;
+                    break;
+                case 3:
+                    filterMode = FilterMode.Equipment;
+                    break;
+                case 4:
+                    filterMode = FilterMode.Potions;
+                    break;
+                case 5:
+                    filterMode = FilterMode.Placeables;
+                    break;
+                case 6:
+                    filterMode = FilterMode.Misc;
+                    break;
+                default:
+                    filterMode = FilterMode.All;
+                    break;
+                }
+                RefreshStorageItems();
             }
-            RefreshStorageItems();
+
             lock (threadLock)
             {
                 threadNeedsRestart = true;
@@ -875,32 +880,37 @@ namespace MagicStorage
         private static void AnalyzeIngredients()
         {
             Player player = Main.player[Main.myPlayer];
-            itemCounts.Clear();
-            if (adjTiles.Length != player.adjTile.Length)
-            {
-                Array.Resize(ref adjTiles, player.adjTile.Length);
-            }
-            for (int k = 0; k < adjTiles.Length; k++)
-            {
-                adjTiles[k] = false;
-            }
-            adjWater = false;
-            adjLava = false;
-            adjHoney = false;
-            zoneSnow = false;
-            alchemyTable = false;
 
-            foreach (Item item in items)
+            lock (itemsLock)
             {
-                if (itemCounts.ContainsKey(item.netID))
+                itemCounts.Clear();
+                if (adjTiles.Length != player.adjTile.Length)
                 {
-                    itemCounts[item.netID] += item.stack;
+                    Array.Resize(ref adjTiles, player.adjTile.Length);
                 }
-                else
+                for (int k = 0; k < adjTiles.Length; k++)
                 {
-                    itemCounts[item.netID] = item.stack;
+                    adjTiles[k] = false;
+                }
+                adjWater = false;
+                adjLava = false;
+                adjHoney = false;
+                zoneSnow = false;
+                alchemyTable = false;
+
+                foreach (Item item in items)
+                {
+                    if (itemCounts.ContainsKey(item.netID))
+                    {
+                        itemCounts[item.netID] += item.stack;
+                    }
+                    else
+                    {
+                        itemCounts[item.netID] = item.stack;
+                    }
                 }
             }
+
             foreach (Item item in GetCraftingStations())
             {
                 if (item.createTile >= 0)
@@ -994,31 +1004,36 @@ namespace MagicStorage
                     return false;
                 }
             }
-            foreach (Item ingredient in recipe.requiredItem)
+
+            lock (itemsLock)
             {
-                if (ingredient.type == 0)
+                foreach (Item ingredient in recipe.requiredItem)
                 {
-                    break;
-                }
-                int stack = ingredient.stack;
-                bool useRecipeGroup = false;
-                foreach (int type in itemCounts.Keys)
-                {
-                    if (RecipeGroupMatch(recipe, type, ingredient.type))
+                    if (ingredient.type == 0)
                     {
-                        stack -= itemCounts[type];
-                        useRecipeGroup = true;
+                        break;
+                    }
+                    int stack = ingredient.stack;
+                    bool useRecipeGroup = false;
+                    foreach (int type in itemCounts.Keys)
+                    {
+                        if (RecipeGroupMatch(recipe, type, ingredient.type))
+                        {
+                            stack -= itemCounts[type];
+                            useRecipeGroup = true;
+                        }
+                    }
+                    if (!useRecipeGroup && itemCounts.ContainsKey(ingredient.netID))
+                    {
+                        stack -= itemCounts[ingredient.netID];
+                    }
+                    if (stack > 0)
+                    {
+                        return false;
                     }
                 }
-                if (!useRecipeGroup && itemCounts.ContainsKey(ingredient.netID))
-                {
-                    stack -= itemCounts[ingredient.netID];
-                }
-                if (stack > 0)
-                {
-                    return false;
-                }
             }
+
             if (recipe.needWater && !adjWater && !adjTiles[TileID.Sinks])
             {
                 return false;
@@ -1186,7 +1201,12 @@ namespace MagicStorage
                 if (MouseClicked)
                 {
                     selectedRecipe = recipes[slot];
-                    RefreshStorageItems();
+                    
+                    lock (itemsLock)
+                    {
+                        RefreshStorageItems();
+                    }
+                    
                     blockStorageItems.Clear();
                 }
                 hoverSlot = visualSlot;
@@ -1349,58 +1369,63 @@ namespace MagicStorage
 
         private static void TryCraft()
         {
-            List<Item> availableItems = new List<Item>(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
-            List<Item> toWithdraw = new List<Item>();
-            for (int k = 0; k < selectedRecipe.requiredItem.Length; k++)
+            List<Item> toWithdraw;
+            lock (itemsLock)
             {
-                Item item = selectedRecipe.requiredItem[k];
-                if (item.type == 0)
+                List<Item> availableItems = new List<Item>(storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()));
+                toWithdraw = new List<Item>();
+                for (int k = 0; k < selectedRecipe.requiredItem.Length; k++)
                 {
-                    break;
-                }
-                int stack = item.stack;
-                ModRecipe modRecipe = selectedRecipe as ModRecipe;
-                if (modRecipe != null)
-                {
-                    stack = modRecipe.ConsumeItem(item.type, item.stack);
-                }
-                if (selectedRecipe.alchemy && alchemyTable)
-                {
-                    int save = 0;
-                    for (int j = 0; j < stack; j++)
+                    Item item = selectedRecipe.requiredItem[k];
+                    if (item.type == 0)
                     {
-                        if (Main.rand.Next(3) == 0)
-                        {
-                            save++;
-                        }
+                        break;
                     }
-                    stack -= save;
-                }
-                if (stack > 0)
-                {
-                    foreach (Item tryItem in availableItems)
+                    int stack = item.stack;
+                    ModRecipe modRecipe = selectedRecipe as ModRecipe;
+                    if (modRecipe != null)
                     {
-                        if (item.type == tryItem.type || RecipeGroupMatch(selectedRecipe, item.type, tryItem.type))
+                        stack = modRecipe.ConsumeItem(item.type, item.stack);
+                    }
+                    if (selectedRecipe.alchemy && alchemyTable)
+                    {
+                        int save = 0;
+                        for (int j = 0; j < stack; j++)
                         {
-                            if (tryItem.stack > stack)
+                            if (Main.rand.Next(3) == 0)
                             {
-                                Item temp = tryItem.Clone();
-                                temp.stack = stack;
-                                toWithdraw.Add(temp);
-                                tryItem.stack -= stack;
-                                stack = 0;
+                                save++;
                             }
-                            else
+                        }
+                        stack -= save;
+                    }
+                    if (stack > 0)
+                    {
+                        foreach (Item tryItem in availableItems)
+                        {
+                            if (item.type == tryItem.type || RecipeGroupMatch(selectedRecipe, item.type, tryItem.type))
                             {
-                                toWithdraw.Add(tryItem.Clone());
-                                stack -= tryItem.stack;
-                                tryItem.stack = 0;
-                                tryItem.type = 0;
+                                if (tryItem.stack > stack)
+                                {
+                                    Item temp = tryItem.Clone();
+                                    temp.stack = stack;
+                                    toWithdraw.Add(temp);
+                                    tryItem.stack -= stack;
+                                    stack = 0;
+                                }
+                                else
+                                {
+                                    toWithdraw.Add(tryItem.Clone());
+                                    stack -= tryItem.stack;
+                                    tryItem.stack = 0;
+                                    tryItem.type = 0;
+                                }
                             }
                         }
                     }
                 }
             }
+
             Item resultItem = selectedRecipe.createItem.Clone();
             resultItem.Prefix(-1);
 

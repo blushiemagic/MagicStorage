@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Microsoft.Xna.Framework;
 using Terraria.Localization;
+using MagicStorage.Edits;
 
 namespace MagicStorage
 {
@@ -29,6 +30,8 @@ namespace MagicStorage
             legendMod = ModLoader.GetMod("LegendOfTerraria3");
             bluemagicMod = ModLoader.GetMod("Bluemagic");
             AddTranslations();
+
+            EditsLoader.Load();
         }
 
         public override void Unload()
@@ -311,7 +314,14 @@ namespace MagicStorage
             NetHelper.HandlePacket(reader, whoAmI);
         }
 
-        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+		public override bool HijackGetData(ref byte messageType, ref BinaryReader reader, int playerNumber)
+        {
+			EditsLoader.MessageTileEntitySyncing = messageType == MessageID.TileSection;
+
+            return false;
+		}
+
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
             InterfaceHelper.ModifyInterfaceLayers(layers);
         }

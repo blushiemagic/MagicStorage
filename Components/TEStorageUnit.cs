@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
+using MagicStorage.Edits;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -384,6 +385,16 @@ namespace MagicStorage.Components
 
         public override void NetSend(BinaryWriter trueWriter, bool lightSend)
         {
+            //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
+            if (EditsLoader.MessageTileEntitySyncing)
+            {
+                trueWriter.Write((byte)0);
+                base.NetSend(trueWriter, lightSend);
+                return;
+            }
+
+            trueWriter.Write((byte)1);
+
             /* Recreate a BinaryWriter writer */
             MemoryStream buffer = new MemoryStream(65536);
             DeflateStream compressor = new DeflateStream(buffer, CompressionMode.Compress, true);
@@ -428,6 +439,15 @@ namespace MagicStorage.Components
 
         public override void NetReceive(BinaryReader trueReader, bool lightReceive)
         {
+            //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet
+            byte workaround = trueReader.ReadByte();
+
+            if (EditsLoader.MessageTileEntitySyncing || workaround != 1)
+            {
+                base.NetReceive(trueReader, lightReceive);
+                return;
+            }
+
             /* Reads the buffer off the network */
             MemoryStream buffer = new MemoryStream(65536);
             BinaryWriter bufferWriter = new BinaryWriter(buffer);

@@ -7,6 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using MagicStorage.Components;
+using MagicStorage.Edits;
 
 namespace MagicStorage
 {
@@ -19,6 +20,14 @@ namespace MagicStorage
         public static void HandlePacket(BinaryReader reader, int sender)
         {
             MessageType type = (MessageType)reader.ReadByte();
+
+            /*
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+                Main.NewText($"Receiving Message Type \"{Enum.GetName(typeof(MessageType), type)}\"");
+            else if(Main.netMode == NetmodeID.Server)
+                Console.WriteLine($"Receiving Message Type \"{Enum.GetName(typeof(MessageType), type)}\"");
+            */
+
             if (type == MessageType.SearchAndRefreshNetwork)
             {
                 ReceiveSearchAndRefresh(reader);
@@ -33,7 +42,7 @@ namespace MagicStorage
             }
             else if (type == MessageType.RefreshNetworkItems)
             {
-                StorageGUI.RefreshItems();
+                ReceiveRefreshNetworkItems(reader);
             }
             else if (type == MessageType.ClientSendTEUpdate)
             {
@@ -58,6 +67,10 @@ namespace MagicStorage
             else if (type == MessageType.CraftResult)
             {
                 ReceiveCraftResult(reader);
+            }
+            else if (type == MessageType.NetWorkaround)
+            {
+                ReceiveNetWorkaround(reader);
             }
         }
 
@@ -179,17 +192,37 @@ namespace MagicStorage
 
         public static void ReceiveStorageOperation(BinaryReader reader, int sender)
         {
+            int ent = reader.ReadInt32();
+            byte op = reader.ReadByte();
+
+            /*
+            if (Main.netMode == NetmodeID.Server)
+                Console.WriteLine($"Receiving Storage Operation {op} from entity {ent}");
+            else
+                Main.NewText($"Receiving Storage Operation {op} from entity {ent}");
+            */
+
             if (Main.netMode != 2)
             {
+                //The data still needs to be read for exceptions to not be thrown...
+                if (op == 0 || op == 1 || op == 3)
+                {
+                    ItemIO.Receive(reader, true);
+                }
+                else if (op == 3)
+                {
+                    int count = reader.ReadByte();
+                    for (int i = 0; i < count; i++)
+                        ItemIO.Receive(reader, true);
+                }
+
                 return;
             }
-            int ent = reader.ReadInt32();
             if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
             {
                 return;
             }
             TEStorageHeart heart = (TEStorageHeart)TileEntity.ByID[ent];
-            byte op = reader.ReadByte();
             if (op == 0)
             {
                 Item item = ItemIO.Receive(reader, true);
@@ -243,15 +276,40 @@ namespace MagicStorage
 
         public static void ReceiveOperationResult(BinaryReader reader)
         {
+            byte op = reader.ReadByte();
+
+            /*
+            if (Main.netMode == NetmodeID.Server)
+                Console.WriteLine($"Receiving Operation Result {op}");
+            else
+                Main.NewText($"Receiving Operation Result {op}");
+            */
+
             if (Main.netMode != 1)
             {
+                //The data still needs to be read for exceptions to not be thrown...
+                if (op == 0 || op == 1 || op == 3)
+                {
+                    ItemIO.Receive(reader, true);
+                }
+                else if (op == 2)
+                {
+                    int count = reader.ReadByte();
+                    for (int i = 0; i < count; i++)
+                        ItemIO.Receive(reader, true);
+                }
+
                 return;
             }
-            Player player = Main.player[Main.myPlayer];
-            byte op = reader.ReadByte();
             if (op == 0 || op == 1 || op == 3)
             {
                 Item item = ItemIO.Receive(reader, true);
+
+                /*
+                Main.NewText($"Item Read: [type: {item.type}, prefix: {item.prefix}, stack: {item.stack}]");
+                Main.NewText($"Reader Position: {reader.BaseStream.Position}");
+                */
+
                 StoragePlayer.GetItem(item, op != 3);
             }
             else if (op == 2)
@@ -260,6 +318,12 @@ namespace MagicStorage
                 for (int k = 0; k < count; k++)
                 {
                     Item item = ItemIO.Receive(reader, true);
+
+                    /*
+                    Main.NewText($"Item Read: [type: {item.type}, prefix: {item.prefix}, stack: {item.stack}]");
+                    Main.NewText($"Reader Position: {reader.BaseStream.Position}");
+                    */
+
                     StoragePlayer.GetItem(item, false);
                 }
             }
@@ -274,6 +338,23 @@ namespace MagicStorage
                 packet.Write(ent);
                 packet.Send();
             }
+        }
+
+        private static void ReceiveRefreshNetworkItems(BinaryReader reader)
+        {
+            int ent = reader.ReadInt32();
+            if (Main.netMode == 2)
+            {
+                return;
+            }
+
+            if (!TileEntity.ByID.TryGetValue(ent, out _))
+            {
+                //Nothing would've happened anyway
+                return;
+            }
+
+            StorageGUI.RefreshItems();
         }
 
         public static void ClientSendTEUpdate(int id)
@@ -306,6 +387,11 @@ namespace MagicStorage
                     }
                 }
                 NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, id, ent.Position.X, ent.Position.Y);
+            }
+            else if (Main.netMode == 1)
+            {
+                //Still need to read the data
+                reader.ReadInt32();
             }
         }
 
@@ -359,18 +445,32 @@ namespace MagicStorage
 
         public static void ReceiveStationOperation(BinaryReader reader, int sender)
         {
+            int ent = reader.ReadInt32();
+            byte op = reader.ReadByte();
             if (Main.netMode != 2)
             {
+                //Still need to read the data for exceptions to not be thrown...
+                if (op == 0)
+                {
+                    ItemIO.Receive(reader, true);
+                }
+                else if(op == 1)
+                {
+                    reader.ReadByte();
+                }
+                else if(op == 2)
+                {
+                    ItemIO.Receive(reader, true);
+                    reader.ReadByte();
+                }
                 return;
             }
-            int ent = reader.ReadInt32();
             if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess))
             {
                 return;
             }
             TECraftingAccess access = (TECraftingAccess)TileEntity.ByID[ent];
             Item[] stations = access.stations;
-            byte op = reader.ReadByte();
             if (op == 0)
             {
                 Item item = ItemIO.Receive(reader, true);
@@ -419,13 +519,14 @@ namespace MagicStorage
 
         public static void ReceiveStationResult(BinaryReader reader)
         {
+            //Still need to read the data for exceptions to not be thrown...
+            byte op = reader.ReadByte();
+            Item item = ItemIO.Receive(reader, true);
             if (Main.netMode != 1)
             {
                 return;
             }
             Player player = Main.player[Main.myPlayer];
-            byte op = reader.ReadByte();
-            Item item = ItemIO.Receive(reader, true);
             if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
             {
                 Main.mouseItem = item;
@@ -473,6 +574,10 @@ namespace MagicStorage
                     ((TEStorageHeart)TileEntity.ByID[ent]).ResetCompactStage();
                 }
             }
+            else if (Main.netMode == 1)
+            {
+                reader.ReadInt32();
+            }
         }
 
         public static void SendCraftRequest(int heart, List<Item> toWithdraw, Item result)
@@ -494,17 +599,22 @@ namespace MagicStorage
 
         public static void ReceiveCraftRequest(BinaryReader reader, int sender)
         {
+            int ent = reader.ReadInt32();
+            int count = reader.ReadInt32();
             if (Main.netMode != 2)
             {
+                //Still need to read the data for exceptions to not be thrown
+                for (int i = 0; i < count; i++)
+                    ItemIO.Receive(reader, true);
+
+                ItemIO.Receive(reader, true);
                 return;
             }
-            int ent = reader.ReadInt32();
             if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart))
             {
                 return;
             }
             TEStorageHeart heart = (TEStorageHeart)TileEntity.ByID[ent];
-            int count = reader.ReadInt32();
             List<Item> toWithdraw = new List<Item>();
             for (int k = 0; k < count; k++)
             {
@@ -536,6 +646,40 @@ namespace MagicStorage
                 player.QuickSpawnClonedItem(item, item.stack);
             }
         }
+
+        public static void ReceiveNetWorkaround(BinaryReader reader)
+        {
+            EditsLoader.MessageTileEntitySyncing = false;
+
+            int entityCount = reader.ReadUInt16();
+            for (int i = 0; i < entityCount; i++)
+            {
+                /*
+                long entStart = reader.BaseStream.Position;
+
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                {
+                    byte type = reader.ReadByte();
+                    reader.BaseStream.Seek(-1, SeekOrigin.Current);
+                    MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
+                }
+                */
+
+                TileEntity.Read(reader);
+
+                /*
+                if (Main.netMode == NetmodeID.MultiplayerClient)
+                    MagicStorage.Instance.Logger.Debug($"Bytes read (#{i + 1}): {reader.BaseStream.Position - entStart} (total: {reader.BaseStream.Position})");
+                */
+            }
+
+            /*
+            long end = reader.BaseStream.Position;
+
+            if (Main.netMode == NetmodeID.MultiplayerClient && entityCount > 0)
+                MagicStorage.Instance.Logger.Debug($"Received netmessage workaround - {entityCount} entities read, {end} bytes read");
+            */
+        }
     }
 
     enum MessageType : byte
@@ -549,6 +693,7 @@ namespace MagicStorage
         StationOperationResult,
         ResetCompactStage,
         CraftRequest,
-        CraftResult
+        CraftResult,
+        NetWorkaround
     }
 }
