@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using MagicStorageExtra.Edits;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
-using MagicStorageExtra.Edits;
 
 namespace MagicStorageExtra
 {
@@ -314,47 +314,7 @@ namespace MagicStorageExtra
 
 		public override void AddRecipeGroups()
 		{
-			var group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest",
-				ItemID.Chest,
-				ItemID.GoldChest,
-				ItemID.ShadowChest,
-				ItemID.EbonwoodChest,
-				ItemID.RichMahoganyChest,
-				ItemID.PearlwoodChest,
-				ItemID.IvyChest,
-				ItemID.IceChest,
-				ItemID.LivingWoodChest,
-				ItemID.SkywareChest,
-				ItemID.ShadewoodChest,
-				ItemID.WebCoveredChest,
-				ItemID.LihzahrdChest,
-				ItemID.WaterChest,
-				ItemID.JungleChest,
-				ItemID.CorruptionChest,
-				ItemID.CrimsonChest,
-				ItemID.HallowedChest,
-				ItemID.FrozenChest,
-				ItemID.DynastyChest,
-				ItemID.HoneyChest,
-				ItemID.SteampunkChest,
-				ItemID.PalmWoodChest,
-				ItemID.MushroomChest,
-				ItemID.BorealWoodChest,
-				ItemID.SlimeChest,
-				ItemID.GreenDungeonChest,
-				ItemID.PinkDungeonChest,
-				ItemID.BlueDungeonChest,
-				ItemID.BoneChest,
-				ItemID.CactusChest,
-				ItemID.FleshChest,
-				ItemID.ObsidianChest,
-				ItemID.PumpkinChest,
-				ItemID.SpookyChest,
-				ItemID.GlassChest,
-				ItemID.MartianChest,
-				ItemID.GraniteChest,
-				ItemID.MeteoriteChest,
-				ItemID.MarbleChest);
+			var group = new RecipeGroup(() => Language.GetText("LegacyMisc.37") + " Chest", ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest, ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest, ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest, ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest, ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest, ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest);
 			RecipeGroup.RegisterGroup("MagicStorageExtra:AnyChest", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Language.GetTextValue("Mods.MagicStorageExtra.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 			if (bluemagicMod != null)

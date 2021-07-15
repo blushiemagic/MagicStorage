@@ -376,21 +376,19 @@ namespace MagicStorageExtra
 		{
 			if (recipeButtons == null)
 			{
-				recipeButtons = new UIButtonChoice(RefreshItems,
-					new[]
-					{
-						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAvailable"),
-						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll"),
-						MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"),
-						MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll")
-					},
-					new[]
-					{
-						Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),
-						Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
-						Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
-						Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
-					});
+				recipeButtons = new UIButtonChoice(RefreshItems, new[]
+				{
+					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAvailable"),
+					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll"),
+					MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"),
+					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll")
+				}, new[]
+				{
+					Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),
+					Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
+					Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
+					Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
+				});
 				if (MagicStorageConfig.useConfigFilter)
 					recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
 			}
@@ -414,11 +412,7 @@ namespace MagicStorageExtra
 		{
 			try
 			{
-				if (MagicStorageExtra.IsItemKnownHotKey != null &&
-				    MagicStorageExtra.IsItemKnownHotKey.GetAssignedKeys().Count > 0 &&
-				    MagicStorageExtra.IsItemKnownHotKey.JustPressed &&
-				    Main.HoverItem != null &&
-				    !Main.HoverItem.IsAir)
+				if (MagicStorageExtra.IsItemKnownHotKey != null && MagicStorageExtra.IsItemKnownHotKey.GetAssignedKeys().Count > 0 && MagicStorageExtra.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir)
 				{
 					string s = Main.HoverItem.Name + " is ";
 					int t = Main.HoverItem.type;
@@ -479,8 +473,7 @@ namespace MagicStorageExtra
 				Player player = Main.LocalPlayer;
 				Initialize();
 				InitReflection();
-				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft &&
-				    Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
+				if (Main.mouseX > panelLeft && Main.mouseX < recipeWidth + panelWidth + panelLeft && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 				{
 					player.mouseInterface = true;
 					player.showItemIcon = false;
@@ -514,12 +507,7 @@ namespace MagicStorageExtra
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 
-			if (Main.netMode == NetmodeID.SinglePlayer &&
-			    curMouse.X > dim.X && curMouse.X < dim.X + dim.Width &&
-			    curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height &&
-			    selectedRecipe != null &&
-			    Main.mouseItem.IsAir &&
-			    CanItemBeTakenForTest(selectedRecipe.createItem))
+			if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height && selectedRecipe != null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
 				Main.instance.MouseText(Language.GetText("Mods.MagicStorageExtra.CraftTooltip").Value);
 		}
 
@@ -759,11 +747,11 @@ namespace MagicStorageExtra
 			}
 
 			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
-			Vector2 boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
+			var boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
 			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
 			Rectangle dim2 = scrollBar2.GetClippingRectangle(Main.spriteBatch);
-			Vector2 box2Pos = new Vector2(dim2.X, dim2.Y + dim2.Height * (scrollBar2.ViewPosition / scrollBar2MaxViewSize));
+			var box2Pos = new Vector2(dim2.X, dim2.Y + dim2.Height * (scrollBar2.ViewPosition / scrollBar2MaxViewSize));
 			float box2Height = dim2.Height * (scrollBar2ViewSize / scrollBar2MaxViewSize);
 			if (scrollBarFocus > 0)
 			{
@@ -787,15 +775,13 @@ namespace MagicStorageExtra
 			}
 			else if (MouseClicked)
 			{
-				if (curMouse.X > boxPos.X && curMouse.X < boxPos.X + boxWidth &&
-				    curMouse.Y > boxPos.Y - 3f && curMouse.Y < boxPos.Y + boxHeight + 4f)
+				if (curMouse.X > boxPos.X && curMouse.X < boxPos.X + boxWidth && curMouse.Y > boxPos.Y - 3f && curMouse.Y < boxPos.Y + boxHeight + 4f)
 				{
 					scrollBarFocus = 1;
 					scrollBarFocusMouseStart = curMouse.Y;
 					scrollBarFocusPositionStart = scrollBar.ViewPosition;
 				}
-				else if (curMouse.X > box2Pos.X && curMouse.X < box2Pos.X + boxWidth &&
-				         curMouse.Y > box2Pos.Y - 3f && curMouse.Y < box2Pos.Y + box2Height + 4f)
+				else if (curMouse.X > box2Pos.X && curMouse.X < box2Pos.X + boxWidth && curMouse.Y > box2Pos.Y - 3f && curMouse.Y < box2Pos.Y + box2Height + 4f)
 				{
 					scrollBarFocus = 2;
 					scrollBarFocusMouseStart = curMouse.Y;
@@ -814,8 +800,7 @@ namespace MagicStorageExtra
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 			bool flag = false;
-			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width &&
-			    curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				craftButton.BackgroundColor = new Color(73, 94, 171);
 				if (RightMouseClicked && selectedRecipe != null && Main.mouseItem.IsAir)
@@ -824,17 +809,14 @@ namespace MagicStorageExtra
 					if (CanItemBeTakenForTest(item))
 					{
 						int type = item.type;
-						Item testItem = new Item();
+						var testItem = new Item();
 						testItem.SetDefaults(type, true);
 						MarkAsTestItem(testItem);
 						Main.mouseItem = testItem;
 						ModPlayer.TestedRecipes.Add(selectedRecipe.createItem);
 					}
 				}
-				else if (curMouse.LeftButton == ButtonState.Pressed &&
-				         selectedRecipe != null &&
-				         IsAvailable(selectedRecipe, false) &&
-				         PassesBlock(selectedRecipe))
+				else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe != null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
 					if (craftTimer <= 0)
 					{
@@ -871,19 +853,7 @@ namespace MagicStorageExtra
 		}
 
 		private static bool CanItemBeTakenForTest(Item item) =>
-			Main.netMode == NetmodeID.SinglePlayer &&
-			!item.consumable &&
-			(item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee ||
-			 item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 ||
-			 item.accessory || Main.projHook[item.shoot] ||
-			 item.pick > 0 || item.axe > 0 || item.hammer > 0) &&
-			!item.summon &&
-			item.createTile < TileID.Dirt &&
-			item.createWall < 0 &&
-			!item.potion &&
-			item.fishingPole <= 1 &&
-			item.ammo == AmmoID.None &&
-			!ModPlayer.TestedRecipes.Contains(item);
+			Main.netMode == NetmodeID.SinglePlayer && !item.consumable && (item.mana > 0 || item.magic || item.ranged || item.thrown || item.melee || item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0 || item.accessory || Main.projHook[item.shoot] || item.pick > 0 || item.axe > 0 || item.hammer > 0) && !item.summon && item.createTile < TileID.Dirt && item.createWall < 0 && !item.potion && item.fishingPole <= 1 && item.ammo == AmmoID.None && !ModPlayer.TestedRecipes.Contains(item);
 
 		public static void MarkAsTestItem(Item testItem)
 		{
@@ -928,8 +898,8 @@ namespace MagicStorageExtra
 			InitSortButtons();
 			InitRecipeButtons();
 			InitFilterButtons();
-			SortMode sortMode = (SortMode) sortButtons.Choice;
-			FilterMode filterMode = (FilterMode) filterButtons.Choice;
+			var sortMode = (SortMode) sortButtons.Choice;
+			var filterMode = (FilterMode) filterButtons.Choice;
 
 			RefreshStorageItems();
 
@@ -1402,7 +1372,7 @@ namespace MagicStorageExtra
 					{
 						foreach (Item item in storageItems)
 						{
-							ItemData data = new ItemData(item);
+							var data = new ItemData(item);
 							if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.type, ingredient.type))
 							{
 								stack -= item.stack;
@@ -1413,7 +1383,7 @@ namespace MagicStorageExtra
 						if (!useRecipeGroup)
 							foreach (Item item in storageItems)
 							{
-								ItemData data = new ItemData(item);
+								var data = new ItemData(item);
 								if (!blockStorageItems.Contains(data) && item.type == ingredient.type)
 									stack -= item.stack;
 							}
@@ -1463,9 +1433,7 @@ namespace MagicStorageExtra
 		}
 
 		private static bool RecipeGroupMatch(Recipe recipe, int invType, int reqType) =>
-			recipe.useWood(invType, reqType) || recipe.useSand(invType, reqType) ||
-			recipe.useIronBar(invType, reqType) || recipe.useFragment(invType, reqType) ||
-			recipe.AcceptedByItemGroups(invType, reqType) || recipe.usePressurePlate(invType, reqType);
+			recipe.useWood(invType, reqType) || recipe.useSand(invType, reqType) || recipe.useIronBar(invType, reqType) || recipe.useFragment(invType, reqType) || recipe.AcceptedByItemGroups(invType, reqType) || recipe.usePressurePlate(invType, reqType);
 
 		private static void HoverStation(int slot, ref int hoverSlot)
 		{
@@ -1665,7 +1633,7 @@ namespace MagicStorageExtra
 				item.newAndShiny = false;
 				if (MouseClicked)
 				{
-					ItemData data = new ItemData(item);
+					var data = new ItemData(item);
 					lock (blockStorageItems)
 					{
 						if (blockStorageItems.Contains(data))

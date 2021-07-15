@@ -75,7 +75,8 @@ namespace MagicStorageExtra.Components
 				GetHeart().EnterReadLock();
 			try
 			{
-				if (ignorePrefix) return hasItemNoPrefix.Contains(check.type);
+				if (ignorePrefix)
+					return hasItemNoPrefix.Contains(check.type);
 				var data = new ItemData(check);
 				return hasItem.Contains(data);
 			}
@@ -96,7 +97,8 @@ namespace MagicStorageExtra.Components
 				GetHeart().EnterWriteLock();
 			try
 			{
-				if (CraftingGUI.IsTestItem(toDeposit)) return;
+				if (CraftingGUI.IsTestItem(toDeposit))
+					return;
 				Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
@@ -109,8 +111,10 @@ namespace MagicStorageExtra.Components
 							newStack = item.maxStack;
 						item.stack = newStack;
 
-						if (toDeposit.favorited) item.favorited = true;
-						if (toDeposit.newAndShiny) item.newAndShiny = MagicStorageConfig.glowNewItems;
+						if (toDeposit.favorited)
+							item.favorited = true;
+						if (toDeposit.newAndShiny)
+							item.newAndShiny = MagicStorageConfig.glowNewItems;
 
 						hasChange = true;
 						toDeposit.stack = total - newStack;
@@ -166,7 +170,8 @@ namespace MagicStorageExtra.Components
 							maxToTake -= 1;
 						int withdraw = Math.Min(lookFor.stack, maxToTake);
 						item.stack -= withdraw;
-						if (item.stack <= 0) items.RemoveAt(k);
+						if (item.stack <= 0)
+							items.RemoveAt(k);
 						result.stack += withdraw;
 						lookFor.stack -= withdraw;
 						if (lookFor.stack <= 0)
@@ -289,7 +294,7 @@ namespace MagicStorageExtra.Components
 		public override TagCompound Save()
 		{
 			TagCompound tag = base.Save();
-			var tagItems = items.Select(ItemIO.Save).ToList();
+			List<TagCompound> tagItems = items.Select(ItemIO.Save).ToList();
 			tag.Set("Items", tagItems);
 			return tag;
 		}
@@ -317,12 +322,12 @@ namespace MagicStorageExtra.Components
 			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
 			if (EditsLoader.MessageTileEntitySyncing)
 			{
-				trueWriter.Write((byte)0);
+				trueWriter.Write((byte) 0);
 				base.NetSend(trueWriter, lightSend);
 				return;
 			}
 
-			trueWriter.Write((byte)1);
+			trueWriter.Write((byte) 1);
 
 			/* Recreate a BinaryWriter writer */
 			var buffer = new MemoryStream(65536);

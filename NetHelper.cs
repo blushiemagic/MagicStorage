@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using MagicStorageExtra.Components;
+using MagicStorageExtra.Edits;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using MagicStorageExtra.Components;
-using MagicStorageExtra.Edits;
 
 namespace MagicStorageExtra
 {
@@ -211,6 +210,7 @@ namespace MagicStorageExtra
 
 				return;
 			}
+
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
 				return;
 			if (op == 0)
@@ -328,15 +328,11 @@ namespace MagicStorageExtra
 		{
 			int ent = reader.ReadInt32();
 			if (Main.netMode == NetmodeID.Server)
-			{
 				return;
-			}
 
 			if (!TileEntity.ByID.TryGetValue(ent, out _))
-			{
 				//Nothing would've happened anyway
 				return;
-			}
 
 			StorageGUI.RefreshItems();
 		}
@@ -358,7 +354,7 @@ namespace MagicStorageExtra
 			if (Main.netMode == NetmodeID.Server)
 			{
 				int id = reader.ReadInt32();
-				var ent = TileEntity.Read(reader, true);
+				TileEntity ent = TileEntity.Read(reader, true);
 				ent.ID = id;
 				TileEntity.ByID[id] = ent;
 				TileEntity.ByPosition[ent.Position] = ent;
@@ -437,22 +433,22 @@ namespace MagicStorageExtra
 				{
 					ItemIO.Receive(reader, true);
 				}
-				else if(op == 1)
+				else if (op == 1)
 				{
 					reader.ReadByte();
 				}
-				else if(op == 2)
+				else if (op == 2)
 				{
 					ItemIO.Receive(reader, true);
 					reader.ReadByte();
 				}
-				
+
 				return;
 			}
-			
+
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess access))
 				return;
-			
+
 			if (op == 0)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
@@ -581,13 +577,13 @@ namespace MagicStorageExtra
 					ItemIO.Receive(reader, true);
 
 				ItemIO.Receive(reader, true);
-				
+
 				return;
 			}
 
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
 				return;
-			
+
 			var toWithdraw = new List<Item>();
 			for (int k = 0; k < withdrawCount; k++)
 				toWithdraw.Add(ItemIO.Receive(reader, true, true));
@@ -651,24 +647,21 @@ namespace MagicStorageExtra
 
 			int entityCount = reader.ReadUInt16();
 			for (int i = 0; i < entityCount; i++)
-			{
 				/*
-				long entStart = reader.BaseStream.Position;
-				if (Main.netMode == NetmodeID.MultiplayerClient)
-				{
-					byte type = reader.ReadByte();
-					reader.BaseStream.Seek(-1, SeekOrigin.Current);
-					MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
-				}
-				*/
+					long entStart = reader.BaseStream.Position;
+					if (Main.netMode == NetmodeID.MultiplayerClient)
+					{
+						byte type = reader.ReadByte();
+						reader.BaseStream.Seek(-1, SeekOrigin.Current);
+						MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
+					}
+					*/
 
 				TileEntity.Read(reader);
-
-				/*
+			/*
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					MagicStorage.Instance.Logger.Debug($"Bytes read (#{i + 1}): {reader.BaseStream.Position - entStart} (total: {reader.BaseStream.Position})");
 				*/
-			}
 
 			/*
 			long end = reader.BaseStream.Position;

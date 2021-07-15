@@ -100,9 +100,7 @@ namespace MagicStorageExtra
 			{
 				int playerX = (int) (player.Center.X / 16f);
 				int playerY = (int) (player.Center.Y / 16f);
-				if (!remoteAccess &&
-				    (playerX < storageAccess.X - player.lastTileRangeX || playerX > storageAccess.X + player.lastTileRangeX + 1 ||
-				     playerY < storageAccess.Y - player.lastTileRangeY || playerY > storageAccess.Y + player.lastTileRangeY + 1))
+				if (!remoteAccess && (playerX < storageAccess.X - player.lastTileRangeX || playerX > storageAccess.X + player.lastTileRangeX + 1 || playerY < storageAccess.Y - player.lastTileRangeY || playerY > storageAccess.Y + player.lastTileRangeY + 1))
 				{
 					Main.PlaySound(SoundID.MenuClose);
 					CloseStorage();
@@ -256,7 +254,8 @@ namespace MagicStorageExtra
 
 		public override bool CanHitPvp(Item item, Player target)
 		{
-			if (CraftingGUI.IsTestItem(item)) return false;
+			if (CraftingGUI.IsTestItem(item))
+				return false;
 			return base.CanHitPvp(item, target);
 		}
 

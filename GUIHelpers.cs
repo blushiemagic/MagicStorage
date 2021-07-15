@@ -11,23 +11,21 @@ namespace MagicStorageExtra
 	{
 		public static UIButtonChoice MakeSortButtons(Action onChanged)
 		{
-			return new UIButtonChoice(onChanged,
-				new[]
-				{
-					Main.inventorySortTexture[0],
-					MagicStorageExtra.Instance.GetTexture("Assets/SortID"),
-					MagicStorageExtra.Instance.GetTexture("Assets/SortName"),
-					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber"),
-					MagicStorageExtra.Instance.GetTexture("Assets/SortNumber")
-				},
-				new[]
-				{
-					Language.GetText("Mods.MagicStorageExtra.SortDefault"),
-					Language.GetText("Mods.MagicStorageExtra.SortID"),
-					Language.GetText("Mods.MagicStorageExtra.SortName"),
-					Language.GetText("Mods.MagicStorageExtra.SortValue"),
-					Language.GetText("Mods.MagicStorageExtra.SortDps")
-				});
+			return new UIButtonChoice(onChanged, new[]
+			{
+				Main.inventorySortTexture[0],
+				MagicStorageExtra.Instance.GetTexture("Assets/SortID"),
+				MagicStorageExtra.Instance.GetTexture("Assets/SortName"),
+				MagicStorageExtra.Instance.GetTexture("Assets/SortNumber"),
+				MagicStorageExtra.Instance.GetTexture("Assets/SortNumber")
+			}, new[]
+			{
+				Language.GetText("Mods.MagicStorageExtra.SortDefault"),
+				Language.GetText("Mods.MagicStorageExtra.SortID"),
+				Language.GetText("Mods.MagicStorageExtra.SortName"),
+				Language.GetText("Mods.MagicStorageExtra.SortValue"),
+				Language.GetText("Mods.MagicStorageExtra.SortDps")
+			});
 		}
 
 		public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged)

@@ -8,9 +8,8 @@ namespace MagicStorageExtra.Components
 {
 	public class TERemoteAccess : TEStorageCenter
 	{
-		private Point16 locator = new Point16(-1, -1);
-
 		private bool _loaded;
+		private Point16 locator = new Point16(-1, -1);
 
 		internal bool Loaded
 		{

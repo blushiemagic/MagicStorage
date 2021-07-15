@@ -168,7 +168,7 @@ namespace MagicStorageExtra.Components
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
 			var frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
-			var color = Color.Lerp(Color.White, lightColor, 0.5f);
+			Color color = Color.Lerp(Color.White, lightColor, 0.5f);
 			spriteBatch.Draw(mod.GetTexture("Components/StorageUnit_Glow"), drawPos, frame, color);
 		}
 	}

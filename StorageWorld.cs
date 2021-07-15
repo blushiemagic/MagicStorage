@@ -94,7 +94,7 @@ namespace MagicStorageExtra
 			{
 				#region Initialize TileToCreatingItem
 
-				var tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) =>
+				Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) =>
 					{
 						var item = new Item();
 						// provide items

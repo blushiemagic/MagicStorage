@@ -12,7 +12,8 @@ namespace MagicStorageExtra.Sorting
 		{
 			ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where(item => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
-			if (takeCount != null) filteredItems = filteredItems.Take(takeCount.Value);
+			if (takeCount != null)
+				filteredItems = filteredItems.Take(takeCount.Value);
 			CompareFunction func = MakeSortFunction(sortMode);
 			return func is null ? filteredItems : filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
 		}
@@ -112,13 +113,15 @@ namespace MagicStorageExtra.Sorting
 
 		private static bool FilterName(Item item, string filter)
 		{
-			if (filter.Trim().Length == 0) filter = string.Empty;
+			if (filter.Trim().Length == 0)
+				filter = string.Empty;
 			return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant(), StringComparison.Ordinal) >= 0;
 		}
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{
-			if (modFilterIndex == ModSearchBox.ModIndexAll) return true;
+			if (modFilterIndex == ModSearchBox.ModIndexAll)
+				return true;
 			Mod[] allMods = MagicStorageExtra.Instance.AllMods;
 			int index = ModSearchBox.ModIndexBaseGame;
 			if (item.modItem != null)

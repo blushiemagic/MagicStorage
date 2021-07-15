@@ -101,7 +101,8 @@ namespace MagicStorageExtra.UI
 				if (!newString.Equals(prev))
 				{
 					int newStringLength = newString.Length;
-					if (prev != Text) newString += Text.Substring(cursorPosition);
+					if (prev != Text)
+						newString += Text.Substring(cursorPosition);
 					Text = newString;
 					cursorPosition = newStringLength;
 					changed = true;

@@ -20,7 +20,8 @@ namespace MagicStorageExtra
 
 		public static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
-			if (!Main.instance.IsActive) return;
+			if (!Main.instance.IsActive)
+				return;
 			for (int k = 0; k < layers.Count; k++)
 				if (layers[k].Name == "Vanilla: Inventory")
 				{
@@ -32,7 +33,7 @@ namespace MagicStorageExtra
 		public static bool DrawStorageGUI()
 		{
 			Player player = Main.LocalPlayer;
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			Point16 storageAccess = modPlayer.ViewingStorage();
 			if (Main.playerInventory && storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{

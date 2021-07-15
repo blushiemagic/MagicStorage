@@ -32,12 +32,15 @@ namespace MagicStorageExtra
 
 		private void SetSearchMod(int index, bool silent)
 		{
-			if (ModIndex == index) return;
+			if (ModIndex == index)
+				return;
 			ModIndex = index;
 			_modButton?.SetText(MakeModButtonText());
 			ModName = "";
-			if (index > -1) ModName = MagicStorageExtra.Instance.AllMods[index].Name;
-			if (!silent) OnChanged?.Invoke();
+			if (index > -1)
+				ModName = MagicStorageExtra.Instance.AllMods[index].Name;
+			if (!silent)
+				OnChanged?.Invoke();
 		}
 
 		public void Reset(bool silent)
