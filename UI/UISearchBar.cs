@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,19 +18,16 @@ namespace MagicStorageExtra.UI
 		private const int padding = 4;
 		private static readonly List<UISearchBar> searchBars = new List<UISearchBar>();
 		private readonly Action _clearedEvent;
-		private readonly LocalizedText defaultText = Language.GetText("Mods.MagicStorageExtra.Search");
+		private readonly LocalizedText defaultText;
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
+		private static readonly Texture2D texture = ModContent.GetTexture("MagicStorageExtra/Assets/SearchBar");
 
-		public UISearchBar()
+		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
 			SetPadding(padding);
 			searchBars.Add(this);
-		}
-
-		public UISearchBar(LocalizedText defaultText, Action clearedEvent) : this()
-		{
 			this.defaultText = defaultText;
 			_clearedEvent = clearedEvent;
 		}
@@ -51,92 +49,105 @@ namespace MagicStorageExtra.UI
 
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			MouseState mouse = StorageGUI.curMouse;
-			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width &&
+			                 mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
 			if (StorageGUI.MouseClicked && Parent != null)
-			{
-				if (!hasFocus && mouseOver)
-				{
-					hasFocus = true;
-					CheckBlockInput();
-				}
-				else if (hasFocus && !mouseOver)
-				{
-					hasFocus = false;
-					CheckBlockInput();
-					cursorPosition = Text.Length;
-				}
-			}
-			else if (StorageGUI.curMouse.RightButton == ButtonState.Pressed && StorageGUI.oldMouse.RightButton == ButtonState.Released)
-			{
-				if (!mouseOver && Parent != null && hasFocus)
-				{
-					hasFocus = false;
-					cursorPosition = Text.Length;
-					CheckBlockInput();
-				}
-				else if (mouseOver && Text.Length > 0)
-				{
-					Text = string.Empty;
-					cursorPosition = 0;
-					_clearedEvent?.Invoke();
-				}
-			}
+				LeftClick(mouseOver);
+			else if (StorageGUI.RightMouseClicked)
+				RightClick(mouseOver);
 
 			if (hasFocus)
-			{
-				PlayerInput.WritingText = true;
-				Main.instance.HandleIME();
-				string prev = Text;
-				if (cursorPosition < Text.Length && Text.Length > 0)
-					prev = prev.Remove(cursorPosition);
-				string newString = Main.GetInputText(prev);
-				if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
-				{
-					string trimmed = newString.TrimEnd();
-					int index = trimmed.LastIndexOf(" ", trimmed.Length, StringComparison.Ordinal);
-					newString = index != -1 ? trimmed.Substring(0, index) : string.Empty;
-				}
-
-				bool changed = false;
-				if (!newString.Equals(prev))
-				{
-					int newStringLength = newString.Length;
-					if (prev != Text)
-						newString += Text.Substring(cursorPosition);
-					Text = newString;
-					cursorPosition = newStringLength;
-					changed = true;
-				}
-
-				if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
-				{
-					Text = Text.Remove(cursorPosition, 1);
-					changed = true;
-				}
-
-				if (KeyTyped(Keys.Left) && cursorPosition > 0)
-					cursorPosition--;
-				if (KeyTyped(Keys.Right) && cursorPosition < Text.Length)
-					cursorPosition++;
-				if (KeyTyped(Keys.Home))
-					cursorPosition = 0;
-				if (KeyTyped(Keys.End))
-					cursorPosition = Text.Length;
-				if (changed)
-					StorageGUI.RefreshItems();
-				if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
-				{
-					hasFocus = false;
-					CheckBlockInput();
-				}
-			}
+				HandleTextInput();
 
 			base.Update(gameTime);
 		}
 
+		private void LeftClick(bool mouseOver)
+		{
+			if (!hasFocus && mouseOver)
+			{
+				hasFocus = true;
+				CheckBlockInput();
+			}
+			else if (hasFocus && !mouseOver)
+			{
+				LoseFocus();
+			}
+		}
+
+		private void RightClick(bool mouseOver)
+		{
+			if (!mouseOver && Parent != null && hasFocus)
+			{
+				LoseFocus();
+			}
+			else if (mouseOver && Text.Length > 0)
+			{
+				Text = string.Empty;
+				cursorPosition = 0;
+				_clearedEvent?.Invoke();
+			}
+		}
+
+		private void LoseFocus()
+		{
+			hasFocus = false;
+			CheckBlockInput();
+			cursorPosition = Text.Length;
+		}
+
+		private void HandleTextInput()
+		{
+			PlayerInput.WritingText = true;
+			Main.instance.HandleIME();
+			string prev = Text;
+			if (cursorPosition < Text.Length && Text.Length > 0)
+				prev = prev.Remove(cursorPosition);
+
+			string newString = Main.GetInputText(prev);
+			if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
+				DeleteWord(ref newString);
+
+			if (newString != prev)
+			{
+				int newStringLength = newString.Length;
+				if (prev != Text)
+					newString += Text.Substring(cursorPosition);
+				Text = newString;
+				cursorPosition = newStringLength;
+				StorageGUI.RefreshItems();
+			}
+
+			if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
+			{
+				Text = Text.Remove(cursorPosition, 1);
+				StorageGUI.RefreshItems();
+			}
+
+			if (KeyTyped(Keys.Left) && cursorPosition > 0)
+				cursorPosition--;
+			if (KeyTyped(Keys.Right) && cursorPosition < Text.Length)
+				cursorPosition++;
+			if (KeyTyped(Keys.Home))
+				cursorPosition = 0;
+			if (KeyTyped(Keys.End))
+				cursorPosition = Text.Length;
+			if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
+			{
+				hasFocus = false;
+				CheckBlockInput();
+			}
+		}
+
+		private static void DeleteWord(ref string newString)
+		{
+			string trimmed = newString.TrimEnd();
+			int index = trimmed.LastIndexOf(" ", trimmed.Length, StringComparison.Ordinal);
+			newString = index != -1 ? trimmed.Substring(0, index) : string.Empty;
+		}
+
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			Texture2D texture = ModContent.GetTexture("MagicStorageExtra/Assets/SearchBar");
 			CalculatedStyle dim = GetDimensions();
 			int innerWidth = (int) dim.Width - 2 * padding;
 			int innerHeight = (int) dim.Height - 2 * padding;
@@ -172,17 +183,11 @@ namespace MagicStorageExtra.UI
 			}
 		}
 
-		public bool KeyTyped(Keys key) => Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
+		public static bool KeyTyped(Keys key) => Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
 
 		private static void CheckBlockInput()
 		{
-			Main.blockInput = false;
-			foreach (UISearchBar searchBar in searchBars)
-				if (searchBar.hasFocus)
-				{
-					Main.blockInput = true;
-					break;
-				}
+			Main.blockInput = searchBars.Any(searchBar => searchBar.hasFocus);
 		}
 	}
 }
