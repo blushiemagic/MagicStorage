@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Carmitane)");
             DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Carmesí)");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(血腥)");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Unidade de Armazenamento (Carmim)");
         }
 
         public override void SetDefaults()

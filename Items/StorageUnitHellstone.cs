@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Infernale)");
             DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Piedra Infernal)");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(狱岩)");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Unidade de Armazenamento (Pedra Infernal)");
         }
 
         public override void SetDefaults()

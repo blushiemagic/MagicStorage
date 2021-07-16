@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Amélioration d'Unité de stockage (Démonite)");
             DisplayName.AddTranslation(GameCulture.Spanish, "Actualización de Unidad de Almacenamiento (Endemoniado)");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储升级珠(魔金)");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Melhoria de Armazenamento (Demonita)");
 
             Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity"
                 + "\n<right> a Storage Unit to use");
@@ -29,6 +30,8 @@ namespace MagicStorage.Items
                 + "\n<right> en la unidad de almacenamiento para utilizar");
             Tooltip.AddTranslation(GameCulture.Chinese, "将存储单元升级至80容量"
                 + "\n<right>一个存储单元(魔金)可镶嵌");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "Melhora a unidade de armazenamento para abrigar até 80 itens diferentes"
+                + "\n<right> uma Unidade de Armazenamento para usar");
         }
 
         public override void SetDefaults()
