@@ -16,7 +16,7 @@ namespace MagicStorage.Components
         // Use StorageComponent_Highlight as the default highlight mask for subclasses
         public override string HighlightTexture { get { return typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight"; } }
 
-        public override void SetDefaults()
+        public override void SetStaticDefaults()
         {
             Main.tileSolidTop[Type] = true;
             Main.tileFrameImportant[Type] = true;
@@ -26,7 +26,7 @@ namespace MagicStorage.Components
             TileObjectData.newTile.CoordinateHeights = new int[] { 16, 16 };
             TileObjectData.newTile.CoordinateWidth = 16;
             TileObjectData.newTile.CoordinatePadding = 2;
-            TileObjectData.newTile.HookCheck = new PlacementHook(CanPlace, -1, 0, true);
+            TileObjectData.newTile.HookCheckIfCanPlace = new PlacementHook(CanPlace, -1, 0, true);
             TileObjectData.newTile.UsesCustomCanPlace = true;
             ModifyObjectData();
             ModTileEntity tileEntity = GetTileEntity();
@@ -42,8 +42,7 @@ namespace MagicStorage.Components
             ModTranslation text = CreateMapEntryName();
             text.SetDefault("Magic Storage");
             AddMapEntry(new Color(153, 107, 61), text);
-            dustType = 7;
-            disableSmartCursor = true;
+            DustType = 7;
             TileID.Sets.HasOutlines[Type] = HasSmartInteract();
         }
 
@@ -58,16 +57,16 @@ namespace MagicStorage.Components
 
         public virtual int ItemType(int frameX, int frameY)
         {
-            return mod.ItemType("StorageComponent");
+            return ModContent.ItemType<Items.StorageComponent>();
         }
 
         public static bool IsStorageComponent(Point16 point)
         {
             Tile tile = Main.tile[point.X, point.Y];
-            return tile.active() && TileLoader.GetTile(tile.type) is StorageComponent;
+            return tile.IsActive && TileLoader.GetTile(tile.type) is StorageComponent;
         }
 
-        public int CanPlace(int i, int j, int type, int style, int direction)
+        public int CanPlace(int i, int j, int type, int style, int direction, int alternative)
         {
             int count = 0;
             if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
@@ -76,9 +75,10 @@ namespace MagicStorage.Components
             }
 
             Point16 startSearch = new Point16(i - 1, j - 1);
-            HashSet<Point16> explored = new HashSet<Point16>();
-            explored.Add(startSearch);
-            Queue<Point16> toExplore = new Queue<Point16>();
+			HashSet<Point16> explored = new HashSet<Point16>(){
+				startSearch
+			};
+			Queue<Point16> toExplore = new Queue<Point16>();
             foreach (Point16 point in TEStorageComponent.AdjacentComponents(startSearch))
             {
                 toExplore.Enqueue(point);
@@ -118,7 +118,7 @@ namespace MagicStorage.Components
             }
             else
             {
-                if (Main.netMode == 1)
+                if (Main.netMode == NetmodeID.MultiplayerClient)
                 {
                     NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
                 }

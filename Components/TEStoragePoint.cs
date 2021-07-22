@@ -19,9 +19,10 @@ namespace MagicStorage.Components
             Point16 oldCenter = center;
             center = new Point16(-1, -1);
 
-            HashSet<Point16> explored = new HashSet<Point16>();
-            explored.Add(Position);
-            Queue<Point16> toExplore = new Queue<Point16>();
+			HashSet<Point16> explored = new HashSet<Point16>(){
+				Position
+			};
+			Queue<Point16> toExplore = new Queue<Point16>();
             foreach (Point16 point in AdjacentComponents())
             {
                 toExplore.Enqueue(point);
@@ -98,13 +99,13 @@ namespace MagicStorage.Components
             center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
             writer.Write(center.X);
             writer.Write(center.Y);
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
             center = new Point16(reader.ReadInt16(), reader.ReadInt16());
         }

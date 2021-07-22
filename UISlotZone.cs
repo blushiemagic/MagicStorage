@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -18,11 +19,9 @@ namespace MagicStorage
         private int numColumns = 10;
         private int numRows = 4;
         private int hoverSlot = -1;
-        private HoverItemSlot onHover;
-        private GetItem getItem;
-        private float inventoryScale;
-
-        private static Item[] temp = new Item[11];
+        private readonly HoverItemSlot onHover;
+        private readonly GetItem getItem;
+        private readonly float inventoryScale;
 
         public UISlotZone(HoverItemSlot onHover, GetItem getItem, float scale)
         {
@@ -46,8 +45,8 @@ namespace MagicStorage
             {
                 return;
             }
-            int slotWidth = (int)(Main.inventoryBackTexture.Width * inventoryScale * Main.UIScale);
-            int slotHeight = (int)(Main.inventoryBackTexture.Height * inventoryScale * Main.UIScale);
+            int slotWidth = (int)(TextureAssets.InventoryBack.Value.Width * inventoryScale * Main.UIScale);
+            int slotHeight = (int)(TextureAssets.InventoryBack.Value.Height * inventoryScale * Main.UIScale);
             int slotX = (curMouse.X - (int)origin.X) / (slotWidth + padding);
             int slotY = (curMouse.Y - (int)origin.Y) / (slotHeight + padding);
             if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= numRows)
@@ -63,8 +62,8 @@ namespace MagicStorage
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            float slotWidth = Main.inventoryBackTexture.Width * inventoryScale;
-            float slotHeight = Main.inventoryBackTexture.Height * inventoryScale;
+            float slotWidth = TextureAssets.InventoryBack.Value.Width * inventoryScale;
+            float slotHeight = TextureAssets.InventoryBack.Value.Height * inventoryScale;
             Vector2 origin = GetDimensions().Position();
             float oldScale = Main.inventoryScale;
             Main.inventoryScale = inventoryScale;

@@ -9,15 +9,16 @@ using Terraria.Localization;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.GameContent;
 
 namespace MagicStorage
 {
     public class UISearchBar : UIElement
     {
-        private static List<UISearchBar> searchBars = new List<UISearchBar>();
+        private static readonly List<UISearchBar> searchBars = new List<UISearchBar>();
 
         private const int padding = 4;
-        private LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
+        private readonly LocalizedText defaultText = Language.GetText("Mods.MagicStorage.Search");
         private string text = string.Empty;
         private int cursorPosition = 0;
         private bool hasFocus = false;
@@ -101,7 +102,7 @@ namespace MagicStorage
                     int newStringLength = newString.Length;
                     if (prev != text)
                     {
-                        newString += text.Substring(cursorPosition);
+                        newString += text[cursorPosition..];
                     }
                     text = newString;
                     cursorPosition = newStringLength;
@@ -151,7 +152,7 @@ namespace MagicStorage
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            Texture2D texture = ModContent.GetTexture("MagicStorage/SearchBar");
+            Texture2D texture = ModContent.Request<Texture2D>("MagicStorage/SearchBar").Value;
             CalculatedStyle dim = GetDimensions();
             int innerWidth = (int)dim.Width - 2 * padding;
             int innerHeight = (int)dim.Height - 2 * padding;
@@ -167,7 +168,7 @@ namespace MagicStorage
 
             bool isEmpty = text.Length == 0;
             string drawText = isEmpty ? defaultText.Value : text;
-            DynamicSpriteFont font = Main.fontMouseText;
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
             Vector2 size = font.MeasureString(drawText);
             float scale = innerHeight / size.Y;
             if (isEmpty && hasFocus)
@@ -188,7 +189,7 @@ namespace MagicStorage
             }
         }
 
-        public bool KeyTyped(Keys key)
+        public static bool KeyTyped(Keys key)
         {
             return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
         }

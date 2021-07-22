@@ -47,9 +47,9 @@ namespace MagicStorage.Components
 
         public TEStorageHeart GetHeart()
         {
-            if (center != new Point16(-1, -1) && TileEntity.ByPosition.ContainsKey(center) && TileEntity.ByPosition[center] is TEStorageCenter)
+            if (center != new Point16(-1, -1) && TileEntity.ByPosition.ContainsKey(center) && TileEntity.ByPosition[center] is TEStorageCenter entity)
             {
-                return ((TEStorageCenter)TileEntity.ByPosition[center]).GetHeart();
+                return entity.GetHeart();
             }
             return null;
         }
@@ -82,14 +82,14 @@ namespace MagicStorage.Components
             center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
             writer.Write(inactive);
             writer.Write(center.X);
             writer.Write(center.Y);
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
             inactive = reader.ReadBoolean();
             center = new Point16(reader.ReadInt16(), reader.ReadInt16());

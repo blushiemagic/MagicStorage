@@ -1,7 +1,7 @@
-author = blushiemagic
-version = 0.4.3.6
+author = blushiemagic & absoluteAquarian
+version = 0.5
 displayName = Magic Storage
-homepage = https://forums.terraria.org/index.php?threads/magic-storage.56294/
+homepage = https://forums.terraria.org/index.php?threads/magic-storage.106520/
 hideCode = false
 hideResources = false
 includeSource = true

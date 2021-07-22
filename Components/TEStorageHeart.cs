@@ -15,14 +15,14 @@ namespace MagicStorage.Components
 {
     public class TEStorageHeart : TEStorageCenter
     {
-        private ReaderWriterLockSlim itemsLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim itemsLock = new ReaderWriterLockSlim();
         public List<Point16> remoteAccesses = new List<Point16>();
         private int updateTimer = 60;
         private int compactStage = 0;
 
         public override bool ValidTile(Tile tile)
         {
-            return tile.type == mod.TileType("StorageHeart") && tile.frameX == 0 && tile.frameY == 0;
+            return tile.type == ModContent.TileType<StorageHeart>() && tile.frameX == 0 && tile.frameY == 0;
         }
 
         public override TEStorageHeart GetHeart()
@@ -73,7 +73,7 @@ namespace MagicStorage.Components
                     k--;
                 }
             }
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 return;
             }
@@ -81,7 +81,7 @@ namespace MagicStorage.Components
             if (updateTimer >= 60)
             {
                 updateTimer = 0;
-                if (Main.netMode != 2 || itemsLock.TryEnterWriteLock(2))
+                if (Main.netMode != NetmodeID.Server || itemsLock.TryEnterWriteLock(2))
                 {
                     try
                     {
@@ -89,7 +89,7 @@ namespace MagicStorage.Components
                     }
                     finally
                     {
-                        if (Main.netMode == 2)
+                        if (Main.netMode == NetmodeID.Server)
                         {
                             itemsLock.ExitWriteLock();
                         }
@@ -258,7 +258,7 @@ namespace MagicStorage.Components
 
         public void DepositItem(Item toDeposit)
         {
-            if (Main.netMode == 2)
+            if (Main.netMode == NetmodeID.Server)
             {
                 EnterWriteLock();
             }
@@ -294,7 +294,7 @@ namespace MagicStorage.Components
                 {
                     ResetCompactStage();
                 }
-                if (Main.netMode == 2)
+                if (Main.netMode == NetmodeID.Server)
                 {
                     ExitWriteLock();
                 }
@@ -303,11 +303,11 @@ namespace MagicStorage.Components
 
         public Item TryWithdraw(Item lookFor)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 return new Item();
             }
-            if (Main.netMode == 2)
+            if (Main.netMode == NetmodeID.Server)
             {
                 EnterWriteLock();
             }
@@ -345,7 +345,7 @@ namespace MagicStorage.Components
             }
             finally
             {
-                if (Main.netMode == 2)
+                if (Main.netMode == NetmodeID.Server)
                 {
                     ExitWriteLock();
                 }
@@ -376,9 +376,9 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
-            base.NetSend(writer, lightSend);
+            base.NetSend(writer);
             writer.Write((short)remoteAccesses.Count);
             foreach (Point16 remoteAccess in remoteAccesses)
             {
@@ -387,9 +387,9 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
-            base.NetReceive(reader, lightReceive);
+            base.NetReceive(reader);
             int count = reader.ReadInt16();
             for (int k = 0; k < count; k++)
             {

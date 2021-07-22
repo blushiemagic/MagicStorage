@@ -10,13 +10,13 @@ namespace MagicStorage.Sorting
 
         public int Compare(object object1, object object2)
         {
-            if (object1 is Item && object2 is Item)
+            if (object1 is Item item && object2 is Item item2)
             {
-                return Compare((Item)object1, (Item)object2);
+                return Compare(item, item2);
             }
-            if (object1 is Recipe && object2 is Recipe)
+            if (object1 is Recipe recipe && object2 is Recipe recipe2)
             {
-                return Compare(((Recipe)object1).createItem, ((Recipe)object2).createItem);
+                return Compare(recipe.createItem, recipe2.createItem);
             }
             return 0;
         }

@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.GameContent.Creative;
 
 namespace MagicStorage.Items
 {
@@ -10,39 +11,38 @@ namespace MagicStorage.Items
     {
         public override void SetStaticDefaults()
         {
-            DisplayName.AddTranslation(GameCulture.Russian, "Соединитель Ячеек Хранилища");
-            DisplayName.AddTranslation(GameCulture.Polish, "Łącznik");
-            DisplayName.AddTranslation(GameCulture.French, "Connecteur de Stockage");
-            DisplayName.AddTranslation(GameCulture.Spanish, "Conector de Almacenamiento");
-            DisplayName.AddTranslation(GameCulture.Chinese, "存储连接器");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Соединитель Ячеек Хранилища");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Łącznik");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Connecteur de Stockage");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Conector de Almacenamiento");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储连接器");
+
+            CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 100;
         }    
     
         public override void SetDefaults()
         {
-            item.width = 12;
-            item.height = 12;
-            item.maxStack = 999;
-            item.useTurn = true;
-            item.autoReuse = true;
-            item.useAnimation = 15;
-            item.useTime = 10;
-            item.useStyle = 1;
-            item.consumable = true;
-            item.rare = 0;
-            item.value = Item.sellPrice(0, 0, 0, 10);
-            item.createTile = mod.TileType("StorageConnector");
+            Item.width = 12;
+            Item.height = 12;
+            Item.maxStack = 999;
+            Item.useTurn = true;
+            Item.autoReuse = true;
+            Item.useAnimation = 15;
+            Item.useTime = 10;
+            Item.useStyle = ItemUseStyleID.Swing;
+            Item.consumable = true;
+            Item.rare = ItemRarityID.White;
+            Item.value = Item.sellPrice(0, 0, 0, 10);
+            Item.createTile = ModContent.TileType<Components.StorageConnector>();
         }
 
         public override void AddRecipes()
         {
-            ModRecipe recipe = new ModRecipe(mod);
-            recipe.AddIngredient(ItemID.Wood, 16);
-            recipe.AddIngredient(ItemID.IronBar);
-            recipe.anyWood = true;
-            recipe.anyIronBar = true;
+            Recipe recipe = CreateRecipe(16);
+            recipe.AddRecipeGroup(RecipeGroupID.Wood, 16);
+            recipe.AddRecipeGroup(RecipeGroupID.IronBar, 1);
             recipe.AddTile(TileID.WorkBenches);
-            recipe.SetResult(this, 16);
-            recipe.AddRecipe();
+            recipe.Register();
         }
     }
 }

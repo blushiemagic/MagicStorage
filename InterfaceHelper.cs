@@ -17,6 +17,9 @@ namespace MagicStorage
         public static void Initialize()
         {
             _itemIconCacheTimeInfo = typeof(Main).GetField("_itemIconCacheTime", BindingFlags.NonPublic | BindingFlags.Static);
+
+            if(_itemIconCacheTimeInfo is null)
+                throw new Exception("Reflection value was null (source: InterfaceHelper.Initialize)");
         }
 
         public static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -26,7 +29,7 @@ namespace MagicStorage
                 if (layers[k].Name == "Vanilla: Inventory")
                 {
                     layers.Insert(k + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
-                    k++;
+                    break;
                 }
             }
         }
@@ -52,11 +55,11 @@ namespace MagicStorage
             }
             if (modTile is CraftingAccess)
             {
-                CraftingGUI.Draw(heart);
+                CraftingGUI.Draw();
             }
             else
             {
-                StorageGUI.Draw(heart);
+                StorageGUI.Draw();
             }
             return true;
         }
@@ -75,10 +78,10 @@ namespace MagicStorage
             Rectangle result = new Rectangle((int)vector.X, (int)vector.Y, (int)(position.X - vector.X), (int)(position.Y - vector.Y));
             int width = Main.spriteBatch.GraphicsDevice.Viewport.Width;
             int height = Main.spriteBatch.GraphicsDevice.Viewport.Height;
-            result.X = Utils.Clamp<int>(result.X, 0, width);
-            result.Y = Utils.Clamp<int>(result.Y, 0, height);
-            result.Width = Utils.Clamp<int>(result.Width, 0, width - result.X);
-            result.Height = Utils.Clamp<int>(result.Height, 0, height - result.Y);
+            result.X = Utils.Clamp(result.X, 0, width);
+            result.Y = Utils.Clamp(result.Y, 0, height);
+            result.Width = Utils.Clamp(result.Width, 0, width - result.X);
+            result.Height = Utils.Clamp(result.Height, 0, height - result.Y);
             return result;
         }
     }

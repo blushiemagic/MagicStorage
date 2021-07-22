@@ -10,7 +10,7 @@ namespace MagicStorage.Items
         {
             if (context == "bossBag" && arg == ItemID.MoonLordBossBag && Main.rand.Next(10) == 0)
             {
-                player.QuickSpawnItem(mod.ItemType("RadiantJewel"));
+                player.QuickSpawnItem(ModContent.ItemType<RadiantJewel>());
             }
         }
     }

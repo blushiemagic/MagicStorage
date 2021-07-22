@@ -12,14 +12,14 @@ namespace MagicStorage.Components
         public override bool ValidTile(int i, int j)
         {
             Tile tile = Main.tile[i, j];
-            return tile.active() && ValidTile(tile);
+            return tile.IsActive && ValidTile(tile);
         }
 
         public abstract bool ValidTile(Tile tile);
 
-        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction)
+        public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternative)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 NetHelper.SendComponentPlace(i - 1, j - 1, Type);
                 return -1;
@@ -29,17 +29,19 @@ namespace MagicStorage.Components
             return id;
         }
 
-        public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction)
+#pragma warning disable IDE0060
+        public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction, int alternative)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
-                NetMessage.SendTileRange(Main.myPlayer, i - 1, j - 1, 2, 2);
+                NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 2, 2);
                 NetHelper.SendSearchAndRefresh(i - 1, j - 1);
                 return 0;
             }
             SearchAndRefreshNetwork(new Point16(i - 1, j - 1));
             return 0;
         }
+#pragma warning restore IDE0060
 
         public virtual void OnPlace()
         {
@@ -48,7 +50,7 @@ namespace MagicStorage.Components
 
         public override void OnKill()
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 NetHelper.SendSearchAndRefresh(Position.X, Position.Y);
             }
@@ -58,7 +60,7 @@ namespace MagicStorage.Components
             }
         }
 
-        private static IEnumerable<Point16> checkNeighbors = new Point16[]
+        private static readonly IEnumerable<Point16> checkNeighbors = new Point16[]
         {
             new Point16(-1, 0),
             new Point16(0, -1),
@@ -70,7 +72,7 @@ namespace MagicStorage.Components
             new Point16(-1, 1)
         };
 
-        private static IEnumerable<Point16> checkNeighbors1x1 = new Point16[]
+        private static readonly IEnumerable<Point16> checkNeighbors1x1 = new Point16[]
         {
             new Point16(-1, 0),
             new Point16(0, -1),
@@ -86,13 +88,13 @@ namespace MagicStorage.Components
         public static IEnumerable<Point16> AdjacentComponents(Point16 point)
         {
             List<Point16> points = new List<Point16>();
-            bool isConnector = Main.tile[point.X, point.Y].type == MagicStorage.Instance.TileType("StorageConnector");
+            bool isConnector = Main.tile[point.X, point.Y].type == ModContent.TileType<StorageConnector>();
             foreach (Point16 add in (isConnector ? checkNeighbors1x1 : checkNeighbors))
             {
                 int checkX = point.X + add.X;
                 int checkY = point.Y + add.Y;
                 Tile tile = Main.tile[checkX, checkY];
-                if (!tile.active())
+                if (!tile.IsActive)
                 {
                     continue;
                 }
@@ -112,7 +114,7 @@ namespace MagicStorage.Components
                         points.Add(check);
                     }
                 }
-                else if (tile.type == MagicStorage.Instance.TileType("StorageConnector"))
+                else if (tile.type == ModContent.TileType<StorageConnector>())
                 {
                     Point16 check = new Point16(checkX, checkY);
                     if (!points.Contains(check))
@@ -126,9 +128,10 @@ namespace MagicStorage.Components
 
         public static Point16 FindStorageCenter(Point16 startSearch)
         {
-            HashSet<Point16> explored = new HashSet<Point16>();
-            explored.Add(startSearch);
-            Queue<Point16> toExplore = new Queue<Point16>();
+			HashSet<Point16> explored = new HashSet<Point16>(){
+				startSearch
+			};
+			Queue<Point16> toExplore = new Queue<Point16>();
             foreach (Point16 point in AdjacentComponents(startSearch))
             {
                 toExplore.Enqueue(point);

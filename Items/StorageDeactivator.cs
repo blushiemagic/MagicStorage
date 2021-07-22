@@ -5,6 +5,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using MagicStorage.Components;
 using Terraria.Localization;
+using Terraria.GameContent.Creative;
 
 namespace MagicStorage.Items
 {
@@ -13,36 +14,38 @@ namespace MagicStorage.Items
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Storage Unit Wand");
-            DisplayName.AddTranslation(GameCulture.Russian, "Жезл Ячейки Хранилища");
-            DisplayName.AddTranslation(GameCulture.Polish, "Różdżka jednostki magazynującej");
-            DisplayName.AddTranslation(GameCulture.French, "Baguette d'unité de stockage");
-            DisplayName.AddTranslation(GameCulture.Spanish, "Varita de unidad de almacenamiento");
-            DisplayName.AddTranslation(GameCulture.French, "Baguetter d'unité de stockage");
-            DisplayName.AddTranslation(GameCulture.Chinese, "存储单元魔杖");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Жезл Ячейки Хранилища");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Różdżka jednostki magazynującej");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Baguette d'unité de stockage");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Varita de unidad de almacenamiento");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Baguetter d'unité de stockage");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元魔杖");
 
             Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
-            Tooltip.AddTranslation(GameCulture.Russian, "<right> на Ячейке Хранилища что бы активировать/деактивировать ее");
-            Tooltip.AddTranslation(GameCulture.Polish, "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
-            Tooltip.AddTranslation(GameCulture.French, "<right> pour changer l'unité de stockage actif/inactif");
-            Tooltip.AddTranslation(GameCulture.Spanish, "<right> para cambiar el unidad de almacenamiento activo/inactivo");
-            Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储单元使其切换启用/禁用");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "<right> на Ячейке Хранилища что бы активировать/деактивировать ее");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "<right> pour changer l'unité de stockage actif/inactif");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "<right> para cambiar el unidad de almacenamiento activo/inactivo");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储单元使其切换启用/禁用");
+
+            CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
         }
 
         public override void SetDefaults()
         {
-            item.width = 24;
-            item.height = 28;
-            item.useTurn = true;
-            item.autoReuse = true;
-            item.useAnimation = 15;
-            item.useTime = 15;
-            item.useStyle = 1;
-            item.tileBoost = 20;
-            item.rare = 1;
-            item.value = Item.sellPrice(0, 0, 40, 0);
+            Item.width = 24;
+            Item.height = 28;
+            Item.useTurn = true;
+            Item.autoReuse = true;
+            Item.useAnimation = 15;
+            Item.useTime = 15;
+            Item.useStyle = ItemUseStyleID.Swing;
+            Item.tileBoost = 20;
+            Item.rare = ItemRarityID.Blue;
+            Item.value = Item.sellPrice(0, 0, 40, 0);
         }
 
-        public override bool UseItem(Player player)
+        public override bool? UseItem(Player player)
         {
             if (player.whoAmI == Main.myPlayer && player.itemAnimation > 0 && player.itemTime == 0 && player.controlUseItem)
             {
@@ -57,17 +60,17 @@ namespace MagicStorage.Items
                     j--;
                 }
                 Point16 point = new Point16(i, j);
-                if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit)
+                if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit unit)
                 {
-                    TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[point];
+                    TEAbstractStorageUnit storageUnit = unit;
                     storageUnit.Inactive = !storageUnit.Inactive;
                     string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
                     Main.NewText("Storage Unit has been " + activeText);
                     NetHelper.ClientSendTEUpdate(storageUnit.ID);
-                    if (storageUnit is TEStorageUnit)
+                    if (storageUnit is TEStorageUnit storage)
                     {
-                        ((TEStorageUnit)storageUnit).UpdateTileFrameWithNetSend();
-                        if (Main.netMode == 0)
+                        storage.UpdateTileFrameWithNetSend();
+                        if (Main.netMode == NetmodeID.SinglePlayer)
                         {
                             storageUnit.GetHeart().ResetCompactStage();
                         }
@@ -79,12 +82,11 @@ namespace MagicStorage.Items
 
         public override void AddRecipes()
         {
-            ModRecipe recipe = new ModRecipe(mod);
+            Recipe recipe = CreateRecipe();
             recipe.AddIngredient(ItemID.ActuationRod);
             recipe.AddIngredient(null, "StorageComponent");
             recipe.AddTile(TileID.Anvils);
-            recipe.SetResult(this);
-            recipe.AddRecipe();
+            recipe.Register();
         }
     }
 }

@@ -56,5 +56,13 @@ namespace MagicStorage
             }
             return data1.Prefix - data2.Prefix;
         }
-    }
+
+		public static bool operator ==(ItemData left, ItemData right) {
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(ItemData left, ItemData right) {
+			return !(left == right);
+		}
+	}
 }

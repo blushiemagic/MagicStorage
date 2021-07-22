@@ -16,7 +16,7 @@ namespace MagicStorage.Components
     public class TEStorageUnit : TEAbstractStorageUnit
     {
         private IList<Item> items = new List<Item>();
-        private Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
+        private readonly Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
         private bool receiving = false;
 
         //metadata
@@ -79,12 +79,12 @@ namespace MagicStorage.Components
 
         public override bool ValidTile(Tile tile)
         {
-            return tile.type == mod.TileType("StorageUnit") && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
+            return tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
         }
 
         public override bool HasSpaceInStackFor(Item check, bool locked = false)
         {
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().EnterReadLock();
             }
@@ -95,7 +95,7 @@ namespace MagicStorage.Components
             }
             finally
             {
-                if (Main.netMode == 2 && !locked)
+                if (Main.netMode == NetmodeID.Server && !locked)
                 {
                     GetHeart().ExitReadLock();
                 }
@@ -109,7 +109,7 @@ namespace MagicStorage.Components
 
         public override bool HasItem(Item check, bool locked = false)
         {
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().EnterReadLock();
             }
@@ -120,7 +120,7 @@ namespace MagicStorage.Components
             }
             finally
             {
-                if (Main.netMode == 2 && !locked)
+                if (Main.netMode == NetmodeID.Server && !locked)
                 {
                     GetHeart().ExitReadLock();
                 }
@@ -134,11 +134,11 @@ namespace MagicStorage.Components
 
         public override void DepositItem(Item toDeposit, bool locked = false)
         {
-            if (Main.netMode == 1 && !receiving)
+            if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
             {
                 return;
             }
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().EnterWriteLock();
             }
@@ -176,11 +176,10 @@ namespace MagicStorage.Components
                     items.Add(item);
                     toDeposit.SetDefaults(0, true);
                     hasChange = true;
-                    finished = true;
                 }
-                if (hasChange && Main.netMode != 1)
+                if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (Main.netMode == 2)
+                    if (Main.netMode == NetmodeID.Server)
                     {
                         netQueue.Enqueue(UnitOperation.Deposit.Create(original));
                     }
@@ -189,7 +188,7 @@ namespace MagicStorage.Components
             }
             finally
             {
-                if (Main.netMode == 2 && !locked)
+                if (Main.netMode == NetmodeID.Server && !locked)
                 {
                     GetHeart().ExitWriteLock();
                 }
@@ -198,11 +197,11 @@ namespace MagicStorage.Components
 
         public override Item TryWithdraw(Item lookFor, bool locked = false)
         {
-            if (Main.netMode == 1 && !receiving)
+            if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
             {
                 return new Item();
             }
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().EnterWriteLock();
             }
@@ -227,9 +226,9 @@ namespace MagicStorage.Components
                         lookFor.stack -= withdraw;
                         if (lookFor.stack <= 0)
                         {
-                            if (Main.netMode != 1)
+                            if (Main.netMode != NetmodeID.MultiplayerClient)
                             {
-                                if (Main.netMode == 2)
+                                if (Main.netMode == NetmodeID.Server)
                                 {
                                     netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
                                 }
@@ -243,9 +242,9 @@ namespace MagicStorage.Components
                 {
                     return new Item();
                 }
-                if (Main.netMode != 1)
+                if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
-                    if (Main.netMode == 2)
+                    if (Main.netMode == NetmodeID.Server)
                     {
                         netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
                     }
@@ -255,7 +254,7 @@ namespace MagicStorage.Components
             }
             finally
             {
-                if (Main.netMode == 2 && !locked)
+                if (Main.netMode == NetmodeID.Server && !locked)
                 {
                     GetHeart().ExitWriteLock();
                 }
@@ -267,7 +266,7 @@ namespace MagicStorage.Components
             Tile topLeft = Main.tile[Position.X, Position.Y];
             int oldFrame = topLeft.frameX;
             int style;
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().EnterReadLock();
             }
@@ -283,7 +282,7 @@ namespace MagicStorage.Components
             {
                 style = 1;
             }
-            if (Main.netMode == 2 && !locked)
+            if (Main.netMode == NetmodeID.Server && !locked)
             {
                 GetHeart().ExitReadLock();
             }
@@ -303,7 +302,7 @@ namespace MagicStorage.Components
         {
             if (UpdateTileFrame(locked))
             {
-                NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
+                NetMessage.SendTileSquare(-1, Position.X, Position.Y, 2, 2);
             }
         }
 
@@ -319,7 +318,7 @@ namespace MagicStorage.Components
             dict = unit1.hasItem;
             unit1.hasItem = unit2.hasItem;
             unit2.hasItem = dict;
-            if (Main.netMode == 2)
+            if (Main.netMode == NetmodeID.Server)
             {
                 unit1.netQueue.Clear();
                 unit2.netQueue.Clear();
@@ -333,15 +332,15 @@ namespace MagicStorage.Components
         //precondition: lock is already taken
         internal Item WithdrawStack()
         {
-            if (Main.netMode == 1 && !receiving)
+            if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
             {
                 return new Item();
             }
             Item item = items[items.Count - 1];
             items.RemoveAt(items.Count - 1);
-            if (Main.netMode != 1)
+            if (Main.netMode != NetmodeID.MultiplayerClient)
             {
-                if (Main.netMode == 2)
+                if (Main.netMode == NetmodeID.Server)
                 {
                     netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
                 }
@@ -377,19 +376,19 @@ namespace MagicStorage.Components
                 }
                 hasItem.Add(data);
             }
-            if (Main.netMode == 2)
+            if (Main.netMode == NetmodeID.Server)
             {
                 netQueue.Enqueue(UnitOperation.FullSync.Create());
             }
         }
 
-        public override void NetSend(BinaryWriter trueWriter, bool lightSend)
+        public override void NetSend(BinaryWriter trueWriter)
         {
             //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
             if (EditsLoader.MessageTileEntitySyncing)
             {
                 trueWriter.Write((byte)0);
-                base.NetSend(trueWriter, lightSend);
+                base.NetSend(trueWriter);
                 return;
             }
 
@@ -402,8 +401,8 @@ namespace MagicStorage.Components
             BinaryWriter writer = new BinaryWriter(writerBuffer);
 
             /* Original code */
-            base.NetSend(writer, lightSend);
-            if (netQueue.Count > Capacity / 2 || !lightSend)
+            base.NetSend(writer);
+            if (netQueue.Count > Capacity / 2)
             {
                 netQueue.Clear();
                 netQueue.Enqueue(UnitOperation.FullSync.Create());
@@ -422,6 +421,7 @@ namespace MagicStorage.Components
             trueWriter.Write(buffer.ToArray());
 
             /* Compression stats and debugging code (server side) */
+            /*
             if (false)
             {
                 MemoryStream decompressedBuffer = new MemoryStream(65536);
@@ -432,19 +432,20 @@ namespace MagicStorage.Components
                 Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
                 decompressor.Dispose(); decompressedBuffer.Dispose();
             }
+            */
 
             /* Dispose all objects */
             writer.Dispose(); writerBuffer.Dispose(); compressor.Dispose(); buffer.Dispose();
         }
 
-        public override void NetReceive(BinaryReader trueReader, bool lightReceive)
+        public override void NetReceive(BinaryReader trueReader)
         {
             //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet
             byte workaround = trueReader.ReadByte();
 
             if (EditsLoader.MessageTileEntitySyncing || workaround != 1)
             {
-                base.NetReceive(trueReader, lightReceive);
+                base.NetReceive(trueReader);
                 return;
             }
 
@@ -460,10 +461,10 @@ namespace MagicStorage.Components
             BinaryReader reader = new BinaryReader(decompressor);
 
             /* Original code */
-            base.NetReceive(reader, lightReceive);
-            if (TileEntity.ByPosition.ContainsKey(Position) && TileEntity.ByPosition[Position] is TEStorageUnit)
+            base.NetReceive(reader);
+            if (TileEntity.ByPosition.ContainsKey(Position) && TileEntity.ByPosition[Position] is TEStorageUnit unit)
             {
-                TEStorageUnit other = (TEStorageUnit)TileEntity.ByPosition[Position];
+                TEStorageUnit other = unit;
                 items = other.items;
                 hasSpaceInStack = other.hasSpaceInStack;
                 hasItem = other.hasItem;
@@ -523,7 +524,7 @@ namespace MagicStorage.Components
             public static readonly UnitOperation Deposit = new DepositOperation();
             public static readonly UnitOperation Withdraw = new WithdrawOperation();
             public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
-            private static List<UnitOperation> types = new List<UnitOperation>();
+            private static readonly List<UnitOperation> types = new List<UnitOperation>();
 
             static UnitOperation()
             {

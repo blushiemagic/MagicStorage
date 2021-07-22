@@ -25,12 +25,12 @@ namespace MagicStorage.Components
 
         public override bool ValidTile(Tile tile)
         {
-            return tile.type == mod.TileType("CraftingAccess") && tile.frameX == 0 && tile.frameY == 0;
+            return tile.type == ModContent.TileType<CraftingAccess>() && tile.frameX == 0 && tile.frameY == 0;
         }
 
         public void TryDepositStation(Item item)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 return;
             }
@@ -60,7 +60,7 @@ namespace MagicStorage.Components
 
         public Item TryWithdrawStation(int slot)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 return new Item();
             }
@@ -76,7 +76,7 @@ namespace MagicStorage.Components
 
         public Item DoStationSwap(Item item, int slot)
         {
-            if (Main.netMode == 1)
+            if (Main.netMode == NetmodeID.MultiplayerClient)
             {
                 return new Item();
             }
@@ -137,7 +137,7 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
             foreach (Item item in stations)
             {
@@ -145,7 +145,7 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
             for (int k = 0; k < stations.Length; k++)
             {

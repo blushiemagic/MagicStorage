@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.GameContent.Creative;
 
 namespace MagicStorage.Items
 {
@@ -11,37 +12,38 @@ namespace MagicStorage.Items
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Crimtane Storage Unit");
-            DisplayName.AddTranslation(GameCulture.Russian, "Кримтановая Ячейка Хранилища");
-            DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Karmazynium)");
-            DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Carmitane)");
-            DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Carmesí)");
-            DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(血腥)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Кримтановая Ячейка Хранилища");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca (Karmazynium)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage (Carmitane)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento (Carmesí)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元(血腥)");
+
+            CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
         }
 
         public override void SetDefaults()
         {
-            item.width = 26;
-            item.height = 26;
-            item.maxStack = 99;
-            item.useTurn = true;
-            item.autoReuse = true;
-            item.useAnimation = 15;
-            item.useTime = 10;
-            item.useStyle = 1;
-            item.consumable = true;
-            item.rare = 1;
-            item.value = Item.sellPrice(0, 0, 32, 0);
-            item.createTile = mod.TileType("StorageUnit");
-            item.placeStyle = 2;
+            Item.width = 26;
+            Item.height = 26;
+            Item.maxStack = 99;
+            Item.useTurn = true;
+            Item.autoReuse = true;
+            Item.useAnimation = 15;
+            Item.useTime = 10;
+            Item.useStyle = ItemUseStyleID.Swing;
+            Item.consumable = true;
+            Item.rare = ItemRarityID.Blue;
+            Item.value = Item.sellPrice(0, 0, 32, 0);
+            Item.createTile = ModContent.TileType<Components.StorageUnit>();
+            Item.placeStyle = 2;
         }
 
         public override void AddRecipes()
         {
-            ModRecipe recipe = new ModRecipe(mod);
-            recipe.AddIngredient(mod.ItemType("StorageUnit"));
-            recipe.AddIngredient(mod.ItemType("UpgradeCrimtane"));
-            recipe.SetResult(this);
-            recipe.AddRecipe();
+            Recipe recipe = CreateRecipe();
+            recipe.AddIngredient(ModContent.ItemType<StorageUnit>());
+            recipe.AddIngredient(ModContent.ItemType<UpgradeCrimtane>());
+            recipe.Register();
         }
     }
 }

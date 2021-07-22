@@ -19,9 +19,10 @@ namespace MagicStorage.Components
             List<Point16> oldStorageUnits = new List<Point16>(storageUnits);
             storageUnits.Clear();
             HashSet<Point16> hashStorageUnits = new HashSet<Point16>();
-            HashSet<Point16> explored = new HashSet<Point16>();
-            explored.Add(Position);
-            Queue<Point16> toExplore = new Queue<Point16>();
+			HashSet<Point16> explored = new HashSet<Point16>(){
+				Position
+			};
+			Queue<Point16> toExplore = new Queue<Point16>();
             foreach (Point16 point in AdjacentComponents())
             {
                 toExplore.Enqueue(point);
@@ -34,9 +35,9 @@ namespace MagicStorage.Components
                 if (!explored.Contains(explore) && explore != StorageComponent.killTile)
                 {
                     explored.Add(explore);
-                    if (TileEntity.ByPosition.ContainsKey(explore) && TileEntity.ByPosition[explore] is TEAbstractStorageUnit)
+                    if (TileEntity.ByPosition.ContainsKey(explore) && TileEntity.ByPosition[explore] is TEAbstractStorageUnit unit)
                     {
-                        TEAbstractStorageUnit storageUnit = (TEAbstractStorageUnit)TileEntity.ByPosition[explore];
+                        TEAbstractStorageUnit storageUnit = unit;
                         if (storageUnit.Link(Position))
                         {
                             NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
@@ -122,7 +123,7 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
             writer.Write((short)storageUnits.Count);
             foreach (Point16 storageUnit in storageUnits)
@@ -132,7 +133,7 @@ namespace MagicStorage.Components
             }
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
             int count = reader.ReadInt16();
             for (int k = 0; k < count; k++)

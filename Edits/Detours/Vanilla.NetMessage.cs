@@ -40,7 +40,7 @@ namespace MagicStorage.Edits.Detours
 				foreach (var item in TileEntity.ByPosition) {
 					Point16 pos = item.Key;
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
-						if (ModTileEntity.GetTileEntity(item.Value.type)?.mod == MagicStorage.Instance)
+						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(item.Value.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
 							ids.Enqueue(item.Value.ID);
 				}
 

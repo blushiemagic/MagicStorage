@@ -15,8 +15,8 @@ namespace MagicStorage
         private const int buttonSize = 32;
         private const int buttonPadding = 8;
 
-        private Texture2D[] buttons;
-        private LocalizedText[] names;
+        private readonly Texture2D[] buttons;
+        private readonly LocalizedText[] names;
         private int choice = 0;
 
         public int Choice
@@ -31,7 +31,7 @@ namespace MagicStorage
         {
             if (buttons.Length != names.Length || buttons.Length == 0)
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Invalid array length(s) specified");
             }
             this.buttons = buttons;
             this.names = names;
@@ -74,8 +74,8 @@ namespace MagicStorage
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            Texture2D backTexture = MagicStorage.Instance.GetTexture("SortButtonBackground");
-            Texture2D backTextureActive = MagicStorage.Instance.GetTexture("SortButtonBackgroundActive");
+            Texture2D backTexture = MagicStorage.Instance.Assets.Request<Texture2D>("SortButtonBackground").Value;
+            Texture2D backTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("SortButtonBackgroundActive").Value;
             CalculatedStyle dim = GetDimensions();
             for (int k = 0; k < buttons.Length; k++)
             {

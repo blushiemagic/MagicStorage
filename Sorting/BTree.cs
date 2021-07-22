@@ -9,7 +9,7 @@ namespace MagicStorage.Sorting
     public class BTree<T>
     {
         private BTreeNode<T> root;
-        private CompareFunction func;
+        private readonly CompareFunction func;
 
         public BTree(CompareFunction func)
         {
@@ -19,14 +19,11 @@ namespace MagicStorage.Sorting
 
         public void Insert(T item)
         {
-            T pushedItem;
-            BTreeNode<T> pushedBranch;
-            if (root.Insert(item, out pushedItem, out pushedBranch))
-            {
-                BTreeNode<T> newRoot = new BTreeNode<T>(func, root, pushedItem, pushedBranch);
-                root = newRoot;
-            }
-        }
+			if(root.Insert(item, out T pushedItem, out BTreeNode<T> pushedBranch)) {
+				BTreeNode<T> newRoot = new BTreeNode<T>(func, root, pushedItem, pushedBranch);
+				root = newRoot;
+			}
+		}
 
         public IEnumerable<T> GetSortedItems()
         {
@@ -37,10 +34,10 @@ namespace MagicStorage.Sorting
     class BTreeNode<T>
     {
         private const int branchFactor = 32;
-        private CompareFunction func;
-        private List<T> elements = new List<T>(branchFactor);
-        private List<BTreeNode<T>> branches = new List<BTreeNode<T>>(branchFactor + 1);
-        private bool isLeaf;
+        private readonly CompareFunction func;
+        private readonly List<T> elements = new List<T>(branchFactor);
+        private readonly List<BTreeNode<T>> branches = new List<BTreeNode<T>>(branchFactor + 1);
+        private readonly bool isLeaf;
 
         internal BTreeNode(CompareFunction func, bool isLeaf)
         {
@@ -67,16 +64,14 @@ namespace MagicStorage.Sorting
                     Split(out pushItem, out pushBranch);
                     return true;
                 }
-                pushItem = default(T);
+                pushItem = default;
                 pushBranch = null;
                 return false;
             }
             else
             {
-                T pushedItem;
-                BTreeNode<T> pushedBranch;
-                int splitBranch = InsertIntoBranch(item, out pushedItem, out pushedBranch);
-                if (splitBranch >= 0)
+				int splitBranch = InsertIntoBranch(item, out T pushedItem, out BTreeNode<T> pushedBranch);
+				if (splitBranch >= 0)
                 {
                     branches.Insert(splitBranch + 1, pushedBranch);
                     elements.Insert(splitBranch, pushedItem);
@@ -86,7 +81,7 @@ namespace MagicStorage.Sorting
                         return true;
                     }
                 }
-                pushItem = default(T);
+                pushItem = default;
                 pushBranch = null;
                 return false;
             }
@@ -164,7 +159,7 @@ namespace MagicStorage.Sorting
                     else
                     {
                         ((Item)(object)elements[check]).stack += ((Item)(object)item).stack;
-                        pushItem = default(T);
+                        pushItem = default;
                         pushNode = null;
                         return -1;
                     }
@@ -210,8 +205,8 @@ namespace MagicStorage.Sorting
 
     public class AppendEnumerable<T> : IEnumerable<T>
     {
-        private IEnumerable<T> enumerable;
-        private T element;
+        private readonly IEnumerable<T> enumerable;
+        private readonly T element;
 
         public AppendEnumerable(IEnumerable<T> enumerable, T element)
         {
@@ -232,8 +227,8 @@ namespace MagicStorage.Sorting
 
     public class AppendEnumerator<T> : IEnumerator<T>
     {
-        private IEnumerator<T> enumerator;
-        private T element;
+        private readonly IEnumerator<T> enumerator;
+        private readonly T element;
         private bool enumeratorFinished;
         private bool finished;
 

@@ -17,7 +17,7 @@ namespace MagicStorage.Components
 
         public override bool ValidTile(Tile tile)
         {
-            return tile.type == mod.TileType("RemoteAccess") && tile.frameX == 0 && tile.frameY == 0;
+            return tile.type == ModContent.TileType<RemoteAccess>() && tile.frameX == 0 && tile.frameY == 0;
         }
 
         public override TEStorageHeart GetHeart()
@@ -73,16 +73,16 @@ namespace MagicStorage.Components
             locator = new Point16(tagLocator.GetShort("X"), tagLocator.GetShort("Y"));
         }
 
-        public override void NetSend(BinaryWriter writer, bool lightSend)
+        public override void NetSend(BinaryWriter writer)
         {
-            base.NetSend(writer, lightSend);
+            base.NetSend(writer);
             writer.Write(locator.X);
             writer.Write(locator.Y);
         }
 
-        public override void NetReceive(BinaryReader reader, bool lightReceive)
+        public override void NetReceive(BinaryReader reader)
         {
-            base.NetReceive(reader, lightReceive);
+            base.NetReceive(reader);
             locator = new Point16(reader.ReadInt16(), reader.ReadInt16());
         }
     }

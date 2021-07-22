@@ -21,7 +21,7 @@ namespace MagicStorage.Components
 
         public override bool ValidTile(Tile tile)
         {
-            return tile.type == mod.TileType("CreativeStorageUnit") && tile.frameX == 0 && tile.frameY == 0;
+            return tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
         }
 
         public override bool HasSpaceInStackFor(Item check, bool locked = false)
@@ -55,7 +55,7 @@ namespace MagicStorage.Components
 
     class CreativeEnumerable : IEnumerable<Item>
     {
-        private bool inactive;
+        private readonly bool inactive;
 
         internal CreativeEnumerable(bool inactive)
         {
@@ -75,7 +75,7 @@ namespace MagicStorage.Components
 
     class CreativeEnumerator : IEnumerator<Item>
     {
-        private bool inactive;
+        private readonly bool inactive;
         private int id = 0;
 
         internal CreativeEnumerator(bool inactive)

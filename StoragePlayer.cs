@@ -5,6 +5,8 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 using MagicStorage.Components;
+using Terraria.ID;
+using Terraria.Audio;
 
 namespace MagicStorage
 {
@@ -16,7 +18,7 @@ namespace MagicStorage
 
         public override void UpdateDead()
         {
-            if (player.whoAmI == Main.myPlayer)
+            if (Player.whoAmI == Main.myPlayer)
             {
                 CloseStorage();
             }
@@ -24,34 +26,34 @@ namespace MagicStorage
 
         public override void ResetEffects()
         {
-            if (player.whoAmI != Main.myPlayer)
+            if (Player.whoAmI != Main.myPlayer)
             {
                 return;
             }
             if (timeSinceOpen < 1)
             {
-                player.talkNPC = -1;
+                Player.SetTalkNPC(-1);
                 Main.playerInventory = true;
                 timeSinceOpen++;
             }
-            if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1))
+            if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (Player.chest != -1 || !Main.playerInventory || Player.sign > -1 || Player.talkNPC > -1))
             {
                 CloseStorage();
                 Recipe.FindRecipes();
             }
             else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
             {
-                int playerX = (int)(player.Center.X / 16f);
-                int playerY = (int)(player.Center.Y / 16f);
-                if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1))
+                int PlayerX = (int)(Player.Center.X / 16f);
+                int PlayerY = (int)(Player.Center.Y / 16f);
+                if (!remoteAccess && (PlayerX < storageAccess.X - Player.tileRangeX || PlayerX > storageAccess.X + Player.tileRangeX + 1 || PlayerY < storageAccess.Y - Player.tileRangeY || PlayerY > storageAccess.Y + Player.tileRangeY + 1))
                 {
-                    Main.PlaySound(11, -1, -1, 1);
+                    SoundEngine.PlaySound(11, -1, -1, 1);
                     CloseStorage();
                     Recipe.FindRecipes();
                 }
                 else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess))
                 {
-                    Main.PlaySound(11, -1, -1, 1);
+                    SoundEngine.PlaySound(11, -1, -1, 1);
                     CloseStorage();
                     Recipe.FindRecipes();
                 }
@@ -94,7 +96,7 @@ namespace MagicStorage
 
         public static void GetItem(Item item, bool toMouse)
         {
-            Player player = Main.player[Main.myPlayer];
+            Player Player = Main.player[Main.myPlayer];
             if (toMouse && Main.playerInventory && Main.mouseItem.IsAir)
             {
                 Main.mouseItem = item;
@@ -113,10 +115,10 @@ namespace MagicStorage
             }
             if (!item.IsAir)
             {
-                item = player.GetItem(Main.myPlayer, item, false, true);
+                item = Player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
                 if (!item.IsAir)
                 {
-                    player.QuickSpawnClonedItem(item, item.stack);
+                    Player.QuickSpawnClonedItem(item, item.stack);
                 }
             }
         }
@@ -140,7 +142,7 @@ namespace MagicStorage
             int oldStack = item.stack;
             if (StorageCrafting())
             {
-                if (Main.netMode == 0)
+                if (Main.netMode == NetmodeID.SinglePlayer)
                 {
                     GetCraftingAccess().TryDepositStation(item);
                 }
@@ -152,7 +154,7 @@ namespace MagicStorage
             }
             else
             {
-                if (Main.netMode == 0)
+                if (Main.netMode == NetmodeID.SinglePlayer)
                 {
                     GetStorageHeart().DepositItem(item);
                 }
@@ -164,7 +166,7 @@ namespace MagicStorage
             }
             if (item.type != oldType || item.stack != oldStack)
             {
-                Main.PlaySound(7, -1, -1, 1, 1f, 0f);
+                SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
                 StorageGUI.RefreshItems();
             }
             return true;
@@ -206,7 +208,7 @@ namespace MagicStorage
                 return false;
             }
             Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-            return tile != null && tile.type == mod.TileType("CraftingAccess");
+            return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
         }
 
         public static bool IsStorageCrafting()    

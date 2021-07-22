@@ -15,12 +15,12 @@ namespace MagicStorage.Components
     {
         public override ModTileEntity GetTileEntity()
         {
-            return mod.GetTileEntity("TECraftingAccess");
+            return (ModTileEntity)TileEntity.manager.GetTileEntity<TECraftingAccess>(ModContent.TileEntityType<TECraftingAccess>());
         }
 
         public override int ItemType(int frameX, int frameY)
         {
-            return mod.ItemType("CraftingAccess");
+            return ModContent.ItemType<Items.CraftingAccess>();
         }
 
         public override bool HasSmartInteract()
@@ -58,18 +58,14 @@ namespace MagicStorage.Components
             {
                 return;
             }
-            TECraftingAccess access = TileEntity.ByPosition[new Point16(i, j)] as TECraftingAccess;
-            if (access != null)
-            {
-                foreach (Item item in access.stations)
-                {
-                    if (!item.IsAir)
-                    {
-                        fail = true;
-                        break;
-                    }
-                }
-            }
-        }
+			if(TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access) {
+				foreach(Item item in access.stations) {
+					if(!item.IsAir) {
+						fail = true;
+						break;
+					}
+				}
+			}
+		}
     }
 }

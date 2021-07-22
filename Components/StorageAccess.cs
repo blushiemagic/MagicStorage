@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using Terraria.ObjectData;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria.Audio;
 
 namespace MagicStorage.Components
 {
@@ -16,7 +17,7 @@ namespace MagicStorage.Components
     {
         public override int ItemType(int frameX, int frameY)
         {
-            return mod.ItemType("StorageAccess");
+            return ModContent.ItemType<Items.StorageAccess>();
         }
 
         public override bool HasSmartInteract()
@@ -43,12 +44,12 @@ namespace MagicStorage.Components
         {
             Player player = Main.LocalPlayer;
             Tile tile = Main.tile[i, j];
-            player.showItemIcon = true;
-            player.showItemIcon2 = ItemType(tile.frameX, tile.frameY);
+            player.cursorItemIconEnabled = true;
+            player.cursorItemIconID = ItemType(tile.frameX, tile.frameY);
             player.noThrow = 2;
         }
 
-        public override bool NewRightClick(int i, int j)
+		public override bool RightClick(int i, int j)
         {
             if (Main.tile[i, j].frameX % 36 == 18)
             {
@@ -68,14 +69,14 @@ namespace MagicStorage.Components
             Main.mouseRightRelease = false;
             if (player.sign > -1)
             {
-                Main.PlaySound(11, -1, -1, 1);
+                SoundEngine.PlaySound(11, -1, -1, 1);
                 player.sign = -1;
                 Main.editSign = false;
                 Main.npcChatText = string.Empty;
             }
             if (Main.editChest)
             {
-                Main.PlaySound(12, -1, -1, 1);
+                SoundEngine.PlaySound(12, -1, -1, 1);
                 Main.editChest = false;
                 Main.npcChatText = string.Empty;
             }
@@ -86,7 +87,7 @@ namespace MagicStorage.Components
             }
             if (player.talkNPC > -1)
             {
-                player.talkNPC = -1;
+                player.SetTalkNPC(-1);
                 Main.npcChatCornerItem = 0;
                 Main.npcChatText = string.Empty;
             }
@@ -98,7 +99,7 @@ namespace MagicStorage.Components
             if (prevOpen == toOpen)
             {
                 modPlayer.CloseStorage();
-                Main.PlaySound(11, -1, -1, 1);
+                SoundEngine.PlaySound(11, -1, -1, 1);
                 Recipe.FindRecipes();
             }
             else
@@ -111,7 +112,7 @@ namespace MagicStorage.Components
                     PlayerInput.Triggers.JustPressed.Grapple = false;
                 }
                 Main.recBigList = false;
-                Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10, -1, -1, 1);
+                SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10, -1, -1, 1);
                 Recipe.FindRecipes();
             }
             return true;
@@ -125,7 +126,7 @@ namespace MagicStorage.Components
             Rectangle frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
             Color lightColor = Lighting.GetColor(i, j, Color.White);
             Color color = Color.Lerp(lightColor, Color.White, Main.essScale);
-            spriteBatch.Draw(mod.GetTexture("Components/" + Name + "_Glow"), drawPos, frame, color);
+            spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/" + Name + "_Glow").Value, drawPos, frame, color);
         }
     }
 }

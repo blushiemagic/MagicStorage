@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
@@ -10,13 +12,13 @@ namespace MagicStorage.Sorting
 
         public bool Passes(object obj)
         {
-            if (obj is Item)
+            if (obj is Item item)
             {
-                return Passes((Item)obj);
+                return Passes(item);
             }
-            if (obj is Recipe)
+            if (obj is Recipe recipe)
             {
-                return Passes(((Recipe)obj).createItem);
+                return Passes(recipe.createItem);
             }
             return false;
         }
@@ -34,7 +36,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.melee && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+            return item.DamageType == DamageClass.Melee && item.pick == 0 && item.axe == 0 && item.hammer == 0;
         }
     }
 
@@ -42,7 +44,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.ranged;
+            return item.DamageType == DamageClass.Ranged;
         }
     }
 
@@ -50,7 +52,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.magic;
+            return item.DamageType == DamageClass.Magic;
         }
     }
 
@@ -58,7 +60,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.summon;
+            return item.DamageType == DamageClass.Summon;
         }
     }
 
@@ -66,7 +68,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.thrown;
+            return item.DamageType == DamageClass.Throwing;
         }
     }
 
@@ -74,7 +76,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return !item.melee && !item.ranged && !item.magic && !item.summon && !item.thrown && item.damage > 0;
+            return item.DamageType != DamageClass.Melee && item.DamageType != DamageClass.Ranged && item.DamageType != DamageClass.Magic && item.DamageType != DamageClass.Summon && item.DamageType != DamageClass.Throwing && item.damage > 0;
         }
     }
 
@@ -138,13 +140,13 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.createTile >= 0 || item.createWall > 0;
+            return item.createTile >= TileID.Dirt || item.createWall > 0;
         }
     }
 
     public class FilterMisc : ItemFilter
     {
-        private static List<ItemFilter> blacklist = new List<ItemFilter> {
+        private static readonly List<ItemFilter> blacklist = new List<ItemFilter> {
             new FilterWeapon(),
             new FilterTool(),
             new FilterEquipment(),

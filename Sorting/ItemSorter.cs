@@ -9,35 +9,17 @@ namespace MagicStorage.Sorting
     {
         public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
         {
-            ItemFilter filter;
-            switch (filterMode)
-            {
-            case FilterMode.All:
-                filter = new FilterAll();
-                break;
-            case FilterMode.Weapons:
-                filter = new FilterWeapon();
-                break;
-            case FilterMode.Tools:
-                filter = new FilterTool();
-                break;
-            case FilterMode.Equipment:
-                filter = new FilterEquipment();
-                break;
-            case FilterMode.Potions:
-                filter = new FilterPotion();
-                break;
-            case FilterMode.Placeables:
-                filter = new FilterPlaceable();
-                break;
-            case FilterMode.Misc:
-                filter = new FilterMisc();
-                break;
-            default:
-                filter = new FilterAll();
-                break;
-            }
-            IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
+			ItemFilter filter = filterMode switch {
+				FilterMode.All => new FilterAll(),
+				FilterMode.Weapons => new FilterWeapon(),
+				FilterMode.Tools => new FilterTool(),
+				FilterMode.Equipment => new FilterEquipment(),
+				FilterMode.Potions => new FilterPotion(),
+				FilterMode.Placeables => new FilterPlaceable(),
+				FilterMode.Misc => new FilterMisc(),
+				_ => new FilterAll(),
+			};
+			IEnumerable<Item> filteredItems = items.Where((item) => filter.Passes(item) && FilterName(item, modFilter, nameFilter));
             CompareFunction func;
             switch (sortMode)
             {
@@ -75,35 +57,17 @@ namespace MagicStorage.Sorting
 
         public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, string modFilter, string nameFilter)
         {
-            ItemFilter filter;
-            switch (filterMode)
-            {
-            case FilterMode.All:
-                filter = new FilterAll();
-                break;
-            case FilterMode.Weapons:
-                filter = new FilterWeapon();
-                break;
-            case FilterMode.Tools:
-                filter = new FilterTool();
-                break;
-            case FilterMode.Equipment:
-                filter = new FilterEquipment();
-                break;
-            case FilterMode.Potions:
-                filter = new FilterPotion();
-                break;
-            case FilterMode.Placeables:
-                filter = new FilterPlaceable();
-                break;
-            case FilterMode.Misc:
-                filter = new FilterMisc();
-                break;
-            default:
-                filter = new FilterAll();
-                break;
-            }
-            IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
+			ItemFilter filter = filterMode switch {
+				FilterMode.All => new FilterAll(),
+				FilterMode.Weapons => new FilterWeapon(),
+				FilterMode.Tools => new FilterTool(),
+				FilterMode.Equipment => new FilterEquipment(),
+				FilterMode.Potions => new FilterPotion(),
+				FilterMode.Placeables => new FilterPlaceable(),
+				FilterMode.Misc => new FilterMisc(),
+				_ => new FilterAll(),
+			};
+			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, modFilter, nameFilter));
             CompareFunction func;
             switch (sortMode)
             {
@@ -134,11 +98,11 @@ namespace MagicStorage.Sorting
         private static bool FilterName(Item item, string modFilter, string filter)
         {
             string modName = "Terraria";
-            if (item.modItem != null)
+            if (item.ModItem != null)
             {
-                modName = item.modItem.mod.DisplayName;
+                modName = item.ModItem.Mod.DisplayName;
             }
-            return modName.ToLowerInvariant().IndexOf(modFilter.ToLowerInvariant()) >= 0 && item.Name.ToLowerInvariant().IndexOf(filter.ToLowerInvariant()) >= 0;
+            return modName.ToLowerInvariant().Contains(modFilter.ToLowerInvariant(), StringComparison.CurrentCulture) && item.Name.ToLowerInvariant().Contains(filter.ToLowerInvariant(), StringComparison.CurrentCulture);
         }
     }
 }

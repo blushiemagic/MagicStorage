@@ -13,12 +13,12 @@ namespace MagicStorage.Components
     {
         public override ModTileEntity GetTileEntity()
         {
-            return mod.GetTileEntity("TECreativeStorageUnit");
+            return (ModTileEntity)TileEntity.manager.GetTileEntity<TECreativeStorageUnit>(ModContent.TileEntityType<TECreativeStorageUnit>());
         }
 
         public override int ItemType(int frameX, int frameY)
         {
-            return mod.ItemType("CreativeStorageUnit");
+            return ModContent.ItemType<Items.CreativeStorageUnit>();
         }
 
         public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
@@ -29,7 +29,7 @@ namespace MagicStorage.Components
             Rectangle frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
             Color lightColor = Lighting.GetColor(i, j, Color.White);
             Color color = Color.Lerp(Color.White, lightColor, 0.5f);
-            spriteBatch.Draw(mod.GetTexture("Components/CreativeStorageUnit_Glow"), drawPos, frame, color);
+            spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/CreativeStorageUnit_Glow").Value, drawPos, frame, color);
         }
     }
 }

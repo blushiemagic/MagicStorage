@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Localization;
+using Terraria.GameContent.Creative;
 
 namespace MagicStorage.Items
 {
@@ -11,37 +12,38 @@ namespace MagicStorage.Items
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Luminite Storage Unit");
-            DisplayName.AddTranslation(GameCulture.Russian, "Люминитовая Ячейка Хранилища");
-            DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca (Luminowana)");
-            DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Luminite)");
-            DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Luminita)");
-            DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(夜明)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Люминитовая Ячейка Хранилища");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca (Luminowana)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage (Luminite)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento (Luminita)");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元(夜明)");
+
+            CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 5;
         }
 
         public override void SetDefaults()
         {
-            item.width = 26;
-            item.height = 26;
-            item.maxStack = 99;
-            item.useTurn = true;
-            item.autoReuse = true;
-            item.useAnimation = 15;
-            item.useTime = 10;
-            item.useStyle = 1;
-            item.consumable = true;
-            item.rare = 10;
-            item.value = Item.sellPrice(0, 2, 50, 0);
-            item.createTile = mod.TileType("StorageUnit");
-            item.placeStyle = 6;
+            Item.width = 26;
+            Item.height = 26;
+            Item.maxStack = 99;
+            Item.useTurn = true;
+            Item.autoReuse = true;
+            Item.useAnimation = 15;
+            Item.useTime = 10;
+            Item.useStyle = ItemUseStyleID.Swing;
+            Item.consumable = true;
+            Item.rare = ItemRarityID.Red;
+            Item.value = Item.sellPrice(0, 2, 50, 0);
+            Item.createTile = ModContent.TileType<Components.StorageUnit>();
+            Item.placeStyle = 6;
         }
 
         public override void AddRecipes()
         {
-            ModRecipe recipe = new ModRecipe(mod);
-            recipe.AddIngredient(mod.ItemType("StorageUnitBlueChlorophyte"));
-            recipe.AddIngredient(mod.ItemType("UpgradeLuminite"));
-            recipe.SetResult(this);
-            recipe.AddRecipe();
+            Recipe recipe = CreateRecipe();
+            recipe.AddIngredient(ModContent.ItemType<StorageUnitBlueChlorophyte>());
+            recipe.AddIngredient(ModContent.ItemType<UpgradeLuminite>());
+            recipe.Register();
         }
     }
 }

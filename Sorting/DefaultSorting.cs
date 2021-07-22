@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
@@ -20,8 +21,8 @@ namespace MagicStorage.Sorting
 
     public static class SortClassList
     {
-        private static bool initialized = false;
-        private static List<DefaultSortClass> classes = new List<DefaultSortClass>();
+        private static readonly bool initialized = false;
+        private static readonly List<DefaultSortClass> classes = new List<DefaultSortClass>();
 
         public static int Compare(Item item1, Item item2)
         {
@@ -97,27 +98,27 @@ namespace MagicStorage.Sorting
 
         private static bool MeleeWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.melee && item.pick < 1 && item.hammer < 1 && item.axe < 1;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Melee && item.pick < 1 && item.hammer < 1 && item.axe < 1;
         }
 
         private static bool RangedWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.ranged;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Ranged;
         }
 
         private static bool MagicWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.magic;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Magic;
         }
 
         private static bool SummonWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.summon;
+            return item.maxStack == 1 && item.damage > 0 && item.DamageType == DamageClass.Summon;
         }
 
         private static bool ThrownWeapon(Item item)
         {
-            return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > 0 && item.thrown;
+            return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.DamageType == DamageClass.Throwing;
         }
 
         private static bool Weapon(Item item)
@@ -267,17 +268,17 @@ namespace MagicStorage.Sorting
 
         private static bool Misc(Item item)
         {
-            return item.createTile < 0 && item.createWall < 1;
+            return item.createTile < TileID.Dirt && item.createWall < 1;
         }
 
         private static bool FrameImportantTile(Item item)
         {
-            return item.createTile >= 0 && Main.tileFrameImportant[item.createTile];
+            return item.createTile >= TileID.Dirt && Main.tileFrameImportant[item.createTile];
         }
 
         private static bool CommonTile(Item item)
         {
-            return item.createTile >= 0 || item.createWall > 0;
+            return item.createTile >= TileID.Dirt || item.createWall > 0;
         }
 
         private static int CompareRarity(Item item1, Item item2)
@@ -433,8 +434,8 @@ namespace MagicStorage.Sorting
 
     public class DefaultSortClass
     {
-        private Func<Item, bool> passFunc;
-        private Func<Item, Item, int> compareFunc;
+        private readonly Func<Item, bool> passFunc;
+        private readonly Func<Item, Item, int> compareFunc;
 
         public DefaultSortClass(Func<Item, bool> passFunc, Func<Item, Item, int> compareFunc)
         {

@@ -8,7 +8,7 @@ namespace MagicStorage
 {
     public class BlockRecipes : GlobalRecipe
     {
-        public static bool active = true;
+        internal static bool active = true;
 
         public override bool RecipeAvailable(Recipe recipe)
         {
