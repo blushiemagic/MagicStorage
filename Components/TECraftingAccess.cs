@@ -27,10 +27,16 @@ namespace MagicStorage.Components
 		public void TryDepositStation(Item item)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
 				return;
+			}
+
 			foreach (Item station in stations)
 				if (station.type == item.type)
+				{
 					return;
+				}
+
 			for (int k = 0; k < stations.Length; k++)
 				if (stations[k].IsAir)
 				{
@@ -38,7 +44,10 @@ namespace MagicStorage.Components
 					stations[k].stack = 1;
 					item.stack--;
 					if (item.stack <= 0)
+					{
 						item.SetDefaults();
+					}
+
 					NetHelper.SendTEUpdate(ID, Position);
 					return;
 				}
@@ -47,7 +56,10 @@ namespace MagicStorage.Components
 		public Item TryWithdrawStation(int slot)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
 				return new Item();
+			}
+
 			if (!stations[slot].IsAir)
 			{
 				Item item = stations[slot];
@@ -62,11 +74,19 @@ namespace MagicStorage.Components
 		public Item DoStationSwap(Item item, int slot)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
 				return new Item();
+			}
+
 			if (!item.IsAir)
+			{
 				for (int k = 0; k < stations.Length; k++)
 					if (k != slot && stations[k].type == item.type)
+					{
 						return item;
+					}
+			}
+
 			if ((item.IsAir || item.stack == 1) && !stations[slot].IsAir)
 			{
 				Item temp = item;
@@ -82,7 +102,10 @@ namespace MagicStorage.Components
 				stations[slot].stack = 1;
 				item.stack--;
 				if (item.stack <= 0)
+				{
 					item.SetDefaults();
+				}
+
 				NetHelper.SendTEUpdate(ID, Position);
 				return item;
 			}
@@ -103,11 +126,17 @@ namespace MagicStorage.Components
 		{
 			IList<TagCompound> listStations = tag.GetList<TagCompound>("Stations");
 			if (listStations != null && listStations.Count > 0)
+			{
 				for (int k = 0; k < stations.Length; k++)
 					if (k < listStations.Count)
+					{
 						stations[k] = ItemIO.Load(listStations[k]);
+					}
 					else
+					{
 						stations[k] = new Item();
+					}
+			}
 		}
 
 		public override void NetSend(BinaryWriter writer, bool lightSend)

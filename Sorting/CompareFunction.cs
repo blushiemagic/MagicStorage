@@ -11,9 +11,15 @@ namespace MagicStorage.Sorting
 		public int Compare(object object1, object object2)
 		{
 			if (object1 is Item item1 && object2 is Item item2)
+			{
 				return Compare(item1, item2);
+			}
+
 			if (object1 is Recipe recipe1 && object2 is Recipe recipe2)
+			{
 				return Compare(recipe1.createItem, recipe2.createItem);
+			}
+
 			return 0;
 		}
 	}
@@ -46,29 +52,51 @@ namespace MagicStorage.Sorting
 		public static double GetDps(Item item)
 		{
 			if (item.damage <= 0)
+			{
 				return 0d;
+			}
 
 			int defence;
 			if (NPC.downedMoonlord)
+			{
 				defence = 50;
+			}
 			else if (NPC.downedAncientCultist)
+			{
 				defence = 43;
+			}
 			else if (NPC.downedGolemBoss)
+			{
 				defence = 38;
+			}
 			else if (NPC.downedPlantBoss)
+			{
 				defence = 32;
+			}
 			else if (NPC.downedMechBossAny)
+			{
 				defence = 26;
+			}
 			else if (Main.hardMode)
+			{
 				defence = 22;
+			}
 			else if (NPC.downedBoss3)
+			{
 				defence = 16;
+			}
 			else if (NPC.downedBoss2)
+			{
 				defence = 14;
+			}
 			else if (NPC.downedBoss1)
+			{
 				defence = 10;
+			}
 			else
+			{
 				defence = 8;
+			}
 
 			return Math.Max(item.damage - defence * 0.5d, 1) / Math.Max((item.useTime + item.reuseDelay) / 60d, 0.001d) * (1d + item.crit / 100d);
 		}

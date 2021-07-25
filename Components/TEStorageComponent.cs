@@ -70,9 +70,13 @@ namespace MagicStorage.Components
 		public override void OnKill()
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
 				NetHelper.SendSearchAndRefresh(Position.X, Position.Y);
+			}
 			else
+			{
 				SearchAndRefreshNetwork(Position);
+			}
 		}
 
 		public IEnumerable<Point16> AdjacentComponents() => AdjacentComponents(Position);
@@ -87,22 +91,35 @@ namespace MagicStorage.Components
 				int checkY = point.Y + add.Y;
 				Tile tile = Main.tile[checkX, checkY];
 				if (!tile.active())
+				{
 					continue;
+				}
+
 				if (TileLoader.GetTile(tile.type) is StorageComponent)
 				{
 					if (tile.frameX % 36 == 18)
+					{
 						checkX--;
+					}
+
 					if (tile.frameY % 36 == 18)
+					{
 						checkY--;
+					}
+
 					var check = new Point16(checkX, checkY);
 					if (!points.Contains(check))
+					{
 						points.Add(check);
+					}
 				}
 				else if (tile.type == ModContent.TileType<StorageConnector>())
 				{
 					var check = new Point16(checkX, checkY);
 					if (!points.Contains(check))
+					{
 						points.Add(check);
+					}
 				}
 			}
 
@@ -123,7 +140,10 @@ namespace MagicStorage.Components
 				{
 					explored.Add(explore);
 					if (TEStorageCenter.IsStorageCenter(explore))
+					{
 						return explore;
+					}
+
 					foreach (Point16 point in AdjacentComponents(explore))
 						toExplore.Enqueue(point);
 				}

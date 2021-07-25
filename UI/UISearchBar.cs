@@ -52,15 +52,20 @@ namespace MagicStorage.UI
 
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			MouseState mouse = StorageGUI.curMouse;
-			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width &&
-			                 mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
 			if (StorageGUI.MouseClicked && Parent != null)
+			{
 				LeftClick(mouseOver);
+			}
 			else if (StorageGUI.RightMouseClicked)
+			{
 				RightClick(mouseOver);
+			}
 
 			if (hasFocus)
+			{
 				HandleTextInput();
+			}
 
 			base.Update(gameTime);
 		}
@@ -105,17 +110,24 @@ namespace MagicStorage.UI
 			Main.instance.HandleIME();
 			string prev = Text;
 			if (cursorPosition < Text.Length && Text.Length > 0)
+			{
 				prev = prev.Remove(cursorPosition);
+			}
 
 			string newString = Main.GetInputText(prev);
 			if ((Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl)) && KeyTyped(Keys.Back))
+			{
 				DeleteWord(ref newString);
+			}
 
 			if (newString != prev)
 			{
 				int newStringLength = newString.Length;
 				if (prev != Text)
+				{
 					newString += Text.Substring(cursorPosition);
+				}
+
 				Text = newString;
 				cursorPosition = newStringLength;
 				StorageGUI.RefreshItems();
@@ -128,13 +140,25 @@ namespace MagicStorage.UI
 			}
 
 			if (KeyTyped(Keys.Left) && cursorPosition > 0)
+			{
 				cursorPosition--;
+			}
+
 			if (KeyTyped(Keys.Right) && cursorPosition < Text.Length)
+			{
 				cursorPosition++;
+			}
+
 			if (KeyTyped(Keys.Home))
+			{
 				cursorPosition = 0;
+			}
+
 			if (KeyTyped(Keys.End))
+			{
 				cursorPosition = Text.Length;
+			}
+
 			if (KeyTyped(Keys.Enter) || KeyTyped(Keys.Tab) || KeyTyped(Keys.Escape))
 			{
 				hasFocus = false;
@@ -178,7 +202,10 @@ namespace MagicStorage.UI
 
 			Color color = Color.Black;
 			if (isEmpty)
+			{
 				color *= 0.75f;
+			}
+
 			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + padding, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			if (!isEmpty && hasFocus && cursorTimer < 30)
 			{

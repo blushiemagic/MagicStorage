@@ -28,16 +28,31 @@ namespace MagicStorage.Components
 			{
 				int style = Main.tile[Position.X, Position.Y].frameY / 36;
 				if (style == 8)
+				{
 					return 4;
+				}
+
 				if (style > 1)
+				{
 					style--;
+				}
+
 				int capacity = style + 1;
 				if (capacity > 4)
+				{
 					capacity++;
+				}
+
 				if (capacity > 6)
+				{
 					capacity++;
+				}
+
 				if (capacity > 8)
+				{
 					capacity += 7;
+				}
+
 				return 40 * capacity;
 			}
 		}
@@ -54,7 +69,10 @@ namespace MagicStorage.Components
 		public override bool HasSpaceInStackFor(Item check, bool locked = false)
 		{
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().EnterReadLock();
+			}
+
 			try
 			{
 				var data = new ItemData(check);
@@ -63,7 +81,9 @@ namespace MagicStorage.Components
 			finally
 			{
 				if (Main.netMode == NetmodeID.Server && !locked)
+				{
 					GetHeart().ExitReadLock();
+				}
 			}
 		}
 
@@ -72,18 +92,26 @@ namespace MagicStorage.Components
 		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false)
 		{
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().EnterReadLock();
+			}
+
 			try
 			{
 				if (ignorePrefix)
+				{
 					return hasItemNoPrefix.Contains(check.type);
+				}
+
 				var data = new ItemData(check);
 				return hasItem.Contains(data);
 			}
 			finally
 			{
 				if (Main.netMode == NetmodeID.Server && !locked)
+				{
 					GetHeart().ExitReadLock();
+				}
 			}
 		}
 
@@ -92,13 +120,22 @@ namespace MagicStorage.Components
 		public override void DepositItem(Item toDeposit, bool locked = false)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+			{
 				return;
+			}
+
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().EnterWriteLock();
+			}
+
 			try
 			{
 				if (CraftingGUI.IsTestItem(toDeposit))
+				{
 					return;
+				}
+
 				Item original = toDeposit.Clone();
 				bool finished = false;
 				bool hasChange = false;
@@ -108,13 +145,21 @@ namespace MagicStorage.Components
 						int total = item.stack + toDeposit.stack;
 						int newStack = total;
 						if (newStack > item.maxStack)
+						{
 							newStack = item.maxStack;
+						}
+
 						item.stack = newStack;
 
 						if (toDeposit.favorited)
+						{
 							item.favorited = true;
+						}
+
 						if (toDeposit.newAndShiny)
+						{
 							item.newAndShiny = MagicStorageConfig.glowNewItems;
+						}
 
 						hasChange = true;
 						toDeposit.stack = total - newStack;
@@ -138,23 +183,34 @@ namespace MagicStorage.Components
 				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
 				{
 					if (Main.netMode == NetmodeID.Server)
+					{
 						netQueue.Enqueue(UnitOperation.Deposit.Create(original));
+					}
+
 					PostChangeContents();
 				}
 			}
 			finally
 			{
 				if (Main.netMode == NetmodeID.Server && !locked)
+				{
 					GetHeart().ExitWriteLock();
+				}
 			}
 		}
 
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+			{
 				return new Item();
+			}
+
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().EnterWriteLock();
+			}
+
 			try
 			{
 				Item original = lookFor.Clone();
@@ -167,11 +223,17 @@ namespace MagicStorage.Components
 					{
 						int maxToTake = item.stack;
 						if (item.stack > 0 && item.favorited && keepOneIfFavorite)
+						{
 							maxToTake -= 1;
+						}
+
 						int withdraw = Math.Min(lookFor.stack, maxToTake);
 						item.stack -= withdraw;
 						if (item.stack <= 0)
+						{
 							items.RemoveAt(k);
+						}
+
 						result.stack += withdraw;
 						lookFor.stack -= withdraw;
 						if (lookFor.stack <= 0)
@@ -194,7 +256,10 @@ namespace MagicStorage.Components
 				}
 
 				if (result.stack == 0)
+				{
 					return new Item();
+				}
+
 				if (Main.netMode != NetmodeID.MultiplayerClient)
 				{
 					if (Main.netMode == NetmodeID.Server)
@@ -212,7 +277,9 @@ namespace MagicStorage.Components
 			finally
 			{
 				if (Main.netMode == NetmodeID.Server && !locked)
+				{
 					GetHeart().ExitWriteLock();
+				}
 			}
 		}
 
@@ -222,17 +289,33 @@ namespace MagicStorage.Components
 			int oldFrame = topLeft.frameX;
 			int style;
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().EnterReadLock();
+			}
+
 			if (IsEmpty)
+			{
 				style = 0;
+			}
 			else if (IsFull)
+			{
 				style = 2;
+			}
 			else
+			{
 				style = 1;
+			}
+
 			if (Main.netMode == NetmodeID.Server && !locked)
+			{
 				GetHeart().ExitReadLock();
+			}
+
 			if (Inactive)
+			{
 				style += 3;
+			}
+
 			style *= 36;
 			topLeft.frameX = (short) style;
 			Main.tile[Position.X, Position.Y + 1].frameX = (short) style;
@@ -244,7 +327,9 @@ namespace MagicStorage.Components
 		public void UpdateTileFrameWithNetSend(bool locked = false)
 		{
 			if (UpdateTileFrame(locked))
+			{
 				NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
+			}
 		}
 
 		//precondition: lock is already taken
@@ -278,13 +363,19 @@ namespace MagicStorage.Components
 		internal Item WithdrawStack()
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+			{
 				return new Item();
+			}
+
 			Item item = items[items.Count - 1];
 			items.RemoveAt(items.Count - 1);
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				if (Main.netMode == NetmodeID.Server)
+				{
 					netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
+				}
+
 				PostChangeContents();
 			}
 
@@ -308,13 +399,18 @@ namespace MagicStorage.Components
 				items.Add(item);
 				var data = new ItemData(item);
 				if (item.stack < item.maxStack)
+				{
 					hasSpaceInStack.Add(data);
+				}
+
 				hasItem.Add(data);
 				hasItemNoPrefix.Add(data.Type);
 			}
 
 			if (Main.netMode == NetmodeID.Server)
+			{
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
+			}
 		}
 
 		public override void NetSend(BinaryWriter trueWriter, bool lightSend)
@@ -413,9 +509,15 @@ namespace MagicStorage.Components
 			bool flag = false;
 			for (int k = 0; k < count; k++)
 				if (UnitOperation.Receive(reader, this))
+				{
 					flag = true;
+				}
+
 			if (flag)
+			{
 				RepairMetadata();
+			}
+
 			receiving = false;
 
 			/* Dispose all objects */
@@ -442,7 +544,10 @@ namespace MagicStorage.Components
 			{
 				var data = new ItemData(item);
 				if (item.stack < item.maxStack)
+				{
 					hasSpaceInStack.Add(data);
+				}
+
 				hasItem.Add(data);
 				hasItemNoPrefix.Add(data.Type);
 			}
@@ -521,7 +626,10 @@ namespace MagicStorage.Components
 					unit.items.Add(item);
 					var data = new ItemData(item);
 					if (item.stack < item.maxStack)
+					{
 						unit.hasSpaceInStack.Add(data);
+					}
+
 					unit.hasItem.Add(data);
 					unit.hasItemNoPrefix.Add(data.Type);
 				}

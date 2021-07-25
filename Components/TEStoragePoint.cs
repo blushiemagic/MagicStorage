@@ -37,7 +37,9 @@ namespace MagicStorage.Components
 			}
 
 			if (center != oldCenter)
+			{
 				NetHelper.SendTEUpdate(ID, Position);
+			}
 		}
 
 		public override void OnPlace()
@@ -57,7 +59,10 @@ namespace MagicStorage.Components
 		public TEStorageHeart GetHeart()
 		{
 			if (center != new Point16(-1, -1))
+			{
 				return ((TEStorageCenter) ByPosition[center]).GetHeart();
+			}
+
 			return null;
 		}
 

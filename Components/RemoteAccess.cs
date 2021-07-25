@@ -26,21 +26,34 @@ namespace MagicStorage.Components
 			if (item.type == ModContent.ItemType<Locator>() || item.type == ModContent.ItemType<LocatorDisk>())
 			{
 				if (Main.tile[i, j].frameX % 36 == 18)
+				{
 					i--;
+				}
+
 				if (Main.tile[i, j].frameY % 36 == 18)
+				{
 					j--;
+				}
+
 				var ent = (TERemoteAccess) TileEntity.ByPosition[new Point16(i, j)];
 				var locator = (Locator) item.modItem;
 				if (ent.TryLocate(locator.location, out string message))
 				{
 					if (item.type == ModContent.ItemType<LocatorDisk>())
+					{
 						locator.location = new Point16(-1, -1);
+					}
 					else
+					{
 						item.SetDefaults();
+					}
 				}
 
 				if (player.selectedItem == 58)
+				{
 					Main.mouseItem = item.Clone();
+				}
+
 				Main.NewText(message);
 				return true;
 			}

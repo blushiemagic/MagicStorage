@@ -40,9 +40,14 @@ namespace MagicStorage.Items
 			recipe.AddIngredient(ItemID.SpectreBar, 5);
 			recipe.AddIngredient(ItemID.BeetleHusk, 2);
 			if (MagicStorage.legendMod is null)
+			{
 				recipe.AddIngredient(ItemID.Emerald);
+			}
 			else
+			{
 				recipe.AddRecipeGroup("MagicStorage:AnyEmerald");
+			}
+
 			recipe.AddTile(TileID.MythrilAnvil);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

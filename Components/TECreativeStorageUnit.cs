@@ -25,7 +25,10 @@ namespace MagicStorage.Components
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Inactive)
+			{
 				return new Item();
+			}
+
 			return lookFor.Clone();
 		}
 	}
@@ -70,7 +73,10 @@ namespace MagicStorage.Components
 		public bool MoveNext()
 		{
 			if (inactive)
+			{
 				return false;
+			}
+
 			do
 			{
 				id++;

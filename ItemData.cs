@@ -32,7 +32,10 @@ namespace MagicStorage
 			var data1 = new ItemData(item1);
 			var data2 = new ItemData(item2);
 			if (data1.Type != data2.Type)
+			{
 				return data1.Type - data2.Type;
+			}
+
 			return data1.Prefix - data2.Prefix;
 		}
 	}

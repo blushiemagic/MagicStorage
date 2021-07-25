@@ -21,7 +21,10 @@ namespace MagicStorage
 		public static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			if (!Main.instance.IsActive)
+			{
 				return;
+			}
+
 			for (int k = 0; k < layers.Count; k++)
 				if (layers[k].Name == "Vanilla: Inventory")
 				{
@@ -44,9 +47,13 @@ namespace MagicStorage
 					if (heart != null)
 					{
 						if (access is CraftingAccess)
+						{
 							CraftingGUI.Draw(heart);
+						}
 						else
+						{
 							StorageGUI.Draw(heart);
+						}
 					}
 				}
 			}

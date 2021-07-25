@@ -316,7 +316,10 @@ namespace MagicStorage
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 			if (bluemagicMod != null)
+			{
 				group.ValidItems.Add(bluemagicMod.ItemType("DarkBlueIce"));
+			}
+
 			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
 			group = new RecipeGroup(() => Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ItemType("ShadowDiamond"));
 			if (legendMod != null)
@@ -361,7 +364,10 @@ namespace MagicStorage
 		public override void PostUpdateInput()
 		{
 			if (!Main.instance.IsActive)
+			{
 				return;
+			}
+
 			StorageGUI.Update(null);
 			CraftingGUI.Update(null);
 		}

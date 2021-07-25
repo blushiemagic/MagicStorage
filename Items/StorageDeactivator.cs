@@ -48,9 +48,15 @@ namespace MagicStorage.Items
 				int i = Player.tileTargetX;
 				int j = Player.tileTargetY;
 				if (Main.tile[i, j].frameX % 36 == 18)
+				{
 					i--;
+				}
+
 				if (Main.tile[i, j].frameY % 36 == 18)
+				{
 					j--;
+				}
+
 				var point = new Point16(i, j);
 				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit storageUnit)
 				{
@@ -62,7 +68,9 @@ namespace MagicStorage.Items
 					{
 						unit.UpdateTileFrameWithNetSend();
 						if (Main.netMode == NetmodeID.SinglePlayer)
+						{
 							unit.GetHeart().ResetCompactStage();
+						}
 					}
 				}
 			}

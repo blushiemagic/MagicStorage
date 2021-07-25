@@ -38,9 +38,14 @@ namespace MagicStorage.Items
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.CrimtaneBar, 10);
 			if (MagicStorage.legendMod is null)
+			{
 				recipe.AddIngredient(ItemID.Amethyst);
+			}
 			else
+			{
 				recipe.AddRecipeGroup("MagicStorage:AnyAmethyst");
+			}
+
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

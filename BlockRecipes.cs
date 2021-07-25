@@ -12,7 +12,10 @@ namespace MagicStorage
 		public override bool RecipeAvailable(Recipe recipe)
 		{
 			if (!active)
+			{
 				return true;
+			}
+
 			try
 			{
 				Player player = Main.LocalPlayer;

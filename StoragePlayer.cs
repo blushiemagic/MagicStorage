@@ -74,13 +74,18 @@ namespace MagicStorage
 		public override void UpdateDead()
 		{
 			if (player.whoAmI == Main.myPlayer)
+			{
 				CloseStorage();
+			}
 		}
 
 		public override void ResetEffects()
 		{
 			if (player.whoAmI != Main.myPlayer)
+			{
 				return;
+			}
+
 			if (timeSinceOpen < 1)
 			{
 				player.talkNPC = -1;
@@ -127,7 +132,10 @@ namespace MagicStorage
 			remoteAccess = remote;
 			_latestAccessedStorage = GetStorageHeart();
 			if (MagicStorageConfig.useConfigFilter && CraftingGUI.recipeButtons != null)
+			{
 				CraftingGUI.recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
+			}
+
 			StorageGUI.RefreshItems();
 		}
 
@@ -151,7 +159,10 @@ namespace MagicStorage
 			{
 				int total = Main.mouseItem.stack + item.stack;
 				if (total > Main.mouseItem.maxStack)
+				{
 					total = Main.mouseItem.maxStack;
+				}
+
 				int difference = total - Main.mouseItem.stack;
 				Main.mouseItem.stack = total;
 				item.stack -= difference;
@@ -161,19 +172,30 @@ namespace MagicStorage
 			{
 				item = player.GetItem(Main.myPlayer, item, false, true);
 				if (!item.IsAir)
+				{
 					player.QuickSpawnClonedItem(item, item.stack);
+				}
 			}
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
 		{
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
+			{
 				return false;
+			}
+
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
 				return false;
+			}
+
 			Item item = inventory[slot];
 			if (item.favorited || item.IsAir)
+			{
 				return false;
+			}
+
 			int oldType = item.type;
 			int oldStack = item.stack;
 			if (StorageCrafting())
@@ -216,10 +238,16 @@ namespace MagicStorage
 		public TEStorageHeart GetStorageHeart()
 		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
 				return null;
+			}
+
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
 			if (tile is null)
+			{
 				return null;
+			}
+
 			int tileType = tile.type;
 			ModTile modTile = TileLoader.GetTile(tileType);
 			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
@@ -228,14 +256,20 @@ namespace MagicStorage
 		public TECraftingAccess GetCraftingAccess()
 		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0 || !TileEntity.ByPosition.ContainsKey(storageAccess))
+			{
 				return null;
+			}
+
 			return TileEntity.ByPosition[storageAccess] as TECraftingAccess;
 		}
 
 		public bool StorageCrafting()
 		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
 				return false;
+			}
+
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
 			return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
 		}
@@ -255,7 +289,10 @@ namespace MagicStorage
 		public override bool CanHitPvp(Item item, Player target)
 		{
 			if (CraftingGUI.IsTestItem(item))
+			{
 				return false;
+			}
+
 			return base.CanHitPvp(item, target);
 		}
 
@@ -263,12 +300,16 @@ namespace MagicStorage
 		{
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
 				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				{
 					item.TurnToAir();
+				}
 
 			{
 				Item item = player.trashItem;
 				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				{
 					item.TurnToAir();
+				}
 			}
 			base.OnRespawn(player);
 		}

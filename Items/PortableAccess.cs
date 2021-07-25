@@ -40,9 +40,13 @@ namespace MagicStorage.Items
 				{
 					Tile tile = Main.tile[location.X, location.Y];
 					if (!tile.active() || tile.type != ModContent.TileType<Components.StorageHeart>() || tile.frameX != 0 || tile.frameY != 0)
+					{
 						Main.NewText("Storage Heart is missing!");
+					}
 					else
+					{
 						OpenStorage(player);
+					}
 				}
 				else
 				{

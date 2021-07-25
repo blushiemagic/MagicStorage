@@ -88,7 +88,10 @@ namespace MagicStorage
 		public static void SendTEUpdate(int id, Point16 position)
 		{
 			if (Main.netMode != NetmodeID.Server)
+			{
 				return;
+			}
+
 			if (queueUpdates)
 			{
 				if (!updateQueueContains.Contains(id))
@@ -212,7 +215,10 @@ namespace MagicStorage
 			}
 
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
+			{
 				return;
+			}
+
 			if (op == 0)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
@@ -246,7 +252,9 @@ namespace MagicStorage
 					Item item = ItemIO.Receive(reader, true, true);
 					heart.DepositItem(item);
 					if (!item.IsAir)
+					{
 						items.Add(item);
+					}
 				}
 
 				ProcessUpdateQueue();
@@ -328,11 +336,15 @@ namespace MagicStorage
 		{
 			int ent = reader.ReadInt32();
 			if (Main.netMode == NetmodeID.Server)
+			{
 				return;
+			}
 
 			if (!TileEntity.ByID.TryGetValue(ent, out _))
 				//Nothing would've happened anyway
+			{
 				return;
+			}
 
 			StorageGUI.RefreshItems();
 		}
@@ -447,7 +459,9 @@ namespace MagicStorage
 			}
 
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess access))
+			{
 				return;
+			}
 
 			if (op == 0)
 			{
@@ -488,7 +502,9 @@ namespace MagicStorage
 			var modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
 			TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
 			if (heart != null)
+			{
 				SendRefreshNetworkItems(heart.ID);
+			}
 		}
 
 		public static void ReceiveStationResult(BinaryReader reader)
@@ -498,7 +514,9 @@ namespace MagicStorage
 			Item item = ItemIO.Receive(reader, true);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
 				return;
+			}
 
 			Player player = Main.LocalPlayer;
 			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
@@ -510,7 +528,10 @@ namespace MagicStorage
 			{
 				int total = Main.mouseItem.stack + item.stack;
 				if (total > Main.mouseItem.maxStack)
+				{
 					total = Main.mouseItem.maxStack;
+				}
+
 				Main.mouseItem.stack = total;
 				item.stack -= total;
 			}
@@ -519,7 +540,9 @@ namespace MagicStorage
 			{
 				item = player.GetItem(Main.myPlayer, item, false, true);
 				if (!item.IsAir)
+				{
 					player.QuickSpawnClonedItem(item, item.stack);
+				}
 			}
 		}
 
@@ -540,7 +563,9 @@ namespace MagicStorage
 			{
 				int ent = reader.ReadInt32();
 				if (TileEntity.ByID[ent] is TEStorageHeart heart)
+				{
 					heart.ResetCompactStage();
+				}
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -582,7 +607,9 @@ namespace MagicStorage
 			}
 
 			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
+			{
 				return;
+			}
 
 			var toWithdraw = new List<Item>();
 			for (int k = 0; k < withdrawCount; k++)

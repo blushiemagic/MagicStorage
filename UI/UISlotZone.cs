@@ -40,16 +40,24 @@ namespace MagicStorage.UI
 			Vector2 origin = InterfaceHelper.GetFullRectangle(this).TopLeft();
 			MouseState curMouse = StorageGUI.curMouse;
 			if (curMouse.X <= origin.X || curMouse.Y <= origin.Y)
+			{
 				return;
+			}
+
 			int slotWidth = (int) (Main.inventoryBackTexture.Width * inventoryScale * Main.UIScale);
 			int slotHeight = (int) (Main.inventoryBackTexture.Height * inventoryScale * Main.UIScale);
 			int slotX = (curMouse.X - (int) origin.X) / (slotWidth + padding);
 			int slotY = (curMouse.Y - (int) origin.Y) / (slotHeight + padding);
 			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= numRows)
+			{
 				return;
+			}
+
 			Vector2 slotPos = origin + new Vector2(slotX * (slotWidth + padding * Main.UIScale), slotY * (slotHeight + padding * Main.UIScale));
 			if (curMouse.X > slotPos.X && curMouse.X < slotPos.X + slotWidth && curMouse.Y > slotPos.Y && curMouse.Y < slotPos.Y + slotHeight)
+			{
 				onHover(slotX + numColumns * slotY, ref hoverSlot);
+			}
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)

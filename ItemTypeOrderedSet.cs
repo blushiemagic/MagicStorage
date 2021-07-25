@@ -92,17 +92,24 @@ namespace MagicStorage
 			{
 				IList<int> listV2 = tag.GetList<int>(_name + Suffix);
 				if (listV2 != null)
+				{
 					_items = listV2.Select(x =>
 					{
 						if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
+						{
 							return null;
+						}
+
 						var item = new Item();
 						item.SetDefaults(x);
 						item.type = x;
 						return item;
 					}).Where(x => x != null).ToList();
+				}
 				else
+				{
 					_items = new List<Item>();
+				}
 			}
 
 			_set = new HashSet<int>(_items.Select(x => x.type));

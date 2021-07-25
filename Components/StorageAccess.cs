@@ -19,10 +19,16 @@ namespace MagicStorage.Components
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
 			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
+			{
 				return null;
+			}
+
 			TileEntity heart = TileEntity.ByPosition[point];
 			if (!(heart is TEStorageCenter center))
+			{
 				return null;
+			}
+
 			return center.GetHeart();
 		}
 
@@ -38,14 +44,23 @@ namespace MagicStorage.Components
 		public override bool NewRightClick(int i, int j)
 		{
 			if (Main.tile[i, j].frameX % 36 == 18)
+			{
 				i--;
+			}
+
 			if (Main.tile[i, j].frameY % 36 == 18)
+			{
 				j--;
+			}
 
 			string text = "This access is not connected to a Storage Heart!";
 			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
+			{
 				if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
+				{
 					text = "Storage Heart area not loaded! Try again.";
+				}
+			}
 
 			if (GetHeart(i, j) == null)
 			{
@@ -104,7 +119,10 @@ namespace MagicStorage.Components
 				modPlayer.OpenStorage(toOpen);
 				modPlayer.timeSinceOpen = 0;
 				if (PlayerInput.GrappleAndInteractAreShared)
+				{
 					PlayerInput.Triggers.JustPressed.Grapple = false;
+				}
+
 				Main.recBigList = false;
 				Main.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
 				lock (BlockRecipes.activeLock)

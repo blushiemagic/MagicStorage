@@ -32,11 +32,17 @@ namespace MagicStorage.UI
 		{
 			bool oldValue = Value;
 			if (StorageGUI.MouseClicked && Parent != null)
+			{
 				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
+				{
 					Value = !Value;
+				}
+			}
 
 			if (oldValue != Value)
+			{
 				onChanged?.Invoke();
+			}
 		}
 
 		private bool MouseOverButton(int mouseX, int mouseY)
@@ -64,7 +70,9 @@ namespace MagicStorage.UI
 		public void DrawText()
 		{
 			if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
+			{
 				Main.instance.MouseText(_name.Value);
+			}
 		}
 	}
 }

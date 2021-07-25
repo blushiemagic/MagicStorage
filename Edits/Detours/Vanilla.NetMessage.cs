@@ -39,8 +39,12 @@ namespace MagicStorage.Edits.Detours
 				{
 					Point16 pos = item.Key;
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
+					{
 						if (ModTileEntity.GetTileEntity(item.Value.type)?.mod == MagicStorage.Instance)
+						{
 							ids.Enqueue(item.Value.ID);
+						}
+					}
 				}
 
 				var ms = new MemoryStream();
@@ -54,7 +58,9 @@ namespace MagicStorage.Edits.Detours
 
 				if (written > 0)
 					//Write the remaining information
+				{
 					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, true);
+				}
 
 				/*
 				if (Main.netMode == NetmodeID.Server && total > 0)

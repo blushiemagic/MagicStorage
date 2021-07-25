@@ -23,7 +23,9 @@ namespace MagicStorage
 		{
 			RecursiveCraftMod = ModLoader.GetMod("RecursiveCraft");
 			if (Enabled)
+			{
 				Initialize(); // Move that logic into another method to prevent this.
+			}
 		}
 
 		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches. 
@@ -39,7 +41,9 @@ namespace MagicStorage
 		public static void InitRecipes()
 		{
 			if (Enabled)
+			{
 				InitRecipes_Inner();
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -52,7 +56,10 @@ namespace MagicStorage
 		public static void Unload()
 		{
 			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
+			{
 				Unload_Inner(); // Once again we must separate out this logic.
+			}
+
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
@@ -84,9 +91,14 @@ namespace MagicStorage
 			var dictionary = new Dictionary<int, int>();
 			foreach (Item item in items)
 				if (dictionary.ContainsKey(item.type))
+				{
 					dictionary[item.type] += item.stack;
+				}
 				else
+				{
 					dictionary[item.type] = item.stack;
+				}
+
 			return dictionary;
 		}
 
@@ -97,10 +109,15 @@ namespace MagicStorage
 		public static void RecursiveRecipes()
 		{
 			if (Main.rand == null)
+			{
 				Main.rand = new UnifiedRandom((int) DateTime.UtcNow.Ticks);
+			}
+
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
+			{
 				return;
+			}
 
 			lock (Members.recipeCache)
 			{
@@ -110,9 +127,13 @@ namespace MagicStorage
 				{
 					Recipe recipe = Main.recipe[i];
 					if (recipe is CompoundRecipe compound)
+					{
 						SingleSearch(recursiveSearch, compound.OverridenRecipe);
+					}
 					else
+					{
 						SingleSearch(recursiveSearch, recipe);
+					}
 				}
 			}
 		}
@@ -123,7 +144,10 @@ namespace MagicStorage
 			var modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
 			if (heart == null)
+			{
 				return null;
+			}
+
 			return FlatDict(heart.GetStoredItems());
 		}
 
@@ -148,7 +172,9 @@ namespace MagicStorage
 			}
 
 			if (recipeInfo != null && recipeInfo.RecipeUsed.Count > 1)
+			{
 				Members.recipeCache.Add(recipe, recipeInfo);
+			}
 		}
 
 		public static bool IsCompoundRecipe(Recipe recipe) => recipe is CompoundRecipe;
@@ -158,18 +184,24 @@ namespace MagicStorage
 		public static bool UpdateRecipe(Recipe recipe)
 		{
 			if (recipe is CompoundRecipe compound)
+			{
 				recipe = compound.OverridenRecipe;
+			}
 			else
+			{
 				return false;
+			}
 
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems != null)
+			{
 				lock (Members.recipeCache)
 				{
 					Members.recipeCache.Remove(recipe);
 					var recursiveSearch = new RecursiveSearch(storedItems, GuiAsCraftingSource());
 					SingleSearch(recursiveSearch, recipe);
 				}
+			}
 
 			return Members.recipeCache.ContainsKey(recipe);
 		}
@@ -177,7 +209,10 @@ namespace MagicStorage
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
 			if (recipe is CompoundRecipe compound)
+			{
 				recipe = compound.OverridenRecipe;
+			}
+
 			if (Members.recipeCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 			{
 				int index = Array.IndexOf(Main.recipe, recipe);

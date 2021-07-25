@@ -22,7 +22,10 @@ namespace MagicStorage.Components
 		public override TEStorageHeart GetHeart()
 		{
 			if (locator.X < 0 || locator.Y < 0)
+			{
 				return null;
+			}
+
 			if (!ByPosition.ContainsKey(locator))
 			{
 				Load();
@@ -65,7 +68,9 @@ namespace MagicStorage.Components
 		{
 			TEStorageHeart heart = GetHeart();
 			if (heart != null && !heart.remoteAccesses.Contains(Position))
+			{
 				heart.remoteAccesses.Add(Position);
+			}
 		}
 
 		public override TagCompound Save()

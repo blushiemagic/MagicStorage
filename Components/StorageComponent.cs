@@ -30,9 +30,14 @@ namespace MagicStorage.Components
 			ModifyObjectData();
 			ModTileEntity tileEntity = GetTileEntity();
 			if (tileEntity != null)
+			{
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(tileEntity.Hook_AfterPlacement, -1, 0, false);
+			}
 			else
+			{
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(TEStorageComponent.Hook_AfterPlacement_NoEntity, -1, 0, false);
+			}
+
 			TileObjectData.addTile(Type);
 			ModTranslation text = CreateMapEntryName();
 			text.SetDefault("Magic Storage");
@@ -60,7 +65,9 @@ namespace MagicStorage.Components
 		{
 			int count = 0;
 			if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
+			{
 				count++;
+			}
 
 			var startSearch = new Point16(i - 1, j - 1);
 			var explored = new HashSet<Point16> {startSearch};
@@ -78,7 +85,9 @@ namespace MagicStorage.Components
 					{
 						count++;
 						if (count >= 2)
+						{
 							return -1;
+						}
 					}
 
 					foreach (Point16 point in TEStorageComponent.AdjacentComponents(explore))
@@ -101,9 +110,13 @@ namespace MagicStorage.Components
 			else
 			{
 				if (Main.netMode == NetmodeID.MultiplayerClient)
+				{
 					NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
+				}
 				else
+				{
 					TEStorageComponent.SearchAndRefreshNetwork(killTile);
+				}
 			}
 
 			killTile = new Point16(-1, -1);

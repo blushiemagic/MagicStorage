@@ -26,7 +26,10 @@ namespace MagicStorage.Components
 		public TEStorageHeart GetHeart()
 		{
 			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter)
+			{
 				return ((TEStorageCenter) ByPosition[center]).GetHeart();
+			}
+
 			return null;
 		}
 

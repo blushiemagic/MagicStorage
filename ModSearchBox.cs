@@ -27,20 +27,30 @@ namespace MagicStorage
 		public void InitLangStuff()
 		{
 			if (_modButton == null)
+			{
 				_modButton = new UITextPanel<string>(MakeModButtonText(), 0.8f);
+			}
 		}
 
 		private void SetSearchMod(int index, bool silent)
 		{
 			if (ModIndex == index)
+			{
 				return;
+			}
+
 			ModIndex = index;
 			_modButton?.SetText(MakeModButtonText());
 			ModName = "";
 			if (index > -1)
+			{
 				ModName = MagicStorage.Instance.AllMods[index].Name;
+			}
+
 			if (!silent)
+			{
 				OnChanged?.Invoke();
+			}
 		}
 
 		public void Reset(bool silent)
@@ -73,13 +83,17 @@ namespace MagicStorage
 				{
 					index++;
 					if (index >= allMods.Length)
+					{
 						index = ModIndexAll;
+					}
 				}
 				else if (curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released)
 				{
 					index--;
 					if (index < -2)
+					{
 						index = allMods.Length - 1;
+					}
 				}
 
 				SetSearchMod(index, false);

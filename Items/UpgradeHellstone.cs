@@ -38,9 +38,14 @@ namespace MagicStorage.Items
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.HellstoneBar, 10);
 			if (MagicStorage.legendMod is null)
+			{
 				recipe.AddIngredient(ItemID.Topaz);
+			}
 			else
+			{
 				recipe.AddRecipeGroup("MagicStorage:AnyTopaz");
+			}
+
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

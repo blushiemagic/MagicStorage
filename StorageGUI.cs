@@ -138,7 +138,10 @@ namespace MagicStorage
 			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
+			{
 				noDisplayRows = 0;
+			}
+
 			scrollBarMaxViewSize = 1 + noDisplayRows;
 			scrollBar.Height.Set(displayRows * (itemSlotHeight + padding), 0f);
 			scrollBar.Left.Set(-20f, 1f);
@@ -157,12 +160,14 @@ namespace MagicStorage
 			int numItems = 0;
 			int capacity = 0;
 			if (heart != null)
+			{
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
 					if (abstractStorageUnit is TEStorageUnit storageUnit)
 					{
 						numItems += storageUnit.NumItems;
 						capacity += storageUnit.Capacity;
 					}
+			}
 
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
@@ -171,12 +176,20 @@ namespace MagicStorage
 		private static void InitLangStuff()
 		{
 			if (depositButton == null)
+			{
 				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
+			}
+
 			if (searchBar == null)
+			{
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
+			}
+
 			modSearchBox.InitLangStuff();
 			if (capacityText == null)
+			{
 				capacityText = new UIText("Items");
+			}
 		}
 
 		internal static void Unload()
@@ -189,15 +202,22 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			if (sortButtons == null)
+			{
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
+			}
+
 			if (favoritedOnlyButton == null)
+			{
 				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorage.Instance.GetTexture("Assets/FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+			}
 		}
 
 		private static void InitFilterButtons()
 		{
 			if (filterButtons == null)
+			{
 				filterButtons = GUIHelpers.MakeFilterButtons(true, RefreshItems);
+			}
 		}
 
 		public static void Update(GameTime gameTime)
@@ -207,7 +227,10 @@ namespace MagicStorage
 			if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
+				{
 					ResetSlotFocus();
+				}
+
 				basePanel?.Update(gameTime);
 				UpdateScrollBar();
 				UpdateDepositButton();
@@ -313,7 +336,9 @@ namespace MagicStorage
 			didMatCheck.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
+			{
 				return;
+			}
 
 			InitLangStuff();
 			InitSortButtons();
@@ -398,7 +423,9 @@ namespace MagicStorage
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
+			{
 				Main.instance.MouseText(Language.GetText("Mods.MagicStorage.DepositTooltip").Value);
+			}
 		}
 
 		private static void ResetSlotFocus()
@@ -420,16 +447,22 @@ namespace MagicStorage
 				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0)
 				{
 					if (TryDeposit(Main.mouseItem))
+					{
 						changed = true;
+					}
 				}
 				else if (Main.mouseItem.IsAir && slot < items.Count && !items[slot].IsAir)
 				{
 					if (Main.keyState.IsKeyDown(Keys.LeftAlt))
 					{
 						if (Main.netMode == NetmodeID.SinglePlayer)
+						{
 							items[slot].favorited = !items[slot].favorited;
+						}
 						else
+						{
 							Main.NewTextMultiline("Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
+						}
 						// there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
 						// a workaropund would be to withdraw and deposit it back with changed favorite flag
 						// but it still might look ugly for the player that initiates operation
@@ -438,10 +471,16 @@ namespace MagicStorage
 					{
 						Item toWithdraw = items[slot].Clone();
 						if (toWithdraw.stack > toWithdraw.maxStack)
+						{
 							toWithdraw.stack = toWithdraw.maxStack;
+						}
+
 						Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
 						if (ItemSlot.ShiftInUse)
+						{
 							Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+						}
+
 						changed = true;
 					}
 				}
@@ -454,7 +493,9 @@ namespace MagicStorage
 			}
 
 			if (RightMouseClicked && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			{
 				slotFocus = slot;
+			}
 
 			if (slot < items.Count && !items[slot].IsAir)
 			{
@@ -463,7 +504,9 @@ namespace MagicStorage
 			}
 
 			if (slotFocus >= 0)
+			{
 				SlotFocusLogic();
+			}
 		}
 
 		private static void SlotFocusLogic()
@@ -479,14 +522,22 @@ namespace MagicStorage
 					rightClickTimer = maxRightClickTimer;
 					maxRightClickTimer = maxRightClickTimer * 3 / 4;
 					if (maxRightClickTimer <= 0)
+					{
 						maxRightClickTimer = 1;
+					}
+
 					Item toWithdraw = items[slotFocus].Clone();
 					toWithdraw.stack = 1;
 					Item result = DoWithdraw(toWithdraw);
 					if (Main.mouseItem.IsAir)
+					{
 						Main.mouseItem = result;
+					}
 					else
+					{
 						Main.mouseItem.stack += result.stack;
+					}
+
 					Main.soundInstanceMenuTick.Stop();
 					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
 					Main.PlaySound(SoundID.MenuTick);
@@ -536,7 +587,9 @@ namespace MagicStorage
 						int oldStack = item.stack;
 						heart.DepositItem(item);
 						if (oldStack != item.stack)
+						{
 							changed = true;
+						}
 					}
 				}
 			}
@@ -547,7 +600,9 @@ namespace MagicStorage
 				{
 					Item item = player.inventory[k];
 					if (filter(item))
+					{
 						items.Add(item);
+					}
 				}
 
 				NetHelper.SendDepositAll(heart.ID, items);
@@ -586,7 +641,10 @@ namespace MagicStorage
 		{
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
 				return heart.TryWithdraw(item, keepOneIfFavorite);
+			}
+
 			NetHelper.SendWithdraw(heart.ID, item, toInventory, keepOneIfFavorite);
 			return new Item();
 		}

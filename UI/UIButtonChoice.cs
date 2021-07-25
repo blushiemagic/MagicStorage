@@ -20,7 +20,9 @@ namespace MagicStorage.UI
 		public UIButtonChoice(Action onChanged, Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
+			{
 				throw new ArgumentException();
+			}
 
 			_onChanged = onChanged;
 			this.buttonSize = buttonSize;
@@ -40,15 +42,19 @@ namespace MagicStorage.UI
 		{
 			int oldChoice = Choice;
 			if (StorageGUI.MouseClicked && Parent != null)
+			{
 				for (int k = 0; k < buttons.Length; k++)
 					if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k))
 					{
 						Choice = k;
 						break;
 					}
+			}
 
 			if (oldChoice != Choice)
+			{
 				_onChanged?.Invoke();
+			}
 		}
 
 		private bool MouseOverButton(int mouseX, int mouseY, int button)
@@ -80,7 +86,9 @@ namespace MagicStorage.UI
 		{
 			for (int k = 0; k < buttons.Length; k++)
 				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k))
+				{
 					Main.instance.MouseText(names[k].Value);
+				}
 		}
 	}
 }

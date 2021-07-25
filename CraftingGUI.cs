@@ -237,7 +237,10 @@ namespace MagicStorage
 			recipeZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
+			{
 				noDisplayRows = 0;
+			}
+
 			scrollBarMaxViewSize = 1 + noDisplayRows;
 			scrollBar.Height.Set(displayRows * (itemSlotHeight + padding), 0f);
 			scrollBar.Left.Set(-20f, 1f);
@@ -255,12 +258,14 @@ namespace MagicStorage
 			int numItems = 0;
 			int capacity = 0;
 			if (heart != null)
+			{
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
 					if (abstractStorageUnit is TEStorageUnit storageUnit)
 					{
 						numItems += storageUnit.NumItems;
 						capacity += storageUnit.Capacity;
 					}
+			}
 
 			capacityText.SetText(numItems + "/" + capacity + " Items");
 			bottomBar.Append(capacityText);
@@ -281,7 +286,10 @@ namespace MagicStorage
 			int extraRow = itemsNeeded % numColumns2 != 0 ? 1 : 0;
 			int totalRows = recipeRows + extraRow;
 			if (totalRows < 2)
+			{
 				totalRows = 2;
+			}
+
 			const float ingredientZoneTop = 54f;
 			float ingredientZoneHeight = 30f * totalRows;
 
@@ -313,7 +321,10 @@ namespace MagicStorage
 			storageZone.SetDimensions(numColumns2, displayRows2);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
+			{
 				noDisplayRows2 = 0;
+			}
+
 			scrollBar2MaxViewSize = 1 + noDisplayRows2;
 			scrollBar2.Height.Set(displayRows2 * (smallSlotHeight + padding), 0f);
 			scrollBar2.Left.Set(-20f, 1f);
@@ -338,23 +349,50 @@ namespace MagicStorage
 		private static void InitLangStuff()
 		{
 			if (searchBar == null)
+			{
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
+			}
+
 			if (stationText == null)
+			{
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+			}
+
 			if (capacityText == null)
+			{
 				capacityText = new UIText("Items");
+			}
+
 			if (recipePanelHeader == null)
+			{
 				recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
+			}
+
 			if (ingredientText == null)
+			{
 				ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
+			}
+
 			if (reqObjText == null)
+			{
 				reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+			}
+
 			if (reqObjText2 == null)
+			{
 				reqObjText2 = new UIText("");
+			}
+
 			if (storedItemsText == null)
+			{
 				storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+			}
+
 			if (craftButton == null)
+			{
 				craftButton = new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"));
+			}
+
 			modSearchBox.InitLangStuff();
 		}
 
@@ -369,7 +407,9 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			if (sortButtons == null)
+			{
 				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
+			}
 		}
 
 		private static void InitRecipeButtons()
@@ -390,20 +430,26 @@ namespace MagicStorage
 					Language.GetText("Mods.MagicStorage.RecipeBlacklist")
 				});
 				if (MagicStorageConfig.useConfigFilter)
+				{
 					recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
+				}
 			}
 		}
 
 		private static void InitFilterButtons()
 		{
 			if (filterButtons == null)
+			{
 				filterButtons = GUIHelpers.MakeFilterButtons(false, RefreshItems);
+			}
 		}
 
 		private static void InitReflection()
 		{
 			if (_getAcceptedGroups == null)
+			{
 				_getAcceptedGroups = typeof(RecipeFinder).GetMethod("GetAcceptedGroups", BindingFlags.NonPublic | BindingFlags.Static);
+			}
 		}
 
 		private static List<int> GetAcceptedVanillaGroups(Recipe recipe) => (List<int>) _getAcceptedGroups?.Invoke(null, new object[] {recipe});
@@ -421,7 +467,9 @@ namespace MagicStorage
 						s += "known";
 						int sum = ModPlayer.LatestAccessedStorage?.GetStoredItems().Where(x => x.type == t).Select(x => x.stack).DefaultIfEmpty().Sum() ?? 0;
 						if (sum > 0)
+						{
 							s += $" ({sum} in l.a.s.)";
+						}
 					}
 					else
 					{
@@ -443,7 +491,9 @@ namespace MagicStorage
 				if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 				{
 					if (curMouse.RightButton == ButtonState.Released)
+					{
 						ResetSlotFocus();
+					}
 
 					basePanel?.Update(gameTime);
 					recipePanel?.Update(gameTime);
@@ -484,7 +534,9 @@ namespace MagicStorage
 				recipePanel.Draw(Main.spriteBatch);
 				Vector2 pos = recipeZone.GetDimensions().Position();
 				if (threadRunning)
+				{
 					Utils.DrawBorderString(Main.spriteBatch, "Loading", pos + new Vector2(8f, 8f), Color.White);
+				}
 
 				stationZone.DrawText();
 				recipeZone.DrawText();
@@ -508,29 +560,43 @@ namespace MagicStorage
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 
 			if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height && selectedRecipe != null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
+			{
 				Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
+			}
 		}
 
 		private static Item GetStation(int slot, ref int context)
 		{
 			Item[] stations = GetCraftingStations();
 			if (stations == null || slot >= stations.Length)
+			{
 				return new Item();
+			}
+
 			return stations[slot];
 		}
 
 		private static Item GetRecipe(int slot, ref int context)
 		{
 			if (threadRunning)
+			{
 				return new Item();
+			}
+
 			int index = slot + numColumns * (int) Math.Round(scrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
 			if (!item.IsAir)
 			{
 				if (recipes[index] == selectedRecipe)
+				{
 					context = 6;
+				}
+
 				if (!recipeAvailable[index])
+				{
 					context = recipes[index] == selectedRecipe ? 4 : 3;
+				}
+
 				if (ModPlayer.FavoritedRecipes.Contains(item))
 				{
 					item = item.Clone();
@@ -550,7 +616,9 @@ namespace MagicStorage
 		private static Item GetHeader(int slot, ref int context)
 		{
 			if (selectedRecipe == null)
+			{
 				return new Item();
+			}
 
 			Item item = selectedRecipe.createItem;
 			if (item.IsAir)
@@ -567,21 +635,40 @@ namespace MagicStorage
 		private static Item GetIngredient(int slot, ref int context)
 		{
 			if (selectedRecipe == null || slot >= selectedRecipe.requiredItem.Length)
+			{
 				return new Item();
+			}
 
 			Item item = selectedRecipe.requiredItem[slot].Clone();
 			if (selectedRecipe.anyWood && item.type == ItemID.Wood)
+			{
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.Wood));
+			}
+
 			if (selectedRecipe.anySand && item.type == ItemID.SandBlock)
+			{
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.SandBlock));
+			}
+
 			if (selectedRecipe.anyIronBar && item.type == ItemID.IronBar)
+			{
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Lang.GetItemNameValue(ItemID.IronBar));
+			}
+
 			if (selectedRecipe.anyFragment && item.type == ItemID.FragmentSolar)
+			{
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Language.GetText("LegacyMisc.51").Value);
+			}
+
 			if (selectedRecipe.anyPressurePlate && item.type == ItemID.GrayPressurePlate)
+			{
 				item.SetNameOverride(Language.GetText("LegacyMisc.37").Value + " " + Language.GetText("LegacyMisc.38").Value);
+			}
+
 			if (selectedRecipe.ProcessGroupsForText(item.type, out string nameOverride))
+			{
 				item.SetNameOverride(nameOverride);
+			}
 
 			Item storageItem;
 			int totalGroupStack = 0;
@@ -592,26 +679,37 @@ namespace MagicStorage
 				List<int> vanillaGroups = GetAcceptedVanillaGroups(selectedRecipe);
 				IEnumerable<int> allGroups = selectedRecipe.acceptedGroups;
 				if (vanillaGroups != null)
+				{
 					allGroups = allGroups.Union(vanillaGroups);
+				}
 
 				foreach (RecipeGroup rec in allGroups.Select(index => RecipeGroup.recipeGroups[index]))
 					if (rec.ValidItems.Contains(item.type))
+					{
 						foreach (int type in rec.ValidItems)
 							totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
+					}
 			}
 
 			if (!item.IsAir)
 			{
 				if (storageItem.IsAir && totalGroupStack == 0)
+				{
 					context = 3; // Unavailable - Red
+				}
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
+				{
 					context = 4; // Partially in stock - Pinkish
+				}
+
 				// context == 0 - Available - Default Blue
 				if (context != 0)
 				{
 					bool craftable = _productToRecipes.ContainsKey(item.type) && _productToRecipes[item.type].Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
 					if (craftable)
+					{
 						context = 6; // Craftable - Light green
+					}
 				}
 			}
 
@@ -622,11 +720,16 @@ namespace MagicStorage
 		private static int AmountCraftable(Recipe recipe)
 		{
 			if (!IsAvailable(recipe))
+			{
 				return 0;
+			}
+
 			int maxCraftable = int.MaxValue;
 
 			if (RecursiveCraftIntegration.Enabled)
+			{
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+			}
 
 			lock (items)
 			{
@@ -634,13 +737,21 @@ namespace MagicStorage
 				{
 					int total = 0;
 					if (reqItem.type == ItemID.None)
+					{
 						break;
+					}
+
 					foreach (Item invItem in items)
 						if (invItem.type == reqItem.type || RecipeGroupMatch(recipe, invItem.type, reqItem.type))
+						{
 							total += invItem.stack;
+						}
+
 					int craftable = total / reqItem.stack;
 					if (craftable < maxCraftable)
+					{
 						maxCraftable = craftable;
+					}
 				}
 			}
 
@@ -654,7 +765,9 @@ namespace MagicStorage
 			lock (blockStorageItems)
 			{
 				if (blockStorageItems.Contains(new ItemData(item)))
+				{
 					context = 3;
+				}
 			}
 
 			return item;
@@ -689,7 +802,10 @@ namespace MagicStorage
 				foreach (int tile in selectedRecipe.requiredTile.TakeWhile(tile => tile != -1))
 				{
 					if (!isEmpty)
+					{
 						text += ", ";
+					}
+
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 					isEmpty = false;
 				}
@@ -697,7 +813,10 @@ namespace MagicStorage
 				if (selectedRecipe.needWater)
 				{
 					if (!isEmpty)
+					{
 						text += ", ";
+					}
+
 					AddText(Language.GetTextValue("LegacyInterface.53"));
 					isEmpty = false;
 				}
@@ -705,7 +824,10 @@ namespace MagicStorage
 				if (selectedRecipe.needHoney)
 				{
 					if (!isEmpty)
+					{
 						text += ", ";
+					}
+
 					AddText(Language.GetTextValue("LegacyInterface.58"));
 					isEmpty = false;
 				}
@@ -713,7 +835,10 @@ namespace MagicStorage
 				if (selectedRecipe.needLava)
 				{
 					if (!isEmpty)
+					{
 						text += ", ";
+					}
+
 					AddText(Language.GetTextValue("LegacyInterface.56"));
 					isEmpty = false;
 				}
@@ -721,20 +846,30 @@ namespace MagicStorage
 				if (selectedRecipe.needSnowBiome)
 				{
 					if (!isEmpty)
+					{
 						text += ", ";
+					}
+
 					AddText(Language.GetTextValue("LegacyInterface.123"));
 					isEmpty = false;
 				}
 
 				if (isEmpty)
+				{
 					text = Language.GetTextValue("LegacyInterface.23");
+				}
+
 				reqObjText2.SetText(text);
 				Item item = selectedRecipe.createItem;
 				double dps = CompareDps.GetDps(item);
 				if (dps >= 1d)
+				{
 					recipePanelHeader.SetText("DPS = " + dps.ToString("F"));
+				}
 				else
+				{
 					recipePanelHeader.SetText("");
+				}
 			}
 		}
 
@@ -823,11 +958,19 @@ namespace MagicStorage
 						craftTimer = maxCraftTimer;
 						maxCraftTimer = maxCraftTimer * 3 / 4;
 						if (maxCraftTimer <= 0)
+						{
 							maxCraftTimer = 1;
+						}
+
 						TryCraft();
 						if (RecursiveCraftIntegration.Enabled)
+						{
 							if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
+							{
 								SetSelectedRecipe(selectedRecipe);
+							}
+						}
+
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);
 					}
@@ -835,7 +978,9 @@ namespace MagicStorage
 					craftTimer--;
 					flag = true;
 					if (ModPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
+					{
 						RefreshItems();
+					}
 				}
 			}
 			else
@@ -844,7 +989,10 @@ namespace MagicStorage
 			}
 
 			if (selectedRecipe == null || !IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
+			{
 				craftButton.BackgroundColor = new Color(30, 40, 100) * 0.7f;
+			}
+
 			if (!flag)
 			{
 				craftTimer = 0;
@@ -880,15 +1028,19 @@ namespace MagicStorage
 		{
 			StoragePlayer modPlayer = ModPlayer;
 			if (modPlayer.SeenRecipes.Count == 0)
+			{
 				foreach (int item in GetKnownItems())
 					modPlayer.SeenRecipes.Add(item);
+			}
 
 			lock (items)
 			{
 				items.Clear();
 				TEStorageHeart heart = GetHeart();
 				if (heart == null)
+				{
 					return;
+				}
 
 				items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 			}
@@ -946,12 +1098,17 @@ namespace MagicStorage
 		private static IEnumerable<int> RetrieveFoundItemsCheckList()
 		{
 			if (_checkListMod == null)
+			{
 				_checkListMod = ModLoader.GetMod("ItemChecklist");
+			}
 
 			object response = _checkListMod?.Call("RequestFoundItems");
 			bool[] foundItems = response is bool[] found ? found : new bool[0];
 			if (foundItems.Length > 0)
+			{
 				wasItemChecklistRetrieved = true;
+			}
+
 			return foundItems.Select((v, type) => new {WasFound = v, type}).Where(x => x.WasFound).Select(x => x.type);
 		}
 
@@ -970,12 +1127,16 @@ namespace MagicStorage
 		private static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
 		{
 			if (cache.TryGetValue(recipe, out bool v))
+			{
 				return v;
+			}
 
 			foreach (int tile in recipe.requiredTile.TakeWhile(tile => tile != -1))
 			{
 				if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out List<int> possibleItems))
+				{
 					continue;
+				}
 
 				if (!possibleItems.Any(x => IsKnownRecursively_CheckIngredient(x, availableSet, recursionTree, cache)))
 				{
@@ -989,9 +1150,15 @@ namespace MagicStorage
 			{
 				ingredients++;
 				if (IsKnownRecursively_CheckIngredient(t, availableSet, recursionTree, cache))
+				{
 					continue;
+				}
+
 				if (IsKnownRecursively_CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, t))
+				{
 					continue;
+				}
+
 				cache[recipe] = false;
 				return false;
 			}
@@ -1010,17 +1177,25 @@ namespace MagicStorage
 		{
 			foreach (RecipeGroup g in recipe.acceptedGroups.Select(j => RecipeGroup.recipeGroups[j]))
 				if (g.ContainsItem(t))
+				{
 					foreach (int groupItemType in g.ValidItems)
 						if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
+						{
 							return true;
+						}
+				}
 
 			List<int> recipeAcceptedGroups = GetAcceptedVanillaGroups(recipe);
 
 			if (recipeAcceptedGroups != null)
+			{
 				foreach (int acceptedGroup in recipeAcceptedGroups)
 				foreach (int groupItemType in RecipeGroup.recipeGroups[acceptedGroup].ValidItems)
 					if (groupItemType != t && IsKnownRecursively_CheckIngredient(groupItemType, availableSet, recursionTree, cache))
+					{
 						return true;
+					}
+			}
 
 			return false;
 		}
@@ -1028,15 +1203,26 @@ namespace MagicStorage
 		private static bool IsKnownRecursively_CheckIngredient(int t, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
 		{
 			if (availableSet.Contains(t))
+			{
 				return true;
+			}
+
 			if (!recursionTree.Add(t))
+			{
 				return false;
+			}
+
 			try
 			{
 				if (!_productToRecipes.TryGetValue(t, out List<Recipe> ingredientRecipes))
+				{
 					return false;
+				}
+
 				if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsKnownRecursively(x, availableSet, recursionTree, cache)))
+				{
 					return false;
+				}
 			}
 			finally
 			{
@@ -1107,7 +1293,9 @@ namespace MagicStorage
 					}
 
 					if (RecursiveCraftIntegration.Enabled)
+					{
 						RecursiveCraftIntegration.RecursiveRecipes();
+					}
 
 					DoFiltering();
 
@@ -1139,7 +1327,9 @@ namespace MagicStorage
 					{
 						Recipe compound = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 						if (index != -1)
+						{
 							threadRecipes[index] = compound;
+						}
 
 						selectedRecipe = compound;
 						RefreshStorageItems();
@@ -1152,6 +1342,7 @@ namespace MagicStorage
 					lock (recipeLock)
 					{
 						if (RecursiveCraftIntegration.Enabled)
+						{
 							if (selectedRecipe != null)
 							{
 								// If the selected recipe is compound, replace the overridden recipe with the compound one so it shows as selected in the UI
@@ -1160,18 +1351,25 @@ namespace MagicStorage
 									Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
 									int index = threadRecipes.IndexOf(overridden);
 									if (index != -1 && threadRecipeAvailable[index])
+									{
 										GuttedSetSelectedRecipe(overridden, index);
+									}
 									else
+									{
 										GuttedSetSelectedRecipe(overridden, index);
+									}
 								}
 								// If the selectedRecipe(which isn't compound) is uncraftable but is in the available list, this means it's compound version is craftable
 								else if (!IsAvailable(selectedRecipe, false))
 								{
 									int index = threadRecipes.IndexOf(selectedRecipe);
 									if (index != -1 && threadRecipeAvailable[index])
+									{
 										GuttedSetSelectedRecipe(selectedRecipe, index);
+									}
 								}
 							}
+						}
 
 						nextRecipes = new List<Recipe>();
 						nextRecipeAvailable = new List<bool>();
@@ -1217,9 +1415,13 @@ namespace MagicStorage
 				itemCounts.Clear();
 				foreach (Item item in items)
 					if (itemCounts.ContainsKey(item.type))
+					{
 						itemCounts[item.type] += item.stack;
+					}
 					else
+					{
 						itemCounts[item.type] = item.stack;
+					}
 			}
 
 			foreach (Item item in GetCraftingStations())
@@ -1263,13 +1465,25 @@ namespace MagicStorage
 					player.alchemyTable = false;
 					TileLoader.AdjTiles(player, item.createTile);
 					if (player.adjWater)
+					{
 						adjWater = true;
+					}
+
 					if (player.adjLava)
+					{
 						adjLava = true;
+					}
+
 					if (player.adjHoney)
+					{
 						adjHoney = true;
+					}
+
 					if (player.alchemyTable)
+					{
 						alchemyTable = true;
+					}
+
 					player.adjTile = oldAdjTile;
 					player.adjWater = oldAdjWater;
 					player.adjLava = oldAdjLava;
@@ -1292,7 +1506,9 @@ namespace MagicStorage
 				}
 
 				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
+				{
 					zoneSnow = true;
+				}
 			}
 
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
@@ -1301,14 +1517,21 @@ namespace MagicStorage
 		public static bool IsAvailable(Recipe recipe, bool compound = true)
 		{
 			if (RecursiveCraftIntegration.Enabled && compound)
+			{
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+			}
 
 			foreach (int tile in recipe.requiredTile)
 			{
 				if (tile == -1)
+				{
 					break;
+				}
+
 				if (!adjTiles[tile])
+				{
 					return false;
+				}
 			}
 
 			lock (itemCounts)
@@ -1316,7 +1539,10 @@ namespace MagicStorage
 				foreach (Item ingredient in recipe.requiredItem)
 				{
 					if (ingredient.type == ItemID.None)
+					{
 						break;
+					}
+
 					int stack = ingredient.stack;
 					bool useRecipeGroup = false;
 					foreach (int type in itemCounts.Keys)
@@ -1327,27 +1553,46 @@ namespace MagicStorage
 						}
 
 					if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
+					{
 						stack -= amount;
+					}
+
 					if (stack > 0)
+					{
 						return false;
+					}
 				}
 			}
 
 			if (recipe.needWater && !adjWater && !adjTiles[TileID.Sinks])
+			{
 				return false;
+			}
+
 			if (recipe.needLava && !adjLava)
+			{
 				return false;
+			}
+
 			if (recipe.needHoney && !adjHoney)
+			{
 				return false;
+			}
+
 			if (recipe.needSnowBiome && !zoneSnow)
+			{
 				return false;
+			}
+
 			lock (BlockRecipes.activeLock)
 			{
 				try
 				{
 					BlockRecipes.active = false;
 					if (!RecipeHooks.RecipeAvailable(recipe))
+					{
 						return false;
+					}
 				}
 				finally
 				{
@@ -1363,7 +1608,10 @@ namespace MagicStorage
 			foreach (Item ingredient in recipe.requiredItem)
 			{
 				if (ingredient.type == ItemID.None)
+				{
 					break;
+				}
+
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
 				lock (storageItems)
@@ -1381,17 +1629,23 @@ namespace MagicStorage
 						}
 
 						if (!useRecipeGroup)
+						{
 							foreach (Item item in storageItems)
 							{
 								var data = new ItemData(item);
 								if (!blockStorageItems.Contains(data) && item.type == ingredient.type)
+								{
 									stack -= item.stack;
+								}
 							}
+						}
 					}
 				}
 
 				if (stack > 0)
+				{
 					return false;
+				}
 			}
 
 			return true;
@@ -1412,13 +1666,20 @@ namespace MagicStorage
 							foreach (Item reqItem in selectedRecipe.requiredItem)
 							{
 								if (reqItem.type == ItemID.None)
+								{
 									break;
+								}
+
 								if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, reqItem.type, item.type))
+								{
 									storageItems.Add(item);
+								}
 							}
 
 							if (item.type == selectedRecipe.createItem.type)
+							{
 								result = item;
+							}
 						}
 					}
 
@@ -1439,7 +1700,9 @@ namespace MagicStorage
 		{
 			TECraftingAccess ent = GetCraftingEntity();
 			if (ent == null || slot >= ent.stations.Length)
+			{
 				return;
+			}
 
 			Player player = Main.LocalPlayer;
 			if (MouseClicked)
@@ -1461,7 +1724,10 @@ namespace MagicStorage
 					}
 
 					if (!result.IsAir)
+					{
 						player.QuickSpawnClonedItem(result);
+					}
+
 					changed = true;
 				}
 				else if (player.itemAnimation == 0 && player.itemTime == 0)
@@ -1470,7 +1736,9 @@ namespace MagicStorage
 					int oldStack = Main.mouseItem.stack;
 					Main.mouseItem = DoStationSwap(Main.mouseItem, slot);
 					if (oldType != Main.mouseItem.type || oldStack != Main.mouseItem.stack)
+					{
 						changed = true;
+					}
 				}
 
 				if (changed)
@@ -1495,19 +1763,25 @@ namespace MagicStorage
 					if (Main.keyState.IsKeyDown(Keys.LeftAlt))
 					{
 						if (!ModPlayer.FavoritedRecipes.Add(recipe.createItem))
+						{
 							ModPlayer.FavoritedRecipes.Remove(recipe.createItem);
+						}
 					}
 					else if (Main.keyState.IsKeyDown(Keys.LeftControl))
 					{
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
 							if (ModPlayer.RemoveFromHiddenRecipes(recipe.createItem))
+							{
 								RefreshItems();
+							}
 						}
 						else
 						{
 							if (ModPlayer.AddToHiddenRecipes(recipe.createItem))
+							{
 								RefreshItems();
+							}
 						}
 					}
 					else
@@ -1538,7 +1812,9 @@ namespace MagicStorage
 		private static void SetSelectedRecipe(Recipe recipe)
 		{
 			if (recipe != null)
+			{
 				ModPlayer.SeenRecipes.Add(recipe.createItem);
+			}
 
 			if (RecursiveCraftIntegration.Enabled)
 			{
@@ -1550,7 +1826,9 @@ namespace MagicStorage
 					{
 						index = recipes.IndexOf(selectedRecipe);
 						if (index != -1)
+						{
 							recipes[index] = overridden;
+						}
 					}
 				}
 
@@ -1606,7 +1884,10 @@ namespace MagicStorage
 						foreach (Recipe r in itemRecipes.Where(x => IsKnownRecursively(x, knownItems, recursionTree, cache)))
 						{
 							if (selected == null)
+							{
 								selected = r;
+							}
+
 							if (IsAvailable(r))
 							{
 								selected = r;
@@ -1615,7 +1896,9 @@ namespace MagicStorage
 						}
 
 						if (selected != null)
+						{
 							SetSelectedRecipe(selected);
+						}
 					}
 				}
 
@@ -1637,9 +1920,13 @@ namespace MagicStorage
 					lock (blockStorageItems)
 					{
 						if (blockStorageItems.Contains(data))
+						{
 							blockStorageItems.Remove(data);
+						}
 						else
+						{
 							blockStorageItems.Add(data);
+						}
 					}
 				}
 
@@ -1650,10 +1937,14 @@ namespace MagicStorage
 		private static void HoverResult(int slot, ref int hoverSlot)
 		{
 			if (slot != 0)
+			{
 				return;
+			}
 
 			if (Main.mouseItem.IsAir && result != null && !result.IsAir)
+			{
 				result.newAndShiny = false;
+			}
 
 			Player player = Main.LocalPlayer;
 			if (MouseClicked)
@@ -1662,7 +1953,9 @@ namespace MagicStorage
 				if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && result != null && Main.mouseItem.type == result.type)
 				{
 					if (TryDepositResult(Main.mouseItem))
+					{
 						changed = true;
+					}
 				}
 				else if (Main.mouseItem.IsAir && result != null && !result.IsAir)
 				{
@@ -1674,10 +1967,16 @@ namespace MagicStorage
 					{
 						Item toWithdraw = result.Clone();
 						if (toWithdraw.stack > toWithdraw.maxStack)
+						{
 							toWithdraw.stack = toWithdraw.maxStack;
+						}
+
 						Main.mouseItem = DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
 						if (ItemSlot.ShiftInUse)
+						{
 							Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+						}
+
 						changed = true;
 					}
 				}
@@ -1690,12 +1989,16 @@ namespace MagicStorage
 			}
 
 			if (RightMouseClicked && result != null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			{
 				slotFocus = true;
+			}
 
 			hoverSlot = slot;
 
 			if (slotFocus)
+			{
 				SlotFocusLogic();
+			}
 		}
 
 		private static void SlotFocusLogic()
@@ -1711,14 +2014,22 @@ namespace MagicStorage
 					rightClickTimer = maxRightClickTimer;
 					maxRightClickTimer = maxRightClickTimer * 3 / 4;
 					if (maxRightClickTimer <= 0)
+					{
 						maxRightClickTimer = 1;
+					}
+
 					Item toWithdraw = result.Clone();
 					toWithdraw.stack = 1;
 					Item withdrawn = DoWithdrawResult(toWithdraw);
 					if (Main.mouseItem.IsAir)
+					{
 						Main.mouseItem = withdrawn;
+					}
 					else
+					{
 						Main.mouseItem.stack += withdrawn.stack;
+					}
+
 					Main.soundInstanceMenuTick.Stop();
 					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
 					Main.PlaySound(SoundID.MenuTick);
@@ -1778,20 +2089,30 @@ namespace MagicStorage
 			foreach (Item item in selectedRecipe.requiredItem)
 			{
 				if (item.type == ItemID.None)
+				{
 					break;
+				}
+
 				int stack = item.stack;
 				if (selectedRecipe is ModRecipe modRecipe)
+				{
 					stack = modRecipe.ConsumeItem(item.type, item.stack);
+				}
+
 				if (selectedRecipe.alchemy && alchemyTable)
 				{
 					int save = 0;
 					for (int j = 0; j < stack; j++)
 						if (Main.rand.Next(3) == 0)
+						{
 							save++;
+						}
+
 					stack -= save;
 				}
 
 				if (stack > 0)
+				{
 					foreach (Item tryItem in availableItems)
 						if (item.type == tryItem.type || RecipeGroupMatch(selectedRecipe, item.type, tryItem.type))
 						{
@@ -1811,6 +2132,7 @@ namespace MagicStorage
 								tryItem.type = ItemID.None;
 							}
 						}
+				}
 			}
 
 			Item resultItem = selectedRecipe.createItem.Clone();
@@ -1834,10 +2156,14 @@ namespace MagicStorage
 			}
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
 					Main.LocalPlayer.QuickSpawnClonedItem(item, item.stack);
+			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
+			}
 		}
 
 		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)
@@ -1847,7 +2173,10 @@ namespace MagicStorage
 			{
 				Item withdrawn = heart.TryWithdraw(tryWithdraw, false);
 				if (!withdrawn.IsAir)
+				{
 					items.Add(withdrawn);
+				}
+
 				if (withdrawn.stack < tryWithdraw.stack)
 				{
 					for (int k = 0; k < items.Count; k++)
@@ -1869,7 +2198,9 @@ namespace MagicStorage
 			{
 				heart.DepositItem(result);
 				if (!result.IsAir)
+				{
 					items.Add(result);
+				}
 			}
 
 			return items;
@@ -1900,7 +2231,10 @@ namespace MagicStorage
 		{
 			TEStorageHeart heart = GetHeart();
 			if (Main.netMode == NetmodeID.SinglePlayer)
+			{
 				return heart.TryWithdraw(item, false);
+			}
+
 			NetHelper.SendWithdraw(heart.ID, item, toInventory);
 			return new Item();
 		}

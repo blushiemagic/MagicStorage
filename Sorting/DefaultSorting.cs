@@ -41,14 +41,20 @@ namespace MagicStorage.Sorting
 				}
 
 			if (class1 != class2)
+			{
 				return class1 - class2;
+			}
+
 			return classes[class1].Compare(item1, item2);
 		}
 
 		public static void Initialize()
 		{
 			if (initialized)
+			{
 				return;
+			}
+
 			classes.Add(new DefaultSortClass(MeleeWeapon, CompareDps));
 			classes.Add(new DefaultSortClass(RangedWeapon, CompareDps));
 			classes.Add(new DefaultSortClass(MagicWeapon, CompareDps));
@@ -177,7 +183,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = item1.pick - item2.pick;
 			if (result == 0)
+			{
 				result = item1.axe - item2.axe;
+			}
+
 			return result;
 		}
 
@@ -185,7 +194,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = item1.axe - item2.axe;
 			if (result == 0)
+			{
 				result = item1.hammer - item2.hammer;
+			}
+
 			return result;
 		}
 
@@ -202,7 +214,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = item1.vanity.CompareTo(item2.vanity);
 			if (result == 0)
+			{
 				result = CompareValue(item1, item2);
+			}
+
 			return result;
 		}
 
@@ -210,7 +225,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
+			{
 				result = item2.dye - item1.dye;
+			}
+
 			return result;
 		}
 
@@ -218,7 +236,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
+			{
 				result = item2.hairDye - item1.hairDye;
+			}
+
 			return result;
 		}
 
@@ -230,7 +251,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareHealing(item1, item2);
 			if (result == 0)
+			{
 				result = CompareMana(item1, item2);
+			}
+
 			return result;
 		}
 
@@ -241,7 +265,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = ItemID.Sets.SortingPriorityPainting[item2.type] - ItemID.Sets.SortingPriorityPainting[item1.type];
 			if (result == 0)
+			{
 				result = item1.paint - item2.paint;
+			}
+
 			return result;
 		}
 
@@ -249,7 +276,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = ItemID.Sets.SortingPriorityWiring[item2.type] - ItemID.Sets.SortingPriorityWiring[item1.type];
 			if (result == 0)
+			{
 				result = CompareRarity(item1, item2);
+			}
+
 			return result;
 		}
 
@@ -266,7 +296,10 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
+			{
 				result = item2.value - item1.value;
+			}
+
 			return result;
 		}
 
