@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class CreativeStorageUnit : StorageComponent
 	{

@@ -3,7 +3,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ID;
 
-namespace MagicStorageExtra.Sorting
+namespace MagicStorage.Sorting
 {
 	public abstract class ItemFilter
 	{

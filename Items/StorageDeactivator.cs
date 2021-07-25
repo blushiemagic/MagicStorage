@@ -1,11 +1,11 @@
-﻿using MagicStorageExtra.Components;
+﻿using MagicStorage.Components;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class StorageDeactivator : ModItem
 	{

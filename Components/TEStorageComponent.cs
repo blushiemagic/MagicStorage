@@ -4,7 +4,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public abstract class TEStorageComponent : ModTileEntity
 	{

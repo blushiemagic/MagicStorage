@@ -2,7 +2,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class RadiantJewelBag : GlobalItem
 	{

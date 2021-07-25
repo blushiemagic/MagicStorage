@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicStorageExtra", "MagicStorageExtra.csproj", "{389B7639-2D67-407E-8203-1EB6E59FD03C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicStorage", "MagicStorage.csproj", "{389B7639-2D67-407E-8203-1EB6E59FD03C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

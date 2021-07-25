@@ -6,7 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class StorageConnector : ModTile
 	{

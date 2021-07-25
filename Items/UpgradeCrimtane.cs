@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class UpgradeCrimtane : ModItem
 	{
@@ -37,10 +37,10 @@ namespace MagicStorageExtra.Items
 		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(ItemID.CrimtaneBar, 10);
-			if (MagicStorageExtra.legendMod is null)
+			if (MagicStorage.legendMod is null)
 				recipe.AddIngredient(ItemID.Amethyst);
 			else
-				recipe.AddRecipeGroup("MagicStorageExtra:AnyAmethyst");
+				recipe.AddRecipeGroup("MagicStorage:AnyAmethyst");
 			recipe.AddTile(TileID.Anvils);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 
-namespace MagicStorageExtra.Sorting
+namespace MagicStorage.Sorting
 {
 	public class CompareDefault : CompareFunction
 	{

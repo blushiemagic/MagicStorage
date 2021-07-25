@@ -2,7 +2,7 @@
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class CreativeStorageUnit : ModItem
 	{

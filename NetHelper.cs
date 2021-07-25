@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using MagicStorageExtra.Components;
-using MagicStorageExtra.Edits;
+using MagicStorage.Components;
+using MagicStorage.Edits;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra
+namespace MagicStorage
 {
 	public static class NetHelper
 	{
@@ -118,7 +118,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.SearchAndRefreshNetwork);
 				packet.Write((short) i);
 				packet.Write((short) j);
@@ -134,7 +134,7 @@ namespace MagicStorageExtra
 
 		private static ModPacket PrepareStorageOperation(int ent, byte op)
 		{
-			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte) MessageType.TryStorageOperation);
 			packet.Write(ent);
 			packet.Write(op);
@@ -143,7 +143,7 @@ namespace MagicStorageExtra
 
 		private static ModPacket PrepareOperationResult(byte op)
 		{
-			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte) MessageType.StorageOperationResult);
 			packet.Write(op);
 			return packet;
@@ -317,7 +317,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.RefreshNetworkItems);
 				packet.Write(ent);
 				packet.Send();
@@ -341,7 +341,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.ClientSendTEUpdate);
 				packet.Write(id);
 				TileEntity.Write(packet, TileEntity.ByID[id], true);
@@ -375,7 +375,7 @@ namespace MagicStorageExtra
 
 		private static ModPacket PrepareStationOperation(int ent, byte op)
 		{
-			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte) MessageType.TryStationOperation);
 			packet.Write(ent);
 			packet.Write(op);
@@ -384,7 +384,7 @@ namespace MagicStorageExtra
 
 		private static ModPacket PrepareStationResult(byte op)
 		{
-			ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte) MessageType.StationOperationResult);
 			packet.Write(op);
 			return packet;
@@ -527,7 +527,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.ResetCompactStage);
 				packet.Write(ent);
 				packet.Send();
@@ -552,7 +552,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.CraftRequest);
 				packet.Write(heart);
 				packet.Write(toWithdraw.Count);
@@ -596,7 +596,7 @@ namespace MagicStorageExtra
 			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, results);
 			if (items.Count > 0)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.CraftResult);
 				packet.Write(items.Count);
 				foreach (Item item in items)
@@ -622,7 +622,7 @@ namespace MagicStorageExtra
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.SectionRequest);
 
 				packet.Write(coords.X);

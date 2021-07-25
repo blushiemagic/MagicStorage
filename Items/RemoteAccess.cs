@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class RemoteAccess : ModItem
 	{
@@ -37,11 +37,11 @@ namespace MagicStorageExtra.Items
 		{
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(null, "StorageComponent");
-			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
-			if (MagicStorageExtra.legendMod is null)
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
+			if (MagicStorage.legendMod is null)
 				recipe.AddIngredient(ItemID.Ruby, 3);
 			else
-				recipe.AddRecipeGroup("MagicStorageExtra:AnyRuby", 3);
+				recipe.AddRecipeGroup("MagicStorage:AnyRuby", 3);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

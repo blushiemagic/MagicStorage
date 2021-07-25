@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using MagicStorageExtra.Components;
+using MagicStorage.Components;
 using RecursiveCraft;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using OnPlayer = On.Terraria.Player;
 
-namespace MagicStorageExtra
+namespace MagicStorage
 {
 	public static class RecursiveCraftIntegration
 	{

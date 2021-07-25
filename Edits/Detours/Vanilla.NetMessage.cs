@@ -6,7 +6,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Edits.Detours
+namespace MagicStorage.Edits.Detours
 {
 	internal static class Vanilla
 	{
@@ -24,7 +24,7 @@ namespace MagicStorageExtra.Edits.Detours
 			//This is to circumvent the 65535 shorts' worth of data per-message limit and, hopefully, prevent world sections from suddenly disappearing for no reason
 			if (msgType == MessageID.TileSection)
 			{
-				ModPacket packet = MagicStorageExtra.Instance.GetPacket();
+				ModPacket packet = MagicStorage.Instance.GetPacket();
 
 				//Get the entities in the section.  Keep writing until the next entity written would make the size go over 65535
 				int startX = number;
@@ -39,7 +39,7 @@ namespace MagicStorageExtra.Edits.Detours
 				{
 					Point16 pos = item.Key;
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
-						if (ModTileEntity.GetTileEntity(item.Value.type)?.mod == MagicStorageExtra.Instance)
+						if (ModTileEntity.GetTileEntity(item.Value.type)?.mod == MagicStorage.Instance)
 							ids.Enqueue(item.Value.ID);
 				}
 
@@ -129,7 +129,7 @@ namespace MagicStorageExtra.Edits.Detours
 				if (!lastSend)
 				{
 					//Reset the packet
-					packet = MagicStorageExtra.Instance.GetPacket();
+					packet = MagicStorage.Instance.GetPacket();
 
 					packetCount++;
 

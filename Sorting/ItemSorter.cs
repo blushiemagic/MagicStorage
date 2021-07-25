@@ -4,7 +4,7 @@ using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Sorting
+namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
@@ -122,7 +122,7 @@ namespace MagicStorageExtra.Sorting
 		{
 			if (modFilterIndex == ModSearchBox.ModIndexAll)
 				return true;
-			Mod[] allMods = MagicStorageExtra.Instance.AllMods;
+			Mod[] allMods = MagicStorage.Instance.AllMods;
 			int index = ModSearchBox.ModIndexBaseGame;
 			if (item.modItem != null)
 				index = Array.IndexOf(allMods, item.modItem.mod);
