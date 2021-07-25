@@ -122,7 +122,7 @@ namespace MagicStorage.Components
 				TEStorageComponent.SearchAndRefreshNetwork(StorageComponent.killTile);
 			}
 
-			StorageComponent.killTile = new Point16(-1, -1);
+			StorageComponent.killTile = Point16.NegativeOne;
 		}
 	}
 }

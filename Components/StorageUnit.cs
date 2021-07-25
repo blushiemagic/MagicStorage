@@ -103,40 +103,35 @@ namespace MagicStorage.Components
 			Player player = Main.LocalPlayer;
 			Item item = player.inventory[player.selectedItem];
 			int style = Main.tile[i, j].frameY / 36;
-			bool success = false;
+			bool success = true;
 			switch (style)
 			{
 				case 0 when item.type == ModContent.ItemType<UpgradeDemonite>():
 					SetStyle(i, j, 1);
-					success = true;
 					break;
 				case 0 when item.type == ModContent.ItemType<UpgradeCrimtane>():
 					SetStyle(i, j, 2);
-					success = true;
 					break;
 				case 1 when item.type == ModContent.ItemType<UpgradeHellstone>():
 					SetStyle(i, j, 3);
-					success = true;
 					break;
 				case 2 when item.type == ModContent.ItemType<UpgradeHellstone>():
 					SetStyle(i, j, 3);
-					success = true;
 					break;
 				case 3 when item.type == ModContent.ItemType<UpgradeHallowed>():
 					SetStyle(i, j, 4);
-					success = true;
 					break;
 				case 4 when item.type == ModContent.ItemType<UpgradeBlueChlorophyte>():
 					SetStyle(i, j, 5);
-					success = true;
 					break;
 				case 5 when item.type == ModContent.ItemType<UpgradeLuminite>():
 					SetStyle(i, j, 6);
-					success = true;
 					break;
 				case 6 when item.type == ModContent.ItemType<UpgradeTerra>():
 					SetStyle(i, j, 7);
-					success = true;
+					break;
+				default:
+					success = false;
 					break;
 			}
 

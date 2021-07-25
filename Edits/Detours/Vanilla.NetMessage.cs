@@ -47,33 +47,29 @@ namespace MagicStorage.Edits.Detours
 					}
 				}
 
-				var ms = new MemoryStream();
-				var ms2 = new MemoryStream();
-				var msWriter = new BinaryWriter(ms);
-				var msWriter2 = new BinaryWriter(ms2);
-				int written = 0, total = 0, packetCount = 1;
-
-				while (ids.Count > 0)
-					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, false);
-
-				if (written > 0)
-					//Write the remaining information
+				using (var ms = new MemoryStream())
+				using (var ms2 = new MemoryStream())
+				using (var msWriter = new BinaryWriter(ms))
+				using (var msWriter2 = new BinaryWriter(ms2))
 				{
-					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, true);
+					int written = 0, total = 0, packetCount = 1;
+
+					while (ids.Count > 0)
+						WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, false);
+
+					if (written > 0)
+						//Write the remaining information
+					{
+						WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, true);
+					}
+
+					/*
+					if (Main.netMode == NetmodeID.Server && total > 0)
+						Console.WriteLine($"Magic Storage: Wrote {packetCount} packets for {total} entities, {(packetCount - 1) * 65535 + ms.Position} bytes written");
+					*/
+					msWriter.Flush();
+					msWriter2.Flush();
 				}
-
-				/*
-				if (Main.netMode == NetmodeID.Server && total > 0)
-					Console.WriteLine($"Magic Storage: Wrote {packetCount} packets for {total} entities, {(packetCount - 1) * 65535 + ms.Position} bytes written");
-				*/
-
-				msWriter.Flush();
-				msWriter.Close();
-				msWriter.Dispose();
-
-				msWriter2.Flush();
-				msWriter2.Close();
-				msWriter2.Dispose();
 			}
 		}
 

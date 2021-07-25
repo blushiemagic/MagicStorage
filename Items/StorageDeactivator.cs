@@ -58,7 +58,7 @@ namespace MagicStorage.Items
 				}
 
 				var point = new Point16(i, j);
-				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit storageUnit)
+				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
 				{
 					storageUnit.Inactive = !storageUnit.Inactive;
 					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";

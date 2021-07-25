@@ -9,9 +9,9 @@ namespace MagicStorage.Components
 	public class TERemoteAccess : TEStorageCenter
 	{
 		private bool _loaded;
-		private Point16 locator = new Point16(-1, -1);
+		private Point16 locator = Point16.NegativeOne;
 
-		internal bool Loaded
+		public bool Loaded
 		{
 			get => locator.X < 0 || locator.Y < 0 || _loaded;
 			private set => _loaded = value;
@@ -26,13 +26,13 @@ namespace MagicStorage.Components
 				return null;
 			}
 
-			if (!ByPosition.ContainsKey(locator))
+			if (!ByPosition.TryGetValue(locator, out TileEntity te))
 			{
 				Load();
 				return null;
 			}
 
-			return ByPosition[locator] as TEStorageHeart;
+			return te as TEStorageHeart;
 		}
 
 		private void Load()

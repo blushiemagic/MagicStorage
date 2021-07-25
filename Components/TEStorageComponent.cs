@@ -149,7 +149,7 @@ namespace MagicStorage.Components
 				}
 			}
 
-			return new Point16(-1, -1);
+			return Point16.NegativeOne;
 		}
 
 		public override void OnNetPlace()

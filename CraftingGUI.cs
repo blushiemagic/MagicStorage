@@ -1012,7 +1012,7 @@ namespace MagicStorage
 			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 		}
 
-		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
+		public static bool IsTestItem(Item item) => item != null && !item.IsAir && item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 
 		private static TEStorageHeart GetHeart() => ModPlayer.GetStorageHeart();
 

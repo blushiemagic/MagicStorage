@@ -33,7 +33,7 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.ContainsKey(remoteAccess) && ByPosition[remoteAccess] is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess) ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.ContainsKey(storageUnit) && ByPosition[storageUnit] is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit) ByPosition[storageUnit]);
+			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.TryGetValue(remoteAccess, out TileEntity te) && te is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess) ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.TryGetValue(storageUnit, out TileEntity te) && te is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit) ByPosition[storageUnit]);
 		}
 
 		public IEnumerable<Item> GetStoredItems()
@@ -64,7 +64,7 @@ namespace MagicStorage.Components
 		public override void Update()
 		{
 			for (int k = 0; k < remoteAccesses.Count; k++)
-				if (!ByPosition.ContainsKey(remoteAccesses[k]) || !(ByPosition[remoteAccesses[k]] is TERemoteAccess))
+				if (!ByPosition.TryGetValue(remoteAccesses[k], out TileEntity te) || !(te is TERemoteAccess))
 				{
 					remoteAccesses.RemoveAt(k);
 					k--;

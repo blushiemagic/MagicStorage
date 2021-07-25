@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using MagicStorage.Edits;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -426,49 +427,44 @@ namespace MagicStorage.Components
 			trueWriter.Write((byte) 1);
 
 			/* Recreate a BinaryWriter writer */
-			var buffer = new MemoryStream(65536);
-			var compressor = new DeflateStream(buffer, CompressionMode.Compress, true);
-			var writerBuffer = new BufferedStream(compressor, 65536);
-			var writer = new BinaryWriter(writerBuffer);
-
-			/* Original code */
-			base.NetSend(writer, lightSend);
-			if (netQueue.Count > Capacity / 2 || !lightSend)
+			using (var buffer = new MemoryStream(65536))
+			using (var compressor = new DeflateStream(buffer, CompressionMode.Compress, true))
+			using (var writerBuffer = new BufferedStream(compressor, 65536))
+			using (var writer = new BinaryWriter(writerBuffer))
 			{
-				netQueue.Clear();
-				netQueue.Enqueue(UnitOperation.FullSync.Create());
+				/* Original code */
+				base.NetSend(writer, lightSend);
+				if (netQueue.Count > Capacity / 2 || !lightSend)
+				{
+					netQueue.Clear();
+					netQueue.Enqueue(UnitOperation.FullSync.Create());
+				}
+
+				writer.Write((ushort) netQueue.Count);
+				while (netQueue.Count > 0)
+					netQueue.Dequeue().Send(writer, this);
+
+				/* Forces data to be flushed into the compressed buffer */
+				writerBuffer.Flush();
+				compressor.Close();
+
+				/* Sends the buffer through the network */
+				trueWriter.Write((ushort) buffer.Length);
+				trueWriter.Write(buffer.ToArray());
+
+				/* Compression stats and debugging code (server side) */
+				if (false)
+				{
+					using (var decompressedBuffer = new MemoryStream(65536))
+					using (var decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true))
+					{
+						decompressor.CopyTo(decompressedBuffer);
+						decompressor.Close();
+
+						Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
+					}
+				}
 			}
-
-			writer.Write((ushort) netQueue.Count);
-			while (netQueue.Count > 0)
-				netQueue.Dequeue().Send(writer, this);
-
-			/* Forces data to be flushed into the compressed buffer */
-			writerBuffer.Flush();
-			compressor.Close();
-
-			/* Sends the buffer through the network */
-			trueWriter.Write((ushort) buffer.Length);
-			trueWriter.Write(buffer.ToArray());
-
-			/* Compression stats and debugging code (server side) */
-			if (false)
-			{
-				var decompressedBuffer = new MemoryStream(65536);
-				var decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
-				decompressor.CopyTo(decompressedBuffer);
-				decompressor.Close();
-
-				Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
-				decompressor.Dispose();
-				decompressedBuffer.Dispose();
-			}
-
-			/* Dispose all objects */
-			writer.Dispose();
-			writerBuffer.Dispose();
-			compressor.Dispose();
-			buffer.Dispose();
 		}
 
 		public override void NetReceive(BinaryReader trueReader, bool lightReceive)
@@ -483,48 +479,46 @@ namespace MagicStorage.Components
 			}
 
 			/* Reads the buffer off the network */
-			var buffer = new MemoryStream(65536);
-			var bufferWriter = new BinaryWriter(buffer);
-
-			bufferWriter.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
-			buffer.Position = 0;
-
-			/* Recreate the BinaryReader reader */
-			var decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
-			var reader = new BinaryReader(decompressor);
-
-			/* Original code */
-			base.NetReceive(reader, lightReceive);
-			if (ByPosition.ContainsKey(Position) && ByPosition[Position] is TEStorageUnit)
+			using (var buffer = new MemoryStream(65536))
+			using (var bufferWriter = new BinaryWriter(buffer))
 			{
-				var other = (TEStorageUnit) ByPosition[Position];
-				items = other.items;
-				hasSpaceInStack = other.hasSpaceInStack;
-				hasItem = other.hasItem;
-				hasItemNoPrefix = other.hasItemNoPrefix;
-			}
 
-			receiving = true;
-			int count = reader.ReadUInt16();
-			bool flag = false;
-			for (int k = 0; k < count; k++)
-				if (UnitOperation.Receive(reader, this))
+				bufferWriter.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
+				buffer.Position = 0;
+
+				/* Recreate the BinaryReader reader */
+				using (var decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true))
+				using (var reader = new BinaryReader(decompressor))
 				{
-					flag = true;
+
+					/* Original code */
+					base.NetReceive(reader, lightReceive);
+					if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit)
+					{
+						var other = (TEStorageUnit) ByPosition[Position];
+						items = other.items;
+						hasSpaceInStack = other.hasSpaceInStack;
+						hasItem = other.hasItem;
+						hasItemNoPrefix = other.hasItemNoPrefix;
+					}
+
+					receiving = true;
+					int count = reader.ReadUInt16();
+					bool flag = false;
+					for (int k = 0; k < count; k++)
+						if (UnitOperation.Receive(reader, this))
+						{
+							flag = true;
+						}
+
+					if (flag)
+					{
+						RepairMetadata();
+					}
+
+					receiving = false;
 				}
-
-			if (flag)
-			{
-				RepairMetadata();
 			}
-
-			receiving = false;
-
-			/* Dispose all objects */
-			reader.Dispose();
-			decompressor.Dispose();
-			bufferWriter.Dispose();
-			buffer.Dispose();
 		}
 
 		private void ClearItemsData()

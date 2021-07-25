@@ -10,7 +10,7 @@ namespace MagicStorage.Components
 {
 	public class StorageComponent : ModTile
 	{
-		public static Point16 killTile = new Point16(-1, -1);
+		public static Point16 killTile = Point16.NegativeOne;
 
 		// Use StorageComponent_Highlight as the default highlight mask for subclasses
 		public override string HighlightTexture => typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight";
@@ -119,7 +119,7 @@ namespace MagicStorage.Components
 				}
 			}
 
-			killTile = new Point16(-1, -1);
+			killTile = Point16.NegativeOne;
 		}
 	}
 }

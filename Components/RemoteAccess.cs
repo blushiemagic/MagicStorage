@@ -13,11 +13,7 @@ namespace MagicStorage.Components
 
 		public override bool HasSmartInteract() => true;
 
-		public override TEStorageHeart GetHeart(int i, int j)
-		{
-			TileEntity ent = TileEntity.ByPosition[new Point16(i, j)];
-			return ((TERemoteAccess) ent).GetHeart();
-		}
+		public override TEStorageHeart GetHeart(int i, int j) => ((TERemoteAccess) TileEntity.ByPosition[new Point16(i, j)]).GetHeart();
 
 		public override bool NewRightClick(int i, int j)
 		{
@@ -41,7 +37,7 @@ namespace MagicStorage.Components
 				{
 					if (item.type == ModContent.ItemType<LocatorDisk>())
 					{
-						locator.location = new Point16(-1, -1);
+						locator.location = Point16.NegativeOne;
 					}
 					else
 					{

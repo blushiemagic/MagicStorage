@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 {
 	public class Locator : ModItem
 	{
-		public Point16 location = new Point16(-1, -1);
+		public Point16 location = Point16.NegativeOne;
 
 		public override bool CloneNewInstances => true;
 

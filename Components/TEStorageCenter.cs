@@ -26,9 +26,8 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
 				{
 					explored.Add(explore);
-					if (ByPosition.ContainsKey(explore) && ByPosition[explore] is TEAbstractStorageUnit)
+					if (ByPosition.TryGetValue(explore, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
 					{
-						var storageUnit = (TEAbstractStorageUnit) ByPosition[explore];
 						if (storageUnit.Link(Position))
 						{
 							NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
@@ -47,10 +46,9 @@ namespace MagicStorage.Components
 			foreach (Point16 oldStorageUnit in oldStorageUnits)
 				if (!hashStorageUnits.Contains(oldStorageUnit))
 				{
-					if (ByPosition.ContainsKey(oldStorageUnit) && ByPosition[oldStorageUnit] is TEAbstractStorageUnit)
+					if (ByPosition.TryGetValue(oldStorageUnit, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
 					{
-						TileEntity storageUnit = ByPosition[oldStorageUnit];
-						((TEAbstractStorageUnit) storageUnit).Unlink();
+						storageUnit.Unlink();
 						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 					}
 
@@ -82,7 +80,7 @@ namespace MagicStorage.Components
 
 		public abstract TEStorageHeart GetHeart();
 
-		public static bool IsStorageCenter(Point16 point) => ByPosition.ContainsKey(point) && ByPosition[point] is TEStorageCenter;
+		public static bool IsStorageCenter(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter;
 
 		public override TagCompound Save()
 		{

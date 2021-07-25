@@ -18,18 +18,12 @@ namespace MagicStorage.Components
 		public virtual TEStorageHeart GetHeart(int i, int j)
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
+			if (point.X >= 0 && point.Y >= 0 && TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
 			{
-				return null;
+				return center.GetHeart();
 			}
 
-			TileEntity heart = TileEntity.ByPosition[point];
-			if (!(heart is TEStorageCenter center))
-			{
-				return null;
-			}
-
-			return center.GetHeart();
+			return null;
 		}
 
 		public override void MouseOver(int i, int j)
@@ -54,9 +48,9 @@ namespace MagicStorage.Components
 			}
 
 			string text = "This access is not connected to a Storage Heart!";
-			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
+			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te))
 			{
-				if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
+				if (te is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
 				{
 					text = "Storage Heart area not loaded! Try again.";
 				}

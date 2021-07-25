@@ -22,15 +22,7 @@ namespace MagicStorage.Components
 		{
 		}
 
-		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
-		{
-			if (Inactive)
-			{
-				return new Item();
-			}
-
-			return lookFor.Clone();
-		}
+		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false) => Inactive ? new Item() : lookFor.Clone();
 	}
 
 	internal class CreativeEnumerable : IEnumerable<Item>

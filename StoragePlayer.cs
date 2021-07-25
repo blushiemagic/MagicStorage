@@ -18,7 +18,7 @@ namespace MagicStorage
 
 		private TEStorageHeart _latestAccessedStorage;
 		public bool remoteAccess;
-		private Point16 storageAccess = new Point16(-1, -1);
+		private Point16 storageAccess = Point16.NegativeOne;
 
 		public int timeSinceOpen = 1;
 
@@ -141,7 +141,7 @@ namespace MagicStorage
 
 		public void CloseStorage()
 		{
-			storageAccess = new Point16(-1, -1);
+			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
 		}
 
@@ -255,12 +255,13 @@ namespace MagicStorage
 
 		public TECraftingAccess GetCraftingAccess()
 		{
-			if (storageAccess.X < 0 || storageAccess.Y < 0 || !TileEntity.ByPosition.ContainsKey(storageAccess))
+			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && TileEntity.ByPosition.TryGetValue(storageAccess, out TileEntity te))
 			{
-				return null;
+				return te as TECraftingAccess;
 			}
 
-			return TileEntity.ByPosition[storageAccess] as TECraftingAccess;
+			return null;
+
 		}
 
 		public bool StorageCrafting()
@@ -278,39 +279,29 @@ namespace MagicStorage
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
 		{
-			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
-				{
-					damage *= 5;
-					break;
-				}
-		}
-
-		public override bool CanHitPvp(Item item, Player target)
-		{
-			if (CraftingGUI.IsTestItem(item))
+			IEnumerable<Item> allItems = player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips);
+			if (allItems.Any(CraftingGUI.IsTestItem))
 			{
-				return false;
+				damage *= 5;
 			}
-
-			return base.CanHitPvp(item, target);
 		}
+
+		public override bool CanHitPvp(Item item, Player target) => !CraftingGUI.IsTestItem(item) && base.CanHitPvp(item, target);
 
 		public override void OnRespawn(Player player)
 		{
-			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+			IEnumerable<Item> allItems = player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips);
+			foreach (Item item in allItems)
+				if (CraftingGUI.IsTestItem(item))
 				{
 					item.TurnToAir();
 				}
 
+			if (CraftingGUI.IsTestItem(player.trashItem))
 			{
-				Item item = player.trashItem;
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
-				{
-					item.TurnToAir();
-				}
+				player.trashItem.TurnToAir();
 			}
+
 			base.OnRespawn(player);
 		}
 	}

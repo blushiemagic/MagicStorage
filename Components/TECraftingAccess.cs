@@ -31,11 +31,10 @@ namespace MagicStorage.Components
 				return;
 			}
 
-			foreach (Item station in stations)
-				if (station.type == item.type)
-				{
-					return;
-				}
+			if (stations.Any(station => station.type == item.type))
+			{
+				return;
+			}
 
 			for (int k = 0; k < stations.Length; k++)
 				if (stations[k].IsAir)

@@ -1,3 +1,4 @@
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -15,18 +16,17 @@ namespace MagicStorage.Components
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
+			if (point.X < 0 || point.Y < 0)
 			{
 				return null;
 			}
 
-			TileEntity heart = TileEntity.ByPosition[point];
-			if (!(heart is TEStorageCenter center))
+			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
 			{
-				return null;
+				return center.GetHeart();
 			}
 
-			return center.GetHeart();
+			return null;
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
@@ -42,19 +42,12 @@ namespace MagicStorage.Components
 			}
 
 			var pos = new Point16(i, j);
-			if (!TileEntity.ByPosition.ContainsKey(pos))
+			if (TileEntity.ByPosition.TryGetValue(pos, out TileEntity te) && te is TECraftingAccess access)
 			{
-				return;
-			}
-
-			if (TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access)
-			{
-				foreach (Item item in access.stations)
-					if (!item.IsAir)
-					{
-						fail = true;
-						break;
-					}
+				if (access.stations.Any(item => !item.IsAir))
+				{
+					fail = true;
+				}
 			}
 		}
 	}
