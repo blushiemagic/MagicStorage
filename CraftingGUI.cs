@@ -18,6 +18,7 @@ using MagicStorage.Sorting;
 using Terraria.GameContent;
 using Terraria.Audio;
 using MagicStorage.Items;
+using ReLogic.Content;
 
 namespace MagicStorage
 {
@@ -365,8 +366,8 @@ namespace MagicStorage
 				sortButtons = new UIButtonChoice(new Texture2D[]
 				{
 					TextureAssets.InventorySort[0].Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("SortID").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("SortName").Value
+					MagicStorage.Instance.Assets.Request<Texture2D>("SortID", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("SortName", AssetRequestMode.ImmediateLoad).Value
 				},
 				new LocalizedText[]
 				{
@@ -383,8 +384,8 @@ namespace MagicStorage
 			{
 				recipeButtons = new UIButtonChoice(new Texture2D[]
 				{
-					MagicStorage.Instance.Assets.Request<Texture2D>("RecipeAvailable").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("RecipeAll").Value
+					MagicStorage.Instance.Assets.Request<Texture2D>("RecipeAvailable", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("RecipeAll", AssetRequestMode.ImmediateLoad).Value
 				},
 				new LocalizedText[]
 				{
@@ -400,13 +401,13 @@ namespace MagicStorage
 			{
 				filterButtons = new UIButtonChoice(new Texture2D[]
 				{
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterAll").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterMelee").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterPickaxe").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterArmor").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterPotion").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterTile").Value,
-					MagicStorage.Instance.Assets.Request<Texture2D>("FilterMisc").Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterAll", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterMelee", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterPickaxe", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterArmor", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterPotion", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterTile", AssetRequestMode.ImmediateLoad).Value,
+					MagicStorage.Instance.Assets.Request<Texture2D>("FilterMisc", AssetRequestMode.ImmediateLoad).Value,
 				},
 				new LocalizedText[]
 				{
@@ -422,35 +423,37 @@ namespace MagicStorage
 		}
 
 		public static void Update(GameTime gameTime)
-		{try{
-			oldMouse = StorageGUI.oldMouse;
-			curMouse = StorageGUI.curMouse;
-			if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
-			{
-				if (curMouse.RightButton == ButtonState.Released)
+		{
+			try{
+				oldMouse = StorageGUI.oldMouse;
+				curMouse = StorageGUI.curMouse;
+				if (Main.playerInventory && Main.player[Main.myPlayer].GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 				{
+					if (curMouse.RightButton == ButtonState.Released)
+					{
+						ResetSlotFocus();
+					}
+					if (basePanel != null)
+					{
+						basePanel.Update(gameTime);
+					}
+					if (recipePanel != null)
+					{
+						recipePanel.Update(gameTime);
+					}
+					UpdateRecipeText();
+					UpdateScrollBar();
+					UpdateCraftButton();
+				}
+				else
+				{
+					scrollBarFocus = 0;
+					selectedRecipe = null;
+					craftTimer = 0;
+					maxCraftTimer = startMaxCraftTimer;
 					ResetSlotFocus();
 				}
-				if (basePanel != null)
-				{
-					basePanel.Update(gameTime);
-				}
-				if (recipePanel != null)
-				{
-					recipePanel.Update(gameTime);
-				}
-				UpdateRecipeText();
-				UpdateScrollBar();
-				UpdateCraftButton();
-			}
-			else
-			{
-				scrollBarFocus = 0;
-				selectedRecipe = null;
-				craftTimer = 0;
-				maxCraftTimer = startMaxCraftTimer;
-				ResetSlotFocus();
-			}}catch(Exception e){Main.NewTextMultiline(e.ToString());}
+			}catch(Exception e){Main.NewTextMultiline(e.ToString());}
 		}
 
 		public static void Draw()
@@ -460,7 +463,7 @@ namespace MagicStorage
 				Player player = Main.player[Main.myPlayer];
 				StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 				Initialize();
-				if (Main.mouseX > panelLeft && Main.mouseX < recipeLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
+				if (Main.mouseX > panelLeft && Main.mouseX < recipeLeft + recipeWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 				{
 					player.mouseInterface = true;
 					player.cursorItemIconEnabled = false;
@@ -506,11 +509,11 @@ namespace MagicStorage
 			}
 			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
-			if (item.IsAir && recipes[index] == selectedRecipe)
+			if (!item.IsAir && recipes[index] == selectedRecipe)
 			{
 				context = 6;
 			}
-			if (item.IsAir && !recipeAvailable[index])
+			if (!item.IsAir && !recipeAvailable[index])
 			{
 				context = recipes[index] == selectedRecipe ? 4 : 3;
 			}
@@ -821,58 +824,64 @@ namespace MagicStorage
 		private static void RefreshRecipes()
 		{
 			while (true)
-			{try{
-				SortMode sortMode;
-				FilterMode filterMode;
-				lock (threadLock)
-				{
-					threadNeedsRestart = false;
-					sortMode = threadSortMode;
-					filterMode = threadFilterMode;
-				}
-				var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
-				threadRecipes.Clear();
-				threadRecipeAvailable.Clear();
-				try
-				{
-					if (recipeButtons.Choice == 0)
+			{
+				try{
+					SortMode sortMode;
+					FilterMode filterMode;
+					lock (threadLock)
 					{
-						threadRecipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
-						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
+						threadNeedsRestart = false;
+						sortMode = threadSortMode;
+						filterMode = threadFilterMode;
 					}
-					else
+					var temp = ItemSorter.GetRecipes(sortMode, filterMode, searchBar2.Text, searchBar.Text);
+					threadRecipes.Clear();
+					threadRecipeAvailable.Clear();
+					try
 					{
-						threadRecipes.AddRange(temp);
-						threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+						if (recipeButtons.Choice == 0)
+						{
+							threadRecipes.AddRange(temp.Where(recipe => IsAvailable(recipe)));
+							threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
+						}
+						else
+						{
+							threadRecipes.AddRange(temp);
+							threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+						}
 					}
-				}
-				catch (InvalidOperationException)
-				{
-				}
-				catch (KeyNotFoundException)
-				{
-				}
-				lock (recipeLock)
-				{
-					nextRecipes = new List<Recipe>();
-					nextRecipeAvailable = new List<bool>();
-					nextRecipes.AddRange(threadRecipes);
-					nextRecipeAvailable.AddRange(threadRecipeAvailable);
-					
-				}
-				lock (threadLock)
-				{
-					if (!threadNeedsRestart)
+					catch (InvalidOperationException)
 					{
-						threadRunning = false;
-						return;
 					}
-				}}catch(Exception e){Main.NewTextMultiline(e.ToString());}
+					catch (KeyNotFoundException)
+					{
+					}
+					lock (recipeLock)
+					{
+						nextRecipes = new List<Recipe>();
+						nextRecipeAvailable = new List<bool>();
+						nextRecipes.AddRange(threadRecipes);
+						nextRecipeAvailable.AddRange(threadRecipeAvailable);
+					}
+					lock (threadLock)
+					{
+						if (!threadNeedsRestart)
+						{
+							threadRunning = false;
+							return;
+						}
+					}
+				}
+				catch(Exception e)
+				{
+					Main.NewTextMultiline(e.ToString());
+				}
 			}
 		}
 
 		private static void AnalyzeIngredients()
 		{
+			// TODO: why the hell is this throwing IOOB exceptions
 			Player player = Main.player[Main.myPlayer];
 
 			lock (itemsLock)
@@ -982,7 +991,7 @@ namespace MagicStorage
 					zoneSnow = true;
 				}
 			}
-			adjTiles[ModContent.ItemType<Items.CraftingAccess>()] = true;
+			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 		}
 
 		private static bool IsAvailable(Recipe recipe)
@@ -1130,42 +1139,16 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool RecipeGroupMatch(Recipe recipe, int type1, int type2)
+		private static bool RecipeGroupMatch(Recipe recipe, int requiredType, int inventoryType)
 		{
-			//Why in the hell were the "recipe.useX" methods privated in 1.4.  I'm not happy about this.
-			// - absoluteAquarian
-			return CanUse(RecipeGroupID.Wood, type1, type2)
-				|| CanUse(RecipeGroupID.Sand, type1, type2)
-				|| CanUse(RecipeGroupID.IronBar, type1, type2)
-				|| CanUse(RecipeGroupID.Fragment, type1, type2)
-				|| CanUse(RecipeGroupID.PressurePlate, type1, type2)
-				|| CanUse(RecipeGroupID.Birds, type1, type2)
-				|| CanUse(RecipeGroupID.Bugs, type1, type2)
-				|| CanUse(RecipeGroupID.Butterflies, type1, type2)
-				|| CanUse(RecipeGroupID.Dragonflies, type1, type2)
-				|| CanUse(RecipeGroupID.Ducks, type1, type2)
-				|| CanUse(RecipeGroupID.Fireflies, type1, type2)
-				|| CanUse(RecipeGroupID.FishForDinner, type1, type2)
-				|| CanUse(RecipeGroupID.Fruit, type1, type2)
-				|| CanUse(RecipeGroupID.GoldenCritter, type1, type2)
-				|| CanUse(RecipeGroupID.Scorpions, type1, type2)
-				|| CanUse(RecipeGroupID.Snails, type1, type2)
-				|| CanUse(RecipeGroupID.Turtles, type1, type2)
-				|| AcceptedByItemGroups(recipe, type1, type2);
-
-			//return recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
-		}
-
-		private static bool CanUse(int groupID, int inventoryType, int requiredType)
-			=> RecipeGroup.recipeGroups[groupID].ContainsItem(requiredType) && RecipeGroup.recipeGroups[groupID].ContainsItem(inventoryType);
-
-		internal static bool AcceptedByItemGroups(Recipe recipe, int invType, int reqType) {
 			foreach (int num in recipe.acceptedGroups) {
-				if (RecipeGroup.recipeGroups[num].ContainsItem(invType) && RecipeGroup.recipeGroups[num].ContainsItem(reqType))
+				if (RecipeGroup.recipeGroups[num].ContainsItem(inventoryType) && RecipeGroup.recipeGroups[num].ContainsItem(requiredType))
 					return true;
 			}
 			
 			return false;
+
+			//return recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
 		}
 
 		private static void HoverStation(int slot, ref int hoverSlot)
