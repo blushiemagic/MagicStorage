@@ -1037,24 +1037,23 @@ namespace MagicStorage
 				}
 			}
 
-			if (recipe.HasCondition(Recipe.Condition.NearWater) && !adjWater && !adjTiles[TileID.Sinks])
-			{
-				return false;
-			}
-			if (recipe.HasCondition(Recipe.Condition.NearLava) && !adjLava)
-			{
-				return false;
-			}
-			if (recipe.HasCondition(Recipe.Condition.NearHoney) && !adjHoney)
-			{
-				return false;
-			}
-			if (recipe.HasCondition(Recipe.Condition.InSnow) && !zoneSnow)
-			{
-				return false;
-			}
 			try
 			{
+				Player player = Main.LocalPlayer;
+				for (int i = 0; i < adjTiles.Length; i++)
+					if (adjTiles[i])
+						player.adjTile[i] = true;
+				if (adjWater)
+					player.adjWater = true;
+				if (adjLava)
+					player.adjLava = true;
+				if (adjHoney)
+					player.adjHoney = true;
+				if (alchemyTable)
+					player.alchemyTable = true;
+				if (zoneSnow)
+					player.ZoneSnow = true;
+
 				BlockRecipes.active = false;
 				if (!RecipeLoader.RecipeAvailable(recipe))
 				{
