@@ -98,27 +98,27 @@ namespace MagicStorage.Sorting
 
         private static bool MeleeWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Melee && item.pick < 1 && item.hammer < 1 && item.axe < 1;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Melee) && item.pick < 1 && item.hammer < 1 && item.axe < 1;
         }
 
         private static bool RangedWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Ranged;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Ranged);
         }
 
         private static bool MagicWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.DamageType == DamageClass.Magic;
+            return item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Magic);
         }
 
         private static bool SummonWeapon(Item item)
         {
-            return item.maxStack == 1 && item.damage > 0 && item.DamageType == DamageClass.Summon;
+            return item.maxStack == 1 && item.damage > 0 && item.CountsAsClass(DamageClass.Summon);
         }
 
         private static bool ThrownWeapon(Item item)
         {
-            return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.DamageType == DamageClass.Throwing;
+            return item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.CountsAsClass(DamageClass.Throwing);
         }
 
         private static bool Weapon(Item item)
