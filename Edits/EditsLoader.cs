@@ -1,7 +1,7 @@
-﻿using MagicStorageExtra.Edits.Detours;
+﻿using MagicStorage.Edits.Detours;
 using On.Terraria;
 
-namespace MagicStorageExtra.Edits
+namespace MagicStorage.Edits
 {
 	//Handles loading/unloading any method detours and IL edits
 	internal static class EditsLoader

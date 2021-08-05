@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Reflection;
-using MagicStorageExtra.Components;
+using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorageExtra
+namespace MagicStorage
 {
 	public static class InterfaceHelper
 	{
@@ -25,7 +25,7 @@ namespace MagicStorageExtra
 			for (int k = 0; k < layers.Count; k++)
 				if (layers[k].Name == "Vanilla: Inventory")
 				{
-					layers.Insert(k + 1, new LegacyGameInterfaceLayer("MagicStorageExtra: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
+					layers.Insert(k + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
 					k++;
 				}
 		}

@@ -5,7 +5,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class PortableAccess : Locator
 	{
@@ -119,7 +119,7 @@ namespace MagicStorageExtra.Items
 			for (int k = 0; k < lines.Count; k++)
 				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
 				{
-					lines[k].text = Language.GetTextValue("Mods.MagicStorageExtra.SetTo", location.X, location.Y);
+					lines[k].text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
 				}
 				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip2")
 				{
@@ -133,19 +133,19 @@ namespace MagicStorageExtra.Items
 			var recipe = new ModRecipe(mod);
 			recipe.AddIngredient(mod, "LocatorDisk");
 			recipe.AddIngredient(mod, "RadiantJewel");
-			recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
+			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			recipe.AddIngredient(ItemID.Ruby, 7);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();
 
-			Mod otherMod = MagicStorageExtra.bluemagicMod;
+			Mod otherMod = MagicStorage.bluemagicMod;
 			if (otherMod != null)
 			{
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "InfinityCrystal");
-				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
+				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(otherMod, "PuriumAnvil");
 				recipe.SetResult(this);
@@ -158,7 +158,7 @@ namespace MagicStorageExtra.Items
 				recipe = new ModRecipe(mod);
 				recipe.AddIngredient(mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
-				recipe.AddRecipeGroup("MagicStorageExtra:AnyDiamond", 3);
+				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 				recipe.AddIngredient(ItemID.Ruby, 7);
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.SetResult(this);

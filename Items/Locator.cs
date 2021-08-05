@@ -7,7 +7,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class Locator : ModItem
 	{
@@ -46,7 +46,7 @@ namespace MagicStorageExtra.Items
 			for (int k = 0; k < lines.Count; k++)
 				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0")
 				{
-					lines[k].text = Language.GetTextValue("Mods.MagicStorageExtra.SetTo", location.X, location.Y);
+					lines[k].text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
 				}
 				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
 				{

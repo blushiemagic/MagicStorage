@@ -8,7 +8,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class TEStorageHeart : TEStorageCenter
 	{

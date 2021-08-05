@@ -1,4 +1,4 @@
-using MagicStorageExtra.Items;
+using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class StorageUnit : StorageComponent
 	{

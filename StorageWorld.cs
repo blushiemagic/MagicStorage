@@ -6,7 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra
+namespace MagicStorage
 {
 	public class StorageWorld : ModWorld
 	{

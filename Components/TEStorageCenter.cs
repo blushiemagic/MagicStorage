@@ -3,7 +3,7 @@ using System.IO;
 using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public abstract class TEStorageCenter : TEStorageComponent
 	{

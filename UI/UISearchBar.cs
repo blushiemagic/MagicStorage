@@ -11,7 +11,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorageExtra.UI
+namespace MagicStorage.UI
 {
 	public class UISearchBar : UIElement
 	{
@@ -22,7 +22,7 @@ namespace MagicStorageExtra.UI
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
-		private static readonly Texture2D texture = ModContent.GetTexture("MagicStorageExtra/Assets/SearchBar");
+		private static readonly Texture2D texture = ModContent.GetTexture("MagicStorage/Assets/SearchBar");
 
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{

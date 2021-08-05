@@ -1,4 +1,4 @@
-namespace MagicStorageExtra.Sorting
+namespace MagicStorage.Sorting
 {
 	public enum SortMode
 	{

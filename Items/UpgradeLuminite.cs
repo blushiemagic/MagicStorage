@@ -3,7 +3,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Items
+namespace MagicStorage.Items
 {
 	public class UpgradeLuminite : ModItem
 	{
@@ -41,10 +41,10 @@ namespace MagicStorageExtra.Items
 			recipe.AddIngredient(ItemID.FragmentVortex, 5);
 			recipe.AddIngredient(ItemID.FragmentNebula, 5);
 			recipe.AddIngredient(ItemID.FragmentStardust, 5);
-			if (MagicStorageExtra.legendMod is null)
+			if (MagicStorage.legendMod is null)
 				recipe.AddIngredient(ItemID.Ruby);
 			else
-				recipe.AddRecipeGroup("MagicStorageExtra:AnyRuby");
+				recipe.AddRecipeGroup("MagicStorage:AnyRuby");
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.SetResult(this);
 			recipe.AddRecipe();

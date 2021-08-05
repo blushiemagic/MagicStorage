@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class TECreativeStorageUnit : TEAbstractStorageUnit
 	{

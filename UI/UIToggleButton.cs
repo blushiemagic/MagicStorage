@@ -5,7 +5,7 @@ using Terraria;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace MagicStorageExtra.UI
+namespace MagicStorage.UI
 {
 	public class UIToggleButton : UIElement
 	{
@@ -51,8 +51,8 @@ namespace MagicStorageExtra.UI
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			Texture2D backTexture = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackground");
-			Texture2D backTextureActive = MagicStorageExtra.Instance.GetTexture("Assets/SortButtonBackgroundActive");
+			Texture2D backTexture = MagicStorage.Instance.GetTexture("Assets/SortButtonBackground");
+			Texture2D backTextureActive = MagicStorage.Instance.GetTexture("Assets/SortButtonBackgroundActive");
 			CalculatedStyle dim = GetDimensions();
 			Texture2D texture = Value ? backTextureActive : backTexture;
 			var drawPos = new Vector2(dim.X, dim.Y);

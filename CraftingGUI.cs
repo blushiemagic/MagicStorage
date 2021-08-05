@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using MagicStorageExtra.Components;
-using MagicStorageExtra.Items;
-using MagicStorageExtra.Sorting;
-using MagicStorageExtra.UI;
+using MagicStorage.Components;
+using MagicStorage.Items;
+using MagicStorage.Sorting;
+using MagicStorage.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
@@ -17,7 +17,7 @@ using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorageExtra
+namespace MagicStorage
 {
 	public static class CraftingGUI
 	{
@@ -338,21 +338,21 @@ namespace MagicStorageExtra
 		private static void InitLangStuff()
 		{
 			if (searchBar == null)
-				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorageExtra.SearchName"), RefreshItems);
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			if (stationText == null)
-				stationText = new UIText(Language.GetText("Mods.MagicStorageExtra.CraftingStations"));
+				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 			if (capacityText == null)
 				capacityText = new UIText("Items");
 			if (recipePanelHeader == null)
-				recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorageExtra.SelectedRecipe"));
+				recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
 			if (ingredientText == null)
-				ingredientText = new UIText(Language.GetText("Mods.MagicStorageExtra.Ingredients"));
+				ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
 			if (reqObjText == null)
 				reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
 			if (reqObjText2 == null)
 				reqObjText2 = new UIText("");
 			if (storedItemsText == null)
-				storedItemsText = new UIText(Language.GetText("Mods.MagicStorageExtra.StoredItems"));
+				storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
 			if (craftButton == null)
 				craftButton = new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"));
 			modSearchBox.InitLangStuff();
@@ -378,16 +378,16 @@ namespace MagicStorageExtra
 			{
 				recipeButtons = new UIButtonChoice(RefreshItems, new[]
 				{
-					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAvailable"),
-					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll"),
-					MagicStorageExtra.Instance.GetTexture("Assets/FilterMisc"),
-					MagicStorageExtra.Instance.GetTexture("Assets/RecipeAll")
+					MagicStorage.Instance.GetTexture("Assets/RecipeAvailable"),
+					MagicStorage.Instance.GetTexture("Assets/RecipeAll"),
+					MagicStorage.Instance.GetTexture("Assets/FilterMisc"),
+					MagicStorage.Instance.GetTexture("Assets/RecipeAll")
 				}, new[]
 				{
-					Language.GetText("Mods.MagicStorageExtra.RecipeAvailable"),
-					Language.GetText("Mods.MagicStorageExtra.RecipeAll"),
-					Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
-					Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
+					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
+					Language.GetText("Mods.MagicStorage.RecipeAll"),
+					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
+					Language.GetText("Mods.MagicStorage.RecipeBlacklist")
 				});
 				if (MagicStorageConfig.UseConfigFilter)
 					recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
@@ -412,7 +412,7 @@ namespace MagicStorageExtra
 		{
 			try
 			{
-				if (MagicStorageExtra.IsItemKnownHotKey != null && MagicStorageExtra.IsItemKnownHotKey.GetAssignedKeys().Count > 0 && MagicStorageExtra.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir)
+				if (MagicStorage.IsItemKnownHotKey != null && MagicStorage.IsItemKnownHotKey.GetAssignedKeys().Count > 0 && MagicStorage.IsItemKnownHotKey.JustPressed && Main.HoverItem != null && !Main.HoverItem.IsAir)
 				{
 					string s = Main.HoverItem.Name + " is ";
 					int t = Main.HoverItem.type;
@@ -508,7 +508,7 @@ namespace MagicStorageExtra
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 
 			if (Main.netMode == NetmodeID.SinglePlayer && curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height && selectedRecipe != null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
-				Main.instance.MouseText(Language.GetText("Mods.MagicStorageExtra.CraftTooltip").Value);
+				Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
 		}
 
 		private static Item GetStation(int slot, ref int context)
@@ -667,7 +667,7 @@ namespace MagicStorageExtra
 			if (selectedRecipe == null)
 			{
 				reqObjText2.SetText("");
-				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorageExtra.SelectedRecipe").Value);
+				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
 			}
 			else
 			{
@@ -861,10 +861,10 @@ namespace MagicStorageExtra
 			testItem.shopCustomPrice = 0;
 			testItem.material = false;
 			testItem.rare = -11;
-			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
+			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 		}
 
-		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
+		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 
 		private static TEStorageHeart GetHeart() => ModPlayer.GetStorageHeart();
 

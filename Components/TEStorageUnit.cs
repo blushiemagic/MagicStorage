@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using MagicStorageExtra.Edits;
+using MagicStorage.Edits;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorageExtra.Components
+namespace MagicStorage.Components
 {
 	public class TEStorageUnit : TEAbstractStorageUnit
 	{
