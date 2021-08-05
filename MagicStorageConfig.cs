@@ -15,15 +15,15 @@ namespace MagicStorageExtra
 		[DefaultValue(true)]
 		public bool glowNewItems;
 
-		[Label("Default recipe filter")]
-		[Tooltip("Enable to default to all recipes, disable to default to available recipes")]
-		[DefaultValue(true)]
-		public bool showAllRecipes;
-
 		[Label("Use default filter")]
 		[Tooltip("Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)")]
 		[DefaultValue(true)]
 		public bool useConfigFilter;
+
+		[Label("Default recipe filter")]
+		[Tooltip("Enable to default to all recipes, disable to default to available recipes")]
+		[DefaultValue(true)]
+		public bool showAllRecipes;
 
 		[Label("Quick stack deposit mode")]
 		[Tooltip("Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released")]

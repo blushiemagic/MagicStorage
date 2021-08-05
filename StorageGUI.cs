@@ -373,7 +373,7 @@ namespace MagicStorageExtra
 				depositButton.BackgroundColor = new Color(73, 94, 171);
 				if (MouseClicked)
 				{
-					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.RightControl);
+					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl);
 					if (TryDepositAll(ctrlDown == MagicStorageConfig.QuickStackDepositMode))
 					{
 						RefreshItems();
@@ -399,7 +399,10 @@ namespace MagicStorageExtra
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(depositButton);
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-				Main.instance.MouseText(Language.GetText("Mods.MagicStorageExtra.DepositTooltip").Value);
+			{
+				string alt = MagicStorageConfig.QuickStackDepositMode ? "Alt" : "";
+				Main.instance.MouseText(Language.GetText($"Mods.MagicStorageExtra.DepositTooltip{alt}").Value);
+			}
 		}
 
 		private static void ResetSlotFocus()

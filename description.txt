@@ -17,6 +17,9 @@ Blacklist/Whitelist for specific accesses
 Wait for bug reports
 
 Changelog:
+0.5.4.1:
+Add config for storage deposit quick stack behaviour
+ - Due to some config changes, all your config settings have been reset
 0.5.4.0:
 Fixed world sections not loading due to storage systems having too many items
 Fixed bad netcode causing "read underflows"
