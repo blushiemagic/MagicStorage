@@ -1,4 +1,4 @@
-using System;
+CountsAsClass(using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -36,7 +36,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType == DamageClass.Melee && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+            return item.CountsAsClass(DamageClass.Melee) && item.pick == 0 && item.axe == 0 && item.hammer == 0;
         }
     }
 
@@ -44,7 +44,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType == DamageClass.Ranged;
+            return item.CountsAsClass(DamageClass.Ranged);
         }
     }
 
@@ -52,7 +52,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType == DamageClass.Magic;
+            return item.CountsAsClass(DamageClass.Magic);
         }
     }
 
@@ -60,7 +60,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType == DamageClass.Summon;
+            return item.CountsAsClass(DamageClass.Summon);
         }
     }
 
@@ -68,7 +68,7 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType == DamageClass.Throwing;
+            return item.CountsAsClass(DamageClass.Throwing);
         }
     }
 
@@ -76,7 +76,12 @@ namespace MagicStorage.Sorting
     {
         public override bool Passes(Item item)
         {
-            return item.DamageType != DamageClass.Melee && item.DamageType != DamageClass.Ranged && item.DamageType != DamageClass.Magic && item.DamageType != DamageClass.Summon && item.DamageType != DamageClass.Throwing && item.damage > 0;
+            return !item.CountsAsClass(DamageClass.Melee) &&
+                   !item.CountsAsClass(DamageClass.Ranged) &&
+                   !item.CountsAsClass(DamageClass.Magic) &&
+                   !item.CountsAsClass(DamageClass.Summon) &&
+                   !item.CountsAsClass(DamageClass.Throwing) &&
+                   item.damage > 0;
         }
     }
 
