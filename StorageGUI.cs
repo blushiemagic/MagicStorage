@@ -373,7 +373,8 @@ namespace MagicStorageExtra
 				depositButton.BackgroundColor = new Color(73, 94, 171);
 				if (MouseClicked)
 				{
-					if (TryDepositAll(!Main.keyState.IsKeyDown(Keys.LeftControl) && !Main.keyState.IsKeyDown(Keys.RightControl)))
+					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) && Main.keyState.IsKeyDown(Keys.RightControl);
+					if (TryDepositAll(ctrlDown == MagicStorageConfig.QuickStackDepositMode))
 					{
 						RefreshItems();
 						Main.PlaySound(SoundID.Grab);

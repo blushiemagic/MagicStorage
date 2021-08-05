@@ -114,7 +114,7 @@ namespace MagicStorageExtra.Components
 						if (toDeposit.favorited)
 							item.favorited = true;
 						if (toDeposit.newAndShiny)
-							item.newAndShiny = MagicStorageConfig.glowNewItems;
+							item.newAndShiny = MagicStorageConfig.GlowNewItems;
 
 						hasChange = true;
 						toDeposit.stack = total - newStack;

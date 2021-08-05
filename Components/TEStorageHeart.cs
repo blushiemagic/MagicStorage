@@ -236,7 +236,7 @@ namespace MagicStorageExtra.Components
 					}
 
 				bool prevNewAndShiny = toDeposit.newAndShiny;
-				toDeposit.newAndShiny = MagicStorageConfig.glowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
+				toDeposit.newAndShiny = MagicStorageConfig.GlowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 					if (!storageUnit.Inactive && !storageUnit.IsFull)
 					{

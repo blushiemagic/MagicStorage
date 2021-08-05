@@ -389,8 +389,8 @@ namespace MagicStorageExtra
 					Language.GetText("Mods.MagicStorageExtra.ShowOnlyFavorited"),
 					Language.GetText("Mods.MagicStorageExtra.RecipeBlacklist")
 				});
-				if (MagicStorageConfig.useConfigFilter)
-					recipeButtons.Choice = MagicStorageConfig.showAllRecipes ? 1 : 0;
+				if (MagicStorageConfig.UseConfigFilter)
+					recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 			}
 		}
 
@@ -540,7 +540,7 @@ namespace MagicStorageExtra
 				if (!ModPlayer.SeenRecipes.Contains(item))
 				{
 					item = item.Clone();
-					item.newAndShiny = MagicStorageConfig.glowNewItems;
+					item.newAndShiny = MagicStorageConfig.GlowNewItems;
 				}
 			}
 
