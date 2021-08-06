@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ID;
@@ -21,21 +22,19 @@ namespace MagicStorage.Components
 			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
 				return null;
 			TileEntity heart = TileEntity.ByPosition[point];
-			if (!(heart is TEStorageCenter center))
-				return null;
-			return center.GetHeart();
+			return heart is TEStorageCenter center ? center.GetHeart() : null;
 		}
 
 		public override void MouseOver(int i, int j)
 		{
 			Player player = Main.LocalPlayer;
 			Tile tile = Main.tile[i, j];
-			player.showItemIcon = true;
-			player.showItemIcon2 = ItemType(tile.frameX, tile.frameY);
+			player.cursorItemIconEnabled = true;
+			player.cursorItemIconID = ItemType(tile.frameX, tile.frameY);
 			player.noThrow = 2;
 		}
 
-		public override bool NewRightClick(int i, int j)
+		public override bool RightClick(int i, int j)
 		{
 			if (Main.tile[i, j].frameX % 36 == 18)
 				i--;
@@ -54,11 +53,11 @@ namespace MagicStorage.Components
 			}
 
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Main.mouseRightRelease = false;
 			if (player.sign > -1)
 			{
-				Main.PlaySound(SoundID.MenuClose);
+				SoundEngine.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
@@ -66,7 +65,7 @@ namespace MagicStorage.Components
 
 			if (Main.editChest)
 			{
-				Main.PlaySound(SoundID.MenuTick);
+				SoundEngine.PlaySound(SoundID.MenuTick);
 				Main.editChest = false;
 				Main.npcChatText = string.Empty;
 			}
@@ -79,7 +78,7 @@ namespace MagicStorage.Components
 
 			if (player.talkNPC > -1)
 			{
-				player.talkNPC = -1;
+				player.SetTalkNPC(-1);
 				Main.npcChatCornerItem = 0;
 				Main.npcChatText = string.Empty;
 			}
@@ -87,12 +86,12 @@ namespace MagicStorage.Components
 			bool hadChestOpen = player.chest != -1;
 			player.chest = -1;
 			Main.stackSplit = 600;
-			var toOpen = new Point16(i, j);
+			Point16 toOpen = new(i, j);
 			Point16 prevOpen = modPlayer.ViewingStorage();
 			if (prevOpen == toOpen)
 			{
 				modPlayer.CloseStorage();
-				Main.PlaySound(SoundID.MenuClose);
+				SoundEngine.PlaySound(SoundID.MenuClose);
 				lock (BlockRecipes.activeLock)
 				{
 					Recipe.FindRecipes();
@@ -106,7 +105,7 @@ namespace MagicStorage.Components
 				if (PlayerInput.GrappleAndInteractAreShared)
 					PlayerInput.Triggers.JustPressed.Grapple = false;
 				Main.recBigList = false;
-				Main.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
+				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
 				lock (BlockRecipes.activeLock)
 				{
 					Recipe.FindRecipes();
@@ -121,10 +120,10 @@ namespace MagicStorage.Components
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
-			var frame = new Rectangle(tile.frameX, tile.frameY, 16, 16);
+			Rectangle frame = new(tile.frameX, tile.frameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(lightColor, Color.White, Main.essScale);
-			spriteBatch.Draw(mod.GetTexture("Components/" + Name + "_Glow"), drawPos, frame, color);
+			spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/" + Name + "_Glow").Value, drawPos, frame, color);
 		}
 	}
 }

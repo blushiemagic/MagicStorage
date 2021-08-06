@@ -28,25 +28,23 @@ namespace MagicStorage.Edits.Detours
 
 				//Get the entities in the section.  Keep writing until the next entity written would make the size go over 65535
 				int startX = number;
-				int startY = (int) number2;
-				short width = (short) number3;
-				short height = (short) number4;
+				int startY = (int)number2;
+				short width = (short)number3;
+				short height = (short)number4;
 
-				var ids = new Queue<int>();
+				Queue<int> ids = new();
 
 				//Only process tile entities from Magic Storage
-				foreach (KeyValuePair<Point16, TileEntity> item in TileEntity.ByPosition)
-				{
-					Point16 pos = item.Key;
+				// TODO consider using ModTileEntity.ByPosition
+				foreach ((Point16 pos, TileEntity tileEntity) in TileEntity.ByPosition)
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
-						if (ModTileEntity.GetTileEntity(item.Value.type)?.mod == MagicStorage.Instance)
-							ids.Enqueue(item.Value.ID);
-				}
+						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
+							ids.Enqueue(tileEntity.ID);
 
-				var ms = new MemoryStream();
-				var ms2 = new MemoryStream();
-				var msWriter = new BinaryWriter(ms);
-				var msWriter2 = new BinaryWriter(ms2);
+				using MemoryStream ms = new();
+				using MemoryStream ms2 = new();
+				using BinaryWriter msWriter = new(ms);
+				using BinaryWriter msWriter2 = new(ms2);
 				int written = 0, total = 0, packetCount = 1;
 
 				while (ids.Count > 0)
@@ -63,11 +61,9 @@ namespace MagicStorage.Edits.Detours
 
 				msWriter.Flush();
 				msWriter.Close();
-				msWriter.Dispose();
 
 				msWriter2.Flush();
 				msWriter2.Close();
-				msWriter2.Dispose();
 			}
 		}
 
@@ -101,9 +97,9 @@ namespace MagicStorage.Edits.Detours
 
 				//Write the data before the "overflow"
 				//If this isn't the last packet, then the actual amount of entities written is "written - 1"
-				packet.Write((byte) MessageType.NetWorkaround);
-				packet.Write((ushort) (lastSend ? written : written - 1));
-				packet.Write(bytes, 0, (int) start);
+				packet.Write((byte)MessageType.NetWorkaround);
+				packet.Write((ushort)(lastSend ? written : written - 1));
+				packet.Write(bytes, 0, (int)start);
 
 				packet.Send(remoteClient, ignoreClient);
 
@@ -146,7 +142,7 @@ namespace MagicStorage.Edits.Detours
 			if (!lastSend)
 			{
 				//Copy over the new bytes
-				msWriter.Write(newBytes, 0, (int) (end - start));
+				msWriter.Write(newBytes, 0, (int)(end - start));
 
 				ms2.Position = 0;
 				ms2.SetLength(0);

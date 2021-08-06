@@ -8,26 +8,26 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.Russian, "Креативная Ячейка Хранилища");
-			DisplayName.AddTranslation(GameCulture.Polish, "Kreatywna Jednostka Magazynująca");
-			DisplayName.AddTranslation(GameCulture.French, "Unité de Stockage Créatif");
-			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento Creativa");
-			DisplayName.AddTranslation(GameCulture.Chinese, "创造储存单元");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Креативная Ячейка Хранилища");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Kreatywna Jednostka Magazynująca");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de Stockage Créatif");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento Creativa");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "创造储存单元");
 		}
 
 		public override void SetDefaults()
 		{
-			item.width = 26;
-			item.height = 26;
-			item.maxStack = 99;
-			item.useTurn = true;
-			item.autoReuse = true;
-			item.useAnimation = 15;
-			item.useTime = 10;
-			item.useStyle = ItemUseStyleID.SwingThrow;
-			item.consumable = true;
-			item.rare = ItemRarityID.White;
-			item.createTile = ModContent.TileType<Components.CreativeStorageUnit>();
+			Item.width = 26;
+			Item.height = 26;
+			Item.maxStack = 99;
+			Item.useTurn = true;
+			Item.autoReuse = true;
+			Item.useAnimation = 15;
+			Item.useTime = 10;
+			Item.useStyle = ItemUseStyleID.Swing;
+			Item.consumable = true;
+			Item.rare = ItemRarityID.White;
+			Item.createTile = ModContent.TileType<Components.CreativeStorageUnit>();
 		}
 	}
 }

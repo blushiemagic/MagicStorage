@@ -25,8 +25,8 @@ namespace MagicStorage.Components
 
 		public TEStorageHeart GetHeart()
 		{
-			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter)
-				return ((TEStorageCenter) ByPosition[center]).GetHeart();
+			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter entity)
+				return entity.GetHeart();
 			return null;
 		}
 
@@ -42,9 +42,9 @@ namespace MagicStorage.Components
 
 		public override TagCompound Save()
 		{
-			var tag = new TagCompound();
+			TagCompound tag = new();
 			tag.Set("Inactive", Inactive);
-			var tagCenter = new TagCompound();
+			TagCompound tagCenter = new();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
 			tag.Set("Center", tagCenter);
@@ -58,14 +58,14 @@ namespace MagicStorage.Components
 			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
+		public override void NetSend(BinaryWriter writer)
 		{
 			writer.Write(Inactive);
 			writer.Write(center.X);
 			writer.Write(center.Y);
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		public override void NetReceive(BinaryReader reader)
 		{
 			Inactive = reader.ReadBoolean();
 			center = new Point16(reader.ReadInt16(), reader.ReadInt16());

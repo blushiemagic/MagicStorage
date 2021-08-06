@@ -58,7 +58,7 @@ namespace MagicStorage.Components
 		{
 			get
 			{
-				var item = new Item();
+				Item item = new();
 				item.SetDefaults(id, true);
 				item.stack = item.maxStack;
 				return item;

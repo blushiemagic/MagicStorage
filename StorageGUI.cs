@@ -5,11 +5,15 @@ using MagicStorage.Components;
 using MagicStorage.Sorting;
 using MagicStorage.UI;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
+using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage
@@ -18,7 +22,7 @@ namespace MagicStorage
 	{
 		private const int padding = 4;
 		private const int numColumns = 10;
-		public const float inventoryScale = 0.85f;
+		private const float inventoryScale = 0.85f;
 		private const int startMaxRightClickTimer = 20;
 
 		public static MouseState curMouse;
@@ -31,30 +35,34 @@ namespace MagicStorage
 		private static float panelHeight;
 
 		private static UIElement topBar;
-		internal static UISearchBar searchBar;
+
+		// TODO consider Terraria's UISearchBar
+		internal static UI.UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		private static UIToggleButton favoritedOnlyButton;
+
 		internal static UITextPanel<LocalizedText> depositButton;
-		internal static UITextPanel<LocalizedText> restockButton;
+
 		private static UIElement topBar2;
 		private static UIButtonChoice filterButtons;
 
-		public static readonly ModSearchBox modSearchBox = new ModSearchBox(RefreshItems);
+		public static readonly ModSearchBox modSearchBox = new(RefreshItems);
 
-		private static readonly UISlotZone slotZone = new UISlotZone(HoverItemSlot, GetItem, inventoryScale);
+		private static readonly UISlotZone slotZone = new(HoverItemSlot, GetItem, inventoryScale);
 		private static int slotFocus = -1;
+
 		private static int rightClickTimer;
 		private static int maxRightClickTimer = startMaxRightClickTimer;
 
-		internal static UIScrollbar scrollBar = new UIScrollbar();
+		internal static UIScrollbar scrollBar = new();
 		private static bool scrollBarFocus;
 		private static int scrollBarFocusMouseStart;
 		private static float scrollBarFocusPositionStart;
 		private static readonly float scrollBarViewSize = 1f;
 		private static float scrollBarMaxViewSize = 2f;
 
-		private static readonly List<Item> items = new List<Item>();
-		private static readonly List<bool> didMatCheck = new List<bool>();
+		private static readonly List<Item> items = new();
+		private static readonly List<bool> didMatCheck = new();
 		private static int numRows;
 		private static int displayRows;
 
@@ -67,8 +75,8 @@ namespace MagicStorage
 		public static void Initialize()
 		{
 			InitLangStuff();
-			float itemSlotWidth = Main.inventoryBackTexture.Width * inventoryScale;
-			float itemSlotHeight = Main.inventoryBackTexture.Height * inventoryScale;
+			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * inventoryScale;
+			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * inventoryScale;
 
 			panelTop = Main.instance.invBottom + 60;
 			panelLeft = 20f;
@@ -94,6 +102,7 @@ namespace MagicStorage
 			favoritedOnlyButton.Left.Set(x, 0f);
 			topBar.Append(favoritedOnlyButton);
 
+			// TODO make this a new variable
 			x += favoritedOnlyButton.GetDimensions().Width + 2 * padding;
 
 			depositButton.Left.Set(x, 0f);
@@ -103,6 +112,7 @@ namespace MagicStorage
 			depositButton.PaddingBottom = 8f;
 			topBar.Append(depositButton);
 
+			// TODO also new variable
 			x += depositButton.GetDimensions().Width;
 
 			float depositButtonRight = x;
@@ -119,8 +129,8 @@ namespace MagicStorage
 
 			InitFilterButtons();
 
-			float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
 			topBar2.Append(filterButtons);
+			float filterButtonsRight = filterButtons.GetDimensions().Width + padding;
 
 			modSearchBox.Button.Left.Set(filterButtonsRight + padding, 0f);
 			modSearchBox.Button.Width.Set(-filterButtonsRight - 2 * padding, 1f);
@@ -134,7 +144,7 @@ namespace MagicStorage
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
-			displayRows = (int) slotZone.GetDimensions().Height / ((int) itemSlotHeight + padding);
+			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
 			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
@@ -170,13 +180,10 @@ namespace MagicStorage
 
 		private static void InitLangStuff()
 		{
-			if (depositButton == null)
-				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
-			if (searchBar == null)
-				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
+			depositButton ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
+			searchBar ??= new UI.UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), RefreshItems);
 			modSearchBox.InitLangStuff();
-			if (capacityText == null)
-				capacityText = new UIText("Items");
+			capacityText ??= new UIText("Items");
 		}
 
 		internal static void Unload()
@@ -188,16 +195,13 @@ namespace MagicStorage
 
 		private static void InitSortButtons()
 		{
-			if (sortButtons == null)
-				sortButtons = GUIHelpers.MakeSortButtons(RefreshItems);
-			if (favoritedOnlyButton == null)
-				favoritedOnlyButton = new UIToggleButton(RefreshItems, MagicStorage.Instance.GetTexture("Assets/FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+			sortButtons ??= GUIHelpers.MakeSortButtons(RefreshItems);
+			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, ModContent.Request<Texture2D>("Assets/FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 		}
 
 		private static void InitFilterButtons()
 		{
-			if (filterButtons == null)
-				filterButtons = GUIHelpers.MakeFilterButtons(true, RefreshItems);
+			filterButtons ??= GUIHelpers.MakeFilterButtons(true, RefreshItems);
 		}
 
 		public static void Update(GameTime gameTime)
@@ -216,19 +220,19 @@ namespace MagicStorage
 			else
 			{
 				scrollBarFocus = false;
+				scrollBar.ViewPosition = 0f;
 				ResetSlotFocus();
 			}
 		}
 
-		public static void Draw(TEStorageHeart heart)
+		public static void Draw()
 		{
 			Player player = Main.LocalPlayer;
-			player.GetModPlayer<StoragePlayer>();
 			Initialize();
 			if (Main.mouseX > panelLeft && Main.mouseX < panelLeft + panelWidth && Main.mouseY > panelTop && Main.mouseY < panelTop + panelHeight)
 			{
 				player.mouseInterface = true;
-				player.showItemIcon = false;
+				player.cursorItemIconEnabled = false;
 				InterfaceHelper.HideItemIconCache();
 			}
 
@@ -242,7 +246,7 @@ namespace MagicStorage
 
 		private static Item GetItem(int slot, ref int context)
 		{
-			int index = slot + numColumns * (int) Math.Round(scrollBar.ViewPosition);
+			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < items.Count ? items[index] : new Item();
 			if (!item.IsAir && !didMatCheck[index])
 			{
@@ -262,7 +266,7 @@ namespace MagicStorage
 			}
 
 			Rectangle dim = scrollBar.GetClippingRectangle(Main.spriteBatch);
-			var boxPos = new Vector2(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
+			Vector2 boxPos = new(dim.X, dim.Y + dim.Height * (scrollBar.ViewPosition / scrollBarMaxViewSize));
 			float boxWidth = 20f * Main.UIScale;
 			float boxHeight = dim.Height * (scrollBarViewSize / scrollBarMaxViewSize);
 			if (scrollBarFocus)
@@ -296,8 +300,9 @@ namespace MagicStorage
 
 		private static TEStorageHeart GetHeart()
 		{
+			// TODO can be one line expression body
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			return modPlayer.GetStorageHeart();
 		}
 
@@ -318,9 +323,9 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			var sortMode = (SortMode) sortButtons.Choice;
+			SortMode sortMode = (SortMode)sortButtons.Choice;
 
-			var filterMode = (FilterMode) filterButtons.Choice;
+			FilterMode filterMode = (FilterMode)filterButtons.Choice;
 			int modFilterIndex = modSearchBox.ModIndex;
 
 			void DoFiltering()
@@ -377,7 +382,7 @@ namespace MagicStorage
 					if (TryDepositAll(ctrlDown == MagicStorageConfig.QuickStackDepositMode))
 					{
 						RefreshItems();
-						Main.PlaySound(SoundID.Grab);
+						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				}
 				else if (CraftingGUI.RightMouseClicked)
@@ -385,7 +390,7 @@ namespace MagicStorage
 					if (TryRestock())
 					{
 						RefreshItems();
-						Main.PlaySound(SoundID.Grab);
+						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				}
 			}
@@ -416,7 +421,7 @@ namespace MagicStorage
 		{
 			Player player = Main.LocalPlayer;
 			int visualSlot = slot;
-			slot += numColumns * (int) Math.Round(scrollBar.ViewPosition);
+			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 			if (MouseClicked)
 			{
@@ -445,7 +450,7 @@ namespace MagicStorage
 							toWithdraw.stack = toWithdraw.maxStack;
 						Main.mouseItem = DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
 						if (ItemSlot.ShiftInUse)
-							Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, false, true);
+							Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
 						changed = true;
 					}
 				}
@@ -453,7 +458,7 @@ namespace MagicStorage
 				if (changed)
 				{
 					RefreshItems();
-					Main.PlaySound(SoundID.Grab);
+					SoundEngine.PlaySound(SoundID.Grab);
 				}
 			}
 
@@ -491,9 +496,9 @@ namespace MagicStorage
 						Main.mouseItem = result;
 					else
 						Main.mouseItem.stack += result.stack;
-					Main.soundInstanceMenuTick.Stop();
-					Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
-					Main.PlaySound(SoundID.MenuTick);
+					SoundEngine.LegacySoundPlayer.SoundInstanceMenuTick.Stop();
+					SoundEngine.LegacySoundPlayer.SoundInstanceMenuTick = SoundEngine.LegacySoundPlayer.SoundMenuTick.Value.CreateInstance();
+					SoundEngine.PlaySound(SoundID.MenuTick);
 					RefreshItems();
 				}
 

@@ -7,18 +7,21 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
+using MagicStorage.Components;
+using Terraria.ID;
+using Terraria.Audio;
 
 namespace MagicStorage
 {
 	public class StoragePlayer : ModPlayer
 	{
-		private readonly ItemTypeOrderedSet _craftedRecipes = new ItemTypeOrderedSet("CraftedRecipes");
+		private readonly ItemTypeOrderedSet _craftedRecipes = new("CraftedRecipes");
 
-		private readonly ItemTypeOrderedSet _hiddenRecipes = new ItemTypeOrderedSet("HiddenItems");
+		private readonly ItemTypeOrderedSet _hiddenRecipes = new("HiddenItems");
 
 		private TEStorageHeart _latestAccessedStorage;
 		public bool remoteAccess;
-		private Point16 storageAccess = new Point16(-1, -1);
+		private Point16 storageAccess = new(-1, -1);
 
 		public int timeSinceOpen = 1;
 
@@ -28,13 +31,13 @@ namespace MagicStorage
 
 		public IEnumerable<Item> CraftedRecipes => _craftedRecipes.Items;
 
-		public ItemTypeOrderedSet FavoritedRecipes { get; } = new ItemTypeOrderedSet("FavoritedRecipes");
+		public ItemTypeOrderedSet FavoritedRecipes { get; } = new("FavoritedRecipes");
 
-		public ItemTypeOrderedSet SeenRecipes { get; } = new ItemTypeOrderedSet("SeenRecipes");
+		public ItemTypeOrderedSet SeenRecipes { get; } = new("SeenRecipes");
 
-		public ItemTypeOrderedSet TestedRecipes { get; } = new ItemTypeOrderedSet("TestedRecipes");
+		public ItemTypeOrderedSet TestedRecipes { get; } = new("TestedRecipes");
 
-		public ItemTypeOrderedSet AsKnownRecipes { get; } = new ItemTypeOrderedSet("AsKnownRecipes");
+		public ItemTypeOrderedSet AsKnownRecipes { get; } = new("AsKnownRecipes");
 
 		public TEStorageHeart LatestAccessedStorage =>
 			_latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
@@ -49,7 +52,7 @@ namespace MagicStorage
 
 		public override TagCompound Save()
 		{
-			var c = new TagCompound();
+			TagCompound c = new();
 
 			_hiddenRecipes.Save(c);
 			_craftedRecipes.Save(c);
@@ -73,50 +76,43 @@ namespace MagicStorage
 
 		public override void UpdateDead()
 		{
-			if (player.whoAmI == Main.myPlayer)
+			if (Player.whoAmI == Main.myPlayer)
 				CloseStorage();
 		}
 
 		public override void ResetEffects()
 		{
-			if (player.whoAmI != Main.myPlayer)
+			if (Player.whoAmI != Main.myPlayer)
+			{
 				return;
+			}
 			if (timeSinceOpen < 1)
 			{
-				player.talkNPC = -1;
+				Player.SetTalkNPC(-1);
 				Main.playerInventory = true;
 				timeSinceOpen++;
 			}
-
-			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (player.chest != -1 || !Main.playerInventory || player.sign > -1 || player.talkNPC > -1))
+			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (Player.chest != -1 || !Main.playerInventory || Player.sign > -1 || Player.talkNPC > -1))
 			{
 				CloseStorage();
 				lock (BlockRecipes.activeLock)
-				{
-					Recipe.FindRecipes();
-				}
+				Recipe.FindRecipes();
 			}
 			else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
-				int playerX = (int) (player.Center.X / 16f);
-				int playerY = (int) (player.Center.Y / 16f);
-				if (!remoteAccess && (playerX < storageAccess.X - player.lastTileRangeX || playerX > storageAccess.X + player.lastTileRangeX + 1 || playerY < storageAccess.Y - player.lastTileRangeY || playerY > storageAccess.Y + player.lastTileRangeY + 1))
+				int playerX = (int)(Player.Center.X / 16f);
+				int playerY = (int)(Player.Center.Y / 16f);
+				if (!remoteAccess && (playerX < storageAccess.X - Player.lastTileRangeX || playerX > storageAccess.X + Player.lastTileRangeX + 1 || playerY < storageAccess.Y - Player.lastTileRangeY || playerY > storageAccess.Y + Player.lastTileRangeY + 1))
 				{
-					Main.PlaySound(SoundID.MenuClose);
+					SoundEngine.PlaySound(11, -1, -1, 1);
 					CloseStorage();
-					lock (BlockRecipes.activeLock)
-					{
-						Recipe.FindRecipes();
-					}
+					Recipe.FindRecipes();
 				}
 				else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess))
 				{
-					Main.PlaySound(SoundID.MenuClose);
+					SoundEngine.PlaySound(11, -1, -1, 1);
 					CloseStorage();
-					lock (BlockRecipes.activeLock)
-					{
-						Recipe.FindRecipes();
-					}
+					Recipe.FindRecipes();
 				}
 			}
 		}
@@ -159,7 +155,7 @@ namespace MagicStorage
 
 			if (!item.IsAir)
 			{
-				item = player.GetItem(Main.myPlayer, item, false, true);
+				item = player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
 				if (!item.IsAir)
 					player.QuickSpawnClonedItem(item, item.stack);
 			}
@@ -168,27 +164,30 @@ namespace MagicStorage
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
 		{
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
+			{
 				return false;
+			}
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			{
 				return false;
+			}
 			Item item = inventory[slot];
 			if (item.favorited || item.IsAir)
+			{
 				return false;
+			}
 			int oldType = item.type;
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
-				if (false)
+				if (Main.netMode == NetmodeID.SinglePlayer)
 				{
-					if (Main.netMode == NetmodeID.SinglePlayer)
-					{
-						GetCraftingAccess().TryDepositStation(item);
-					}
-					else
-					{
-						NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
-						item.SetDefaults(0, true);
-					}
+					GetCraftingAccess().TryDepositStation(item);
+				}
+				else
+				{
+					NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
+					item.SetDefaults(0, true);
 				}
 			}
 			else
@@ -203,13 +202,11 @@ namespace MagicStorage
 					item.SetDefaults(0, true);
 				}
 			}
-
 			if (item.type != oldType || item.stack != oldStack)
 			{
-				Main.PlaySound(SoundID.Grab);
+				SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
 				StorageGUI.RefreshItems();
 			}
-
 			return true;
 		}
 
@@ -244,7 +241,7 @@ namespace MagicStorage
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
 		{
-			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
+			foreach (Item item in Player.inventory.Concat(Player.armor).Concat(Player.dye).Concat(Player.miscDyes).Concat(Player.miscEquips))
 				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
 				{
 					damage *= 5;

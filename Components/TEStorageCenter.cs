@@ -7,15 +7,18 @@ namespace MagicStorage.Components
 {
 	public abstract class TEStorageCenter : TEStorageComponent
 	{
-		public List<Point16> storageUnits = new List<Point16>();
+		public List<Point16> storageUnits = new();
 
 		public void ResetAndSearch()
 		{
-			var oldStorageUnits = new List<Point16>(storageUnits);
+			List<Point16> oldStorageUnits = new(storageUnits);
 			storageUnits.Clear();
-			var hashStorageUnits = new HashSet<Point16>();
-			var explored = new HashSet<Point16> {Position};
-			var toExplore = new Queue<Point16>();
+			HashSet<Point16> hashStorageUnits = new();
+			HashSet<Point16> explored = new()
+			{
+				Position
+			};
+			Queue<Point16> toExplore = new();
 			foreach (Point16 point in AdjacentComponents())
 				toExplore.Enqueue(point);
 			bool changed = false;
@@ -26,9 +29,9 @@ namespace MagicStorage.Components
 				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
 				{
 					explored.Add(explore);
-					if (ByPosition.ContainsKey(explore) && ByPosition[explore] is TEAbstractStorageUnit)
+					if (ByPosition.ContainsKey(explore) && ByPosition[explore] is TEAbstractStorageUnit unit)
 					{
-						var storageUnit = (TEAbstractStorageUnit) ByPosition[explore];
+						TEAbstractStorageUnit storageUnit = unit;
 						if (storageUnit.Link(Position))
 						{
 							NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
@@ -50,7 +53,7 @@ namespace MagicStorage.Components
 					if (ByPosition.ContainsKey(oldStorageUnit) && ByPosition[oldStorageUnit] is TEAbstractStorageUnit)
 					{
 						TileEntity storageUnit = ByPosition[oldStorageUnit];
-						((TEAbstractStorageUnit) storageUnit).Unlink();
+						((TEAbstractStorageUnit)storageUnit).Unlink();
 						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 					}
 
@@ -74,7 +77,7 @@ namespace MagicStorage.Components
 		{
 			foreach (Point16 storageUnit in storageUnits)
 			{
-				var unit = (TEAbstractStorageUnit) ByPosition[storageUnit];
+				TEAbstractStorageUnit unit = (TEAbstractStorageUnit)ByPosition[storageUnit];
 				unit.Unlink();
 				NetHelper.SendTEUpdate(unit.ID, unit.Position);
 			}
@@ -86,11 +89,11 @@ namespace MagicStorage.Components
 
 		public override TagCompound Save()
 		{
-			var tag = new TagCompound();
-			var tagUnits = new List<TagCompound>();
+			TagCompound tag = new();
+			List<TagCompound> tagUnits = new();
 			foreach (Point16 storageUnit in storageUnits)
 			{
-				var tagUnit = new TagCompound();
+				TagCompound tagUnit = new();
 				tagUnit.Set("X", storageUnit.X);
 				tagUnit.Set("Y", storageUnit.Y);
 				tagUnits.Add(tagUnit);
@@ -106,9 +109,9 @@ namespace MagicStorage.Components
 				storageUnits.Add(new Point16(tagUnit.GetShort("X"), tagUnit.GetShort("Y")));
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
+		public override void NetSend(BinaryWriter writer)
 		{
-			writer.Write((short) storageUnits.Count);
+			writer.Write((short)storageUnits.Count);
 			foreach (Point16 storageUnit in storageUnits)
 			{
 				writer.Write(storageUnit.X);
@@ -116,7 +119,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		public override void NetReceive(BinaryReader reader)
 		{
 			int count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)

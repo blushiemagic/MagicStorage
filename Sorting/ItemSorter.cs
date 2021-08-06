@@ -28,85 +28,40 @@ namespace MagicStorage.Sorting
 
 		private static CompareFunction MakeSortFunction(SortMode sortMode)
 		{
-			CompareFunction func;
-			switch (sortMode)
+			CompareFunction func = sortMode switch
 			{
-				case SortMode.Default:
-					func = new CompareDefault();
-					break;
-				case SortMode.Id:
-					func = new CompareID();
-					break;
-				case SortMode.Name:
-					func = new CompareName();
-					break;
-				case SortMode.Value:
-					func = new CompareValue();
-					break;
-				case SortMode.Dps:
-					func = new CompareDps();
-					break;
-				default:
-					func = null;
-					break;
-			}
+				SortMode.Default => new CompareDefault(),
+				SortMode.Id      => new CompareID(),
+				SortMode.Name    => new CompareName(),
+				SortMode.Value   => new CompareValue(),
+				SortMode.Dps     => new CompareDps(),
+				_                => null
+			};
 
 			return func;
 		}
 
 		private static ItemFilter MakeFilter(FilterMode filterMode)
 		{
-			ItemFilter filter;
-			switch (filterMode)
+			ItemFilter filter = filterMode switch
 			{
-				case FilterMode.All:
-					filter = new FilterAll();
-					break;
-				case FilterMode.WeaponsMelee:
-					filter = new FilterWeaponMelee();
-					break;
-				case FilterMode.WeaponsRanged:
-					filter = new FilterWeaponRanged();
-					break;
-				case FilterMode.WeaponsMagic:
-					filter = new FilterWeaponMagic();
-					break;
-				case FilterMode.WeaponsSummon:
-					filter = new FilterWeaponSummon();
-					break;
-				case FilterMode.Ammo:
-					filter = new FilterAmmo();
-					break;
-				case FilterMode.WeaponsThrown:
-					filter = new FilterWeaponThrown();
-					break;
-				case FilterMode.Tools:
-					filter = new FilterTool();
-					break;
-				case FilterMode.Armor:
-					filter = new FilterArmor();
-					break;
-				case FilterMode.Vanity:
-					filter = new FilterVanity();
-					break;
-				case FilterMode.Equipment:
-					filter = new FilterEquipment();
-					break;
-				case FilterMode.Potions:
-					filter = new FilterPotion();
-					break;
-				case FilterMode.Placeables:
-					filter = new FilterPlaceable();
-					break;
-				case FilterMode.Misc:
-					filter = new FilterMisc();
-					break;
-				case FilterMode.Recent:
-					throw new NotSupportedException();
-				default:
-					filter = new FilterAll();
-					break;
-			}
+				FilterMode.All           => new FilterAll(),
+				FilterMode.WeaponsMelee  => new FilterWeaponMelee(),
+				FilterMode.WeaponsRanged => new FilterWeaponRanged(),
+				FilterMode.WeaponsMagic  => new FilterWeaponMagic(),
+				FilterMode.WeaponsSummon => new FilterWeaponSummon(),
+				FilterMode.Ammo          => new FilterAmmo(),
+				FilterMode.WeaponsThrown => new FilterWeaponThrown(),
+				FilterMode.Tools         => new FilterTool(),
+				FilterMode.Armor         => new FilterArmor(),
+				FilterMode.Vanity        => new FilterVanity(),
+				FilterMode.Equipment     => new FilterEquipment(),
+				FilterMode.Potions       => new FilterPotion(),
+				FilterMode.Placeables    => new FilterPlaceable(),
+				FilterMode.Misc          => new FilterMisc(),
+				FilterMode.Recent        => throw new NotSupportedException(),
+				_                        => new FilterAll()
+			};
 
 			return filter;
 		}
@@ -115,17 +70,17 @@ namespace MagicStorage.Sorting
 		{
 			if (filter.Trim().Length == 0)
 				filter = string.Empty;
-			return item.Name.ToLowerInvariant().IndexOf(filter.Trim().ToLowerInvariant(), StringComparison.Ordinal) >= 0;
+			return item.Name.ToLowerInvariant().Contains(filter.Trim().ToLowerInvariant());
 		}
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{
 			if (modFilterIndex == ModSearchBox.ModIndexAll)
 				return true;
-			Mod[] allMods = MagicStorage.Instance.AllMods;
+			Mod[] allMods = MagicStorage.AllMods;
 			int index = ModSearchBox.ModIndexBaseGame;
-			if (item.modItem != null)
-				index = Array.IndexOf(allMods, item.modItem.mod);
+			if (item.ModItem != null)
+				index = Array.IndexOf(allMods, item.ModItem.Mod);
 			return index == modFilterIndex;
 		}
 	}

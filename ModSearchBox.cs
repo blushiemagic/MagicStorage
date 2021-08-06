@@ -26,8 +26,7 @@ namespace MagicStorage
 
 		public void InitLangStuff()
 		{
-			if (_modButton == null)
-				_modButton = new UITextPanel<string>(MakeModButtonText(), 0.8f);
+			_modButton ??= new UITextPanel<string>(MakeModButtonText(), 0.8f);
 		}
 
 		private void SetSearchMod(int index, bool silent)
@@ -38,7 +37,7 @@ namespace MagicStorage
 			_modButton?.SetText(MakeModButtonText());
 			ModName = "";
 			if (index > -1)
-				ModName = MagicStorage.Instance.AllMods[index].Name;
+				ModName = MagicStorage.AllMods[index].Name;
 			if (!silent)
 				OnChanged?.Invoke();
 		}
@@ -50,15 +49,12 @@ namespace MagicStorage
 
 		private string MakeModButtonText()
 		{
-			switch (ModIndex)
+			return ModIndex switch
 			{
-				case ModIndexAll:
-					return "All mods";
-				case ModIndexBaseGame:
-					return "Terraria";
-				default:
-					return MagicStorage.Instance.AllMods[ModIndex].Name;
-			}
+				ModIndexAll      => "All mods",
+				ModIndexBaseGame => "Terraria",
+				_                => MagicStorage.AllMods[ModIndex].Name
+			};
 		}
 
 		public void Update(MouseState curMouse, MouseState oldMouse)
@@ -67,7 +63,7 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				_modButton.BackgroundColor = new Color(73, 94, 171);
-				Mod[] allMods = MagicStorage.Instance.AllMods;
+				Mod[] allMods = MagicStorage.AllMods;
 				int index = ModIndex;
 				if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
 				{

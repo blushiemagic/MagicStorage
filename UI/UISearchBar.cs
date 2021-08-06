@@ -4,8 +4,10 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using ReLogic.Graphics;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -16,13 +18,14 @@ namespace MagicStorage.UI
 	public class UISearchBar : UIElement
 	{
 		private const int padding = 4;
-		private static readonly List<UISearchBar> searchBars = new List<UISearchBar>();
+		private static readonly List<UISearchBar> searchBars = new();
 		private readonly Action _clearedEvent;
 		private readonly LocalizedText defaultText;
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
-		private static readonly Texture2D texture = ModContent.GetTexture("MagicStorage/Assets/SearchBar");
+		private static readonly Asset<Texture2D> textureAsset = ModContent.Request<Texture2D>("MagicStorage/Assets/SearchBar");
+		private static readonly Asset<DynamicSpriteFont> fontAsset = FontAssets.MouseText;
 
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
@@ -151,6 +154,7 @@ namespace MagicStorage.UI
 			CalculatedStyle dim = GetDimensions();
 			int innerWidth = (int) dim.Width - 2 * padding;
 			int innerHeight = (int) dim.Height - 2 * padding;
+			Texture2D texture = textureAsset.Value;
 			spriteBatch.Draw(texture, dim.Position(), new Rectangle(0, 0, padding, padding), Color.White);
 			spriteBatch.Draw(texture, new Rectangle((int) dim.X + padding, (int) dim.Y, innerWidth, padding), new Rectangle(padding, 0, 1, padding), Color.White);
 			spriteBatch.Draw(texture, new Vector2(dim.X + padding + innerWidth, dim.Y), new Rectangle(padding + 1, 0, padding, padding), Color.White);
@@ -163,7 +167,7 @@ namespace MagicStorage.UI
 
 			bool isEmpty = Text.Length == 0;
 			string drawText = isEmpty ? defaultText.Value : Text;
-			DynamicSpriteFont font = Main.fontMouseText;
+			DynamicSpriteFont font = fontAsset.Value;
 			Vector2 size = font.MeasureString(drawText);
 			float scale = innerHeight / size.Y;
 			if (isEmpty && hasFocus)

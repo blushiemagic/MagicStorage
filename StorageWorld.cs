@@ -8,9 +8,9 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
-	public class StorageWorld : ModWorld
+	public class StorageWorld : ModSystem
 	{
-		private const int saveVersion = 0;
+		private const int SaveVersion = 0;
 		public static bool kingSlimeDiamond;
 		public static bool boss1Diamond;
 		public static bool boss2Diamond;
@@ -25,9 +25,14 @@ namespace MagicStorage
 		public static bool fishronDiamond;
 		public static bool ancientCultistDiamond;
 		public static bool moonlordDiamond;
-		public static Dictionary<int, List<int>> TileToCreatingItem = new Dictionary<int, List<int>>();
 
-		public override void Initialize()
+		//New 1.4 bosses!
+		public static bool queenSlimeDiamond;
+		public static bool empressDiamond;
+
+		public static Dictionary<int, List<int>> TileToCreatingItem = new();
+
+		public override void OnWorldLoad()
 		{
 			kingSlimeDiamond = false;
 			boss1Diamond = false;
@@ -43,13 +48,15 @@ namespace MagicStorage
 			fishronDiamond = false;
 			ancientCultistDiamond = false;
 			moonlordDiamond = false;
+			queenSlimeDiamond = false;
+			empressDiamond = false;
 		}
 
-		public override TagCompound Save()
+		public override TagCompound SaveWorldData()
 		{
-			var tag = new TagCompound
+			TagCompound tag = new()
 			{
-				["saveVersion"] = saveVersion,
+				["saveVersion"] = SaveVersion,
 				["kingSlimeDiamond"] = kingSlimeDiamond,
 				["boss1Diamond"] = boss1Diamond,
 				["boss2Diamond"] = boss2Diamond,
@@ -63,12 +70,14 @@ namespace MagicStorage
 				["golemBossDiamond"] = golemBossDiamond,
 				["fishronDiamond"] = fishronDiamond,
 				["ancientCultistDiamond"] = ancientCultistDiamond,
-				["moonlordDiamond"] = moonlordDiamond
+				["moonlordDiamond"] = moonlordDiamond,
+				["queenSlimeDiamond"] = queenSlimeDiamond,
+				["empressDiamond"] = empressDiamond
 			};
 			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadWorldData(TagCompound tag)
 		{
 			kingSlimeDiamond = tag.GetBool("kingSlimeDiamond");
 			boss1Diamond = tag.GetBool("boss1Diamond");
@@ -84,70 +93,72 @@ namespace MagicStorage
 			fishronDiamond = tag.GetBool("fishronDiamond");
 			ancientCultistDiamond = tag.GetBool("ancientCultistDiamond");
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
+			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
+			empressDiamond = tag.GetBool("empressDiamond");
 
 			Volatile.Write(ref TileToCreatingItem, new Dictionary<int, List<int>>()); // used from threaded RefreshRecipes
 		}
 
-		public override void PostUpdate()
+		public override void PostUpdateWorld()
 		{
-			if (TileToCreatingItem.Count == 0)
-			{
-				#region Initialize TileToCreatingItem
+			if (TileToCreatingItem.Count != 0)
+				return;
 
-				Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((x, i) =>
+			#region Initialize TileToCreatingItem
+
+			Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((_, i) =>
+				{
+					Item item = new();
+					// provide items
+					try
 					{
-						var item = new Item();
-						// provide items
-						try
-						{
-							item.SetDefaults(i, true);
-						}
-						catch
-						{
-							return null;
-						}
-
-						return item;
-					}).Where(x => x?.type > 0 && x.createTile >= TileID.Dirt).Select(x =>
+						item.SetDefaults(i, true);
+					}
+					catch
 					{
-						// provide item and its tiles
-						var tiles = new List<int> {x.createTile};
-						switch (x.createTile)
-						{
-							case TileID.GlassKiln:
-							case TileID.Hellforge:
-								tiles.Add(TileID.Furnaces);
-								break;
-							case TileID.AdamantiteForge:
-								tiles.Add(TileID.Furnaces);
-								tiles.Add(TileID.Hellforge);
-								break;
-							case TileID.MythrilAnvil:
-								tiles.Add(TileID.Anvils);
-								break;
-							case TileID.BewitchingTable:
-							case TileID.Tables2:
-								tiles.Add(TileID.Tables);
-								break;
-							case TileID.AlchemyTable:
-								tiles.Add(TileID.Bottles);
-								tiles.Add(TileID.Tables);
-								break;
-						}
+						return null;
+					}
 
-						return new
-						{
-							item = x,
-							tiles
-						};
-					})
-					// flatten - tile, item
-					.SelectMany(x => x.tiles.Select(t => new {tile = t, x.item})).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
+					return item;
+				}).Where(i => i is not null).Where(x => x.type > ItemID.None && x.createTile >= TileID.Dirt).Select(x =>
+				{
+					// provide item and its tiles
+					List<int> tiles = new() { x.createTile };
+					switch (x.createTile)
+					{
+						case TileID.GlassKiln:
+						case TileID.Hellforge:
+							tiles.Add(TileID.Furnaces);
+							break;
+						case TileID.AdamantiteForge:
+							tiles.Add(TileID.Furnaces);
+							tiles.Add(TileID.Hellforge);
+							break;
+						case TileID.MythrilAnvil:
+							tiles.Add(TileID.Anvils);
+							break;
+						case TileID.BewitchingTable:
+						case TileID.Tables2:
+							tiles.Add(TileID.Tables);
+							break;
+						case TileID.AlchemyTable:
+							tiles.Add(TileID.Bottles);
+							tiles.Add(TileID.Tables);
+							break;
+					}
 
-				Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
+					return new
+					{
+						item = x,
+						tiles
+					};
+				})
+				// flatten - tile, item
+				.SelectMany(x => x.tiles.Select(t => new { tile = t, x.item })).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
 
-				#endregion
-			}
+			Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
+
+			#endregion
 		}
 	}
 }

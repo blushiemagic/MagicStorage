@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -12,34 +14,36 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Portable Remote Storage Access");
-			DisplayName.AddTranslation(GameCulture.Russian, "Портативный Модуль Удаленного Доступа к Хранилищу");
-			DisplayName.AddTranslation(GameCulture.Chinese, "便携式远程存储装置");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Портативный Модуль Удаленного Доступа к Хранилищу");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "便携式远程存储装置");
 
 			Tooltip.SetDefault("<right> Storage Heart to store location" + "\nCurrently not set to any location" + "\nUse item to access your storage");
-			Tooltip.AddTranslation(GameCulture.Russian, "<right> по Cердцу Хранилища чтобы запомнить его местоположение" + "\nВ данный момент Сердце Хранилища не привязанно" + "\nИспользуйте что бы получить доступ к вашему Хранилищу");
-			Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "<right> по Cердцу Хранилища чтобы запомнить его местоположение" + "\nВ данный момент Сердце Хранилища не привязанно" + "\nИспользуйте что бы получить доступ к вашему Хранилищу");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
+
+			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 
 		public override void SetDefaults()
 		{
-			item.width = 28;
-			item.height = 28;
-			item.maxStack = 1;
-			item.rare = ItemRarityID.Purple;
-			item.useStyle = ItemUseStyleID.SwingThrow;
-			item.useAnimation = 28;
-			item.useTime = 28;
-			item.value = Item.sellPrice(0, 10);
+			Item.width = 28;
+			Item.height = 28;
+			Item.maxStack = 1;
+			Item.rare = ItemRarityID.Purple;
+			Item.useStyle = ItemUseStyleID.Swing;
+			Item.useAnimation = 28;
+			Item.useTime = 28;
+			Item.value = Item.sellPrice(0, 10);
 		}
 
-		public override bool UseItem(Player player)
+		public override bool? UseItem(Player player)
 		{
 			if (player.whoAmI == Main.myPlayer)
 			{
 				if (location.X >= 0 && location.Y >= 0)
 				{
 					Tile tile = Main.tile[location.X, location.Y];
-					if (!tile.active() || tile.type != ModContent.TileType<Components.StorageHeart>() || tile.frameX != 0 || tile.frameY != 0)
+					if (!tile.IsActive || tile.type != ModContent.TileType<Components.StorageHeart>() || tile.frameX != 0 || tile.frameY != 0)
 						Main.NewText("Storage Heart is missing!");
 					else
 						OpenStorage(player);
@@ -55,10 +59,10 @@ namespace MagicStorage.Items
 
 		private void OpenStorage(Player player)
 		{
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1)
 			{
-				Main.PlaySound(SoundID.MenuClose);
+				SoundEngine.PlaySound(11);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
@@ -66,7 +70,7 @@ namespace MagicStorage.Items
 
 			if (Main.editChest)
 			{
-				Main.PlaySound(SoundID.MenuTick);
+				SoundEngine.PlaySound(SoundID.MenuTick);
 				Main.editChest = false;
 				Main.npcChatText = string.Empty;
 			}
@@ -79,7 +83,7 @@ namespace MagicStorage.Items
 
 			if (player.talkNPC > -1)
 			{
-				player.talkNPC = -1;
+				player.SetTalkNPC(-1);
 				Main.npcChatCornerItem = 0;
 				Main.npcChatText = string.Empty;
 			}
@@ -92,7 +96,7 @@ namespace MagicStorage.Items
 			if (prevOpen == toOpen)
 			{
 				modPlayer.CloseStorage();
-				Main.PlaySound(SoundID.MenuClose);
+				SoundEngine.PlaySound(11);
 				lock (BlockRecipes.activeLock)
 				{
 					Recipe.FindRecipes();
@@ -105,7 +109,7 @@ namespace MagicStorage.Items
 				modPlayer.timeSinceOpen = 0;
 				Main.playerInventory = true;
 				Main.recBigList = false;
-				Main.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
+				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
 				lock (BlockRecipes.activeLock)
 				{
 					Recipe.FindRecipes();
@@ -130,39 +134,23 @@ namespace MagicStorage.Items
 
 		public override void AddRecipes()
 		{
-			var recipe = new ModRecipe(mod);
-			recipe.AddIngredient(mod, "LocatorDisk");
-			recipe.AddIngredient(mod, "RadiantJewel");
+			Recipe recipe = CreateRecipe();
+			recipe.AddIngredient(Mod, "LocatorDisk");
+			recipe.AddIngredient(Mod, "RadiantJewel");
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			recipe.AddIngredient(ItemID.Ruby, 7);
+			recipe.AddIngredient(ItemID.Ruby, 3);
 			recipe.AddTile(TileID.LunarCraftingStation);
-			recipe.SetResult(this);
-			recipe.AddRecipe();
+			recipe.Register();
 
-			Mod otherMod = MagicStorage.bluemagicMod;
-			if (otherMod != null)
+			if (ModLoader.TryGetMod("CalamityMod", out Mod otherMod))
 			{
-				recipe = new ModRecipe(mod);
-				recipe.AddIngredient(mod, "LocatorDisk");
-				recipe.AddIngredient(otherMod, "InfinityCrystal");
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 7);
-				recipe.AddTile(otherMod, "PuriumAnvil");
-				recipe.SetResult(this);
-				recipe.AddRecipe();
-			}
-
-			otherMod = ModLoader.GetMod("CalamityMod");
-			if (otherMod != null)
-			{
-				recipe = new ModRecipe(mod);
-				recipe.AddIngredient(mod, "LocatorDisk");
+				recipe = CreateRecipe();
+				recipe.AddIngredient(Mod, "LocatorDisk");
 				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 7);
+				recipe.AddIngredient(ItemID.Ruby, 3);
 				recipe.AddTile(TileID.LunarCraftingStation);
-				recipe.SetResult(this);
-				recipe.AddRecipe();
+				recipe.Register();
 			}
 		}
 	}

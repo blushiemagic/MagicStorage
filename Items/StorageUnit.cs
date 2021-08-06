@@ -1,4 +1,5 @@
 ﻿using Terraria;
+using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -9,46 +10,46 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.Russian, "Ячейка Хранилища");
-			DisplayName.AddTranslation(GameCulture.Polish, "Jednostka magazynująca");
-			DisplayName.AddTranslation(GameCulture.French, "Unité de stockage");
-			DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento");
-			DisplayName.AddTranslation(GameCulture.Chinese, "存储单元");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Ячейка Хранилища");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元");
+
+			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 30;
 		}
 
 		public override void SetDefaults()
 		{
-			item.width = 26;
-			item.height = 26;
-			item.maxStack = 99;
-			item.useTurn = true;
-			item.autoReuse = true;
-			item.useAnimation = 15;
-			item.useTime = 10;
-			item.useStyle = ItemUseStyleID.SwingThrow;
-			item.consumable = true;
-			item.rare = ItemRarityID.White;
-			item.value = Item.sellPrice(0, 0, 6);
-			item.createTile = ModContent.TileType<Components.StorageUnit>();
+			Item.width = 26;
+			Item.height = 26;
+			Item.maxStack = 99;
+			Item.useTurn = true;
+			Item.autoReuse = true;
+			Item.useAnimation = 15;
+			Item.useTime = 10;
+			Item.useStyle = ItemUseStyleID.Swing;
+			Item.consumable = true;
+			Item.rare = ItemRarityID.White;
+			Item.value = Item.sellPrice(0, 0, 6);
+			Item.createTile = ModContent.TileType<Components.StorageUnit>();
 		}
 
 		public override void AddRecipes()
 		{
-			var recipe = new ModRecipe(mod);
+			Recipe recipe = CreateRecipe();
 			recipe.AddIngredient(ModContent.ItemType<StorageComponent>());
 			recipe.AddRecipeGroup("MagicStorage:AnyChest");
 			recipe.AddIngredient(ItemID.SilverBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
-			recipe.SetResult(this);
-			recipe.AddRecipe();
+			recipe.Register();
 
-			recipe = new ModRecipe(mod);
+			recipe = CreateRecipe();
 			recipe.AddIngredient(ModContent.ItemType<StorageComponent>());
 			recipe.AddRecipeGroup("MagicStorage:AnyChest");
 			recipe.AddIngredient(ItemID.TungstenBar, 10);
 			recipe.AddTile(TileID.WorkBenches);
-			recipe.SetResult(this);
-			recipe.AddRecipe();
+			recipe.Register();
 		}
 	}
 }

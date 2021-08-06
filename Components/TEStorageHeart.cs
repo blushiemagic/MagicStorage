@@ -12,10 +12,10 @@ namespace MagicStorage.Components
 {
 	public class TEStorageHeart : TEStorageCenter
 	{
-		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new ItemTypeOrderedSet("UniqueItemsPutHistory");
-		private readonly ReaderWriterLockSlim itemsLock = new ReaderWriterLockSlim();
+		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
+		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
-		public List<Point16> remoteAccesses = new List<Point16>();
+		public List<Point16> remoteAccesses = new();
 		private int updateTimer = 60;
 
 		public bool IsAlive { get; private set; } = true;
@@ -33,7 +33,7 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.ContainsKey(remoteAccess) && ByPosition[remoteAccess] is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess) ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.ContainsKey(storageUnit) && ByPosition[storageUnit] is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit) ByPosition[storageUnit]);
+			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.ContainsKey(remoteAccess) && ByPosition[remoteAccess] is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess)ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.ContainsKey(storageUnit) && ByPosition[storageUnit] is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit)ByPosition[storageUnit]);
 		}
 
 		public IEnumerable<Item> GetStoredItems()
@@ -64,7 +64,7 @@ namespace MagicStorage.Components
 		public override void Update()
 		{
 			for (int k = 0; k < remoteAccesses.Count; k++)
-				if (!ByPosition.ContainsKey(remoteAccesses[k]) || !(ByPosition[remoteAccesses[k]] is TERemoteAccess))
+				if (!ByPosition.ContainsKey(remoteAccesses[k]) || ByPosition[remoteAccesses[k]] is not TERemoteAccess)
 				{
 					remoteAccesses.RemoveAt(k);
 					k--;
@@ -106,7 +106,7 @@ namespace MagicStorage.Components
 			TEStorageUnit inactiveUnit = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
+				if (abstractStorageUnit is not TEStorageUnit storageUnit)
 					continue;
 				if (storageUnit.Inactive && !storageUnit.IsEmpty)
 					inactiveUnit = storageUnit;
@@ -120,7 +120,7 @@ namespace MagicStorage.Components
 
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit storageUnit) || storageUnit.Inactive)
+				if (abstractStorageUnit is not TEStorageUnit storageUnit || storageUnit.Inactive)
 					continue;
 				if (storageUnit.IsEmpty && inactiveUnit.NumItems <= storageUnit.Capacity)
 				{
@@ -135,7 +135,7 @@ namespace MagicStorage.Components
 			Item tryMove = inactiveUnit.WithdrawStack();
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit storageUnit) || storageUnit.Inactive)
+				if (abstractStorageUnit is not TEStorageUnit storageUnit || storageUnit.Inactive)
 					continue;
 				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir)
 				{
@@ -162,7 +162,7 @@ namespace MagicStorage.Components
 			TEStorageUnit emptyUnit = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
+				if (abstractStorageUnit is not TEStorageUnit storageUnit)
 					continue;
 				if (emptyUnit is null && storageUnit.IsEmpty && !storageUnit.Inactive)
 				{
@@ -186,7 +186,7 @@ namespace MagicStorage.Components
 			TEStorageUnit unitWithSpace = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
-				if (!(abstractStorageUnit is TEStorageUnit storageUnit))
+				if (abstractStorageUnit is not TEStorageUnit storageUnit)
 					continue;
 				if (unitWithSpace is null && !storageUnit.IsFull && !storageUnit.Inactive)
 				{
@@ -267,7 +267,7 @@ namespace MagicStorage.Components
 				EnterWriteLock();
 			try
 			{
-				var result = new Item();
+				Item result = new();
 				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits().Reverse())
 					if (storageUnit.HasItem(lookFor, true))
 					{
@@ -318,10 +318,10 @@ namespace MagicStorage.Components
 		public override TagCompound Save()
 		{
 			TagCompound tag = base.Save();
-			var tagRemotes = new List<TagCompound>();
+			List<TagCompound> tagRemotes = new();
 			foreach (Point16 remoteAccess in remoteAccesses)
 			{
-				var tagRemote = new TagCompound();
+				TagCompound tagRemote = new();
 				tagRemote.Set("X", remoteAccess.X);
 				tagRemote.Set("Y", remoteAccess.Y);
 				tagRemotes.Add(tagRemote);
@@ -340,10 +340,10 @@ namespace MagicStorage.Components
 			_uniqueItemsPutHistory.Load(tag);
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
+		public override void NetSend(BinaryWriter writer)
 		{
-			base.NetSend(writer, lightSend);
-			writer.Write((short) remoteAccesses.Count);
+			base.NetSend(writer);
+			writer.Write((short)remoteAccesses.Count);
 			foreach (Point16 remoteAccess in remoteAccesses)
 			{
 				writer.Write(remoteAccess.X);
@@ -351,9 +351,9 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		public override void NetReceive(BinaryReader reader)
 		{
-			base.NetReceive(reader, lightReceive);
+			base.NetReceive(reader);
 			int count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)
 				remoteAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));

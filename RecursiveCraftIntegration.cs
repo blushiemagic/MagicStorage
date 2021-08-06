@@ -69,7 +69,7 @@ namespace MagicStorage
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
-				var item = new Item();
+				Item item = new();
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
@@ -81,7 +81,7 @@ namespace MagicStorage
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
 		{
-			var dictionary = new Dictionary<int, int>();
+			Dictionary<int, int> dictionary = new();
 			foreach (Item item in items)
 				if (dictionary.ContainsKey(item.type))
 					dictionary[item.type] += item.stack;
@@ -120,7 +120,7 @@ namespace MagicStorage
 		private static Dictionary<int, int> GetStoredItems()
 		{
 			Player player = Main.LocalPlayer;
-			var modPlayer = player.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
 			if (heart == null)
 				return null;

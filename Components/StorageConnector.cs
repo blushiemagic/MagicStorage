@@ -10,33 +10,36 @@ namespace MagicStorage.Components
 {
 	public class StorageConnector : ModTile
 	{
-		public override void SetDefaults()
+		public override void SetStaticDefaults()
 		{
 			Main.tileSolid[Type] = false;
 			TileObjectData.newTile.Width = 1;
 			TileObjectData.newTile.Height = 1;
 			TileObjectData.newTile.Origin = new Point16(0, 0);
-			TileObjectData.newTile.CoordinateHeights = new[] {16};
+			TileObjectData.newTile.CoordinateHeights = new[] { 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
-			TileObjectData.newTile.HookCheck = new PlacementHook(CanPlace, -1, 0, true);
+			TileObjectData.newTile.HookCheckIfCanPlace = new PlacementHook(CanPlace, -1, 0, true);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			ModTranslation text = CreateMapEntryName();
 			text.SetDefault("Magic Storage");
 			AddMapEntry(new Color(153, 107, 61), text);
-			dustType = 7;
-			drop = ModContent.ItemType<Items.StorageConnector>();
+			DustType = 7;
+			ItemDrop = ModContent.ItemType<Items.StorageConnector>();
 		}
 
-		public int CanPlace(int i, int j, int type, int style, int direction)
+		public static int CanPlace(int i, int j, int type, int style, int direction, int alternative)
 		{
 			int count = 0;
 
-			var startSearch = new Point16(i, j);
-			var explored = new HashSet<Point16> {startSearch};
-			var toExplore = new Queue<Point16>();
+			Point16 startSearch = new(i, j);
+			HashSet<Point16> explored = new()
+			{
+				startSearch
+			};
+			Queue<Point16> toExplore = new();
 			foreach (Point16 point in TEStorageComponent.AdjacentComponents(startSearch))
 				toExplore.Enqueue(point);
 
@@ -61,11 +64,11 @@ namespace MagicStorage.Components
 			return count;
 		}
 
-		public static int Hook_AfterPlacement(int i, int j, int type, int style, int direction)
+		public static int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternative)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				NetMessage.SendTileRange(Main.myPlayer, i, j, 1, 1);
+				NetMessage.SendTileSquare(Main.myPlayer, i, j, 1, 1);
 				NetHelper.SendSearchAndRefresh(i, j);
 				return 0;
 			}
@@ -78,16 +81,16 @@ namespace MagicStorage.Components
 		{
 			int frameX = 0;
 			int frameY = 0;
-			if (WorldGen.InWorld(i - 1, j) && Main.tile[i - 1, j].active() && Main.tile[i - 1, j].type == Type)
+			if (WorldGen.InWorld(i - 1, j) && Main.tile[i - 1, j].IsActive && Main.tile[i - 1, j].type == Type)
 				frameX += 18;
-			if (WorldGen.InWorld(i + 1, j) && Main.tile[i + 1, j].active() && Main.tile[i + 1, j].type == Type)
+			if (WorldGen.InWorld(i + 1, j) && Main.tile[i + 1, j].IsActive && Main.tile[i + 1, j].type == Type)
 				frameX += 36;
-			if (WorldGen.InWorld(i, j - 1) && Main.tile[i, j - 1].active() && Main.tile[i, j - 1].type == Type)
+			if (WorldGen.InWorld(i, j - 1) && Main.tile[i, j - 1].IsActive && Main.tile[i, j - 1].type == Type)
 				frameY += 18;
-			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].active() && Main.tile[i, j + 1].type == Type)
+			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].IsActive && Main.tile[i, j + 1].type == Type)
 				frameY += 36;
-			Main.tile[i, j].frameX = (short) frameX;
-			Main.tile[i, j].frameY = (short) frameY;
+			Main.tile[i, j].frameX = (short)frameX;
+			Main.tile[i, j].frameY = (short)frameY;
 			return false;
 		}
 

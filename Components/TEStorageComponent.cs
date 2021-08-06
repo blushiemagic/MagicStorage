@@ -31,12 +31,12 @@ namespace MagicStorage.Components
 		public override bool ValidTile(int i, int j)
 		{
 			Tile tile = Main.tile[i, j];
-			return tile.active() && ValidTile(tile);
+			return tile.IsActive && ValidTile(tile);
 		}
 
 		public abstract bool ValidTile(Tile tile);
 
-		public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction)
+		public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternative)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -45,15 +45,15 @@ namespace MagicStorage.Components
 			}
 
 			int id = Place(i - 1, j - 1);
-			((TEStorageComponent) ByID[id]).OnPlace();
+			((TEStorageComponent)ByID[id]).OnPlace();
 			return id;
 		}
 
-		public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction)
+		public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction, int alternative)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				NetMessage.SendTileRange(Main.myPlayer, i - 1, j - 1, 2, 2);
+				NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 2, 2);
 				NetHelper.SendSearchAndRefresh(i - 1, j - 1);
 				return 0;
 			}
@@ -79,14 +79,14 @@ namespace MagicStorage.Components
 
 		public static IEnumerable<Point16> AdjacentComponents(Point16 point)
 		{
-			var points = new List<Point16>();
+			List<Point16> points = new();
 			bool isConnector = Main.tile[point.X, point.Y].type == ModContent.TileType<StorageConnector>();
 			foreach (Point16 add in isConnector ? checkNeighbors1x1 : checkNeighbors)
 			{
 				int checkX = point.X + add.X;
 				int checkY = point.Y + add.Y;
 				Tile tile = Main.tile[checkX, checkY];
-				if (!tile.active())
+				if (!tile.IsActive)
 					continue;
 				if (TileLoader.GetTile(tile.type) is StorageComponent)
 				{
@@ -94,13 +94,13 @@ namespace MagicStorage.Components
 						checkX--;
 					if (tile.frameY % 36 == 18)
 						checkY--;
-					var check = new Point16(checkX, checkY);
+					Point16 check = new(checkX, checkY);
 					if (!points.Contains(check))
 						points.Add(check);
 				}
 				else if (tile.type == ModContent.TileType<StorageConnector>())
 				{
-					var check = new Point16(checkX, checkY);
+					Point16 check = new(checkX, checkY);
 					if (!points.Contains(check))
 						points.Add(check);
 				}
@@ -111,8 +111,11 @@ namespace MagicStorage.Components
 
 		public static Point16 FindStorageCenter(Point16 startSearch)
 		{
-			var explored = new HashSet<Point16> {startSearch};
-			var toExplore = new Queue<Point16>();
+			HashSet<Point16> explored = new()
+			{
+				startSearch
+			};
+			Queue<Point16> toExplore = new();
 			foreach (Point16 point in AdjacentComponents(startSearch))
 				toExplore.Enqueue(point);
 
@@ -143,7 +146,7 @@ namespace MagicStorage.Components
 			Point16 center = FindStorageCenter(position);
 			if (center.X >= 0 && center.Y >= 0)
 			{
-				var centerEnt = (TEStorageCenter) ByPosition[center];
+				TEStorageCenter centerEnt = (TEStorageCenter)ByPosition[center];
 				centerEnt.ResetAndSearch();
 			}
 		}

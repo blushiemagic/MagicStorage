@@ -9,7 +9,7 @@ namespace MagicStorage.Components
 	public class TERemoteAccess : TEStorageCenter
 	{
 		private bool _loaded;
-		private Point16 locator = new Point16(-1, -1);
+		private Point16 locator = new(-1, -1);
 
 		internal bool Loaded
 		{
@@ -71,7 +71,7 @@ namespace MagicStorage.Components
 		public override TagCompound Save()
 		{
 			TagCompound tag = base.Save();
-			var tagLocator = new TagCompound();
+			TagCompound tagLocator = new();
 			tagLocator.Set("X", locator.X);
 			tagLocator.Set("Y", locator.Y);
 			tag.Set("Locator", tagLocator);
@@ -85,16 +85,16 @@ namespace MagicStorage.Components
 			locator = new Point16(tagLocator.GetShort("X"), tagLocator.GetShort("Y"));
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
+		public override void NetSend(BinaryWriter writer)
 		{
-			base.NetSend(writer, lightSend);
+			base.NetSend(writer);
 			writer.Write(locator.X);
 			writer.Write(locator.Y);
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		public override void NetReceive(BinaryReader reader)
 		{
-			base.NetReceive(reader, lightReceive);
+			base.NetReceive(reader);
 			locator = new Point16(reader.ReadInt16(), reader.ReadInt16());
 		}
 	}

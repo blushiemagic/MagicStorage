@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
@@ -17,10 +18,10 @@ namespace MagicStorage.Sorting
 
 	public static class SortClassList
 	{
-		private static readonly bool initialized = false;
-		private static readonly List<DefaultSortClass> classes = new List<DefaultSortClass>();
+		private static bool initialized;
+		private static readonly List<DefaultSortClass> classes = new();
 
-		private static readonly CompareDps _dps = new CompareDps();
+		private static readonly CompareDps _dps = new();
 
 		public static int Compare(Item item1, Item item2)
 		{
@@ -86,18 +87,19 @@ namespace MagicStorage.Sorting
 			classes.Add(new DefaultSortClass(Misc, CompareMisc));
 			classes.Add(new DefaultSortClass(FrameImportantTile, CompareName));
 			classes.Add(new DefaultSortClass(CommonTile, CompareName));
+
+			initialized = true;
 		}
 
-		private static bool MeleeWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.melee && item.pick < 1 && item.hammer < 1 && item.axe < 1;
+		private static bool MeleeWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Melee) && item.pick < 1 && item.hammer < 1 && item.axe < 1;
 
-		private static bool RangedWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.ranged;
+		private static bool RangedWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Ranged);
 
-		private static bool MagicWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.magic;
+		private static bool MagicWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Magic);
 
-		private static bool SummonWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.summon;
+		private static bool SummonWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.CountsAsClass(DamageClass.Summon);
 
-		private static bool ThrownWeapon(Item item) =>
-			item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.thrown;
+		private static bool ThrownWeapon(Item item) => item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.CountsAsClass(DamageClass.Throwing);
 
 		private static bool Weapon(Item item) => item.damage > 0 && item.ammo == 0 && item.pick == 0 && item.axe == 0 && item.hammer == 0;
 
@@ -195,8 +197,7 @@ namespace MagicStorage.Sorting
 
 		private static int CompareHammer(Item item1, Item item2) => item1.hammer - item2.hammer;
 
-		private static int CompareTerraformingPriority(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityTerraforming[item1.type] - ItemID.Sets.SortingPriorityTerraforming[item2.type];
+		private static int CompareTerraformingPriority(Item item1, Item item2) => ItemID.Sets.SortingPriorityTerraforming[item1.type] - ItemID.Sets.SortingPriorityTerraforming[item2.type];
 
 		private static int CompareAccessory(Item item1, Item item2)
 		{
@@ -234,8 +235,7 @@ namespace MagicStorage.Sorting
 			return result;
 		}
 
-		private static int CompareBossSpawn(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityBossSpawns[item1.type] - ItemID.Sets.SortingPriorityBossSpawns[item2.type];
+		private static int CompareBossSpawn(Item item1, Item item2) => ItemID.Sets.SortingPriorityBossSpawns[item1.type] - ItemID.Sets.SortingPriorityBossSpawns[item2.type];
 
 		private static int ComparePainting(Item item1, Item item2)
 		{
@@ -253,14 +253,11 @@ namespace MagicStorage.Sorting
 			return result;
 		}
 
-		private static int CompareMaterial(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityMaterials[item2.type] - ItemID.Sets.SortingPriorityMaterials[item1.type];
+		private static int CompareMaterial(Item item1, Item item2) => ItemID.Sets.SortingPriorityMaterials[item2.type] - ItemID.Sets.SortingPriorityMaterials[item1.type];
 
-		private static int CompareRope(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityRopes[item2.type] - ItemID.Sets.SortingPriorityRopes[item1.type];
+		private static int CompareRope(Item item1, Item item2) => ItemID.Sets.SortingPriorityRopes[item2.type] - ItemID.Sets.SortingPriorityRopes[item1.type];
 
-		private static int CompareExtractible(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityExtractibles[item2.type] - ItemID.Sets.SortingPriorityExtractibles[item1.type];
+		private static int CompareExtractible(Item item1, Item item2) => ItemID.Sets.SortingPriorityExtractibles[item2.type] - ItemID.Sets.SortingPriorityExtractibles[item1.type];
 
 		public static int CompareMisc(Item item1, Item item2)
 		{
@@ -275,8 +272,8 @@ namespace MagicStorage.Sorting
 
 	public class DefaultSortClass
 	{
-		private readonly Func<Item, Item, int> compareFunc;
 		private readonly Func<Item, bool> passFunc;
+		private readonly Func<Item, Item, int> compareFunc;
 
 		public DefaultSortClass(Func<Item, bool> passFunc, Func<Item, Item, int> compareFunc)
 		{

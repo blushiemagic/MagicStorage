@@ -1,8 +1,10 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.UI
@@ -12,12 +14,14 @@ namespace MagicStorage.UI
 		private readonly Action _onChanged;
 		private readonly int buttonPadding;
 
-		private readonly Texture2D[] buttons;
+		private readonly Asset<Texture2D>[] buttons;
 		private readonly int buttonSize;
 
 		private readonly LocalizedText[] names;
+		private static readonly Asset<Texture2D> backTexture = ModContent.Request<Texture2D>("Assets/SortButtonBackground");
+		private static readonly Asset<Texture2D> backTextureActive = ModContent.Request<Texture2D>("Assets/SortButtonBackgroundActive");
 
-		public UIButtonChoice(Action onChanged, Texture2D[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
+		public UIButtonChoice(Action onChanged, Asset<Texture2D>[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
 				throw new ArgumentException();
@@ -63,16 +67,14 @@ namespace MagicStorage.UI
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			Texture2D backTexture = MagicStorage.Instance.GetTexture("Assets/SortButtonBackground");
-			Texture2D backTextureActive = MagicStorage.Instance.GetTexture("Assets/SortButtonBackgroundActive");
 			CalculatedStyle dim = GetDimensions();
 			for (int k = 0; k < buttons.Length; k++)
 			{
-				Texture2D texture = k == Choice ? backTextureActive : backTexture;
-				var drawPos = new Vector2(dim.X + k * (buttonSize + buttonPadding), dim.Y);
+				Asset<Texture2D> texture = k == Choice ? backTextureActive : backTexture;
+				Vector2 drawPos = new(dim.X + k * (buttonSize + buttonPadding), dim.Y);
 				Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k) ? Color.Silver : Color.White;
-				Main.spriteBatch.Draw(texture, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
-				Main.spriteBatch.Draw(buttons[k], new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
+				Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
+				Main.spriteBatch.Draw(buttons[k].Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
 			}
 		}
 

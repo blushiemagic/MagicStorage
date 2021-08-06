@@ -7,7 +7,7 @@ namespace MagicStorage
 	public class BlockRecipes : GlobalRecipe
 	{
 		public static bool active = true;
-		public static object activeLock = new object();
+		public static object activeLock = new();
 
 		public override bool RecipeAvailable(Recipe recipe)
 		{
@@ -16,7 +16,7 @@ namespace MagicStorage
 			try
 			{
 				Player player = Main.LocalPlayer;
-				var modPlayer = player.GetModPlayer<StoragePlayer>();
+				StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 				Point16 storageAccess = modPlayer.ViewingStorage();
 				return storageAccess.X < 0 || storageAccess.Y < 0;
 			}

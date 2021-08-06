@@ -28,9 +28,11 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return;
+
 			foreach (Item station in stations)
 				if (station.type == item.type)
 					return;
+
 			for (int k = 0; k < stations.Length; k++)
 				if (stations[k].IsAir)
 				{
@@ -48,6 +50,7 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return new Item();
+
 			if (!stations[slot].IsAir)
 			{
 				Item item = stations[slot];
@@ -63,15 +66,15 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return new Item();
+
 			if (!item.IsAir)
 				for (int k = 0; k < stations.Length; k++)
 					if (k != slot && stations[k].type == item.type)
 						return item;
+
 			if ((item.IsAir || item.stack == 1) && !stations[slot].IsAir)
 			{
-				Item temp = item;
-				item = stations[slot];
-				stations[slot] = temp;
+				(item, stations[slot]) = (stations[slot], item);
 				NetHelper.SendTEUpdate(ID, Position);
 				return item;
 			}
@@ -92,7 +95,7 @@ namespace MagicStorage.Components
 
 		public override TagCompound Save()
 		{
-			var tag = new TagCompound
+			TagCompound tag = new()
 			{
 				["Stations"] = stations.Select(ItemIO.Save).ToList()
 			};
@@ -110,13 +113,13 @@ namespace MagicStorage.Components
 						stations[k] = new Item();
 		}
 
-		public override void NetSend(BinaryWriter writer, bool lightSend)
+		public override void NetSend(BinaryWriter writer)
 		{
 			foreach (Item item in stations)
 				ItemIO.Send(item, writer, true, true);
 		}
 
-		public override void NetReceive(BinaryReader reader, bool lightReceive)
+		public override void NetReceive(BinaryReader reader)
 		{
 			for (int k = 0; k < stations.Length; k++)
 				stations[k] = ItemIO.Receive(reader, true, true);

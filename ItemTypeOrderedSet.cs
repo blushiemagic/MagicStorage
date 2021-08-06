@@ -10,8 +10,8 @@ namespace MagicStorage
 	{
 		private const string Suffix = "~v2";
 		private readonly string _name;
-		private List<Item> _items = new List<Item>();
-		private HashSet<int> _set = new HashSet<int>();
+		private List<Item> _items = new();
+		private HashSet<int> _set = new();
 
 		public ItemTypeOrderedSet(string name)
 		{
@@ -26,7 +26,7 @@ namespace MagicStorage
 
 		public bool Add(int type)
 		{
-			var item = new Item();
+			Item item = new();
 			item.SetDefaults(type);
 			if (_set.Add(item.type))
 			{
@@ -96,7 +96,7 @@ namespace MagicStorage
 					{
 						if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
 							return null;
-						var item = new Item();
+						Item item = new();
 						item.SetDefaults(x);
 						item.type = x;
 						return item;

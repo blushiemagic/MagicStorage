@@ -10,22 +10,22 @@ namespace MagicStorage.Components
 {
 	public class StorageComponent : ModTile
 	{
-		public static Point16 killTile = new Point16(-1, -1);
+		public static Point16 killTile = new(-1, -1);
 
 		// Use StorageComponent_Highlight as the default highlight mask for subclasses
 		public override string HighlightTexture => typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight";
 
-		public override void SetDefaults()
+		public override void SetStaticDefaults()
 		{
 			Main.tileSolidTop[Type] = true;
 			Main.tileFrameImportant[Type] = true;
 			TileObjectData.newTile.Width = 2;
 			TileObjectData.newTile.Height = 2;
 			TileObjectData.newTile.Origin = new Point16(1, 1);
-			TileObjectData.newTile.CoordinateHeights = new[] {16, 16};
+			TileObjectData.newTile.CoordinateHeights = new[] { 16, 16 };
 			TileObjectData.newTile.CoordinateWidth = 16;
 			TileObjectData.newTile.CoordinatePadding = 2;
-			TileObjectData.newTile.HookCheck = new PlacementHook(CanPlace, -1, 0, true);
+			TileObjectData.newTile.HookCheckIfCanPlace = new PlacementHook(CanPlace, -1, 0, true);
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			ModifyObjectData();
 			ModTileEntity tileEntity = GetTileEntity();
@@ -37,8 +37,8 @@ namespace MagicStorage.Components
 			ModTranslation text = CreateMapEntryName();
 			text.SetDefault("Magic Storage");
 			AddMapEntry(new Color(153, 107, 61), text);
-			dustType = 7;
-			disableSmartCursor = true;
+			DustType = 7;
+			TileID.Sets.DisableSmartCursor[Type] = true;
 			TileID.Sets.HasOutlines[Type] = HasSmartInteract();
 		}
 
@@ -53,18 +53,18 @@ namespace MagicStorage.Components
 		public static bool IsStorageComponent(Point16 point)
 		{
 			Tile tile = Main.tile[point.X, point.Y];
-			return tile.active() && TileLoader.GetTile(tile.type) is StorageComponent;
+			return tile.IsActive && TileLoader.GetTile(tile.type) is StorageComponent;
 		}
 
-		public int CanPlace(int i, int j, int type, int style, int direction)
+		public int CanPlace(int i, int j, int type, int style, int direction, int alternative)
 		{
 			int count = 0;
 			if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
 				count++;
 
-			var startSearch = new Point16(i - 1, j - 1);
-			var explored = new HashSet<Point16> {startSearch};
-			var toExplore = new Queue<Point16>();
+			Point16 startSearch = new(i - 1, j - 1);
+			HashSet<Point16> explored = new() { startSearch };
+			Queue<Point16> toExplore = new();
 			foreach (Point16 point in TEStorageComponent.AdjacentComponents(startSearch))
 				toExplore.Enqueue(point);
 

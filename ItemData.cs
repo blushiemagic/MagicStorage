@@ -29,11 +29,21 @@ namespace MagicStorage
 
 		public static int Compare(Item item1, Item item2)
 		{
-			var data1 = new ItemData(item1);
-			var data2 = new ItemData(item2);
+			ItemData data1 = new(item1);
+			ItemData data2 = new(item2);
 			if (data1.Type != data2.Type)
+			{
 				return data1.Type - data2.Type;
+			}
 			return data1.Prefix - data2.Prefix;
+		}
+
+		public static bool operator ==(ItemData left, ItemData right) {
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(ItemData left, ItemData right) {
+			return !(left == right);
 		}
 	}
 }

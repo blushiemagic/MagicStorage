@@ -6,7 +6,7 @@ namespace MagicStorage.Components
 {
 	public class CraftingAccess : StorageAccess
 	{
-		public override ModTileEntity GetTileEntity() => mod.GetTileEntity("TECraftingAccess");
+		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TECraftingAccess>();
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CraftingAccess>();
 
@@ -18,9 +18,7 @@ namespace MagicStorage.Components
 			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
 				return null;
 			TileEntity heart = TileEntity.ByPosition[point];
-			if (!(heart is TEStorageCenter center))
-				return null;
-			return center.GetHeart();
+			return heart is TEStorageCenter center ? center.GetHeart() : null;
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
@@ -29,7 +27,7 @@ namespace MagicStorage.Components
 				i--;
 			if (Main.tile[i, j].frameY > 0)
 				j--;
-			var pos = new Point16(i, j);
+			Point16 pos = new(i, j);
 			if (!TileEntity.ByPosition.ContainsKey(pos))
 				return;
 			if (TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access)
