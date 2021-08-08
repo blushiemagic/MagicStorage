@@ -1,4 +1,3 @@
-CountsAsClass(using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;

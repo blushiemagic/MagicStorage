@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework;
 using Terraria.Localization;
 using MagicStorage.Edits;
 using MagicStorage.Items;
+using MagicStorage.Stations;
+using System.Linq;
 
 namespace MagicStorage
 {
@@ -17,6 +19,8 @@ namespace MagicStorage
 		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
 
 		public static readonly Version requiredVersion = new Version(0, 12);
+
+		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
 
 		public override void Load()
 		{
@@ -29,12 +33,16 @@ namespace MagicStorage
 			AddTranslations();
 
 			EditsLoader.Load();
+
+			DirectDetourManager.Load();
 		}
 
 		public override void Unload()
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+
+			DirectDetourManager.Unload();
 		}
 
 		private void AddTranslations()
@@ -226,6 +234,41 @@ namespace MagicStorage
 			LocalizationLoader.AddTranslation(text);
 		}
 
+		public override void AddRecipes(){
+			CreateRecipe(ItemID.CookedMarshmallow)
+				.AddIngredient(ItemID.Marshmallow)
+				.AddCondition(new Recipe.Condition(NetworkText.FromLiteral("Biome Globe in a Crafting Interface"), recipe => CraftingGUI.Campfire))
+				.Register();
+		}
+
+		public override void PostAddRecipes()
+		{
+			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
+			for(int i = 0; i < Recipe.maxRecipes; i++)
+			{
+				Recipe recipe = Main.recipe[i];
+
+				if(recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+				{
+					Recipe copy = CreateRecipe(recipe.createItem.type, recipe.createItem.stack);
+
+					for(int r = 0; r < recipe.requiredItem.Count; r++)
+						copy.AddIngredient(recipe.requiredItem[r].type, recipe.requiredItem[r].stack);
+
+					copy.acceptedGroups = new List<int>(recipe.acceptedGroups);
+
+					copy.requiredTile = new List<int>(recipe.requiredTile){
+						ModContent.TileType<CombinedStations4Tile>()
+					};
+
+					//Copy all conditions except the graveyard one
+					copy.AddCondition(recipe.Conditions.Where(cond => cond != Recipe.Condition.InGraveyardBiome));
+
+					copy.Register();
+				}
+			}
+		}
+
 		public override void AddRecipeGroups()
 		{
 			RecipeGroup group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " Chest",
@@ -277,6 +320,249 @@ namespace MagicStorage
 			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ModContent.ItemType<ShadowDiamond>());
 
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyWorkBench",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.WorkBench)}",
+					ItemID.WorkBench,
+					ItemID.BambooWorkbench,
+					ItemID.BlueDungeonWorkBench,
+					ItemID.BoneWorkBench,
+					ItemID.BorealWoodWorkBench,
+					ItemID.CactusWorkBench,
+					ItemID.CrystalWorkbench,
+					ItemID.DynastyWorkBench,
+					ItemID.EbonwoodWorkBench,
+					ItemID.FleshWorkBench,
+					ItemID.FrozenWorkBench,
+					ItemID.GlassWorkBench,
+					ItemID.GoldenWorkbench,
+					ItemID.GothicWorkBench,
+					ItemID.GraniteWorkBench,
+					ItemID.GreenDungeonWorkBench,
+					ItemID.HoneyWorkBench,
+					ItemID.LesionWorkbench,
+					ItemID.LihzahrdWorkBench,
+					ItemID.LivingWoodWorkBench,
+					ItemID.MarbleWorkBench,
+					ItemID.MartianWorkBench,
+					ItemID.MeteoriteWorkBench,
+					ItemID.NebulaWorkbench,
+					ItemID.ObsidianWorkBench,
+					ItemID.PalmWoodWorkBench,
+					ItemID.PearlwoodWorkBench,
+					ItemID.PinkDungeonWorkBench,
+					ItemID.PumpkinWorkBench,
+					ItemID.RichMahoganyWorkBench,
+					ItemID.SandstoneWorkbench,
+					ItemID.ShadewoodWorkBench,
+					ItemID.SkywareWorkbench,
+					ItemID.SlimeWorkBench,
+					ItemID.SolarWorkbench,
+					ItemID.SpiderWorkbench,
+					ItemID.SpookyWorkBench,
+					ItemID.StardustWorkbench,
+					ItemID.SteampunkWorkBench,
+					ItemID.VortexWorkbench));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyPreHmAnvil",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.IronAnvil)}",
+					ItemID.IronAnvil,
+					ItemID.LeadAnvil));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyBottle",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Bottle)}",
+					ItemID.Bottle,
+					ItemID.PinkVase,
+					ItemID.Mug,
+					ItemID.DynastyCup,
+					ItemID.WineGlass,
+					ItemID.HoneyCup,
+					ItemID.SteampunkCup));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnySink",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MetalSink)}",
+					ItemID.BambooSink,
+					ItemID.BlueDungeonSink,
+					ItemID.BoneSink,
+					ItemID.BorealWoodSink,
+					ItemID.CactusSink,
+					ItemID.CrystalSink,
+					ItemID.DynastySink,
+					ItemID.EbonwoodSink,
+					ItemID.FleshSink,
+					ItemID.FrozenSink,
+					ItemID.GlassSink,
+					ItemID.GoldenSink,
+					ItemID.GraniteSink,
+					ItemID.GreenDungeonSink,
+					ItemID.HoneySink,
+					ItemID.LesionSink,
+					ItemID.LihzahrdSink,
+					ItemID.LivingWoodSink,
+					ItemID.MarbleSink,
+					ItemID.MartianSink,
+					ItemID.MetalSink,
+					ItemID.MeteoriteSink,
+					ItemID.MushroomSink,
+					ItemID.NebulaSink,
+					ItemID.ObsidianSink,
+					ItemID.PalmWoodSink,
+					ItemID.PearlwoodSink,
+					ItemID.PinkDungeonSink,
+					ItemID.PumpkinSink,
+					ItemID.RichMahoganySink,
+					ItemID.SandstoneSink,
+					ItemID.ShadewoodSink,
+					ItemID.SkywareSink,
+					ItemID.SlimeSink,
+					ItemID.SolarSink,
+					ItemID.SpiderSinkSpiderSinkDoesWhateverASpiderSinkDoes,
+					ItemID.SpookySink,
+					ItemID.StardustSink,
+					ItemID.SteampunkSink,
+					ItemID.VortexSink,
+					ItemID.WoodenSink));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyTable",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.WoodenTable)}",
+					ItemID.BambooTable,
+					ItemID.BanquetTable,
+					ItemID.BlueDungeonTable,
+					ItemID.BoneTable,
+					ItemID.BorealWoodTable,
+					ItemID.CactusTable,
+					ItemID.CrystalTable,
+					ItemID.DynastyTable,
+					ItemID.EbonwoodTable,
+					ItemID.FleshTable,
+					ItemID.FrozenTable,
+					ItemID.GlassTable,
+					ItemID.GoldenTable,
+					ItemID.GothicTable,
+					ItemID.GraniteTable,
+					ItemID.GreenDungeonTable,
+					ItemID.HoneyTable,
+					ItemID.LesionTable,
+					ItemID.LihzahrdTable,
+					ItemID.LivingWoodTable,
+					ItemID.MarbleTable,
+					ItemID.MartianTable,
+					ItemID.MeteoriteTable,
+					ItemID.MushroomTable,
+					ItemID.NebulaTable,
+					ItemID.ObsidianTable,
+					ItemID.PalmWoodTable,
+					ItemID.PearlwoodTable,
+					ItemID.PicnicTable,
+					ItemID.PicnicTableWithCloth,
+					ItemID.PineTable,
+					ItemID.PinkDungeonTable,
+					ItemID.PumpkinTable,
+					ItemID.RichMahoganyTable,
+					ItemID.SandstoneTable,
+					ItemID.ShadewoodTable,
+					ItemID.SkywareTable,
+					ItemID.SlimeTable,
+					ItemID.SolarTable,
+					ItemID.SpiderTable,
+					ItemID.SpookyTable,
+					ItemID.StardustTable,
+					ItemID.SteampunkTable,
+					ItemID.VortexTable,
+					ItemID.WoodenTable));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyCookingPot",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CookingPot)}",
+					ItemID.CookingPot,
+					ItemID.Cauldron));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyHmAnvil",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MythrilAnvil)}",
+					ItemID.MythrilAnvil,
+					ItemID.OrichalcumAnvil));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyHmFurnace",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.AdamantiteForge)}",
+					ItemID.AdamantiteForge,
+					ItemID.TitaniumForge));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyBookcase",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Bookcase)}",
+					ItemID.Bookcase,
+					ItemID.BambooBookcase,
+					ItemID.BlueDungeonBookcase,
+					ItemID.BoneBookcase,
+					ItemID.BorealWoodBookcase,
+					ItemID.CactusBookcase,
+					ItemID.CrystalBookCase,
+					ItemID.DynastyBookcase,
+					ItemID.EbonwoodBookcase,
+					ItemID.FleshBookcase,
+					ItemID.FrozenBookcase,
+					ItemID.GlassBookcase,
+					ItemID.GoldenBookcase,
+					ItemID.GothicBookcase,
+					ItemID.GraniteBookcase,
+					ItemID.GreenDungeonBookcase,
+					ItemID.HoneyBookcase,
+					ItemID.LesionBookcase,
+					ItemID.LihzahrdBookcase,
+					ItemID.MarbleBookcase,
+					ItemID.MeteoriteBookcase,
+					ItemID.MushroomBookcase,
+					ItemID.NebulaBookcase,
+					ItemID.ObsidianBookcase,
+					ItemID.PalmWoodBookcase,
+					ItemID.PearlwoodBookcase,
+					ItemID.PinkDungeonBookcase,
+					ItemID.PumpkinBookcase,
+					ItemID.RichMahoganyBookcase,
+					ItemID.SandstoneBookcase,
+					ItemID.ShadewoodBookcase,
+					ItemID.SkywareBookcase,
+					ItemID.SlimeBookcase,
+					ItemID.SolarBookcase,
+					ItemID.SpiderBookcase,
+					ItemID.SpookyBookcase,
+					ItemID.StardustBookcase,
+					ItemID.SteampunkBookcase,
+					ItemID.VortexBookcase));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyTombstone",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Tombstone)}",
+					ItemID.Tombstone,
+					ItemID.GraveMarker,
+					ItemID.CrossGraveMarker,
+					ItemID.Headstone,
+					ItemID.Gravestone,
+					ItemID.Obelisk,
+					ItemID.RichGravestone1,
+					ItemID.RichGravestone2,
+					ItemID.RichGravestone3,
+					ItemID.RichGravestone4,
+					ItemID.RichGravestone5));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Campfire)}",
+					ItemID.Campfire,
+					ItemID.BoneCampfire,
+					ItemID.CoralCampfire,
+					ItemID.CorruptCampfire,
+					ItemID.CrimsonCampfire,
+					ItemID.CursedCampfire,
+					ItemID.DemonCampfire,
+					ItemID.DesertCampfire,
+					ItemID.FrozenCampfire,
+					ItemID.HallowedCampfire,
+					ItemID.IchorCampfire,
+					ItemID.JungleCampfire,
+					ItemID.RainbowCampfire,
+					ItemID.UltraBrightCampfire));
+
+			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar",
+				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Language.GetTextValue("MapObject.DemonAltar")}",
+					ModContent.ItemType<DemonAltar>(),
+					ModContent.ItemType<CrimsonAltar>()));
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)

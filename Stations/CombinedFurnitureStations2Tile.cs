@@ -1,0 +1,35 @@
+﻿using Microsoft.Xna.Framework;
+using Terraria.ID;
+
+namespace MagicStorage.Stations{
+	public class CombinedFurnitureStations2Tile : CombinedStationsTile<CombinedFurnitureStations2Item>{
+		//Combines:
+		//(Furniture Tier 1)
+		//Bone Welder, Glass Kiln, Honey Dispenser, Ice Machine, Living Loom, Sky Mill, Solidifier
+		//(Furniture Tier 2)
+		//Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
+		public override int[] GetAdjTiles()
+			=> new int[]{
+				Type,
+				//Tier 1
+				TileID.BoneWelder,
+				TileID.GlassKiln,
+				TileID.HoneyDispenser,
+				TileID.IceMachine,
+				TileID.LivingLoom,
+				TileID.SkyMill,
+				TileID.Solidifier,
+				//Tier 2
+				TileID.LesionStation,
+				TileID.FleshCloningVat,
+				TileID.SteampunkBoiler,
+				TileID.LihzahrdFurnace
+			};
+
+		public override Color MapColor => Color.Orange;
+
+		public override void GetTileDimensions(out int width, out int height){
+			throw new System.NotImplementedException();
+		}
+	}
+}

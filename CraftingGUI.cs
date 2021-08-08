@@ -74,6 +74,8 @@ namespace MagicStorage
 		private static bool adjHoney = false;
 		private static bool zoneSnow = false;
 		private static bool alchemyTable = false;
+		private static bool graveyard = false;
+		public static bool Campfire { get; private set; } = false;
 		private static List<Recipe> recipes = new List<Recipe>();
 		private static List<bool> recipeAvailable = new List<bool>();
 		private static Recipe selectedRecipe = null;
@@ -447,6 +449,9 @@ namespace MagicStorage
 				}
 				else
 				{
+					//Reset the campfire bool since it could be used elswhere
+					Campfire = false;
+
 					scrollBarFocus = 0;
 					selectedRecipe = null;
 					craftTimer = 0;
@@ -881,7 +886,6 @@ namespace MagicStorage
 
 		private static void AnalyzeIngredients()
 		{
-			// TODO: why the hell is this throwing IOOB exceptions
 			Player player = Main.player[Main.myPlayer];
 
 			lock (itemsLock)
@@ -900,6 +904,8 @@ namespace MagicStorage
 				adjHoney = false;
 				zoneSnow = false;
 				alchemyTable = false;
+				graveyard = false;
+				Campfire = false;
 
 				foreach (Item item in items)
 				{
@@ -941,6 +947,13 @@ namespace MagicStorage
 						adjTiles[TileID.Tables] = true;
 						alchemyTable = true;
 					}
+
+					if (item.createTile == TileID.Tombstones)
+					{
+						adjTiles[TileID.Tombstones] = true;
+						graveyard = true;
+					}
+
 					bool[] oldAdjTile = player.adjTile;
 					bool oldAdjWater = adjWater;
 					bool oldAdjLava = adjLava;
@@ -951,16 +964,28 @@ namespace MagicStorage
 					player.adjLava = false;
 					player.adjHoney = false;
 					player.alchemyTable = false;
+
 					TileLoader.AdjTiles(player, item.createTile);
-					if (player.adjWater)
+
+					if (player.adjTile[TileID.WorkBenches] || player.adjTile[TileID.Tables] || player.adjTile[TileID.Tables2])
+					{
+						player.adjTile[TileID.Chairs] = true;
+					}
+
+					if (player.adjTile[TileID.Tombstones])
+					{
+						graveyard = true;
+					}
+
+					if (player.adjWater || item.createTile == TileID.Sinks || TileID.Sets.CountsAsWaterSource[item.createTile])
 					{
 						adjWater = true;
 					}
-					if (player.adjLava)
+					if (player.adjLava || TileID.Sets.CountsAsLavaSource[item.createTile])
 					{
 						adjLava = true;
 					}
-					if (player.adjHoney)
+					if (player.adjHoney || TileID.Sets.CountsAsHoneySource[item.createTile])
 					{
 						adjHoney = true;
 					}
@@ -986,9 +1011,21 @@ namespace MagicStorage
 				{
 					adjHoney = true;
 				}
-				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
+				if (item.type == ModContent.ItemType<SnowBiomeEmulator>() || item.type == ModContent.ItemType<BiomeGlobe>())
 				{
 					zoneSnow = true;
+				}
+
+				if (item.type == ModContent.ItemType<BiomeGlobe>())
+				{
+					graveyard = true;
+					Campfire = true;
+					adjWater = true;
+					adjLava = true;
+					adjHoney = true;
+
+					adjTiles[TileID.Campfire] = true;
+					adjTiles[TileID.DemonAltar] = true;
 				}
 			}
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
@@ -1041,8 +1078,8 @@ namespace MagicStorage
 			{
 				Player player = Main.LocalPlayer;
 				for (int i = 0; i < adjTiles.Length; i++)
-					if (adjTiles[i])
-						player.adjTile[i] = true;
+					player.adjTile[i] = adjTiles[i];
+
 				if (adjWater)
 					player.adjWater = true;
 				if (adjLava)
@@ -1053,6 +1090,8 @@ namespace MagicStorage
 					player.alchemyTable = true;
 				if (zoneSnow)
 					player.ZoneSnow = true;
+				if (graveyard)
+					player.ZoneGraveyard = true;
 
 				BlockRecipes.active = false;
 				if (!RecipeLoader.RecipeAvailable(recipe))
