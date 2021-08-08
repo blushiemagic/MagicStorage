@@ -10,4 +10,9 @@
   <ItemGroup>
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="RecursiveCraft">
+      <HintPath>lib\RecursiveCraft_v2.0.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

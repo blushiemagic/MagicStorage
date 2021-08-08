@@ -41,7 +41,7 @@ namespace MagicStorage
 
 		public override void PostAddRecipes()
 		{
-			RecursiveCraftIntegration.InitRecipes();
+			RecursiveCraftIntegration.PostAddRecipes();
 		}
 
 		public override void Unload()

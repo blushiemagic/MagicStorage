@@ -623,21 +623,23 @@ namespace MagicStorage
 			if (RecursiveCraftIntegration.Enabled)
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
 
-			lock (items)
+			int GetAmountCraftable(Item requiredItem)
 			{
-				foreach (Item reqItem in recipe.requiredItem)
+				int total = 0;
+				if (requiredItem.type == ItemID.None)
+					return 0;
+				lock (items)
 				{
-					int total = 0;
-					if (reqItem.type == ItemID.None)
-						break;
-					foreach (Item invItem in items)
-						if (invItem.type == reqItem.type || RecipeGroupMatch(recipe, invItem.type, reqItem.type))
-							total += invItem.stack;
-					int craftable = total / reqItem.stack;
-					if (craftable < maxCraftable)
-						maxCraftable = craftable;
+					foreach (Item inventoryItem in items)
+						if (inventoryItem.type == requiredItem.type || RecipeGroupMatch(recipe, inventoryItem.type, requiredItem.type))
+							total += inventoryItem.stack;
 				}
+
+				int craftable = total / requiredItem.stack;
+				return craftable;
 			}
+
+			maxCraftable = recipe.requiredItem.Select(GetAmountCraftable).Prepend(maxCraftable).Min();
 
 			return maxCraftable;
 		}
