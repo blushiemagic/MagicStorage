@@ -13,13 +13,8 @@ namespace MagicStorage.Edits
 			NetMessage.SendData += Vanilla.NetMessage_SendData;
 
 			MessageBuffer.GetData += Vanilla.MessageBuffer_GetData;
-		}
 
-		public static void Unload()
-		{
-			NetMessage.SendData -= Vanilla.NetMessage_SendData;
-
-			MessageBuffer.GetData -= Vanilla.MessageBuffer_GetData;
+			Recipe.FindRecipes += Vanilla.Recipe_FindRecipes;
 		}
 	}
 }

@@ -4,64 +4,9 @@ This mod offers a solution to storage problems once and for all. It allows you t
 
 The magic storage scales as you progress in your playthrough. It is accessible very early in the game, but with limited power. As you defeat bosses and earn more materials, you will be able to upgrade your storage to perform more functions and more easily expand the storage capacity.
 
-Changes from original:
-Added more station slots to the crafting interface.
-Added more sort options.
-Added RecursiveCraft support
-Added quick stack and restock to Storage Heart deposit button (Read tooltip)
-Added weapon DPS calculation (Not 100% accurate)
+Please report bugs/issues to this mod's Discord server: https://discord.gg/FemPG7eev4
 
 TODO:
 Money Compactor
 Blacklist/Whitelist for specific accesses
 Wait for bug reports
-
-Changelog:
-0.5.4.1:
-Add config for storage deposit quick stack behaviour
- - Due to some config changes, all your config settings have been reset
-0.5.4.0:
-Fixed world sections not loading due to storage systems having too many items
-Fixed bad netcode causing "read underflows"
-Fixed the crafting GUI sometimes throwing exceptions
-Fixes done by absoluteAquarian
-0.5.3.6:
-Update RecursiveCraft reference
-0.5.3.5:
-Fix storage access
-0.5.3.4:
-Fix reach extending items not working
-0.5.3.3:
-Show that ingredient is craftable in ingredient list
-0.5.3.2:
-Fix logic error
-0.5.3.1:
-Fix storage heart not being loaded when far away in multiplayer
-0.5.3.0:
-Update for new RecursiveCraft version
-0.5.2.13:
-Fix issue with recipe staying selected after reload
-0.5.2.12:
-Fix bug introduced in 0.5.2.9 and add Mod Helpers bug reporting feature
-0.5.2.11:
-Some more optimizations
-0.5.2.10:
-Fix right click only working on result once
-0.5.2.9:
-Fix pulling wrong item from storage
-0.5.2.8:
-Optimizations and modular ingredient UI
-0.5.2.7:
-Added config for default recipe filter
-0.5.2.6:
-Fixed extracting items from first instead of last stack
-0.5.2.5:
-Functional RecursiveCraft support
-0.5.2.4:
-Fix vanilla recipe groups not being processed
-0.5.2.2:
-Temporarily disable integration with RecursiveCraft due to bugs
-0.5.2.1:
-Fix search bug
-0.5.2.0:
-Added integration with the RecursiveCraft mod

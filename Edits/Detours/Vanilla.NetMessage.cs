@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Edits.Detours
 {
-	internal static class Vanilla
+	internal static partial class Vanilla
 	{
 		internal static void NetMessage_SendData(NetMessage.orig_SendData orig, int msgType, int remoteClient, int ignoreClient, NetworkText text, int number,
 			float number2, float number3, float number4, int number5, int number6, int number7)

@@ -22,7 +22,7 @@ namespace MagicStorage.Components
 		public override bool RightClick(int i, int j)
 		{
 			Player player = Main.LocalPlayer;
-			Item item = player.inventory[player.selectedItem];
+			Item item = player.HeldItem;
 			if (item.type == ModContent.ItemType<Locator>() || item.type == ModContent.ItemType<LocatorDisk>())
 			{
 				if (Main.tile[i, j].frameX % 36 == 18)

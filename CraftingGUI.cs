@@ -131,16 +131,13 @@ namespace MagicStorage
 		public static List<Item> compoundCraftSurplus = new();
 
 		private static bool[] adjTiles = new bool[TileLoader.TileCount];
-
 		private static bool adjWater;
-
 		private static bool adjLava;
-
 		private static bool adjHoney;
-
 		private static bool zoneSnow;
-
 		private static bool alchemyTable;
+		private static bool graveyard;
+		public static bool Campfire { get; private set; }
 
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 
@@ -280,7 +277,7 @@ namespace MagicStorage
 
 			recipePanel.Append(ingredientText);
 
-			int itemsNeeded = selectedRecipe?.requiredItem.Count(item => !item.IsAir) ?? IngredientColumns * 2;
+			int itemsNeeded = selectedRecipe?.requiredItem.Count ?? IngredientColumns * 2;
 			int recipeRows = itemsNeeded / IngredientColumns;
 			int extraRow = itemsNeeded % IngredientColumns != 0 ? 1 : 0;
 			int totalRows = recipeRows + extraRow;
@@ -450,6 +447,9 @@ namespace MagicStorage
 				}
 				else
 				{
+					//Reset the campfire bool since it could be used elswhere
+					Campfire = false;
+
 					recipeScrollBarFocus = 0;
 					craftTimer = 0;
 					maxCraftTimer = StartMaxCraftTimer;
@@ -551,12 +551,7 @@ namespace MagicStorage
 
 			Item item = selectedRecipe.createItem;
 			if (item.IsAir)
-			{
-				int t = item.type;
-				item = new Item();
-				item.SetDefaults(t);
-				item.stack = 0;
-			}
+				item = new Item(item.type, 0);
 
 			return item;
 		}
@@ -637,8 +632,6 @@ namespace MagicStorage
 			int GetAmountCraftable(Item requiredItem)
 			{
 				int total = 0;
-				if (requiredItem.type == ItemID.None)
-					return 0;
 				lock (items)
 				{
 					foreach (Item inventoryItem in items)
@@ -993,12 +986,12 @@ namespace MagicStorage
 			}
 
 			int ingredients = 0;
-			foreach (int t in recipe.requiredItem.Select(item => item.type).Where(t => t > 0))
+			foreach (Item item in recipe.requiredItem)
 			{
 				ingredients++;
-				if (CheckIngredient(t, availableSet, recursionTree, cache))
+				if (CheckIngredient(item.type, availableSet, recursionTree, cache))
 					continue;
-				if (CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, t))
+				if (CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, item.type))
 					continue;
 				cache[recipe] = false;
 				return false;
@@ -1212,6 +1205,8 @@ namespace MagicStorage
 			adjHoney = false;
 			zoneSnow = false;
 			alchemyTable = false;
+			graveyard = false;
+			Campfire = false;
 
 			lock (itemCounts)
 			{
@@ -1249,6 +1244,12 @@ namespace MagicStorage
 							break;
 					}
 
+					if (item.createTile == TileID.Tombstones)
+					{
+						adjTiles[TileID.Tombstones] = true;
+						graveyard = true;
+					}
+
 					bool[] oldAdjTile = player.adjTile;
 					bool oldAdjWater = adjWater;
 					bool oldAdjLava = adjLava;
@@ -1259,15 +1260,22 @@ namespace MagicStorage
 					player.adjLava = false;
 					player.adjHoney = false;
 					player.alchemyTable = false;
+
 					TileLoader.AdjTiles(player, item.createTile);
-					if (player.adjWater)
+
+					if (player.adjTile[TileID.WorkBenches] || player.adjTile[TileID.Tables] || player.adjTile[TileID.Tables2])
+						player.adjTile[TileID.Chairs] = true;
+					if (player.adjWater || TileID.Sets.CountsAsWaterSource[item.createTile])
 						adjWater = true;
-					if (player.adjLava)
+					if (player.adjLava || TileID.Sets.CountsAsLavaSource[item.createTile])
 						adjLava = true;
-					if (player.adjHoney)
+					if (player.adjHoney || TileID.Sets.CountsAsHoneySource[item.createTile])
 						adjHoney = true;
 					if (player.alchemyTable)
 						alchemyTable = true;
+					if (player.adjTile[TileID.Tombstones])
+						graveyard = true;
+
 					player.adjTile = oldAdjTile;
 					player.adjWater = oldAdjWater;
 					player.adjLava = oldAdjLava;
@@ -1288,11 +1296,23 @@ namespace MagicStorage
 						adjHoney = true;
 						break;
 				}
-
-				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
+				if (item.type == ModContent.ItemType<SnowBiomeEmulator>() || item.type == ModContent.ItemType<BiomeGlobe>())
+				{
 					zoneSnow = true;
-			}
+				}
 
+				if (item.type == ModContent.ItemType<BiomeGlobe>())
+				{
+					graveyard = true;
+					Campfire = true;
+					adjWater = true;
+					adjLava = true;
+					adjHoney = true;
+
+					adjTiles[TileID.Campfire] = true;
+					adjTiles[TileID.DemonAltar] = true;
+				}
+			}
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 		}
 
@@ -1308,8 +1328,6 @@ namespace MagicStorage
 			{
 				foreach (Item ingredient in recipe.requiredItem)
 				{
-					if (ingredient.type == ItemID.None)
-						break;
 					int stack = ingredient.stack;
 					bool useRecipeGroup = false;
 					foreach (int type in itemCounts.Keys)
@@ -1332,8 +1350,8 @@ namespace MagicStorage
 				{
 					Player player = Main.LocalPlayer;
 					for (int i = 0; i < adjTiles.Length; i++)
-						if (adjTiles[i])
-							player.adjTile[i] = true;
+						player.adjTile[i] = adjTiles[i];
+
 					if (adjWater)
 						player.adjWater = true;
 					if (adjLava)
@@ -1344,6 +1362,8 @@ namespace MagicStorage
 						player.alchemyTable = true;
 					if (zoneSnow)
 						player.ZoneSnow = true;
+					if (graveyard)
+						player.ZoneGraveyard = true;
 
 					BlockRecipes.Active = false;
 					if (!RecipeLoader.RecipeAvailable(recipe))
@@ -1362,8 +1382,6 @@ namespace MagicStorage
 		{
 			foreach (Item ingredient in recipe.requiredItem)
 			{
-				if (ingredient.type == ItemID.None)
-					break;
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
 				lock (storageItems)
@@ -1411,24 +1429,15 @@ namespace MagicStorage
 						foreach (Item item in items)
 						{
 							foreach (Item reqItem in selectedRecipe.requiredItem)
-							{
-								if (reqItem.type == ItemID.None)
-									break;
 								if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type))
 									storageItems.Add(item);
-							}
 
 							if (item.type == selectedRecipe.createItem.type)
 								result = item;
 						}
 					}
 
-					if (result == null)
-					{
-						result = new Item();
-						result.SetDefaults(selectedRecipe.createItem.type);
-						result.stack = 0;
-					}
+					result ??= new Item(selectedRecipe.createItem.type, 0);
 				}
 			}
 		}
@@ -1598,10 +1607,8 @@ namespace MagicStorage
 
 			int visualSlot = slot;
 			slot += IngredientColumns * (int) Math.Round(storageScrollBar.ViewPosition);
-			int count = selectedRecipe.requiredItem.Select((item, i) => new { item, i }).FirstOrDefault(x => x.item.type == ItemID.None)?.i + 1 ??
-						selectedRecipe.requiredItem.Count;
 
-			if (slot >= count)
+			if (slot >= selectedRecipe.requiredItem.Count)
 				return;
 
 			// select ingredient recipe by right clicking
@@ -1791,8 +1798,6 @@ namespace MagicStorage
 
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
-				if (reqItem.type == ItemID.None)
-					break;
 				int stack = reqItem.stack;
 
 				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);

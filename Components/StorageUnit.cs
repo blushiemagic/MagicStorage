@@ -70,7 +70,7 @@ namespace MagicStorage.Components
 		private static bool TryUpgrade(int i, int j)
 		{
 			Player player = Main.LocalPlayer;
-			Item item = player.inventory[player.selectedItem];
+			Item item = player.HeldItem;
 			int style = Main.tile[i, j].frameY / 36;
 			bool success = false;
 			if (style == 0 && item.type == ModContent.ItemType<UpgradeDemonite>())
