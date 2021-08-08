@@ -13,19 +13,19 @@ namespace MagicStorage
 {
 	public static class NetHelper
 	{
-		private static bool queueUpdates = false;
+		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
 
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
-			MessageType type = (MessageType)reader.ReadByte();
+			MessageType type = (MessageType) reader.ReadByte();
 
 			/*
 			if (Main.netMode == NetmodeID.MultiplayerClient)
-				Main.NewText($"Receiving Message Type \"{Enum.GetName(typeof(MessageType), type)}\"");
+				Main.NewText($"Receiving Message Type \"{Enum.GetName(type)}\"");
 			else if(Main.netMode == NetmodeID.Server)
-				Console.WriteLine($"Receiving Message Type \"{Enum.GetName(typeof(MessageType), type)}\"");
+				Console.WriteLine($"Receiving Message Type \"{Enum.GetName(type)}\"");
 			*/
 
 			switch (type)
@@ -110,9 +110,7 @@ namespace MagicStorage
 			{
 				queueUpdates = false;
 				while (updateQueue.Count > 0)
-				{
 					NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, updateQueue.Dequeue());
-				}
 				updateQueueContains.Clear();
 			}
 		}
@@ -200,22 +198,28 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == 0 || op == 1 || op == 3)
+				if (op == 0)
 				{
-					ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true);
+				}
+				else if (op == 1 || op == 3)
+				{
+					_ = reader.ReadBoolean();
+					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == 3)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
-						ItemIO.Receive(reader, true);
+						_ = ItemIO.Receive(reader, true);
 				}
 
 				return;
 			}
 
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
+			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
+
 			if (op == 0)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
@@ -282,13 +286,13 @@ namespace MagicStorage
 				//The data still needs to be read for exceptions to not be thrown...
 				if (op == 0 || op == 1 || op == 3)
 				{
-					ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true);
 				}
 				else if (op == 2)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
-						ItemIO.Receive(reader, true);
+						_ = ItemIO.Receive(reader, true);
 				}
 
 				return;
@@ -339,13 +343,8 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (!TileEntity.ByID.TryGetValue(ent, out _))
-			{
-				//Nothing would've happened anyway
-				return;
-			}
-
-			StorageGUI.RefreshItems();
+			if (TileEntity.ByID.ContainsKey(ent))
+				StorageGUI.RefreshItems();
 		}
 
 		public static void ClientSendTEUpdate(int id)
@@ -380,7 +379,9 @@ namespace MagicStorage
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				//Still need to read the data
-				reader.ReadInt32();
+				_ = reader.ReadInt32();
+				// TODO does TileEntity need to be read?
+				//_ = TileEntity.Read(reader, true);
 			}
 		}
 
@@ -442,22 +443,22 @@ namespace MagicStorage
 				//Still need to read the data for exceptions to not be thrown...
 				if (op == 0)
 				{
-					ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true);
 				}
 				else if (op == 1)
 				{
-					reader.ReadByte();
+					_ = reader.ReadByte();
 				}
 				else if (op == 2)
 				{
-					ItemIO.Receive(reader, true);
-					reader.ReadByte();
+					_ = ItemIO.Receive(reader, true);
+					_ = reader.ReadByte();
 				}
 
 				return;
 			}
 
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TECraftingAccess access))
+			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TECraftingAccess access)
 				return;
 
 			if (op == 0)
@@ -498,7 +499,7 @@ namespace MagicStorage
 			Point16 pos = access.Position;
 			StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
 			TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
-			if (heart != null)
+			if (heart is not null)
 				SendRefreshNetworkItems(heart.ID);
 		}
 
@@ -585,14 +586,17 @@ namespace MagicStorage
 			{
 				//Still need to read the data for exceptions to not be thrown
 				for (int i = 0; i < withdrawCount; i++)
-					ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true);
 
-				ItemIO.Receive(reader, true);
+
+				int count = reader.ReadInt32();
+				for (int i = 0; i < count; i++)
+					_ = ItemIO.Receive(reader, true, true);
 
 				return;
 			}
 
-			if (!TileEntity.ByID.ContainsKey(ent) || !(TileEntity.ByID[ent] is TEStorageHeart heart))
+			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
 			List<Item> toWithdraw = new();
@@ -658,25 +662,22 @@ namespace MagicStorage
 
 			int entityCount = reader.ReadUInt16();
 			for (int i = 0; i < entityCount; i++)
-			{
 				/*
-				long entStart = reader.BaseStream.Position;
-
-				if (Main.netMode == NetmodeID.MultiplayerClient)
-				{
-					byte type = reader.ReadByte();
-					reader.BaseStream.Seek(-1, SeekOrigin.Current);
-					MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
-				}
-				*/
+					long entStart = reader.BaseStream.Position;
+	
+					if (Main.netMode == NetmodeID.MultiplayerClient)
+					{
+						byte type = reader.ReadByte();
+						reader.BaseStream.Seek(-1, SeekOrigin.Current);
+						MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
+					}
+					*/
 
 				TileEntity.Read(reader);
-
-				/*
+			/*
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					MagicStorage.Instance.Logger.Debug($"Bytes read (#{i + 1}): {reader.BaseStream.Position - entStart} (total: {reader.BaseStream.Position})");
 				*/
-			}
 
 			/*
 			long end = reader.BaseStream.Position;

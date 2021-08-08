@@ -18,16 +18,15 @@ namespace MagicStorage
 		{
 			_itemIconCacheTimeInfo = typeof(Main).GetField("_itemIconCacheTime", BindingFlags.NonPublic | BindingFlags.Static);
 
-			if(_itemIconCacheTimeInfo is null)
+			if (_itemIconCacheTimeInfo is null)
 				throw new Exception("Reflection value was null (source: InterfaceHelper.Initialize)");
 		}
 
 		public static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			int inventoryIndex = layers.FindIndex(layer => layer.Name == "Vanilla: Inventory");
-			if (inventoryIndex != -1) {
+			if (inventoryIndex != -1)
 				layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
-			}
 		}
 
 		public static bool DrawStorageGUI()
@@ -41,7 +40,7 @@ namespace MagicStorage
 				if (modTile is StorageAccess access)
 				{
 					TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
-					if (heart != null)
+					if (heart is not null)
 					{
 						if (access is CraftingAccess)
 							CraftingGUI.Draw();
@@ -63,10 +62,10 @@ namespace MagicStorage
 		{
 			CalculatedStyle dimensions = element.GetDimensions();
 			Vector2 vector = new(dimensions.X, dimensions.Y);
-			Vector2 position = (new Vector2(dimensions.Width, dimensions.Height)) + vector;
+			Vector2 position = new Vector2(dimensions.Width, dimensions.Height) + vector;
 			vector = Vector2.Transform(vector, Main.UIScaleMatrix);
 			position = Vector2.Transform(position, Main.UIScaleMatrix);
-			Rectangle result = new((int)vector.X, (int)vector.Y, (int)(position.X - vector.X), (int)(position.Y - vector.Y));
+			Rectangle result = new((int) vector.X, (int) vector.Y, (int) (position.X - vector.X), (int) (position.Y - vector.Y));
 			int width = Main.spriteBatch.GraphicsDevice.Viewport.Width;
 			int height = Main.spriteBatch.GraphicsDevice.Viewport.Height;
 			result.X = Utils.Clamp(result.X, 0, width);

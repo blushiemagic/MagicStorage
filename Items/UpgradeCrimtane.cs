@@ -18,10 +18,14 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(血腥))");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity" + "\n<right> a Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Увеличивает количество слотов в Ячейке Хранилища до 80" + "\n<right> на Ячейке Хранилища для улучшения");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ulepsza jednostkę magazynującą do 80 miejsc" + "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "améliore la capacité de unité de stockage à 80" + "\n<right> l'unité de stockage pour utiliser");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Capacidad de unidad de almacenamiento mejorada a 80" + "\n<right> en la unidad de almacenamiento para utilizar");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
+				"Увеличивает количество слотов в Ячейке Хранилища до 80" + "\n<right> на Ячейке Хранилища для улучшения");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish),
+				"Ulepsza jednostkę magazynującą do 80 miejsc" + "\n<right> na Jednostkę magazynującą (Standardową), aby użyć");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French),
+				"améliore la capacité de unité de stockage à 80" + "\n<right> l'unité de stockage pour utiliser");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
+				"Capacidad de unidad de almacenamiento mejorada a 80" + "\n<right> en la unidad de almacenamiento para utilizar");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至80容量" + "\n<right>一个存储单元(血腥)可镶嵌");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
@@ -33,7 +37,7 @@ namespace MagicStorage.Items
 			Item.height = 12;
 			Item.maxStack = 99;
 			Item.rare = ItemRarityID.Blue;
-			Item.value = Item.sellPrice(0, 0, 32);
+			Item.value = Item.sellPrice(silver: 32);
 		}
 
 		public override void AddRecipes()

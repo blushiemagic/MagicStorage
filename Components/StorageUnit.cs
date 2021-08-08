@@ -18,7 +18,7 @@ namespace MagicStorage.Components
 			TileObjectData.newTile.StyleWrapLimit = 6;
 		}
 
-		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TEStorageUnit>();
+		public override TEStorageUnit GetTileEntity() => ModContent.GetInstance<TEStorageUnit>();
 
 		public override void MouseOver(int i, int j)
 		{
@@ -59,7 +59,7 @@ namespace MagicStorage.Components
 				j--;
 			if (TryUpgrade(i, j))
 				return true;
-			TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
+			TEStorageUnit storageUnit = (TEStorageUnit) TileEntity.ByPosition[new Point16(i, j)];
 			Main.LocalPlayer.tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
@@ -111,11 +111,11 @@ namespace MagicStorage.Components
 
 			if (success)
 			{
-				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByPosition[new Point16(i, j)];
+				TEStorageUnit storageUnit = (TEStorageUnit) TileEntity.ByPosition[new Point16(i, j)];
 				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
 				TEStorageHeart heart = storageUnit.GetHeart();
-				if (heart != null)
+				if (heart is not null)
 				{
 					if (Main.netMode == NetmodeID.SinglePlayer)
 						heart.ResetCompactStage();
@@ -135,10 +135,10 @@ namespace MagicStorage.Components
 
 		private static void SetStyle(int i, int j, int style)
 		{
-			Main.tile[i, j].frameY = (short)(36 * style);
-			Main.tile[i + 1, j].frameY = (short)(36 * style);
-			Main.tile[i, j + 1].frameY = (short)(36 * style + 18);
-			Main.tile[i + 1, j + 1].frameY = (short)(36 * style + 18);
+			Main.tile[i, j].frameY = (short) (36 * style);
+			Main.tile[i + 1, j].frameY = (short) (36 * style);
+			Main.tile[i, j + 1].frameY = (short) (36 * style + 18);
+			Main.tile[i + 1, j + 1].frameY = (short) (36 * style + 18);
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)

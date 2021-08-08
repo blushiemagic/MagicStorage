@@ -36,7 +36,7 @@ namespace MagicStorage.Components
 
 		public abstract bool ValidTile(Tile tile);
 
-		public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternative)
+		public override int Hook_AfterPlacement(int i, int j, int type, int style, int direction, int alternate)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -45,11 +45,11 @@ namespace MagicStorage.Components
 			}
 
 			int id = Place(i - 1, j - 1);
-			((TEStorageComponent)ByID[id]).OnPlace();
+			((TEStorageComponent) ByID[id]).OnPlace();
 			return id;
 		}
 
-		public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction, int alternative)
+		public static int Hook_AfterPlacement_NoEntity(int i, int j, int type, int style, int direction, int alternate)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -132,7 +132,7 @@ namespace MagicStorage.Components
 				}
 			}
 
-			return new Point16(-1, -1);
+			return Point16.NegativeOne;
 		}
 
 		public override void OnNetPlace()
@@ -146,7 +146,7 @@ namespace MagicStorage.Components
 			Point16 center = FindStorageCenter(position);
 			if (center.X >= 0 && center.Y >= 0)
 			{
-				TEStorageCenter centerEnt = (TEStorageCenter)ByPosition[center];
+				TEStorageCenter centerEnt = (TEStorageCenter) ByPosition[center];
 				centerEnt.ResetAndSearch();
 			}
 		}

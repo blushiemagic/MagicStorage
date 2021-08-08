@@ -19,10 +19,13 @@ namespace MagicStorage.Components
 		public virtual TEStorageHeart GetHeart(int i, int j)
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
+			if (point.X < 0 || point.Y < 0)
 				return null;
-			TileEntity heart = TileEntity.ByPosition[point];
-			return heart is TEStorageCenter center ? center.GetHeart() : null;
+
+			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
+				return center.GetHeart();
+
+			return null;
 		}
 
 		public override void MouseOver(int i, int j)
@@ -92,7 +95,7 @@ namespace MagicStorage.Components
 			{
 				modPlayer.CloseStorage();
 				SoundEngine.PlaySound(SoundID.MenuClose);
-				lock (BlockRecipes.activeLock)
+				lock (BlockRecipes.ActiveLock)
 				{
 					Recipe.FindRecipes();
 				}
@@ -106,7 +109,7 @@ namespace MagicStorage.Components
 					PlayerInput.Triggers.JustPressed.Grapple = false;
 				Main.recBigList = false;
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
-				lock (BlockRecipes.activeLock)
+				lock (BlockRecipes.ActiveLock)
 				{
 					Recipe.FindRecipes();
 				}

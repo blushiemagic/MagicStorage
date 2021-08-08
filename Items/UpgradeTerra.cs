@@ -18,10 +18,14 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(泰拉)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 640 capacity" + "\n<right> a Luminite Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Увеличивает количество слотов в Ячейке Хранилища до 640" + "\n<right> на Люминитовой Ячейке Хранилища для улучшения");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ulepsza jednostkę magazynującą do 640 miejsc" + "\n<right> na Jednostkę magazynującą (Luminowaną), aby użyć");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "améliore la capacité de unité de stockage à 640" + "\n<right> l'unité de stockage (Luminite) pour utiliser");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Capacidad de unidad de almacenamiento mejorada a 640" + "\n<right> en la unidad de almacenamiento (Luminita) para utilizar");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
+				"Увеличивает количество слотов в Ячейке Хранилища до 640" + "\n<right> на Люминитовой Ячейке Хранилища для улучшения");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish),
+				"Ulepsza jednostkę magazynującą do 640 miejsc" + "\n<right> na Jednostkę magazynującą (Luminowaną), aby użyć");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French),
+				"améliore la capacité de unité de stockage à 640" + "\n<right> l'unité de stockage (Luminite) pour utiliser");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
+				"Capacidad de unidad de almacenamiento mejorada a 640" + "\n<right> en la unidad de almacenamiento (Luminita) para utilizar");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至640容量" + "\n<right>一个存储单元(泰拉)可镶嵌");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -33,7 +37,7 @@ namespace MagicStorage.Items
 			Item.height = 12;
 			Item.maxStack = 99;
 			Item.rare = ItemRarityID.Purple;
-			Item.value = Item.sellPrice(0, 10);
+			Item.value = Item.sellPrice(gold: 10);
 		}
 
 		public override void AddRecipes()
@@ -44,10 +48,10 @@ namespace MagicStorage.Items
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.Register();
 
-			if (ModLoader.TryGetMod("CalamityMod", out Mod otherMod))
+			if (ModLoader.TryGetMod("CalamityMod", out Mod calamityMod))
 			{
 				recipe = CreateRecipe();
-				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
+				recipe.AddIngredient(calamityMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 				recipe.AddTile(TileID.LunarCraftingStation);
 				recipe.Register();

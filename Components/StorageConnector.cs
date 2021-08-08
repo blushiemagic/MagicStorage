@@ -35,10 +35,7 @@ namespace MagicStorage.Components
 			int count = 0;
 
 			Point16 startSearch = new(i, j);
-			HashSet<Point16> explored = new()
-			{
-				startSearch
-			};
+			HashSet<Point16> explored = new() { startSearch };
 			Queue<Point16> toExplore = new();
 			foreach (Point16 point in TEStorageComponent.AdjacentComponents(startSearch))
 				toExplore.Enqueue(point);
@@ -89,8 +86,8 @@ namespace MagicStorage.Components
 				frameY += 18;
 			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].IsActive && Main.tile[i, j + 1].type == Type)
 				frameY += 36;
-			Main.tile[i, j].frameX = (short)frameX;
-			Main.tile[i, j].frameY = (short)frameY;
+			Main.tile[i, j].frameX = (short) frameX;
+			Main.tile[i, j].frameY = (short) frameY;
 			return false;
 		}
 
@@ -103,7 +100,7 @@ namespace MagicStorage.Components
 				NetHelper.SendSearchAndRefresh(StorageComponent.killTile.X, StorageComponent.killTile.Y);
 			else
 				TEStorageComponent.SearchAndRefreshNetwork(StorageComponent.killTile);
-			StorageComponent.killTile = new Point16(-1, -1);
+			StorageComponent.killTile = Point16.NegativeOne;
 		}
 	}
 }

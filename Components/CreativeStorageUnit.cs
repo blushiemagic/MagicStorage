@@ -7,7 +7,7 @@ namespace MagicStorage.Components
 {
 	public class CreativeStorageUnit : StorageComponent
 	{
-		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TECreativeStorageUnit>();
+		public override TECreativeStorageUnit GetTileEntity() => ModContent.GetInstance<TECreativeStorageUnit>();
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CreativeStorageUnit>();
 

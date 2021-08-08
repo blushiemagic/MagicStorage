@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using MagicStorage.Edits;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -179,7 +180,7 @@ namespace MagicStorage.Components
 							{
 								if (Main.netMode == NetmodeID.Server)
 								{
-									WithdrawOperation op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+									WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
 									op.SendKeepOneIfFavorite = keepOneIfFavorite;
 									netQueue.Enqueue(op);
 								}
@@ -198,7 +199,7 @@ namespace MagicStorage.Components
 				{
 					if (Main.netMode == NetmodeID.Server)
 					{
-						WithdrawOperation op = (WithdrawOperation)UnitOperation.Withdraw.Create(original);
+						WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
 						op.SendKeepOneIfFavorite = keepOneIfFavorite;
 						netQueue.Enqueue(op);
 					}
@@ -233,10 +234,10 @@ namespace MagicStorage.Components
 			if (Inactive)
 				style += 3;
 			style *= 36;
-			topLeft.frameX = (short)style;
-			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
-			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
-			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
+			topLeft.frameX = (short) style;
+			Main.tile[Position.X, Position.Y + 1].frameX = (short) style;
+			Main.tile[Position.X + 1, Position.Y].frameX = (short) (style + 18);
+			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short) (style + 18);
 			return oldFrame != style;
 		}
 
@@ -314,12 +315,12 @@ namespace MagicStorage.Components
 			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
 			if (EditsLoader.MessageTileEntitySyncing)
 			{
-				trueWriter.Write((byte)0);
+				trueWriter.Write((byte) 0);
 				base.NetSend(trueWriter);
 				return;
 			}
 
-			trueWriter.Write((byte)1);
+			trueWriter.Write((byte) 1);
 
 			/* Recreate a BinaryWriter writer */
 			using MemoryStream buffer = new(65536);
@@ -335,7 +336,7 @@ namespace MagicStorage.Components
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
 			}
 
-			writer.Write((ushort)netQueue.Count);
+			writer.Write((ushort) netQueue.Count);
 			while (netQueue.Count > 0)
 				netQueue.Dequeue().Send(writer, this);
 
@@ -344,7 +345,7 @@ namespace MagicStorage.Components
 			compressor.Close();
 
 			/* Sends the buffer through the network */
-			trueWriter.Write((ushort)buffer.Length);
+			trueWriter.Write((ushort) buffer.Length);
 			trueWriter.Write(buffer.ToArray());
 
 			/* Compression stats and debugging code (server side) */
@@ -385,12 +386,11 @@ namespace MagicStorage.Components
 
 			/* Original code */
 			base.NetReceive(reader);
-			if (ByPosition.ContainsKey(Position) && ByPosition[Position] is TEStorageUnit unit)
+			if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
 			{
-				TEStorageUnit other = unit;
-				items = other.items;
-				hasSpaceInStack = other.hasSpaceInStack;
-				hasItem = other.hasItem;
+				items = otherUnit.items;
+				hasSpaceInStack = otherUnit.hasSpaceInStack;
+				hasItem = otherUnit.hasItem;
 			}
 
 			receiving = true;
@@ -452,10 +452,10 @@ namespace MagicStorage.Components
 				types.Add(Withdraw);
 				types.Add(WithdrawStack);
 				for (int k = 0; k < types.Count; k++)
-					types[k].id = (byte)k;
+					types[k].id = (byte) k;
 			}
 
-			public UnitOperation Create() => (UnitOperation)MemberwiseClone();
+			public UnitOperation Create() => (UnitOperation) MemberwiseClone();
 
 			public UnitOperation Create(Item item)
 			{

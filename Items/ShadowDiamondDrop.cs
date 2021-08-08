@@ -126,7 +126,8 @@ namespace MagicStorage.Items
 	internal class ShadowDiamondCondition : IItemDropRuleCondition
 	{
 		public bool CanDrop(DropAttemptInfo info) =>
-			!info.IsInSimulation && info.npc.type switch
+			!info.IsInSimulation &&
+			info.npc.type switch
 			{
 				NPCID.KingSlime         => !StorageWorld.kingSlimeDiamond,
 				NPCID.EyeofCthulhu      => !StorageWorld.boss1Diamond,

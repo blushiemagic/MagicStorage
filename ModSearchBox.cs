@@ -13,16 +13,16 @@ namespace MagicStorage
 		private UITextPanel<string> _modButton;
 		public Action OnChanged;
 
-		public ModSearchBox(Action onChanged)
-		{
-			OnChanged = onChanged;
-		}
-
 		public int ModIndex { get; private set; } = ModIndexAll;
 
 		public string ModName { get; private set; }
 
 		public UIPanel Button => _modButton;
+
+		public ModSearchBox(Action onChanged)
+		{
+			OnChanged = onChanged;
+		}
 
 		public void InitLangStuff()
 		{

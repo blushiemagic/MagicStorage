@@ -41,7 +41,7 @@ namespace MagicStorage.Items
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.tileBoost = 20;
 			Item.rare = ItemRarityID.Blue;
-			Item.value = Item.sellPrice(0, 0, 40);
+			Item.value = Item.sellPrice(silver: 40);
 		}
 
 		public override bool? UseItem(Player player)
@@ -54,10 +54,10 @@ namespace MagicStorage.Items
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
+
 				Point16 point = new(i, j);
-				if (TileEntity.ByPosition.ContainsKey(point) && TileEntity.ByPosition[point] is TEAbstractStorageUnit unit)
+				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
 				{
-					TEAbstractStorageUnit storageUnit = unit;
 					storageUnit.Inactive = !storageUnit.Inactive;
 					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
 					Main.NewText("Storage Unit has been " + activeText);

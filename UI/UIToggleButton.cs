@@ -11,12 +11,14 @@ namespace MagicStorage.UI
 {
 	public class UIToggleButton : UIElement
 	{
+		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground");
+		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive");
 		private readonly Asset<Texture2D> button;
 		private readonly LocalizedText name;
 		private readonly int buttonSize;
 		private readonly Action onChanged;
-		private static readonly Asset<Texture2D> backTexture = ModContent.Request<Texture2D>("Assets/SortButtonBackground");
-		private static readonly Asset<Texture2D> backTextureActive = ModContent.Request<Texture2D>("Assets/SortButtonBackgroundActive");
+
+		public bool Value { get; set; }
 
 		public UIToggleButton(Action onChanged, Asset<Texture2D> button, LocalizedText name, int buttonSize = 21)
 		{
@@ -30,12 +32,10 @@ namespace MagicStorage.UI
 			MinHeight.Set(buttonSize, 0f);
 		}
 
-		public bool Value { get; set; }
-
 		public override void Update(GameTime gameTime)
 		{
 			bool oldValue = Value;
-			if (StorageGUI.MouseClicked && Parent != null)
+			if (StorageGUI.MouseClicked && Parent is not null)
 				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
 					Value = !Value;
 
@@ -56,7 +56,7 @@ namespace MagicStorage.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			CalculatedStyle dim = GetDimensions();
-			Asset<Texture2D> texture = Value ? backTextureActive : backTexture;
+			Asset<Texture2D> texture = Value ? BackTextureActive : BackTexture;
 			Vector2 drawPos = new(dim.X, dim.Y);
 			Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y) ? Color.Silver : Color.White;
 			Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);

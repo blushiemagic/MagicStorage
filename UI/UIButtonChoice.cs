@@ -11,6 +11,8 @@ namespace MagicStorage.UI
 {
 	public class UIButtonChoice : UIElement
 	{
+		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground");
+		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive");
 		private readonly Action _onChanged;
 		private readonly int buttonPadding;
 
@@ -18,8 +20,8 @@ namespace MagicStorage.UI
 		private readonly int buttonSize;
 
 		private readonly LocalizedText[] names;
-		private static readonly Asset<Texture2D> backTexture = ModContent.Request<Texture2D>("Assets/SortButtonBackground");
-		private static readonly Asset<Texture2D> backTextureActive = ModContent.Request<Texture2D>("Assets/SortButtonBackgroundActive");
+
+		public int Choice { get; set; }
 
 		public UIButtonChoice(Action onChanged, Asset<Texture2D>[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
@@ -38,12 +40,10 @@ namespace MagicStorage.UI
 			MinHeight.Set(buttonSize, 0f);
 		}
 
-		public int Choice { get; set; }
-
 		public override void Update(GameTime gameTime)
 		{
 			int oldChoice = Choice;
-			if (StorageGUI.MouseClicked && Parent != null)
+			if (StorageGUI.MouseClicked && Parent is not null)
 				for (int k = 0; k < buttons.Length; k++)
 					if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k))
 					{
@@ -70,7 +70,7 @@ namespace MagicStorage.UI
 			CalculatedStyle dim = GetDimensions();
 			for (int k = 0; k < buttons.Length; k++)
 			{
-				Asset<Texture2D> texture = k == Choice ? backTextureActive : backTexture;
+				Asset<Texture2D> texture = k == Choice ? BackTextureActive : BackTexture;
 				Vector2 drawPos = new(dim.X + k * (buttonSize + buttonPadding), dim.Y);
 				Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y, k) ? Color.Silver : Color.White;
 				Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);

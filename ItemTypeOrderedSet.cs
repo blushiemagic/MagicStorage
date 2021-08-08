@@ -13,14 +13,14 @@ namespace MagicStorage
 		private List<Item> _items = new();
 		private HashSet<int> _set = new();
 
+		public int Count => _items.Count;
+
+		public IEnumerable<Item> Items => _items;
+
 		public ItemTypeOrderedSet(string name)
 		{
 			_name = name;
 		}
-
-		public int Count => _items.Count;
-
-		public IEnumerable<Item> Items => _items;
 
 		public bool Add(Item item) => Add(item.type);
 
@@ -41,11 +41,7 @@ namespace MagicStorage
 
 		public bool Contains(Item item) => _set.Contains(item.type);
 
-		public bool Remove(Item item)
-		{
-			int type = item.type;
-			return Remove(type);
-		}
+		public bool Remove(Item item) => Remove(item.type);
 
 		public bool Remove(int type)
 		{
@@ -84,23 +80,25 @@ namespace MagicStorage
 		public void Load(TagCompound tag)
 		{
 			IList<TagCompound> list = tag.GetList<TagCompound>(_name);
-			if (list != null && list.Count > 0)
+			if (list is not null && list.Count > 0)
 			{
 				_items = list.Select(ItemIO.Load).ToList();
 			}
 			else
 			{
 				IList<int> listV2 = tag.GetList<int>(_name + Suffix);
-				if (listV2 != null)
+				if (listV2 is not null)
 					_items = listV2.Select(x =>
-					{
-						if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
-							return null;
-						Item item = new();
-						item.SetDefaults(x);
-						item.type = x;
-						return item;
-					}).Where(x => x != null).ToList();
+						{
+							if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
+								return null;
+							Item item = new();
+							item.SetDefaults(x);
+							item.type = x;
+							return item;
+						})
+						.Where(x => x is not null)
+						.ToList();
 				else
 					_items = new List<Item>();
 			}

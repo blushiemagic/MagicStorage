@@ -17,25 +17,25 @@ namespace MagicStorage.UI
 {
 	public class UISearchBar : UIElement
 	{
-		private const int padding = 4;
-		private static readonly List<UISearchBar> searchBars = new();
+		private const int Padding = 4;
+		private static readonly List<UISearchBar> SearchBars = new();
+		private static readonly Asset<Texture2D> TextureAsset = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SearchBar");
+		private static readonly Asset<DynamicSpriteFont> MouseTextFont = FontAssets.MouseText;
 		private readonly Action _clearedEvent;
 		private readonly LocalizedText defaultText;
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
-		private static readonly Asset<Texture2D> textureAsset = ModContent.Request<Texture2D>("MagicStorage/Assets/SearchBar");
-		private static readonly Asset<DynamicSpriteFont> fontAsset = FontAssets.MouseText;
+
+		public string Text { get; private set; } = string.Empty;
 
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
-			SetPadding(padding);
-			searchBars.Add(this);
+			SetPadding(Padding);
+			SearchBars.Add(this);
 			this.defaultText = defaultText;
 			_clearedEvent = clearedEvent;
 		}
-
-		public string Text { get; private set; } = string.Empty;
 
 		public void Reset()
 		{
@@ -52,9 +52,8 @@ namespace MagicStorage.UI
 
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			MouseState mouse = StorageGUI.curMouse;
-			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width &&
-			                 mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
-			if (StorageGUI.MouseClicked && Parent != null)
+			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+			if (StorageGUI.MouseClicked && Parent is not null)
 				LeftClick(mouseOver);
 			else if (StorageGUI.RightMouseClicked)
 				RightClick(mouseOver);
@@ -80,7 +79,7 @@ namespace MagicStorage.UI
 
 		private void RightClick(bool mouseOver)
 		{
-			if (!mouseOver && Parent != null && hasFocus)
+			if (!mouseOver && Parent is not null && hasFocus)
 			{
 				LoseFocus();
 			}
@@ -152,22 +151,26 @@ namespace MagicStorage.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			CalculatedStyle dim = GetDimensions();
-			int innerWidth = (int) dim.Width - 2 * padding;
-			int innerHeight = (int) dim.Height - 2 * padding;
-			Texture2D texture = textureAsset.Value;
-			spriteBatch.Draw(texture, dim.Position(), new Rectangle(0, 0, padding, padding), Color.White);
-			spriteBatch.Draw(texture, new Rectangle((int) dim.X + padding, (int) dim.Y, innerWidth, padding), new Rectangle(padding, 0, 1, padding), Color.White);
-			spriteBatch.Draw(texture, new Vector2(dim.X + padding + innerWidth, dim.Y), new Rectangle(padding + 1, 0, padding, padding), Color.White);
-			spriteBatch.Draw(texture, new Rectangle((int) dim.X, (int) dim.Y + padding, padding, innerHeight), new Rectangle(0, padding, padding, 1), Color.White);
-			spriteBatch.Draw(texture, new Rectangle((int) dim.X + padding, (int) dim.Y + padding, innerWidth, innerHeight), new Rectangle(padding, padding, 1, 1), Color.White);
-			spriteBatch.Draw(texture, new Rectangle((int) dim.X + padding + innerWidth, (int) dim.Y + padding, padding, innerHeight), new Rectangle(padding + 1, padding, padding, 1), Color.White);
-			spriteBatch.Draw(texture, new Vector2(dim.X, dim.Y + padding + innerHeight), new Rectangle(0, padding + 1, padding, padding), Color.White);
-			spriteBatch.Draw(texture, new Rectangle((int) dim.X + padding, (int) dim.Y + padding + innerHeight, innerWidth, padding), new Rectangle(padding, padding + 1, 1, padding), Color.White);
-			spriteBatch.Draw(texture, new Vector2(dim.X + padding + innerWidth, dim.Y + padding + innerHeight), new Rectangle(padding + 1, padding + 1, padding, padding), Color.White);
+			int innerWidth = (int) dim.Width - 2 * Padding;
+			int innerHeight = (int) dim.Height - 2 * Padding;
+			Texture2D texture = TextureAsset.Value;
+			spriteBatch.Draw(texture, dim.Position(), new Rectangle(0, 0, Padding, Padding), Color.White);
+			spriteBatch.Draw(texture, new Rectangle((int) dim.X + Padding, (int) dim.Y, innerWidth, Padding), new Rectangle(Padding, 0, 1, Padding), Color.White);
+			spriteBatch.Draw(texture, new Vector2(dim.X + Padding + innerWidth, dim.Y), new Rectangle(Padding + 1, 0, Padding, Padding), Color.White);
+			spriteBatch.Draw(texture, new Rectangle((int) dim.X, (int) dim.Y + Padding, Padding, innerHeight), new Rectangle(0, Padding, Padding, 1), Color.White);
+			spriteBatch.Draw(texture, new Rectangle((int) dim.X + Padding, (int) dim.Y + Padding, innerWidth, innerHeight), new Rectangle(Padding, Padding, 1, 1),
+				Color.White);
+			spriteBatch.Draw(texture, new Rectangle((int) dim.X + Padding + innerWidth, (int) dim.Y + Padding, Padding, innerHeight),
+				new Rectangle(Padding + 1, Padding, Padding, 1), Color.White);
+			spriteBatch.Draw(texture, new Vector2(dim.X, dim.Y + Padding + innerHeight), new Rectangle(0, Padding + 1, Padding, Padding), Color.White);
+			spriteBatch.Draw(texture, new Rectangle((int) dim.X + Padding, (int) dim.Y + Padding + innerHeight, innerWidth, Padding),
+				new Rectangle(Padding, Padding + 1, 1, Padding), Color.White);
+			spriteBatch.Draw(texture, new Vector2(dim.X + Padding + innerWidth, dim.Y + Padding + innerHeight), new Rectangle(Padding + 1, Padding + 1, Padding, Padding),
+				Color.White);
 
 			bool isEmpty = Text.Length == 0;
 			string drawText = isEmpty ? defaultText.Value : Text;
-			DynamicSpriteFont font = fontAsset.Value;
+			DynamicSpriteFont font = MouseTextFont.Value;
 			Vector2 size = font.MeasureString(drawText);
 			float scale = innerHeight / size.Y;
 			if (isEmpty && hasFocus)
@@ -179,11 +182,11 @@ namespace MagicStorage.UI
 			Color color = Color.Black;
 			if (isEmpty)
 				color *= 0.75f;
-			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + padding, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + Padding, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			if (!isEmpty && hasFocus && cursorTimer < 30)
 			{
 				float drawCursor = font.MeasureString(drawText.Substring(0, cursorPosition)).X * scale;
-				spriteBatch.DrawString(font, "|", new Vector2(dim.X + padding + drawCursor, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+				spriteBatch.DrawString(font, "|", new Vector2(dim.X + Padding + drawCursor, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			}
 		}
 
@@ -191,7 +194,7 @@ namespace MagicStorage.UI
 
 		private static void CheckBlockInput()
 		{
-			Main.blockInput = searchBars.Any(searchBar => searchBar.hasFocus);
+			Main.blockInput = SearchBars.Any(searchBar => searchBar.hasFocus);
 		}
 	}
 }

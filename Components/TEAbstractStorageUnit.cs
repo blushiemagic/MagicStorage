@@ -21,12 +21,16 @@ namespace MagicStorage.Components
 			return changed;
 		}
 
-		public bool Unlink() => Link(new Point16(-1, -1));
+		public bool Unlink() => Link(Point16.NegativeOne);
 
 		public TEStorageHeart GetHeart()
 		{
-			if (center != new Point16(-1, -1) && ByPosition.ContainsKey(center) && ByPosition[center] is TEStorageCenter entity)
+			if (center == Point16.NegativeOne)
+				return null;
+
+			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter entity)
 				return entity.GetHeart();
+
 			return null;
 		}
 

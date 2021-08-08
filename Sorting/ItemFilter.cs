@@ -28,7 +28,12 @@ namespace MagicStorage.Sorting
 
 	public class FilterWeaponMelee : ItemFilter
 	{
-		public override bool Passes(Item item) => (item.CountsAsClass(DamageClass.Melee) || item.CountsAsClass(DamageClass.Throwing) && !item.consumable) && item.pick == 0 && item.axe == 0 && item.hammer == 0 && item.damage > 0;
+		public override bool Passes(Item item) =>
+			(item.CountsAsClass(DamageClass.Melee) || item.CountsAsClass(DamageClass.Throwing) && !item.consumable) &&
+			item.pick == 0 &&
+			item.axe == 0 &&
+			item.hammer == 0 &&
+			item.damage > 0;
 	}
 
 	public class FilterWeaponRanged : ItemFilter
@@ -58,7 +63,12 @@ namespace MagicStorage.Sorting
 					return false;
 			}
 
-			return item.CountsAsClass(DamageClass.Summon) || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item) || item.sentry;
+			return item.CountsAsClass(DamageClass.Summon) ||
+				   SortClassList.BossSpawn(item) ||
+				   SortClassList.Cart(item) ||
+				   SortClassList.LightPet(item) ||
+				   SortClassList.Mount(item) ||
+				   item.sentry;
 		}
 	}
 
@@ -104,7 +114,12 @@ namespace MagicStorage.Sorting
 
 	public class FilterWeapon : ItemFilter
 	{
-		public override bool Passes(Item item) => !(item.consumable && item.CountsAsClass(DamageClass.Throwing)) && (item.damage > 0 || item.CountsAsClass(DamageClass.Magic) && item.healLife > 0 && item.mana > 0) && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+		public override bool Passes(Item item) =>
+			!(item.consumable && item.CountsAsClass(DamageClass.Throwing)) &&
+			(item.damage > 0 || item.CountsAsClass(DamageClass.Magic) && item.healLife > 0 && item.mana > 0) &&
+			item.pick == 0 &&
+			item.axe == 0 &&
+			item.hammer == 0;
 	}
 
 	public class FilterPickaxe : ItemFilter
@@ -134,12 +149,21 @@ namespace MagicStorage.Sorting
 
 	public class FilterEquipment : ItemFilter
 	{
-		public override bool Passes(Item item) => !item.vanity && (item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType]));
+		public override bool Passes(Item item) =>
+			!item.vanity &&
+			(item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType]));
 	}
 
 	public class FilterPotion : ItemFilter
 	{
-		public override bool Passes(Item item) => item.consumable && (item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion || item.Name.ToLowerInvariant().Contains("potion") || item.Name.ToLowerInvariant().Contains("elixir"));
+		public override bool Passes(Item item) =>
+			item.consumable &&
+			(item.healLife > 0 ||
+			 item.healMana > 0 ||
+			 item.buffType > 0 ||
+			 item.potion ||
+			 item.Name.ToLowerInvariant().Contains("potion") ||
+			 item.Name.ToLowerInvariant().Contains("elixir"));
 	}
 
 	public class FilterPlaceable : ItemFilter

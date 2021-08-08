@@ -2,14 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Components;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
-using MagicStorage.Components;
-using Terraria.ID;
-using Terraria.Audio;
 
 namespace MagicStorage
 {
@@ -21,7 +19,7 @@ namespace MagicStorage
 
 		private TEStorageHeart _latestAccessedStorage;
 		public bool remoteAccess;
-		private Point16 storageAccess = new(-1, -1);
+		private Point16 storageAccess = Point16.NegativeOne;
 
 		public int timeSinceOpen = 1;
 
@@ -39,8 +37,7 @@ namespace MagicStorage
 
 		public ItemTypeOrderedSet AsKnownRecipes { get; } = new("AsKnownRecipes");
 
-		public TEStorageHeart LatestAccessedStorage =>
-			_latestAccessedStorage != null && _latestAccessedStorage.IsAlive ? _latestAccessedStorage : null;
+		public TEStorageHeart LatestAccessedStorage => _latestAccessedStorage is { IsAlive: true } ? _latestAccessedStorage : null;
 
 		public bool IsRecipeHidden(Item item) => _hiddenRecipes.Contains(item);
 
@@ -83,34 +80,40 @@ namespace MagicStorage
 		public override void ResetEffects()
 		{
 			if (Player.whoAmI != Main.myPlayer)
-			{
 				return;
-			}
+
 			if (timeSinceOpen < 1)
 			{
 				Player.SetTalkNPC(-1);
 				Main.playerInventory = true;
 				timeSinceOpen++;
 			}
+
 			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (Player.chest != -1 || !Main.playerInventory || Player.sign > -1 || Player.talkNPC > -1))
 			{
 				CloseStorage();
-				lock (BlockRecipes.activeLock)
-				Recipe.FindRecipes();
+				lock (BlockRecipes.ActiveLock)
+				{
+					Recipe.FindRecipes();
+				}
 			}
 			else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
-				int playerX = (int)(Player.Center.X / 16f);
-				int playerY = (int)(Player.Center.Y / 16f);
-				if (!remoteAccess && (playerX < storageAccess.X - Player.lastTileRangeX || playerX > storageAccess.X + Player.lastTileRangeX + 1 || playerY < storageAccess.Y - Player.lastTileRangeY || playerY > storageAccess.Y + Player.lastTileRangeY + 1))
+				int playerX = (int) (Player.Center.X / 16f);
+				int playerY = (int) (Player.Center.Y / 16f);
+				if (!remoteAccess &&
+					(playerX < storageAccess.X - Player.lastTileRangeX ||
+					 playerX > storageAccess.X + Player.lastTileRangeX + 1 ||
+					 playerY < storageAccess.Y - Player.lastTileRangeY ||
+					 playerY > storageAccess.Y + Player.lastTileRangeY + 1))
 				{
-					SoundEngine.PlaySound(11, -1, -1, 1);
+					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (!(TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is StorageAccess))
+				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is not StorageAccess)
 				{
-					SoundEngine.PlaySound(11, -1, -1, 1);
+					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
@@ -122,14 +125,14 @@ namespace MagicStorage
 			storageAccess = point;
 			remoteAccess = remote;
 			_latestAccessedStorage = GetStorageHeart();
-			if (MagicStorageConfig.UseConfigFilter && CraftingGUI.recipeButtons != null)
+			if (MagicStorageConfig.UseConfigFilter && CraftingGUI.recipeButtons is not null)
 				CraftingGUI.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 			StorageGUI.RefreshItems();
 		}
 
 		public void CloseStorage()
 		{
-			storageAccess = new Point16(-1, -1);
+			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
 		}
 
@@ -164,18 +167,12 @@ namespace MagicStorage
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
 		{
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
-			{
 				return false;
-			}
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
-			{
 				return false;
-			}
 			Item item = inventory[slot];
 			if (item.favorited || item.IsAir)
-			{
 				return false;
-			}
 			int oldType = item.type;
 			int oldStack = item.stack;
 			if (StorageCrafting())
@@ -202,11 +199,13 @@ namespace MagicStorage
 					item.SetDefaults(0, true);
 				}
 			}
+
 			if (item.type != oldType || item.stack != oldStack)
 			{
-				SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
+				SoundEngine.PlaySound(SoundID.Grab);
 				StorageGUI.RefreshItems();
 			}
+
 			return true;
 		}
 
@@ -224,9 +223,13 @@ namespace MagicStorage
 
 		public TECraftingAccess GetCraftingAccess()
 		{
-			if (storageAccess.X < 0 || storageAccess.Y < 0 || !TileEntity.ByPosition.ContainsKey(storageAccess))
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
-			return TileEntity.ByPosition[storageAccess] as TECraftingAccess;
+
+			if (TileEntity.ByPosition.TryGetValue(storageAccess, out TileEntity te))
+				return te as TECraftingAccess;
+
+			return null;
 		}
 
 		public bool StorageCrafting()
@@ -234,7 +237,7 @@ namespace MagicStorage
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return false;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			return tile != null && tile.type == ModContent.TileType<CraftingAccess>();
+			return tile is not null && tile.type == ModContent.TileType<CraftingAccess>();
 		}
 
 		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();
@@ -242,7 +245,7 @@ namespace MagicStorage
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
 		{
 			foreach (Item item in Player.inventory.Concat(Player.armor).Concat(Player.dye).Concat(Player.miscDyes).Concat(Player.miscEquips))
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
 				{
 					damage *= 5;
 					break;
@@ -259,12 +262,12 @@ namespace MagicStorage
 		public override void OnRespawn(Player player)
 		{
 			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
 					item.TurnToAir();
 
 			{
 				Item item = player.trashItem;
-				if (item != null && !item.IsAir && CraftingGUI.IsTestItem(item))
+				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
 					item.TurnToAir();
 			}
 			base.OnRespawn(player);

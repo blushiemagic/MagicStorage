@@ -106,7 +106,8 @@ namespace MagicStorage
 
 			#region Initialize TileToCreatingItem
 
-			Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount).Select((_, i) =>
+			Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount)
+				.Select((_, i) =>
 				{
 					Item item = new();
 					// provide items
@@ -120,11 +121,14 @@ namespace MagicStorage
 					}
 
 					return item;
-				}).Where(i => i is not null).Where(x => x.type > ItemID.None && x.createTile >= TileID.Dirt).Select(x =>
+				})
+				.Where(item => item is not null)
+				.Where(item => item.type > ItemID.None && item.createTile >= TileID.Dirt)
+				.Select(item =>
 				{
 					// provide item and its tiles
-					List<int> tiles = new() { x.createTile };
-					switch (x.createTile)
+					List<int> tiles = new() { item.createTile };
+					switch (item.createTile)
 					{
 						case TileID.GlassKiln:
 						case TileID.Hellforge:
@@ -147,14 +151,12 @@ namespace MagicStorage
 							break;
 					}
 
-					return new
-					{
-						item = x,
-						tiles
-					};
+					return (item, tiles);
 				})
 				// flatten - tile, item
-				.SelectMany(x => x.tiles.Select(t => new { tile = t, x.item })).GroupBy(x => x.tile).ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
+				.SelectMany(x => x.tiles.Select(tile => (tile, x.item)))
+				.GroupBy(x => x.tile)
+				.ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
 
 			Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
 

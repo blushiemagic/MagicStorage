@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using MagicStorage.Edits;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework.Input;
@@ -18,7 +16,7 @@ namespace MagicStorage
 		public static readonly Version requiredVersion = new(0, 12);
 		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
 
-		// TODO can there 2 be const?
+		// TODO can these 2 be const?
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
@@ -132,7 +130,7 @@ namespace MagicStorage
 
 			text = LocalizationLoader.CreateTranslation(this, "SortStack");
 			text.SetDefault("Sort by Stacks");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировка по стакам");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировать по стопкам");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Trier par piles");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ordenar por pilas");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按堆栈排序");
@@ -316,61 +314,38 @@ namespace MagicStorage
 
 		public override void PostSetupContent()
 		{
-			Type type = Assembly.GetAssembly(typeof(Mod)).GetType("Terraria.ModLoader.Mod");
-			FieldInfo loadModsField = type.GetField("items", BindingFlags.Instance | BindingFlags.NonPublic);
-
-			AllMods = ModLoader.Mods.Where(x => !x.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase)).Where(x => x.Name != "ModLoader").Where(x => ((IDictionary<string, ModItem>)loadModsField.GetValue(x)).Count > 0).ToArray();
+			AllMods = ModLoader.Mods.Where(mod => mod.Name != "ModLoader")
+				.Where(mod => !mod.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
+				.Where(mod => mod.GetContent<ModItem>().Any())
+				.ToArray();
 		}
 
 		public override void AddRecipeGroups()
 		{
-			RecipeGroup group = new(() => Language.GetTextValue("LegacyMisc.37") + " Chest",
-				ItemID.Chest,
-				ItemID.GoldChest,
-				ItemID.ShadowChest,
-				ItemID.EbonwoodChest,
-				ItemID.RichMahoganyChest,
-				ItemID.PearlwoodChest,
-				ItemID.IvyChest,
-				ItemID.IceChest,
-				ItemID.LivingWoodChest,
-				ItemID.SkywareChest,
-				ItemID.ShadewoodChest,
-				ItemID.WebCoveredChest,
-				ItemID.LihzahrdChest,
-				ItemID.WaterChest,
-				ItemID.JungleChest,
-				ItemID.CorruptionChest,
-				ItemID.CrimsonChest,
-				ItemID.HallowedChest,
-				ItemID.FrozenChest,
-				ItemID.DynastyChest,
-				ItemID.HoneyChest,
-				ItemID.SteampunkChest,
-				ItemID.PalmWoodChest,
-				ItemID.MushroomChest,
-				ItemID.BorealWoodChest,
-				ItemID.SlimeChest,
-				ItemID.GreenDungeonChest,
-				ItemID.PinkDungeonChest,
-				ItemID.BlueDungeonChest,
-				ItemID.BoneChest,
-				ItemID.CactusChest,
-				ItemID.FleshChest,
-				ItemID.ObsidianChest,
-				ItemID.PumpkinChest,
-				ItemID.SpookyChest,
-				ItemID.GlassChest,
-				ItemID.MartianChest,
-				ItemID.GraniteChest,
-				ItemID.MeteoriteChest,
-				ItemID.MarbleChest);
+			int[] items =
+			{
+				ItemID.Chest, ItemID.GoldChest, ItemID.ShadowChest, ItemID.EbonwoodChest, ItemID.RichMahoganyChest, ItemID.PearlwoodChest, ItemID.IvyChest,
+				ItemID.IceChest, ItemID.LivingWoodChest, ItemID.SkywareChest, ItemID.ShadewoodChest, ItemID.WebCoveredChest, ItemID.LihzahrdChest, ItemID.WaterChest,
+				ItemID.JungleChest, ItemID.CorruptionChest, ItemID.CrimsonChest, ItemID.HallowedChest, ItemID.FrozenChest, ItemID.DynastyChest, ItemID.HoneyChest,
+				ItemID.SteampunkChest, ItemID.PalmWoodChest, ItemID.MushroomChest, ItemID.BorealWoodChest, ItemID.SlimeChest, ItemID.GreenDungeonChest,
+				ItemID.PinkDungeonChest, ItemID.BlueDungeonChest, ItemID.BoneChest, ItemID.CactusChest, ItemID.FleshChest, ItemID.ObsidianChest, ItemID.PumpkinChest,
+				ItemID.SpookyChest, ItemID.GlassChest, ItemID.MartianChest, ItemID.GraniteChest, ItemID.MeteoriteChest, ItemID.MarbleChest
+			};
+			RecipeGroup group = new(() => Language.GetTextValue("LegacyMisc.37") + " Chest", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 
-			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
+			items = new int[]
+			{
+				ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock, ItemID.RedIceBlock
+			};
+			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
 
-			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ModContent.ItemType<ShadowDiamond>());
+			items = new[]
+			{
+				ItemID.Diamond, ModContent.ItemType<ShadowDiamond>()
+			};
+			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Lang.GetItemNameValue(ItemID.Diamond), items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 		}
 

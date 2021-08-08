@@ -32,7 +32,7 @@ namespace MagicStorage.Items
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.consumable = true;
 			Item.rare = ItemRarityID.Red;
-			Item.value = Item.sellPrice(0, 2, 50);
+			Item.value = Item.sellPrice(gold: 2, silver: 50);
 			Item.createTile = ModContent.TileType<Components.StorageUnit>();
 			Item.placeStyle = 6;
 		}

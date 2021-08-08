@@ -18,10 +18,14 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(狱岩)");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 120 capacity" + "\n<right> a Demonite/Crimtane Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Увеличивает количество слотов в Ячейке Хранилища до 120" + "\n<right> на Демонитовой/Кримтановой Ячейке Хранилища для улучшения");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ulepsza jednostkę magazynującą do 120 miejsc" + "\n<right> na Jednostkę magazynującą (Karmazynit/Demonit), aby użyć");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "améliore la capacité de unité de stockage à 120" + "\n<right> l'unité de stockage (Démonite/Carmitane) pour utiliser");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Capacidad de unidad de almacenamiento mejorada a 120" + "\n<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
+				"Увеличивает количество слотов в Ячейке Хранилища до 120" + "\n<right> на Демонитовой/Кримтановой Ячейке Хранилища для улучшения");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish),
+				"Ulepsza jednostkę magazynującą do 120 miejsc" + "\n<right> na Jednostkę magazynującą (Karmazynit/Demonit), aby użyć");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French),
+				"améliore la capacité de unité de stockage à 120" + "\n<right> l'unité de stockage (Démonite/Carmitane) pour utiliser");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
+				"Capacidad de unidad de almacenamiento mejorada a 120" + "\n<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至120容量" + "\n<right>一个存储单元(血腥/魔金)可镶嵌");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
@@ -33,7 +37,7 @@ namespace MagicStorage.Items
 			Item.height = 12;
 			Item.maxStack = 99;
 			Item.rare = ItemRarityID.Green;
-			Item.value = Item.sellPrice(0, 0, 40);
+			Item.value = Item.sellPrice(silver: 40);
 		}
 
 		public override void AddRecipes()

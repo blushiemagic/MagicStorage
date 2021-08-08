@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using MagicStorage.UI;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage
 {
-	public class GUIHelpers
+	public static class GUIHelpers
 	{
 		public static UIButtonChoice MakeSortButtons(Action onChanged)
 		{
 			return new UIButtonChoice(onChanged, new[]
 			{
 				TextureAssets.InventorySort[0],
-				ModContent.Request<Texture2D>("Assets/SortID"),
-				ModContent.Request<Texture2D>("Assets/SortName"),
-				ModContent.Request<Texture2D>("Assets/SortNumber"),
-				ModContent.Request<Texture2D>("Assets/SortNumber")
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortID"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortName"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortNumber"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortNumber")
 			}, new[]
 			{
 				Language.GetText("Mods.MagicStorage.SortDefault"),
@@ -35,20 +34,20 @@ namespace MagicStorage
 		{
 			List<Asset<Texture2D>> textures = new()
 			{
-				ModContent.Request<Texture2D>("Assets/FilterAll"),
-				ModContent.Request<Texture2D>("Assets/FilterMelee"),
-				ModContent.Request<Texture2D>("Assets/FilterRanged"),
-				ModContent.Request<Texture2D>("Assets/FilterMagic"),
-				ModContent.Request<Texture2D>("Assets/FilterSummon"),
-				ModContent.Request<Texture2D>("Assets/FilterThrowing"),
-				ModContent.Request<Texture2D>("Assets/FilterAmmo"),
-				ModContent.Request<Texture2D>("Assets/FilterPickaxe"),
-				ModContent.Request<Texture2D>("Assets/FilterArmor"),
-				ModContent.Request<Texture2D>("Assets/FilterEquips"),
-				ModContent.Request<Texture2D>("Assets/FilterVanity"),
-				ModContent.Request<Texture2D>("Assets/FilterPotion"),
-				ModContent.Request<Texture2D>("Assets/FilterTile"),
-				ModContent.Request<Texture2D>("Assets/FilterMisc")
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMelee"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterRanged"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMagic"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterSummon"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterThrowing"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAmmo"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPickaxe"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterArmor"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterEquips"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterVanity"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPotion"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterTile"),
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc")
 			};
 			List<LocalizedText> texts = new()
 			{
@@ -69,7 +68,7 @@ namespace MagicStorage
 			};
 			if (withHistory)
 			{
-				textures.Add(ModContent.Request<Texture2D>("Assets/FilterAll"));
+				textures.Add(MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll"));
 				texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
 			}
 

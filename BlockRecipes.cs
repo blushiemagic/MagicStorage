@@ -6,12 +6,12 @@ namespace MagicStorage
 {
 	public class BlockRecipes : GlobalRecipe
 	{
-		public static bool active = true;
-		public static object activeLock = new();
+		public static bool Active = true;
+		public static readonly object ActiveLock = new();
 
 		public override bool RecipeAvailable(Recipe recipe)
 		{
-			if (!active)
+			if (!Active)
 				return true;
 			try
 			{

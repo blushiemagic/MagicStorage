@@ -9,14 +9,14 @@ namespace MagicStorage
 		public override TagCompound Save(Item item)
 		{
 			if (CraftingGUI.IsTestItem(item))
-				return new TagCompound {{"TestItem", true}};
+				return new TagCompound { { "TestItem", true } };
 
 			return null;
 		}
 
 		public override void Load(Item item, TagCompound tag)
 		{
-			if (tag != null && tag.ContainsKey("TestItem"))
+			if (tag is not null && tag.ContainsKey("TestItem"))
 				CraftingGUI.MarkAsTestItem(item);
 
 			base.Load(item, tag);

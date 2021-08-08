@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using MagicStorage.Components;
 using RecursiveCraft;
@@ -18,11 +19,11 @@ namespace MagicStorage
 		private static Mod RecursiveCraftMod;
 
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
-		public static bool Enabled => RecursiveCraftMod != null;
+		public static bool Enabled => RecursiveCraftMod is not null;
 
 		public static void Load()
 		{
-			RecursiveCraftMod = ModLoader.GetMod("RecursiveCraft");
+			ModLoader.TryGetMod("RecursiveCraft", out RecursiveCraftMod);
 			if (Enabled)
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
@@ -53,12 +54,12 @@ namespace MagicStorage
 		public static void Unload()
 		{
 			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
-				Unload_Inner(); // Once again we must separate out this logic.
+				StrongRef_Unload(); // Once again we must separate out this logic.
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void Unload_Inner()
+		private static void StrongRef_Unload()
 		{
 			Members.RecipeInfoCache = null;
 			Members.CompoundRecipe = null;
@@ -83,11 +84,8 @@ namespace MagicStorage
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
 		{
 			Dictionary<int, int> dictionary = new();
-			foreach (Item item in items)
-				if (dictionary.ContainsKey(item.type))
-					dictionary[item.type] += item.stack;
-				else
-					dictionary[item.type] = item.stack;
+			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
+				dictionary[type] = amount;
 			return dictionary;
 		}
 
@@ -97,7 +95,7 @@ namespace MagicStorage
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
 		public static void RecursiveRecipes()
 		{
-			Main.rand ??= new UnifiedRandom((int)DateTime.UtcNow.Ticks);
+			Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;
@@ -122,18 +120,18 @@ namespace MagicStorage
 			Player player = Main.LocalPlayer;
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
-			if (heart != null)
+			if (heart is not null)
 				return FlatDict(heart.GetStoredItems());
 			return null;
 		}
 
 		private static void SingleSearch(Recipe recipe, Dictionary<int, int> inventory)
 		{
-			lock (BlockRecipes.activeLock)
+			lock (BlockRecipes.ActiveLock)
 			{
-				BlockRecipes.active = false;
+				BlockRecipes.Active = false;
 				RecipeInfo recipeInfo = RecursiveCraft.RecursiveCraft.RecursiveSearch.FindIngredientsForRecipe(recipe, inventory);
-				BlockRecipes.active = true;
+				BlockRecipes.Active = true;
 				if (recipeInfo?.RecipeUsed.Count > 1)
 					Members.RecipeInfoCache.Add(recipe, recipeInfo);
 			}
@@ -149,7 +147,7 @@ namespace MagicStorage
 				recipe = Members.CompoundRecipe.OverridenRecipe;
 
 			Dictionary<int, int> storedItems = GetStoredItems();
-			if (storedItems != null)
+			if (storedItems is not null)
 				lock (Members.RecipeInfoCache)
 				{
 					Members.RecipeInfoCache.Remove(recipe);

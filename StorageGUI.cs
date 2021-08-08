@@ -144,7 +144,7 @@ namespace MagicStorage
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
-			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
+			displayRows = (int) slotZone.GetDimensions().Height / ((int) itemSlotHeight + padding);
 			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
@@ -166,7 +166,7 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			int numItems = 0;
 			int capacity = 0;
-			if (heart != null)
+			if (heart is not null)
 				foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits())
 					if (abstractStorageUnit is TEStorageUnit storageUnit)
 					{
@@ -196,7 +196,8 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			sortButtons ??= GUIHelpers.MakeSortButtons(RefreshItems);
-			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, ModContent.Request<Texture2D>("Assets/FilterMisc"), Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc"),
+				Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 		}
 
 		private static void InitFilterButtons()
@@ -246,7 +247,7 @@ namespace MagicStorage
 
 		private static Item GetItem(int slot, ref int context)
 		{
-			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			int index = slot + numColumns * (int) Math.Round(scrollBar.ViewPosition);
 			Item item = index < items.Count ? items[index] : new Item();
 			if (!item.IsAir && !didMatCheck[index])
 			{
@@ -323,9 +324,9 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			SortMode sortMode = (SortMode)sortButtons.Choice;
+			SortMode sortMode = (SortMode) sortButtons.Choice;
 
-			FilterMode filterMode = (FilterMode)filterButtons.Choice;
+			FilterMode filterMode = (FilterMode) filterButtons.Choice;
 			int modFilterIndex = modSearchBox.ModIndex;
 
 			void DoFiltering()
@@ -336,7 +337,8 @@ namespace MagicStorage
 					Dictionary<int, Item> stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
 
 					IEnumerable<Item> toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
-					itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode, FilterMode.All, modFilterIndex, searchBar.Text, 100);
+					itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortMode.Default ? SortMode.AsIs : sortMode, FilterMode.All, modFilterIndex,
+						searchBar.Text, 100);
 				}
 				else
 				{
@@ -421,7 +423,7 @@ namespace MagicStorage
 		{
 			Player player = Main.LocalPlayer;
 			int visualSlot = slot;
-			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
+			slot += numColumns * (int) Math.Round(scrollBar.ViewPosition);
 
 			if (MouseClicked)
 			{
@@ -438,7 +440,8 @@ namespace MagicStorage
 						if (Main.netMode == NetmodeID.SinglePlayer)
 							items[slot].favorited = !items[slot].favorited;
 						else
-							Main.NewTextMultiline("Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
+							Main.NewTextMultiline(
+								"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again");
 						// there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
 						// a workaropund would be to withdraw and deposit it back with changed favorite flag
 						// but it still might look ugly for the player that initiates operation
@@ -462,7 +465,9 @@ namespace MagicStorage
 				}
 			}
 
-			if (RightMouseClicked && slot < items.Count && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			if (RightMouseClicked &&
+				slot < items.Count &&
+				(Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, items[slot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 				slotFocus = slot;
 
 			if (slot < items.Count && !items[slot].IsAir)
@@ -477,7 +482,8 @@ namespace MagicStorage
 
 		private static void SlotFocusLogic()
 		{
-			if (slotFocus >= items.Count || !Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			if (slotFocus >= items.Count ||
+				!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}
@@ -575,7 +581,7 @@ namespace MagicStorage
 			bool changed = false;
 
 			foreach (Item item in player.inventory)
-				if (item != null && !item.IsAir && item.stack < item.maxStack)
+				if (item is not null && !item.IsAir && item.stack < item.maxStack)
 				{
 					Item toWithdraw = item.Clone();
 					toWithdraw.stack = item.maxStack - item.stack;

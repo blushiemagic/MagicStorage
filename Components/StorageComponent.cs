@@ -10,10 +10,10 @@ namespace MagicStorage.Components
 {
 	public class StorageComponent : ModTile
 	{
-		public static Point16 killTile = new(-1, -1);
+		public static Point16 killTile = Point16.NegativeOne;
 
 		// Use StorageComponent_Highlight as the default highlight mask for subclasses
-		public override string HighlightTexture => typeof(StorageComponent).FullName.Replace('.', '/') + "_Highlight";
+		public override string HighlightTexture => typeof(StorageComponent).FullName!.Replace('.', '/') + "_Highlight";
 
 		public override void SetStaticDefaults()
 		{
@@ -29,7 +29,7 @@ namespace MagicStorage.Components
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			ModifyObjectData();
 			ModTileEntity tileEntity = GetTileEntity();
-			if (tileEntity != null)
+			if (tileEntity is not null)
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(tileEntity.Hook_AfterPlacement, -1, 0, false);
 			else
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(TEStorageComponent.Hook_AfterPlacement_NoEntity, -1, 0, false);
@@ -59,7 +59,7 @@ namespace MagicStorage.Components
 		public int CanPlace(int i, int j, int type, int style, int direction, int alternative)
 		{
 			int count = 0;
-			if (GetTileEntity() != null && GetTileEntity() is TEStorageCenter)
+			if (GetTileEntity() is TEStorageCenter)
 				count++;
 
 			Point16 startSearch = new(i - 1, j - 1);
@@ -94,7 +94,7 @@ namespace MagicStorage.Components
 			Item.NewItem(i * 16, j * 16, 32, 32, ItemType(frameX, frameY));
 			killTile = new Point16(i, j);
 			ModTileEntity tileEntity = GetTileEntity();
-			if (tileEntity != null)
+			if (tileEntity is not null)
 			{
 				tileEntity.Kill(i, j);
 			}
@@ -106,7 +106,7 @@ namespace MagicStorage.Components
 					TEStorageComponent.SearchAndRefreshNetwork(killTile);
 			}
 
-			killTile = new Point16(-1, -1);
+			killTile = Point16.NegativeOne;
 		}
 	}
 }

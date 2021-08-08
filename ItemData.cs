@@ -32,18 +32,12 @@ namespace MagicStorage
 			ItemData data1 = new(item1);
 			ItemData data2 = new(item2);
 			if (data1.Type != data2.Type)
-			{
 				return data1.Type - data2.Type;
-			}
 			return data1.Prefix - data2.Prefix;
 		}
 
-		public static bool operator ==(ItemData left, ItemData right) {
-			return left.Equals(right);
-		}
+		public static bool operator ==(ItemData left, ItemData right) => Matches(left, right);
 
-		public static bool operator !=(ItemData left, ItemData right) {
-			return !(left == right);
-		}
+		public static bool operator !=(ItemData left, ItemData right) => !(left == right);
 	}
 }

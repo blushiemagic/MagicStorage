@@ -12,7 +12,7 @@ namespace MagicStorage.Components
 		public void ResetAndSearch()
 		{
 			Point16 oldCenter = center;
-			center = new Point16(-1, -1);
+			center = Point16.NegativeOne;
 
 			HashSet<Point16> explored = new()
 			{
@@ -55,16 +55,11 @@ namespace MagicStorage.Components
 			return changed;
 		}
 
-		public bool Unlink() => Link(new Point16(-1, -1));
+		public bool Unlink() => Link(Point16.NegativeOne);
 
-		public TEStorageHeart GetHeart()
-		{
-			if (center != new Point16(-1, -1))
-				return ((TEStorageCenter)ByPosition[center]).GetHeart();
-			return null;
-		}
+		public TEStorageHeart GetHeart() => center != Point16.NegativeOne ? ((TEStorageCenter) ByPosition[center]).GetHeart() : null;
 
-		public static bool IsStoragePoint(Point16 point) => ByPosition.ContainsKey(point) && ByPosition[point] is TEStoragePoint;
+		public static bool IsStoragePoint(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStoragePoint;
 
 		public override TagCompound Save()
 		{

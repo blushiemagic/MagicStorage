@@ -15,7 +15,7 @@ namespace MagicStorage.Components
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
-		public List<Point16> remoteAccesses = new();
+		public HashSet<Point16> remoteAccesses = new();
 		private int updateTimer = 60;
 
 		public bool IsAlive { get; private set; } = true;
@@ -33,7 +33,13 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			return storageUnits.Concat(remoteAccesses.Where(remoteAccess => ByPosition.ContainsKey(remoteAccess) && ByPosition[remoteAccess] is TERemoteAccess).SelectMany(remoteAccess => ((TERemoteAccess)ByPosition[remoteAccess]).storageUnits)).Where(storageUnit => ByPosition.ContainsKey(storageUnit) && ByPosition[storageUnit] is TEAbstractStorageUnit).Select(storageUnit => (TEAbstractStorageUnit)ByPosition[storageUnit]);
+			IEnumerable<Point16> remoteStorageUnits = remoteAccesses.Select(remoteAccess => ByPosition.TryGetValue(remoteAccess, out TileEntity te) ? te : null)
+				.OfType<TERemoteAccess>()
+				.SelectMany(remoteAccess => remoteAccess.storageUnits);
+
+			return storageUnits.Concat(remoteStorageUnits)
+				.Select(storageUnit => ByPosition.TryGetValue(storageUnit, out TileEntity te) ? te : null)
+				.OfType<TEAbstractStorageUnit>();
 		}
 
 		public IEnumerable<Item> GetStoredItems()
@@ -63,12 +69,9 @@ namespace MagicStorage.Components
 
 		public override void Update()
 		{
-			for (int k = 0; k < remoteAccesses.Count; k++)
-				if (!ByPosition.ContainsKey(remoteAccesses[k]) || ByPosition[remoteAccesses[k]] is not TERemoteAccess)
-				{
-					remoteAccesses.RemoveAt(k);
-					k--;
-				}
+			foreach (Point16 remoteAccess in remoteAccesses)
+				if (!ByPosition.TryGetValue(remoteAccess, out TileEntity te) || te is not TERemoteAccess)
+					remoteAccesses.Remove(remoteAccess);
 
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				return;
@@ -103,14 +106,7 @@ namespace MagicStorage.Components
 		//precondition: lock is already taken
 		public bool EmptyInactive()
 		{
-			TEStorageUnit inactiveUnit = null;
-			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
-			{
-				if (abstractStorageUnit is not TEStorageUnit storageUnit)
-					continue;
-				if (storageUnit.Inactive && !storageUnit.IsEmpty)
-					inactiveUnit = storageUnit;
-			}
+			TEStorageUnit inactiveUnit = GetStorageUnits().OfType<TEStorageUnit>().FirstOrDefault(unit => unit.Inactive && !unit.IsEmpty);
 
 			if (inactiveUnit is null)
 			{
@@ -119,24 +115,17 @@ namespace MagicStorage.Components
 			}
 
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
-			{
-				if (abstractStorageUnit is not TEStorageUnit storageUnit || storageUnit.Inactive)
-					continue;
-				if (storageUnit.IsEmpty && inactiveUnit.NumItems <= storageUnit.Capacity)
+				if (abstractStorageUnit is TEStorageUnit { Inactive: false, IsEmpty: true } storageUnit && inactiveUnit.NumItems <= storageUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
 					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
-			}
 
 			bool hasChange = false;
 			NetHelper.StartUpdateQueue();
 			Item tryMove = inactiveUnit.WithdrawStack();
-			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
-			{
-				if (abstractStorageUnit is not TEStorageUnit storageUnit || storageUnit.Inactive)
-					continue;
+			foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>().Where(unit => !unit.Inactive))
 				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir)
 				{
 					storageUnit.DepositItem(tryMove, true);
@@ -144,7 +133,6 @@ namespace MagicStorage.Components
 						tryMove = inactiveUnit.WithdrawStack();
 					hasChange = true;
 				}
-			}
 
 			if (!tryMove.IsAir)
 				inactiveUnit.DepositItem(tryMove, true);
@@ -168,7 +156,7 @@ namespace MagicStorage.Components
 				{
 					emptyUnit = storageUnit;
 				}
-				else if (emptyUnit != null && !storageUnit.IsEmpty && storageUnit.NumItems <= emptyUnit.Capacity)
+				else if (emptyUnit is not null && !storageUnit.IsEmpty && storageUnit.NumItems <= emptyUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(emptyUnit, storageUnit);
 					NetHelper.SendRefreshNetworkItems(ID);
@@ -192,7 +180,7 @@ namespace MagicStorage.Components
 				{
 					unitWithSpace = storageUnit;
 				}
-				else if (unitWithSpace != null && !storageUnit.IsEmpty)
+				else if (unitWithSpace is not null && !storageUnit.IsEmpty)
 				{
 					NetHelper.StartUpdateQueue();
 					while (!unitWithSpace.IsFull && !storageUnit.IsEmpty)
@@ -343,7 +331,7 @@ namespace MagicStorage.Components
 		public override void NetSend(BinaryWriter writer)
 		{
 			base.NetSend(writer);
-			writer.Write((short)remoteAccesses.Count);
+			writer.Write((short) remoteAccesses.Count);
 			foreach (Point16 remoteAccess in remoteAccesses)
 			{
 				writer.Write(remoteAccess.X);

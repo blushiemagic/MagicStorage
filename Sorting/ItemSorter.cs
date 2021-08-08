@@ -8,11 +8,12 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter,
+			int? takeCount = null)
 		{
 			ItemFilter filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where(item => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
-			if (takeCount != null)
+			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
 			CompareFunction func = MakeSortFunction(sortMode);
 			return func is null ? filteredItems : filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
@@ -21,9 +22,12 @@ namespace MagicStorage.Sorting
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			ItemFilter filter = MakeFilter(filterMode);
-			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) => index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
-			CompareFunction func = MakeSortFunction(sortMode);
-			return func is null ? filteredRecipes : filteredRecipes.OrderBy(x => x.createItem, func).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
+			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) =>
+				index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+			CompareFunction sortFunction = MakeSortFunction(sortMode);
+			return sortFunction is null
+				? filteredRecipes
+				: filteredRecipes.OrderBy(x => x.createItem, sortFunction).ThenBy(x => x.createItem.type).ThenBy(x => x.createItem.value);
 		}
 
 		private static CompareFunction MakeSortFunction(SortMode sortMode)
@@ -79,7 +83,7 @@ namespace MagicStorage.Sorting
 				return true;
 			Mod[] allMods = MagicStorage.AllMods;
 			int index = ModSearchBox.ModIndexBaseGame;
-			if (item.ModItem != null)
+			if (item.ModItem is not null)
 				index = Array.IndexOf(allMods, item.ModItem.Mod);
 			return index == modFilterIndex;
 		}

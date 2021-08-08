@@ -7,7 +7,7 @@ namespace MagicStorage.Components
 {
 	public class RemoteAccess : StorageAccess
 	{
-		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TERemoteAccess>();
+		public override TERemoteAccess GetTileEntity() => ModContent.GetInstance<TERemoteAccess>();
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.RemoteAccess>();
 
@@ -16,7 +16,7 @@ namespace MagicStorage.Components
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			TileEntity ent = TileEntity.ByPosition[new Point16(i, j)];
-			return ((TERemoteAccess)ent).GetHeart();
+			return ((TERemoteAccess) ent).GetHeart();
 		}
 
 		public override bool RightClick(int i, int j)
@@ -29,12 +29,12 @@ namespace MagicStorage.Components
 					i--;
 				if (Main.tile[i, j].frameY % 36 == 18)
 					j--;
-				TERemoteAccess ent = (TERemoteAccess)TileEntity.ByPosition[new Point16(i, j)];
-				Locator locator = (Locator)item.ModItem;
+				TERemoteAccess ent = (TERemoteAccess) TileEntity.ByPosition[new Point16(i, j)];
+				Locator locator = (Locator) item.ModItem;
 				if (ent.TryLocate(locator.location, out string message))
 				{
 					if (item.type == ModContent.ItemType<LocatorDisk>())
-						locator.location = new Point16(-1, -1);
+						locator.location = Point16.NegativeOne;
 					else
 						item.SetDefaults();
 				}

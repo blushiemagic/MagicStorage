@@ -105,7 +105,7 @@ namespace MagicStorage.Components
 		public override void Load(TagCompound tag)
 		{
 			IList<TagCompound> listStations = tag.GetList<TagCompound>("Stations");
-			if (listStations != null && listStations.Count > 0)
+			if (listStations is not null && listStations.Count > 0)
 				for (int k = 0; k < stations.Length; k++)
 					if (k < listStations.Count)
 						stations[k] = ItemIO.Load(listStations[k]);

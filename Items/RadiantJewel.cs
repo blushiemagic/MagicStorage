@@ -33,7 +33,7 @@ namespace MagicStorage.Items
 			Item.height = 14;
 			Item.maxStack = 99;
 			Item.rare = ItemRarityID.Purple;
-			Item.value = Item.sellPrice(0, 10);
+			Item.value = Item.sellPrice(gold: 10);
 		}
 
 		public override Color? GetAlpha(Color lightColor) => Color.White;

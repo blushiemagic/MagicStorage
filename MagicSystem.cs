@@ -1,6 +1,6 @@
-﻿using MagicStorage.Edits;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using MagicStorage.Edits;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -26,9 +26,8 @@ namespace MagicStorage
 		public override void PostUpdateInput()
 		{
 			if (!Main.instance.IsActive)
-			{
 				return;
-			}
+
 			StorageGUI.Update(null);
 			CraftingGUI.Update(null);
 		}

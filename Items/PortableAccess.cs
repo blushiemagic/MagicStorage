@@ -18,7 +18,10 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "便携式远程存储装置");
 
 			Tooltip.SetDefault("<right> Storage Heart to store location" + "\nCurrently not set to any location" + "\nUse item to access your storage");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "<right> по Cердцу Хранилища чтобы запомнить его местоположение" + "\nВ данный момент Сердце Хранилища не привязанно" + "\nИспользуйте что бы получить доступ к вашему Хранилищу");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
+				"<right> по Cердцу Хранилища чтобы запомнить его местоположение" +
+				"\nВ данный момент Сердце Хранилища не привязанно" +
+				"\nИспользуйте что бы получить доступ к вашему Хранилищу");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
@@ -33,7 +36,7 @@ namespace MagicStorage.Items
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.useAnimation = 28;
 			Item.useTime = 28;
-			Item.value = Item.sellPrice(0, 10);
+			Item.value = Item.sellPrice(gold: 10);
 		}
 
 		public override bool? UseItem(Player player)
@@ -62,7 +65,7 @@ namespace MagicStorage.Items
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1)
 			{
-				SoundEngine.PlaySound(11);
+				SoundEngine.PlaySound(SoundID.MenuClose);
 				player.sign = -1;
 				Main.editSign = false;
 				Main.npcChatText = string.Empty;
@@ -96,8 +99,8 @@ namespace MagicStorage.Items
 			if (prevOpen == toOpen)
 			{
 				modPlayer.CloseStorage();
-				SoundEngine.PlaySound(11);
-				lock (BlockRecipes.activeLock)
+				SoundEngine.PlaySound(SoundID.MenuClose);
+				lock (BlockRecipes.ActiveLock)
 				{
 					Recipe.FindRecipes();
 				}
@@ -109,8 +112,8 @@ namespace MagicStorage.Items
 				modPlayer.timeSinceOpen = 0;
 				Main.playerInventory = true;
 				Main.recBigList = false;
-				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? 12 : 10);
-				lock (BlockRecipes.activeLock)
+				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
+				lock (BlockRecipes.ActiveLock)
 				{
 					Recipe.FindRecipes();
 				}
@@ -142,11 +145,11 @@ namespace MagicStorage.Items
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.Register();
 
-			if (ModLoader.TryGetMod("CalamityMod", out Mod otherMod))
+			if (ModLoader.TryGetMod("CalamityMod", out Mod calamityMod))
 			{
 				recipe = CreateRecipe();
 				recipe.AddIngredient(Mod, "LocatorDisk");
-				recipe.AddIngredient(otherMod, "CosmiliteBar", 20);
+				recipe.AddIngredient(calamityMod, "CosmiliteBar", 20);
 				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 				recipe.AddIngredient(ItemID.Ruby, 3);
 				recipe.AddTile(TileID.LunarCraftingStation);

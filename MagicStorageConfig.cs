@@ -32,13 +32,17 @@ namespace MagicStorage
 
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
-		[JsonIgnore] public static bool GlowNewItems => Instance.glowNewItems;
+		[JsonIgnore]
+		public static bool GlowNewItems => Instance.glowNewItems;
 
-		[JsonIgnore] public static bool UseConfigFilter => Instance.useConfigFilter;
+		[JsonIgnore]
+		public static bool UseConfigFilter => Instance.useConfigFilter;
 
-		[JsonIgnore] public static bool ShowAllRecipes => Instance.showAllRecipes;
+		[JsonIgnore]
+		public static bool ShowAllRecipes => Instance.showAllRecipes;
 
-		[JsonIgnore] public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
+		[JsonIgnore]
+		public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

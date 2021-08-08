@@ -9,7 +9,7 @@ namespace MagicStorage.Components
 	public class TERemoteAccess : TEStorageCenter
 	{
 		private bool _loaded;
-		private Point16 locator = new(-1, -1);
+		private Point16 locator = Point16.NegativeOne;
 
 		internal bool Loaded
 		{
@@ -23,13 +23,12 @@ namespace MagicStorage.Components
 		{
 			if (locator.X < 0 || locator.Y < 0)
 				return null;
-			if (!ByPosition.ContainsKey(locator))
-			{
-				Load();
-				return null;
-			}
 
-			return ByPosition[locator] as TEStorageHeart;
+			if (ByPosition.TryGetValue(locator, out TileEntity te))
+				return te as TEStorageHeart;
+
+			Load();
+			return null;
 		}
 
 		private void Load()
@@ -64,8 +63,7 @@ namespace MagicStorage.Components
 		public override void Update()
 		{
 			TEStorageHeart heart = GetHeart();
-			if (heart != null && !heart.remoteAccesses.Contains(Position))
-				heart.remoteAccesses.Add(Position);
+			heart?.remoteAccesses.Add(Position);
 		}
 
 		public override TagCompound Save()
