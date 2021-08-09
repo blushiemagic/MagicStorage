@@ -1,71 +1,43 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.GameInput;
-using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ObjectData;
-using Microsoft.Xna.Framework;
-using MagicStorage.Items;
 
 namespace MagicStorage.Components
 {
-    public class CraftingAccess : StorageAccess
-    {
-        public override ModTileEntity GetTileEntity()
-        {
-            return (ModTileEntity)TileEntity.manager.GetTileEntity<TECraftingAccess>(ModContent.TileEntityType<TECraftingAccess>());
-        }
+	public class CraftingAccess : StorageAccess
+	{
+		public override TECraftingAccess GetTileEntity() => ModContent.GetInstance<TECraftingAccess>();
 
-        public override int ItemType(int frameX, int frameY)
-        {
-            return ModContent.ItemType<Items.CraftingAccess>();
-        }
+		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CraftingAccess>();
 
-        public override bool HasSmartInteract()
-        {
-            return true;
-        }
+		public override bool HasSmartInteract() => true;
 
-        public override TEStorageHeart GetHeart(int i, int j)
-        {
-            Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-            if (point.X < 0 || point.Y < 0 || !TileEntity.ByPosition.ContainsKey(point))
-            {
-                return null;
-            }
-            TileEntity heart = TileEntity.ByPosition[point];
-            if (!(heart is TEStorageCenter))
-            {
-                return null;
-            }
-            return ((TEStorageCenter)heart).GetHeart();
-        }
+		public override TEStorageHeart GetHeart(int i, int j)
+		{
+			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
+			if (point.X < 0 || point.Y < 0)
+				return null;
 
-        public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
-        {
-            if (Main.tile[i, j].frameX > 0)
-            {
-                i--;
-            }
-            if (Main.tile[i, j].frameY > 0)
-            {
-                j--;
-            }
-            Point16 pos = new Point16(i, j);
-            if (!TileEntity.ByPosition.ContainsKey(pos))
-            {
-                return;
-            }
-			if(TileEntity.ByPosition[new Point16(i, j)] is TECraftingAccess access) {
-				foreach(Item item in access.stations) {
-					if(!item.IsAir) {
-						fail = true;
-						break;
-					}
-				}
-			}
+			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
+				return center.GetHeart();
+
+			return null;
 		}
-    }
+
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
+		{
+			if (Main.tile[i, j].frameX > 0)
+				i--;
+			if (Main.tile[i, j].frameY > 0)
+				j--;
+
+			Point16 pos = new(i, j);
+			if (!TileEntity.ByPosition.TryGetValue(pos, out TileEntity te) || te is not TECraftingAccess access)
+				return;
+
+			if (access.stations.Any(item => !item.IsAir))
+				fail = true;
+		}
+	}
 }

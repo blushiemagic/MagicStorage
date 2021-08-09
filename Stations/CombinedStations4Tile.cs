@@ -1,8 +1,13 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Terraria.ID;
 
-namespace MagicStorage.Stations{
-	public class CombinedStations4Tile : CombinedStationsTile<CombinedStations4Item>{
+namespace MagicStorage.Stations
+{
+	public class CombinedStations4Tile : CombinedStationsTile<CombinedStations4Item>
+	{
+		public override Color MapColor => Color.Orange;
+
 		//Combines:
 		//(Tier 1)
 		//Work Bench, Furnace, Anvil, Bottle, Sawmill, Sink, Loom, Table
@@ -16,8 +21,9 @@ namespace MagicStorage.Stations{
 		//Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
 		//(Final Tier)
 		//Autohammer, Ancient Manipulator, All Liquids, Tombstone (Ecto Mist), Campfire, Demon/Crimson Altar
-		public override int[] GetAdjTiles()
-			=> new int[]{
+		public override int[] GetAdjTiles() =>
+			new int[]
+			{
 				Type,
 				//Tier 1 (Standard)
 				TileID.WorkBenches,
@@ -67,16 +73,16 @@ namespace MagicStorage.Stations{
 				TileID.DemonAltar
 			};
 
-		public override void SafeSetStaticDefaults(){
+		public override void SafeSetStaticDefaults()
+		{
 			TileID.Sets.CountsAsWaterSource[Type] = true;
 			TileID.Sets.CountsAsLavaSource[Type] = true;
 			TileID.Sets.CountsAsHoneySource[Type] = true;
 		}
 
-		public override Color MapColor => Color.Orange;
-
-		public override void GetTileDimensions(out int width, out int height){
-			throw new System.NotImplementedException();
+		public override void GetTileDimensions(out int width, out int height)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

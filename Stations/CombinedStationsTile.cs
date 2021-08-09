@@ -1,22 +1,27 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
-namespace MagicStorage.Stations{
+namespace MagicStorage.Stations
+{
 	[Autoload(false)]
-	public abstract class CombinedStationsTile<TItem> : ModTile where TItem : ModItem{
-		public abstract Color MapColor{ get; }
+	public abstract class CombinedStationsTile<TItem> : ModTile where TItem : ModItem
+	{
+		public abstract Color MapColor { get; }
 
 		public abstract int[] GetAdjTiles();
 
 		public abstract void GetTileDimensions(out int width, out int height);
 
-		public virtual void SafeSetStaticDefaults(){ }
+		public virtual void SafeSetStaticDefaults()
+		{
+		}
 
-		public sealed override void SetStaticDefaults(){
+		public sealed override void SetStaticDefaults()
+		{
 			SafeSetStaticDefaults();
 
 			Main.tileSolid[Type] = false;
@@ -36,7 +41,8 @@ namespace MagicStorage.Stations{
 			AddMapEntry(MapColor);
 		}
 
-		private static int[] CreateArrayFromLength(int length){
+		private static int[] CreateArrayFromLength(int length)
+		{
 			int[] arr = new int[length];
 
 			Array.Fill(arr, 16);
@@ -46,9 +52,10 @@ namespace MagicStorage.Stations{
 			return arr;
 		}
 
-		public sealed override void KillMultiTile(int i, int j, int frameX, int frameY){
+		public sealed override void KillMultiTile(int i, int j, int frameX, int frameY)
+		{
 			GetTileDimensions(out int width, out int height);
-			Item.NewItem(i * 16, j * 16, width * 16, height * 16, ModContent.ItemType<TItem>(), 1);
+			Item.NewItem(i * 16, j * 16, width * 16, height * 16, ModContent.ItemType<TItem>());
 		}
 	}
 }

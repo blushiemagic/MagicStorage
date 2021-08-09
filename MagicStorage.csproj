@@ -7,10 +7,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA2211;CA1816</NoWarn>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="RecursiveCraft">
+      <HintPath>lib\RecursiveCraft_v2.0.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

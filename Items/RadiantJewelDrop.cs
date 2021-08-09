@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
@@ -13,10 +11,11 @@ namespace MagicStorage.Items
 		{
 			if (npc.type == NPCID.MoonLordCore)
 			{
-				var rule = new LeadingConditionRule(new Conditions.NotExpert());
+				LeadingConditionRule rule = new(new Conditions.NotExpert());
 
 				//1 out of 20 chance to drop 1 item
-				rule.OnSuccess(new DropOneByOne(ModContent.ItemType<RadiantJewel>(), new DropOneByOne.Parameters(){
+				rule.OnSuccess(new DropOneByOne(ModContent.ItemType<RadiantJewel>(), new DropOneByOne.Parameters
+				{
 					ChanceNumerator = 1,
 					ChanceDenominator = 20,
 					MinimumStackPerChunkBase = 1,

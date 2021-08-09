@@ -1,10 +1,14 @@
 ﻿using MagicStorage.Items;
 using Terraria;
 using Terraria.ID;
+using OnRecipe = On.Terraria.Recipe;
 
-namespace MagicStorage.Edits.Detours{
-	internal static partial class Vanilla{
-		internal static void Recipe_FindRecipes(On.Terraria.Recipe.orig_FindRecipes orig, bool canDelayCheck){
+namespace MagicStorage.Edits.Detours
+{
+	internal static partial class Vanilla
+	{
+		internal static void Recipe_FindRecipes(OnRecipe.orig_FindRecipes orig, bool canDelayCheck)
+		{
 			Player player = Main.LocalPlayer;
 
 			bool oldGraveyard = player.ZoneGraveyard;
@@ -16,7 +20,8 @@ namespace MagicStorage.Edits.Detours{
 			bool oldHoney = player.adjHoney;
 
 			//Override these flags
-			if(Main.LocalPlayer.GetModPlayer<BiomePlayer>().biomeGlobe){
+			if (player.GetModPlayer<BiomePlayer>().biomeGlobe)
+			{
 				player.ZoneGraveyard = true;
 				player.ZoneSnow = true;
 				player.adjTile[TileID.Campfire] = true;
