@@ -2,17 +2,20 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Stations{
+namespace MagicStorage.Stations
+{
 	[Autoload(false)]
-	public abstract class CombinedStationsItem<TTile> : ModItem where TTile : ModTile{
-		public abstract string ItemName{ get; }
-		public abstract string ItemDescription{ get; }
+	public abstract class CombinedStationsItem<TTile> : ModItem where TTile : ModTile
+	{
+		public abstract string ItemName { get; }
+		public abstract string ItemDescription { get; }
 
 		public virtual int SacrificeCount => 1;
 
-		public abstract int Rarity{ get; }
+		public abstract int Rarity { get; }
 
-		public sealed override void SetStaticDefaults(){
+		public sealed override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault(ItemName);
 			Tooltip.SetDefault(ItemDescription);
 
@@ -21,9 +24,12 @@ namespace MagicStorage.Stations{
 
 		public abstract void GetItemDimensions(out int width, out int height);
 
-		public virtual void SafeSetDefaults(){ }
+		public virtual void SafeSetDefaults()
+		{
+		}
 
-		public override void SetDefaults(){
+		public override void SetDefaults()
+		{
 			SafeSetDefaults();
 			Item.DamageType = DamageClass.NoScaling;
 			Item.damage = 0;

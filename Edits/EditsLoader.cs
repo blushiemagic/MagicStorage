@@ -1,4 +1,7 @@
-﻿namespace MagicStorage.Edits
+﻿using MagicStorage.Edits.Detours;
+using On.Terraria;
+
+namespace MagicStorage.Edits
 {
 	//Handles loading/unloading any method detours and IL edits
 	internal static class EditsLoader
@@ -7,11 +10,11 @@
 
 		public static void Load()
 		{
-			On.Terraria.NetMessage.SendData += Detours.Vanilla.NetMessage_SendData;
+			NetMessage.SendData += Vanilla.NetMessage_SendData;
 
-			On.Terraria.MessageBuffer.GetData += Detours.Vanilla.MessageBuffer_GetData;
+			MessageBuffer.GetData += Vanilla.MessageBuffer_GetData;
 
-			On.Terraria.Recipe.FindRecipes += Detours.Vanilla.Recipe_FindRecipes;
+			Recipe.FindRecipes += Vanilla.Recipe_FindRecipes;
 		}
 	}
 }

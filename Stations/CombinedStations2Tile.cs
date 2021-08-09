@@ -1,15 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Terraria.ID;
 
-namespace MagicStorage.Stations{
-	public class CombinedStations2Tile : CombinedStationsTile<CombinedStations2Item>{
+namespace MagicStorage.Stations
+{
+	public class CombinedStations2Tile : CombinedStationsTile<CombinedStations2Item>
+	{
+		public override Color MapColor => Color.Orange;
+
 		//Combines:
 		//(Tier 1)
 		//Work Bench, Furnace, Anvil, Bottle, Sawmill, Sink, Loom, Table
 		//(Tier 2)
 		//Hellforge, Alchemy Table, Cooking Pot, Tinkerer's Workshop, Dye Vat, Heavy Work Bench, Keg, Teapot
-		public override int[] GetAdjTiles()
-			=> new int[]{
+		public override int[] GetAdjTiles() =>
+			new int[]
+			{
 				Type,
 				//Tier 1
 				TileID.WorkBenches,
@@ -32,10 +38,9 @@ namespace MagicStorage.Stations{
 				TileID.TeaKettle
 			};
 
-		public override Color MapColor => Color.Orange;
-
-		public override void GetTileDimensions(out int width, out int height){
-			throw new System.NotImplementedException();
+		public override void GetTileDimensions(out int width, out int height)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -1,37 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.UI;
-using Microsoft.Xna.Framework;
-using Terraria.Localization;
+using System.Linq;
 using MagicStorage.Edits;
 using MagicStorage.Items;
 using MagicStorage.Stations;
-using System.Linq;
+using Microsoft.Xna.Framework.Input;
+using Terraria;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MagicStorage
 {
 	public class MagicStorage : Mod
 	{
+		public static readonly Version requiredVersion = new(0, 12);
 		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
 
-		public static readonly Version requiredVersion = new Version(0, 12);
+		// TODO can these 2 be const?
+		public static string GithubUserName => "blushiemagic";
+		public static string GithubProjectName => "MagicStorage";
+
+		public static ModKeybind IsItemKnownHotKey { get; private set; }
+
+		public static Mod[] AllMods { get; private set; }
 
 		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
 
 		public override void Load()
 		{
 			if (TModLoaderVersion < requiredVersion)
-			{
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
-			}
 
 			InterfaceHelper.Initialize();
 			AddTranslations();
+			IsItemKnownHotKey = KeybindLoader.RegisterKeybind(this, "Is This Item Known?", Keys.Q);
 
+			RecursiveCraftIntegration.Load();
 			EditsLoader.Load();
 
 			DirectDetourManager.Load();
@@ -39,8 +45,10 @@ namespace MagicStorage
 
 		public override void Unload()
 		{
+			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+			RecursiveCraftIntegration.Unload();
 
 			DirectDetourManager.Unload();
 		}
@@ -86,11 +94,15 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "搜索名称");
 			LocalizationLoader.AddTranslation(text);
 
+			text = LocalizationLoader.CreateTranslation(this, "CraftAmount");
+			text.SetDefault("Craft amount");
+			LocalizationLoader.AddTranslation(text);
+
 			text = LocalizationLoader.CreateTranslation(this, "SearchMod");
 			text.SetDefault("Search Mod");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Поиск по моду");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Recherche par Mod");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "búsqueda por Mod");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Recherche par mod");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "búsqueda por mod");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "搜索模组");
 			LocalizationLoader.AddTranslation(text);
 
@@ -120,10 +132,18 @@ namespace MagicStorage
 
 			text = LocalizationLoader.CreateTranslation(this, "SortStack");
 			text.SetDefault("Sort by Stacks");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировка по стакам");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировать по стопкам");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Trier par piles");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ordenar por pilas");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按堆栈排序");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "SortValue");
+			text.SetDefault("Sort by Value");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировать по значению");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Trier par valeur");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ordenar por valor");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按值排序");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterAll");
@@ -156,6 +176,38 @@ namespace MagicStorage
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Filtrer par Équipement");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Filtrar por equipamiento");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选装备");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsMelee");
+			text.SetDefault("Filter Melee Weapons");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsRanged");
+			text.SetDefault("Filter Ranged Weapons");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsMagic");
+			text.SetDefault("Filter Magic Weapons");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsSummon");
+			text.SetDefault("Filter Summons");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsThrown");
+			text.SetDefault("Filter Throwing Weapons");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterAmmo");
+			text.SetDefault("Filter Ammo");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterArmor");
+			text.SetDefault("Filter Armor");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "FilterVanity");
+			text.SetDefault("Filter Vanity Items");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterPotions");
@@ -227,14 +279,43 @@ namespace MagicStorage
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "RecipeAll");
-			text.SetDefault("Show all recipes");
+			text.SetDefault("Show all known recipes");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Afficher toutes les recettes");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Mostrar todas las recetas");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "显示全部配方");
 			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "RecipeBlacklist");
+			text.SetDefault("Show hidden recipes (ctrl+click on recipe to (un)hide)");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "SortDps");
+			text.SetDefault("Sort by DPS");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "ShowOnlyFavorited");
+			text.SetDefault("Only Favorited");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "DepositTooltip");
+			text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "DepositTooltipAlt");
+			text.SetDefault("Quick Stack - ctrl+click, Deposit All - click, Restock - right click");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "CraftTooltip");
+			text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
+			LocalizationLoader.AddTranslation(text);
+
+			text = LocalizationLoader.CreateTranslation(this, "TestItemSuffix");
+			text.SetDefault(" !UNTIL RESPAWN!");
+			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes(){
+		public override void AddRecipes()
+		{
 			CreateRecipe(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromLiteral("Biome Globe in a Crafting Interface"), recipe => CraftingGUI.Campfire))
@@ -244,22 +325,20 @@ namespace MagicStorage
 		public override void PostAddRecipes()
 		{
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
-			for(int i = 0; i < Recipe.maxRecipes; i++)
+			for (int i = 0; i < Recipe.maxRecipes; i++)
 			{
 				Recipe recipe = Main.recipe[i];
 
-				if(recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
 					Recipe copy = CreateRecipe(recipe.createItem.type, recipe.createItem.stack);
 
-					for(int r = 0; r < recipe.requiredItem.Count; r++)
-						copy.AddIngredient(recipe.requiredItem[r].type, recipe.requiredItem[r].stack);
+					foreach (Item item in recipe.requiredItem)
+						copy.AddIngredient(item.type, item.stack);
 
 					copy.acceptedGroups = new List<int>(recipe.acceptedGroups);
 
-					copy.requiredTile = new List<int>(recipe.requiredTile){
-						ModContent.TileType<CombinedStations4Tile>()
-					};
+					copy.requiredTile = new List<int>(recipe.requiredTile) { ModContent.TileType<CombinedStations4Tile>() };
 
 					//Copy all conditions except the graveyard one
 					copy.AddCondition(recipe.Conditions.Where(cond => cond != Recipe.Condition.InGraveyardBiome));
@@ -267,11 +346,24 @@ namespace MagicStorage
 					copy.Register();
 				}
 			}
+
+			RecursiveCraftIntegration.PostAddRecipes();
+		}
+
+		public override void PostSetupContent()
+		{
+			AllMods = ModLoader.Mods.Where(mod => mod.Name != "ModLoader")
+				.Where(mod => !mod.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
+				.Where(mod => mod.GetContent<ModItem>().Any())
+				.ToArray();
 		}
 
 		public override void AddRecipeGroups()
 		{
-			RecipeGroup group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " Chest",
+			string any = Language.GetTextValue("LegacyMisc.37");
+
+			int[] items =
+			{
 				ItemID.Chest,
 				ItemID.GoldChest,
 				ItemID.ShadowChest,
@@ -311,258 +403,268 @@ namespace MagicStorage
 				ItemID.MartianChest,
 				ItemID.GraniteChest,
 				ItemID.MeteoriteChest,
-				ItemID.MarbleChest);
-
+				ItemID.MarbleChest
+			};
+			RecipeGroup group = new(() => $"{any} Chest", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
-			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock"), ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock);
 
+			items = new int[] { ItemID.SnowBlock, ItemID.IceBlock, ItemID.PurpleIceBlock, ItemID.PinkIceBlock, ItemID.RedIceBlock };
+			group = new RecipeGroup(() => $"{any} {Language.GetTextValue("Mods.MagicStorage.SnowBiomeBlock")}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnySnowBiomeBlock", group);
-			group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Lang.GetItemNameValue(ItemID.Diamond), ItemID.Diamond, ModContent.ItemType<ShadowDiamond>());
 
+			items = new[] { ItemID.Diamond, ModContent.ItemType<ShadowDiamond>() };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Diamond)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyWorkBench",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.WorkBench)}",
-					ItemID.WorkBench,
-					ItemID.BambooWorkbench,
-					ItemID.BlueDungeonWorkBench,
-					ItemID.BoneWorkBench,
-					ItemID.BorealWoodWorkBench,
-					ItemID.CactusWorkBench,
-					ItemID.CrystalWorkbench,
-					ItemID.DynastyWorkBench,
-					ItemID.EbonwoodWorkBench,
-					ItemID.FleshWorkBench,
-					ItemID.FrozenWorkBench,
-					ItemID.GlassWorkBench,
-					ItemID.GoldenWorkbench,
-					ItemID.GothicWorkBench,
-					ItemID.GraniteWorkBench,
-					ItemID.GreenDungeonWorkBench,
-					ItemID.HoneyWorkBench,
-					ItemID.LesionWorkbench,
-					ItemID.LihzahrdWorkBench,
-					ItemID.LivingWoodWorkBench,
-					ItemID.MarbleWorkBench,
-					ItemID.MartianWorkBench,
-					ItemID.MeteoriteWorkBench,
-					ItemID.NebulaWorkbench,
-					ItemID.ObsidianWorkBench,
-					ItemID.PalmWoodWorkBench,
-					ItemID.PearlwoodWorkBench,
-					ItemID.PinkDungeonWorkBench,
-					ItemID.PumpkinWorkBench,
-					ItemID.RichMahoganyWorkBench,
-					ItemID.SandstoneWorkbench,
-					ItemID.ShadewoodWorkBench,
-					ItemID.SkywareWorkbench,
-					ItemID.SlimeWorkBench,
-					ItemID.SolarWorkbench,
-					ItemID.SpiderWorkbench,
-					ItemID.SpookyWorkBench,
-					ItemID.StardustWorkbench,
-					ItemID.SteampunkWorkBench,
-					ItemID.VortexWorkbench));
+			items = new int[]
+			{
+				ItemID.WorkBench,
+				ItemID.BambooWorkbench,
+				ItemID.BlueDungeonWorkBench,
+				ItemID.BoneWorkBench,
+				ItemID.BorealWoodWorkBench,
+				ItemID.CactusWorkBench,
+				ItemID.CrystalWorkbench,
+				ItemID.DynastyWorkBench,
+				ItemID.EbonwoodWorkBench,
+				ItemID.FleshWorkBench,
+				ItemID.FrozenWorkBench,
+				ItemID.GlassWorkBench,
+				ItemID.GoldenWorkbench,
+				ItemID.GothicWorkBench,
+				ItemID.GraniteWorkBench,
+				ItemID.GreenDungeonWorkBench,
+				ItemID.HoneyWorkBench,
+				ItemID.LesionWorkbench,
+				ItemID.LihzahrdWorkBench,
+				ItemID.LivingWoodWorkBench,
+				ItemID.MarbleWorkBench,
+				ItemID.MartianWorkBench,
+				ItemID.MeteoriteWorkBench,
+				ItemID.NebulaWorkbench,
+				ItemID.ObsidianWorkBench,
+				ItemID.PalmWoodWorkBench,
+				ItemID.PearlwoodWorkBench,
+				ItemID.PinkDungeonWorkBench,
+				ItemID.PumpkinWorkBench,
+				ItemID.RichMahoganyWorkBench,
+				ItemID.SandstoneWorkbench,
+				ItemID.ShadewoodWorkBench,
+				ItemID.SkywareWorkbench,
+				ItemID.SlimeWorkBench,
+				ItemID.SolarWorkbench,
+				ItemID.SpiderWorkbench,
+				ItemID.SpookyWorkBench,
+				ItemID.StardustWorkbench,
+				ItemID.SteampunkWorkBench,
+				ItemID.VortexWorkbench
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WorkBench)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyWorkBench", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyPreHmAnvil",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.IronAnvil)}",
-					ItemID.IronAnvil,
-					ItemID.LeadAnvil));
+			items = new int[] { ItemID.IronAnvil, ItemID.LeadAnvil };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.IronAnvil)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyPreHmAnvil", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyBottle",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Bottle)}",
-					ItemID.Bottle,
-					ItemID.PinkVase,
-					ItemID.Mug,
-					ItemID.DynastyCup,
-					ItemID.WineGlass,
-					ItemID.HoneyCup,
-					ItemID.SteampunkCup));
+			items = new int[] { ItemID.Bottle, ItemID.PinkVase, ItemID.Mug, ItemID.DynastyCup, ItemID.WineGlass, ItemID.HoneyCup, ItemID.SteampunkCup };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Bottle)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyBottle", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnySink",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MetalSink)}",
-					ItemID.BambooSink,
-					ItemID.BlueDungeonSink,
-					ItemID.BoneSink,
-					ItemID.BorealWoodSink,
-					ItemID.CactusSink,
-					ItemID.CrystalSink,
-					ItemID.DynastySink,
-					ItemID.EbonwoodSink,
-					ItemID.FleshSink,
-					ItemID.FrozenSink,
-					ItemID.GlassSink,
-					ItemID.GoldenSink,
-					ItemID.GraniteSink,
-					ItemID.GreenDungeonSink,
-					ItemID.HoneySink,
-					ItemID.LesionSink,
-					ItemID.LihzahrdSink,
-					ItemID.LivingWoodSink,
-					ItemID.MarbleSink,
-					ItemID.MartianSink,
-					ItemID.MetalSink,
-					ItemID.MeteoriteSink,
-					ItemID.MushroomSink,
-					ItemID.NebulaSink,
-					ItemID.ObsidianSink,
-					ItemID.PalmWoodSink,
-					ItemID.PearlwoodSink,
-					ItemID.PinkDungeonSink,
-					ItemID.PumpkinSink,
-					ItemID.RichMahoganySink,
-					ItemID.SandstoneSink,
-					ItemID.ShadewoodSink,
-					ItemID.SkywareSink,
-					ItemID.SlimeSink,
-					ItemID.SolarSink,
-					ItemID.SpiderSinkSpiderSinkDoesWhateverASpiderSinkDoes,
-					ItemID.SpookySink,
-					ItemID.StardustSink,
-					ItemID.SteampunkSink,
-					ItemID.VortexSink,
-					ItemID.WoodenSink));
+			items = new int[]
+			{
+				ItemID.BambooSink,
+				ItemID.BlueDungeonSink,
+				ItemID.BoneSink,
+				ItemID.BorealWoodSink,
+				ItemID.CactusSink,
+				ItemID.CrystalSink,
+				ItemID.DynastySink,
+				ItemID.EbonwoodSink,
+				ItemID.FleshSink,
+				ItemID.FrozenSink,
+				ItemID.GlassSink,
+				ItemID.GoldenSink,
+				ItemID.GraniteSink,
+				ItemID.GreenDungeonSink,
+				ItemID.HoneySink,
+				ItemID.LesionSink,
+				ItemID.LihzahrdSink,
+				ItemID.LivingWoodSink,
+				ItemID.MarbleSink,
+				ItemID.MartianSink,
+				ItemID.MetalSink,
+				ItemID.MeteoriteSink,
+				ItemID.MushroomSink,
+				ItemID.NebulaSink,
+				ItemID.ObsidianSink,
+				ItemID.PalmWoodSink,
+				ItemID.PearlwoodSink,
+				ItemID.PinkDungeonSink,
+				ItemID.PumpkinSink,
+				ItemID.RichMahoganySink,
+				ItemID.SandstoneSink,
+				ItemID.ShadewoodSink,
+				ItemID.SkywareSink,
+				ItemID.SlimeSink,
+				ItemID.SolarSink,
+				ItemID.SpiderSinkSpiderSinkDoesWhateverASpiderSinkDoes,
+				ItemID.SpookySink,
+				ItemID.StardustSink,
+				ItemID.SteampunkSink,
+				ItemID.VortexSink,
+				ItemID.WoodenSink
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.MetalSink)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnySink", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyTable",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.WoodenTable)}",
-					ItemID.BambooTable,
-					ItemID.BanquetTable,
-					ItemID.BlueDungeonTable,
-					ItemID.BoneTable,
-					ItemID.BorealWoodTable,
-					ItemID.CactusTable,
-					ItemID.CrystalTable,
-					ItemID.DynastyTable,
-					ItemID.EbonwoodTable,
-					ItemID.FleshTable,
-					ItemID.FrozenTable,
-					ItemID.GlassTable,
-					ItemID.GoldenTable,
-					ItemID.GothicTable,
-					ItemID.GraniteTable,
-					ItemID.GreenDungeonTable,
-					ItemID.HoneyTable,
-					ItemID.LesionTable,
-					ItemID.LihzahrdTable,
-					ItemID.LivingWoodTable,
-					ItemID.MarbleTable,
-					ItemID.MartianTable,
-					ItemID.MeteoriteTable,
-					ItemID.MushroomTable,
-					ItemID.NebulaTable,
-					ItemID.ObsidianTable,
-					ItemID.PalmWoodTable,
-					ItemID.PearlwoodTable,
-					ItemID.PicnicTable,
-					ItemID.PicnicTableWithCloth,
-					ItemID.PineTable,
-					ItemID.PinkDungeonTable,
-					ItemID.PumpkinTable,
-					ItemID.RichMahoganyTable,
-					ItemID.SandstoneTable,
-					ItemID.ShadewoodTable,
-					ItemID.SkywareTable,
-					ItemID.SlimeTable,
-					ItemID.SolarTable,
-					ItemID.SpiderTable,
-					ItemID.SpookyTable,
-					ItemID.StardustTable,
-					ItemID.SteampunkTable,
-					ItemID.VortexTable,
-					ItemID.WoodenTable));
+			items = new int[]
+			{
+				ItemID.BambooTable,
+				ItemID.BanquetTable,
+				ItemID.BlueDungeonTable,
+				ItemID.BoneTable,
+				ItemID.BorealWoodTable,
+				ItemID.CactusTable,
+				ItemID.CrystalTable,
+				ItemID.DynastyTable,
+				ItemID.EbonwoodTable,
+				ItemID.FleshTable,
+				ItemID.FrozenTable,
+				ItemID.GlassTable,
+				ItemID.GoldenTable,
+				ItemID.GothicTable,
+				ItemID.GraniteTable,
+				ItemID.GreenDungeonTable,
+				ItemID.HoneyTable,
+				ItemID.LesionTable,
+				ItemID.LihzahrdTable,
+				ItemID.LivingWoodTable,
+				ItemID.MarbleTable,
+				ItemID.MartianTable,
+				ItemID.MeteoriteTable,
+				ItemID.MushroomTable,
+				ItemID.NebulaTable,
+				ItemID.ObsidianTable,
+				ItemID.PalmWoodTable,
+				ItemID.PearlwoodTable,
+				ItemID.PicnicTable,
+				ItemID.PicnicTableWithCloth,
+				ItemID.PineTable,
+				ItemID.PinkDungeonTable,
+				ItemID.PumpkinTable,
+				ItemID.RichMahoganyTable,
+				ItemID.SandstoneTable,
+				ItemID.ShadewoodTable,
+				ItemID.SkywareTable,
+				ItemID.SlimeTable,
+				ItemID.SolarTable,
+				ItemID.SpiderTable,
+				ItemID.SpookyTable,
+				ItemID.StardustTable,
+				ItemID.SteampunkTable,
+				ItemID.VortexTable,
+				ItemID.WoodenTable
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WoodenTable)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyTable", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyCookingPot",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.CookingPot)}",
-					ItemID.CookingPot,
-					ItemID.Cauldron));
+			items = new int[] { ItemID.CookingPot, ItemID.Cauldron };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.CookingPot)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyCookingPot", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyHmAnvil",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.MythrilAnvil)}",
-					ItemID.MythrilAnvil,
-					ItemID.OrichalcumAnvil));
+			items = new int[] { ItemID.MythrilAnvil, ItemID.OrichalcumAnvil };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.MythrilAnvil)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyHmAnvil", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyHmFurnace",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.AdamantiteForge)}",
-					ItemID.AdamantiteForge,
-					ItemID.TitaniumForge));
+			items = new int[] { ItemID.AdamantiteForge, ItemID.TitaniumForge };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.AdamantiteForge)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyHmFurnace", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyBookcase",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Bookcase)}",
-					ItemID.Bookcase,
-					ItemID.BambooBookcase,
-					ItemID.BlueDungeonBookcase,
-					ItemID.BoneBookcase,
-					ItemID.BorealWoodBookcase,
-					ItemID.CactusBookcase,
-					ItemID.CrystalBookCase,
-					ItemID.DynastyBookcase,
-					ItemID.EbonwoodBookcase,
-					ItemID.FleshBookcase,
-					ItemID.FrozenBookcase,
-					ItemID.GlassBookcase,
-					ItemID.GoldenBookcase,
-					ItemID.GothicBookcase,
-					ItemID.GraniteBookcase,
-					ItemID.GreenDungeonBookcase,
-					ItemID.HoneyBookcase,
-					ItemID.LesionBookcase,
-					ItemID.LihzahrdBookcase,
-					ItemID.MarbleBookcase,
-					ItemID.MeteoriteBookcase,
-					ItemID.MushroomBookcase,
-					ItemID.NebulaBookcase,
-					ItemID.ObsidianBookcase,
-					ItemID.PalmWoodBookcase,
-					ItemID.PearlwoodBookcase,
-					ItemID.PinkDungeonBookcase,
-					ItemID.PumpkinBookcase,
-					ItemID.RichMahoganyBookcase,
-					ItemID.SandstoneBookcase,
-					ItemID.ShadewoodBookcase,
-					ItemID.SkywareBookcase,
-					ItemID.SlimeBookcase,
-					ItemID.SolarBookcase,
-					ItemID.SpiderBookcase,
-					ItemID.SpookyBookcase,
-					ItemID.StardustBookcase,
-					ItemID.SteampunkBookcase,
-					ItemID.VortexBookcase));
+			items = new int[]
+			{
+				ItemID.Bookcase,
+				ItemID.BambooBookcase,
+				ItemID.BlueDungeonBookcase,
+				ItemID.BoneBookcase,
+				ItemID.BorealWoodBookcase,
+				ItemID.CactusBookcase,
+				ItemID.CrystalBookCase,
+				ItemID.DynastyBookcase,
+				ItemID.EbonwoodBookcase,
+				ItemID.FleshBookcase,
+				ItemID.FrozenBookcase,
+				ItemID.GlassBookcase,
+				ItemID.GoldenBookcase,
+				ItemID.GothicBookcase,
+				ItemID.GraniteBookcase,
+				ItemID.GreenDungeonBookcase,
+				ItemID.HoneyBookcase,
+				ItemID.LesionBookcase,
+				ItemID.LihzahrdBookcase,
+				ItemID.MarbleBookcase,
+				ItemID.MeteoriteBookcase,
+				ItemID.MushroomBookcase,
+				ItemID.NebulaBookcase,
+				ItemID.ObsidianBookcase,
+				ItemID.PalmWoodBookcase,
+				ItemID.PearlwoodBookcase,
+				ItemID.PinkDungeonBookcase,
+				ItemID.PumpkinBookcase,
+				ItemID.RichMahoganyBookcase,
+				ItemID.SandstoneBookcase,
+				ItemID.ShadewoodBookcase,
+				ItemID.SkywareBookcase,
+				ItemID.SlimeBookcase,
+				ItemID.SolarBookcase,
+				ItemID.SpiderBookcase,
+				ItemID.SpookyBookcase,
+				ItemID.StardustBookcase,
+				ItemID.SteampunkBookcase,
+				ItemID.VortexBookcase
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Bookcase)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyBookcase", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyTombstone",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Tombstone)}",
-					ItemID.Tombstone,
-					ItemID.GraveMarker,
-					ItemID.CrossGraveMarker,
-					ItemID.Headstone,
-					ItemID.Gravestone,
-					ItemID.Obelisk,
-					ItemID.RichGravestone1,
-					ItemID.RichGravestone2,
-					ItemID.RichGravestone3,
-					ItemID.RichGravestone4,
-					ItemID.RichGravestone5));
+			items = new int[]
+			{
+				ItemID.Tombstone,
+				ItemID.GraveMarker,
+				ItemID.CrossGraveMarker,
+				ItemID.Headstone,
+				ItemID.Gravestone,
+				ItemID.Obelisk,
+				ItemID.RichGravestone1,
+				ItemID.RichGravestone2,
+				ItemID.RichGravestone3,
+				ItemID.RichGravestone4,
+				ItemID.RichGravestone5
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Tombstone)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyTombstone", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Lang.GetItemNameValue(ItemID.Campfire)}",
-					ItemID.Campfire,
-					ItemID.BoneCampfire,
-					ItemID.CoralCampfire,
-					ItemID.CorruptCampfire,
-					ItemID.CrimsonCampfire,
-					ItemID.CursedCampfire,
-					ItemID.DemonCampfire,
-					ItemID.DesertCampfire,
-					ItemID.FrozenCampfire,
-					ItemID.HallowedCampfire,
-					ItemID.IchorCampfire,
-					ItemID.JungleCampfire,
-					ItemID.RainbowCampfire,
-					ItemID.UltraBrightCampfire));
+			items = new int[]
+			{
+				ItemID.Campfire,
+				ItemID.BoneCampfire,
+				ItemID.CoralCampfire,
+				ItemID.CorruptCampfire,
+				ItemID.CrimsonCampfire,
+				ItemID.CursedCampfire,
+				ItemID.DemonCampfire,
+				ItemID.DesertCampfire,
+				ItemID.FrozenCampfire,
+				ItemID.HallowedCampfire,
+				ItemID.IchorCampfire,
+				ItemID.JungleCampfire,
+				ItemID.RainbowCampfire,
+				ItemID.UltraBrightCampfire
+			};
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Campfire)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire", group);
 
-			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar",
-				new RecipeGroup(() => $"{Language.GetTextValue("LegacyMisc.37")} {Language.GetTextValue("MapObject.DemonAltar")}",
-					ModContent.ItemType<DemonAltar>(),
-					ModContent.ItemType<CrimsonAltar>()));
+			items = new[] { ModContent.ItemType<DemonAltar>(), ModContent.ItemType<CrimsonAltar>() };
+			group = new RecipeGroup(() => $"{any} {Language.GetTextValue("MapObject.DemonAltar")}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar", group);
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
@@ -571,4 +673,3 @@ namespace MagicStorage
 		}
 	}
 }
-

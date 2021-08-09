@@ -1,8 +1,10 @@
-author = blushiemagic & absoluteAquarian
+author = blushiemagic & absoluteAquarian & wvlad & exterminator
 version = 0.5.0.3
 displayName = Magic Storage
-homepage = https://forums.terraria.org/index.php?threads/magic-storage.106520/
+homepage = https://github.com/blushiemagic/MagicStorage
 hideCode = false
 hideResources = false
 includeSource = true
+includePDB = true
 buildIgnore = OldArt\*, .git\*
+weakReferences = RecursiveCraft@2.0

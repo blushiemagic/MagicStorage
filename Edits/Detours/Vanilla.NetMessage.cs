@@ -1,8 +1,6 @@
-﻿using ReLogic.OS;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using Terraria;
+using On.Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
@@ -10,9 +8,10 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Edits.Detours
 {
-	internal static class Vanilla
+	internal static partial class Vanilla
 	{
-		internal static void NetMessage_SendData(On.Terraria.NetMessage.orig_SendData orig, int msgType, int remoteClient, int ignoreClient, NetworkText text, int number, float number2, float number3, float number4, int number5, int number6, int number7)
+		internal static void NetMessage_SendData(NetMessage.orig_SendData orig, int msgType, int remoteClient, int ignoreClient, NetworkText text, int number,
+			float number2, float number3, float number4, int number5, int number6, int number7)
 		{
 			//TileSection (10) doesn't set "networkSend" to true in TileEntity.Write, so this needs to be kept track of manually
 			//Keeping track of this simplifies the workaround code somewhat
@@ -30,34 +29,31 @@ namespace MagicStorage.Edits.Detours
 
 				//Get the entities in the section.  Keep writing until the next entity written would make the size go over 65535
 				int startX = number;
-				int startY = (int)number2;
-				short width = (short)number3;
-				short height = (short)number4;
+				int startY = (int) number2;
+				short width = (short) number3;
+				short height = (short) number4;
 
-				Queue<int> ids = new Queue<int>();
+				Queue<int> ids = new();
 
 				//Only process tile entities from Magic Storage
-				foreach (var item in TileEntity.ByPosition) {
-					Point16 pos = item.Key;
+				// TODO consider using ModTileEntity.ByPosition
+				foreach ((Point16 pos, TileEntity tileEntity) in TileEntity.ByPosition)
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
-						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(item.Value.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
-							ids.Enqueue(item.Value.ID);
-				}
+						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
+							ids.Enqueue(tileEntity.ID);
 
-				MemoryStream ms = new MemoryStream();
-				MemoryStream ms2 = new MemoryStream();
-				BinaryWriter msWriter = new BinaryWriter(ms);
-				BinaryWriter msWriter2 = new BinaryWriter(ms2);
+				using MemoryStream ms = new();
+				using MemoryStream ms2 = new();
+				using BinaryWriter msWriter = new(ms);
+				using BinaryWriter msWriter2 = new(ms2);
 				int written = 0, total = 0, packetCount = 1;
 
-				while(ids.Count > 0)
-					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, lastSend: false);
+				while (ids.Count > 0)
+					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, false);
 
-				if(written > 0)
-				{
+				if (written > 0)
 					//Write the remaining information
-					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, lastSend: true);
-				}
+					WriteNetWorkaround(msWriter, ms, msWriter2, ms2, ids, ref written, ref total, ref packetCount, ref packet, remoteClient, ignoreClient, true);
 
 				/*
 				if (Main.netMode == NetmodeID.Server && total > 0)
@@ -66,15 +62,15 @@ namespace MagicStorage.Edits.Detours
 
 				msWriter.Flush();
 				msWriter.Close();
-				msWriter.Dispose();
 
 				msWriter2.Flush();
 				msWriter2.Close();
-				msWriter2.Dispose();
 			}
 		}
 
-		private static void WriteNetWorkaround(BinaryWriter msWriter, MemoryStream ms, BinaryWriter msWriter2, MemoryStream ms2, Queue<int> ids, ref int written, ref int total, ref int packetCount, ref ModPacket packet, int remoteClient, int ignoreClient, bool lastSend){
+		private static void WriteNetWorkaround(BinaryWriter msWriter, MemoryStream ms, BinaryWriter msWriter2, MemoryStream ms2, Queue<int> ids, ref int written,
+			ref int total, ref int packetCount, ref ModPacket packet, int remoteClient, int ignoreClient, bool lastSend)
+		{
 			long start = msWriter.BaseStream.Position, end = start;
 
 			// TODO: why does the last entity in the packet have a bad ID???  also, fix the "read underflow" issues from the other packet types
@@ -91,21 +87,21 @@ namespace MagicStorage.Edits.Detours
 				end += msWriter2.BaseStream.Position;
 			}
 
-			var newBytes = ms2.GetBuffer();
+			byte[] newBytes = ms2.GetBuffer();
 
-			if (end > 65535 || (lastSend && written > 0))
+			if (end > 65535 || lastSend && written > 0)
 			{
 				//Too much data for one net message
 				// TODO: handle when ONE entity sends too much data, since this assumes that at least 2 would have to be split up across messages
 				msWriter.Flush();
 
-				var bytes = ms.GetBuffer();
-						
+				byte[] bytes = ms.GetBuffer();
+
 				//Write the data before the "overflow"
 				//If this isn't the last packet, then the actual amount of entities written is "written - 1"
-				packet.Write((byte)MessageType.NetWorkaround);
-				packet.Write((ushort)(lastSend ? written : written - 1));
-				packet.Write(bytes, 0, (int)start);
+				packet.Write((byte) MessageType.NetWorkaround);
+				packet.Write((ushort) (lastSend ? written : written - 1));
+				packet.Write(bytes, 0, (int) start);
 
 				packet.Send(remoteClient, ignoreClient);
 
@@ -148,7 +144,7 @@ namespace MagicStorage.Edits.Detours
 			if (!lastSend)
 			{
 				//Copy over the new bytes
-				msWriter.Write(newBytes, 0, (int)(end - start));
+				msWriter.Write(newBytes, 0, (int) (end - start));
 
 				ms2.Position = 0;
 				ms2.SetLength(0);
@@ -156,7 +152,7 @@ namespace MagicStorage.Edits.Detours
 			}
 		}
 
-		internal static void MessageBuffer_GetData(On.Terraria.MessageBuffer.orig_GetData orig, MessageBuffer self, int start, int length, out int messageType)
+		internal static void MessageBuffer_GetData(MessageBuffer.orig_GetData orig, Terraria.MessageBuffer self, int start, int length, out int messageType)
 		{
 			orig(self, start, length, out messageType);
 

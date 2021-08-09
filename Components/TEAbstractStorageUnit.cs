@@ -1,98 +1,78 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
-    public abstract class TEAbstractStorageUnit : TEStorageComponent
-    {
-        private bool inactive;
-        private Point16 center;
+	public abstract class TEAbstractStorageUnit : TEStorageComponent
+	{
+		private Point16 center;
 
-        public bool Inactive
-        {
-            get
-            {
-                return inactive;
-            }
-            set
-            {
-                inactive = value;
-            }
-        }
+		public bool Inactive { get; set; }
 
-        public abstract bool IsFull
-        {
-            get;
-        }
+		public abstract bool IsFull { get; }
 
-        public bool Link(Point16 pos)
-        {
-            bool changed = pos != center;
-            center = pos;
-            return changed;
-        }
+		public bool Link(Point16 pos)
+		{
+			bool changed = pos != center;
+			center = pos;
+			return changed;
+		}
 
-        public bool Unlink()
-        {
-            return Link(new Point16(-1, -1));
-        }
+		public bool Unlink() => Link(Point16.NegativeOne);
 
-        public TEStorageHeart GetHeart()
-        {
-            if (center != new Point16(-1, -1) && TileEntity.ByPosition.ContainsKey(center) && TileEntity.ByPosition[center] is TEStorageCenter entity)
-            {
-                return entity.GetHeart();
-            }
-            return null;
-        }
+		public TEStorageHeart GetHeart()
+		{
+			if (center == Point16.NegativeOne)
+				return null;
 
-        public abstract bool HasSpaceInStackFor(Item check, bool locked = false);
+			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter entity)
+				return entity.GetHeart();
 
-        public abstract  bool HasItem(Item check, bool locked = false);
+			return null;
+		}
 
-        public abstract IEnumerable<Item> GetItems();
+		public abstract bool HasSpaceInStackFor(Item check, bool locked = false);
 
-        public abstract void DepositItem(Item toDeposit, bool locked = false);
+		public abstract bool HasItem(Item check, bool locked = false, bool ignorePrefix = false);
 
-        public abstract Item TryWithdraw(Item lookFor, bool locked = false);
+		public abstract IEnumerable<Item> GetItems();
 
-        public override TagCompound Save()
-        {
-            TagCompound tag = new TagCompound();
-            tag.Set("Inactive", inactive);
-            TagCompound tagCenter = new TagCompound();
-            tagCenter.Set("X", center.X);
-            tagCenter.Set("Y", center.Y);
-            tag.Set("Center", tagCenter);
-            return tag;
-        }
+		public abstract void DepositItem(Item toDeposit, bool locked = false);
 
-        public override void Load(TagCompound tag)
-        {
-            inactive = tag.GetBool("Inactive");
-            TagCompound tagCenter = tag.GetCompound("Center");
-            center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
-        }
+		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 
-        public override void NetSend(BinaryWriter writer)
-        {
-            writer.Write(inactive);
-            writer.Write(center.X);
-            writer.Write(center.Y);
-        }
+		public override TagCompound Save()
+		{
+			TagCompound tag = new();
+			tag.Set("Inactive", Inactive);
+			TagCompound tagCenter = new();
+			tagCenter.Set("X", center.X);
+			tagCenter.Set("Y", center.Y);
+			tag.Set("Center", tagCenter);
+			return tag;
+		}
 
-        public override void NetReceive(BinaryReader reader)
-        {
-            inactive = reader.ReadBoolean();
-            center = new Point16(reader.ReadInt16(), reader.ReadInt16());
-        }
-    }
+		public override void Load(TagCompound tag)
+		{
+			Inactive = tag.GetBool("Inactive");
+			TagCompound tagCenter = tag.GetCompound("Center");
+			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
+		}
+
+		public override void NetSend(BinaryWriter writer)
+		{
+			writer.Write(Inactive);
+			writer.Write(center.X);
+			writer.Write(center.Y);
+		}
+
+		public override void NetReceive(BinaryReader reader)
+		{
+			Inactive = reader.ReadBoolean();
+			center = new Point16(reader.ReadInt16(), reader.ReadInt16());
+		}
+	}
 }
