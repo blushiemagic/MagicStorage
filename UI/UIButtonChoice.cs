@@ -11,8 +11,8 @@ namespace MagicStorage.UI
 {
 	public class UIButtonChoice : UIElement
 	{
-		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground");
-		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive");
+		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
+		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 		private readonly Action _onChanged;
 		private readonly int buttonPadding;
 
@@ -26,7 +26,7 @@ namespace MagicStorage.UI
 		public UIButtonChoice(Action onChanged, Asset<Texture2D>[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
 			if (buttons.Length != names.Length || buttons.Length == 0)
-				throw new ArgumentException();
+				throw new ArgumentException("Array Lengths must match and be non-zero");
 
 			_onChanged = onChanged;
 			this.buttonSize = buttonSize;

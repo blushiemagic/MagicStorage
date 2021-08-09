@@ -7,6 +7,7 @@ using MagicStorage.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -196,7 +197,8 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			sortButtons ??= GUIHelpers.MakeSortButtons(RefreshItems);
-			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc"),
+			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, 
+				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 				Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 		}
 

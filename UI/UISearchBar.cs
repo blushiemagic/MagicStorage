@@ -19,7 +19,7 @@ namespace MagicStorage.UI
 	{
 		private const int Padding = 4;
 		private static readonly List<UISearchBar> SearchBars = new();
-		private static readonly Asset<Texture2D> TextureAsset = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SearchBar");
+		private static readonly Asset<Texture2D> TextureAsset = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SearchBar", AssetRequestMode.ImmediateLoad);
 		private static readonly Asset<DynamicSpriteFont> MouseTextFont = FontAssets.MouseText;
 		private readonly Action _clearedEvent;
 		private readonly LocalizedText defaultText;
@@ -114,7 +114,7 @@ namespace MagicStorage.UI
 			{
 				int newStringLength = newString.Length;
 				if (prev != Text)
-					newString += Text.Substring(cursorPosition);
+					newString += Text[cursorPosition..];
 				Text = newString;
 				cursorPosition = newStringLength;
 				StorageGUI.RefreshItems();

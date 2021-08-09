@@ -9,6 +9,7 @@ using MagicStorage.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -369,10 +370,10 @@ namespace MagicStorage
 			{
 				recipeButtons = new UIButtonChoice(RefreshItems, new[]
 				{
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable"),
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll"),
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc"),
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll")
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad)
 				}, new[]
 				{
 					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
