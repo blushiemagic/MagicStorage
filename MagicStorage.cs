@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Edits;
 using MagicStorage.Items;
 using MagicStorage.Stations;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,8 @@ namespace MagicStorage {
 		public static Mod[] AllMods { get; private set; }
 
 		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
+
+		public static readonly Version requiredVersion = new Version(0, 12);
 
 		public override void Load()
 		{
