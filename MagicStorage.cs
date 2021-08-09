@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Terraria;
-using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.UI;
-using Microsoft.Xna.Framework;
-using Terraria.Localization;
-using MagicStorage.Edits;
+﻿using MagicStorage.Edits;
 using MagicStorage.Items;
 using MagicStorage.Stations;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Terraria;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
-namespace MagicStorage
-{
-	public class MagicStorage : Mod
-	{
+namespace MagicStorage {
+	public class MagicStorage : Mod {
 		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
 
 		public static readonly Version requiredVersion = new Version(0, 12);
 
 		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
 
-		public override void Load()
-		{
-			if (TModLoaderVersion < requiredVersion)
-			{
+		public override void Load() {
+			if(TModLoaderVersion < requiredVersion) {
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
 			}
 
@@ -37,16 +31,14 @@ namespace MagicStorage
 			DirectDetourManager.Load();
 		}
 
-		public override void Unload()
-		{
+		public override void Unload() {
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
 
 			DirectDetourManager.Unload();
 		}
 
-		private void AddTranslations()
-		{
+		private void AddTranslations() {
 			ModTranslation text = LocalizationLoader.CreateTranslation(this, "SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ustawione na: X={0}, Y={1}");
@@ -234,22 +226,19 @@ namespace MagicStorage
 			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes(){
+		public override void AddRecipes() {
 			CreateRecipe(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromLiteral("Biome Globe in a Crafting Interface"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
-		public override void PostAddRecipes()
-		{
+		public override void PostAddRecipes() {
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
-			for(int i = 0; i < Recipe.maxRecipes; i++)
-			{
+			for(int i = 0; i < Recipe.maxRecipes; i++) {
 				Recipe recipe = Main.recipe[i];
 
-				if(recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
-				{
+				if(recipe.HasCondition(Recipe.Condition.InGraveyardBiome)) {
 					Recipe copy = CreateRecipe(recipe.createItem.type, recipe.createItem.stack);
 
 					for(int r = 0; r < recipe.requiredItem.Count; r++)
@@ -565,8 +554,7 @@ namespace MagicStorage
 					ModContent.ItemType<CrimsonAltar>()));
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI)
-		{
+		public override void HandlePacket(BinaryReader reader, int whoAmI) {
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 	}
