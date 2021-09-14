@@ -28,7 +28,7 @@ namespace MagicStorage.Edits.MSIL{
 				i => i.MatchAdd()))
 				goto bad_il;
 
-			ILLabel jumpLabel = c.DefineLabel();
+			ILLabel jumpLabel = c.MarkLabel();
 
 			//Go back to the beginning and find the code that handles the Marshmallow on a Stick usage
 			c.Index = 0;

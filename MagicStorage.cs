@@ -304,7 +304,10 @@ namespace MagicStorage {
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "CraftTooltip");
-			text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
+
+			//See explanation in CraftingGUI.UpdateCraftButton() for why the test feature was removed
+			// text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
+			text.SetDefault("Left click to Craft");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "TestItemSuffix");

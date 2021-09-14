@@ -1,8 +1,11 @@
 ﻿using System;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
+	//Don't load until we've gotten the sprites
+	[Autoload(false)]
 	public class CombinedStations1Item : CombinedStationsItem<CombinedStations1Tile>
 	{
 		public override string ItemName => "Combined Stations (Tier 1)";

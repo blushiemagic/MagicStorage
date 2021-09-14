@@ -669,7 +669,7 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 			{
 				reqObjText2.SetText("");
-				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorageExtra.SelectedRecipe").Value);
+				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
 			}
 			else
 			{
@@ -706,6 +706,9 @@ namespace MagicStorage
 
 				if (selectedRecipe.HasCondition(Recipe.Condition.InSnow))
 					AddText(Language.GetTextValue("LegacyInterface.123"));
+
+				if (selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+					AddText(Language.GetTextValue("LegacyInterface.124"));
 
 				if (isEmpty)
 					text = Language.GetTextValue("LegacyInterface.23");
@@ -779,6 +782,11 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				craftButton.BackgroundColor = new Color(73, 94, 171);
+				//The "Test Item" feature is very cheaty and I don't want that in Magic Storage.
+				//However, just deleting the code would be a waste, so it's commented out instead.
+				// - absoluteAquarian
+				// TODO: make this a config option
+				/*
 				if (RightMouseClicked && selectedRecipe is not null && Main.mouseItem.IsAir)
 				{
 					Item item = selectedRecipe.createItem;
@@ -792,7 +800,7 @@ namespace MagicStorage
 						Main.LocalPlayer.GetModPlayer<StoragePlayer>().TestedRecipes.Add(selectedRecipe.createItem);
 					}
 				}
-				else if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
+				else */ if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
 					if (craftTimer <= 0)
 					{
@@ -863,10 +871,10 @@ namespace MagicStorage
 			testItem.shopCustomPrice = 0;
 			testItem.material = false;
 			testItem.rare = -11;
-			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
+			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 		}
 
-		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorageExtra.TestItemSuffix"));
+		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 
 
 		private static TEStorageHeart GetHeart() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().GetStorageHeart();
@@ -1218,6 +1226,9 @@ namespace MagicStorage
 
 			foreach (Item item in GetCraftingStations())
 			{
+				if (item.IsAir)
+					continue;
+
 				if (item.createTile >= TileID.Dirt)
 				{
 					adjTiles[item.createTile] = true;
@@ -1347,6 +1358,8 @@ namespace MagicStorage
 
 			lock (BlockRecipes.ActiveLock)
 			{
+				bool[] oldAdjTile = (bool[])Main.LocalPlayer.adjTile.Clone();
+
 				try
 				{
 					Player player = Main.LocalPlayer;
@@ -1373,6 +1386,7 @@ namespace MagicStorage
 				finally
 				{
 					BlockRecipes.Active = true;
+					Main.LocalPlayer.adjTile = oldAdjTile;
 				}
 			}
 

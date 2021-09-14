@@ -4,6 +4,8 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
+	//Don't load until we've gotten the sprites
+	[Autoload(false)]
 	public class CombinedStations4Item : CombinedStationsItem<CombinedStations4Tile>
 	{
 		public override string ItemName => "Combined Stations (Final Tier)";

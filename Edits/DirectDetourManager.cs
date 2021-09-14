@@ -30,9 +30,9 @@ namespace MagicStorage.Edits
 			catch (Exception ex)
 			{
 				throw new Exception("An error occurred while doing patching in MagicStorage." +
-									"\nReport this error to the mod devs and disable the mod in the meantime." +
-									"\n\n\n" +
-									ex);
+				                    "\nReport this error to the mod devs and disable the mod in the meantime." +
+				                    "\n\n" +
+				                    ex);
 			}
 		}
 

@@ -103,6 +103,7 @@ namespace MagicStorage
 			lock (Members.RecipeInfoCache)
 			{
 				Members.RecipeInfoCache.Clear();
+				RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
 				foreach (Recipe r in Main.recipe)
 				{
 					Recipe recipe = r;
@@ -110,7 +111,7 @@ namespace MagicStorage
 						break;
 					if (recipe == Members.CompoundRecipe.Compound)
 						recipe = Members.CompoundRecipe.OverridenRecipe;
-					SingleSearch(recipe, storedItems);
+					SingleSearch(recipe);
 				}
 			}
 		}
@@ -125,15 +126,14 @@ namespace MagicStorage
 			return null;
 		}
 
-		private static void SingleSearch(Recipe recipe, Dictionary<int, int> inventory)
+		private static void SingleSearch(Recipe recipe)
 		{
 			lock (BlockRecipes.ActiveLock)
 			{
 				BlockRecipes.Active = false;
-				RecipeInfo recipeInfo = RecursiveCraft.RecursiveCraft.RecursiveSearch.FindIngredientsForRecipe(recipe, inventory);
-				BlockRecipes.Active = true;
-				if (recipeInfo?.RecipeUsed.Count > 1)
+				if (RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
 					Members.RecipeInfoCache.Add(recipe, recipeInfo);
+				BlockRecipes.Active = true;
 			}
 		}
 
@@ -151,7 +151,8 @@ namespace MagicStorage
 				lock (Members.RecipeInfoCache)
 				{
 					Members.RecipeInfoCache.Remove(recipe);
-					SingleSearch(recipe, storedItems);
+					RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
+					SingleSearch(recipe);
 				}
 
 			return Members.RecipeInfoCache.ContainsKey(recipe);

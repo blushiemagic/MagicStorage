@@ -12,7 +12,7 @@ namespace MagicStorage
 	{
 		[Label("Display new items/recipes")]
 		[Tooltip("Toggles whether new items in the storage will glow to indicate they're new")]
-		[DefaultValue(true)]
+		[DefaultValue(false)]
 		public bool glowNewItems;
 
 		[Label("Use default filter")]
@@ -22,7 +22,7 @@ namespace MagicStorage
 
 		[Label("Default recipe filter")]
 		[Tooltip("Enable to default to all recipes, disable to default to available recipes")]
-		[DefaultValue(true)]
+		[DefaultValue(false)]
 		public bool showAllRecipes;
 
 		[Label("Quick stack deposit mode")]

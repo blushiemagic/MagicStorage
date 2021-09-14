@@ -6,6 +6,8 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
+	//Don't load until we've gotten the sprites
+	[Autoload(false)]
 	public class BiomeGlobe : ModItem
 	{
 		public override void SetStaticDefaults()
