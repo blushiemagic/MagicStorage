@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Enums;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
@@ -13,14 +14,10 @@ namespace MagicStorage.Components
 		public override void SetStaticDefaults()
 		{
 			Main.tileSolid[Type] = false;
-			TileObjectData.newTile.Width = 1;
-			TileObjectData.newTile.Height = 1;
-			TileObjectData.newTile.Origin = new Point16(0, 0);
-			TileObjectData.newTile.CoordinateHeights = new[] { 16 };
-			TileObjectData.newTile.CoordinateWidth = 16;
-			TileObjectData.newTile.CoordinatePadding = 2;
+			TileObjectData.newTile.CopyFrom(TileObjectData.Style1x1);
+			TileObjectData.newTile.AnchorBottom = new AnchorData(AnchorType.EmptyTile, TileObjectData.newTile.Width, 0);
+			TileObjectData.newTile.LavaDeath = false;
 			TileObjectData.newTile.HookCheckIfCanPlace = new PlacementHook(CanPlace, -1, 0, true);
-			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
 			ModTranslation text = CreateMapEntryName();
