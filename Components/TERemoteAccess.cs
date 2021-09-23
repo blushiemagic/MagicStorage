@@ -66,19 +66,18 @@ namespace MagicStorage.Components
 			heart?.remoteAccesses.Add(Position);
 		}
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = base.Save();
+			base.SaveData(tag);
 			TagCompound tagLocator = new();
 			tagLocator.Set("X", locator.X);
 			tagLocator.Set("Y", locator.Y);
 			tag.Set("Locator", tagLocator);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
-			base.Load(tag);
+			base.LoadData(tag);
 			TagCompound tagLocator = tag.GetCompound("Locator");
 			locator = new Point16(tagLocator.GetShort("X"), tagLocator.GetShort("Y"));
 		}

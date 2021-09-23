@@ -61,17 +61,15 @@ namespace MagicStorage.Components
 
 		public static bool IsStoragePoint(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStoragePoint;
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = new();
 			TagCompound tagCenter = new();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
 			tag.Set("Center", tagCenter);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			TagCompound tagCenter = tag.GetCompound("Center");
 			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));

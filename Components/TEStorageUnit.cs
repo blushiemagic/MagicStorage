@@ -284,17 +284,16 @@ namespace MagicStorage.Components
 			return item;
 		}
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = base.Save();
+			base.SaveData(tag);
 			List<TagCompound> tagItems = items.Select(ItemIO.Save).ToList();
 			tag.Set("Items", tagItems);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
-			base.Load(tag);
+			base.LoadData(tag);
 			ClearItemsData();
 			foreach (Item item in tag.GetList<TagCompound>("Items").Select(ItemIO.Load))
 			{
