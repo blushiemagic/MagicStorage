@@ -303,9 +303,9 @@ namespace MagicStorage.Components
 			}
 		}
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = base.Save();
+			base.SaveData(tag);
 			List<TagCompound> tagRemotes = new();
 			foreach (Point16 remoteAccess in remoteAccesses)
 			{
@@ -317,12 +317,11 @@ namespace MagicStorage.Components
 
 			tag.Set("RemoteAccesses", tagRemotes);
 			_uniqueItemsPutHistory.Save(tag);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
-			base.Load(tag);
+			base.LoadData(tag);
 			foreach (TagCompound tagRemote in tag.GetList<TagCompound>("RemoteAccesses"))
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			_uniqueItemsPutHistory.Load(tag);

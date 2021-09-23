@@ -6,22 +6,16 @@ namespace MagicStorage
 {
 	public class ItemSaveLoadHook : GlobalItem
 	{
-		public override TagCompound Save(Item item)
+		public override void SaveData(Item item, TagCompound tag)
 		{
 			if (CraftingGUI.IsTestItem(item))
-				return new TagCompound { { "TestItem", true } };
-
-			return null;
+				tag["TestItem"] = true;
 		}
 
-		public override void Load(Item item, TagCompound tag)
+		public override void LoadData(Item item, TagCompound tag)
 		{
-			if (tag is not null && tag.ContainsKey("TestItem"))
+			if (tag.ContainsKey("TestItem"))
 				CraftingGUI.MarkAsTestItem(item);
-
-			base.Load(item, tag);
 		}
-
-		public override bool NeedsSaving(Item item) => CraftingGUI.IsTestItem(item);
 	}
 }

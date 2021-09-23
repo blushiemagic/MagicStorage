@@ -44,18 +44,16 @@ namespace MagicStorage.Components
 
 		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = new();
 			tag.Set("Inactive", Inactive);
 			TagCompound tagCenter = new();
 			tagCenter.Set("X", center.X);
 			tagCenter.Set("Y", center.Y);
 			tag.Set("Center", tagCenter);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			Inactive = tag.GetBool("Inactive");
 			TagCompound tagCenter = tag.GetCompound("Center");

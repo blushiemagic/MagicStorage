@@ -85,9 +85,8 @@ namespace MagicStorage.Components
 
 		public static bool IsStorageCenter(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter;
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = new();
 			List<TagCompound> tagUnits = new();
 			foreach (Point16 storageUnit in storageUnits)
 			{
@@ -98,10 +97,9 @@ namespace MagicStorage.Components
 			}
 
 			tag.Set("StorageUnits", tagUnits);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			foreach (TagCompound tagUnit in tag.GetList<TagCompound>("StorageUnits"))
 				storageUnits.Add(new Point16(tagUnit.GetShort("X"), tagUnit.GetShort("Y")));
