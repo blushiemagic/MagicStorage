@@ -44,7 +44,7 @@ namespace MagicStorage.Components
 			if (Main.tile[i, j].frameY % 36 == 18)
 				j--;
 
-			string text = "This access is not connected to a Storage Heart!";
+			string text = this is StorageHeart ? "Could not load Storage Heart tile entity!" : "This access is not connected to a Storage Heart!";
 			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
 				if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
 					text = "Storage Heart area not loaded! Try again.";
