@@ -52,29 +52,25 @@ namespace MagicStorage
 			empressDiamond = false;
 		}
 
-		public override TagCompound SaveWorldData()
+		public override void SaveWorldData(TagCompound tag)
 		{
-			TagCompound tag = new()
-			{
-				["saveVersion"] = SaveVersion,
-				["kingSlimeDiamond"] = kingSlimeDiamond,
-				["boss1Diamond"] = boss1Diamond,
-				["boss2Diamond"] = boss2Diamond,
-				["boss3Diamond"] = boss3Diamond,
-				["queenBeeDiamond"] = queenBeeDiamond,
-				["hardmodeDiamond"] = hardmodeDiamond,
-				["mechBoss1Diamond"] = mechBoss1Diamond,
-				["mechBoss2Diamond"] = mechBoss2Diamond,
-				["mechBoss3Diamond"] = mechBoss3Diamond,
-				["plantBossDiamond"] = plantBossDiamond,
-				["golemBossDiamond"] = golemBossDiamond,
-				["fishronDiamond"] = fishronDiamond,
-				["ancientCultistDiamond"] = ancientCultistDiamond,
-				["moonlordDiamond"] = moonlordDiamond,
-				["queenSlimeDiamond"] = queenSlimeDiamond,
-				["empressDiamond"] = empressDiamond
-			};
-			return tag;
+			tag["saveVersion"] = SaveVersion;
+			tag["kingSlimeDiamond"] = kingSlimeDiamond;
+			tag["boss1Diamond"] = boss1Diamond;
+			tag["boss2Diamond"] = boss2Diamond;
+			tag["boss3Diamond"] = boss3Diamond;
+			tag["queenBeeDiamond"] = queenBeeDiamond;
+			tag["hardmodeDiamond"] = hardmodeDiamond;
+			tag["mechBoss1Diamond"] = mechBoss1Diamond;
+			tag["mechBoss2Diamond"] = mechBoss2Diamond;
+			tag["mechBoss3Diamond"] = mechBoss3Diamond;
+			tag["plantBossDiamond"] = plantBossDiamond;
+			tag["golemBossDiamond"] = golemBossDiamond;
+			tag["fishronDiamond"] = fishronDiamond;
+			tag["ancientCultistDiamond"] = ancientCultistDiamond;
+			tag["moonlordDiamond"] = moonlordDiamond;
+			tag["queenSlimeDiamond"] = queenSlimeDiamond;
+			tag["empressDiamond"] = empressDiamond;
 		}
 
 		public override void LoadWorldData(TagCompound tag)

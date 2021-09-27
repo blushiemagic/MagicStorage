@@ -47,21 +47,17 @@ namespace MagicStorage
 
 		public bool AddToCraftedRecipes(Item item) => _craftedRecipes.Add(item);
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound c = new();
-
-			_hiddenRecipes.Save(c);
-			_craftedRecipes.Save(c);
-			FavoritedRecipes.Save(c);
-			SeenRecipes.Save(c);
-			TestedRecipes.Save(c);
-			AsKnownRecipes.Save(c);
-
-			return c;
+			_hiddenRecipes.Save(tag);
+			_craftedRecipes.Save(tag);
+			FavoritedRecipes.Save(tag);
+			SeenRecipes.Save(tag);
+			TestedRecipes.Save(tag);
+			AsKnownRecipes.Save(tag);
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			_hiddenRecipes.Load(tag);
 			_craftedRecipes.Load(tag);

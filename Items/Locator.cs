@@ -72,15 +72,13 @@ namespace MagicStorage.Items
 			recipe.Register();
 		}
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = new();
 			tag.Set("X", location.X);
 			tag.Set("Y", location.Y);
-			return tag;
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			location = new Point16(tag.GetShort("X"), tag.GetShort("Y"));
 		}

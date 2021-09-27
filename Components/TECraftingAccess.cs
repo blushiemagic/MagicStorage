@@ -93,16 +93,12 @@ namespace MagicStorage.Components
 			return item;
 		}
 
-		public override TagCompound Save()
+		public override void SaveData(TagCompound tag)
 		{
-			TagCompound tag = new()
-			{
-				["Stations"] = stations.Select(ItemIO.Save).ToList()
-			};
-			return tag;
+			tag["Stations"] = stations.Select(ItemIO.Save).ToList();
 		}
 
-		public override void Load(TagCompound tag)
+		public override void LoadData(TagCompound tag)
 		{
 			IList<TagCompound> listStations = tag.GetList<TagCompound>("Stations");
 			if (listStations is not null && listStations.Count > 0)
