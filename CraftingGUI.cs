@@ -14,6 +14,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Map;
@@ -397,6 +398,7 @@ namespace MagicStorage
 			{
 				// TODO this needs to be in a better place. What's the hook for doing Keybinds?
 				if (MagicStorage.IsItemKnownHotKey is not null &&
+					PlayerInput.CurrentProfile.InputModes[InputMode.Keyboard].KeyStatus.ContainsKey("Is This Item Known?") &&
 					MagicStorage.IsItemKnownHotKey.GetAssignedKeys().Count > 0 &&
 					MagicStorage.IsItemKnownHotKey.JustPressed &&
 					Main.HoverItem is not null &&
