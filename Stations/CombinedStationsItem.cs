@@ -1,4 +1,5 @@
-﻿using Terraria.GameContent.Creative;
+﻿using Terraria;
+using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -28,7 +29,7 @@ namespace MagicStorage.Stations
 		{
 		}
 
-		public override void SetDefaults()
+		public sealed override void SetDefaults()
 		{
 			SafeSetDefaults();
 			Item.DamageType = DamageClass.NoScaling;
@@ -43,6 +44,17 @@ namespace MagicStorage.Stations
 			Item.useTurn = true;
 			Item.maxStack = 99;
 			Item.rare = Rarity;
+		}
+
+		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks){
+			int price = 0;
+
+			for(int i = 0; i < typeStacks.Length; i++){
+				Item tItem = new Item(typeStacks[i].type);
+				price += tItem.value * typeStacks[i].stack;
+			}
+
+			return price;
 		}
 	}
 }

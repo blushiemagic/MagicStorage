@@ -1,11 +1,10 @@
-﻿using System;
-using Terraria.ID;
+﻿using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	//Don't load until we've gotten the sprites
-	[Autoload(false)]
+	//Overwrite the base class logic
+	[Autoload(true)]
 	public class CombinedStations2Item : CombinedStationsItem<CombinedStations2Tile>
 	{
 		public override string ItemName => "Combined Stations (Tier 2)";
@@ -14,9 +13,21 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Pink;
 
+		public override void SafeSetDefaults()
+		{
+			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedFurnitureStations1Item>(), 1),
+				(ItemID.AlchemyTable, 1),
+				(ItemID.CookingPot, 1),
+				(ItemID.TinkerersWorkshop, 1),
+				(ItemID.DyeVat, 1),
+				(ItemID.HeavyWorkBench, 1),
+				(ItemID.TeaKettle, 1));
+		}
+
 		public override void GetItemDimensions(out int width, out int height)
 		{
-			throw new NotImplementedException();
+			width = 30;
+			height = 30;
 		}
 
 		public override void AddRecipes()

@@ -1,12 +1,11 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	//Don't load until we've gotten the sprites
-	[Autoload(false)]
+	//Overwrite the base class logic
+	[Autoload(true)]
 	public class CombinedStations4Tile : CombinedStationsTile<CombinedStations4Item>
 	{
 		public override Color MapColor => Color.Orange;
@@ -85,7 +84,8 @@ namespace MagicStorage.Stations
 
 		public override void GetTileDimensions(out int width, out int height)
 		{
-			throw new NotImplementedException();
+			width = 3;
+			height = 3;
 		}
 	}
 }

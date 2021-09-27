@@ -1,12 +1,11 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	//Don't load until we've gotten the sprites
-	[Autoload(false)]
+	//Overwrite the base class logic
+	[Autoload(true)]
 	public class CombinedStations3Tile : CombinedStationsTile<CombinedStations3Item>
 	{
 		public override Color MapColor => Color.Orange;
@@ -18,9 +17,8 @@ namespace MagicStorage.Stations
 		//Hellforge, Alchemy Table, Cooking Pot, Tinkerer's Workshop, Dye Vat, Heavy Work Bench, Keg, Teapot
 		//(Tier 3)
 		//Imbuing Station, Mythril Anvil, Adamantite Forge, Bookcase, Crystal Ball, Blend-O-Matic, Meat Grinder
-		public override int[] GetAdjTiles() =>
-			new int[]
-			{
+		public override int[] GetAdjTiles()
+			=> new int[]{
 				Type,
 				//Tier 1
 				TileID.WorkBenches,
@@ -51,9 +49,15 @@ namespace MagicStorage.Stations
 				TileID.MeatGrinder
 			};
 
+		public override void SafeSetStaticDefaults()
+		{
+			TileID.Sets.CountsAsWaterSource[Type] = true;
+		}
+
 		public override void GetTileDimensions(out int width, out int height)
 		{
-			throw new NotImplementedException();
+			width = 3;
+			height = 3;
 		}
 	}
 }

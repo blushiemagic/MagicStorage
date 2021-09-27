@@ -44,7 +44,15 @@ namespace MagicStorage.Edits.MSIL{
 
 			//After the check that the type is valid, but before the actual use code
 			c.Emit(OpCodes.Ldarg_0);
-			c.EmitDelegate<Func<Player, bool>>(player => player.GetModPlayer<BiomePlayer>().biomeGlobe);
+			c.EmitDelegate<Func<Player, bool>>(player => {
+				bool isGlobe = player.GetModPlayer<BiomePlayer>().biomeGlobe;
+
+				//Mimic the code that sets the X position of the item since that's being skipped
+				if(isGlobe)
+					player.itemLocation.X = player.position.X + player.width * 0.5f + 8 * player.direction;
+
+				return isGlobe;
+			});
 			c.Emit(OpCodes.Brtrue, jumpLabel);
 
 			ILHelper.UpdateInstructionOffsets(c);

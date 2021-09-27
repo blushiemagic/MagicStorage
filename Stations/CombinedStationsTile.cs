@@ -30,6 +30,8 @@ namespace MagicStorage.Stations
 
 			TileObjectData.newTile.CopyFrom(TileObjectData.Style3x2);
 			GetTileDimensions(out int width, out int height);
+			TileObjectData.newTile.Width = width;
+			TileObjectData.newTile.Height = height;
 			TileObjectData.newTile.StyleHorizontal = true;
 			TileObjectData.newTile.StyleWrapLimit = 36;
 			TileObjectData.newTile.Origin = new Point16((width - 1) / 2, height - 1);
