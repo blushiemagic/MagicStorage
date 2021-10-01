@@ -59,7 +59,10 @@ namespace MagicStorage.Components
 				j--;
 			if (TryUpgrade(i, j))
 				return true;
-			TEStorageUnit storageUnit = (TEStorageUnit) TileEntity.ByPosition[new Point16(i, j)];
+
+			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
+				return false;
+			
 			Main.LocalPlayer.tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
@@ -111,7 +114,9 @@ namespace MagicStorage.Components
 
 			if (success)
 			{
-				TEStorageUnit storageUnit = (TEStorageUnit) TileEntity.ByPosition[new Point16(i, j)];
+				if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
+					return false;
+				
 				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
 				TEStorageHeart heart = storageUnit.GetHeart();
@@ -128,9 +133,11 @@ namespace MagicStorage.Components
 					item.SetDefaults();
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
+
+				return true;
 			}
 
-			return success;
+			return false;
 		}
 
 		private static void SetStyle(int i, int j, int style)

@@ -144,11 +144,8 @@ namespace MagicStorage.Components
 		public static void SearchAndRefreshNetwork(Point16 position)
 		{
 			Point16 center = FindStorageCenter(position);
-			if (center.X >= 0 && center.Y >= 0)
-			{
-				TEStorageCenter centerEnt = (TEStorageCenter) ByPosition[center];
+			if (center != Point16.NegativeOne && ByPosition.TryGetValue(center, out var te) && te is TEStorageCenter centerEnt)
 				centerEnt.ResetAndSearch();
-			}
 		}
 	}
 }

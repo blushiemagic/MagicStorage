@@ -551,7 +551,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 			{
 				int ent = reader.ReadInt32();
-				if (TileEntity.ByID[ent] is TEStorageHeart heart)
+				if (TileEntity.ByID.TryGetValue(ent, out var te) && te is TEStorageHeart heart)
 					heart.ResetCompactStage();
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
