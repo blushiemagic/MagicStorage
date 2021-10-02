@@ -43,11 +43,27 @@ namespace MagicStorage.Components
 			return type;
 		}
 
-		public override bool CanKillTile(int i, int j, ref bool blockDamage) => Main.tile[i, j].frameX / 36 % 3 == 0;
+		public override bool CanKillTile(int i, int j, ref bool blockDamage)
+		{
+			if (Main.tile[i, j].frameX % 36 == 18)
+				i--;
+			if (Main.tile[i, j].frameY % 36 == 18)
+				j--;
+
+			if (!TileEntity.ByPosition.ContainsKey(new Point16(i, j)))
+				return true;
+
+			return Main.tile[i, j].frameX / 36 % 3 == 0;
+		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (Main.tile[i, j].frameX / 36 % 3 != 0)
+			if (Main.tile[i, j].frameX % 36 == 18)
+				i--;
+			if (Main.tile[i, j].frameY % 36 == 18)
+				j--;
+
+			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && Main.tile[i, j].frameX / 36 % 3 != 0)
 				fail = true;
 		}
 
