@@ -75,7 +75,9 @@ namespace MagicStorage.Components
 		{
 			foreach (Point16 storageUnit in storageUnits)
 			{
-				TEAbstractStorageUnit unit = (TEAbstractStorageUnit) ByPosition[storageUnit];
+				if (!ByPosition.TryGetValue(storageUnit, out var te) || te is not TEAbstractStorageUnit unit)
+					continue;
+				
 				unit.Unlink();
 				NetHelper.SendTEUpdate(unit.ID, unit.Position);
 			}

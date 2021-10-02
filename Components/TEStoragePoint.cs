@@ -57,7 +57,8 @@ namespace MagicStorage.Components
 
 		public bool Unlink() => Link(Point16.NegativeOne);
 
-		public TEStorageHeart GetHeart() => center != Point16.NegativeOne ? ((TEStorageCenter) ByPosition[center]).GetHeart() : null;
+		public TEStorageHeart GetHeart() =>
+			center != Point16.NegativeOne && ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter centerEnt ? centerEnt.GetHeart() : null;
 
 		public static bool IsStoragePoint(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStoragePoint;
 

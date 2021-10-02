@@ -16,7 +16,7 @@ namespace MagicStorage.Components
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point.X < 0 || point.Y < 0)
+			if (point == Point16.NegativeOne)
 				return null;
 
 			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
@@ -31,9 +31,8 @@ namespace MagicStorage.Components
 				i--;
 			if (Main.tile[i, j].frameY > 0)
 				j--;
-
-			Point16 pos = new(i, j);
-			if (!TileEntity.ByPosition.TryGetValue(pos, out TileEntity te) || te is not TECraftingAccess access)
+			
+			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) || te is not TECraftingAccess access)
 				return;
 
 			if (access.stations.Any(item => !item.IsAir))
