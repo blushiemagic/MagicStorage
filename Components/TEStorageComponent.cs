@@ -28,9 +28,9 @@ namespace MagicStorage.Components
 			new Point16(0, 1)
 		};
 
-		public override bool ValidTile(int i, int j)
+		public override bool IsTileValidForEntity(int x, int y)
 		{
-			Tile tile = Main.tile[i, j];
+			Tile tile = Main.tile[x, y];
 			return tile.IsActive && ValidTile(tile);
 		}
 
