@@ -48,7 +48,6 @@ namespace MagicStorage.Components
 					Main.mouseItem = item.Clone();
 				Main.NewText(message);
 				return true;
-
 			}
 
 			return base.RightClick(i, j);
