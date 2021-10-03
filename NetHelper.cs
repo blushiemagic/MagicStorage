@@ -200,18 +200,18 @@ namespace MagicStorage
 				//The data still needs to be read for exceptions to not be thrown...
 				if (op == 0)
 				{
-					_ = ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == 1 || op == 3)
 				{
 					_ = reader.ReadBoolean();
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 3)
+				else if (op == 2)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
-						_ = ItemIO.Receive(reader, true);
+						_ = ItemIO.Receive(reader, true, true);
 				}
 
 				return;
@@ -286,13 +286,13 @@ namespace MagicStorage
 				//The data still needs to be read for exceptions to not be thrown...
 				if (op == 0 || op == 1 || op == 3)
 				{
-					_ = ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == 2)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
-						_ = ItemIO.Receive(reader, true);
+						_ = ItemIO.Receive(reader, true, true);
 				}
 
 				return;
@@ -443,7 +443,7 @@ namespace MagicStorage
 				//Still need to read the data for exceptions to not be thrown...
 				if (op == 0)
 				{
-					_ = ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == 1)
 				{
@@ -451,7 +451,7 @@ namespace MagicStorage
 				}
 				else if (op == 2)
 				{
-					_ = ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true, true);
 					_ = reader.ReadByte();
 				}
 
@@ -507,7 +507,7 @@ namespace MagicStorage
 		{
 			//Still need to read the data for exceptions to not be thrown...
 			byte op = reader.ReadByte();
-			Item item = ItemIO.Receive(reader, true);
+			Item item = ItemIO.Receive(reader, true, true);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
@@ -586,7 +586,7 @@ namespace MagicStorage
 			{
 				//Still need to read the data for exceptions to not be thrown
 				for (int i = 0; i < withdrawCount; i++)
-					_ = ItemIO.Receive(reader, true);
+					_ = ItemIO.Receive(reader, true, true);
 
 
 				int count = reader.ReadInt32();
