@@ -673,7 +673,7 @@ namespace MagicStorage
 					}
 					*/
 
-				TileEntity.Read(reader);
+				TileEntity.Read(reader, true);
 			/*
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					MagicStorage.Instance.Logger.Debug($"Bytes read (#{i + 1}): {reader.BaseStream.Position - entStart} (total: {reader.BaseStream.Position})");
