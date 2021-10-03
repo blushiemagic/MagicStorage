@@ -121,8 +121,18 @@ namespace MagicStorage
 			storageAccess = point;
 			remoteAccess = remote;
 			_latestAccessedStorage = GetStorageHeart();
+
 			if (MagicStorageConfig.UseConfigFilter && CraftingGUI.recipeButtons is not null)
+			{
 				CraftingGUI.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+			}
+
+			if (MagicStorageConfig.ClearSearchText)
+			{
+				StorageGUI.searchBar?.Reset();
+				CraftingGUI.searchBar?.Reset();
+			}
+
 			StorageGUI.RefreshItems();
 		}
 

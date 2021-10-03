@@ -30,6 +30,11 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool quickStackDepositMode;
 
+		[Label("Clear search text")]
+		[Tooltip("Enable to clear the search text when opening the UI")]
+		[DefaultValue(false)]
+		public bool clearSearchText;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -43,6 +48,8 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
+
+		[JsonIgnore] public static bool ClearSearchText => Instance.clearSearchText;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
