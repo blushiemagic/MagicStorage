@@ -54,7 +54,7 @@ namespace MagicStorage
 		private static UIElement topBar;
 
 		// TODO take a look at Terraria's UISearchBar
-		private static UI.UISearchBar searchBar;
+		public static UI.UISearchBar searchBar;
 		private static UIButtonChoice sortButtons;
 		internal static UIButtonChoice recipeButtons;
 		private static UIElement topBar2;
