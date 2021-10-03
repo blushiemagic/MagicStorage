@@ -15,8 +15,27 @@ namespace MagicStorage.Sorting
 			IEnumerable<Item> filteredItems = items.Where(item => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
+
+			filteredItems = Aggregate(filteredItems);
+
 			CompareFunction func = MakeSortFunction(sortMode);
 			return func is null ? filteredItems : filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
+		}
+
+		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
+		{
+			Dictionary<ItemData, Item> dict = new();
+
+			foreach (Item item in items)
+			{
+				ItemData itemData = new(item);
+				if (dict.TryGetValue(itemData, out Item i))
+					i.stack += item.stack;
+				else
+					dict.Add(itemData, item.Clone());
+			}
+
+			return dict.Values;
 		}
 
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
