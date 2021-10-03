@@ -36,7 +36,6 @@ namespace MagicStorage.Edits.Detours
 				Queue<int> ids = new();
 
 				//Only process tile entities from Magic Storage
-				// TODO consider using ModTileEntity.ByPosition
 				foreach ((Point16 pos, TileEntity tileEntity) in TileEntity.ByPosition)
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
 						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
@@ -78,7 +77,7 @@ namespace MagicStorage.Edits.Detours
 			if (!lastSend)
 			{
 				//The last send won't be getting another tile, so just ignore this section
-				TileEntity.Write(msWriter2, TileEntity.ByID[ids.Dequeue()]);
+				TileEntity.Write(msWriter2, TileEntity.ByID[ids.Dequeue()], true);
 				written++;
 				total++;
 
