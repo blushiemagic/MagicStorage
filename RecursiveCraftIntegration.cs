@@ -75,7 +75,7 @@ namespace MagicStorage
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
-				return 0;
+				return item.whoAmI;
 			}
 
 			return orig(self, type, stack);
