@@ -67,7 +67,7 @@ namespace MagicStorage
 			OnPlayer.QuickSpawnItem_int_int -= OnPlayerOnQuickSpawnItem_int_int;
 		}
 
-		private static void OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
+		private static int OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
@@ -75,10 +75,10 @@ namespace MagicStorage
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
-				return;
+				return -1;
 			}
 
-			orig(self, type, stack);
+			return orig(self, type, stack);
 		}
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)

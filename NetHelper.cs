@@ -8,18 +8,23 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using System.Linq;
 
 namespace MagicStorage
 {
 	public static class NetHelper
 	{
+		private static byte OP_DEPOSIT_ALL = 2;
+		private static byte OP_DELETE_ITEM = 4;
+		private static byte OP_DELETE_ALL_ITEMS = 5;
+
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
 
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
-			MessageType type = (MessageType) reader.ReadByte();
+			MessageType type = (MessageType)reader.ReadByte();
 
 			/*
 			if (Main.netMode == NetmodeID.MultiplayerClient)
@@ -66,8 +71,77 @@ namespace MagicStorage
 				case MessageType.NetWorkaround:
 					ReceiveNetWorkaround(reader);
 					break;
+				case MessageType.PlayerJoined:
+					RecivePlayerJoined(reader);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		public static void PlayerJoined()
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.PlayerJoined);
+				packet.Write((byte)Main.myPlayer);
+				packet.Send();
+			}
+		}
+
+		public static void RecivePlayerJoined(BinaryReader reader)
+		{
+			if (Main.netMode == NetmodeID.Server)
+			{				
+				List<TileEntity> teList = new();
+
+				foreach ((int id, TileEntity tileEntity) in TileEntity.ByID)
+				{
+					if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
+					{
+						teList.Add(tileEntity);
+						if (tileEntity is TEStorageUnit)
+						{
+							((TEStorageUnit)tileEntity).FullySync();
+						}
+					}
+				}
+
+				using (MemoryStream packetStream = new())
+				using (MemoryStream tempStream = new())
+				using (BinaryWriter tempWriter = new BinaryWriter(tempStream))
+				{
+					byte remoteClient = reader.ReadByte();
+					ModPacket packet = MagicStorage.Instance.GetPacket();
+					ushort pCount = 0;
+					while (teList.Count > 0)
+					{						
+						TileEntity.Write(tempWriter, teList[0], true);
+						tempWriter.Flush();
+						long combinedLength = packetStream.Length + tempStream.Length;
+						if (combinedLength <= 65535)
+						{
+							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
+							pCount++;
+							teList.RemoveAt(0);
+						}
+
+						if (combinedLength >= 65535 || teList.Count == 0)
+						{
+							packet.Write((byte)MessageType.NetWorkaround);
+							packet.Write(pCount);
+							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
+							packet.Send(remoteClient);
+
+							packetStream.SetLength(0);
+							packet = MagicStorage.Instance.GetPacket();
+							pCount = 0;
+						}
+
+						tempStream.SetLength(0);
+					}
+				}
 			}
 		}
 
@@ -120,9 +194,9 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.SearchAndRefreshNetwork);
-				packet.Write((short) i);
-				packet.Write((short) j);
+				packet.Write((byte)MessageType.SearchAndRefreshNetwork);
+				packet.Write((short)i);
+				packet.Write((short)j);
 				packet.Send();
 			}
 		}
@@ -136,7 +210,7 @@ namespace MagicStorage
 		private static ModPacket PrepareStorageOperation(int ent, byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte) MessageType.TryStorageOperation);
+			packet.Write((byte)MessageType.TryStorageOperation);
 			packet.Write(ent);
 			packet.Write(op);
 			return packet;
@@ -145,7 +219,7 @@ namespace MagicStorage
 		private static ModPacket PrepareOperationResult(byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte) MessageType.StorageOperationResult);
+			packet.Write((byte)MessageType.StorageOperationResult);
 			packet.Write(op);
 			return packet;
 		}
@@ -164,22 +238,62 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStorageOperation(ent, (byte) (toInventory ? 3 : 1));
+				ModPacket packet = PrepareStorageOperation(ent, (byte)(toInventory ? 3 : 1));
 				packet.Write(keepOneIfFavorite);
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 			}
 		}
 
-		public static void SendDepositAll(int ent, List<Item> items)
+		public static void SendDepositAll(int ent, List<Item> _items)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStorageOperation(ent, 2);
-				packet.Write((byte) items.Count);
-				foreach (Item item in items)
-					ItemIO.Send(item, packet, true, true);
+				int size = byte.MaxValue;
+				for (int i = 0; i < _items.Count; i += size)
+				{
+					List<Item> items = _items.GetRange(i, (i + size) > _items.Count ? _items.Count - i : size);
+					using (ModPacket packet = PrepareStorageOperation(ent, OP_DEPOSIT_ALL))
+					{
+						packet.Write((byte)items.Count);
+						for (int j = 0; j < items.Count; ++j)
+						{
+							ItemIO.Send(items[j], packet, true, true);
+						}
+						packet.Send();
+					}
+				}
+			}
+		}
+
+		public static void DeleteItem(int ent, Item item)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				ModPacket packet = PrepareStorageOperation(ent, OP_DELETE_ITEM);
+				ItemIO.Send(item, packet, true, true);
 				packet.Send();
+			}
+		}
+
+		public static void DeleteItems(int ent, List<Item> _items)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				int size = byte.MaxValue;
+				for (int i = 0; i < _items.Count; i += size)
+				{
+					List<Item> items = _items.GetRange(i, (i + size) > _items.Count ? _items.Count - i : size);
+					using (ModPacket packet = PrepareStorageOperation(ent, OP_DELETE_ALL_ITEMS))
+					{
+						packet.Write((byte)items.Count);
+						for (int j = 0; j < items.Count; ++j)
+						{
+							ItemIO.Send(items[j], packet, true, true);
+						}
+						packet.Send();
+					}
+				}
 			}
 		}
 
@@ -207,7 +321,17 @@ namespace MagicStorage
 					_ = reader.ReadBoolean();
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 2)
+				else if (op == OP_DELETE_ITEM)
+				{
+					_ = ItemIO.Receive(reader, true, true);
+				}
+				else if (op == OP_DELETE_ALL_ITEMS)
+				{
+					int count = reader.ReadByte();
+					for (int i = 0; i < count; i++)
+						_ = ItemIO.Receive(reader, true, true);
+				}
+				else if (op == OP_DEPOSIT_ALL)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
@@ -243,7 +367,23 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			else if (op == 2)
+			else if (op == OP_DELETE_ITEM)
+			{
+				Item item = ItemIO.Receive(reader, true, true);
+				heart.TryWithdraw(item, false);
+			}
+			else if (op == OP_DELETE_ALL_ITEMS)
+			{
+				int count = reader.ReadByte();
+				List<Item> items = new();
+				StartUpdateQueue();
+				for (int k = 0; k < count; k++)
+				{
+					heart.TryWithdraw(ItemIO.Receive(reader, true, true), false);
+				}
+				ProcessUpdateQueue();
+			}
+			else if (op == OP_DEPOSIT_ALL)
 			{
 				int count = reader.ReadByte();
 				List<Item> items = new();
@@ -260,7 +400,7 @@ namespace MagicStorage
 				if (items.Count > 0)
 				{
 					ModPacket packet = PrepareOperationResult(op);
-					packet.Write((byte) items.Count);
+					packet.Write((byte)items.Count);
 					foreach (Item item in items)
 						ItemIO.Send(item, packet, true, true);
 					packet.Send(sender);
@@ -288,7 +428,7 @@ namespace MagicStorage
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 2)
+				else if (op == OP_DEPOSIT_ALL)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
@@ -309,7 +449,7 @@ namespace MagicStorage
 
 				StoragePlayer.GetItem(item, op != 3);
 			}
-			else if (op == 2)
+			else if (op == OP_DEPOSIT_ALL)
 			{
 				int count = reader.ReadByte();
 				for (int k = 0; k < count; k++)
@@ -331,7 +471,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.RefreshNetworkItems);
+				packet.Write((byte)MessageType.RefreshNetworkItems);
 				packet.Write(ent);
 				packet.Send();
 			}
@@ -352,7 +492,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.ClientSendTEUpdate);
+				packet.Write((byte)MessageType.ClientSendTEUpdate);
 				packet.Write(id);
 				TileEntity.Write(packet, TileEntity.ByID[id], true);
 				packet.Send();
@@ -388,7 +528,7 @@ namespace MagicStorage
 		private static ModPacket PrepareStationOperation(int ent, byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte) MessageType.TryStationOperation);
+			packet.Write((byte)MessageType.TryStationOperation);
 			packet.Write(ent);
 			packet.Write(op);
 			return packet;
@@ -397,7 +537,7 @@ namespace MagicStorage
 		private static ModPacket PrepareStationResult(byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte) MessageType.StationOperationResult);
+			packet.Write((byte)MessageType.StationOperationResult);
 			packet.Write(op);
 			return packet;
 		}
@@ -417,7 +557,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = PrepareStationOperation(ent, 1);
-				packet.Write((byte) slot);
+				packet.Write((byte)slot);
 				packet.Send();
 			}
 		}
@@ -428,7 +568,7 @@ namespace MagicStorage
 			{
 				ModPacket packet = PrepareStationOperation(ent, 2);
 				ItemIO.Send(item, packet, true, true);
-				packet.Write((byte) slot);
+				packet.Write((byte)slot);
 				packet.Send();
 			}
 		}
@@ -540,7 +680,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.ResetCompactStage);
+				packet.Write((byte)MessageType.ResetCompactStage);
 				packet.Write(ent);
 				packet.Send();
 			}
@@ -565,7 +705,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.CraftRequest);
+				packet.Write((byte)MessageType.CraftRequest);
 				packet.Write(heart);
 				packet.Write(toWithdraw.Count);
 				foreach (Item item in toWithdraw)
@@ -612,7 +752,7 @@ namespace MagicStorage
 			if (items.Count > 0)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.CraftResult);
+				packet.Write((byte)MessageType.CraftResult);
 				packet.Write(items.Count);
 				foreach (Item item in items)
 					ItemIO.Send(item, packet, true, true);
@@ -638,7 +778,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte) MessageType.SectionRequest);
+				packet.Write((byte)MessageType.SectionRequest);
 
 				packet.Write(coords.X);
 				packet.Write(coords.Y);
@@ -658,33 +798,11 @@ namespace MagicStorage
 
 		public static void ReceiveNetWorkaround(BinaryReader reader)
 		{
-			EditsLoader.MessageTileEntitySyncing = false;
-
 			int entityCount = reader.ReadUInt16();
 			for (int i = 0; i < entityCount; i++)
-				/*
-					long entStart = reader.BaseStream.Position;
-	
-					if (Main.netMode == NetmodeID.MultiplayerClient)
-					{
-						byte type = reader.ReadByte();
-						reader.BaseStream.Seek(-1, SeekOrigin.Current);
-						MagicStorage.Instance.Logger.Debug($"Reading entity data of type {type}");
-					}
-					*/
-
+			{
 				TileEntity.Read(reader, true);
-			/*
-				if (Main.netMode == NetmodeID.MultiplayerClient)
-					MagicStorage.Instance.Logger.Debug($"Bytes read (#{i + 1}): {reader.BaseStream.Position - entStart} (total: {reader.BaseStream.Position})");
-				*/
-
-			/*
-			long end = reader.BaseStream.Position;
-
-			if (Main.netMode == NetmodeID.MultiplayerClient && entityCount > 0)
-				MagicStorage.Instance.Logger.Debug($"Received netmessage workaround - {entityCount} entities read, {end} bytes read");
-			*/
+			}
 		}
 	}
 
@@ -701,6 +819,7 @@ namespace MagicStorage
 		CraftRequest,
 		CraftResult,
 		SectionRequest,
-		NetWorkaround
+		NetWorkaround,
+		PlayerJoined
 	}
 }

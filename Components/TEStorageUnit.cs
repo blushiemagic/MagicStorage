@@ -14,7 +14,29 @@ namespace MagicStorage.Components
 {
 	public class TEStorageUnit : TEAbstractStorageUnit
 	{
-		private readonly Queue<UnitOperation> netQueue = new();
+		internal enum NetOperations : byte
+		{
+			FullySync,
+			Deposit,
+			Withdraw,
+			WithdrawStack,
+		}
+
+		private struct NetOperation
+		{
+			public NetOperation(NetOperations _netOPeration, Item _item = null, bool _keepOneInFavorite = false)
+			{
+				netOperation = _netOPeration;
+				item = _item;
+				keepOneInFavorite = _keepOneInFavorite;
+			}
+
+			public NetOperations netOperation { get; }
+			public Item item { get; }
+			public bool keepOneInFavorite { get; }
+		}
+
+		private readonly Queue<NetOperation> netOpQueue = new();
 		private HashSet<ItemData> hasItem = new();
 		private HashSet<int> hasItemNoPrefix = new();
 
@@ -138,7 +160,9 @@ namespace MagicStorage.Components
 				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
 				{
 					if (Main.netMode == NetmodeID.Server)
-						netQueue.Enqueue(UnitOperation.Deposit.Create(original));
+					{
+						netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
+					}
 					PostChangeContents();
 				}
 			}
@@ -180,9 +204,7 @@ namespace MagicStorage.Components
 							{
 								if (Main.netMode == NetmodeID.Server)
 								{
-									WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
-									op.SendKeepOneIfFavorite = keepOneIfFavorite;
-									netQueue.Enqueue(op);
+									netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
 								}
 
 								PostChangeContents();
@@ -194,14 +216,14 @@ namespace MagicStorage.Components
 				}
 
 				if (result.stack == 0)
+				{
 					return new Item();
+				}
 				if (Main.netMode != NetmodeID.MultiplayerClient)
 				{
 					if (Main.netMode == NetmodeID.Server)
 					{
-						WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
-						op.SendKeepOneIfFavorite = keepOneIfFavorite;
-						netQueue.Enqueue(op);
+						netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
 					}
 
 					PostChangeContents();
@@ -234,10 +256,10 @@ namespace MagicStorage.Components
 			if (Inactive)
 				style += 3;
 			style *= 36;
-			topLeft.frameX = (short) style;
-			Main.tile[Position.X, Position.Y + 1].frameX = (short) style;
-			Main.tile[Position.X + 1, Position.Y].frameX = (short) (style + 18);
-			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short) (style + 18);
+			topLeft.frameX = (short)style;
+			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
+			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
+			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
 			return oldFrame != style;
 		}
 
@@ -254,15 +276,15 @@ namespace MagicStorage.Components
 			(unit1.hasSpaceInStack, unit2.hasSpaceInStack) = (unit2.hasSpaceInStack, unit1.hasSpaceInStack);
 			(unit1.hasItem, unit2.hasItem) = (unit2.hasItem, unit1.hasItem);
 			(unit1.hasItemNoPrefix, unit2.hasItemNoPrefix) = (unit2.hasItemNoPrefix, unit1.hasItemNoPrefix);
-			if (Main.netMode == NetmodeID.Server)
-			{
-				unit1.netQueue.Clear();
-				unit2.netQueue.Clear();
-				unit1.netQueue.Enqueue(UnitOperation.FullSync.Create());
-				unit2.netQueue.Enqueue(UnitOperation.FullSync.Create());
-			}
+            if (Main.netMode == NetmodeID.Server)
+            {
+				unit1.netOpQueue.Clear();
+				unit2.netOpQueue.Clear();
+				unit1.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+				unit2.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));				
+            }
 
-			unit1.PostChangeContents();
+            unit1.PostChangeContents();
 			unit2.PostChangeContents();
 		}
 
@@ -277,7 +299,9 @@ namespace MagicStorage.Components
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				if (Main.netMode == NetmodeID.Server)
-					netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.WithdrawStack));
+				}
 				PostChangeContents();
 			}
 
@@ -304,79 +328,80 @@ namespace MagicStorage.Components
 				hasItem.Add(data);
 				hasItemNoPrefix.Add(data.Type);
 			}
+		}
 
-			if (Main.netMode == NetmodeID.Server)
-				netQueue.Enqueue(UnitOperation.FullSync.Create());
+		public void FullySync()
+		{
+			netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 		}
 
 		public override void NetSend(BinaryWriter trueWriter)
-		{
-			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
-			if (EditsLoader.MessageTileEntitySyncing)
+		{						
+			// too many updates at this point just fully sync
+			if (netOpQueue.Count > Capacity / 2)
 			{
-				trueWriter.Write((byte) 0);
-				base.NetSend(trueWriter);
-				return;
+				netOpQueue.Clear();
+				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
-
-			trueWriter.Write((byte) 1);
 
 			/* Recreate a BinaryWriter writer */
 			using MemoryStream buffer = new(65536);
 			using DeflateStream compressor = new(buffer, CompressionMode.Compress, true);
-			using BufferedStream writerBuffer = new(compressor, 65536);
+			using BufferedStream writerBuffer = new(compressor, buffer.Capacity);
 			using BinaryWriter writer = new(writerBuffer);
 
 			/* Original code */
 			base.NetSend(writer);
-			if (netQueue.Count > Capacity / 2)
-			{
-				netQueue.Clear();
-				netQueue.Enqueue(UnitOperation.FullSync.Create());
-			}
 
-			writer.Write((ushort) netQueue.Count);
-			while (netQueue.Count > 0)
-				netQueue.Dequeue().Send(writer, this);
+			writer.Write((ushort)netOpQueue.Count);
+			while (netOpQueue.Count > 0)
+			{
+				NetOperation netOp = netOpQueue.Dequeue();
+				writer.Write((byte)netOp.netOperation);
+				switch (netOp.netOperation)
+				{
+					case NetOperations.FullySync:
+						writer.Write(items.Count);
+						foreach (Item item in items)
+						{
+							ItemIO.Send(item, writer, true, true);
+						}
+						break;
+					case NetOperations.Withdraw:
+						writer.Write(netOp.keepOneInFavorite);
+						ItemIO.Send(netOp.item, writer, true, true);
+						break;
+					case NetOperations.WithdrawStack:
+						break;
+					case NetOperations.Deposit:
+						ItemIO.Send(netOp.item, writer, true, true);
+						break;
+					default:
+						Main.NewText($"NetSend Bad OP: {netOp.netOperation}", Microsoft.Xna.Framework.Color.Red);
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.WriteLine($"NetSend Bad OP: {netOp.netOperation}");
+						Console.ResetColor();
+						break;
+				}
+			}
 
 			/* Forces data to be flushed into the compressed buffer */
+			writer.Flush();
 			writerBuffer.Flush();
-			compressor.Close();
 
 			/* Sends the buffer through the network */
-			trueWriter.Write((ushort) buffer.Length);
+			trueWriter.Write((ushort)buffer.Length);
 			trueWriter.Write(buffer.ToArray());
-
-			/* Compression stats and debugging code (server side) */
-			/*
-			if (false)
-			{
-				using MemoryStream decompressedBuffer = new MemoryStream(65536);
-				using DeflateStream decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
-				decompressor.CopyTo(decompressedBuffer);
-				decompressor.Close(); 
-
-				Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
-			}
-			*/
 		}
 
 		public override void NetReceive(BinaryReader trueReader)
 		{
-			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet
-			byte workaround = trueReader.ReadByte();
-
-			if (EditsLoader.MessageTileEntitySyncing || workaround != 1)
-			{
-				base.NetReceive(trueReader);
-				return;
-			}
-
 			/* Reads the buffer off the network */
 			using MemoryStream buffer = new(65536);
 			using BinaryWriter bufferWriter = new(buffer);
 
-			bufferWriter.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
+			ushort bufferLen = trueReader.ReadUInt16();
+			bufferWriter.Write(trueReader.ReadBytes(bufferLen));
 			buffer.Position = 0;
 
 			/* Recreate the BinaryReader reader */
@@ -393,12 +418,54 @@ namespace MagicStorage.Components
 			}
 
 			receiving = true;
-			int count = reader.ReadUInt16();
-			bool flag = false;
-			for (int k = 0; k < count; k++)
-				if (UnitOperation.Receive(reader, this))
-					flag = true;
-			if (flag)
+			int opCount = reader.ReadUInt16();
+			bool repairMetaData = true;
+			for (int i = 0; i < opCount; i++)
+			{
+				byte netOp = reader.ReadByte();
+				if (Enum.IsDefined(typeof(NetOperations), netOp))
+				{
+					switch ((NetOperations)netOp)
+					{
+						case NetOperations.FullySync:
+							repairMetaData = false;
+							ClearItemsData();
+							int itemsCount = reader.ReadInt32();
+							for (int j = 0; j < itemsCount; j++)
+							{
+								Item item = ItemIO.Receive(reader, true, true);
+								items.Add(item);
+								ItemData data = new(item);
+								if (item.stack < item.maxStack)
+									hasSpaceInStack.Add(data);
+								hasItem.Add(data);
+								hasItemNoPrefix.Add(data.Type);
+							}
+							break;
+						case NetOperations.Withdraw:
+							bool keepOneIfFavorite = reader.ReadBoolean();
+							TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+							break;
+						case NetOperations.WithdrawStack:
+							WithdrawStack();
+							break;
+						case NetOperations.Deposit:
+							DepositItem(ItemIO.Receive(reader, true, true));
+							break;
+						default:
+							break;
+					}
+				}
+				else
+				{
+					Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine($"NetRecive Bad OP: {netOp}");
+					Console.ResetColor();
+				}
+			}
+
+			if (repairMetaData)
 				RepairMetadata();
 			receiving = false;
 		}
@@ -431,126 +498,6 @@ namespace MagicStorage.Components
 			RepairMetadata();
 			UpdateTileFrameWithNetSend(true);
 			NetHelper.SendTEUpdate(ID, Position);
-		}
-
-		internal abstract class UnitOperation
-		{
-			public static readonly UnitOperation FullSync = new FullSyncOperation();
-			public static readonly UnitOperation Deposit = new DepositOperation();
-			public static readonly UnitOperation Withdraw = new WithdrawOperation();
-			public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
-			private static readonly List<UnitOperation> types = new();
-			protected Item data;
-
-			protected byte id;
-
-			static UnitOperation()
-			{
-				types.Add(FullSync);
-				types.Add(Deposit);
-				types.Add(Withdraw);
-				types.Add(WithdrawStack);
-				for (int k = 0; k < types.Count; k++)
-					types[k].id = (byte) k;
-			}
-
-			public UnitOperation Create() => (UnitOperation) MemberwiseClone();
-
-			public UnitOperation Create(Item item)
-			{
-				UnitOperation clone = Create();
-				clone.data = item;
-				return clone;
-			}
-
-			public void Send(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(id);
-				SendData(writer, unit);
-			}
-
-			protected abstract void SendData(BinaryWriter writer, TEStorageUnit unit);
-
-			public static bool Receive(BinaryReader reader, TEStorageUnit unit)
-			{
-				byte id = reader.ReadByte();
-				return id < types.Count && types[id].ReceiveData(reader, unit);
-			}
-
-			protected abstract bool ReceiveData(BinaryReader reader, TEStorageUnit unit);
-		}
-
-		private class FullSyncOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(unit.items.Count);
-				foreach (Item item in unit.items)
-					ItemIO.Send(item, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.ClearItemsData();
-				int count = reader.ReadInt32();
-				for (int k = 0; k < count; k++)
-				{
-					Item item = ItemIO.Receive(reader, true, true);
-					unit.items.Add(item);
-					ItemData data = new(item);
-					if (item.stack < item.maxStack)
-						unit.hasSpaceInStack.Add(data);
-					unit.hasItem.Add(data);
-					unit.hasItemNoPrefix.Add(data.Type);
-				}
-
-				return false;
-			}
-		}
-
-		private class DepositOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				ItemIO.Send(data, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.DepositItem(ItemIO.Receive(reader, true, true));
-				return true;
-			}
-		}
-
-		private class WithdrawOperation : UnitOperation
-		{
-			public bool SendKeepOneIfFavorite { get; set; }
-
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(SendKeepOneIfFavorite);
-				ItemIO.Send(data, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				bool keepOneIfFavorite = reader.ReadBoolean();
-				unit.TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
-				return true;
-			}
-		}
-
-		private class WithdrawStackOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.WithdrawStack();
-				return true;
-			}
 		}
 	}
 }

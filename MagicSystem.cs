@@ -13,8 +13,6 @@ namespace MagicStorage
 	{
 		public override bool HijackGetData(ref byte messageType, ref BinaryReader reader, int playerNumber)
 		{
-			EditsLoader.MessageTileEntitySyncing = messageType == MessageID.TileSection;
-
 			return false;
 		}
 

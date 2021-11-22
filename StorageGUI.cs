@@ -145,7 +145,7 @@ namespace MagicStorage
 			basePanel.Append(slotZone);
 
 			numRows = (items.Count + numColumns - 1) / numColumns;
-			displayRows = (int) slotZone.GetDimensions().Height / ((int) itemSlotHeight + padding);
+			displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + padding);
 			slotZone.SetDimensions(numColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
@@ -197,7 +197,7 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			sortButtons ??= GUIHelpers.MakeSortButtons(RefreshItems);
-			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, 
+			favoritedOnlyButton ??= new UIToggleButton(RefreshItems,
 				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 				Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 		}
@@ -249,7 +249,7 @@ namespace MagicStorage
 
 		private static Item GetItem(int slot, ref int context)
 		{
-			int index = slot + numColumns * (int) Math.Round(scrollBar.ViewPosition);
+			int index = slot + numColumns * (int)Math.Round(scrollBar.ViewPosition);
 			Item item = index < items.Count ? items[index] : new Item();
 			if (!item.IsAir && !didMatCheck[index])
 			{
@@ -326,9 +326,9 @@ namespace MagicStorage
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
-			SortMode sortMode = (SortMode) sortButtons.Choice;
+			SortMode sortMode = (SortMode)sortButtons.Choice;
 
-			FilterMode filterMode = (FilterMode) filterButtons.Choice;
+			FilterMode filterMode = (FilterMode)filterButtons.Choice;
 			int modFilterIndex = modSearchBox.ModIndex;
 
 			void DoFiltering()
@@ -425,7 +425,7 @@ namespace MagicStorage
 		{
 			Player player = Main.LocalPlayer;
 			int visualSlot = slot;
-			slot += numColumns * (int) Math.Round(scrollBar.ViewPosition);
+			slot += numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 			if (MouseClicked)
 			{
@@ -460,6 +460,7 @@ namespace MagicStorage
 					}
 				}
 
+				RefreshItems();
 				if (changed)
 				{
 					RefreshItems();
@@ -542,10 +543,10 @@ namespace MagicStorage
 			bool changed = false;
 
 			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
-
+			int inventorySize = player.inventory.Count();
 			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
-				for (int k = 10; k < 50; k++)
+				for (int k = 10; k < inventorySize; k++)
 				{
 					Item item = player.inventory[k];
 					if (filter(item))
@@ -559,8 +560,8 @@ namespace MagicStorage
 			}
 			else
 			{
-				var items = new List<Item>();
-				for (int k = 10; k < 50; k++)
+				var items = new List<Item>();				
+				for (int k = 10; k < inventorySize; k++)
 				{
 					Item item = player.inventory[k];
 					if (filter(item))
