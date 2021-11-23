@@ -14,9 +14,9 @@ namespace MagicStorage
 {
 	public static class NetHelper
 	{
-		private static byte OP_DEPOSIT_ALL = 2;
-		private static byte OP_DELETE_ITEM = 4;
-		private static byte OP_DELETE_ALL_ITEMS = 5;
+		private const byte OP_DEPOSIT_ALL = 2;
+		private const byte OP_DELETE_ITEM = 4;
+		private const byte OP_DELETE_ALL_ITEMS = 5;
 
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
