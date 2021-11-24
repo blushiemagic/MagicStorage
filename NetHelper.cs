@@ -106,9 +106,9 @@ namespace MagicStorage
 							((TEStorageUnit)tileEntity).FullySync();
 						}
 					}
-				}
+				}				
 
-				using (MemoryStream packetStream = new())
+				using (MemoryStream packetStream = new(65536))
 				using (MemoryStream tempStream = new())
 				using (BinaryWriter tempWriter = new BinaryWriter(tempStream))
 				{
@@ -117,29 +117,28 @@ namespace MagicStorage
 					ushort pCount = 0;
 					while (teList.Count > 0)
 					{						
-						TileEntity.Write(tempWriter, teList[0], true);
-						tempWriter.Flush();
-						long combinedLength = packetStream.Length + tempStream.Length;
-						if (combinedLength <= 65535)
+						TileEntity.Write(tempWriter, teList[0], true);				
+						tempWriter.Flush();                        
+                        long combinedLength = packetStream.Length + tempStream.Length;
+						if (combinedLength <= packetStream.Capacity)
 						{
-							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
+							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);							
 							pCount++;
 							teList.RemoveAt(0);
 						}
+						tempStream.SetLength(0);
 
-						if (combinedLength >= 65535 || teList.Count == 0)
+						if (combinedLength >= packetStream.Capacity || teList.Count == 0)
 						{
 							packet.Write((byte)MessageType.NetWorkaround);
 							packet.Write(pCount);
-							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
+							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);							
 							packet.Send(remoteClient);
 
 							packetStream.SetLength(0);
 							packet = MagicStorage.Instance.GetPacket();
 							pCount = 0;
-						}
-
-						tempStream.SetLength(0);
+						}						
 					}
 				}
 			}

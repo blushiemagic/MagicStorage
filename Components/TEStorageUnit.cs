@@ -336,22 +336,18 @@ namespace MagicStorage.Components
 		}
 
 		public override void NetSend(BinaryWriter trueWriter)
-		{						
+		{									
+			using MemoryStream buffer = new(65536);
+			using BinaryWriter writer = new(buffer);
+
+			base.NetSend(writer);
+
 			// too many updates at this point just fully sync
 			if (netOpQueue.Count > Capacity / 2)
 			{
 				netOpQueue.Clear();
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
-
-			/* Recreate a BinaryWriter writer */
-			using MemoryStream buffer = new(65536);
-			using DeflateStream compressor = new(buffer, CompressionMode.Compress, true);
-			using BufferedStream writerBuffer = new(compressor, buffer.Capacity);
-			using BinaryWriter writer = new(writerBuffer);
-
-			/* Original code */
-			base.NetSend(writer);
 
 			writer.Write((ushort)netOpQueue.Count);
 			while (netOpQueue.Count > 0)
@@ -377,97 +373,105 @@ namespace MagicStorage.Components
 						ItemIO.Send(netOp.item, writer, true, true);
 						break;
 					default:
-						Main.NewText($"NetSend Bad OP: {netOp.netOperation}", Microsoft.Xna.Framework.Color.Red);
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine($"NetSend Bad OP: {netOp.netOperation}");
-						Console.ResetColor();
 						break;
 				}
 			}
 
-			/* Forces data to be flushed into the compressed buffer */
+			/* Forces data to be flushed into the buffer */
 			writer.Flush();
-			writerBuffer.Flush();
+
+			byte[] data = null;
+			/* compress buffer data */
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				using (DeflateStream deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress))
+				{
+					deflateStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
+				}
+				data = memoryStream.ToArray();
+			}
 
 			/* Sends the buffer through the network */
-			trueWriter.Write((ushort)buffer.Length);
-			trueWriter.Write(buffer.ToArray());
+			trueWriter.Write((ushort)data.Length);
+			trueWriter.Write(data.ToArray());
 		}
 
 		public override void NetReceive(BinaryReader trueReader)
 		{
 			/* Reads the buffer off the network */
-			using MemoryStream buffer = new(65536);
-			using BinaryWriter bufferWriter = new(buffer);
+			using MemoryStream buffer = new();
 
 			ushort bufferLen = trueReader.ReadUInt16();
-			bufferWriter.Write(trueReader.ReadBytes(bufferLen));
+			buffer.Write(trueReader.ReadBytes(bufferLen));
 			buffer.Position = 0;
 
 			/* Recreate the BinaryReader reader */
 			using DeflateStream decompressor = new(buffer, CompressionMode.Decompress, true);
 			using BinaryReader reader = new(decompressor);
 
-			/* Original code */
-			base.NetReceive(reader);
-			if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
-			{
-				items = otherUnit.items;
-				hasSpaceInStack = otherUnit.hasSpaceInStack;
-				hasItem = otherUnit.hasItem;
-			}
-
-			receiving = true;
+			base.NetReceive(reader);			
+			
 			int opCount = reader.ReadUInt16();
-			bool repairMetaData = true;
-			for (int i = 0; i < opCount; i++)
-			{
-				byte netOp = reader.ReadByte();
-				if (Enum.IsDefined(typeof(NetOperations), netOp))
+			if(opCount > 0)
+            {
+				if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
 				{
-					switch ((NetOperations)netOp)
+					items = otherUnit.items;
+					hasSpaceInStack = otherUnit.hasSpaceInStack;
+					hasItem = otherUnit.hasItem;
+				}
+
+				receiving = true;
+				bool repairMetaData = true;
+				for (int i = 0; i < opCount; i++)
+				{
+					byte netOp = reader.ReadByte();
+					if (Enum.IsDefined(typeof(NetOperations), netOp))
 					{
-						case NetOperations.FullySync:
-							repairMetaData = false;
-							ClearItemsData();
-							int itemsCount = reader.ReadInt32();
-							for (int j = 0; j < itemsCount; j++)
-							{
-								Item item = ItemIO.Receive(reader, true, true);
-								items.Add(item);
-								ItemData data = new(item);
-								if (item.stack < item.maxStack)
-									hasSpaceInStack.Add(data);
-								hasItem.Add(data);
-								hasItemNoPrefix.Add(data.Type);
-							}
-							break;
-						case NetOperations.Withdraw:
-							bool keepOneIfFavorite = reader.ReadBoolean();
-							TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
-							break;
-						case NetOperations.WithdrawStack:
-							WithdrawStack();
-							break;
-						case NetOperations.Deposit:
-							DepositItem(ItemIO.Receive(reader, true, true));
-							break;
-						default:
-							break;
+						switch ((NetOperations)netOp)
+						{
+							case NetOperations.FullySync:
+								repairMetaData = false;
+								ClearItemsData();
+								int itemsCount = reader.ReadInt32();
+								for (int j = 0; j < itemsCount; j++)
+								{
+									Item item = ItemIO.Receive(reader, true, true);
+									items.Add(item);
+									ItemData data = new(item);
+									if (item.stack < item.maxStack)
+										hasSpaceInStack.Add(data);
+									hasItem.Add(data);
+									hasItemNoPrefix.Add(data.Type);
+								}
+								break;
+							case NetOperations.Withdraw:
+								bool keepOneIfFavorite = reader.ReadBoolean();
+								TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+								break;
+							case NetOperations.WithdrawStack:
+								WithdrawStack();
+								break;
+							case NetOperations.Deposit:
+								DepositItem(ItemIO.Receive(reader, true, true));
+								break;
+							default:
+								break;
+						}
+					}
+					else
+					{
+						Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.WriteLine($"NetRecive Bad OP: {netOp}");
+						Console.ResetColor();
 					}
 				}
-				else
-				{
-					Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine($"NetRecive Bad OP: {netOp}");
-					Console.ResetColor();
-				}
-			}
 
-			if (repairMetaData)
-				RepairMetadata();
-			receiving = false;
+				if (repairMetaData)
+					RepairMetadata();
+				receiving = false;
+			}			
 		}
 
 		private void ClearItemsData()
