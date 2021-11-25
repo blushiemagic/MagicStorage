@@ -276,15 +276,15 @@ namespace MagicStorage.Components
 			(unit1.hasSpaceInStack, unit2.hasSpaceInStack) = (unit2.hasSpaceInStack, unit1.hasSpaceInStack);
 			(unit1.hasItem, unit2.hasItem) = (unit2.hasItem, unit1.hasItem);
 			(unit1.hasItemNoPrefix, unit2.hasItemNoPrefix) = (unit2.hasItemNoPrefix, unit1.hasItemNoPrefix);
-            if (Main.netMode == NetmodeID.Server)
-            {
+			if (Main.netMode == NetmodeID.Server)
+			{
 				unit1.netOpQueue.Clear();
 				unit2.netOpQueue.Clear();
 				unit1.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
-				unit2.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));				
-            }
+				unit2.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+			}
 
-            unit1.PostChangeContents();
+			unit1.PostChangeContents();
 			unit2.PostChangeContents();
 		}
 
@@ -336,7 +336,7 @@ namespace MagicStorage.Components
 		}
 
 		public override void NetSend(BinaryWriter trueWriter)
-		{									
+		{
 			using MemoryStream buffer = new(65536);
 			using BinaryWriter writer = new(buffer);
 
@@ -409,11 +409,11 @@ namespace MagicStorage.Components
 			using DeflateStream decompressor = new(buffer, CompressionMode.Decompress, true);
 			using BinaryReader reader = new(decompressor);
 
-			base.NetReceive(reader);			
-			
+			base.NetReceive(reader);
+
 			int opCount = reader.ReadUInt16();
-			if(opCount > 0)
-            {
+			if (opCount > 0)
+			{
 				if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
 				{
 					items = otherUnit.items;
@@ -471,7 +471,7 @@ namespace MagicStorage.Components
 				if (repairMetaData)
 					RepairMetadata();
 				receiving = false;
-			}			
+			}
 		}
 
 		private void ClearItemsData()

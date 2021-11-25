@@ -560,7 +560,7 @@ namespace MagicStorage
 			}
 			else
 			{
-				var items = new List<Item>();				
+				var items = new List<Item>();
 				for (int k = 10; k < inventorySize; k++)
 				{
 					Item item = player.inventory[k];

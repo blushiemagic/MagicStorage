@@ -10,7 +10,7 @@ namespace MagicStorage
 {
 	// TODO: think of a better name
 	public class MagicSystem : ModSystem
-	{		
+	{
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			InterfaceHelper.ModifyInterfaceLayers(layers);

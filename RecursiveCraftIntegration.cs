@@ -95,7 +95,7 @@ namespace MagicStorage
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
 		public static void RecursiveRecipes()
 		{
-			Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
+			Main.rand ??= new UnifiedRandom((int)DateTime.UtcNow.Ticks);
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;

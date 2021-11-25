@@ -93,7 +93,7 @@ namespace MagicStorage
 		public static void RecivePlayerJoined(BinaryReader reader)
 		{
 			if (Main.netMode == NetmodeID.Server)
-			{				
+			{
 				List<TileEntity> teList = new();
 
 				foreach ((int id, TileEntity tileEntity) in TileEntity.ByID)
@@ -106,7 +106,7 @@ namespace MagicStorage
 							((TEStorageUnit)tileEntity).FullySync();
 						}
 					}
-				}				
+				}
 
 				using (MemoryStream packetStream = new(65536))
 				using (MemoryStream tempStream = new())
@@ -116,13 +116,13 @@ namespace MagicStorage
 					ModPacket packet = MagicStorage.Instance.GetPacket();
 					ushort pCount = 0;
 					while (teList.Count > 0)
-					{						
-						TileEntity.Write(tempWriter, teList[0], true);				
-						tempWriter.Flush();                        
-                        long combinedLength = packetStream.Length + tempStream.Length;
+					{
+						TileEntity.Write(tempWriter, teList[0], true);
+						tempWriter.Flush();
+						long combinedLength = packetStream.Length + tempStream.Length;
 						if (combinedLength <= packetStream.Capacity)
 						{
-							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);							
+							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
 							pCount++;
 							teList.RemoveAt(0);
 						}
@@ -132,13 +132,13 @@ namespace MagicStorage
 						{
 							packet.Write((byte)MessageType.NetWorkaround);
 							packet.Write(pCount);
-							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);							
+							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
 							packet.Send(remoteClient);
 
 							packetStream.SetLength(0);
 							packet = MagicStorage.Instance.GetPacket();
 							pCount = 0;
-						}						
+						}
 					}
 				}
 			}
