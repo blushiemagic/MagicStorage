@@ -329,7 +329,7 @@ namespace MagicStorage.Components
 
 			/* Original code */
 			base.NetSend(writer);
-			if (netQueue.Count > Capacity / 2)
+			if (netQueue.Count > Capacity / 2 || !EditsLoader.LightSend)
 			{
 				netQueue.Clear();
 				netQueue.Enqueue(UnitOperation.FullSync.Create());
@@ -354,7 +354,7 @@ namespace MagicStorage.Components
 				using MemoryStream decompressedBuffer = new MemoryStream(65536);
 				using DeflateStream decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
 				decompressor.CopyTo(decompressedBuffer);
-				decompressor.Close(); 
+				decompressor.Close();
 
 				Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
 			}

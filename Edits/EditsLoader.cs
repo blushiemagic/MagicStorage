@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Edits.Detours;
 using On.Terraria;
+using On.Terraria.DataStructures;
 
 namespace MagicStorage.Edits
 {
@@ -8,9 +9,15 @@ namespace MagicStorage.Edits
 	{
 		internal static bool MessageTileEntitySyncing;
 
+		internal static bool LightSend;
+		internal static bool LightReceive;
+
 		public static void Load()
 		{
 			NetMessage.SendData += Vanilla.NetMessage_SendData;
+
+			TileEntity.WriteInner += Vanilla.TileEntity_WriteInner;
+			TileEntity.ReadInner += Vanilla.TileEntity_ReadInner;
 
 			MessageBuffer.GetData += Vanilla.MessageBuffer_GetData;
 
