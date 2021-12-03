@@ -14,11 +14,11 @@ namespace MagicStorage
 {
 	public static class RecursiveCraftIntegration
 	{
-		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things. 
+		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
 		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
 		private static Mod RecursiveCraftMod;
 
-		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
+		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
 		public static bool Enabled => RecursiveCraftMod is not null;
 
 		public static void Load()
@@ -28,8 +28,8 @@ namespace MagicStorage
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
 
-		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches. 
-		// To avoid TypeInitializationException (or ReflectionTypeLoadException) problems, we need to specify NoInlining on methods like this to prevent inlining (methods containing or accessing Types in the Weakly referenced assembly). 
+		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches.
+		// To avoid TypeInitializationException (or ReflectionTypeLoadException) problems, we need to specify NoInlining on methods like this to prevent inlining (methods containing or accessing Types in the Weakly referenced assembly).
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Load()
 		{
@@ -67,7 +67,7 @@ namespace MagicStorage
 			OnPlayer.QuickSpawnItem_int_int -= OnPlayerOnQuickSpawnItem_int_int;
 		}
 
-		private static void OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
+		private static int OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
@@ -75,10 +75,10 @@ namespace MagicStorage
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
-				return;
+				return -1;
 			}
 
-			orig(self, type, stack);
+			return orig(self, type, stack);
 		}
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
