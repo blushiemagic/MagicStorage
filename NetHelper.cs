@@ -104,13 +104,11 @@ namespace MagicStorage
 				using (MemoryStream packetStream = new(65536))
 				using (BinaryWriter BWriter = new BinaryWriter(packetStream))
 				{
-					ushort pCount = 1;
 					TileEntity.Write(BWriter, tileEntity, true);
 					BWriter.Flush();
 
 					ModPacket packet = MagicStorage.Instance.GetPacket();
 					packet.Write((byte)MessageType.SyncStorageUnitToClinet);
-					packet.Write(pCount);
 					packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
 					packet.Send(remoteClient);
 				}
@@ -770,11 +768,7 @@ namespace MagicStorage
 
 		public static void ClientReciveStorageSync(BinaryReader reader)
 		{
-			int entityCount = reader.ReadUInt16();
-			for (int i = 0; i < entityCount; i++)
-			{
-				TileEntity.Read(reader, true);
-			}
+			TileEntity.Read(reader, true);
 		}
 	}
 
