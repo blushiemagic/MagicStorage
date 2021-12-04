@@ -38,7 +38,7 @@ namespace MagicStorage.Edits.Detours
 				//Only process tile entities from Magic Storage
 				foreach ((Point16 pos, TileEntity tileEntity) in TileEntity.ByPosition)
 					if (pos.X >= startX && pos.X < startX + width && pos.Y >= startY && pos.Y < startY + height)
-						if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
+						if (tileEntity is ModTileEntity { Mod: MagicStorage })
 							ids.Enqueue(tileEntity.ID);
 
 				using MemoryStream ms = new();
@@ -70,7 +70,8 @@ namespace MagicStorage.Edits.Detours
 		private static void WriteNetWorkaround(BinaryWriter msWriter, MemoryStream ms, BinaryWriter msWriter2, MemoryStream ms2, Queue<int> ids, ref int written,
 			ref int total, ref int packetCount, ref ModPacket packet, int remoteClient, int ignoreClient, bool lastSend)
 		{
-			long start = msWriter.BaseStream.Position, end = start;
+			long start = msWriter.BaseStream.Position;
+			long end = start;
 
 			// TODO: why does the last entity in the packet have a bad ID???  also, fix the "read underflow" issues from the other packet types
 
