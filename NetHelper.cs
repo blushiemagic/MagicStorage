@@ -359,7 +359,7 @@ namespace MagicStorage
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte) MessageType.ClientSendTEUpdate);
 				packet.Write(id);
-				TileEntity.Write(packet, TileEntity.ByID[id], true);
+				TileEntity.Write(packet, TileEntity.ByID[id], true, true);
 				packet.Send();
 			}
 		}
@@ -369,7 +369,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 			{
 				int id = reader.ReadInt32();
-				TileEntity ent = TileEntity.Read(reader, true);
+				TileEntity ent = TileEntity.Read(reader, true, true);
 				ent.ID = id;
 				TileEntity.ByID[id] = ent;
 				TileEntity.ByPosition[ent.Position] = ent;
@@ -385,8 +385,7 @@ namespace MagicStorage
 			{
 				//Still need to read the data
 				_ = reader.ReadInt32();
-				// TODO does TileEntity need to be read?
-				//_ = TileEntity.Read(reader, true);
+				_ = TileEntity.Read(reader, true, true);
 			}
 		}
 
@@ -502,10 +501,11 @@ namespace MagicStorage
 			}
 
 			Point16 pos = access.Position;
-			StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
-			TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
-			if (heart is not null)
+			if (TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) is StorageAccess storageAccess)
+			{
+				TEStorageHeart heart = storageAccess.GetHeart(pos.X, pos.Y);
 				SendRefreshNetworkItems(heart.ID);
+			}
 		}
 
 		public static void ReceiveStationResult(BinaryReader reader)
