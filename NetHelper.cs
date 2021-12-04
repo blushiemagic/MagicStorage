@@ -68,14 +68,11 @@ namespace MagicStorage
 				case MessageType.SectionRequest:
 					ReceiveClientRequestSection(reader, sender);
 					break;
-				case MessageType.NetWorkaround:
-					ReceiveNetWorkaround(reader);
-					break;
-				case MessageType.PlayerJoined:
-					RecivePlayerJoined(reader);
+				case MessageType.SyncStorageUnitToClinet:
+					ClientReciveStorageSync(reader);
 					break;
 				case MessageType.SyncStorageUnit:
-					ReciveSyncStorageUnit(reader);
+					ServerReciveSyncStorageUnit(reader);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -94,7 +91,7 @@ namespace MagicStorage
 			}
 		}
 
-		public static void ReciveSyncStorageUnit(BinaryReader reader)
+		public static void ServerReciveSyncStorageUnit(BinaryReader reader)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
@@ -105,84 +102,17 @@ namespace MagicStorage
 				storageUnit.FullySync();
 
 				using (MemoryStream packetStream = new(65536))
-				using (MemoryStream tempStream = new())
-				using (BinaryWriter tempWriter = new BinaryWriter(tempStream))
+				using (BinaryWriter BWriter = new BinaryWriter(packetStream))
 				{
 					ushort pCount = 1;
-					TileEntity.Write(tempWriter, tileEntity, true);
-					tempWriter.Flush();
-					packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
+					TileEntity.Write(BWriter, tileEntity, true);
+					BWriter.Flush();
 
 					ModPacket packet = MagicStorage.Instance.GetPacket();
-					packet.Write((byte)MessageType.NetWorkaround);
+					packet.Write((byte)MessageType.SyncStorageUnitToClinet);
 					packet.Write(pCount);
 					packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
 					packet.Send(remoteClient);
-				}
-			}
-		}
-
-		public static void PlayerJoined()
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
-				packet.Write((byte)MessageType.PlayerJoined);
-				packet.Write((byte)Main.myPlayer);
-				packet.Send();
-			}
-		}
-
-		public static void RecivePlayerJoined(BinaryReader reader)
-		{
-			if (Main.netMode == NetmodeID.Server)
-			{
-				List<TileEntity> teList = new();
-
-				foreach ((int id, TileEntity tileEntity) in TileEntity.ByID)
-				{
-					if ((TileEntity.manager.GetTileEntity<ModTileEntity>(tileEntity.type) as ModTileEntity)?.Mod == MagicStorage.Instance)
-					{
-						teList.Add(tileEntity);
-						if (tileEntity is TEStorageUnit)
-						{
-							((TEStorageUnit)tileEntity).FullySync();
-						}
-					}
-				}
-
-				using (MemoryStream packetStream = new(65536))
-				using (MemoryStream tempStream = new())
-				using (BinaryWriter tempWriter = new BinaryWriter(tempStream))
-				{
-					byte remoteClient = reader.ReadByte();
-					ModPacket packet = MagicStorage.Instance.GetPacket();
-					ushort pCount = 0;
-					while (teList.Count > 0)
-					{
-						TileEntity.Write(tempWriter, teList[0], true);
-						tempWriter.Flush();
-						long combinedLength = packetStream.Length + tempStream.Length;
-						if (combinedLength <= packetStream.Capacity)
-						{
-							packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
-							pCount++;
-							teList.RemoveAt(0);
-						}
-						tempStream.SetLength(0);
-
-						if (combinedLength >= packetStream.Capacity || teList.Count == 0)
-						{
-							packet.Write((byte)MessageType.NetWorkaround);
-							packet.Write(pCount);
-							packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
-							packet.Send(remoteClient);
-
-							packetStream.SetLength(0);
-							packet = MagicStorage.Instance.GetPacket();
-							pCount = 0;
-						}
-					}
 				}
 			}
 		}
@@ -838,7 +768,7 @@ namespace MagicStorage
 			}
 		}
 
-		public static void ReceiveNetWorkaround(BinaryReader reader)
+		public static void ClientReciveStorageSync(BinaryReader reader)
 		{
 			int entityCount = reader.ReadUInt16();
 			for (int i = 0; i < entityCount; i++)
@@ -861,8 +791,7 @@ namespace MagicStorage
 		CraftRequest,
 		CraftResult,
 		SectionRequest,
-		NetWorkaround,
-		PlayerJoined,
+		SyncStorageUnitToClinet,
 		SyncStorageUnit
 	}
 }
