@@ -67,14 +67,6 @@ namespace MagicStorage
 			AsKnownRecipes.Load(tag);
 		}
 
-		public override void OnEnterWorld(Player player)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				NetHelper.PlayerJoined();
-			}
-		}
-
 		public override void UpdateDead()
 		{
 			if (Player.whoAmI == Main.myPlayer)

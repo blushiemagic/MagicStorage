@@ -349,6 +349,7 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
 
+			writer.Write((ushort)items.Count);
 			writer.Write((ushort)netOpQueue.Count);
 			while (netOpQueue.Count > 0)
 			{
@@ -411,6 +412,7 @@ namespace MagicStorage.Components
 
 			base.NetReceive(reader);
 
+			int serverItemsCount = reader.ReadInt16();
 			int opCount = reader.ReadUInt16();
 			if (opCount > 0)
 			{
@@ -471,6 +473,10 @@ namespace MagicStorage.Components
 				if (repairMetaData)
 					RepairMetadata();
 				receiving = false;
+			}
+			else if (serverItemsCount != items.Count) // if there is mismatch between the server and the client then send a sync request
+			{
+				NetHelper.SyncStorageUnit(ID);
 			}
 		}
 

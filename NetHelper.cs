@@ -74,8 +74,51 @@ namespace MagicStorage
 				case MessageType.PlayerJoined:
 					RecivePlayerJoined(reader);
 					break;
+				case MessageType.SyncStorageUnit:
+					ReciveSyncStorageUnit(reader);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		public static void SyncStorageUnit(int storageUnitId)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.SyncStorageUnit);
+				packet.Write((byte)Main.myPlayer);
+				packet.Write(storageUnitId);
+				packet.Send();
+			}
+		}
+
+		public static void ReciveSyncStorageUnit(BinaryReader reader)
+		{
+			if (Main.netMode == NetmodeID.Server)
+			{
+				byte remoteClient = reader.ReadByte();
+				int storageUnitId = reader.ReadInt32();
+				TileEntity tileEntity = TileEntity.ByID[storageUnitId];
+				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByID[storageUnitId];
+				storageUnit.FullySync();
+
+				using (MemoryStream packetStream = new(65536))
+				using (MemoryStream tempStream = new())
+				using (BinaryWriter tempWriter = new BinaryWriter(tempStream))
+				{
+					ushort pCount = 1;
+					TileEntity.Write(tempWriter, tileEntity, true);
+					tempWriter.Flush();
+					packetStream.Write(tempStream.GetBuffer(), 0, (int)tempStream.Length);
+
+					ModPacket packet = MagicStorage.Instance.GetPacket();
+					packet.Write((byte)MessageType.NetWorkaround);
+					packet.Write(pCount);
+					packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
+					packet.Send(remoteClient);
+				}
 			}
 		}
 
@@ -819,6 +862,7 @@ namespace MagicStorage
 		CraftResult,
 		SectionRequest,
 		NetWorkaround,
-		PlayerJoined
+		PlayerJoined,
+		SyncStorageUnit
 	}
 }
