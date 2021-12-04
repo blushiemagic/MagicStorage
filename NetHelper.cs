@@ -13,6 +13,11 @@ namespace MagicStorage
 {
 	public static class NetHelper
 	{
+		private const byte OpDepositItem = 0;
+		private const byte OpWithdraw = 1;
+		private const byte OpDepositAll = 2;
+		private const byte OpWithdrawToInventory = 3;
+
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
@@ -154,7 +159,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStorageOperation(ent, 0);
+				ModPacket packet = PrepareStorageOperation(ent, OpDepositItem);
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 			}
@@ -164,7 +169,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStorageOperation(ent, (byte) (toInventory ? 3 : 1));
+				ModPacket packet = PrepareStorageOperation(ent, toInventory ? OpWithdrawToInventory : OpWithdraw);
 				packet.Write(keepOneIfFavorite);
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
@@ -175,7 +180,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStorageOperation(ent, 2);
+				ModPacket packet = PrepareStorageOperation(ent, OpDepositAll);
 				packet.Write((byte) items.Count);
 				foreach (Item item in items)
 					ItemIO.Send(item, packet, true, true);
@@ -198,16 +203,16 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == 0)
+				if (op == OpDepositItem)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 1 || op == 3)
+				else if (op == OpWithdraw || op == OpWithdrawToInventory)
 				{
 					_ = reader.ReadBoolean();
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 2)
+				else if (op == OpDepositAll)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
@@ -220,7 +225,7 @@ namespace MagicStorage
 			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
-			if (op == 0)
+			if (op == OpDepositItem)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				heart.DepositItem(item);
@@ -231,7 +236,7 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			else if (op == 1 || op == 3)
+			else if (op == OpWithdraw || op == OpWithdrawToInventory)
 			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
@@ -243,7 +248,7 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			else if (op == 2)
+			else if (op == OpDepositAll)
 			{
 				int count = reader.ReadByte();
 				List<Item> items = new();
@@ -284,11 +289,11 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == 0 || op == 1 || op == 3)
+				if (op == OpDepositItem || op == OpWithdraw || op == OpWithdrawToInventory)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 2)
+				else if (op == OpDepositAll)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
@@ -298,7 +303,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (op == 0 || op == 1 || op == 3)
+			if (op == OpDepositItem || op == OpWithdraw || op == OpWithdrawToInventory)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 
@@ -309,7 +314,7 @@ namespace MagicStorage
 
 				StoragePlayer.GetItem(item, op != 3);
 			}
-			else if (op == 2)
+			else if (op == OpDepositAll)
 			{
 				int count = reader.ReadByte();
 				for (int k = 0; k < count; k++)
@@ -441,15 +446,15 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//Still need to read the data for exceptions to not be thrown...
-				if (op == 0)
+				if (op == OpDepositItem)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 1)
+				else if (op == OpWithdraw)
 				{
 					_ = reader.ReadByte();
 				}
-				else if (op == 2)
+				else if (op == OpDepositAll)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 					_ = reader.ReadByte();
@@ -461,7 +466,7 @@ namespace MagicStorage
 			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TECraftingAccess access)
 				return;
 
-			if (op == 0)
+			if (op == OpDepositItem)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				access.TryDepositStation(item);
@@ -472,7 +477,7 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			else if (op == 1)
+			else if (op == OpWithdraw)
 			{
 				int slot = reader.ReadByte();
 				Item item = access.TryWithdrawStation(slot);
@@ -483,7 +488,7 @@ namespace MagicStorage
 					packet.Send(sender);
 				}
 			}
-			else if (op == 2)
+			else if (op == OpDepositAll)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				int slot = reader.ReadByte();
@@ -513,12 +518,12 @@ namespace MagicStorage
 				return;
 
 			Player player = Main.LocalPlayer;
-			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
+			if (op == OpDepositAll && Main.playerInventory && Main.mouseItem.IsAir)
 			{
 				Main.mouseItem = item;
 				item = new Item();
 			}
-			else if (op == 2 && Main.playerInventory && Main.mouseItem.type == item.type)
+			else if (op == OpDepositAll && Main.playerInventory && Main.mouseItem.type == item.type)
 			{
 				int total = Main.mouseItem.stack + item.stack;
 				if (total > Main.mouseItem.maxStack)
@@ -664,7 +669,7 @@ namespace MagicStorage
 			for (int i = 0; i < entityCount; i++)
 				/*
 					long entStart = reader.BaseStream.Position;
-	
+
 					if (Main.netMode == NetmodeID.MultiplayerClient)
 					{
 						byte type = reader.ReadByte();
@@ -701,6 +706,6 @@ namespace MagicStorage
 		CraftRequest,
 		CraftResult,
 		SectionRequest,
-		NetWorkaround
+		NetWorkaround,
 	}
 }

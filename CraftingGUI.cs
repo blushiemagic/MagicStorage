@@ -1094,24 +1094,25 @@ namespace MagicStorage
 
 						threadRecipes.Clear();
 						threadRecipeAvailable.Clear();
-						try
+
+						if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
 						{
-							if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
+							foreach (Recipe recipe in filteredRecipes)
 							{
-								threadRecipes.AddRange(filteredRecipes.Where(recipe => IsAvailable(recipe)));
-								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
-							}
-							else
-							{
-								threadRecipes.AddRange(filteredRecipes);
-								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+								if (!IsAvailable(recipe))
+									continue;
+
+								threadRecipes.Add(recipe);
+								threadRecipeAvailable.Add(true);
 							}
 						}
-						catch (InvalidOperationException)
+						else
 						{
-						}
-						catch (KeyNotFoundException)
-						{
+							foreach (Recipe recipe in filteredRecipes)
+							{
+								threadRecipes.Add(recipe);
+								threadRecipeAvailable.Add(IsAvailable(recipe));
+							}
 						}
 					}
 

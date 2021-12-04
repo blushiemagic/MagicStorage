@@ -197,7 +197,7 @@ namespace MagicStorage
 		private static void InitSortButtons()
 		{
 			sortButtons ??= GUIHelpers.MakeSortButtons(RefreshItems);
-			favoritedOnlyButton ??= new UIToggleButton(RefreshItems, 
+			favoritedOnlyButton ??= new UIToggleButton(RefreshItems,
 				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 				Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 		}
@@ -541,14 +541,15 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			bool changed = false;
 
-			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
+			static bool Filter(Item item, bool quickStack, TEStorageHeart heart) =>
+				!item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
 				for (int k = 10; k < 50; k++)
 				{
 					Item item = player.inventory[k];
-					if (filter(item))
+					if (Filter(item, quickStack, heart))
 					{
 						int oldStack = item.stack;
 						heart.DepositItem(item);
@@ -563,7 +564,7 @@ namespace MagicStorage
 				for (int k = 10; k < 50; k++)
 				{
 					Item item = player.inventory[k];
-					if (filter(item))
+					if (Filter(item, quickStack, heart))
 						items.Add(item);
 				}
 

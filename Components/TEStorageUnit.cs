@@ -12,7 +12,7 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
-	public class TEStorageUnit : TEAbstractStorageUnit
+	public partial class TEStorageUnit : TEAbstractStorageUnit
 	{
 		private readonly Queue<UnitOperation> netQueue = new();
 		private HashSet<ItemData> hasItem = new();
@@ -180,8 +180,8 @@ namespace MagicStorage.Components
 							{
 								if (Main.netMode == NetmodeID.Server)
 								{
-									WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
-									op.SendKeepOneIfFavorite = keepOneIfFavorite;
+									WithdrawOperation op = UnitOperation.Withdraw.Create(original);
+									op.KeepOneIfFavorite = keepOneIfFavorite;
 									netQueue.Enqueue(op);
 								}
 
@@ -199,8 +199,8 @@ namespace MagicStorage.Components
 				{
 					if (Main.netMode == NetmodeID.Server)
 					{
-						WithdrawOperation op = (WithdrawOperation) UnitOperation.Withdraw.Create(original);
-						op.SendKeepOneIfFavorite = keepOneIfFavorite;
+						WithdrawOperation op = UnitOperation.Withdraw.Create(original);
+						op.KeepOneIfFavorite = keepOneIfFavorite;
 						netQueue.Enqueue(op);
 					}
 
@@ -314,21 +314,21 @@ namespace MagicStorage.Components
 			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
 			if (EditsLoader.MessageTileEntitySyncing)
 			{
-				trueWriter.Write((byte) 0);
+				trueWriter.Write(true);
 				base.NetSend(trueWriter);
 				return;
 			}
 
-			trueWriter.Write((byte) 1);
+			trueWriter.Write(false);
 
 			/* Recreate a BinaryWriter writer */
 			using MemoryStream buffer = new(65536);
-			using DeflateStream compressor = new(buffer, CompressionMode.Compress, true);
-			using BufferedStream writerBuffer = new(compressor, 65536);
-			using BinaryWriter writer = new(writerBuffer);
+			using BinaryWriter writer = new(buffer);
 
 			/* Original code */
 			base.NetSend(writer);
+
+			// too many updates, at this point just fully sync
 			if (netQueue.Count > Capacity / 2 || !EditsLoader.LightSend)
 			{
 				netQueue.Clear();
@@ -339,13 +339,24 @@ namespace MagicStorage.Components
 			while (netQueue.Count > 0)
 				netQueue.Dequeue().Send(writer, this);
 
-			/* Forces data to be flushed into the compressed buffer */
-			writerBuffer.Flush();
-			compressor.Close();
+			/* Forces data to be flushed into the buffer */
+			writer.Flush();
+
+			byte[] data;
+			/* compress buffer data */
+			using (MemoryStream memoryStream = new())
+			{
+				using (DeflateStream deflateStream = new(memoryStream, CompressionMode.Compress))
+				{
+					deflateStream.Write(buffer.GetBuffer());
+				}
+
+				data = memoryStream.ToArray();
+			}
 
 			/* Sends the buffer through the network */
-			trueWriter.Write((ushort) buffer.Length);
-			trueWriter.Write(buffer.ToArray());
+			trueWriter.Write((ushort) data.Length);
+			trueWriter.Write(data.ToArray());
 
 			/* Compression stats and debugging code (server side) */
 			/*
@@ -364,9 +375,9 @@ namespace MagicStorage.Components
 		public override void NetReceive(BinaryReader trueReader)
 		{
 			//If the workaround is active, then the entity isn't being sent via the NetWorkaround packet
-			byte workaround = trueReader.ReadByte();
+			bool workaround = trueReader.ReadBoolean();
 
-			if (EditsLoader.MessageTileEntitySyncing || workaround != 1)
+			if (EditsLoader.MessageTileEntitySyncing || workaround)
 			{
 				base.NetReceive(trueReader);
 				return;
@@ -374,9 +385,7 @@ namespace MagicStorage.Components
 
 			/* Reads the buffer off the network */
 			using MemoryStream buffer = new(65536);
-			using BinaryWriter bufferWriter = new(buffer);
-
-			bufferWriter.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
+			buffer.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
 			buffer.Position = 0;
 
 			/* Recreate the BinaryReader reader */
@@ -385,6 +394,7 @@ namespace MagicStorage.Components
 
 			/* Original code */
 			base.NetReceive(reader);
+
 			if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
 			{
 				items = otherUnit.items;
@@ -394,11 +404,12 @@ namespace MagicStorage.Components
 
 			receiving = true;
 			int count = reader.ReadUInt16();
-			bool flag = false;
+
+			bool repairMetadata = false;
 			for (int k = 0; k < count; k++)
-				if (UnitOperation.Receive(reader, this))
-					flag = true;
-			if (flag)
+				repairMetadata |= UnitOperation.Receive(reader, this);
+
+			if (repairMetadata)
 				RepairMetadata();
 			receiving = false;
 		}
@@ -431,126 +442,6 @@ namespace MagicStorage.Components
 			RepairMetadata();
 			UpdateTileFrameWithNetSend(true);
 			NetHelper.SendTEUpdate(ID, Position);
-		}
-
-		internal abstract class UnitOperation
-		{
-			public static readonly UnitOperation FullSync = new FullSyncOperation();
-			public static readonly UnitOperation Deposit = new DepositOperation();
-			public static readonly UnitOperation Withdraw = new WithdrawOperation();
-			public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
-			private static readonly List<UnitOperation> types = new();
-			protected Item data;
-
-			protected byte id;
-
-			static UnitOperation()
-			{
-				types.Add(FullSync);
-				types.Add(Deposit);
-				types.Add(Withdraw);
-				types.Add(WithdrawStack);
-				for (int k = 0; k < types.Count; k++)
-					types[k].id = (byte) k;
-			}
-
-			public UnitOperation Create() => (UnitOperation) MemberwiseClone();
-
-			public UnitOperation Create(Item item)
-			{
-				UnitOperation clone = Create();
-				clone.data = item;
-				return clone;
-			}
-
-			public void Send(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(id);
-				SendData(writer, unit);
-			}
-
-			protected abstract void SendData(BinaryWriter writer, TEStorageUnit unit);
-
-			public static bool Receive(BinaryReader reader, TEStorageUnit unit)
-			{
-				byte id = reader.ReadByte();
-				return id < types.Count && types[id].ReceiveData(reader, unit);
-			}
-
-			protected abstract bool ReceiveData(BinaryReader reader, TEStorageUnit unit);
-		}
-
-		private class FullSyncOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(unit.items.Count);
-				foreach (Item item in unit.items)
-					ItemIO.Send(item, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.ClearItemsData();
-				int count = reader.ReadInt32();
-				for (int k = 0; k < count; k++)
-				{
-					Item item = ItemIO.Receive(reader, true, true);
-					unit.items.Add(item);
-					ItemData data = new(item);
-					if (item.stack < item.maxStack)
-						unit.hasSpaceInStack.Add(data);
-					unit.hasItem.Add(data);
-					unit.hasItemNoPrefix.Add(data.Type);
-				}
-
-				return false;
-			}
-		}
-
-		private class DepositOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				ItemIO.Send(data, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.DepositItem(ItemIO.Receive(reader, true, true));
-				return true;
-			}
-		}
-
-		private class WithdrawOperation : UnitOperation
-		{
-			public bool SendKeepOneIfFavorite { get; set; }
-
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-				writer.Write(SendKeepOneIfFavorite);
-				ItemIO.Send(data, writer, true, true);
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				bool keepOneIfFavorite = reader.ReadBoolean();
-				unit.TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
-				return true;
-			}
-		}
-
-		private class WithdrawStackOperation : UnitOperation
-		{
-			protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-			{
-			}
-
-			protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-			{
-				unit.WithdrawStack();
-				return true;
-			}
 		}
 	}
 }
