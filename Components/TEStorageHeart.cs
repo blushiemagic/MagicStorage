@@ -7,11 +7,13 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using System;
 
 namespace MagicStorage.Components
 {
 	public class TEStorageHeart : TEStorageCenter
 	{
+		bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
@@ -79,6 +81,12 @@ namespace MagicStorage.Components
 			if (updateTimer >= 60)
 			{
 				updateTimer = 0;
+				if (compactCoins)
+				{
+					CompactCoins();
+					compactCoins = false;
+				}
+
 				if (Main.netMode != NetmodeID.Server || itemsLock.TryEnterWriteLock(2))
 					try
 					{
@@ -89,6 +97,44 @@ namespace MagicStorage.Components
 						if (Main.netMode == NetmodeID.Server)
 							itemsLock.ExitWriteLock();
 					}
+			}
+		}
+
+		public void CompactCoins()
+		{
+			Dictionary<int, int> coinsQty = new Dictionary<int, int>();
+			coinsQty.Add(ItemID.CopperCoin, 0);
+			coinsQty.Add(ItemID.SilverCoin, 0);
+			coinsQty.Add(ItemID.GoldCoin, 0);
+			coinsQty.Add(ItemID.PlatinumCoin, 0);
+			foreach (Item item in GetStoredItems())
+			{
+				if (item.IsACoin && coinsQty.ContainsKey(item.type))
+				{
+					coinsQty[item.type] += item.stack;
+				}
+			}
+
+			int[] coinTypes = coinsQty.Keys.ToArray();
+			for (int i = 0; i < coinTypes.Length - 1; i++)
+			{
+				int coin = coinTypes[i];
+				int coinQty = coinsQty[coin];
+				if (coinQty >= 100)
+				{
+					int exchangeCoin = coinTypes[i + 1];
+					int exchangedQty = coinQty / 100;
+					coinsQty[exchangeCoin] += exchangedQty;
+
+					Item tempCoin = new();
+					tempCoin.SetDefaults(coin);
+					tempCoin.stack = exchangedQty * 100;
+					TryWithdraw(tempCoin, false);
+
+					tempCoin.SetDefaults(exchangeCoin);
+					tempCoin.stack = exchangedQty;
+					DepositItem(tempCoin);
+				}
 			}
 		}
 
@@ -212,6 +258,10 @@ namespace MagicStorage.Components
 			if (Main.netMode == NetmodeID.Server)
 				EnterWriteLock();
 			int oldStack = toDeposit.stack;
+			if (toDeposit.IsACoin)
+			{
+				compactCoins = true;
+			}
 			try
 			{
 				int remember = toDeposit.type;
@@ -325,12 +375,14 @@ namespace MagicStorage.Components
 			foreach (TagCompound tagRemote in tag.GetList<TagCompound>("RemoteAccesses"))
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			_uniqueItemsPutHistory.Load(tag);
+
+			compactCoins = true;
 		}
 
 		public override void NetSend(BinaryWriter writer)
 		{
 			base.NetSend(writer);
-			writer.Write((short) remoteAccesses.Count);
+			writer.Write((short)remoteAccesses.Count);
 			foreach (Point16 remoteAccess in remoteAccesses)
 			{
 				writer.Write(remoteAccess.X);
