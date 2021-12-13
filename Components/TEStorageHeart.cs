@@ -13,7 +13,7 @@ namespace MagicStorage.Components
 {
 	public class TEStorageHeart : TEStorageCenter
 	{
-		bool compactCoins = false;
+		Queue<bool> compactCoinsQ = new Queue<bool>();
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
@@ -81,10 +81,14 @@ namespace MagicStorage.Components
 			if (updateTimer >= 60)
 			{
 				updateTimer = 0;
-				if (compactCoins)
+				if (compactCoinsQ.Count > 0)
 				{
+					int currentQCount = compactCoinsQ.Count;
 					CompactCoins();
-					compactCoins = false;
+					for (int i = 0; i < currentQCount; i++)
+					{
+						compactCoinsQ.Dequeue();
+					}
 				}
 
 				if (Main.netMode != NetmodeID.Server || itemsLock.TryEnterWriteLock(2))
@@ -133,7 +137,7 @@ namespace MagicStorage.Components
 
 					tempCoin.SetDefaults(exchangeCoin);
 					tempCoin.stack = exchangedQty;
-					DepositItem(tempCoin);
+					DepositItem(tempCoin, true);
 				}
 			}
 		}
@@ -253,14 +257,14 @@ namespace MagicStorage.Components
 				compactStage = stage;
 		}
 
-		public void DepositItem(Item toDeposit)
+		public void DepositItem(Item toDeposit, bool compactCoins = false)
 		{
 			if (Main.netMode == NetmodeID.Server)
 				EnterWriteLock();
 			int oldStack = toDeposit.stack;
-			if (toDeposit.IsACoin)
+			if (toDeposit.IsACoin && !compactCoins)
 			{
-				compactCoins = true;
+				compactCoinsQ.Enqueue(true);
 			}
 			try
 			{
@@ -376,7 +380,7 @@ namespace MagicStorage.Components
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			_uniqueItemsPutHistory.Load(tag);
 
-			compactCoins = true;
+			compactCoinsQ.Enqueue(true);
 		}
 
 		public override void NetSend(BinaryWriter writer)
