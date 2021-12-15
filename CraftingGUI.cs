@@ -236,7 +236,7 @@ namespace MagicStorage
 			basePanel.Append(recipeZone);
 
 			numRows = (recipes.Count + RecipeColumns - 1) / RecipeColumns;
-			displayRows = (int) recipeZone.GetDimensions().Height / ((int) itemSlotHeight + Padding);
+			displayRows = (int)recipeZone.GetDimensions().Height / ((int)itemSlotHeight + Padding);
 			recipeZone.SetDimensions(RecipeColumns, displayRows);
 			int noDisplayRows = numRows - displayRows;
 			if (noDisplayRows < 0)
@@ -312,7 +312,7 @@ namespace MagicStorage
 			storageZone.Height.Set(-storageZoneTop - 36, 1f);
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
-			displayRows2 = (int) storageZone.GetDimensions().Height / ((int) smallSlotHeight + Padding);
+			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
 			storageZone.SetDimensions(IngredientColumns, displayRows2);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
@@ -522,7 +522,7 @@ namespace MagicStorage
 		{
 			if (threadRunning)
 				return new Item();
-			int index = slot + RecipeColumns * (int) Math.Round(recipeScrollBar.ViewPosition);
+			int index = slot + RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
 			if (!item.IsAir)
 			{
@@ -596,7 +596,7 @@ namespace MagicStorage
 					context = 3; // Unavailable - Red
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
 					context = 4; // Partially in stock - Pinkish
-				// context == 0 - Available - Default Blue
+								 // context == 0 - Available - Default Blue
 				if (context != 0)
 				{
 					bool craftable = _productToRecipes.TryGetValue(item.type, out List<Recipe> r) && r.Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
@@ -653,7 +653,7 @@ namespace MagicStorage
 
 		private static Item GetStorage(int slot, ref int context)
 		{
-			int index = slot + IngredientColumns * (int) Math.Round(storageScrollBar.ViewPosition);
+			int index = slot + IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
 			lock (blockStorageItems)
 			{
@@ -802,7 +802,8 @@ namespace MagicStorage
 						Main.LocalPlayer.GetModPlayer<StoragePlayer>().TestedRecipes.Add(selectedRecipe.createItem);
 					}
 				}
-				else */ if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
+				else */
+				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
 					if (craftTimer <= 0)
 					{
@@ -920,8 +921,8 @@ namespace MagicStorage
 			lock (threadLock)
 			{
 				threadNeedsRestart = true;
-				threadSortMode = (SortMode) sortButtons.Choice;
-				threadFilterMode = (FilterMode) filterButtons.Choice;
+				threadSortMode = (SortMode)sortButtons.Choice;
+				threadFilterMode = (FilterMode)filterButtons.Choice;
 				threadCheckListFoundItems = foundItems;
 				if (!threadRunning)
 				{
@@ -1094,24 +1095,25 @@ namespace MagicStorage
 
 						threadRecipes.Clear();
 						threadRecipeAvailable.Clear();
-						try
+
+						if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
 						{
-							if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
+							foreach (Recipe recipe in filteredRecipes)
 							{
-								threadRecipes.AddRange(filteredRecipes.Where(recipe => IsAvailable(recipe)));
-								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => true));
-							}
-							else
-							{
-								threadRecipes.AddRange(filteredRecipes);
-								threadRecipeAvailable.AddRange(threadRecipes.Select(recipe => IsAvailable(recipe)));
+								if (IsAvailable(recipe))
+								{
+									threadRecipes.Add(recipe);
+									threadRecipeAvailable.Add(true);
+								}
 							}
 						}
-						catch (InvalidOperationException)
+						else
 						{
-						}
-						catch (KeyNotFoundException)
-						{
+							foreach (Recipe recipe in filteredRecipes)
+							{
+								threadRecipes.Add(recipe);
+								threadRecipeAvailable.Add(IsAvailable(recipe));
+							}
 						}
 					}
 
@@ -1524,7 +1526,7 @@ namespace MagicStorage
 		private static void HoverRecipe(int slot, ref int hoverSlot)
 		{
 			int visualSlot = slot;
-			slot += RecipeColumns * (int) Math.Round(recipeScrollBar.ViewPosition);
+			slot += RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
 			if (slot < recipes.Count)
 			{
 				Recipe recipe = recipes[slot];
@@ -1623,7 +1625,7 @@ namespace MagicStorage
 			}
 
 			int visualSlot = slot;
-			slot += IngredientColumns * (int) Math.Round(storageScrollBar.ViewPosition);
+			slot += IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 
 			if (slot >= selectedRecipe.requiredItem.Count)
 				return;
@@ -1663,7 +1665,7 @@ namespace MagicStorage
 		private static void HoverStorage(int slot, ref int hoverSlot)
 		{
 			int visualSlot = slot;
-			slot += IngredientColumns * (int) Math.Round(storageScrollBar.ViewPosition);
+			slot += IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			if (slot >= storageItems.Count)
 				return;
 
@@ -1808,10 +1810,10 @@ namespace MagicStorage
 			var toWithdraw = new List<Item>();
 
 			lock (storageItems)
-			lock (blockStorageItems)
-			{
-				availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
-			}
+				lock (blockStorageItems)
+				{
+					availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
+				}
 
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
@@ -1908,31 +1910,15 @@ namespace MagicStorage
 		private static bool TryDepositResult(Item item)
 		{
 			int oldStack = item.stack;
-			DoDepositResult(item);
-			return oldStack != item.stack;
-		}
-
-		private static void DoDepositResult(Item item)
-		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-			{
-				heart.DepositItem(item);
-			}
-			else
-			{
-				NetHelper.SendDeposit(heart.ID, item);
-				item.SetDefaults(0, true);
-			}
+			heart.TryDeposit(item);
+			return oldStack != item.stack;
 		}
 
 		private static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				return heart.TryWithdraw(item, false);
-			NetHelper.SendWithdraw(heart.ID, item, toInventory);
-			return new Item();
+			return heart.TryWithdraw(item, false);
 		}
 	}
 }

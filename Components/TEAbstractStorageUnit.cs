@@ -34,13 +34,13 @@ namespace MagicStorage.Components
 			return null;
 		}
 
-		public abstract bool HasSpaceInStackFor(Item check, bool locked = false);
+		public abstract bool HasSpaceInStackFor(Item check);
 
-		public abstract bool HasItem(Item check, bool locked = false, bool ignorePrefix = false);
+		public abstract bool HasItem(Item check, bool ignorePrefix = false);
 
 		public abstract IEnumerable<Item> GetItems();
 
-		public abstract void DepositItem(Item toDeposit, bool locked = false);
+		public abstract void DepositItem(Item toDeposit);
 
 		public abstract Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false);
 

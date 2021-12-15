@@ -11,13 +11,6 @@ namespace MagicStorage
 	// TODO: think of a better name
 	public class MagicSystem : ModSystem
 	{
-		public override bool HijackGetData(ref byte messageType, ref BinaryReader reader, int playerNumber)
-		{
-			EditsLoader.MessageTileEntitySyncing = messageType == MessageID.TileSection;
-
-			return false;
-		}
-
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			InterfaceHelper.ModifyInterfaceLayers(layers);

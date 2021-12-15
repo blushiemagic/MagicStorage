@@ -95,8 +95,8 @@ namespace MagicStorage
 			}
 			else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
-				int playerX = (int) (Player.Center.X / 16f);
-				int playerY = (int) (Player.Center.Y / 16f);
+				int playerX = (int)(Player.Center.X / 16f);
+				int playerY = (int)(Player.Center.Y / 16f);
 				if (!remoteAccess &&
 					(playerX < storageAccess.X - Player.lastTileRangeX ||
 					 playerX > storageAccess.X + Player.lastTileRangeX + 1 ||
@@ -195,15 +195,7 @@ namespace MagicStorage
 			}
 			else
 			{
-				if (Main.netMode == NetmodeID.SinglePlayer)
-				{
-					GetStorageHeart().DepositItem(item);
-				}
-				else
-				{
-					NetHelper.SendDeposit(GetStorageHeart().ID, item);
-					item.SetDefaults(0, true);
-				}
+				GetStorageHeart().TryDeposit(item);
 			}
 
 			if (item.type != oldType || item.stack != oldStack)
@@ -276,6 +268,7 @@ namespace MagicStorage
 				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
 					item.TurnToAir();
 			}
+
 			base.OnRespawn(player);
 		}
 	}

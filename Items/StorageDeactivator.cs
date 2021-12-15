@@ -56,17 +56,22 @@ namespace MagicStorage.Items
 					j--;
 
 				Point16 point = new(i, j);
-				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
+				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEAbstractStorageUnit storage)
 				{
-					storageUnit.Inactive = !storageUnit.Inactive;
-					string activeText = storageUnit.Inactive ? "Deactivated" : "Activated";
+					storage.Inactive = !storage.Inactive;
+					string activeText = storage.Inactive ? "Deactivated" : "Activated";
 					Main.NewText("Storage Unit has been " + activeText);
-					NetHelper.ClientSendTEUpdate(storageUnit.ID);
-					if (storageUnit is TEStorageUnit storage)
+					if (storage is TEStorageUnit storageUnit)
 					{
-						storage.UpdateTileFrameWithNetSend();
-						if (Main.netMode == NetmodeID.SinglePlayer)
+						if (Main.netMode == NetmodeID.MultiplayerClient)
+						{
+							NetHelper.ClientSendDeactivate(storageUnit.ID, storageUnit.Inactive);
+						}
+						else
+						{
+							storageUnit.UpdateTileFrameWithNetSend();
 							storageUnit.GetHeart().ResetCompactStage();
+						}
 					}
 				}
 			}
