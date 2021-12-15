@@ -14,10 +14,6 @@ namespace MagicStorage
 {
 	public static class NetHelper
 	{
-		private const byte OP_DEPOSIT_ALL = 2;
-		private const byte OP_DELETE_ITEM = 4;
-		private const byte OP_DELETE_ALL_ITEMS = 5;
-
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
@@ -38,17 +34,20 @@ namespace MagicStorage
 				case MessageType.SearchAndRefreshNetwork:
 					ReceiveSearchAndRefresh(reader);
 					break;
-				case MessageType.TryStorageOperation:
-					ReceiveStorageOperation(reader, sender);
+				case MessageType.ClinetStorageOperation:
+					ReciveClientStorageOperation(reader, sender);
 					break;
-				case MessageType.StorageOperationResult:
-					ReceiveOperationResult(reader);
+				case MessageType.ServerStorageResult:
+					ReciveServerStorageResult(reader);
 					break;
 				case MessageType.RefreshNetworkItems:
 					ReceiveRefreshNetworkItems(reader);
 					break;
 				case MessageType.ClientSendTEUpdate:
 					ReceiveClientSendTEUpdate(reader, sender);
+					break;
+				case MessageType.ClientSendDeactivate:
+					ReceiveClientDeactivate(reader, sender);
 					break;
 				case MessageType.TryStationOperation:
 					ReceiveStationOperation(reader, sender);
@@ -72,7 +71,7 @@ namespace MagicStorage
 					ClientReciveStorageSync(reader);
 					break;
 				case MessageType.SyncStorageUnit:
-					ServerReciveSyncStorageUnit(reader);
+					ServerReciveSyncStorageUnit(reader, sender);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -85,17 +84,16 @@ namespace MagicStorage
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.SyncStorageUnit);
-				packet.Write((byte)Main.myPlayer);
 				packet.Write(storageUnitId);
 				packet.Send();
 			}
 		}
 
-		public static void ServerReciveSyncStorageUnit(BinaryReader reader)
+		public static void ServerReciveSyncStorageUnit(BinaryReader reader, int remoteClient)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				byte remoteClient = reader.ReadByte();
+				//byte remoteClient = reader.ReadByte();
 				int storageUnitId = reader.ReadInt32();
 				TileEntity tileEntity = TileEntity.ByID[storageUnitId];
 				TEStorageUnit storageUnit = (TEStorageUnit)TileEntity.ByID[storageUnitId];
@@ -177,131 +175,24 @@ namespace MagicStorage
 			TEStorageComponent.SearchAndRefreshNetwork(point);
 		}
 
-		private static ModPacket PrepareStorageOperation(int ent, byte op)
-		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte)MessageType.TryStorageOperation);
-			packet.Write(ent);
-			packet.Write(op);
-			return packet;
-		}
-
-		private static ModPacket PrepareOperationResult(byte op)
-		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte)MessageType.StorageOperationResult);
-			packet.Write(op);
-			return packet;
-		}
-
-		public static void SendDeposit(int ent, Item item)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStorageOperation(ent, 0);
-				ItemIO.Send(item, packet, true, true);
-				packet.Send();
-			}
-		}
-
-		public static void SendWithdraw(int ent, Item item, bool toInventory = false, bool keepOneIfFavorite = false)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStorageOperation(ent, (byte)(toInventory ? 3 : 1));
-				packet.Write(keepOneIfFavorite);
-				ItemIO.Send(item, packet, true, true);
-				packet.Send();
-			}
-		}
-
-		public static void SendDepositAll(int ent, List<Item> _items)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				int size = byte.MaxValue;
-				for (int i = 0; i < _items.Count; i += size)
-				{
-					List<Item> items = _items.GetRange(i, (i + size) > _items.Count ? _items.Count - i : size);
-					using (ModPacket packet = PrepareStorageOperation(ent, OP_DEPOSIT_ALL))
-					{
-						packet.Write((byte)items.Count);
-						for (int j = 0; j < items.Count; ++j)
-						{
-							ItemIO.Send(items[j], packet, true, true);
-						}
-						packet.Send();
-					}
-				}
-			}
-		}
-
-		public static void DeleteItem(int ent, Item item)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStorageOperation(ent, OP_DELETE_ITEM);
-				ItemIO.Send(item, packet, true, true);
-				packet.Send();
-			}
-		}
-
-		public static void DeleteItems(int ent, List<Item> _items)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				int size = byte.MaxValue;
-				for (int i = 0; i < _items.Count; i += size)
-				{
-					List<Item> items = _items.GetRange(i, (i + size) > _items.Count ? _items.Count - i : size);
-					using (ModPacket packet = PrepareStorageOperation(ent, OP_DELETE_ALL_ITEMS))
-					{
-						packet.Write((byte)items.Count);
-						for (int j = 0; j < items.Count; ++j)
-						{
-							ItemIO.Send(items[j], packet, true, true);
-						}
-						packet.Send();
-					}
-				}
-			}
-		}
-
-		public static void ReceiveStorageOperation(BinaryReader reader, int sender)
+		public static void ReciveClientStorageOperation(BinaryReader reader, int sender)
 		{
 			int ent = reader.ReadInt32();
-			byte op = reader.ReadByte();
-
-			/*
-			if (Main.netMode == NetmodeID.Server)
-				Console.WriteLine($"Receiving Storage Operation {op} from entity {ent}");
-			else
-				Main.NewText($"Receiving Storage Operation {op} from entity {ent}");
-			*/
+			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == 0)
+				if (op == TEStorageHeart.Operation.Deposit)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == 1 || op == 3)
+				else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory)
 				{
 					_ = reader.ReadBoolean();
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == OP_DELETE_ITEM)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == OP_DELETE_ALL_ITEMS)
-				{
-					int count = reader.ReadByte();
-					for (int i = 0; i < count; i++)
-						_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == OP_DEPOSIT_ALL)
+				else if (op == TEStorageHeart.Operation.DepositAll)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
@@ -314,123 +205,38 @@ namespace MagicStorage
 			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
-			if (op == 0)
-			{
-				Item item = ItemIO.Receive(reader, true, true);
-				heart.DepositItem(item);
-				if (!item.IsAir)
-				{
-					ModPacket packet = PrepareOperationResult(op);
-					ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-			else if (op == 1 || op == 3)
-			{
-				bool keepOneIfFavorite = reader.ReadBoolean();
-				Item item = ItemIO.Receive(reader, true, true);
-				item = heart.TryWithdraw(item, keepOneIfFavorite);
-				if (!item.IsAir)
-				{
-					ModPacket packet = PrepareOperationResult(op);
-					ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-			else if (op == OP_DELETE_ITEM)
-			{
-				Item item = ItemIO.Receive(reader, true, true);
-				heart.TryWithdraw(item, false);
-			}
-			else if (op == OP_DELETE_ALL_ITEMS)
-			{
-				int count = reader.ReadByte();
-				List<Item> items = new();
-				StartUpdateQueue();
-				for (int k = 0; k < count; k++)
-				{
-					heart.TryWithdraw(ItemIO.Receive(reader, true, true), false);
-				}
-				ProcessUpdateQueue();
-			}
-			else if (op == OP_DEPOSIT_ALL)
-			{
-				int count = reader.ReadByte();
-				List<Item> items = new();
-				StartUpdateQueue();
-				for (int k = 0; k < count; k++)
-				{
-					Item item = ItemIO.Receive(reader, true, true);
-					heart.DepositItem(item);
-					if (!item.IsAir)
-						items.Add(item);
-				}
-
-				ProcessUpdateQueue();
-				if (items.Count > 0)
-				{
-					ModPacket packet = PrepareOperationResult(op);
-					packet.Write((byte)items.Count);
-					foreach (Item item in items)
-						ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-
-			SendRefreshNetworkItems(ent);
+			heart.QClientOperation(reader, op, sender);
 		}
 
-		public static void ReceiveOperationResult(BinaryReader reader)
+		public static void ReciveServerStorageResult(BinaryReader reader)
 		{
-			byte op = reader.ReadByte();
-
-			/*
-			if (Main.netMode == NetmodeID.Server)
-				Console.WriteLine($"Receiving Operation Result {op}");
-			else
-				Main.NewText($"Receiving Operation Result {op}");
-			*/
+			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == 0 || op == 1 || op == 3)
+				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == OP_DEPOSIT_ALL)
+				else if (op == TEStorageHeart.Operation.DepositAll)
 				{
 					int count = reader.ReadByte();
 					for (int i = 0; i < count; i++)
 						_ = ItemIO.Receive(reader, true, true);
 				}
-
-				return;
 			}
-
-			if (op == 0 || op == 1 || op == 3)
+			else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
-
-				/*
-				Main.NewText($"Item Read: [type: {item.type}, prefix: {item.prefix}, stack: {item.stack}]");
-				Main.NewText($"Reader Position: {reader.BaseStream.Position}");
-				*/
-
-				StoragePlayer.GetItem(item, op != 3);
+				StoragePlayer.GetItem(item, op != TEStorageHeart.Operation.WithdrawToInventory);
 			}
-			else if (op == OP_DEPOSIT_ALL)
+			else if (op == TEStorageHeart.Operation.DepositAll)
 			{
 				int count = reader.ReadByte();
 				for (int k = 0; k < count; k++)
 				{
 					Item item = ItemIO.Receive(reader, true, true);
-
-					/*
-					Main.NewText($"Item Read: [type: {item.type}, prefix: {item.prefix}, stack: {item.stack}]");
-					Main.NewText($"Reader Position: {reader.BaseStream.Position}");
-					*/
-
 					StoragePlayer.GetItem(item, false);
 				}
 			}
@@ -455,6 +261,45 @@ namespace MagicStorage
 
 			if (TileEntity.ByID.ContainsKey(ent))
 				StorageGUI.RefreshItems();
+		}
+
+		public static void ClientSendDeactivate(int id, bool inActive)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.ClientSendDeactivate);
+				packet.Write(id);
+				packet.Write(inActive);
+				packet.Send();
+			}
+		}
+
+		public static void ReceiveClientDeactivate(BinaryReader reader, int sender)
+		{
+			if (Main.netMode == NetmodeID.Server)
+			{
+				int id = reader.ReadInt32();
+				bool inActive = reader.ReadBoolean();
+				TileEntity ent = TileEntity.ByID[id];
+				if (ent is TEStorageUnit storageUnit)
+				{
+					storageUnit.Inactive = inActive;
+					storageUnit.UpdateTileFrameWithNetSend();
+					TEStorageHeart heart = storageUnit.GetHeart();
+					if (heart != null)
+					{
+						heart.ResetCompactStage();
+					}
+				}
+			}
+			else if (Main.netMode == NetmodeID.MultiplayerClient)
+			{
+				//Still need to read the data
+				_ = reader.ReadInt32();
+				// TODO does TileEntity need to be read?
+				//_ = TileEntity.Read(reader, true);
+			}
 		}
 
 		public static void ClientSendTEUpdate(int id)
@@ -775,10 +620,11 @@ namespace MagicStorage
 	internal enum MessageType : byte
 	{
 		SearchAndRefreshNetwork,
-		TryStorageOperation,
-		StorageOperationResult,
+		ClinetStorageOperation,
+		ServerStorageResult,
 		RefreshNetworkItems,
 		ClientSendTEUpdate,
+		ClientSendDeactivate,
 		TryStationOperation,
 		StationOperationResult,
 		ResetCompactStage,

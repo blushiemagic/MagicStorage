@@ -518,63 +518,27 @@ namespace MagicStorage
 		private static bool TryDeposit(Item item)
 		{
 			int oldStack = item.stack;
-			DoDeposit(item);
-			return oldStack != item.stack;
-		}
-
-		private static void DoDeposit(Item item)
-		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-			{
-				heart.DepositItem(item);
-			}
-			else
-			{
-				NetHelper.SendDeposit(heart.ID, item);
-				item.SetDefaults(0, true);
-			}
+			heart.TryDeposit(item);
+			return oldStack != item.stack;
 		}
 
 		private static bool TryDepositAll(bool quickStack)
 		{
 			Player player = Main.LocalPlayer;
 			TEStorageHeart heart = GetHeart();
-			bool changed = false;
 
 			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			int inventorySize = player.inventory.Count();
-			if (Main.netMode == NetmodeID.SinglePlayer)
+			var items = new List<Item>();
+			for (int k = 10; k < inventorySize; k++)
 			{
-				for (int k = 10; k < inventorySize; k++)
-				{
-					Item item = player.inventory[k];
-					if (filter(item))
-					{
-						int oldStack = item.stack;
-						heart.DepositItem(item);
-						if (oldStack != item.stack)
-							changed = true;
-					}
-				}
-			}
-			else
-			{
-				var items = new List<Item>();
-				for (int k = 10; k < inventorySize; k++)
-				{
-					Item item = player.inventory[k];
-					if (filter(item))
-						items.Add(item);
-				}
-
-				NetHelper.SendDepositAll(heart.ID, items);
-				foreach (Item item in items)
-					item.SetDefaults(0, true);
-				changed = true;
+				Item item = player.inventory[k];
+				if (filter(item))
+					items.Add(item);
 			}
 
-			return changed;
+			return heart.TryDeposit(items);
 		}
 
 		private static bool TryRestock()
@@ -603,10 +567,7 @@ namespace MagicStorage
 		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				return heart.TryWithdraw(item, keepOneIfFavorite);
-			NetHelper.SendWithdraw(heart.ID, item, toInventory, keepOneIfFavorite);
-			return new Item();
+			return heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
 		}
 	}
 }

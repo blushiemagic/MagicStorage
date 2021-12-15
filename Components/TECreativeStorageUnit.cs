@@ -12,13 +12,13 @@ namespace MagicStorage.Components
 
 		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
 
-		public override bool HasSpaceInStackFor(Item check, bool locked = false) => false;
+		public override bool HasSpaceInStackFor(Item check) => false;
 
-		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false) => !Inactive;
+		public override bool HasItem(Item check, bool ignorePrefix = false) => !Inactive;
 
 		public override IEnumerable<Item> GetItems() => new CreativeEnumerable(Inactive);
 
-		public override void DepositItem(Item toDeposit, bool locked = false)
+		public override void DepositItem(Item toDeposit)
 		{
 		}
 

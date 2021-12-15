@@ -195,15 +195,7 @@ namespace MagicStorage
 			}
 			else
 			{
-				if (Main.netMode == NetmodeID.SinglePlayer)
-				{
-					GetStorageHeart().DepositItem(item);
-				}
-				else
-				{
-					NetHelper.SendDeposit(GetStorageHeart().ID, item);
-					item.SetDefaults(0, true);
-				}
+				GetStorageHeart().TryDeposit(item);
 			}
 
 			if (item.type != oldType || item.stack != oldStack)

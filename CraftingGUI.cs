@@ -1910,31 +1910,15 @@ namespace MagicStorage
 		private static bool TryDepositResult(Item item)
 		{
 			int oldStack = item.stack;
-			DoDepositResult(item);
-			return oldStack != item.stack;
-		}
-
-		private static void DoDepositResult(Item item)
-		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-			{
-				heart.DepositItem(item);
-			}
-			else
-			{
-				NetHelper.SendDeposit(heart.ID, item);
-				item.SetDefaults(0, true);
-			}
+			heart.TryDeposit(item);
+			return oldStack != item.stack;
 		}
 
 		private static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				return heart.TryWithdraw(item, false);
-			NetHelper.SendWithdraw(heart.ID, item, toInventory);
-			return new Item();
+			return heart.TryWithdraw(item, false);
 		}
 	}
 }

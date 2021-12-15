@@ -8,12 +8,46 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System;
+using System.Collections.Concurrent;
 
 namespace MagicStorage.Components
 {
 	public class TEStorageHeart : TEStorageCenter
 	{
-		Queue<bool> compactCoinsQ = new Queue<bool>();
+		public enum Operation : byte
+		{
+			Withdraw,
+			WithdrawToInventory,
+			Deposit,
+			DepositAll
+		}
+
+		private class HeartOperation
+		{
+			public HeartOperation(Operation _type, Item _item = null, bool _keepOneInFavorite = false, int _client = -1)
+			{
+				type = _type;
+				item = _item;
+				keepOneInFavorite = _keepOneInFavorite;
+				client = _client;
+			}
+
+			public HeartOperation(Operation _heartOperation, List<Item> _items = null, int _client = -1)
+			{
+				type = _heartOperation;
+				items = _items;
+				client = _client;
+			}
+
+			public Operation type { get; }
+			public Item item { get; }
+			public List<Item> items { get; }
+			public bool keepOneInFavorite { get; }
+			public int client { get; }
+		}
+
+		ConcurrentQueue<HeartOperation> clientOpQ = new ConcurrentQueue<HeartOperation>();
+		bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
@@ -49,59 +83,131 @@ namespace MagicStorage.Components
 			return GetStorageUnits().SelectMany(storageUnit => storageUnit.GetItems());
 		}
 
-		public void EnterReadLock()
-		{
-			itemsLock.EnterReadLock();
-		}
-
-		public void ExitReadLock()
-		{
-			itemsLock.ExitReadLock();
-		}
-
-		public void EnterWriteLock()
-		{
-			itemsLock.EnterWriteLock();
-		}
-
-		public void ExitWriteLock()
-		{
-			itemsLock.ExitWriteLock();
-		}
-
 		public override void Update()
 		{
 			foreach (Point16 remoteAccess in remoteAccesses)
 				if (!ByPosition.TryGetValue(remoteAccess, out TileEntity te) || te is not TERemoteAccess)
 					remoteAccesses.Remove(remoteAccess);
 
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-				return;
+			if (Main.netMode == NetmodeID.Server && processClientOperations())
+			{
+				NetHelper.SendRefreshNetworkItems(ID);
+			}
+
 			updateTimer++;
 			if (updateTimer >= 60)
 			{
 				updateTimer = 0;
-				if (compactCoinsQ.Count > 0)
+				if (compactCoins)
 				{
-					int currentQCount = compactCoinsQ.Count;
 					CompactCoins();
-					for (int i = 0; i < currentQCount; i++)
+					compactCoins = false;
+				}
+				CompactOne();
+			}
+		}
+
+		private bool processClientOperations()
+		{
+			int opCount = clientOpQ.Count;
+			bool networkRefresh = false;
+			for (int i = 0; i < opCount; ++i)
+			{
+				HeartOperation op;
+				if (clientOpQ.TryDequeue(out op))
+				{
+					networkRefresh = true;
+					if (op.type == Operation.Withdraw || op.type == Operation.WithdrawToInventory)
 					{
-						compactCoinsQ.Dequeue();
+						Item item = Withdraw(op.item, op.keepOneInFavorite);
+						if (!item.IsAir)
+						{
+							ModPacket packet = PrepareServerResult(op.type);
+							ItemIO.Send(item, packet, true, true);
+							packet.Send(op.client);
+						}
+					}
+					else if (op.type == Operation.Deposit)
+					{
+						DepositItem(op.item);
+						if (!op.item.IsAir)
+						{
+							ModPacket packet = PrepareServerResult(op.type);
+							ItemIO.Send(op.item, packet, true, true);
+							packet.Send(op.client);
+						}
+					}
+					else if (op.type == Operation.DepositAll)
+					{
+						NetHelper.StartUpdateQueue();
+						List<Item> leftOvers = new List<Item>();
+						foreach (Item item in op.items)
+						{
+							DepositItem(item);
+							if (!item.IsAir)
+							{
+								leftOvers.Add(item);
+							}
+						}
+						NetHelper.ProcessUpdateQueue();
+
+						if (leftOvers.Count > 0)
+						{
+							ModPacket packet = PrepareServerResult(op.type);
+							packet.Write((byte)leftOvers.Count);
+							foreach (Item item in leftOvers)
+							{
+								ItemIO.Send(op.item, packet, true, true);
+							}
+							packet.Send(op.client);
+						}
 					}
 				}
-
-				if (Main.netMode != NetmodeID.Server || itemsLock.TryEnterWriteLock(2))
-					try
-					{
-						CompactOne();
-					}
-					finally
-					{
-						if (Main.netMode == NetmodeID.Server)
-							itemsLock.ExitWriteLock();
-					}
 			}
+			return networkRefresh;
+		}
+
+		public void QClientOperation(BinaryReader reader, Operation op, int client)
+		{
+			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
+			{
+				bool keepOneIfFavorite = reader.ReadBoolean();
+				Item item = ItemIO.Receive(reader, true, true);
+				clientOpQ.Enqueue(new HeartOperation(op, item, keepOneIfFavorite, client));
+			}
+			else if (op == Operation.Deposit)
+			{
+				Item item = ItemIO.Receive(reader, true, true);
+				clientOpQ.Enqueue(new HeartOperation(op, item, _client: client));
+			}
+			else if (op == Operation.DepositAll)
+			{
+				int count = reader.ReadByte();
+				List<Item> items = new();
+				for (int k = 0; k < count; k++)
+				{
+					Item item = ItemIO.Receive(reader, true, true);
+					items.Add(item);
+				}
+				clientOpQ.Enqueue(new HeartOperation(op, items, _client: client));
+			}
+		}
+
+		private static ModPacket PrepareServerResult(Operation op)
+		{
+			ModPacket packet = MagicStorage.Instance.GetPacket();
+			packet.Write((byte)MessageType.ServerStorageResult);
+			packet.Write((byte)op);
+			return packet;
+		}
+
+		private ModPacket PrepareClientRequest(Operation op)
+		{
+			ModPacket packet = MagicStorage.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClinetStorageOperation);
+			packet.Write(ID);
+			packet.Write((byte)op);
+			return packet;
 		}
 
 		public void CompactCoins()
@@ -137,12 +243,11 @@ namespace MagicStorage.Components
 
 					tempCoin.SetDefaults(exchangeCoin);
 					tempCoin.stack = exchangedQty;
-					DepositItem(tempCoin, true);
+					DepositItem(tempCoin);
 				}
 			}
 		}
 
-		//precondition: lock is already taken
 		public void CompactOne()
 		{
 			if (compactStage == 0)
@@ -153,7 +258,6 @@ namespace MagicStorage.Components
 				PackItems();
 		}
 
-		//precondition: lock is already taken
 		public bool EmptyInactive()
 		{
 			TEStorageUnit inactiveUnit = GetStorageUnits().OfType<TEStorageUnit>().FirstOrDefault(unit => unit.Inactive && !unit.IsEmpty);
@@ -176,16 +280,16 @@ namespace MagicStorage.Components
 			NetHelper.StartUpdateQueue();
 			Item tryMove = inactiveUnit.WithdrawStack();
 			foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>().Where(unit => !unit.Inactive))
-				while (storageUnit.HasSpaceFor(tryMove, true) && !tryMove.IsAir)
+				while (storageUnit.HasSpaceFor(tryMove) && !tryMove.IsAir)
 				{
-					storageUnit.DepositItem(tryMove, true);
+					storageUnit.DepositItem(tryMove);
 					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
 						tryMove = inactiveUnit.WithdrawStack();
 					hasChange = true;
 				}
 
 			if (!tryMove.IsAir)
-				inactiveUnit.DepositItem(tryMove, true);
+				inactiveUnit.DepositItem(tryMove);
 			NetHelper.ProcessUpdateQueue();
 			if (hasChange)
 				NetHelper.SendRefreshNetworkItems(ID);
@@ -194,7 +298,6 @@ namespace MagicStorage.Components
 			return hasChange;
 		}
 
-		//precondition: lock is already taken
 		public bool Defragment()
 		{
 			TEStorageUnit emptyUnit = null;
@@ -218,7 +321,6 @@ namespace MagicStorage.Components
 			return false;
 		}
 
-		//precondition: lock is already taken
 		public bool PackItems()
 		{
 			TEStorageUnit unitWithSpace = null;
@@ -236,9 +338,9 @@ namespace MagicStorage.Components
 					while (!unitWithSpace.IsFull && !storageUnit.IsEmpty)
 					{
 						Item item = storageUnit.WithdrawStack();
-						unitWithSpace.DepositItem(item, true);
+						unitWithSpace.DepositItem(item);
 						if (!item.IsAir)
-							storageUnit.DepositItem(item, true);
+							storageUnit.DepositItem(item);
 					}
 
 					NetHelper.ProcessUpdateQueue();
@@ -257,104 +359,146 @@ namespace MagicStorage.Components
 				compactStage = stage;
 		}
 
-		public void DepositItem(Item toDeposit, bool compactCoins = false)
+		public void DepositItem(Item toDeposit)
 		{
-			if (Main.netMode == NetmodeID.Server)
-				EnterWriteLock();
 			int oldStack = toDeposit.stack;
-			if (toDeposit.IsACoin && !compactCoins)
+			if (toDeposit.IsACoin)
 			{
-				compactCoinsQ.Enqueue(true);
+				compactCoins = true;
 			}
-			try
+			int remember = toDeposit.type;
+			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit))
+				{
+					storageUnit.DepositItem(toDeposit);
+					if (toDeposit.IsAir)
+						return;
+				}
+
+			bool prevNewAndShiny = toDeposit.newAndShiny;
+			toDeposit.newAndShiny = MagicStorageConfig.GlowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
+			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				if (!storageUnit.Inactive && !storageUnit.IsFull)
+				{
+					storageUnit.DepositItem(toDeposit);
+					if (toDeposit.IsAir)
+					{
+						_uniqueItemsPutHistory.Add(remember);
+						return;
+					}
+				}
+
+			toDeposit.newAndShiny = prevNewAndShiny;
+
+			if (oldStack != toDeposit.stack)
+				ResetCompactStage();
+		}
+
+		public void TryDeposit(Item item)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				int remember = toDeposit.type;
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
-					if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit, true))
-					{
-						storageUnit.DepositItem(toDeposit, true);
-						if (toDeposit.IsAir)
-							return;
-					}
-
-				bool prevNewAndShiny = toDeposit.newAndShiny;
-				toDeposit.newAndShiny = MagicStorageConfig.GlowNewItems && !_uniqueItemsPutHistory.Contains(toDeposit);
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
-					if (!storageUnit.Inactive && !storageUnit.IsFull)
-					{
-						storageUnit.DepositItem(toDeposit, true);
-						if (toDeposit.IsAir)
-						{
-							_uniqueItemsPutHistory.Add(remember);
-							return;
-						}
-					}
-
-				toDeposit.newAndShiny = prevNewAndShiny;
+				ModPacket packet = PrepareClientRequest(Operation.Deposit);
+				ItemIO.Send(item, packet, true, true);
+				packet.Send();
+				item.SetDefaults(0, true);
 			}
-			finally
+			else
 			{
-				if (oldStack != toDeposit.stack)
-					ResetCompactStage();
-				if (Main.netMode == NetmodeID.Server)
-					ExitWriteLock();
+				DepositItem(item);
 			}
 		}
 
-		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite)
+		public bool TryDeposit(List<Item> items)
 		{
+			bool changed = false;
 			if (Main.netMode == NetmodeID.MultiplayerClient)
-				return new Item();
-			if (Main.netMode == NetmodeID.Server)
-				EnterWriteLock();
-			try
 			{
-				Item result = new();
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits().Reverse())
-					if (storageUnit.HasItem(lookFor, true))
+				int size = byte.MaxValue;
+				for (int i = 0; i < items.Count; i += size)
+				{
+					List<Item> _items = items.GetRange(i, (i + size) > items.Count ? items.Count - i : size);
+					using (ModPacket packet = PrepareClientRequest(Operation.DepositAll))
 					{
-						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
-						if (!withdrawn.IsAir)
+						packet.Write((byte)_items.Count);
+						for (int j = 0; j < _items.Count; ++j)
 						{
-							if (result.IsAir)
-								result = withdrawn;
-							else
-								result.stack += withdrawn.stack;
-							if (lookFor.stack <= 0)
-							{
-								ResetCompactStage();
-								return result;
-							}
+							ItemIO.Send(_items[j], packet, true, true);
+						}
+						packet.Send();
+					}
+				}
+
+				foreach (Item item in items)
+				{
+					item.SetDefaults(0, true);
+				}
+				changed = true;
+			}
+			else
+			{
+				foreach (Item item in items)
+				{
+					int oldStack = item.stack;
+					DepositItem(item);
+					if (oldStack != item.stack)
+						changed = true;
+				}
+			}
+			return changed;
+		}
+
+		public Item Withdraw(Item lookFor, bool keepOneIfFavorite)
+		{
+			Item result = new();
+			foreach (TEStorageUnit storageUnit in GetStorageUnits().Reverse())
+			{
+				if (storageUnit.HasItem(lookFor, true))
+				{
+					Item withdrawn = storageUnit.TryWithdraw(lookFor, true, keepOneIfFavorite);
+					if (!withdrawn.IsAir)
+					{
+						if (result.IsAir)
+							result = withdrawn;
+						else
+							result.stack += withdrawn.stack;
+						if (lookFor.stack <= 0)
+						{
+							ResetCompactStage();
+							return result;
 						}
 					}
+				}
+			}
 
-				if (result.stack > 0)
-					ResetCompactStage();
-				return result;
-			}
-			finally
+			if (result.stack > 0)
+				ResetCompactStage();
+			return result;
+		}
+
+		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite, bool toInventory = false)
+		{
+			Item item = new Item();
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				if (Main.netMode == NetmodeID.Server)
-					ExitWriteLock();
+				ModPacket packet = PrepareClientRequest((toInventory ? Operation.WithdrawToInventory : Operation.Withdraw));
+				packet.Write(keepOneIfFavorite);
+				ItemIO.Send(lookFor, packet, true, true);
+				packet.Send();
 			}
+			else
+			{
+				item = Withdraw(lookFor, keepOneIfFavorite);
+			}
+			return item;
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
 		{
-			if (Main.netMode == NetmodeID.Server)
-				EnterReadLock();
-			try
-			{
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
-					if (storageUnit.HasItem(lookFor, true, ignorePrefix))
-						return true;
-				return false;
-			}
-			finally
-			{
-				if (Main.netMode == NetmodeID.Server)
-					ExitReadLock();
-			}
+			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
+				if (storageUnit.HasItem(lookFor, ignorePrefix))
+					return true;
+			return false;
 		}
 
 		public override void SaveData(TagCompound tag)
@@ -380,7 +524,7 @@ namespace MagicStorage.Components
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 			_uniqueItemsPutHistory.Load(tag);
 
-			compactCoinsQ.Enqueue(true);
+			compactCoins = true;
 		}
 
 		public override void NetSend(BinaryWriter writer)

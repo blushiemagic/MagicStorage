@@ -73,103 +73,75 @@ namespace MagicStorage.Components
 
 		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
 
-		public override bool HasSpaceInStackFor(Item check, bool locked = false)
+		public override bool HasSpaceInStackFor(Item check)
 		{
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().EnterReadLock();
-			try
-			{
-				ItemData data = new(check);
-				return hasSpaceInStack.Contains(data);
-			}
-			finally
-			{
-				if (Main.netMode == NetmodeID.Server && !locked)
-					GetHeart().ExitReadLock();
-			}
+			ItemData data = new(check);
+			return hasSpaceInStack.Contains(data);
 		}
 
-		public bool HasSpaceFor(Item check, bool locked = false) => !IsFull || HasSpaceInStackFor(check, locked);
+		public bool HasSpaceFor(Item check) => !IsFull || HasSpaceInStackFor(check);
 
-		public override bool HasItem(Item check, bool locked = false, bool ignorePrefix = false)
+		public override bool HasItem(Item check, bool ignorePrefix = false)
 		{
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().EnterReadLock();
-			try
-			{
-				if (ignorePrefix)
-					return hasItemNoPrefix.Contains(check.type);
-				ItemData data = new(check);
-				return hasItem.Contains(data);
-			}
-			finally
-			{
-				if (Main.netMode == NetmodeID.Server && !locked)
-					GetHeart().ExitReadLock();
-			}
+			if (ignorePrefix)
+				return hasItemNoPrefix.Contains(check.type);
+			ItemData data = new(check);
+			return hasItem.Contains(data);
 		}
 
 		public override IEnumerable<Item> GetItems() => items;
 
-		public override void DepositItem(Item toDeposit, bool locked = false)
+		public override void DepositItem(Item toDeposit)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().EnterWriteLock();
-			try
-			{
-				if (CraftingGUI.IsTestItem(toDeposit))
-					return;
-				Item original = toDeposit.Clone();
-				bool finished = false;
-				bool hasChange = false;
-				foreach (Item item in items)
-					if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
-					{
-						int total = item.stack + toDeposit.stack;
-						int newStack = total;
-						if (newStack > item.maxStack)
-							newStack = item.maxStack;
-						item.stack = newStack;
 
-						if (toDeposit.favorited)
-							item.favorited = true;
-						if (toDeposit.newAndShiny)
-							item.newAndShiny = MagicStorageConfig.GlowNewItems;
+			if (CraftingGUI.IsTestItem(toDeposit))
+				return;
 
-						hasChange = true;
-						toDeposit.stack = total - newStack;
-						if (toDeposit.stack <= 0)
-						{
-							toDeposit.SetDefaults(0, true);
-							finished = true;
-							break;
-						}
-					}
-
-				if (!finished && !IsFull)
+			Item original = toDeposit.Clone();
+			bool finished = false;
+			bool hasChange = false;
+			foreach (Item item in items)
+				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
 				{
-					Item item = toDeposit.Clone();
-					items.Add(item);
-					toDeposit.SetDefaults(0, true);
+					int total = item.stack + toDeposit.stack;
+					int newStack = total;
+					if (newStack > item.maxStack)
+						newStack = item.maxStack;
+					item.stack = newStack;
+
+					if (toDeposit.favorited)
+						item.favorited = true;
+					if (toDeposit.newAndShiny)
+						item.newAndShiny = MagicStorageConfig.GlowNewItems;
+
 					hasChange = true;
-					finished = true;
+					toDeposit.stack = total - newStack;
+					if (toDeposit.stack <= 0)
+					{
+						toDeposit.SetDefaults(0, true);
+						finished = true;
+						break;
+					}
 				}
 
-				if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
-				{
-					if (Main.netMode == NetmodeID.Server)
-					{
-						netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
-					}
-					PostChangeContents();
-				}
-			}
-			finally
+			if (!finished && !IsFull)
 			{
-				if (Main.netMode == NetmodeID.Server && !locked)
-					GetHeart().ExitWriteLock();
+				Item item = toDeposit.Clone();
+				items.Add(item);
+				toDeposit.SetDefaults(0, true);
+				hasChange = true;
+				finished = true;
+			}
+
+			if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
+				}
+				PostChangeContents();
 			}
 		}
 
@@ -177,82 +149,69 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return new Item();
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().EnterWriteLock();
-			try
-			{
-				Item original = lookFor.Clone();
-				Item result = lookFor.Clone();
-				result.stack = 0;
-				for (int k = items.Count - 1; k >= 0; k--)
-				{
-					Item item = items[k];
-					if (ItemData.Matches(lookFor, item))
-					{
-						int maxToTake = item.stack;
-						if (item.stack > 0 && item.favorited && keepOneIfFavorite)
-							maxToTake -= 1;
-						int withdraw = Math.Min(lookFor.stack, maxToTake);
-						item.stack -= withdraw;
-						if (item.stack <= 0)
-							items.RemoveAt(k);
-						result.stack += withdraw;
-						lookFor.stack -= withdraw;
-						if (lookFor.stack <= 0)
-						{
-							if (Main.netMode != NetmodeID.MultiplayerClient)
-							{
-								if (Main.netMode == NetmodeID.Server)
-								{
-									netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
-								}
 
-								PostChangeContents();
+			Item original = lookFor.Clone();
+			Item result = lookFor.Clone();
+			result.stack = 0;
+			for (int k = items.Count - 1; k >= 0; k--)
+			{
+				Item item = items[k];
+				if (ItemData.Matches(lookFor, item))
+				{
+					int maxToTake = item.stack;
+					if (item.stack > 0 && item.favorited && keepOneIfFavorite)
+						maxToTake -= 1;
+					int withdraw = Math.Min(lookFor.stack, maxToTake);
+					item.stack -= withdraw;
+					if (item.stack <= 0)
+						items.RemoveAt(k);
+					result.stack += withdraw;
+					lookFor.stack -= withdraw;
+					if (lookFor.stack <= 0)
+					{
+						if (Main.netMode != NetmodeID.MultiplayerClient)
+						{
+							if (Main.netMode == NetmodeID.Server)
+							{
+								netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
 							}
 
-							return result;
+							PostChangeContents();
 						}
+
+						return result;
 					}
 				}
-
-				if (result.stack == 0)
-				{
-					return new Item();
-				}
-				if (Main.netMode != NetmodeID.MultiplayerClient)
-				{
-					if (Main.netMode == NetmodeID.Server)
-					{
-						netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
-					}
-
-					PostChangeContents();
-				}
-
-				return result;
 			}
-			finally
+
+			if (result.stack == 0)
 			{
-				if (Main.netMode == NetmodeID.Server && !locked)
-					GetHeart().ExitWriteLock();
+				return new Item();
 			}
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
+				}
+
+				PostChangeContents();
+			}
+
+			return result;
 		}
 
-		public bool UpdateTileFrame(bool locked = false)
+		public bool UpdateTileFrame()
 		{
 			Tile topLeft = Main.tile[Position.X, Position.Y];
 			int oldFrame = topLeft.frameX;
 			int style;
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().EnterReadLock();
 			if (IsEmpty)
 				style = 0;
 			else if (IsFull)
 				style = 2;
 			else
 				style = 1;
-			if (Main.netMode == NetmodeID.Server && !locked)
-				GetHeart().ExitReadLock();
 			if (Inactive)
 				style += 3;
 			style *= 36;
@@ -263,13 +222,12 @@ namespace MagicStorage.Components
 			return oldFrame != style;
 		}
 
-		public void UpdateTileFrameWithNetSend(bool locked = false)
+		public void UpdateTileFrameWithNetSend()
 		{
-			if (UpdateTileFrame(locked))
+			if (UpdateTileFrame())
 				NetMessage.SendTileSquare(-1, Position.X, Position.Y, 2, 2);
 		}
 
-		//precondition: lock is already taken
 		internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2)
 		{
 			(unit1.items, unit2.items) = (unit2.items, unit1.items);
@@ -288,7 +246,6 @@ namespace MagicStorage.Components
 			unit2.PostChangeContents();
 		}
 
-		//precondition: lock is already taken
 		internal Item WithdrawStack()
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
@@ -503,10 +460,10 @@ namespace MagicStorage.Components
 			}
 		}
 
-		private void PostChangeContents()
+		public void PostChangeContents()
 		{
 			RepairMetadata();
-			UpdateTileFrameWithNetSend(true);
+			UpdateTileFrameWithNetSend();
 			NetHelper.SendTEUpdate(ID, Position);
 		}
 	}
