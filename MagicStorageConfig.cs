@@ -35,6 +35,18 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool clearSearchText;
 
+		[Label("Display extra station slots")]
+		[Tooltip("Enable to view all 45 crafting station slots in a Crafting Interface\nDisabling will make only 10 slots appear")]
+		[DefaultValue(true)]
+		[ReloadRequired]
+		public bool extraStationSlots;
+
+		[Label("Display extra sorting icons")]
+		[Tooltip("Enable to have the extra sorting options available")]
+		[DefaultValue(true)]
+		[ReloadRequired]
+		public bool extraFilterIcons;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -49,7 +61,14 @@ namespace MagicStorage
 		[JsonIgnore]
 		public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
 
-		[JsonIgnore] public static bool ClearSearchText => Instance.clearSearchText;
+		[JsonIgnore]
+		public static bool ClearSearchText => Instance.clearSearchText;
+
+		[JsonIgnore]
+		public static bool ExtraStationSlots => Instance.extraStationSlots;
+
+		[JsonIgnore]
+		public static bool ExtraFilterIcons => Instance.extraFilterIcons;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

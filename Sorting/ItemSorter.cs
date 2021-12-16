@@ -66,10 +66,11 @@ namespace MagicStorage.Sorting
 
 		private static ItemFilter MakeFilter(FilterMode filterMode)
 		{
+			//Changing the filter config requires a reload anyway... So we probably don't need to verify against the non-extra sorting types
 			ItemFilter filter = filterMode switch
 			{
 				FilterMode.All           => new FilterAll(),
-				FilterMode.WeaponsMelee  => new FilterWeaponMelee(),
+				FilterMode.WeaponsMelee  => MagicStorageConfig.ExtraFilterIcons ? new FilterWeaponMelee() : new FilterWeapon(),
 				FilterMode.WeaponsRanged => new FilterWeaponRanged(),
 				FilterMode.WeaponsMagic  => new FilterWeaponMagic(),
 				FilterMode.WeaponsSummon => new FilterWeaponSummon(),

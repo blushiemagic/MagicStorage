@@ -20,8 +20,9 @@ The 1.4 version of Magic Storage merges the Magic Storage and Magic Storage - Ex
 - Developer for Magic Storage - Extra
 [c/ffff00:AdipemDragon]
 - Created most of the sprites used in the mod
+[c/ffff00:Yowave]
+- Created bug fixes and optimizations for the mod during absoluteAquarian's hiatus from 20Oct2021-15Dec2021
 
 TODO:
-Money Compactor
 Blacklist/Whitelist for specific accesses
 Wait for bug reports

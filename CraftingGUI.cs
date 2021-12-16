@@ -61,7 +61,7 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 
 		private static UIText stationText;
-		private static readonly UISlotZone stationZone = new(HoverStation, GetStation, InventoryScale / 1.55f);
+		private static readonly UISlotZone stationZone = new(HoverStation, GetStation, MagicStorageConfig.ExtraStationSlots ? InventoryScale / 1.55f : InventoryScale);
 		private static readonly UISlotZone recipeZone = new(HoverRecipe, GetRecipe, InventoryScale);
 
 		private static readonly UIScrollbar recipeScrollBar = new();
@@ -227,7 +227,7 @@ namespace MagicStorage
 			stationZone.Top.Set(100f, 0f);
 			// TODO this should be dynamic so that the number of station slots can be changed in a config
 			stationZone.Height.Set(110f, 0f);
-			stationZone.SetDimensions(15, 3);
+			stationZone.SetDimensions(MagicStorageConfig.ExtraStationSlots ? 15 : 10, MagicStorageConfig.ExtraStationSlots ? 3 : 1);
 			basePanel.Append(stationZone);
 
 			recipeZone.Width.Set(0f, 1f);

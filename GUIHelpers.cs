@@ -32,47 +32,71 @@ namespace MagicStorage
 
 		public static UIButtonChoice MakeFilterButtons(bool withHistory, Action onChanged)
 		{
-			List<Asset<Texture2D>> textures = new()
-			{
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMelee", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterRanged", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMagic", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterSummon", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterThrowing", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAmmo", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPickaxe", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterArmor", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterEquips", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterVanity", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPotion", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterTile", AssetRequestMode.ImmediateLoad),
-				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad)
-			};
-			List<LocalizedText> texts = new()
-			{
-				Language.GetText("Mods.MagicStorage.FilterAll"),
-				Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
-				Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
-				Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
-				Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
-				Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
-				Language.GetText("Mods.MagicStorage.FilterAmmo"),
-				Language.GetText("Mods.MagicStorage.FilterTools"),
-				Language.GetText("Mods.MagicStorage.FilterArmor"),
-				Language.GetText("Mods.MagicStorage.FilterEquips"),
-				Language.GetText("Mods.MagicStorage.FilterVanity"),
-				Language.GetText("Mods.MagicStorage.FilterPotions"),
-				Language.GetText("Mods.MagicStorage.FilterTiles"),
-				Language.GetText("Mods.MagicStorage.FilterMisc")
-			};
+			List<Asset<Texture2D>> textures = MagicStorageConfig.ExtraFilterIcons
+				? new()
+				{
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMelee", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterRanged", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMagic", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterSummon", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterThrowing", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAmmo", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPickaxe", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterArmor", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterEquips", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterVanity", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPotion", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterTile", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad)
+				}
+				: new()
+				{
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMelee", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPickaxe", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterArmor", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterPotion", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterTile", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad)
+				};
+			List<LocalizedText> texts = MagicStorageConfig.ExtraFilterIcons
+				? new()
+				{
+					Language.GetText("Mods.MagicStorage.FilterAll"),
+					Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
+					Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
+					Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
+					Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
+					Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
+					Language.GetText("Mods.MagicStorage.FilterAmmo"),
+					Language.GetText("Mods.MagicStorage.FilterTools"),
+					Language.GetText("Mods.MagicStorage.FilterArmor"),
+					Language.GetText("Mods.MagicStorage.FilterEquips"),
+					Language.GetText("Mods.MagicStorage.FilterVanity"),
+					Language.GetText("Mods.MagicStorage.FilterPotions"),
+					Language.GetText("Mods.MagicStorage.FilterTiles"),
+					Language.GetText("Mods.MagicStorage.FilterMisc")
+				}
+				: new()
+				{
+					Language.GetText("Mods.MagicStorage.FilterAll"),
+					Language.GetText("Mods.MagicStorage.FilterWeapons"),
+					Language.GetText("Mods.MagicStorage.FilterTools"),
+					Language.GetText("Mods.MagicStorage.FilterEquips"),
+					Language.GetText("Mods.MagicStorage.FilterPotions"),
+					Language.GetText("Mods.MagicStorage.FilterTiles"),
+					Language.GetText("Mods.MagicStorage.FilterMisc")
+				};
 			if (withHistory)
 			{
 				textures.Add(MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll", AssetRequestMode.ImmediateLoad));
 				texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
 			}
 
-			return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray());
+			return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray(),
+				MagicStorageConfig.ExtraFilterIcons ? 21 : 32,
+				MagicStorageConfig.ExtraFilterIcons ? 1 : 8);
 		}
 	}
 }
