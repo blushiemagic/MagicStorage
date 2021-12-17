@@ -61,7 +61,7 @@ namespace MagicStorage
 		private static UIButtonChoice filterButtons;
 
 		private static UIText stationText;
-		private static readonly UISlotZone stationZone = new(HoverStation, GetStation, MagicStorageConfig.ExtraStationSlots ? InventoryScale / 1.55f : InventoryScale);
+		private static readonly UISlotZone stationZone = new(HoverStation, GetStation, InventoryScale / 1.55f);
 		private static readonly UISlotZone recipeZone = new(HoverRecipe, GetRecipe, InventoryScale);
 
 		private static readonly UIScrollbar recipeScrollBar = new();
@@ -224,15 +224,18 @@ namespace MagicStorage
 			basePanel.Append(stationText);
 
 			stationZone.Width.Set(0f, 1f);
-			stationZone.Top.Set(100f, 0f);
-			// TODO this should be dynamic so that the number of station slots can be changed in a config
-			stationZone.Height.Set(110f, 0f);
-			stationZone.SetDimensions(MagicStorageConfig.ExtraStationSlots ? 15 : 10, MagicStorageConfig.ExtraStationSlots ? 3 : 1);
+			stationZone.Top.Set(100f, 0f);			
+			int rows = GetCraftingStations().Count / 15 + 1;
+			if (rows > TECraftingAccess.Rows) { 
+				rows = TECraftingAccess.Rows;
+			}						
+			stationZone.SetDimensions(TECraftingAccess.Columns, rows);
+			stationZone.Height.Set(stationZone.getHeight(), 1f);
 			basePanel.Append(stationZone);
 
 			recipeZone.Width.Set(0f, 1f);
-			recipeZone.Top.Set(196f, 0f);
-			recipeZone.Height.Set(-196f, 1f);
+			recipeZone.Top.Set(100 + stationZone.getHeight(), 0f);
+			recipeZone.Height.Set(-(100 + stationZone.getHeight()), 1f);
 			basePanel.Append(recipeZone);
 
 			numRows = (recipes.Count + RecipeColumns - 1) / RecipeColumns;
@@ -249,7 +252,7 @@ namespace MagicStorage
 
 			bottomBar.Width.Set(0f, 1f);
 			bottomBar.Height.Set(32f, 0f);
-			bottomBar.Top.Set(-32f, 1f);
+			bottomBar.Top.Set(-15f, 1f);
 			basePanel.Append(bottomBar);
 
 			capacityText.Left.Set(6f, 0f);
@@ -512,8 +515,8 @@ namespace MagicStorage
 
 		private static Item GetStation(int slot, ref int context)
 		{
-			Item[] stations = GetCraftingStations();
-			if (stations is not null && slot < stations.Length)
+			List<Item> stations = GetCraftingStations();
+			if (stations is not null && slot < stations.Count)
 				return stations[slot];
 			return new Item();
 		}
@@ -884,7 +887,7 @@ namespace MagicStorage
 
 		private static TECraftingAccess GetCraftingEntity() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().GetCraftingAccess();
 
-		private static Item[] GetCraftingStations() => GetCraftingEntity()?.stations;
+		private static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
 
 		public static void RefreshItems()
 		{
@@ -1477,40 +1480,36 @@ namespace MagicStorage
 
 		private static void HoverStation(int slot, ref int hoverSlot)
 		{
-			TECraftingAccess ent = GetCraftingEntity();
-			if (ent == null || slot >= ent.stations.Length)
+			TECraftingAccess access = GetCraftingEntity();
+			if (access == null || slot >= TECraftingAccess.ItemsTotal)
 				return;
 
 			Player player = Main.LocalPlayer;
 			if (MouseClicked)
 			{
 				bool changed = false;
-				if (!ent.stations[slot].IsAir && ItemSlot.ShiftInUse)
+				if (slot < access.stations.Count && ItemSlot.ShiftInUse)
 				{
-					Item station = player.GetItem(Main.myPlayer, DoWithdraw(slot), GetItemSettings.InventoryEntityToPlayerInventorySettings);
-					if (!station.IsAir && Main.mouseItem.IsAir)
-					{
-						Main.mouseItem = station;
-						station = new Item();
-					}
-
-					if (!station.IsAir && Main.mouseItem.type == station.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
-					{
-						Main.mouseItem.stack += station.stack;
-						station = new Item();
-					}
-
-					if (!station.IsAir)
-						player.QuickSpawnClonedItem(station);
+					access.TryWithdrawStation(slot, true);
 					changed = true;
 				}
 				else if (player.itemAnimation == 0 && player.itemTime == 0)
 				{
-					int oldType = Main.mouseItem.type;
-					int oldStack = Main.mouseItem.stack;
-					Main.mouseItem = DoStationSwap(Main.mouseItem, slot);
-					if (oldType != Main.mouseItem.type || oldStack != Main.mouseItem.stack)
-						changed = true;
+					if (Main.mouseItem.IsAir)
+					{
+						if (!access.TryWithdrawStation(slot).IsAir)
+						{
+							changed = true;
+						}
+					}
+					else
+					{
+						int oldType = Main.mouseItem.type;
+						int oldStack = Main.mouseItem.stack;
+						Main.mouseItem = access.TryDepositStation(Main.mouseItem);
+						if (oldType != Main.mouseItem.type || oldStack != Main.mouseItem.stack)
+							changed = true;
+					}
 				}
 
 				if (changed)
@@ -1774,34 +1773,6 @@ namespace MagicStorage
 			slotFocus = false;
 			rightClickTimer = 0;
 			maxRightClickTimer = StartMaxRightClickTimer;
-		}
-
-		private static Item DoWithdraw(int slot)
-		{
-			TECraftingAccess access = GetCraftingEntity();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-			{
-				Item station = access.TryWithdrawStation(slot);
-				RefreshItems();
-				return station;
-			}
-
-			NetHelper.SendWithdrawStation(access.ID, slot);
-			return new Item();
-		}
-
-		private static Item DoStationSwap(Item item, int slot)
-		{
-			TECraftingAccess access = GetCraftingEntity();
-			if (Main.netMode == NetmodeID.SinglePlayer)
-			{
-				Item station = access.DoStationSwap(item, slot);
-				RefreshItems();
-				return station;
-			}
-
-			NetHelper.SendStationSlotClick(access.ID, item, slot);
-			return new Item();
 		}
 
 		private static void TryCraft()
