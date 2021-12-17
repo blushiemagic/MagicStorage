@@ -8,6 +8,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
+using System;
 
 namespace MagicStorage
 {
@@ -165,6 +166,18 @@ namespace MagicStorage
 			if (!item.IsAir)
 			{
 				item = player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
+				if (!item.IsAir && Main.mouseItem.IsAir)
+				{
+					Main.mouseItem = item;
+					item = new Item();
+				}				
+
+				if (!item.IsAir && Main.mouseItem.type == item.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
+				{
+					Main.mouseItem.stack += item.stack;
+					item = new Item();
+				}
+
 				if (!item.IsAir)
 					player.QuickSpawnClonedItem(item, item.stack);
 			}
@@ -183,15 +196,7 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
-				if (Main.netMode == NetmodeID.SinglePlayer)
-				{
-					GetCraftingAccess().TryDepositStation(item);
-				}
-				else
-				{
-					NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
-					item.SetDefaults(0, true);
-				}
+				GetCraftingAccess().TryDepositStation(item);				
 			}
 			else
 			{

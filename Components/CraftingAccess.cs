@@ -31,7 +31,7 @@ namespace MagicStorage.Components
 				i--;
 			if (Main.tile[i, j].frameY > 0)
 				j--;
-			
+
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) || te is not TECraftingAccess access)
 				return;
 

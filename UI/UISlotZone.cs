@@ -24,6 +24,7 @@ namespace MagicStorage.UI
 		private int hoverSlot = -1;
 		private int numColumns = 10;
 		private int numRows = 4;
+		private int height;
 
 		public UISlotZone(HoverItemSlot onHover, GetItem getItem, float scale)
 		{
@@ -36,6 +37,7 @@ namespace MagicStorage.UI
 		{
 			numColumns = columns;
 			numRows = rows;
+			height = (int)(InventoryBack.Value.Height * inventoryScale * Main.UIScale) * rows + Padding;
 		}
 
 		public override void Update(GameTime gameTime)
@@ -46,10 +48,10 @@ namespace MagicStorage.UI
 			if (curMouse.X <= origin.X || curMouse.Y <= origin.Y)
 				return;
 			Texture2D texture = InventoryBack.Value;
-			int slotWidth = (int) (texture.Width * inventoryScale * Main.UIScale);
-			int slotHeight = (int) (texture.Height * inventoryScale * Main.UIScale);
-			int slotX = (curMouse.X - (int) origin.X) / (slotWidth + Padding);
-			int slotY = (curMouse.Y - (int) origin.Y) / (slotHeight + Padding);
+			int slotWidth = (int)(texture.Width * inventoryScale * Main.UIScale);
+			int slotHeight = (int)(texture.Height * inventoryScale * Main.UIScale);
+			int slotX = (curMouse.X - (int)origin.X) / (slotWidth + Padding);
+			int slotY = (curMouse.Y - (int)origin.Y) / (slotHeight + Padding);
 			if (slotX < 0 || slotX >= numColumns || slotY < 0 || slotY >= numRows)
 				return;
 			Vector2 slotPos = origin + new Vector2(slotX * (slotWidth + Padding * Main.UIScale), slotY * (slotHeight + Padding * Main.UIScale));
@@ -94,6 +96,11 @@ namespace MagicStorage.UI
 					Main.instance.MouseText(string.Empty);
 				}
 			}
+		}
+
+		public int getHeight()
+		{
+			return height;
 		}
 	}
 }

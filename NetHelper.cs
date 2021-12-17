@@ -49,11 +49,11 @@ namespace MagicStorage
 				case MessageType.ClientSendDeactivate:
 					ReceiveClientDeactivate(reader, sender);
 					break;
-				case MessageType.TryStationOperation:
-					ReceiveStationOperation(reader, sender);
+				case MessageType.ClientStationOperation:
+					ReceiveClientStationOperation(reader, sender);
 					break;
-				case MessageType.StationOperationResult:
-					ReceiveStationResult(reader);
+				case MessageType.ServerStationOperationResult:
+					ReceiveServerStationResult(reader);
 					break;
 				case MessageType.ResetCompactStage:
 					ReceiveResetCompactStage(reader);
@@ -343,7 +343,7 @@ namespace MagicStorage
 		private static ModPacket PrepareStationOperation(int ent, byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte)MessageType.TryStationOperation);
+			packet.Write((byte)MessageType.ClientStationOperation);
 			packet.Write(ent);
 			packet.Write(op);
 			return packet;
@@ -352,7 +352,7 @@ namespace MagicStorage
 		private static ModPacket PrepareStationResult(byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
-			packet.Write((byte)MessageType.StationOperationResult);
+			packet.Write((byte)MessageType.ServerStationOperationResult);
 			packet.Write(op);
 			return packet;
 		}
@@ -377,116 +377,47 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SendStationSlotClick(int ent, Item item, int slot)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStationOperation(ent, 2);
-				ItemIO.Send(item, packet, true, true);
-				packet.Write((byte)slot);
-				packet.Send();
-			}
-		}
-
-		public static void ReceiveStationOperation(BinaryReader reader, int sender)
+		public static void ReceiveClientStationOperation(BinaryReader reader, int sender)
 		{
 			int ent = reader.ReadInt32();
-			byte op = reader.ReadByte();
+			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 
 			if (Main.netMode != NetmodeID.Server)
 			{
-				//Still need to read the data for exceptions to not be thrown...
-				if (op == 0)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == 1)
+				//The data still needs to be read for exceptions to not be thrown...
+				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
 				{
 					_ = reader.ReadByte();
 				}
-				else if (op == 2)
+				else if (op == TECraftingAccess.Operation.Deposit)
 				{
 					_ = ItemIO.Receive(reader, true, true);
-					_ = reader.ReadByte();
 				}
-
 				return;
 			}
 
-			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TECraftingAccess access)
+			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TECraftingAccess craftingAccess)
 				return;
 
-			if (op == 0)
-			{
-				Item item = ItemIO.Receive(reader, true, true);
-				access.TryDepositStation(item);
-				if (item.stack > 0)
-				{
-					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-			else if (op == 1)
-			{
-				int slot = reader.ReadByte();
-				Item item = access.TryWithdrawStation(slot);
-				if (!item.IsAir)
-				{
-					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-			else if (op == 2)
-			{
-				Item item = ItemIO.Receive(reader, true, true);
-				int slot = reader.ReadByte();
-				item = access.DoStationSwap(item, slot);
-				if (!item.IsAir)
-				{
-					ModPacket packet = PrepareStationResult(op);
-					ItemIO.Send(item, packet, true, true);
-					packet.Send(sender);
-				}
-			}
-
-			Point16 pos = access.Position;
-			StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
-			TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
-			if (heart is not null)
-				SendRefreshNetworkItems(heart.ID);
+			craftingAccess.QClientOperation(reader, op, sender);
 		}
 
-		public static void ReceiveStationResult(BinaryReader reader)
+		public static void ReceiveServerStationResult(BinaryReader reader)
 		{
 			//Still need to read the data for exceptions to not be thrown...
-			byte op = reader.ReadByte();
+			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 			Item item = ItemIO.Receive(reader, true, true);
 
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-				return;
-
-			Player player = Main.LocalPlayer;
-			if (op == 2 && Main.playerInventory && Main.mouseItem.IsAir)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				Main.mouseItem = item;
-				item = new Item();
-			}
-			else if (op == 2 && Main.playerInventory && Main.mouseItem.type == item.type)
-			{
-				int total = Main.mouseItem.stack + item.stack;
-				if (total > Main.mouseItem.maxStack)
-					total = Main.mouseItem.maxStack;
-				Main.mouseItem.stack = total;
-				item.stack -= total;
-			}
-
-			if (item.stack > 0)
-			{
-				item = player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-				if (!item.IsAir)
-					player.QuickSpawnClonedItem(item, item.stack);
+				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
+				{
+					StoragePlayer.GetItem(item, op == TECraftingAccess.Operation.Withdraw);
+				}
+				else // deposit operation
+				{
+					Main.mouseItem = item;
+				}
 			}
 		}
 
@@ -625,8 +556,8 @@ namespace MagicStorage
 		RefreshNetworkItems,
 		ClientSendTEUpdate,
 		ClientSendDeactivate,
-		TryStationOperation,
-		StationOperationResult,
+		ClientStationOperation,
+		ServerStationOperationResult,
 		ResetCompactStage,
 		CraftRequest,
 		CraftResult,
