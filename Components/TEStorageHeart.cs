@@ -22,9 +22,9 @@ namespace MagicStorage.Components
 			DepositAll
 		}
 
-		private class HeartOperation
+		private class NetOperation
 		{
-			public HeartOperation(Operation _type, Item _item = null, bool _keepOneInFavorite = false, int _client = -1)
+			public NetOperation(Operation _type, Item _item, bool _keepOneInFavorite, int _client)
 			{
 				type = _type;
 				item = _item;
@@ -32,9 +32,16 @@ namespace MagicStorage.Components
 				client = _client;
 			}
 
-			public HeartOperation(Operation _heartOperation, List<Item> _items = null, int _client = -1)
+			public NetOperation(Operation _type, Item _item, int _client = -1)
 			{
-				type = _heartOperation;
+				type = _type;
+				item = _item;
+				client = _client;
+			}
+
+			public NetOperation(Operation _type, List<Item> _items, int _client)
+			{
+				type = _type;
 				items = _items;
 				client = _client;
 			}
@@ -46,7 +53,7 @@ namespace MagicStorage.Components
 			public int client { get; }
 		}
 
-		ConcurrentQueue<HeartOperation> clientOpQ = new ConcurrentQueue<HeartOperation>();
+		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
 		bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private readonly ReaderWriterLockSlim itemsLock = new();
@@ -113,7 +120,7 @@ namespace MagicStorage.Components
 			bool networkRefresh = false;
 			for (int i = 0; i < opCount; ++i)
 			{
-				HeartOperation op;
+				NetOperation op;
 				if (clientOpQ.TryDequeue(out op))
 				{
 					networkRefresh = true;
@@ -154,10 +161,10 @@ namespace MagicStorage.Components
 						if (leftOvers.Count > 0)
 						{
 							ModPacket packet = PrepareServerResult(op.type);
-							packet.Write((byte)leftOvers.Count);
+							packet.Write(leftOvers.Count);
 							foreach (Item item in leftOvers)
 							{
-								ItemIO.Send(op.item, packet, true, true);
+								ItemIO.Send(item, packet, true, true);
 							}
 							packet.Send(op.client);
 						}
@@ -173,12 +180,12 @@ namespace MagicStorage.Components
 			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new HeartOperation(op, item, keepOneIfFavorite, client));
+				clientOpQ.Enqueue(new NetOperation(op, item, keepOneIfFavorite, client));
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new HeartOperation(op, item, _client: client));
+				clientOpQ.Enqueue(new NetOperation(op, item, client));
 			}
 			else if (op == Operation.DepositAll)
 			{
@@ -189,7 +196,7 @@ namespace MagicStorage.Components
 					Item item = ItemIO.Receive(reader, true, true);
 					items.Add(item);
 				}
-				clientOpQ.Enqueue(new HeartOperation(op, items, _client: client));
+				clientOpQ.Enqueue(new NetOperation(op, items, client));
 			}
 		}
 

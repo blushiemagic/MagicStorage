@@ -233,7 +233,7 @@ namespace MagicStorage
 			}
 			else if (op == TEStorageHeart.Operation.DepositAll)
 			{
-				int count = reader.ReadByte();
+				int count = reader.ReadInt32();
 				for (int k = 0; k < count; k++)
 				{
 					Item item = ItemIO.Receive(reader, true, true);
