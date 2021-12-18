@@ -164,7 +164,7 @@ namespace MagicStorage
 			basePanel = new UIPanel();
 			float innerPanelWidth = RecipeColumns * (itemSlotWidth + Padding) + 20f + Padding;
 			panelWidth = basePanel.PaddingLeft + innerPanelWidth + basePanel.PaddingRight;
-			panelHeight = Main.screenHeight - panelTop - 40f;
+			panelHeight = Main.screenHeight - panelTop;
 			basePanel.Left.Set(panelLeft, 0f);
 			basePanel.Top.Set(panelTop, 0f);
 			basePanel.Width.Set(panelWidth, 0f);
@@ -224,11 +224,12 @@ namespace MagicStorage
 			basePanel.Append(stationText);
 
 			stationZone.Width.Set(0f, 1f);
-			stationZone.Top.Set(100f, 0f);			
-			int rows = GetCraftingStations().Count / 15 + 1;
-			if (rows > TECraftingAccess.Rows) { 
+			stationZone.Top.Set(100f, 0f);
+			int rows = GetCraftingStations().Count / TECraftingAccess.Columns + 1;
+			if (rows > TECraftingAccess.Rows)
+			{
 				rows = TECraftingAccess.Rows;
-			}						
+			}
 			stationZone.SetDimensions(TECraftingAccess.Columns, rows);
 			stationZone.Height.Set(stationZone.getHeight(), 1f);
 			basePanel.Append(stationZone);

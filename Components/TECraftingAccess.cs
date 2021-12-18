@@ -22,14 +22,14 @@ namespace MagicStorage.Components
 
 		private class NetOperation
 		{
-			public NetOperation(Operation _type, Item _item, int _client = -1)
+			public NetOperation(Operation _type, Item _item, int _client)
 			{
 				type = _type;
 				item = _item;
 				client = _client;
 			}
 
-			public NetOperation(Operation _type, int _slot, int _client = -1)
+			public NetOperation(Operation _type, int _slot, int _client)
 			{
 				type = _type;
 				slot = _slot;
