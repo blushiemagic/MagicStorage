@@ -237,8 +237,9 @@ namespace MagicStorage.Components
 			{
 				int coin = coinTypes[i];
 				int coinQty = coinsQty[coin];
-				if (coinQty >= 100)
+				if (coinQty >= 200)
 				{
+					coinQty -= 100;
 					int exchangeCoin = coinTypes[i + 1];
 					int exchangedQty = coinQty / 100;
 					coinsQty[exchangeCoin] += exchangedQty;
