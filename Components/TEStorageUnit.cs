@@ -13,635 +13,507 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
-    public class TEStorageUnit : TEAbstractStorageUnit
-    {
-        private IList<Item> items = new List<Item>();
-        private Queue<UnitOperation> netQueue = new Queue<UnitOperation>();
-        private bool receiving = false;
+	public class TEStorageUnit : TEAbstractStorageUnit
+	{
+		internal enum NetOperations : byte
+		{
+			FullySync,
+			Deposit,
+			Withdraw,
+			WithdrawStack,
+		}
 
-        //metadata
-        private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
-        private HashSet<ItemData> hasItem = new HashSet<ItemData>();
+		private struct NetOperation
+		{
+			public NetOperation(NetOperations _netOPeration, Item _item = null, bool _keepOneInFavorite = false)
+			{
+				netOperation = _netOPeration;
+				item = _item;
+				keepOneInFavorite = _keepOneInFavorite;
+			}
 
-        public int Capacity
-        {
-            get
-            {
-                int style = Main.tile[Position.X, Position.Y].frameY / 36;
-                if (style == 8)
-                {
-                    return 4;
-                }
-                if (style > 1)
-                {
-                    style--;
-                }
-                int capacity = style + 1;
-                if (capacity > 4)
-                {
-                    capacity++;
-                }
-                if (capacity > 6)
-                {
-                    capacity++;
-                }
-                if (capacity > 8)
-                {
-                    capacity += 7;
-                }
-                return 40 * capacity;
-            }
-        }
+			public NetOperations netOperation { get; }
+			public Item item { get; }
+			public bool keepOneInFavorite { get; }
+		}
 
-        public override bool IsFull
-        {
-            get
-            {
-                return items.Count >= Capacity;
-            }
-        }
+		private readonly Queue<NetOperation> netOpQueue = new Queue<NetOperation>();
+		private IList<Item> items = new List<Item>();
+		private bool receiving = false;
 
-        public bool IsEmpty
-        {
-            get
-            {
-                return items.Count == 0;
-            }
-        }
+		//metadata
+		private HashSet<ItemData> hasSpaceInStack = new HashSet<ItemData>();
+		private HashSet<ItemData> hasItem = new HashSet<ItemData>();
 
-        public int NumItems
-        {
-            get
-            {
-                return items.Count;
-            }
-        }
+		public int Capacity
+		{
+			get
+			{
+				int style = Main.tile[Position.X, Position.Y].frameY / 36;
+				if (style == 8)
+				{
+					return 4;
+				}
+				if (style > 1)
+				{
+					style--;
+				}
+				int capacity = style + 1;
+				if (capacity > 4)
+				{
+					capacity++;
+				}
+				if (capacity > 6)
+				{
+					capacity++;
+				}
+				if (capacity > 8)
+				{
+					capacity += 7;
+				}
+				return 40 * capacity;
+			}
+		}
 
-        public override bool ValidTile(Tile tile)
-        {
-            return tile.type == mod.TileType("StorageUnit") && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
-        }
+		public override bool IsFull
+		{
+			get
+			{
+				return items.Count >= Capacity;
+			}
+		}
 
-        public override bool HasSpaceInStackFor(Item check, bool locked = false)
-        {
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().EnterReadLock();
-            }
-            try
-            {
-                ItemData data = new ItemData(check);
-                return hasSpaceInStack.Contains(data);
-            }
-            finally
-            {
-                if (Main.netMode == 2 && !locked)
-                {
-                    GetHeart().ExitReadLock();
-                }
-            }
-        }
+		public bool IsEmpty
+		{
+			get
+			{
+				return items.Count == 0;
+			}
+		}
 
-        public bool HasSpaceFor(Item check, bool locked = false)
-        {
-            return !IsFull || HasSpaceInStackFor(check, locked);
-        }
+		public int NumItems
+		{
+			get
+			{
+				return items.Count;
+			}
+		}
 
-        public override bool HasItem(Item check, bool locked = false)
-        {
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().EnterReadLock();
-            }
-            try
-            {
-                ItemData data = new ItemData(check);
-                return hasItem.Contains(data);
-            }
-            finally
-            {
-                if (Main.netMode == 2 && !locked)
-                {
-                    GetHeart().ExitReadLock();
-                }
-            }
-        }
+		public override bool ValidTile(Tile tile)
+		{
+			return tile.type == mod.TileType("StorageUnit") && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
+		}
 
-        public override IEnumerable<Item> GetItems()
-        {
-            return items;
-        }
+		public override bool HasSpaceInStackFor(Item check)
+		{
+			ItemData data = new ItemData(check);
+			return hasSpaceInStack.Contains(data);
+		}
 
-        public override void DepositItem(Item toDeposit, bool locked = false)
-        {
-            if (Main.netMode == 1 && !receiving)
-            {
-                return;
-            }
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().EnterWriteLock();
-            }
-            try
-            {
-                Item original = toDeposit.Clone();
-                bool finished = false;
-                bool hasChange = false;
-                foreach (Item item in items)
-                {
-                    if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
-                    {
-                        int total = item.stack + toDeposit.stack;
-                        int newStack = total;
-                        if (newStack > item.maxStack)
-                        {
-                            newStack = item.maxStack;
-                        }
-                        item.stack = newStack;
-                        hasChange = true;
-                        toDeposit.stack = total - newStack;
-                        if (toDeposit.stack <= 0)
-                        {
-                            toDeposit.SetDefaults(0, true);
-                            finished = true;
-                            break;
-                        }
-                    }
-                }
-                if (!finished && !IsFull)
-                {
-                    Item item = toDeposit.Clone();
-                    item.newAndShiny = false;
-                    item.favorited = false;
-                    items.Add(item);
-                    toDeposit.SetDefaults(0, true);
-                    hasChange = true;
-                    finished = true;
-                }
-                if (hasChange && Main.netMode != 1)
-                {
-                    if (Main.netMode == 2)
-                    {
-                        netQueue.Enqueue(UnitOperation.Deposit.Create(original));
-                    }
-                    PostChangeContents();
-                }
-            }
-            finally
-            {
-                if (Main.netMode == 2 && !locked)
-                {
-                    GetHeart().ExitWriteLock();
-                }
-            }
-        }
+		public bool HasSpaceFor(Item check) => !IsFull || HasSpaceInStackFor(check);
 
-        public override Item TryWithdraw(Item lookFor, bool locked = false)
-        {
-            if (Main.netMode == 1 && !receiving)
-            {
-                return new Item();
-            }
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().EnterWriteLock();
-            }
-            try
-            {
-                Item original = lookFor.Clone();
-                Item result = lookFor.Clone();
-                result.stack = 0;
-                for (int k = 0; k < items.Count; k++)
-                {
-                    Item item = items[k];
-                    if (ItemData.Matches(lookFor, item))
-                    {
-                        int withdraw = Math.Min(lookFor.stack, item.stack);
-                        item.stack -= withdraw;
-                        if (item.stack <= 0)
-                        {
-                            items.RemoveAt(k);
-                            k--;
-                        }
-                        result.stack += withdraw;
-                        lookFor.stack -= withdraw;
-                        if (lookFor.stack <= 0)
-                        {
-                            if (Main.netMode != 1)
-                            {
-                                if (Main.netMode == 2)
-                                {
-                                    netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
-                                }
-                                PostChangeContents();
-                            }
-                            return result;
-                        }
-                    }
-                }
-                if (result.stack == 0)
-                {
-                    return new Item();
-                }
-                if (Main.netMode != 1)
-                {
-                    if (Main.netMode == 2)
-                    {
-                        netQueue.Enqueue(UnitOperation.Withdraw.Create(original));
-                    }
-                    PostChangeContents();
-                }
-                return result;
-            }
-            finally
-            {
-                if (Main.netMode == 2 && !locked)
-                {
-                    GetHeart().ExitWriteLock();
-                }
-            }
-        }
+		public override bool HasItem(Item check)
+		{
+			ItemData data = new ItemData(check);
+			return hasItem.Contains(data);
+		}
 
-        public bool UpdateTileFrame(bool locked = false)
-        {
-            Tile topLeft = Main.tile[Position.X, Position.Y];
-            int oldFrame = topLeft.frameX;
-            int style;
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().EnterReadLock();
-            }
-            if (IsEmpty)
-            {
-                style = 0;    
-            }
-            else if (IsFull)
-            {
-                style = 2;
-            }
-            else
-            {
-                style = 1;
-            }
-            if (Main.netMode == 2 && !locked)
-            {
-                GetHeart().ExitReadLock();
-            }
-            if (Inactive)
-            {
-                style += 3;
-            }
-            style *= 36;
-            topLeft.frameX = (short)style;
-            Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
-            Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
-            Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
-            return oldFrame != style;
-        }
+		public override IEnumerable<Item> GetItems()
+		{
+			return items;
+		}
 
-        public void UpdateTileFrameWithNetSend(bool locked = false)
-        {
-            if (UpdateTileFrame(locked))
-            {
-                NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
-            }
-        }
+		public override void DepositItem(Item toDeposit)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+				return;
 
-        //precondition: lock is already taken
-        internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2)
-        {
-            IList<Item> items = unit1.items;
-            unit1.items = unit2.items;
-            unit2.items = items;
-            HashSet<ItemData> dict = unit1.hasSpaceInStack;
-            unit1.hasSpaceInStack = unit2.hasSpaceInStack;
-            unit2.hasSpaceInStack = dict;
-            dict = unit1.hasItem;
-            unit1.hasItem = unit2.hasItem;
-            unit2.hasItem = dict;
-            if (Main.netMode == 2)
-            {
-                unit1.netQueue.Clear();
-                unit2.netQueue.Clear();
-                unit1.netQueue.Enqueue(UnitOperation.FullSync.Create());
-                unit2.netQueue.Enqueue(UnitOperation.FullSync.Create());
-            }
-            unit1.PostChangeContents();
-            unit2.PostChangeContents();
-        }
+			Item original = toDeposit.Clone();
+			bool finished = false;
+			bool hasChange = false;
+			foreach (Item item in items)
+			{
+				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
+				{
+					int total = item.stack + toDeposit.stack;
+					int newStack = total;
+					if (newStack > item.maxStack)
+					{
+						newStack = item.maxStack;
+					}
+					item.stack = newStack;
 
-        //precondition: lock is already taken
-        internal Item WithdrawStack()
-        {
-            if (Main.netMode == 1 && !receiving)
-            {
-                return new Item();
-            }
-            Item item = items[items.Count - 1];
-            items.RemoveAt(items.Count - 1);
-            if (Main.netMode != 1)
-            {
-                if (Main.netMode == 2)
-                {
-                    netQueue.Enqueue(UnitOperation.WithdrawStack.Create());
-                }
-                PostChangeContents();
-            }
-            return item;
-        }
+					if (toDeposit.favorited)
+						item.favorited = true;
 
-        public override TagCompound Save()
-        {
-            TagCompound tag = base.Save();
-            List<TagCompound> tagItems = new List<TagCompound>();
-            foreach (Item item in items)
-            {
-                tagItems.Add(ItemIO.Save(item));
-            }
-            tag.Set("Items", tagItems);
-            return tag;
-        }
+					hasChange = true;
+					toDeposit.stack = total - newStack;
+					if (toDeposit.stack <= 0)
+					{
+						toDeposit.SetDefaults(0, true);
+						finished = true;
+						break;
+					}
+				}
+			}
+			if (!finished && !IsFull)
+			{
+				Item item = toDeposit.Clone();
+				item.newAndShiny = false;
+				item.favorited = false;
+				items.Add(item);
+				toDeposit.SetDefaults(0, true);
+				hasChange = true;
+				finished = true;
+			}
 
-        public override void Load(TagCompound tag)
-        {
-            base.Load(tag);
-            ClearItemsData();
-            foreach (TagCompound tagItem in tag.GetList<TagCompound>("Items"))
-            {
-                Item item = ItemIO.Load(tagItem);
-                items.Add(item);
-                ItemData data = new ItemData(item);
-                if (item.stack < item.maxStack)
-                {
-                    hasSpaceInStack.Add(data);
-                }
-                hasItem.Add(data);
-            }
-            if (Main.netMode == 2)
-            {
-                netQueue.Enqueue(UnitOperation.FullSync.Create());
-            }
-        }
+			if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
+				}
+				PostChangeContents();
+			}
+		}
 
-        public override void NetSend(BinaryWriter trueWriter, bool lightSend)
-        {
-            //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet or is being saved to a world file
-            if (EditsLoader.MessageTileEntitySyncing)
-            {
-                trueWriter.Write((byte)0);
-                base.NetSend(trueWriter, lightSend);
-                return;
-            }
+		public override Item TryWithdraw(Item lookFor, bool keepOneIfFavorite = false)
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+				return new Item();
 
-            trueWriter.Write((byte)1);
+			Item original = lookFor.Clone();
+			Item result = lookFor.Clone();
+			result.stack = 0;
+			for (int k = 0; k < items.Count; k++)
+			{
+				Item item = items[k];
+				if (ItemData.Matches(lookFor, item))
+				{
+					int withdraw = Math.Min(lookFor.stack, item.stack);
+					item.stack -= withdraw;
+					if (item.stack <= 0)
+					{
+						items.RemoveAt(k);
+						k--;
+					}
+					result.stack += withdraw;
+					lookFor.stack -= withdraw;
+					if (lookFor.stack <= 0)
+					{
+						if (Main.netMode != NetmodeID.MultiplayerClient)
+						{
+							if (Main.netMode == NetmodeID.Server)
+							{
+								netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
+							}
 
-            /* Recreate a BinaryWriter writer */
-            MemoryStream buffer = new MemoryStream(65536);
-            DeflateStream compressor = new DeflateStream(buffer, CompressionMode.Compress, true);
-            BufferedStream writerBuffer = new BufferedStream(compressor, 65536);
-            BinaryWriter writer = new BinaryWriter(writerBuffer);
+							PostChangeContents();
+						}
+						return result;
+					}
+				}
+			}
 
-            /* Original code */
-            base.NetSend(writer, lightSend);
-            if (netQueue.Count > Capacity / 2 || !lightSend)
-            {
-                netQueue.Clear();
-                netQueue.Enqueue(UnitOperation.FullSync.Create());
-            }
-            writer.Write((ushort)netQueue.Count);
-            while (netQueue.Count > 0)
-            {
-                netQueue.Dequeue().Send(writer, this);
-            }
-            
-            /* Forces data to be flushed into the compressed buffer */
-            writerBuffer.Flush(); compressor.Close();
+			if (result.stack == 0)
+			{
+				return new Item();
+			}
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
+				}
 
-            /* Sends the buffer through the network */
-            trueWriter.Write((ushort)buffer.Length);
-            trueWriter.Write(buffer.ToArray());
+				PostChangeContents();
+			}
+			return result;
+		}
 
-            /* Compression stats and debugging code (server side) */
-            if (false)
-            {
-                MemoryStream decompressedBuffer = new MemoryStream(65536);
-                DeflateStream decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
-                decompressor.CopyTo(decompressedBuffer);
-                decompressor.Close(); 
+		public bool UpdateTileFrame()
+		{
+			Tile topLeft = Main.tile[Position.X, Position.Y];
+			int oldFrame = topLeft.frameX;
+			int style;
+			if (IsEmpty)
+				style = 0;
+			else if (IsFull)
+				style = 2;
+			else
+				style = 1;
+			if (Inactive)
+				style += 3;
+			style *= 36;
+			topLeft.frameX = (short)style;
+			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
+			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
+			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
+			return oldFrame != style;
+		}
 
-                Console.WriteLine("Magic Storage Data Compression Stats: " + decompressedBuffer.Length + " => " + buffer.Length);
-                decompressor.Dispose(); decompressedBuffer.Dispose();
-            }
+		public void UpdateTileFrameWithNetSend(bool locked = false)
+		{
+			if (UpdateTileFrame())
+			{
+				NetMessage.SendTileRange(-1, Position.X, Position.Y, 2, 2);
+			}
+		}
 
-            /* Dispose all objects */
-            writer.Dispose(); writerBuffer.Dispose(); compressor.Dispose(); buffer.Dispose();
-        }
+		//precondition: lock is already taken
+		internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2)
+		{
+			IList<Item> items = unit1.items;
+			unit1.items = unit2.items;
+			unit2.items = items;
+			HashSet<ItemData> dict = unit1.hasSpaceInStack;
+			unit1.hasSpaceInStack = unit2.hasSpaceInStack;
+			unit2.hasSpaceInStack = dict;
+			dict = unit1.hasItem;
+			unit1.hasItem = unit2.hasItem;
+			unit2.hasItem = dict;
+			if (Main.netMode == NetmodeID.Server)
+			{
+				unit1.netOpQueue.Clear();
+				unit2.netOpQueue.Clear();
+				unit1.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+				unit2.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+			}
+			unit1.PostChangeContents();
+			unit2.PostChangeContents();
+		}
 
-        public override void NetReceive(BinaryReader trueReader, bool lightReceive)
-        {
-            //If the workaround is active, then the entity isn't being sent via the NetWorkaround packet
-            byte workaround = trueReader.ReadByte();
+		//precondition: lock is already taken
+		internal Item WithdrawStack()
+		{
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+				return new Item();
 
-            if (EditsLoader.MessageTileEntitySyncing || workaround != 1)
-            {
-                base.NetReceive(trueReader, lightReceive);
-                return;
-            }
+			Item item = items[items.Count - 1];
+			items.RemoveAt(items.Count - 1);
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.WithdrawStack));
+				}
+				PostChangeContents();
+			}
+			return item;
+		}
 
-            /* Reads the buffer off the network */
-            MemoryStream buffer = new MemoryStream(65536);
-            BinaryWriter bufferWriter = new BinaryWriter(buffer);
+		public override TagCompound Save()
+		{
+			TagCompound tag = base.Save();
+			List<TagCompound> tagItems = new List<TagCompound>();
+			foreach (Item item in items)
+			{
+				tagItems.Add(ItemIO.Save(item));
+			}
+			tag.Set("Items", tagItems);
+			return tag;
+		}
 
-            bufferWriter.Write(trueReader.ReadBytes(trueReader.ReadUInt16()));
-            buffer.Position = 0;
+		public override void Load(TagCompound tag)
+		{
+			base.Load(tag);
+			ClearItemsData();
+			foreach (TagCompound tagItem in tag.GetList<TagCompound>("Items"))
+			{
+				Item item = ItemIO.Load(tagItem);
+				items.Add(item);
+				ItemData data = new ItemData(item);
+				if (item.stack < item.maxStack)
+				{
+					hasSpaceInStack.Add(data);
+				}
+				hasItem.Add(data);
+			}
+		}
 
-            /* Recreate the BinaryReader reader */
-            DeflateStream decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true);
-            BinaryReader reader = new BinaryReader(decompressor);
+		public void FullySync()
+		{
+			netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+		}
 
-            /* Original code */
-            base.NetReceive(reader, lightReceive);
-            if (TileEntity.ByPosition.ContainsKey(Position) && TileEntity.ByPosition[Position] is TEStorageUnit)
-            {
-                TEStorageUnit other = (TEStorageUnit)TileEntity.ByPosition[Position];
-                items = other.items;
-                hasSpaceInStack = other.hasSpaceInStack;
-                hasItem = other.hasItem;
-            }
-            receiving = true;
-            int count = reader.ReadUInt16();
-            bool flag = false;
-            for (int k = 0; k < count; k++)
-            {
-                if (UnitOperation.Receive(reader, this))
-                {
-                    flag = true;
-                }
-            }
-            if (flag)
-            {
-                RepairMetadata();
-            }
-            receiving = false;
-            
-            /* Dispose all objects */
-            reader.Dispose(); decompressor.Dispose(); bufferWriter.Dispose(); buffer.Dispose();
-        }
+		public override void NetSend(BinaryWriter trueWriter, bool lightSend)
+		{
+			using (MemoryStream buffer = new MemoryStream(65536))
+			{
+				using (BinaryWriter writer = new BinaryWriter(buffer))
+				{
+					base.NetSend(writer, lightSend);
 
-        private void ClearItemsData()
-        {
-            items.Clear();
-            hasSpaceInStack.Clear();
-            hasItem.Clear();
-        }
+					// too many updates at this point just fully sync
+					if (netOpQueue.Count > Capacity / 2)
+					{
+						netOpQueue.Clear();
+						netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+					}
 
-        private void RepairMetadata()
-        {
-            hasSpaceInStack.Clear();
-            hasItem.Clear();
-            foreach (Item item in items)
-            {
-                ItemData data = new ItemData(item);
-                if (item.stack < item.maxStack)
-                {
-                    hasSpaceInStack.Add(data);
-                }
-                hasItem.Add(data);
-            }
-        }
+					writer.Write((ushort)items.Count);
+					writer.Write((ushort)netOpQueue.Count);
+					while (netOpQueue.Count > 0)
+					{
+						NetOperation netOp = netOpQueue.Dequeue();
+						writer.Write((byte)netOp.netOperation);
+						switch (netOp.netOperation)
+						{
+							case NetOperations.FullySync:
+								writer.Write(items.Count);
+								foreach (Item item in items)
+								{
+									ItemIO.Send(item, writer, true, true);
+								}
+								break;
+							case NetOperations.Withdraw:
+								writer.Write(netOp.keepOneInFavorite);
+								ItemIO.Send(netOp.item, writer, true, true);
+								break;
+							case NetOperations.WithdrawStack:
+								break;
+							case NetOperations.Deposit:
+								ItemIO.Send(netOp.item, writer, true, true);
+								break;
+							default:
+								break;
+						}
+					}
 
-        private void PostChangeContents()
-        {
-            RepairMetadata();
-            UpdateTileFrameWithNetSend(true);
-            NetHelper.SendTEUpdate(ID, Position);
-        }
+					/* Forces data to be flushed into the buffer */
+					writer.Flush();
 
-        abstract class UnitOperation
-        {
-            public static readonly UnitOperation FullSync = new FullSync();
-            public static readonly UnitOperation Deposit = new DepositOperation();
-            public static readonly UnitOperation Withdraw = new WithdrawOperation();
-            public static readonly UnitOperation WithdrawStack = new WithdrawStackOperation();
-            private static List<UnitOperation> types = new List<UnitOperation>();
+					byte[] data = null;
+					/* compress buffer data */
+					using (MemoryStream memoryStream = new MemoryStream())
+					{
+						using (DeflateStream deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress))
+						{
+							deflateStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
+						}
+						data = memoryStream.ToArray();
+					}
 
-            static UnitOperation()
-            {
-                types.Add(FullSync);
-                types.Add(Deposit);
-                types.Add(Withdraw);
-                types.Add(WithdrawStack);
-                for (int k = 0; k < types.Count; k++)
-                {
-                    types[k].id = (byte)k;
-                }
-            }
+					/* Sends the buffer through the network */
+					trueWriter.Write((ushort)data.Length);
+					trueWriter.Write(data);
+				}
+			}
+		}
 
-            protected byte id;
-            protected Item data;
+		public override void NetReceive(BinaryReader trueReader, bool lightSend)
+		{
+			/* Reads the buffer off the network */
+			using (MemoryStream buffer = new MemoryStream())
+			{
+				ushort bufferLen = trueReader.ReadUInt16();
+				buffer.Write(trueReader.ReadBytes(bufferLen), 0, bufferLen);
+				buffer.Position = 0;
 
-            public UnitOperation Create()
-            {
-                return (UnitOperation)MemberwiseClone();
-            }
+				/* Recreate the BinaryReader reader */
+				using (DeflateStream decompressor = new DeflateStream(buffer, CompressionMode.Decompress, true))
+				{
+					using (BinaryReader reader = new BinaryReader(decompressor))
+					{
+						base.NetReceive(reader, lightSend);
 
-            public UnitOperation Create(Item item)
-            {
-                UnitOperation clone = Create();
-                clone.data = item;
-                return clone;
-            }
+						int serverItemsCount = reader.ReadUInt16();
+						int opCount = reader.ReadUInt16();
+						if (opCount > 0)
+						{
+							if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
+							{
+								items = otherUnit.items;
+								hasSpaceInStack = otherUnit.hasSpaceInStack;
+								hasItem = otherUnit.hasItem;
+							}
 
-            public void Send(BinaryWriter writer, TEStorageUnit unit)
-            {
-                writer.Write(id);
-                SendData(writer, unit);
-            }
+							receiving = true;
+							bool repairMetaData = true;
+							for (int i = 0; i < opCount; i++)
+							{
+								byte netOp = reader.ReadByte();
+								if (Enum.IsDefined(typeof(NetOperations), netOp))
+								{
+									switch ((NetOperations)netOp)
+									{
+										case NetOperations.FullySync:
+											repairMetaData = false;
+											ClearItemsData();
+											int itemsCount = reader.ReadInt32();
+											for (int j = 0; j < itemsCount; j++)
+											{
+												Item item = ItemIO.Receive(reader, true, true);
+												items.Add(item);
+												ItemData data = new ItemData(item);
+												if (item.stack < item.maxStack)
+													hasSpaceInStack.Add(data);
+												hasItem.Add(data);
+											}
+											break;
+										case NetOperations.Withdraw:
+											bool keepOneIfFavorite = reader.ReadBoolean();
+											TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+											break;
+										case NetOperations.WithdrawStack:
+											WithdrawStack();
+											break;
+										case NetOperations.Deposit:
+											DepositItem(ItemIO.Receive(reader, true, true));
+											break;
+										default:
+											break;
+									}
+								}
+								else
+								{
+									Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
+									Console.ForegroundColor = ConsoleColor.Red;
+									Console.WriteLine($"NetRecive Bad OP: {netOp}");
+									Console.ResetColor();
+								}
+							}
 
-            protected abstract void SendData(BinaryWriter writer, TEStorageUnit unit);
+							if (repairMetaData)
+								RepairMetadata();
+							receiving = false;
+						}
+						else if (serverItemsCount != items.Count) // if there is mismatch between the server and the client then send a sync request
+						{
+							NetHelper.SyncStorageUnit(ID);
+						}
+					}
+				}
+			}
+		}
 
-            public static bool Receive(BinaryReader reader, TEStorageUnit unit)
-            {
-                byte id = reader.ReadByte();
-                if (id >= 0 && id < types.Count)
-                {
-                    return types[id].ReceiveData(reader, unit);
-                }
-                return false;
-            }
+		private void ClearItemsData()
+		{
+			items.Clear();
+			hasSpaceInStack.Clear();
+			hasItem.Clear();
+		}
 
-            protected abstract bool ReceiveData(BinaryReader reader, TEStorageUnit unit);
-        }
+		private void RepairMetadata()
+		{
+			hasSpaceInStack.Clear();
+			hasItem.Clear();
+			foreach (Item item in items)
+			{
+				ItemData data = new ItemData(item);
+				if (item.stack < item.maxStack)
+				{
+					hasSpaceInStack.Add(data);
+				}
+				hasItem.Add(data);
+			}
+		}
 
-        class FullSync : UnitOperation
-        {
-            protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-            {
-                writer.Write(unit.items.Count);
-                foreach (Item item in unit.items)
-                {
-                    ItemIO.Send(item, writer, true, false);
-                }
-            }
-
-            protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-            {
-                unit.ClearItemsData();
-                int count = reader.ReadInt32();
-                for (int k = 0; k < count; k++)
-                {
-                    Item item = ItemIO.Receive(reader, true, false);
-                    unit.items.Add(item);
-                    ItemData data = new ItemData(item);
-                    if (item.stack < item.maxStack)
-                    {
-                        unit.hasSpaceInStack.Add(data);
-                    }
-                    unit.hasItem.Add(data);
-                }
-                return false;
-            }
-        }
-
-        class DepositOperation : UnitOperation
-        {
-            protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-            {
-                ItemIO.Send(data, writer, true, false);
-            }
-
-            protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-            {
-                unit.DepositItem(ItemIO.Receive(reader, true, false));
-                return true;
-            }
-        }
-
-        class WithdrawOperation : UnitOperation
-        {
-            protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-            {
-                ItemIO.Send(data, writer, true, false);
-            }
-
-            protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-            {
-                unit.TryWithdraw(ItemIO.Receive(reader, true, false));
-                return true;
-            }
-        }
-
-        class WithdrawStackOperation : UnitOperation
-        {
-            protected override void SendData(BinaryWriter writer, TEStorageUnit unit)
-            {
-            }
-
-            protected override bool ReceiveData(BinaryReader reader, TEStorageUnit unit)
-            {
-                unit.WithdrawStack();
-                return true;
-            }
-        }
-    }
+		private void PostChangeContents()
+		{
+			RepairMetadata();
+			UpdateTileFrameWithNetSend(true);
+			NetHelper.SendTEUpdate(ID, Position);
+		}
+	}
 }
