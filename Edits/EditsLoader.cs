@@ -7,9 +7,7 @@
 
 		public static void Load()
 		{
-			On.Terraria.NetMessage.SendData += Detours.Vanilla.NetMessage_SendData;
-
-			On.Terraria.MessageBuffer.GetData += Detours.Vanilla.MessageBuffer_GetData;
+			// 1.4 have Recipe.FindRecipes += Vanilla.Recipe_FindRecipes;
 		}
 	}
 }

@@ -114,6 +114,18 @@ namespace MagicStorage
             if (!item.IsAir)
             {
                 item = player.GetItem(Main.myPlayer, item, false, true);
+                if (!item.IsAir && Main.mouseItem.IsAir)
+                {
+                    Main.mouseItem = item;
+                    item = new Item();
+                }
+
+                if (!item.IsAir && Main.mouseItem.type == item.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
+                {
+                    Main.mouseItem.stack += item.stack;
+                    item = new Item();
+                }
+
                 if (!item.IsAir)
                 {
                     player.QuickSpawnClonedItem(item, item.stack);
@@ -140,27 +152,11 @@ namespace MagicStorage
             int oldStack = item.stack;
             if (StorageCrafting())
             {
-                if (Main.netMode == 0)
-                {
-                    GetCraftingAccess().TryDepositStation(item);
-                }
-                else
-                {
-                    NetHelper.SendDepositStation(GetCraftingAccess().ID, item);
-                    item.SetDefaults(0, true);
-                }
+                GetCraftingAccess().TryDepositStation(item);
             }
             else
             {
-                if (Main.netMode == 0)
-                {
-                    GetStorageHeart().DepositItem(item);
-                }
-                else
-                {
-                    NetHelper.SendDeposit(GetStorageHeart().ID, item);
-                    item.SetDefaults(0, true);
-                }
+                GetStorageHeart().TryDeposit(item);
             }
             if (item.type != oldType || item.stack != oldStack)
             {
