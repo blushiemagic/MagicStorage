@@ -43,7 +43,7 @@ namespace MagicStorage
             {
                 int playerX = (int)(player.Center.X / 16f);
                 int playerY = (int)(player.Center.Y / 16f);
-                if (!remoteAccess && (playerX < storageAccess.X - Player.tileRangeX || playerX > storageAccess.X + Player.tileRangeX + 1 || playerY < storageAccess.Y - Player.tileRangeY || playerY > storageAccess.Y + Player.tileRangeY + 1))
+                if (!remoteAccess && (playerX < storageAccess.X - player.lastTileRangeX || playerX > storageAccess.X + player.lastTileRangeX + 1 || playerY < storageAccess.Y - player.lastTileRangeY || playerY > storageAccess.Y + player.lastTileRangeY + 1))
                 {
                     Main.PlaySound(11, -1, -1, 1);
                     CloseStorage();
