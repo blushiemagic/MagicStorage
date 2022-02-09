@@ -7,7 +7,7 @@ namespace MagicStorage.Edits
 	internal static class EditsLoader
 	{
 		public static void Load()
-		{			
+		{
 			Recipe.FindRecipes += Vanilla.Recipe_FindRecipes;
 		}
 	}
