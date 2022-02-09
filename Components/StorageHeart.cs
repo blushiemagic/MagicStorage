@@ -27,9 +27,9 @@ namespace MagicStorage.Components
 			Item item = player.HeldItem;
 			if (item.type == ModContent.ItemType<Locator>() || item.type == ModContent.ItemType<LocatorDisk>() || item.type == ModContent.ItemType<PortableAccess>())
 			{
-				if (Main.tile[i, j].frameX % 36 == 18)
+				if (Main.tile[i, j].TileFrameX % 36 == 18)
 					i--;
-				if (Main.tile[i, j].frameY % 36 == 18)
+				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
 				Locator locator = (Locator) item.ModItem;
 				locator.location = new Point16(i, j);

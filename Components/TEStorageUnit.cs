@@ -49,7 +49,7 @@ namespace MagicStorage.Components
 		{
 			get
 			{
-				int style = Main.tile[Position.X, Position.Y].frameY / 36;
+				int style = Main.tile[Position.X, Position.Y].TileFrameY / 36;
 				if (style == 8)
 					return 4;
 				if (style > 1)
@@ -71,7 +71,7 @@ namespace MagicStorage.Components
 
 		public int NumItems => items.Count;
 
-		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<StorageUnit>() && tile.frameX % 36 == 0 && tile.frameY % 36 == 0;
+		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<StorageUnit>() && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
 
 		public override bool HasSpaceInStackFor(Item check)
 		{
@@ -204,7 +204,7 @@ namespace MagicStorage.Components
 		public bool UpdateTileFrame()
 		{
 			Tile topLeft = Main.tile[Position.X, Position.Y];
-			int oldFrame = topLeft.frameX;
+			int oldFrame = topLeft.TileFrameX;
 			int style;
 			if (IsEmpty)
 				style = 0;
@@ -215,10 +215,10 @@ namespace MagicStorage.Components
 			if (Inactive)
 				style += 3;
 			style *= 36;
-			topLeft.frameX = (short)style;
-			Main.tile[Position.X, Position.Y + 1].frameX = (short)style;
-			Main.tile[Position.X + 1, Position.Y].frameX = (short)(style + 18);
-			Main.tile[Position.X + 1, Position.Y + 1].frameX = (short)(style + 18);
+			topLeft.TileFrameX = (short)style;
+			Main.tile[Position.X, Position.Y + 1].TileFrameX = (short)style;
+			Main.tile[Position.X + 1, Position.Y].TileFrameX = (short)(style + 18);
+			Main.tile[Position.X + 1, Position.Y + 1].TileFrameX = (short)(style + 18);
 			return oldFrame != style;
 		}
 

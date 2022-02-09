@@ -36,7 +36,7 @@ namespace MagicStorage
 			Point16 storageAccess = modPlayer.ViewingStorage();
 			if (Main.playerInventory && storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
-				ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type);
+				ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
 				if (modTile is StorageAccess access)
 				{
 					TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);

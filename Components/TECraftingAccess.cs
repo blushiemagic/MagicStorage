@@ -97,7 +97,7 @@ namespace MagicStorage.Components
 				}
 
 				Point16 pos = Position;
-				StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].type) as StorageAccess;
+				StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].TileType) as StorageAccess;
 				TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
 				if (heart is not null)
 					NetHelper.SendRefreshNetworkItems(heart.ID);
@@ -135,7 +135,7 @@ namespace MagicStorage.Components
 			return packet;
 		}
 
-		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<CraftingAccess>() && tile.frameX == 0 && tile.frameY == 0;
+		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<CraftingAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		private Item DepositStation(Item item)
 		{

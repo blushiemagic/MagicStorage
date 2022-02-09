@@ -10,7 +10,7 @@ namespace MagicStorage.Components
 	{
 		public override bool IsFull => true;
 
-		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<CreativeStorageUnit>() && tile.frameX == 0 && tile.frameY == 0;
+		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<CreativeStorageUnit>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override bool HasSpaceInStackFor(Item check) => false;
 

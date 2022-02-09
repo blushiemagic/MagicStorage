@@ -33,15 +33,15 @@ namespace MagicStorage.Components
 			Player player = Main.LocalPlayer;
 			Tile tile = Main.tile[i, j];
 			player.cursorItemIconEnabled = true;
-			player.cursorItemIconID = ItemType(tile.frameX, tile.frameY);
+			player.cursorItemIconID = ItemType(tile.TileFrameX, tile.TileFrameY);
 			player.noThrow = 2;
 		}
 
 		public override bool RightClick(int i, int j)
 		{
-			if (Main.tile[i, j].frameX % 36 == 18)
+			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
-			if (Main.tile[i, j].frameY % 36 == 18)
+			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
 			string text = this is StorageHeart ? "Could not load Storage Heart tile entity!" : "This access is not connected to a Storage Heart!";
@@ -123,7 +123,7 @@ namespace MagicStorage.Components
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
-			Rectangle frame = new(tile.frameX, tile.frameY, 16, 16);
+			Rectangle frame = new(tile.TileFrameX, tile.TileFrameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(lightColor, Color.White, Main.essScale);
 			spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/" + Name + "_Glow").Value, drawPos, frame, color);

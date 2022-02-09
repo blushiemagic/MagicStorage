@@ -50,9 +50,9 @@ namespace MagicStorage.Items
 			{
 				int i = Player.tileTargetX;
 				int j = Player.tileTargetY;
-				if (Main.tile[i, j].frameX % 36 == 18)
+				if (Main.tile[i, j].TileFrameX % 36 == 18)
 					i--;
-				if (Main.tile[i, j].frameY % 36 == 18)
+				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
 
 				Point16 point = new(i, j);
