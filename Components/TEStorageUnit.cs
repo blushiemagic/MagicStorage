@@ -71,7 +71,7 @@ namespace MagicStorage.Components
 
 		public int NumItems => items.Count;
 
-		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<StorageUnit>() && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
+		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<StorageUnit>() && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
 
 		public override bool HasSpaceInStackFor(Item check)
 		{

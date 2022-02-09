@@ -70,7 +70,7 @@ namespace MagicStorage.Components
 			IsAlive = false;
 		}
 
-		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<StorageHeart>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
+		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<StorageHeart>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override TEStorageHeart GetHeart() => this;
 

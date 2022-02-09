@@ -135,7 +135,7 @@ namespace MagicStorage.Components
 			return packet;
 		}
 
-		public override bool ValidTile(Tile tile) => tile.TileType == ModContent.TileType<CraftingAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
+		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<CraftingAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		private Item DepositStation(Item item)
 		{
