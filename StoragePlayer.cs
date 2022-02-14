@@ -217,7 +217,7 @@ namespace MagicStorage
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			if (!tile.HasTile) // Is this correct? Is this even needed?
+			if (!tile.HasTile)
 				return null;
 			ModTile modTile = TileLoader.GetTile(tile.TileType);
 			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
@@ -239,8 +239,7 @@ namespace MagicStorage
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return false;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			return tile.HasTile && // Is this correct? Is it even needed?
-				   tile.TileType == ModContent.TileType<CraftingAccess>();
+			return tile.HasTile && tile.TileType == ModContent.TileType<CraftingAccess>();
 		}
 
 		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();
