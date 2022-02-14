@@ -17,7 +17,7 @@ namespace MagicStorage.Components
 			private set => _loaded = value;
 		}
 
-		public override bool ValidTile(Tile tile) => tile.type == ModContent.TileType<RemoteAccess>() && tile.frameX == 0 && tile.frameY == 0;
+		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<RemoteAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override TEStorageHeart GetHeart()
 		{

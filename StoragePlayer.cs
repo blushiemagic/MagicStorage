@@ -108,7 +108,7 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].type) is not StorageAccess)
+				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType) is not StorageAccess)
 				{
 					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();
@@ -170,7 +170,7 @@ namespace MagicStorage
 				{
 					Main.mouseItem = item;
 					item = new Item();
-				}				
+				}
 
 				if (!item.IsAir && Main.mouseItem.type == item.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
 				{
@@ -196,7 +196,7 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			if (StorageCrafting())
 			{
-				GetCraftingAccess().TryDepositStation(item);				
+				GetCraftingAccess().TryDepositStation(item);
 			}
 			else
 			{
@@ -217,10 +217,9 @@ namespace MagicStorage
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			if (tile is null)
+			if (!tile.HasTile) // Is this correct? Is this even needed?
 				return null;
-			int tileType = tile.type;
-			ModTile modTile = TileLoader.GetTile(tileType);
+			ModTile modTile = TileLoader.GetTile(tile.TileType);
 			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
 		}
 
@@ -240,7 +239,8 @@ namespace MagicStorage
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return false;
 			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
-			return tile is not null && tile.type == ModContent.TileType<CraftingAccess>();
+			return tile.HasTile && // Is this correct? Is it even needed?
+				   tile.TileType == ModContent.TileType<CraftingAccess>();
 		}
 
 		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();

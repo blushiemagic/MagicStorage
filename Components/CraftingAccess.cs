@@ -27,9 +27,9 @@ namespace MagicStorage.Components
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (Main.tile[i, j].frameX > 0)
+			if (Main.tile[i, j].TileFrameX > 0)
 				i--;
-			if (Main.tile[i, j].frameY > 0)
+			if (Main.tile[i, j].TileFrameY > 0)
 				j--;
 
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) || te is not TECraftingAccess access)

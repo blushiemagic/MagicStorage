@@ -19,7 +19,7 @@ namespace MagicStorage.Components
 		{
 			Main.tileSolidTop[Type] = true;
 			Main.tileFrameImportant[Type] = true;
-			
+
 			TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
 			TileObjectData.newTile.Origin = new Point16(1, 1);
 			TileObjectData.newTile.LavaDeath = false;
@@ -30,7 +30,7 @@ namespace MagicStorage.Components
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(tileEntity.Hook_AfterPlacement, -1, 0, false);
 			else
 				TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(TEStorageComponent.Hook_AfterPlacement_NoEntity, -1, 0, false);
-			
+
 			TileObjectData.newAlternate.CopyFrom(TileObjectData.newTile);
 			TileObjectData.newAlternate.AnchorBottom = AnchorData.Empty;
 			TileObjectData.addAlternate(0);
@@ -56,7 +56,7 @@ namespace MagicStorage.Components
 		public static bool IsStorageComponent(Point16 point)
 		{
 			Tile tile = Main.tile[point.X, point.Y];
-			return tile.IsActive && TileLoader.GetTile(tile.type) is StorageComponent;
+			return tile.HasTile && TileLoader.GetTile(tile.TileType) is StorageComponent;
 		}
 
 		public int CanPlace(int i, int j, int type, int style, int direction, int alternative)

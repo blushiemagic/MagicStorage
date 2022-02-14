@@ -45,40 +45,40 @@ namespace MagicStorage.Components
 
 		public override bool CanKillTile(int i, int j, ref bool blockDamage)
 		{
-			if (Main.tile[i, j].frameX % 36 == 18)
+			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
-			if (Main.tile[i, j].frameY % 36 == 18)
+			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
 			if (!TileEntity.ByPosition.ContainsKey(new Point16(i, j)))
 				return true;
 
-			return Main.tile[i, j].frameX / 36 % 3 == 0;
+			return Main.tile[i, j].TileFrameX / 36 % 3 == 0;
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (Main.tile[i, j].frameX % 36 == 18)
+			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
-			if (Main.tile[i, j].frameY % 36 == 18)
+			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
-			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && Main.tile[i, j].frameX / 36 % 3 != 0)
+			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && Main.tile[i, j].TileFrameX / 36 % 3 != 0)
 				fail = true;
 		}
 
 		public override bool RightClick(int i, int j)
 		{
-			if (Main.tile[i, j].frameX % 36 == 18)
+			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
-			if (Main.tile[i, j].frameY % 36 == 18)
+			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 			if (TryUpgrade(i, j))
 				return true;
 
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
 				return false;
-			
+
 			Main.LocalPlayer.tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
 			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
@@ -90,7 +90,7 @@ namespace MagicStorage.Components
 		{
 			Player player = Main.LocalPlayer;
 			Item item = player.HeldItem;
-			int style = Main.tile[i, j].frameY / 36;
+			int style = Main.tile[i, j].TileFrameY / 36;
 			bool success = false;
 			if (style == 0 && item.type == ModContent.ItemType<UpgradeDemonite>())
 			{
@@ -132,7 +132,7 @@ namespace MagicStorage.Components
 			{
 				if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
 					return false;
-				
+
 				storageUnit.UpdateTileFrame();
 				NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
 				TEStorageHeart heart = storageUnit.GetHeart();
@@ -158,10 +158,10 @@ namespace MagicStorage.Components
 
 		private static void SetStyle(int i, int j, int style)
 		{
-			Main.tile[i, j].frameY = (short) (36 * style);
-			Main.tile[i + 1, j].frameY = (short) (36 * style);
-			Main.tile[i, j + 1].frameY = (short) (36 * style + 18);
-			Main.tile[i + 1, j + 1].frameY = (short) (36 * style + 18);
+			Main.tile[i, j].TileFrameY = (short) (36 * style);
+			Main.tile[i + 1, j].TileFrameY = (short) (36 * style);
+			Main.tile[i, j + 1].TileFrameY = (short) (36 * style + 18);
+			Main.tile[i + 1, j + 1].TileFrameY = (short) (36 * style + 18);
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
@@ -169,7 +169,7 @@ namespace MagicStorage.Components
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
-			Rectangle frame = new(tile.frameX, tile.frameY, 16, 16);
+			Rectangle frame = new(tile.TileFrameX, tile.TileFrameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(Color.White, lightColor, 0.5f);
 			spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/StorageUnit_Glow").Value, drawPos, frame, color);

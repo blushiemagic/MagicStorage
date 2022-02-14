@@ -78,16 +78,16 @@ namespace MagicStorage.Components
 		{
 			int frameX = 0;
 			int frameY = 0;
-			if (WorldGen.InWorld(i - 1, j) && Main.tile[i - 1, j].IsActive && Main.tile[i - 1, j].type == Type)
+			if (WorldGen.InWorld(i - 1, j) && Main.tile[i - 1, j].HasTile && Main.tile[i - 1, j].TileType == Type)
 				frameX += 18;
-			if (WorldGen.InWorld(i + 1, j) && Main.tile[i + 1, j].IsActive && Main.tile[i + 1, j].type == Type)
+			if (WorldGen.InWorld(i + 1, j) && Main.tile[i + 1, j].HasTile && Main.tile[i + 1, j].TileType == Type)
 				frameX += 36;
-			if (WorldGen.InWorld(i, j - 1) && Main.tile[i, j - 1].IsActive && Main.tile[i, j - 1].type == Type)
+			if (WorldGen.InWorld(i, j - 1) && Main.tile[i, j - 1].HasTile && Main.tile[i, j - 1].TileType == Type)
 				frameY += 18;
-			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].IsActive && Main.tile[i, j + 1].type == Type)
+			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].HasTile && Main.tile[i, j + 1].TileType == Type)
 				frameY += 36;
-			Main.tile[i, j].frameX = (short) frameX;
-			Main.tile[i, j].frameY = (short) frameY;
+			Main.tile[i, j].TileFrameX = (short) frameX;
+			Main.tile[i, j].TileFrameY = (short) frameY;
 			return false;
 		}
 
