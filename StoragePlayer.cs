@@ -14,6 +14,8 @@ namespace MagicStorage
 {
 	public class StoragePlayer : ModPlayer
 	{
+		public static StoragePlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+
 		private readonly ItemTypeOrderedSet _craftedRecipes = new("CraftedRecipes");
 
 		private readonly ItemTypeOrderedSet _hiddenRecipes = new("HiddenItems");
@@ -145,7 +147,7 @@ namespace MagicStorage
 
 		public Point16 ViewingStorage() => storageAccess;
 
-		public static void GetItem(Item item, bool toMouse)
+		public static void GetItem(IEntitySource source, Item item, bool toMouse)
 		{
 			Player player = Main.LocalPlayer;
 			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir)
@@ -179,7 +181,7 @@ namespace MagicStorage
 				}
 
 				if (!item.IsAir)
-					player.QuickSpawnClonedItem(item, item.stack);
+					player.QuickSpawnClonedItem(source, item, item.stack);
 			}
 		}
 
@@ -242,7 +244,7 @@ namespace MagicStorage
 			return tile.HasTile && tile.TileType == ModContent.TileType<CraftingAccess>();
 		}
 
-		public static bool IsStorageCrafting() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().StorageCrafting();
+		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
 
 		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
 		{

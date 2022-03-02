@@ -211,7 +211,7 @@ namespace MagicStorage
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
+			if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
