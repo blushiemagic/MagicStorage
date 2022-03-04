@@ -9,6 +9,8 @@ using Terraria.Localization;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
+using ReLogic.OS;
+using Terraria.UI.Chat;
 
 namespace MagicStorage
 {
@@ -181,10 +183,20 @@ namespace MagicStorage
                 color *= 0.75f;
             }
             spriteBatch.DrawString(font, drawText, new Vector2(dim.X + padding, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
-            if (!isEmpty && hasFocus && cursorTimer < 30)
+            if (!isEmpty && hasFocus)
             {
+                Main.instance.DrawWindowsIMEPanel(new Vector2(24f, 316f), 0f); // IME panel drawing. Necessary for inputting Chinese or some languages.
                 float drawCursor = font.MeasureString(drawText.Substring(0, cursorPosition)).X * scale;
-                spriteBatch.DrawString(font, "|", new Vector2(dim.X + padding + drawCursor, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+                string compositionString = Platform.Current.Ime.CompositionString;
+                if (compositionString != null && compositionString.Length > 0) {
+                    Vector2 position = new Vector2(dim.X + padding + drawCursor, dim.Y + padding);
+                    ChatManager.DrawColorCodedStringShadow(spriteBatch, font, compositionString, position, color, 0f, Vector2.Zero, new Vector2(scale), spread: 1.2f); // an outline that makes composition string clearer
+                    spriteBatch.DrawString(font, compositionString, position, new Color(255, 240, 20), 0f, Vector2.Zero, scale, SpriteEffects.None, 0f); // composition string drawing
+                    drawCursor += font.MeasureString(compositionString).X * scale; // the cursor drawing position should be changed.
+                }
+                if (cursorTimer < 30) {
+                    spriteBatch.DrawString(font, "|", new Vector2(dim.X + padding + drawCursor, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+                }
             }
         }
 
