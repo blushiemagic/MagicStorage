@@ -198,14 +198,14 @@ namespace MagicStorage.Components
 			Item item = new Item();
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareClientRequest((toInventory ? Operation.WithdrawToInventory : Operation.Withdraw));
+				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventory : Operation.Withdraw);
 				packet.Write((byte)slot);
 				packet.Send();
 			}
 			else
 			{
 				item = WithdrawStation(slot);
-				StoragePlayer.GetItem(item, !toInventory);
+				StoragePlayer.GetItem(new EntitySource_TileEntity(this), item, !toInventory);
 			}
 
 			return item;

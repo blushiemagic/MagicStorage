@@ -94,7 +94,8 @@ namespace MagicStorage.Components
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
-			Item.NewItem(i * 16, j * 16, 32, 32, ItemType(frameX, frameY));
+			var source = new EntitySource_TileBreak(i, j);
+			Item.NewItem(source, i * 16, j * 16, 32, 32, ItemType(frameX, frameY));
 			killTile = new Point16(i, j);
 			ModTileEntity tileEntity = GetTileEntity();
 			if (tileEntity is not null)

@@ -225,19 +225,24 @@ namespace MagicStorage
 					for (int i = 0; i < count; i++)
 						_ = ItemIO.Receive(reader, true, true);
 				}
+
+				return;
 			}
-			else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
+
+			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
-				Item item = ItemIO.Receive(reader, true, true);
-				StoragePlayer.GetItem(item, op != TEStorageHeart.Operation.WithdrawToInventory);
+				Item item  = ItemIO.Receive(reader, true, true);
+				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventory);
 			}
 			else if (op == TEStorageHeart.Operation.DepositAll)
 			{
 				int count = reader.ReadInt32();
 				for (int k = 0; k < count; k++)
 				{
-					Item item = ItemIO.Receive(reader, true, true);
-					StoragePlayer.GetItem(item, false);
+					Item item  = ItemIO.Receive(reader, true, true);
+					var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, false);
 				}
 			}
 		}
@@ -412,7 +417,8 @@ namespace MagicStorage
 			{
 				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
 				{
-					StoragePlayer.GetItem(item, op == TECraftingAccess.Operation.Withdraw);
+					var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
 				}
 				else // deposit operation
 				{
@@ -508,14 +514,20 @@ namespace MagicStorage
 			SendRefreshNetworkItems(ent);
 		}
 
+		public class CraftItemSource : IEntitySource
+		{
+
+		}
+
 		public static void ReceiveCraftResult(BinaryReader reader)
 		{
 			Player player = Main.LocalPlayer;
 			int count = reader.ReadInt32();
 			for (int k = 0; k < count; k++)
 			{
-				Item item = ItemIO.Receive(reader, true, true);
-				player.QuickSpawnClonedItem(item, item.stack);
+				Item item  = ItemIO.Receive(reader, true, true);
+				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+				player.QuickSpawnClonedItem(new EntitySource_TileEntity(heart), item, item.stack);
 			}
 		}
 

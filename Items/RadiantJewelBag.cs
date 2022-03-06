@@ -9,7 +9,10 @@ namespace MagicStorage.Items
 		public override void OpenVanillaBag(string context, Player player, int arg)
 		{
 			if (context == "bossBag" && arg == ItemID.MoonLordBossBag && Main.rand.Next(10) == 0)
-				player.QuickSpawnItem(ModContent.ItemType<RadiantJewel>());
+			{
+				var source = player.GetItemSource_OpenItem(ItemID.MoonLordBossBag);
+				player.QuickSpawnItem(source, ModContent.ItemType<RadiantJewel>());
+			}
 		}
 	}
 }

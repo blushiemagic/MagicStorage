@@ -8,7 +8,7 @@ namespace MagicStorage.Components
 {
 	public abstract class TEStorageComponent : ModTileEntity
 	{
-		private static readonly IEnumerable<Point16> checkNeighbors = new[]
+		private static readonly Point16[] checkNeighbors = new[]
 		{
 			new Point16(-1, 0),
 			new Point16(0, -1),
@@ -20,7 +20,7 @@ namespace MagicStorage.Components
 			new Point16(-1, 1)
 		};
 
-		private static readonly IEnumerable<Point16> checkNeighbors1x1 = new[]
+		private static readonly Point16[] checkNeighbors1x1 = new[]
 		{
 			new Point16(-1, 0),
 			new Point16(0, -1),
@@ -88,6 +88,7 @@ namespace MagicStorage.Components
 				Tile tile = Main.tile[checkX, checkY];
 				if (!tile.HasTile)
 					continue;
+
 				if (TileLoader.GetTile(tile.TileType) is StorageComponent)
 				{
 					if (tile.TileFrameX % 36 == 18)
