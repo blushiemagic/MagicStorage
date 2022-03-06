@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
@@ -413,7 +414,7 @@ namespace MagicStorage
 					if (GetKnownItems().Contains(t))
 					{
 						s += "known";
-						int sum = Main.LocalPlayer.GetModPlayer<StoragePlayer>()
+						int sum = StoragePlayer.LocalPlayer
 									  .LatestAccessedStorage?.GetStoredItems()
 									  .Where(x => x.type == t)
 									  .Select(x => x.stack)
@@ -440,7 +441,7 @@ namespace MagicStorage
 			{
 				oldMouse = StorageGUI.oldMouse;
 				curMouse = StorageGUI.curMouse;
-				if (Main.playerInventory && Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
+				if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
 				{
 					if (curMouse.RightButton == ButtonState.Released)
 						ResetSlotFocus();
@@ -535,13 +536,13 @@ namespace MagicStorage
 					context = 6;
 				if (!recipeAvailable[index])
 					context = recipes[index] == selectedRecipe ? 4 : 3;
-				if (Main.LocalPlayer.GetModPlayer<StoragePlayer>().FavoritedRecipes.Contains(item))
+				if (StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item))
 				{
 					item = item.Clone();
 					item.favorited = true;
 				}
 
-				if (!Main.LocalPlayer.GetModPlayer<StoragePlayer>().SeenRecipes.Contains(item))
+				if (!StoragePlayer.LocalPlayer.SeenRecipes.Contains(item))
 				{
 					item = item.Clone();
 					item.newAndShiny = MagicStorageConfig.GlowNewItems;
@@ -803,7 +804,7 @@ namespace MagicStorage
 						testItem.SetDefaults(type, true);
 						MarkAsTestItem(testItem);
 						Main.mouseItem = testItem;
-						Main.LocalPlayer.GetModPlayer<StoragePlayer>().TestedRecipes.Add(selectedRecipe.createItem);
+						StoragePlayer.LocalPlayer.TestedRecipes.Add(selectedRecipe.createItem);
 					}
 				}
 				else */
@@ -827,7 +828,7 @@ namespace MagicStorage
 
 					craftTimer--;
 					stillCrafting = true;
-					if (Main.LocalPlayer.GetModPlayer<StoragePlayer>().AddToCraftedRecipes(selectedRecipe.createItem))
+					if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
 						RefreshItems();
 				}
 			}
@@ -870,7 +871,7 @@ namespace MagicStorage
 			!item.potion &&
 			item.fishingPole <= 1 &&
 			item.ammo == AmmoID.None &&
-			!Main.LocalPlayer.GetModPlayer<StoragePlayer>().TestedRecipes.Contains(item);
+			!StoragePlayer.LocalPlayer.TestedRecipes.Contains(item);
 
 		public static void MarkAsTestItem(Item testItem)
 		{
@@ -884,15 +885,15 @@ namespace MagicStorage
 		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
 
 
-		private static TEStorageHeart GetHeart() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().GetStorageHeart();
+		private static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		private static TECraftingAccess GetCraftingEntity() => Main.LocalPlayer.GetModPlayer<StoragePlayer>().GetCraftingAccess();
+		private static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
 
 		private static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
 
 		public static void RefreshItems()
 		{
-			StoragePlayer modPlayer = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
 			if (modPlayer.SeenRecipes.Count == 0)
 				foreach (int item in GetKnownItems())
 					modPlayer.SeenRecipes.Add(item);
@@ -949,7 +950,7 @@ namespace MagicStorage
 		{
 			foundItems = new HashSet<int>(RetrieveFoundItemsCheckList());
 
-			StoragePlayer modPlayer = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
 			hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
 			craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
 			asKnownRecipes = new HashSet<int>(modPlayer.AsKnownRecipes.Items.Select(x => x.type));
@@ -1530,7 +1531,7 @@ namespace MagicStorage
 			if (slot < recipes.Count)
 			{
 				Recipe recipe = recipes[slot];
-				StoragePlayer storagePlayer = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+				StoragePlayer storagePlayer = StoragePlayer.LocalPlayer;
 				if (MouseClicked)
 				{
 					if (Main.keyState.IsKeyDown(Keys.LeftAlt))
@@ -1579,7 +1580,7 @@ namespace MagicStorage
 		private static void SetSelectedRecipe(Recipe recipe)
 		{
 			if (recipe is not null)
-				Main.LocalPlayer.GetModPlayer<StoragePlayer>().SeenRecipes.Add(recipe.createItem);
+				StoragePlayer.LocalPlayer.SeenRecipes.Add(recipe.createItem);
 
 			if (RecursiveCraftIntegration.Enabled)
 			{
@@ -1839,7 +1840,7 @@ namespace MagicStorage
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
-					Main.LocalPlayer.QuickSpawnClonedItem(item, item.stack);
+					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
 		}

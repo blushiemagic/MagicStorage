@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using MagicStorage.Components;
 using RecursiveCraft;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
@@ -14,11 +15,11 @@ namespace MagicStorage
 {
 	public static class RecursiveCraftIntegration
 	{
-		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things. 
+		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
 		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
 		private static Mod RecursiveCraftMod;
 
-		// Here we define a bool property to quickly check if RecursiveCraft is loaded. 
+		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
 		public static bool Enabled => RecursiveCraftMod is not null;
 
 		public static void Load()
@@ -28,14 +29,15 @@ namespace MagicStorage
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
 
-		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches. 
-		// To avoid TypeInitializationException (or ReflectionTypeLoadException) problems, we need to specify NoInlining on methods like this to prevent inlining (methods containing or accessing Types in the Weakly referenced assembly). 
+		// Be aware of inlining. Inlining can happen at the whim of the runtime. Without this Attribute, this mod happens to crash the 2nd time it is loaded on Linux/Mac. (The first call isn't inlined just by chance.) This can cause headaches.
+		// To avoid TypeInitializationException (or ReflectionTypeLoadException) problems, we need to specify NoInlining on methods like this to prevent inlining (methods containing or accessing Types in the Weakly referenced assembly).
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Load()
 		{
 			// This method will only be called when Enable is true, preventing TypeInitializationException
 			Members.RecipeInfoCache = new Dictionary<Recipe, RecipeInfo>();
-			OnPlayer.QuickSpawnItem_int_int += OnPlayerOnQuickSpawnItem_int_int;
+
+			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
 		}
 
 		public static void PostAddRecipes()
@@ -47,7 +49,7 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_PostAddRecipes()
 		{
-			Members.CompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
+			Members.CompoundRecipe       = new CompoundRecipe(RecursiveCraftMod);
 			Members.ThreadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 		}
 
@@ -55,19 +57,22 @@ namespace MagicStorage
 		{
 			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
 				StrongRef_Unload(); // Once again we must separate out this logic.
+
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Unload()
 		{
-			Members.RecipeInfoCache = null;
-			Members.CompoundRecipe = null;
+			Members.RecipeInfoCache      = null;
+			Members.CompoundRecipe       = null;
 			Members.ThreadCompoundRecipe = null;
-			OnPlayer.QuickSpawnItem_int_int -= OnPlayerOnQuickSpawnItem_int_int;
+
+			OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
 		}
 
-		private static int OnPlayerOnQuickSpawnItem_int_int(OnPlayer.orig_QuickSpawnItem_int_int orig, Player self, int type, int stack)
+		private static int OnPlayerQuickSpawnItem_IEntitySource_int_int(OnPlayer.orig_QuickSpawnItem_IEntitySource_int_int orig,
+			Player self, IEntitySource source, int type, int stack)
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
@@ -78,7 +83,7 @@ namespace MagicStorage
 				return -1;
 			}
 
-			return orig(self, type, stack);
+			return orig(self, source, type, stack);
 		}
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)

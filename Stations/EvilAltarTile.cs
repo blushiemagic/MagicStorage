@@ -33,7 +33,8 @@ namespace MagicStorage.Stations
 		{
 			int type = frameX / 54 == 0 ? ModContent.ItemType<DemonAltar>() : ModContent.ItemType<CrimsonAltar>();
 
-			Item.NewItem(i * 16, j * 16, 48, 32, type);
+			var source = new EntitySource_TileBreak(i, j);
+			Item.NewItem(source, i * 16, j * 16, 48, 32, type);
 		}
 	}
 }
