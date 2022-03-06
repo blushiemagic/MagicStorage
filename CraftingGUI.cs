@@ -1291,7 +1291,7 @@ namespace MagicStorage
 						adjLava = true;
 					if (player.adjHoney || TileID.Sets.CountsAsHoneySource[item.createTile])
 						adjHoney = true;
-					if (player.alchemyTable)
+					if (player.alchemyTable || player.adjTile[TileID.AlchemyTable])
 						alchemyTable = true;
 					if (player.adjTile[TileID.Tombstones])
 						graveyard = true;
