@@ -185,7 +185,7 @@ namespace MagicStorage
             spriteBatch.DrawString(font, drawText, new Vector2(dim.X + padding, dim.Y + padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
             if (!isEmpty && hasFocus)
             {
-                Main.instance.DrawWindowsIMEPanel(new Vector2(24f, 316f), 0f); // IME panel drawing. Necessary for inputting Chinese or some languages.
+                Main.instance.DrawWindowsIMEPanel(new Vector2(20f, Main.instance.invBottom + 60), 0f); // IME panel drawing. Necessary for inputting Chinese or some languages.
                 float drawCursor = font.MeasureString(drawText.Substring(0, cursorPosition)).X * scale;
                 string compositionString = Platform.Current.Ime.CompositionString;
                 if (compositionString != null && compositionString.Length > 0) {
