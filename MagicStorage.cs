@@ -232,6 +232,10 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选杂项");
 			LocalizationLoader.AddTranslation(text);
 
+			text = LocalizationLoader.CreateTranslation(this, "FilterRecent");
+			text.SetDefault("Filter New Recently Added Items");
+			LocalizationLoader.AddTranslation(text);
+
 			text = LocalizationLoader.CreateTranslation(this, "CraftingStations");
 			text.SetDefault("Crafting Stations");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Станции создания");
