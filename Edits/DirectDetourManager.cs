@@ -57,8 +57,11 @@ namespace MagicStorage.Edits
 		private static void IntermediateLanguageHook(MethodInfo orig, MethodInfo modify)
 		{
 			Delegate hook = Delegate.CreateDelegate(typeof(ILContext.Manipulator), modify);
-			delegates.Add((orig, hook));
-			HookEndpointManager.Modify(orig, hook);
+
+			try {
+				HookEndpointManager.Modify(orig, hook);
+				delegates.Add((orig, hook));
+			} catch { }
 		}
 
 		private static void DetourHook(MethodInfo orig, MethodInfo modify)

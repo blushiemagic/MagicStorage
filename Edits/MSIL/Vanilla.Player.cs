@@ -5,6 +5,7 @@ using MonoMod.Cil;
 using System;
 using System.Reflection;
 using Terraria;
+using Terraria.ID;
 
 namespace MagicStorage.Edits.MSIL{
 	internal static partial class Vanilla{
@@ -17,6 +18,8 @@ namespace MagicStorage.Edits.MSIL{
 
 			ILCursor c = new ILCursor(il);
 
+			int patchNum = 1;
+
 			if(!c.TryGotoNext(MoveType.Before, i => i.MatchLdarg(0),
 				i => i.MatchLdflda(Player_itemLocation),
 				i => i.MatchLdarg(0),
@@ -28,6 +31,8 @@ namespace MagicStorage.Edits.MSIL{
 				i => i.MatchAdd()))
 				goto bad_il;
 
+			patchNum++;
+
 			ILLabel jumpLabel = c.MarkLabel();
 
 			//Go back to the beginning and find the code that handles the Marshmallow on a Stick usage
@@ -35,12 +40,11 @@ namespace MagicStorage.Edits.MSIL{
 
 			if(!c.TryGotoNext(MoveType.After, i => i.MatchLdarg(2),
 				i => i.MatchLdfld(Item_type),
-				i => i.MatchLdcI4(968),
-				i => i.MatchCeq(),
-				i => i.MatchStloc(27),
-				i => i.MatchLdloc(27),
-				i => i.MatchBrfalse(out _)))
+				i => i.MatchLdcI4(ItemID.MarshmallowonaStick),
+				i => i.MatchBneUn(out _)))
 				goto bad_il;
+
+			patchNum++;
 
 			//After the check that the type is valid, but before the actual use code
 			c.Emit(OpCodes.Ldarg_0);
@@ -59,7 +63,8 @@ namespace MagicStorage.Edits.MSIL{
 
 			return;
 bad_il:
-			MagicStorage.Instance.Logger.Error("Unable to fully patch Terraria.Player.ItemCheck_ApplyHoldStyle_Inner()");
+			throw new Exception("Unable to fully patch " + il.Method.Name + "()\n" +
+				"Reason: Could not find instruction sequence for patch #" + patchNum);
 		}
 	}
 }
