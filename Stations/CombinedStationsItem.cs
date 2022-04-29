@@ -32,7 +32,7 @@ namespace MagicStorage.Stations
 		public sealed override void SetDefaults()
 		{
 			SafeSetDefaults();
-			Item.DamageType = DamageClass.NoScaling;
+			Item.DamageType = DamageClass.Default;
 			Item.damage = 0;
 			Item.knockBack = 0f;
 			GetItemDimensions(out Item.width, out Item.height);

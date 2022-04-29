@@ -11,8 +11,6 @@ namespace MagicStorage.Components
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.RemoteAccess>();
 
-		public override bool HasSmartInteract() => true;
-
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) && te is TERemoteAccess remoteAccess)

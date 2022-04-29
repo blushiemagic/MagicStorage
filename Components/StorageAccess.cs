@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent.ObjectInteractions;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
@@ -14,7 +15,7 @@ namespace MagicStorage.Components
 	{
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageAccess>();
 
-		public override bool HasSmartInteract() => true;
+		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
 
 		public virtual TEStorageHeart GetHeart(int i, int j)
 		{

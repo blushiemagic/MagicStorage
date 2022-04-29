@@ -514,11 +514,6 @@ namespace MagicStorage
 			SendRefreshNetworkItems(ent);
 		}
 
-		public class CraftItemSource : IEntitySource
-		{
-
-		}
-
 		public static void ReceiveCraftResult(BinaryReader reader)
 		{
 			Player player = Main.LocalPlayer;

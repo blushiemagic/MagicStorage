@@ -42,7 +42,9 @@ namespace MagicStorage.Components
 			AddMapEntry(new Color(153, 107, 61), text);
 			DustType = 7;
 			TileID.Sets.DisableSmartCursor[Type] = true;
-			TileID.Sets.HasOutlines[Type] = HasSmartInteract();
+			// Old: TileID.Sets.HasOutlines[Type] = HasSmartInteract();
+			// New: HasSmartInteract() just enables the highlights to be drawn, thus this Sets just has to be true regardless
+			TileID.Sets.HasOutlines[Type] = true;
 		}
 
 		public virtual void ModifyObjectData()

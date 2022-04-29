@@ -52,11 +52,11 @@ namespace MagicStorage.Items
 		{
 			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
-				if (isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip0")
+				if (isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip0")
 				{
-					lines[k].text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
+					lines[k].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
 				}
-				else if (!isSet && lines[k].mod == "Terraria" && lines[k].Name == "Tooltip1")
+				else if (!isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip1")
 				{
 					lines.RemoveAt(k);
 					k--;

@@ -11,8 +11,6 @@ namespace MagicStorage.Components
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageHeart>();
 
-		public override bool HasSmartInteract() => true;
-
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
 			//return (TEStorageHeart) TileEntity.ByPosition[new Point16(i, j)];
