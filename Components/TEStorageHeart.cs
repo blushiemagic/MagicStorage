@@ -459,7 +459,7 @@ namespace MagicStorage.Components
 		public Item Withdraw(Item lookFor, bool keepOneIfFavorite)
 		{
 			Item result = new();
-			foreach (TEStorageUnit storageUnit in GetStorageUnits().Reverse())
+			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits().Reverse())
 			{
 				if (storageUnit.HasItem(lookFor, true))
 				{
