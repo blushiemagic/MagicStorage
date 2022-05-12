@@ -184,7 +184,7 @@ namespace MagicStorage
 					player.QuickSpawnClonedItem(source, item, item.stack);
 			}
 		}
-
+		
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
 		{
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
@@ -196,14 +196,7 @@ namespace MagicStorage
 				return false;
 			int oldType = item.type;
 			int oldStack = item.stack;
-			if (StorageCrafting())
-			{
-				GetCraftingAccess().TryDepositStation(item);
-			}
-			else
-			{
-				GetStorageHeart().TryDeposit(item);
-			}
+            GetStorageHeart().TryDeposit(item);
 
 			if (item.type != oldType || item.stack != oldStack)
 			{
