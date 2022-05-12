@@ -810,27 +810,42 @@ namespace MagicStorage
 				else */
 				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
-					if (craftTimer <= 0)
-					{
-						craftTimer = maxCraftTimer;
-						maxCraftTimer = maxCraftTimer * 3 / 4;
-						if (maxCraftTimer <= 0)
+                    if (Main.keyState.IsKeyDown(Keys.LeftControl))
+                    {
+                        while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
+                        {
+                            TryCraft();
+                            if (RecursiveCraftIntegration.Enabled)
+                                if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
+                                    SetSelectedRecipe(selectedRecipe);
+                            RefreshItems();
+                        }
+                        SoundEngine.PlaySound(SoundID.Grab);
+                    }
+                    else
+                    {
+                        if (craftTimer <= 0)
+                        {
+                            craftTimer = maxCraftTimer;
+                            maxCraftTimer = maxCraftTimer * 3 / 4;
+                            if (maxCraftTimer <= 0)
 
-							maxCraftTimer = 1;
+                                maxCraftTimer = 1;
 
-						TryCraft();
-						if (RecursiveCraftIntegration.Enabled)
-							if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
-								SetSelectedRecipe(selectedRecipe);
-						RefreshItems();
-						SoundEngine.PlaySound(SoundID.Grab);
-					}
+                            TryCraft();
+                            if (RecursiveCraftIntegration.Enabled)
+                                if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
+                                    SetSelectedRecipe(selectedRecipe);
+                            RefreshItems();
+                            SoundEngine.PlaySound(SoundID.Grab);
+                        }
 
-					craftTimer--;
-					stillCrafting = true;
-					if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
-						RefreshItems();
-				}
+                        craftTimer--;
+                        stillCrafting = true;
+                        if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
+                            RefreshItems();
+                    }
+                }
 			}
 
 			else
