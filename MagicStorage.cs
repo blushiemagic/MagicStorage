@@ -36,7 +36,6 @@ namespace MagicStorage {
 			AddTranslations();
 			IsItemKnownHotKey = KeybindLoader.RegisterKeybind(this, "Is This Item Known?", Keys.Q);
 
-			RecursiveCraftIntegration.Load();
 			EditsLoader.Load();
 
 			DirectDetourManager.Load();
@@ -47,7 +46,6 @@ namespace MagicStorage {
 			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
-			RecursiveCraftIntegration.Unload();
 
 			DirectDetourManager.Unload();
 		}
@@ -349,8 +347,6 @@ namespace MagicStorage {
 					copy.Register();
 				}
 			}
-
-			RecursiveCraftIntegration.PostAddRecipes();
 		}
 
 		public override void PostSetupContent()

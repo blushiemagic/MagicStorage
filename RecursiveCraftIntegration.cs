@@ -13,7 +13,7 @@ using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage
 {
-	public static class RecursiveCraftIntegration
+	public sealed class RecursiveCraftIntegration : ModSystem
 	{
 		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
 		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
@@ -22,7 +22,7 @@ namespace MagicStorage
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
 		public static bool Enabled => RecursiveCraftMod is not null;
 
-		public static void Load()
+		public override void Load()
 		{
 			ModLoader.TryGetMod("RecursiveCraft", out RecursiveCraftMod);
 			if (Enabled)
@@ -40,7 +40,7 @@ namespace MagicStorage
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
 		}
 
-		public static void PostAddRecipes()
+		public override void PostAddRecipes()
 		{
 			if (Enabled)
 				StrongRef_PostAddRecipes();
@@ -49,13 +49,13 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_PostAddRecipes()
 		{
-			Members.CompoundRecipe       = new CompoundRecipe(RecursiveCraftMod);
+			Members.CompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 			Members.ThreadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
 		}
 
-		public static void Unload()
+		public override void Unload()
 		{
-			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
+			if (Enabled)            // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
 				StrongRef_Unload(); // Once again we must separate out this logic.
 
 			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
@@ -64,8 +64,8 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Unload()
 		{
-			Members.RecipeInfoCache      = null;
-			Members.CompoundRecipe       = null;
+			Members.RecipeInfoCache = null;
+			Members.CompoundRecipe = null;
 			Members.ThreadCompoundRecipe = null;
 
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
@@ -80,7 +80,7 @@ namespace MagicStorage
 				item.SetDefaults(type);
 				item.stack = stack;
 				CraftingGUI.compoundCraftSurplus.Add(item);
-				return -1;
+				return -1; // return invalid value since this should never be used
 			}
 
 			return orig(self, source, type, stack);
@@ -100,7 +100,7 @@ namespace MagicStorage
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
 		public static void RecursiveRecipes()
 		{
-			Main.rand ??= new UnifiedRandom((int)DateTime.UtcNow.Ticks);
+			Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems == null)
 				return;
