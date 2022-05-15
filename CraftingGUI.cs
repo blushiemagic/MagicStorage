@@ -699,7 +699,7 @@ namespace MagicStorage
 					isEmpty = false;
 				}
 
-				foreach (int tile in selectedRecipe.requiredTile.TakeWhile(tile => tile != -1))
+				foreach (int tile in selectedRecipe.requiredTile)
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
 				if (selectedRecipe.HasCondition(Recipe.Condition.NearWater))
@@ -994,7 +994,7 @@ namespace MagicStorage
 			if (cache.TryGetValue(recipe, out bool v))
 				return v;
 
-			foreach (int tile in recipe.requiredTile.TakeWhile(tile => tile != -1))
+			foreach (int tile in recipe.requiredTile)
 			{
 				if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out List<int> possibleItems))
 					continue;
@@ -1346,7 +1346,7 @@ namespace MagicStorage
 			if (RecursiveCraftIntegration.Enabled && compound)
 				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
 
-			if (recipe.requiredTile.TakeWhile(tile => tile != -1).Any(tile => !adjTiles[tile]))
+			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
 
 			lock (itemCounts)
