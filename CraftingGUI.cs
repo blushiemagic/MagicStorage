@@ -936,7 +936,7 @@ namespace MagicStorage
 				if (!threadRunning)
 				{
 					threadRunning = true;
-					Task.Run(() => RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy));
+					RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy);
 				}
 			}
 		}
@@ -982,7 +982,7 @@ namespace MagicStorage
 				return;
 
 			IEnumerable<Recipe> allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "")
-				.Where(x => x?.createItem is not null && x.createItem.type > ItemID.None);
+				.Where(x => x.createItem.type > ItemID.None);
 			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 		}
 
@@ -1090,7 +1090,6 @@ namespace MagicStorage
 					void DoFiltering()
 					{
 						var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text)
-							.Where(x => x is not null)
 							// show only blacklisted recipes only if choice = 2, otherwise show all other
 							.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
 							// show only favorited items if selected
@@ -1105,22 +1104,13 @@ namespace MagicStorage
 
 						if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
 						{
-							foreach (Recipe recipe in filteredRecipes)
-							{
-								if (IsAvailable(recipe))
-								{
-									threadRecipes.Add(recipe);
-									threadRecipeAvailable.Add(true);
-								}
-							}
+							threadRecipes.AddRange(filteredRecipes.Where(r => IsAvailable(r)));
+							threadRecipeAvailable.AddRange(Enumerable.Repeat(true, threadRecipes.Count));
 						}
 						else
 						{
-							foreach (Recipe recipe in filteredRecipes)
-							{
-								threadRecipes.Add(recipe);
-								threadRecipeAvailable.Add(IsAvailable(recipe));
-							}
+							threadRecipes.AddRange(filteredRecipes);
+							threadRecipeAvailable.AddRange(threadRecipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
 						}
 					}
 

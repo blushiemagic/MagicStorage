@@ -38,11 +38,13 @@ namespace MagicStorage.Sorting
 			return dict.Values;
 		}
 
-		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
+		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			ItemFilter filter = MakeFilter(filterMode);
-			IEnumerable<Recipe> filteredRecipes = Main.recipe.Take(Recipe.numRecipes).Where(recipe =>
-				filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+			var filteredRecipes = Main.recipe
+				.AsParallel().AsOrdered().Take(Recipe.numRecipes)
+				.Where(recipe => filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+
 			CompareFunction sortFunction = MakeSortFunction(sortMode);
 			return sortFunction is null
 				? filteredRecipes
