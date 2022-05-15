@@ -34,9 +34,6 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Load()
 		{
-			// This method will only be called when Enable is true, preventing TypeInitializationException
-			Members.RecipeInfoCache = new Dictionary<Recipe, RecipeInfo>();
-
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
 		}
 
@@ -64,7 +61,6 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Unload()
 		{
-			Members.RecipeInfoCache = null;
 			Members.CompoundRecipe = null;
 			Members.ThreadCompoundRecipe = null;
 
@@ -105,9 +101,9 @@ namespace MagicStorage
 			if (storedItems == null)
 				return;
 
-			lock (Members.RecipeInfoCache)
+			lock (RecursiveCraft.RecursiveCraft.RecipeInfoCache)
 			{
-				Members.RecipeInfoCache.Clear();
+				RecursiveCraft.RecursiveCraft.RecipeInfoCache.Clear();
 				RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
 				foreach (Recipe r in Main.recipe)
 				{
@@ -137,7 +133,7 @@ namespace MagicStorage
 			{
 				BlockRecipes.Active = false;
 				if (RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
-					Members.RecipeInfoCache.Add(recipe, recipeInfo);
+					RecursiveCraft.RecursiveCraft.RecipeInfoCache.Add(recipe, recipeInfo);
 				BlockRecipes.Active = true;
 			}
 		}
@@ -153,21 +149,21 @@ namespace MagicStorage
 
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems is not null)
-				lock (Members.RecipeInfoCache)
+				lock (RecursiveCraft.RecursiveCraft.RecipeInfoCache)
 				{
-					Members.RecipeInfoCache.Remove(recipe);
+					RecursiveCraft.RecursiveCraft.RecipeInfoCache.Remove(recipe);
 					RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
 					SingleSearch(recipe);
 				}
 
-			return Members.RecipeInfoCache.ContainsKey(recipe);
+			return RecursiveCraft.RecursiveCraft.RecipeInfoCache.ContainsKey(recipe);
 		}
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
 			if (recipe == Members.CompoundRecipe.Compound)
 				recipe = Members.CompoundRecipe.OverridenRecipe;
-			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (!RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
@@ -177,7 +173,7 @@ namespace MagicStorage
 
 		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
 		{
-			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (!RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
@@ -187,7 +183,6 @@ namespace MagicStorage
 
 		private static class Members
 		{
-			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache;
 			public static CompoundRecipe CompoundRecipe;
 			public static CompoundRecipe ThreadCompoundRecipe;
 		}
