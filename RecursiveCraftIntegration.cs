@@ -13,18 +13,21 @@ using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage
 {
+	[JITWhenModsEnabled(RecursiveCraftModName)]
 	public static class RecursiveCraftIntegration
 	{
 		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
 		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
 		private static Mod RecursiveCraftMod;
 
+		public const string RecursiveCraftModName = "RecursiveCraft";
+
 		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
 		public static bool Enabled => RecursiveCraftMod is not null;
 
 		public static void Load()
 		{
-			ModLoader.TryGetMod("RecursiveCraft", out RecursiveCraftMod);
+			ModLoader.TryGetMod(RecursiveCraftModName, out RecursiveCraftMod);
 			if (Enabled)
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
@@ -185,6 +188,7 @@ namespace MagicStorage
 			return Members.ThreadCompoundRecipe.Compound;
 		}
 
+		[JITWhenModsEnabled(RecursiveCraftModName)]
 		private static class Members
 		{
 			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache;
