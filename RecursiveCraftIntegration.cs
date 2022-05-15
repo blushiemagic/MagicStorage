@@ -64,6 +64,7 @@ namespace MagicStorage
 		{
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
 
+			Members.RecipeInfoCache = null!;
 			Members.CompoundRecipes = null!;
 			Members.RecipeToCompoundRecipe = null!;
 		}
@@ -119,6 +120,7 @@ namespace MagicStorage
 
 				Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 				RecursiveCraftMod.FindRecipes(storedItems);
+				Members.RecipeInfoCache = new(RecursiveCraftMod.RecipeInfoCache);
 			});
 		}
 
@@ -142,7 +144,7 @@ namespace MagicStorage
 				recipe = compoundRecipe.OverridenRecipe;
 			}
 
-			return RecursiveCraftMod.RecipeInfoCache.ContainsKey(recipe);
+			return Members.RecipeInfoCache.ContainsKey(recipe);
 		}
 
 		public static Recipe GetOverriddenRecipe(Recipe recipe)
@@ -164,7 +166,7 @@ namespace MagicStorage
 				recipe = compoundRecipe.OverridenRecipe;
 			}
 
-			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
+			if (!Members.RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
@@ -180,7 +182,7 @@ namespace MagicStorage
 			if (recipe == Members.ThreadCompoundRecipe.Compound)
 				recipe = Members.ThreadCompoundRecipe.OverridenRecipe!;
 
-			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
@@ -191,6 +193,7 @@ namespace MagicStorage
 		// TODO: test if the new tml JIT system allows these to be regular fields
 		private static class Members
 		{
+			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
 			public static CompoundRecipe[] CompoundRecipes = null!;
 			public static Dictionary<Recipe, CompoundRecipe> RecipeToCompoundRecipe = null!;
 		}
