@@ -10,21 +10,17 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using OnPlayer = On.Terraria.Player;
+using RecursiveCraftMod = RecursiveCraft.RecursiveCraft;
 
 namespace MagicStorage
 {
 	public sealed class RecursiveCraftIntegration : ModSystem
 	{
-		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
-		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
-		private static Mod RecursiveCraftMod;
-
-		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
-		public static bool Enabled => RecursiveCraftMod is not null;
+		public static bool Enabled { get; private set; }
 
 		public override void Load()
 		{
-			ModLoader.TryGetMod("RecursiveCraft", out RecursiveCraftMod);
+			Enabled = ModLoader.HasMod("RecursiveCraft");
 			if (Enabled)
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
@@ -44,18 +40,16 @@ namespace MagicStorage
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void StrongRef_PostAddRecipes()
+		private void StrongRef_PostAddRecipes()
 		{
-			Members.CompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
-			Members.ThreadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
+			Members.CompoundRecipe = new CompoundRecipe(Mod);
+			Members.ThreadCompoundRecipe = new CompoundRecipe(Mod);
 		}
 
 		public override void Unload()
 		{
 			if (Enabled)            // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
 				StrongRef_Unload(); // Once again we must separate out this logic.
-
-			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -72,9 +66,7 @@ namespace MagicStorage
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
-				Item item = new();
-				item.SetDefaults(type);
-				item.stack = stack;
+				Item item = new(type, stack);
 				CraftingGUI.compoundCraftSurplus.Add(item);
 				return -1; // return invalid value since this should never be used
 			}
@@ -101,10 +93,10 @@ namespace MagicStorage
 			if (storedItems == null)
 				return;
 
-			lock (RecursiveCraft.RecursiveCraft.RecipeInfoCache)
+			lock (RecursiveCraftMod.RecipeInfoCache)
 			{
-				RecursiveCraft.RecursiveCraft.RecipeInfoCache.Clear();
-				RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
+				RecursiveCraftMod.RecipeInfoCache.Clear();
+				RecursiveCraftMod.FindRecipes(storedItems);
 				foreach (Recipe r in Main.recipe)
 				{
 					Recipe recipe = r;
@@ -132,8 +124,8 @@ namespace MagicStorage
 			lock (BlockRecipes.ActiveLock)
 			{
 				BlockRecipes.Active = false;
-				if (RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
-					RecursiveCraft.RecursiveCraft.RecipeInfoCache.Add(recipe, recipeInfo);
+				if (RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
+					RecursiveCraftMod.RecipeInfoCache.Add(recipe, recipeInfo);
 				BlockRecipes.Active = true;
 			}
 		}
@@ -149,21 +141,21 @@ namespace MagicStorage
 
 			Dictionary<int, int> storedItems = GetStoredItems();
 			if (storedItems is not null)
-				lock (RecursiveCraft.RecursiveCraft.RecipeInfoCache)
+				lock (RecursiveCraftMod.RecipeInfoCache)
 				{
-					RecursiveCraft.RecursiveCraft.RecipeInfoCache.Remove(recipe);
-					RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
+					RecursiveCraftMod.RecipeInfoCache.Remove(recipe);
+					RecursiveCraftMod.FindRecipes(storedItems);
 					SingleSearch(recipe);
 				}
 
-			return RecursiveCraft.RecursiveCraft.RecipeInfoCache.ContainsKey(recipe);
+			return RecursiveCraftMod.RecipeInfoCache.ContainsKey(recipe);
 		}
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
 			if (recipe == Members.CompoundRecipe.Compound)
 				recipe = Members.CompoundRecipe.OverridenRecipe;
-			if (!RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
@@ -173,7 +165,7 @@ namespace MagicStorage
 
 		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
 		{
-			if (!RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
