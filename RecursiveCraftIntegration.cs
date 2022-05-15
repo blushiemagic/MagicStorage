@@ -7,9 +7,7 @@ using RecursiveCraft;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 using OnPlayer = On.Terraria.Player;
-using RecursiveCraftMod = RecursiveCraft.RecursiveCraft;
 
 namespace MagicStorage
 {
@@ -30,6 +28,8 @@ namespace MagicStorage
 		private static void StrongRef_Load()
 		{
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
+
+			Members.RecipeInfoCache = new();
 		}
 
 		public override void PostAddRecipes()
@@ -55,7 +55,7 @@ namespace MagicStorage
 
 		public override void Unload()
 		{
-			if (Enabled)            // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
+			if (Enabled)            // Here we properly unload, making sure to check Enabled before unloading anything.
 				StrongRef_Unload(); // Once again we must separate out this logic.
 		}
 
@@ -118,9 +118,32 @@ namespace MagicStorage
 				if (storedItems is null)
 					return;
 
-				RecursiveCraftMod.FindRecipes(storedItems);
-				Members.RecipeInfoCache = new(RecursiveCraftMod.RecipeInfoCache);
+				FindRecipes(storedItems);
 			});
+		}
+
+		private static void FindRecipes(Dictionary<int, int> inventory)
+		{
+			Members.RecipeInfoCache.Clear();
+			RecursiveSearch recursiveSearch = new(inventory);
+
+			for (int i = 0; i < Recipe.numRecipes; i++)
+			{
+				Recipe recipe = Main.recipe[i];
+
+				if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+				{
+					ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
+					recipe = compoundRecipe.OverridenRecipe;
+				}
+
+				RecipeInfo? recipeInfo = recursiveSearch.FindIngredientsForRecipe(recipe);
+				if (recipeInfo != null)
+				{
+					if (recipeInfo.RecipeUsed.Count > 1)
+						Members.RecipeInfoCache.Add(recipe, recipeInfo);
+				}
+			}
 		}
 
 		private static Dictionary<int, int>? GetStoredItems()
@@ -128,9 +151,10 @@ namespace MagicStorage
 			Player player = Main.LocalPlayer;
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
-			if (heart is not null)
-				return FlatDict(heart.GetStoredItems());
-			return null;
+			if (heart is null)
+				return null;
+
+			return FlatDict(heart.GetStoredItems());
 		}
 
 		public static bool IsCompoundRecipe(Recipe recipe) => Members.RecipeToCompoundRecipe.ContainsKey(recipe);
