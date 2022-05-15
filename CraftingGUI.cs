@@ -820,8 +820,12 @@ namespace MagicStorage
 
 						TryCraft();
 						if (RecursiveCraftIntegration.Enabled)
-							if (RecursiveCraftIntegration.UpdateRecipe(selectedRecipe))
+						{
+							RecursiveCraftIntegration.RefreshRecursiveRecipes();
+							if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
 								SetSelectedRecipe(selectedRecipe);
+						}
+
 						RefreshItems();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
@@ -1123,7 +1127,7 @@ namespace MagicStorage
 					}
 
 					if (RecursiveCraftIntegration.Enabled)
-						RecursiveCraftIntegration.RecursiveRecipes();
+						RecursiveCraftIntegration.RefreshRecursiveRecipes();
 
 					DoFiltering();
 
@@ -1365,16 +1369,32 @@ namespace MagicStorage
 				}
 			}
 
+
+			bool retValue = true;
+
+			ExecuteInCraftingGuiEnvironment(() =>
+			{
+				if (retValue && !RecipeLoader.RecipeAvailable(recipe))
+					retValue = false;
+			});
+
+			return retValue;
+		}
+
+		public static void ExecuteInCraftingGuiEnvironment(Action action)
+		{
+			ArgumentNullException.ThrowIfNull(action);
+
 			lock (BlockRecipes.ActiveLock)
 			{
-				bool[] oldAdjTile = (bool[])Main.LocalPlayer.adjTile.Clone();
+				Player player = Main.LocalPlayer;
+				bool[] origAdjTile = player.adjTile;
 
 				try
 				{
-					Player player = Main.LocalPlayer;
-					for (int i = 0; i < adjTiles.Length; i++)
-						player.adjTile[i] = adjTiles[i];
+					player.adjTile = adjTiles;
 
+					// TODO: test if this allows environmental effects such as nearby water
 					if (adjWater)
 						player.adjWater = true;
 					if (adjLava)
@@ -1389,17 +1409,14 @@ namespace MagicStorage
 						player.ZoneGraveyard = true;
 
 					BlockRecipes.Active = false;
-					if (!RecipeLoader.RecipeAvailable(recipe))
-						return false;
+					action();
 				}
 				finally
 				{
 					BlockRecipes.Active = true;
-					Main.LocalPlayer.adjTile = oldAdjTile;
+					player.adjTile = origAdjTile;
 				}
 			}
-
-			return true;
 		}
 
 		private static bool PassesBlock(Recipe recipe)

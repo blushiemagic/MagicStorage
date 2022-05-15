@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using MagicStorage.Components;
 using RecursiveCraft;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using OnPlayer = On.Terraria.Player;
@@ -76,37 +74,43 @@ namespace MagicStorage
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
 		{
-			Dictionary<int, int> dictionary = new();
-			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
-				dictionary[type] = amount;
-			return dictionary;
+			ArgumentNullException.ThrowIfNull(items);
+
+			Dictionary<int, int> flatDict = new();
+
+			foreach (Item item in items)
+			{
+				int type = item.type;
+				int stack = item.stack;
+
+				if (flatDict.ContainsKey(type))
+				{
+					flatDict[type] += stack;
+				}
+				else
+				{
+					flatDict.Add(type, stack);
+				}
+			}
+
+			return flatDict;
 		}
 
 		// Make sure to extract the .dll from the .tmod and then add them to your .csproj as references.
 		// As a convention, I rename the .dll file ModName_v1.2.3.4.dll and place them in Mod Sources/Mods/lib.
 		// I do this for organization and so the .csproj loads properly for others using the GitHub repository.
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
-		public static void RecursiveRecipes()
+		public static void RefreshRecursiveRecipes()
 		{
-			Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
-			Dictionary<int, int> storedItems = GetStoredItems();
-			if (storedItems == null)
-				return;
-
-			lock (RecursiveCraftMod.RecipeInfoCache)
+			CraftingGUI.ExecuteInCraftingGuiEnvironment(() =>
 			{
-				RecursiveCraftMod.RecipeInfoCache.Clear();
+				Dictionary<int, int> storedItems = GetStoredItems();
+				if (storedItems is null)
+					return;
+
+				Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 				RecursiveCraftMod.FindRecipes(storedItems);
-				foreach (Recipe r in Main.recipe)
-				{
-					Recipe recipe = r;
-					if (recipe.createItem.type == ItemID.None)
-						break;
-					if (recipe == Members.CompoundRecipe.Compound)
-						recipe = Members.CompoundRecipe.OverridenRecipe;
-					SingleSearch(recipe);
-				}
-			}
+			});
 		}
 
 		private static Dictionary<int, int> GetStoredItems()
@@ -119,42 +123,23 @@ namespace MagicStorage
 			return null;
 		}
 
-		private static void SingleSearch(Recipe recipe)
-		{
-			lock (BlockRecipes.ActiveLock)
-			{
-				BlockRecipes.Active = false;
-				if (RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
-					RecursiveCraftMod.RecipeInfoCache.Add(recipe, recipeInfo);
-				BlockRecipes.Active = true;
-			}
-		}
-
 		public static bool IsCompoundRecipe(Recipe recipe) => recipe == Members.CompoundRecipe.Compound;
 
-		public static Recipe GetOverriddenRecipe(Recipe recipe) => recipe == Members.CompoundRecipe.Compound ? Members.CompoundRecipe.OverridenRecipe : recipe;
-
-		public static bool UpdateRecipe(Recipe recipe)
+		public static bool HasCompoundVariant(Recipe recipe)
 		{
 			if (recipe == Members.CompoundRecipe.Compound)
-				recipe = Members.CompoundRecipe.OverridenRecipe;
-
-			Dictionary<int, int> storedItems = GetStoredItems();
-			if (storedItems is not null)
-				lock (RecursiveCraftMod.RecipeInfoCache)
-				{
-					RecursiveCraftMod.RecipeInfoCache.Remove(recipe);
-					RecursiveCraftMod.FindRecipes(storedItems);
-					SingleSearch(recipe);
-				}
+				recipe = Members.CompoundRecipe.OverridenRecipe!;
 
 			return RecursiveCraftMod.RecipeInfoCache.ContainsKey(recipe);
 		}
 
+		public static Recipe GetOverriddenRecipe(Recipe recipe) => recipe == Members.CompoundRecipe.Compound ? Members.CompoundRecipe.OverridenRecipe : recipe;
+
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
 			if (recipe == Members.CompoundRecipe.Compound)
-				recipe = Members.CompoundRecipe.OverridenRecipe;
+				recipe = Members.CompoundRecipe.OverridenRecipe!;
+
 			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
