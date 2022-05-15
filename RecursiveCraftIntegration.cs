@@ -118,7 +118,6 @@ namespace MagicStorage
 				if (storedItems is null)
 					return;
 
-				Main.rand ??= new UnifiedRandom((int) DateTime.UtcNow.Ticks);
 				RecursiveCraftMod.FindRecipes(storedItems);
 				Members.RecipeInfoCache = new(RecursiveCraftMod.RecipeInfoCache);
 			});
