@@ -41,8 +41,8 @@ namespace MagicStorage.Sorting
 		public static IEnumerable<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			ItemFilter filter = MakeFilter(filterMode);
-			IEnumerable<Recipe> filteredRecipes = Main.recipe.Where((recipe, index) =>
-				index < Recipe.numRecipes && filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+			IEnumerable<Recipe> filteredRecipes = Main.recipe.Take(Recipe.numRecipes).Where(recipe =>
+				filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 			CompareFunction sortFunction = MakeSortFunction(sortMode);
 			return sortFunction is null
 				? filteredRecipes

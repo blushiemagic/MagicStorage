@@ -635,7 +635,7 @@ namespace MagicStorage
 			int maxCraftable = int.MaxValue;
 
 			if (RecursiveCraftIntegration.Enabled)
-				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 
 			int GetAmountCraftable(Item requiredItem)
 			{
@@ -1087,11 +1087,9 @@ namespace MagicStorage
 
 					int modFilterIndex = modSearchBox.ModIndex;
 
-					IEnumerable<Recipe> filteredRecipes;
-
 					void DoFiltering()
 					{
-						filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text)
+						var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text)
 							.Where(x => x is not null)
 							// show only blacklisted recipes only if choice = 2, otherwise show all other
 							.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
@@ -1341,10 +1339,10 @@ namespace MagicStorage
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 		}
 
-		public static bool IsAvailable(Recipe recipe, bool compound = true)
+		public static bool IsAvailable(Recipe recipe, bool checkCompound = true)
 		{
-			if (RecursiveCraftIntegration.Enabled && compound)
-				recipe = RecursiveCraftIntegration.ApplyThreadCompoundRecipe(recipe);
+			if (RecursiveCraftIntegration.Enabled && checkCompound)
+				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 
 			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
@@ -1596,13 +1594,14 @@ namespace MagicStorage
 
 		private static void SetSelectedRecipe(Recipe recipe)
 		{
-			if (recipe is not null)
-				StoragePlayer.LocalPlayer.SeenRecipes.Add(recipe.createItem);
+			ArgumentNullException.ThrowIfNull(recipe);
+
+			StoragePlayer.LocalPlayer.SeenRecipes.Add(recipe.createItem);
 
 			if (RecursiveCraftIntegration.Enabled)
 			{
 				int index;
-				if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe)
+				if (selectedRecipe != null && RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe)
 				{
 					Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
 					if (overridden != recipe)
@@ -1662,8 +1661,11 @@ namespace MagicStorage
 
 					Recipe selected = null;
 
-					foreach (Recipe r in itemRecipes.Where(x => IsKnownRecursively(x, knownItems, recursionTree, cache)))
+					foreach (Recipe r in itemRecipes)
 					{
+						if (!IsKnownRecursively(r, knownItems, recursionTree, cache))
+							continue;
+
 						selected ??= r;
 						if (IsAvailable(r))
 						{
