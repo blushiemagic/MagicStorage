@@ -150,6 +150,9 @@ namespace MagicStorage
 
 		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
 		{
+			if (recipe == Members.ThreadCompoundRecipe.Compound)
+				recipe = Members.ThreadCompoundRecipe.OverridenRecipe!;
+
 			if (!RecursiveCraftMod.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
