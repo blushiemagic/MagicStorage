@@ -11,13 +11,15 @@ using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage
 {
+	[JITWhenModsEnabled(RecursiveCraftModName)]
 	public sealed class RecursiveCraftIntegration : ModSystem
 	{
+		private const string RecursiveCraftModName = "RecursiveCraft";
 		public static bool Enabled { get; private set; }
 
 		public override void Load()
 		{
-			Enabled = ModLoader.HasMod("RecursiveCraft");
+			Enabled = ModLoader.HasMod(RecursiveCraftModName);
 			if (Enabled)
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
@@ -213,7 +215,9 @@ namespace MagicStorage
 			return Members.ThreadCompoundRecipe.Compound;
 		}
 		*/
+
 		// TODO: test if the new tml JIT system allows these to be regular fields
+		[JITWhenModsEnabled(RecursiveCraftModName)]
 		private static class Members
 		{
 			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
