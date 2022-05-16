@@ -11,8 +11,8 @@ namespace MagicStorage.Sorting
 		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter,
 			int? takeCount = null)
 		{
-			ItemFilter filter = MakeFilter(filterMode);
-			IEnumerable<Item> filteredItems = items.Where(item => filter.Passes(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
+			var filter = MakeFilter(filterMode);
+			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
 
@@ -40,10 +40,12 @@ namespace MagicStorage.Sorting
 
 		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
-			ItemFilter filter = MakeFilter(filterMode);
+			var filter = MakeFilter(filterMode);
 			var filteredRecipes = Main.recipe
-				.AsParallel().AsOrdered().Take(Recipe.numRecipes)
-				.Where(recipe => filter.Passes(recipe) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+				.AsParallel()
+				.AsOrdered()
+				.Take(Recipe.numRecipes)
+				.Where(recipe => filter(recipe.createItem) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 
 			CompareFunction sortFunction = MakeSortFunction(sortMode);
 			return sortFunction is null
@@ -60,36 +62,33 @@ namespace MagicStorage.Sorting
 				SortMode.Name    => new CompareName(),
 				SortMode.Value   => new CompareValue(),
 				SortMode.Dps     => new CompareDps(),
-				_                => null
+				_                => null,
 			};
 
 			return func;
 		}
 
-		private static ItemFilter MakeFilter(FilterMode filterMode)
+		private static ItemFilter.Filter MakeFilter(FilterMode filterMode)
 		{
-			//Changing the filter config requires a reload anyway... So we probably don't need to verify against the non-extra sorting types
-			ItemFilter filter = filterMode switch
+			return filterMode switch
 			{
-				FilterMode.All           => new FilterAll(),
-				FilterMode.WeaponsMelee  => MagicStorageConfig.ExtraFilterIcons ? new FilterWeaponMelee() : new FilterWeapon(),
-				FilterMode.WeaponsRanged => new FilterWeaponRanged(),
-				FilterMode.WeaponsMagic  => new FilterWeaponMagic(),
-				FilterMode.WeaponsSummon => new FilterWeaponSummon(),
-				FilterMode.Ammo          => new FilterAmmo(),
-				FilterMode.WeaponsThrown => new FilterWeaponThrown(),
-				FilterMode.Tools         => new FilterTool(),
-				FilterMode.Armor         => new FilterArmor(),
-				FilterMode.Vanity        => new FilterVanity(),
-				FilterMode.Equipment     => new FilterEquipment(),
-				FilterMode.Potions       => new FilterPotion(),
-				FilterMode.Placeables    => new FilterPlaceable(),
-				FilterMode.Misc          => new FilterMisc(),
+				FilterMode.All           => ItemFilter.All,
+				FilterMode.WeaponsMelee  => MagicStorageConfig.ExtraFilterIcons ? ItemFilter.WeaponMelee : ItemFilter.Weapon,
+				FilterMode.WeaponsRanged => ItemFilter.WeaponRanged,
+				FilterMode.WeaponsMagic  => ItemFilter.WeaponMagic,
+				FilterMode.WeaponsSummon => ItemFilter.WeaponSummon,
+				FilterMode.Ammo          => ItemFilter.Ammo,
+				FilterMode.WeaponsThrown => ItemFilter.WeaponThrown,
+				FilterMode.Tools         => ItemFilter.Tool,
+				FilterMode.Armor         => ItemFilter.Armor,
+				FilterMode.Vanity        => ItemFilter.Vanity,
+				FilterMode.Equipment     => ItemFilter.Equipment,
+				FilterMode.Potions       => ItemFilter.Potion,
+				FilterMode.Placeables    => ItemFilter.Placeable,
+				FilterMode.Misc          => ItemFilter.Misc,
 				FilterMode.Recent        => throw new NotSupportedException(),
-				_                        => new FilterAll()
+				_                        => ItemFilter.All,
 			};
-
-			return filter;
 		}
 
 		private static bool FilterName(Item item, string filter)
