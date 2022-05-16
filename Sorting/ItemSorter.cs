@@ -91,21 +91,18 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		private static bool FilterName(Item item, string filter)
-		{
-			if (filter.Trim().Length == 0)
-				filter = string.Empty;
-			return item.Name.ToLowerInvariant().Contains(filter.Trim().ToLowerInvariant());
-		}
+		private static bool FilterName(Item item, string filter) => item.Name.ToLowerInvariant().Contains(filter.Trim().ToLowerInvariant());
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{
 			if (modFilterIndex == ModSearchBox.ModIndexAll)
 				return true;
-			Mod[] allMods = MagicStorage.AllMods;
+
 			int index = ModSearchBox.ModIndexBaseGame;
+
 			if (item.ModItem is not null)
-				index = Array.IndexOf(allMods, item.ModItem.Mod);
+				index = MagicStorage.IndexByMod[item.ModItem.Mod];
+
 			return index == modFilterIndex;
 		}
 	}

@@ -63,8 +63,10 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				_modButton.BackgroundColor = new Color(73, 94, 171);
-				Mod[] allMods = MagicStorage.AllMods;
+
+				var allMods = MagicStorage.AllMods;
 				int index = ModIndex;
+
 				if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
 				{
 					index++;
