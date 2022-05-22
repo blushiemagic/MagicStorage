@@ -277,10 +277,13 @@ namespace MagicStorage.Sorting
 
 	public class DefaultSortClass
 	{
-		private readonly Func<Item, bool> passFunc;
-		private readonly Func<Item, Item, int> compareFunc;
+		public delegate bool PassFilter(Item item);
+		public delegate int CompareFilter(Item item1, Item item2);
 
-		public DefaultSortClass(Func<Item, bool> passFunc, Func<Item, Item, int> compareFunc)
+		private readonly PassFilter passFunc;
+		private readonly CompareFilter compareFunc;
+
+		public DefaultSortClass(PassFilter passFunc, CompareFilter compareFunc)
 		{
 			this.passFunc = passFunc;
 			this.compareFunc = compareFunc;

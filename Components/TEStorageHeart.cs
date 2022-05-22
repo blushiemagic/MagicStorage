@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using System;
 using System.Collections.Concurrent;
 
 namespace MagicStorage.Components
@@ -56,7 +54,6 @@ namespace MagicStorage.Components
 		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
 		bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
-		private readonly ReaderWriterLockSlim itemsLock = new();
 		private int compactStage;
 		public HashSet<Point16> remoteAccesses = new();
 		private int updateTimer = 60;

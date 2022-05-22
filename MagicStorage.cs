@@ -4,6 +4,7 @@ using MagicStorage.Stations;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Terraria;
@@ -21,7 +22,8 @@ namespace MagicStorage {
 
 		public static ModKeybind IsItemKnownHotKey { get; private set; }
 
-		public static Mod[] AllMods { get; private set; }
+		public static ImmutableArray<Mod> AllMods { get; private set; }
+		public static Dictionary<Mod, int> IndexByMod { get; private set; }
 
 		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
 
@@ -36,7 +38,6 @@ namespace MagicStorage {
 			AddTranslations();
 			IsItemKnownHotKey = KeybindLoader.RegisterKeybind(this, "Is This Item Known?", Keys.Q);
 
-			RecursiveCraftIntegration.Load();
 			EditsLoader.Load();
 
 			DirectDetourManager.Load();
@@ -47,7 +48,6 @@ namespace MagicStorage {
 			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
-			RecursiveCraftIntegration.Unload();
 
 			DirectDetourManager.Unload();
 		}
@@ -349,16 +349,22 @@ namespace MagicStorage {
 					copy.Register();
 				}
 			}
-
-			RecursiveCraftIntegration.PostAddRecipes();
 		}
 
 		public override void PostSetupContent()
 		{
-			AllMods = ModLoader.Mods.Where(mod => mod.Name != "ModLoader")
+			AllMods = ModLoader.Mods.Skip(1)
 				.Where(mod => !mod.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
 				.Where(mod => mod.GetContent<ModItem>().Any())
-				.ToArray();
+				.ToImmutableArray();
+
+			IndexByMod = new();
+
+			for (int i = 0; i < AllMods.Length; i++)
+			{
+				var mod = AllMods[i];
+				IndexByMod[mod] = i;
+			}
 		}
 
 		public override void AddRecipeGroups()

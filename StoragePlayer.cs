@@ -91,10 +91,7 @@ namespace MagicStorage
 			if (storageAccess.X >= 0 && storageAccess.Y >= 0 && (Player.chest != -1 || !Main.playerInventory || Player.sign > -1 || Player.talkNPC > -1))
 			{
 				CloseStorage();
-				lock (BlockRecipes.ActiveLock)
-				{
-					Recipe.FindRecipes();
-				}
+				Recipe.FindRecipes();
 			}
 			else if (storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{

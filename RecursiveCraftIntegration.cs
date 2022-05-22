@@ -1,33 +1,27 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using MagicStorage.Components;
 using RecursiveCraft;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage
 {
+#if !TML_2022_04
 	[JITWhenModsEnabled(RecursiveCraftModName)]
-	public static class RecursiveCraftIntegration
+#endif
+	public sealed class RecursiveCraftIntegration : ModSystem
 	{
-		// Here we store a reference to the RecursiveCraft Mod instance. We can use it for many things.
-		// You can call all the Mod methods on it just like we do with our own Mod instance: RecursiveCraftMod.ItemType("ExampleItem")
-		private static Mod RecursiveCraftMod;
+		private const string RecursiveCraftModName = "RecursiveCraft";
+		public static bool Enabled { get; private set; }
 
-		public const string RecursiveCraftModName = "RecursiveCraft";
-
-		// Here we define a bool property to quickly check if RecursiveCraft is loaded.
-		public static bool Enabled => RecursiveCraftMod is not null;
-
-		public static void Load()
+		public override void Load()
 		{
-			ModLoader.TryGetMod(RecursiveCraftModName, out RecursiveCraftMod);
+			Enabled = ModLoader.HasMod(RecursiveCraftModName);
 			if (Enabled)
 				StrongRef_Load(); // Move that logic into another method to prevent this.
 		}
@@ -37,41 +31,46 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Load()
 		{
-			// This method will only be called when Enable is true, preventing TypeInitializationException
-			Members.RecipeInfoCache = new Dictionary<Recipe, RecipeInfo>();
-
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
+
+			Members.RecipeInfoCache = new();
 		}
 
-		public static void PostAddRecipes()
+		public override void PostAddRecipes()
 		{
 			if (Enabled)
 				StrongRef_PostAddRecipes();
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void StrongRef_PostAddRecipes()
+		private void StrongRef_PostAddRecipes()
 		{
-			Members.CompoundRecipe       = new CompoundRecipe(RecursiveCraftMod);
-			Members.ThreadCompoundRecipe = new CompoundRecipe(RecursiveCraftMod);
+			Members.CompoundRecipes = new CompoundRecipe[Recipe.maxRecipes];
+			Members.RecipeToCompoundRecipe = new();
+
+			for (int i = 0; i < Recipe.maxRecipes; i++)
+			{
+				CompoundRecipe compoundRecipe = new(Mod);
+
+				Members.CompoundRecipes[i] = compoundRecipe;
+				Members.RecipeToCompoundRecipe[compoundRecipe.Compound] = compoundRecipe;
+			}
 		}
 
-		public static void Unload()
+		public override void Unload()
 		{
-			if (Enabled) // Here we properly unload, making sure to check Enabled before setting RecursiveCraftMod to null.
+			if (Enabled)            // Here we properly unload, making sure to check Enabled before unloading anything.
 				StrongRef_Unload(); // Once again we must separate out this logic.
-
-			RecursiveCraftMod = null; // Make sure to null out any references to allow Garbage Collection to work.
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Unload()
 		{
-			Members.RecipeInfoCache      = null;
-			Members.CompoundRecipe       = null;
-			Members.ThreadCompoundRecipe = null;
-
 			OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
+
+			Members.RecipeInfoCache = null!;
+			Members.CompoundRecipes = null!;
+			Members.RecipeToCompoundRecipe = null!;
 		}
 
 		private static int OnPlayerQuickSpawnItem_IEntitySource_int_int(OnPlayer.orig_QuickSpawnItem_IEntitySource_int_int orig,
@@ -79,11 +78,9 @@ namespace MagicStorage
 		{
 			if (CraftingGUI.compoundCrafting)
 			{
-				Item item = new();
-				item.SetDefaults(type);
-				item.stack = stack;
+				Item item = new(type, stack);
 				CraftingGUI.compoundCraftSurplus.Add(item);
-				return -1;
+				return -1; // return invalid value since this should never be used
 			}
 
 			return orig(self, source, type, stack);
@@ -91,95 +88,127 @@ namespace MagicStorage
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
 		{
-			Dictionary<int, int> dictionary = new();
-			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
-				dictionary[type] = amount;
-			return dictionary;
+			ArgumentNullException.ThrowIfNull(items);
+
+			Dictionary<int, int> flatDict = new();
+
+			foreach (Item item in items)
+			{
+				int type = item.type;
+				int stack = item.stack;
+
+				if (flatDict.ContainsKey(type))
+				{
+					flatDict[type] += stack;
+				}
+				else
+				{
+					flatDict.Add(type, stack);
+				}
+			}
+
+			return flatDict;
 		}
 
 		// Make sure to extract the .dll from the .tmod and then add them to your .csproj as references.
 		// As a convention, I rename the .dll file ModName_v1.2.3.4.dll and place them in Mod Sources/Mods/lib.
 		// I do this for organization and so the .csproj loads properly for others using the GitHub repository.
 		// Remind contributors to download the referenced mod itself if they wish to build the mod.
-		public static void RecursiveRecipes()
+		public static void RefreshRecursiveRecipes()
 		{
-			Main.rand ??= new UnifiedRandom((int)DateTime.UtcNow.Ticks);
-			Dictionary<int, int> storedItems = GetStoredItems();
-			if (storedItems == null)
-				return;
-
-			lock (Members.RecipeInfoCache)
+			CraftingGUI.ExecuteInCraftingGuiEnvironment(() =>
 			{
-				Members.RecipeInfoCache.Clear();
-				RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
-				foreach (Recipe r in Main.recipe)
+				var storedItems = GetStoredItems();
+				if (storedItems is null)
+					return;
+
+				FindRecipes(storedItems);
+			});
+		}
+
+		private static void FindRecipes(Dictionary<int, int> inventory)
+		{
+			Members.RecipeInfoCache.Clear();
+			RecursiveSearch recursiveSearch = new(inventory);
+
+			for (int i = 0; i < Recipe.numRecipes; i++)
+			{
+				Recipe recipe = Main.recipe[i];
+
+				if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 				{
-					Recipe recipe = r;
-					if (recipe.createItem.type == ItemID.None)
-						break;
-					if (recipe == Members.CompoundRecipe.Compound)
-						recipe = Members.CompoundRecipe.OverridenRecipe;
-					SingleSearch(recipe);
+					ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
+					recipe = compoundRecipe.OverridenRecipe;
+				}
+
+				RecipeInfo? recipeInfo = recursiveSearch.FindIngredientsForRecipe(recipe);
+				if (recipeInfo != null)
+				{
+					if (recipeInfo.RecipeUsed.Count > 1)
+						Members.RecipeInfoCache.Add(recipe, recipeInfo);
 				}
 			}
 		}
 
-		private static Dictionary<int, int> GetStoredItems()
+		private static Dictionary<int, int>? GetStoredItems()
 		{
 			Player player = Main.LocalPlayer;
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			TEStorageHeart heart = modPlayer.GetStorageHeart();
-			if (heart is not null)
-				return FlatDict(heart.GetStoredItems());
-			return null;
+			if (heart is null)
+				return null;
+
+			return FlatDict(heart.GetStoredItems());
 		}
 
-		private static void SingleSearch(Recipe recipe)
+		public static bool IsCompoundRecipe(Recipe recipe) => Members.RecipeToCompoundRecipe.ContainsKey(recipe);
+
+		public static bool HasCompoundVariant(Recipe recipe)
 		{
-			lock (BlockRecipes.ActiveLock)
+			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
-				BlockRecipes.Active = false;
-				if (RecursiveCraft.RecursiveCraft.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo) && recipeInfo.RecipeUsed?.Count > 1)
-					Members.RecipeInfoCache.Add(recipe, recipeInfo);
-				BlockRecipes.Active = true;
+				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
+				recipe = compoundRecipe.OverridenRecipe;
 			}
-		}
-
-		public static bool IsCompoundRecipe(Recipe recipe) => recipe == Members.CompoundRecipe.Compound;
-
-		public static Recipe GetOverriddenRecipe(Recipe recipe) => recipe == Members.CompoundRecipe.Compound ? Members.CompoundRecipe.OverridenRecipe : recipe;
-
-		public static bool UpdateRecipe(Recipe recipe)
-		{
-			if (recipe == Members.CompoundRecipe.Compound)
-				recipe = Members.CompoundRecipe.OverridenRecipe;
-
-			Dictionary<int, int> storedItems = GetStoredItems();
-			if (storedItems is not null)
-				lock (Members.RecipeInfoCache)
-				{
-					Members.RecipeInfoCache.Remove(recipe);
-					RecursiveCraft.RecursiveCraft.FindRecipes(storedItems);
-					SingleSearch(recipe);
-				}
 
 			return Members.RecipeInfoCache.ContainsKey(recipe);
 		}
 
+		public static Recipe GetOverriddenRecipe(Recipe recipe)
+		{
+			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+			{
+				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
+				return compoundRecipe.OverridenRecipe;
+			}
+
+			return recipe;
+		}
+
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
-			if (recipe == Members.CompoundRecipe.Compound)
-				recipe = Members.CompoundRecipe.OverridenRecipe;
-			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
+			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+			{
+				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
+				recipe = compoundRecipe.OverridenRecipe;
+			}
+
+			if (!Members.RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe);
-			Members.CompoundRecipe.Apply(index, recipeInfo);
-			return Members.CompoundRecipe.Compound;
+			compoundRecipe = Members.CompoundRecipes[index];
+			compoundRecipe.Apply(index, recipeInfo);
+
+			return compoundRecipe.Compound;
 		}
 
+		/*
 		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
 		{
+			if (recipe == Members.ThreadCompoundRecipe.Compound)
+				recipe = Members.ThreadCompoundRecipe.OverridenRecipe!;
+
 			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
 				return recipe;
 
@@ -187,13 +216,17 @@ namespace MagicStorage
 			Members.ThreadCompoundRecipe.Apply(index, recipeInfo);
 			return Members.ThreadCompoundRecipe.Compound;
 		}
+		*/
 
+		// TODO: test if the new tml JIT system allows these to be regular fields
+#if !TML_2022_04
 		[JITWhenModsEnabled(RecursiveCraftModName)]
+#endif
 		private static class Members
 		{
-			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache;
-			public static CompoundRecipe CompoundRecipe;
-			public static CompoundRecipe ThreadCompoundRecipe;
+			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
+			public static CompoundRecipe[] CompoundRecipes = null!;
+			public static Dictionary<Recipe, CompoundRecipe> RecipeToCompoundRecipe = null!;
 		}
 	}
 }

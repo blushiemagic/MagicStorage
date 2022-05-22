@@ -88,7 +88,7 @@ namespace MagicStorage.Items
 			if (player.whoAmI == Main.myPlayer && item.type == ItemID.MarshmallowonaStick && player.GetModPlayer<BiomePlayer>().biomeGlobe)
 			{
 				player.miscTimer++;
-				if (Main.rand.Next(5) == 0)
+				if (Main.rand.NextBool(5))
 					player.miscTimer++;
 
 				if (player.miscTimer > 900)
@@ -103,7 +103,7 @@ namespace MagicStorage.Items
 					{
 						if (player.inventory[k].type == sItem.type && k != player.selectedItem && player.inventory[k].stack < player.inventory[k].maxStack)
 						{
-							SoundEngine.PlaySound(7);
+							SoundEngine.PlaySound(SoundID.Grab);
 							player.inventory[k].stack++;
 							sItem.SetDefaults();
 
