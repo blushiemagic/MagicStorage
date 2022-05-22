@@ -96,10 +96,7 @@ namespace MagicStorage.Components
 			{
 				modPlayer.CloseStorage();
 				SoundEngine.PlaySound(SoundID.MenuClose);
-				lock (BlockRecipes.ActiveLock)
-				{
-					Recipe.FindRecipes();
-				}
+				Recipe.FindRecipes();
 			}
 			else
 			{
@@ -110,10 +107,7 @@ namespace MagicStorage.Components
 					PlayerInput.Triggers.JustPressed.Grapple = false;
 				Main.recBigList = false;
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
-				lock (BlockRecipes.ActiveLock)
-				{
-					Recipe.FindRecipes();
-				}
+				Recipe.FindRecipes();
 			}
 
 			return true;

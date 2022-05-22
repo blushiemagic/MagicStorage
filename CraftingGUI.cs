@@ -569,17 +569,13 @@ namespace MagicStorage
 			if (ProcessGroupsForText(selectedRecipe, item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 
-			Item storageItem;
 			int totalGroupStack = 0;
-			lock (storageItems)
-			{
-				storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
+			Item storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
 
-				foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Select(index => RecipeGroup.recipeGroups[index]))
-					if (rec.ValidItems.Contains(item.type))
-						foreach (int type in rec.ValidItems)
-							totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
-			}
+			foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Select(index => RecipeGroup.recipeGroups[index]))
+				if (rec.ValidItems.Contains(item.type))
+					foreach (int type in rec.ValidItems)
+						totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
 
 			if (!item.IsAir)
 			{
@@ -626,12 +622,9 @@ namespace MagicStorage
 			int GetAmountCraftable(Item requiredItem)
 			{
 				int total = 0;
-				lock (items)
-				{
-					foreach (Item inventoryItem in items)
-						if (inventoryItem.type == requiredItem.type || RecipeGroupMatch(recipe, inventoryItem.type, requiredItem.type))
-							total += inventoryItem.stack;
-				}
+				foreach (Item inventoryItem in items)
+					if (inventoryItem.type == requiredItem.type || RecipeGroupMatch(recipe, inventoryItem.type, requiredItem.type))
+						total += inventoryItem.stack;
 
 				int craftable = total / requiredItem.stack;
 				return craftable;
@@ -646,11 +639,8 @@ namespace MagicStorage
 		{
 			int index = slot + IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
-			lock (blockStorageItems)
-			{
-				if (blockStorageItems.Contains(new ItemData(item)))
-					context = 3;
-			}
+			if (blockStorageItems.Contains(new ItemData(item)))
+				context = 3;
 
 			return item;
 		}
@@ -888,15 +878,12 @@ namespace MagicStorage
 				foreach (int item in GetKnownItems())
 					modPlayer.SeenRecipes.Add(item);
 
-			lock (items)
-			{
-				items.Clear();
-				TEStorageHeart heart = GetHeart();
-				if (heart == null)
-					return;
+			items.Clear();
+			TEStorageHeart heart = GetHeart();
+			if (heart == null)
+				return;
 
-				items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
-			}
+			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
 			AnalyzeIngredients();
 			InitLangStuff();
@@ -1121,10 +1108,7 @@ namespace MagicStorage
 
 					selectedRecipe = compound;
 					RefreshStorageItems();
-					lock (blockStorageItems)
-					{
-						blockStorageItems.Clear();
-					}
+					blockStorageItems.Clear();
 				}
 
 				if (RecursiveCraftIntegration.Enabled)
@@ -1170,12 +1154,9 @@ namespace MagicStorage
 			graveyard = false;
 			Campfire = false;
 
-			lock (itemCounts)
-			{
-				itemCounts.Clear();
-				foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
-					itemCounts[type] = amount;
-			}
+			itemCounts.Clear();
+			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
+				itemCounts[type] = amount;
 
 			foreach (Item item in GetCraftingStations())
 			{
@@ -1289,24 +1270,21 @@ namespace MagicStorage
 			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
 
-			lock (itemCounts)
+			foreach (Item ingredient in recipe.requiredItem)
 			{
-				foreach (Item ingredient in recipe.requiredItem)
-				{
-					int stack = ingredient.stack;
-					bool useRecipeGroup = false;
-					foreach (int type in itemCounts.Keys)
-						if (RecipeGroupMatch(recipe, type, ingredient.type))
-						{
-							stack -= itemCounts[type];
-							useRecipeGroup = true;
-						}
+				int stack = ingredient.stack;
+				bool useRecipeGroup = false;
+				foreach (var (type, count) in itemCounts)
+					if (RecipeGroupMatch(recipe, type, ingredient.type))
+					{
+						stack -= count;
+						useRecipeGroup = true;
+					}
 
-					if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
-						stack -= amount;
-					if (stack > 0)
-						return false;
-				}
+				if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
+					stack -= amount;
+				if (stack > 0)
+					return false;
 			}
 
 
@@ -1325,6 +1303,8 @@ namespace MagicStorage
 		{
 			ArgumentNullException.ThrowIfNull(action);
 
+			// TODO: figure out a way to remove this lock
+			// can't really do it with this design because this method runs many times in parallel
 			lock (BlockRecipes.ActiveLock)
 			{
 				Player player = Main.LocalPlayer;
@@ -1365,29 +1345,24 @@ namespace MagicStorage
 			{
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
-				lock (storageItems)
-				{
-					lock (blockStorageItems)
-					{
-						foreach (Item item in storageItems)
-						{
-							ItemData data = new(item);
-							if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.type, ingredient.type))
-							{
-								stack -= item.stack;
-								useRecipeGroup = true;
-							}
-						}
 
-						if (!useRecipeGroup)
-							foreach (Item item in storageItems)
-							{
-								ItemData data = new(item);
-								if (!blockStorageItems.Contains(data) && item.type == ingredient.type)
-									stack -= item.stack;
-							}
+				foreach (Item item in storageItems)
+				{
+					ItemData data = new(item);
+					if (!blockStorageItems.Contains(data) && RecipeGroupMatch(recipe, item.type, ingredient.type))
+					{
+						stack -= item.stack;
+						useRecipeGroup = true;
 					}
 				}
+
+				if (!useRecipeGroup)
+					foreach (Item item in storageItems)
+					{
+						ItemData data = new(item);
+						if (!blockStorageItems.Contains(data) && item.type == ingredient.type)
+							stack -= item.stack;
+					}
 
 				if (stack > 0)
 					return false;
@@ -1399,28 +1374,22 @@ namespace MagicStorage
 
 		private static void RefreshStorageItems()
 		{
-			lock (storageItems)
+			storageItems.Clear();
+			result = null;
+			if (selectedRecipe is null)
+				return;
+
+			foreach (Item item in items)
 			{
-				storageItems.Clear();
-				result = null;
-				if (selectedRecipe is not null)
-				{
-					lock (items)
-					{
-						foreach (Item item in items)
-						{
-							foreach (Item reqItem in selectedRecipe.requiredItem)
-								if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type))
-									storageItems.Add(item);
+				foreach (Item reqItem in selectedRecipe.requiredItem)
+					if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type))
+						storageItems.Add(item);
 
-							if (item.type == selectedRecipe.createItem.type)
-								result = item;
-						}
-					}
-
-					result ??= new Item(selectedRecipe.createItem.type, 0);
-				}
+				if (item.type == selectedRecipe.createItem.type)
+					result = item;
 			}
+
+			result ??= new Item(selectedRecipe.createItem.type, 0);
 		}
 
 		private static bool RecipeGroupMatch(Recipe recipe, int inventoryType, int requiredType)
@@ -1564,10 +1533,7 @@ namespace MagicStorage
 
 			selectedRecipe = recipe;
 			RefreshStorageItems();
-			lock (blockStorageItems)
-			{
-				blockStorageItems.Clear();
-			}
+			blockStorageItems.Clear();
 		}
 
 		private static void HoverHeader(int slot, ref int hoverSlot)
@@ -1636,13 +1602,10 @@ namespace MagicStorage
 			if (MouseClicked)
 			{
 				ItemData data = new(item);
-				lock (blockStorageItems)
-				{
-					if (blockStorageItems.Contains(data))
-						blockStorageItems.Remove(data);
-					else
-						blockStorageItems.Add(data);
-				}
+				if (blockStorageItems.Contains(data))
+					blockStorageItems.Remove(data);
+				else
+					blockStorageItems.Add(data);
 			}
 
 			hoverSlot = visualSlot;
@@ -1740,14 +1703,8 @@ namespace MagicStorage
 
 		private static void TryCraft()
 		{
-			List<Item> availableItems;
 			var toWithdraw = new List<Item>();
-
-			lock (storageItems)
-				lock (blockStorageItems)
-				{
-					availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
-				}
+			var availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
 
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
