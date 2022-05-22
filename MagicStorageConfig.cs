@@ -41,6 +41,12 @@ namespace MagicStorage
 		[ReloadRequired]
 		public bool extraFilterIcons;
 
+		[Label("Estimate the dps of weapons")]
+		[Tooltip("Enable to show a tooltip with the estimated dps of the item")]
+		[DefaultValue(true)]
+		[ReloadRequired]
+		public bool showDps;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -60,6 +66,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ExtraFilterIcons => Instance.extraFilterIcons;
+
+		[JsonIgnore]
+		public static bool ShowDps => Instance.showDps;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
