@@ -499,7 +499,7 @@ namespace MagicStorage
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-					if (selectedRecipe is not null && Main.mouseItem.IsAir && CanItemBeTakenForTest(selectedRecipe.createItem))
+					if (selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 						Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
 		}
 
