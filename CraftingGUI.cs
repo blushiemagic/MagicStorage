@@ -786,30 +786,50 @@ namespace MagicStorage
 				else */
 				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
-					if (craftTimer <= 0)
+					if (Main.keyState.IsKeyDown(Keys.LeftControl))
 					{
-						craftTimer = maxCraftTimer;
-						maxCraftTimer = maxCraftTimer * 3 / 4;
-						if (maxCraftTimer <= 0)
-
-							maxCraftTimer = 1;
-
-						TryCraft();
-						if (RecursiveCraftIntegration.Enabled)
+						while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 						{
-							RecursiveCraftIntegration.RefreshRecursiveRecipes();
-							if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
-								SetSelectedRecipe(selectedRecipe);
+							TryCraft();
+							if (RecursiveCraftIntegration.Enabled)
+							{
+								RecursiveCraftIntegration.RefreshRecursiveRecipes();
+								if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
+									SetSelectedRecipe(selectedRecipe);
+							}
+
+							RefreshItems();
 						}
 
-						RefreshItems();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
+					else
+					{
+						if (craftTimer <= 0)
+						{
+							craftTimer = maxCraftTimer;
+							maxCraftTimer = maxCraftTimer * 3 / 4;
+							if (maxCraftTimer <= 0)
 
-					craftTimer--;
-					stillCrafting = true;
-					if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
-						RefreshItems();
+								maxCraftTimer = 1;
+
+							TryCraft();
+							if (RecursiveCraftIntegration.Enabled)
+							{
+								RecursiveCraftIntegration.RefreshRecursiveRecipes();
+								if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
+									SetSelectedRecipe(selectedRecipe);
+							}
+
+							RefreshItems();
+							SoundEngine.PlaySound(SoundID.Grab);
+						}
+
+						craftTimer--;
+						stillCrafting = true;
+						if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
+							RefreshItems();
+					}
 				}
 			}
 
