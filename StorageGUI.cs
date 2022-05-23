@@ -530,9 +530,7 @@ namespace MagicStorage
 			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			var items = new List<Item>();
 
-			//NEED to ignore mouse item (slot 58), otherwise the item gets cloned for whatever reason
-			// - absoluteAquarian
-			for (int k = 10; k < 58; k++)
+			for (int k = 10; k < 54; k++)
 			{
 				Item item = player.inventory[k];
 				if (filter(item))
