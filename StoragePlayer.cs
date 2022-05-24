@@ -193,14 +193,7 @@ namespace MagicStorage
 				return false;
 			int oldType = item.type;
 			int oldStack = item.stack;
-			if (StorageCrafting())
-			{
-				GetCraftingAccess().TryDepositStation(item);
-			}
-			else
-			{
-				GetStorageHeart().TryDeposit(item);
-			}
+			GetStorageHeart().TryDeposit(item);
 
 			if (item.type != oldType || item.stack != oldStack)
 			{
