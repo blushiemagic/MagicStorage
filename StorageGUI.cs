@@ -482,10 +482,6 @@ namespace MagicStorage
 				SlotFocusLogic();
 		}
 
-		#if !TML_2022_04
-		public static readonly SoundStyle MenuTickOnce = SoundID.MenuTick with { SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest };
-		#endif
-
 		private static void SlotFocusLogic()
 		{
 			if (slotFocus >= items.Count ||
@@ -514,7 +510,7 @@ namespace MagicStorage
 					SoundEngine.LegacySoundPlayer.SoundInstanceMenuTick = SoundEngine.LegacySoundPlayer.SoundMenuTick.Value.CreateInstance();
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					#else
-					SoundEngine.PlaySound(MenuTickOnce);
+					SoundEngine.PlaySound(SoundID.MenuTick);
 					#endif
 					
 					RefreshItems();
