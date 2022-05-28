@@ -26,7 +26,7 @@ namespace MagicStorage
 
 		public int timeSinceOpen = 1;
 
-		public override bool CloneNewInstances => false;
+		protected override bool CloneNewInstances => false;
 
 		public IEnumerable<Item> HiddenRecipes => _hiddenRecipes.Items;
 

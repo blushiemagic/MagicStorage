@@ -482,6 +482,10 @@ namespace MagicStorage
 				SlotFocusLogic();
 		}
 
+		#if !TML_2022_04
+		public static readonly SoundStyle MenuTickOnce = SoundID.MenuTick with { SoundLimitBehavior = SoundLimitBehavior.ReplaceOldest };
+		#endif
+
 		private static void SlotFocusLogic()
 		{
 			if (slotFocus >= items.Count ||
@@ -504,9 +508,15 @@ namespace MagicStorage
 						Main.mouseItem = result;
 					else
 						Main.mouseItem.stack += result.stack;
+					
+					#if TML_2022_04
 					SoundEngine.LegacySoundPlayer.SoundInstanceMenuTick.Stop();
 					SoundEngine.LegacySoundPlayer.SoundInstanceMenuTick = SoundEngine.LegacySoundPlayer.SoundMenuTick.Value.CreateInstance();
 					SoundEngine.PlaySound(SoundID.MenuTick);
+					#else
+					SoundEngine.PlaySound(MenuTickOnce);
+					#endif
+					
 					RefreshItems();
 				}
 
