@@ -966,8 +966,10 @@ namespace MagicStorage
 			if (_productToRecipes is not null)
 				return;
 
-			IEnumerable<Recipe> allRecipes = ItemSorter.GetRecipes(SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, "")
+			var allRecipes = Main.recipe
+				.Take(Recipe.numRecipes)
 				.Where(x => x.createItem.type > ItemID.None);
+
 			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 		}
 
