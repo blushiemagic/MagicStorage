@@ -4,15 +4,17 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Localization;
-using Terraria.ModLoader;
 using Terraria.UI;
+
+#nullable enable
 
 namespace MagicStorage.UI
 {
 	public class UIButtonChoice : UIElement
 	{
-		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
-		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+		private static Asset<Texture2D> BackTexture => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
+		private static Asset<Texture2D> BackTextureActive => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+
 		private readonly Action _onChanged;
 		private readonly int buttonPadding;
 
@@ -25,6 +27,10 @@ namespace MagicStorage.UI
 
 		public UIButtonChoice(Action onChanged, Asset<Texture2D>[] buttons, LocalizedText[] names, int buttonSize = 21, int buttonPadding = 1)
 		{
+			ArgumentNullException.ThrowIfNull(onChanged);
+			ArgumentNullException.ThrowIfNull(buttons);
+			ArgumentNullException.ThrowIfNull(names);
+
 			if (buttons.Length != names.Length || buttons.Length == 0)
 				throw new ArgumentException("Array Lengths must match and be non-zero");
 
@@ -33,7 +39,9 @@ namespace MagicStorage.UI
 			this.buttonPadding = buttonPadding;
 			this.buttons = buttons;
 			this.names = names;
-			int width = buttonSize * buttons.Length + buttonPadding * (buttons.Length - 1);
+
+			int width = (buttonSize + buttonPadding) * buttons.Length - buttonPadding;
+
 			Width.Set(width, 0f);
 			MinWidth.Set(width, 0f);
 			Height.Set(buttonSize, 0f);
@@ -52,7 +60,7 @@ namespace MagicStorage.UI
 					}
 
 			if (oldChoice != Choice)
-				_onChanged?.Invoke();
+				_onChanged();
 		}
 
 		private bool MouseOverButton(int mouseX, int mouseY, int button)
