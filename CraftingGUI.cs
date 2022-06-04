@@ -1072,6 +1072,7 @@ namespace MagicStorage
 						// hard check if this item can be crafted from available items and their recursive products
 						.Where(x => !wasItemChecklistRetrieved || IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
 						// favorites first
+						.AsSequential()
 						.OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1);
 
 					recipes.Clear();
@@ -1079,7 +1080,7 @@ namespace MagicStorage
 
 					if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
 					{
-						recipes.AddRange(filteredRecipes.Where(r => IsAvailable(r)));
+						recipes.AddRange(filteredRecipes.AsParallel().AsOrdered().Where(r => IsAvailable(r)));
 						recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
 					}
 					else
