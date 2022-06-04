@@ -49,12 +49,17 @@ namespace MagicStorage
 
 		private string MakeModButtonText()
 		{
-			return ModIndex switch
+			string name = ModIndex switch
 			{
 				ModIndexAll      => "All mods",
 				ModIndexBaseGame => "Terraria",
 				_                => MagicStorage.AllMods[ModIndex].Name
 			};
+
+			if (name == "ModLoader")
+				name = "tModLoader";
+
+			return name;
 		}
 
 		public void Update(MouseState curMouse, MouseState oldMouse)

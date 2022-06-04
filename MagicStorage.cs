@@ -353,8 +353,7 @@ namespace MagicStorage {
 
 		public override void PostSetupContent()
 		{
-			AllMods = ModLoader.Mods.Skip(1)
-				.Where(mod => !mod.Name.EndsWith("Library", StringComparison.OrdinalIgnoreCase))
+			AllMods = ModLoader.Mods
 				.Where(mod => mod.GetContent<ModItem>().Any())
 				.ToImmutableArray();
 
