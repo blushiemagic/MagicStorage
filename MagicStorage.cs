@@ -328,23 +328,21 @@ namespace MagicStorage {
 
 		public override void PostAddRecipes() {
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
-			for (int i = 0; i < Recipe.maxRecipes; i++)
+			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
 				Recipe recipe = Main.recipe[i];
 
+				if (recipe.Disabled)
+					continue;
+
 				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
-					Recipe copy = CreateRecipe(recipe.createItem.type, recipe.createItem.stack);
+					Recipe copy = CloneRecipe(recipe);
 
-					foreach (Item item in recipe.requiredItem)
-						copy.AddIngredient(item.type, item.stack);
+					copy.requiredTile.Clear();
+					copy.AddTile<CombinedStations4Tile>();
 
-					copy.acceptedGroups = new List<int>(recipe.acceptedGroups);
-
-					copy.requiredTile = new List<int>(recipe.requiredTile) { ModContent.TileType<CombinedStations4Tile>() };
-
-					//Copy all conditions except the graveyard one
-					copy.AddCondition(recipe.Conditions.Where(cond => cond != Recipe.Condition.InGraveyardBiome));
+					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
 
 					copy.Register();
 				}
