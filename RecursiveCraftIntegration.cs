@@ -13,7 +13,12 @@ namespace MagicStorage
 	public sealed class RecursiveCraftIntegration : ModSystem
 	{
 		private const string RecursiveCraftModName = "RecursiveCraft";
+
 		public static bool Enabled { get; private set; }
+
+		private static CompoundRecipe[] CompoundRecipes = null!;
+		private static Dictionary<Recipe, CompoundRecipe> RecipeToCompoundRecipe = null!;
+		private static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
 
 		public override void Load()
 		{
@@ -28,7 +33,7 @@ namespace MagicStorage
 		private static void StrongRef_Load()
 		{
 
-			Members.RecipeInfoCache = new();
+			RecipeInfoCache = new();
 		}
 
 		public override void PostAddRecipes()
@@ -40,15 +45,15 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private void StrongRef_PostAddRecipes()
 		{
-			Members.CompoundRecipes = new CompoundRecipe[Recipe.maxRecipes];
-			Members.RecipeToCompoundRecipe = new();
+			CompoundRecipes = new CompoundRecipe[Recipe.maxRecipes];
+			RecipeToCompoundRecipe = new();
 
 			for (int i = 0; i < Recipe.maxRecipes; i++)
 			{
 				CompoundRecipe compoundRecipe = new(Mod);
 
-				Members.CompoundRecipes[i] = compoundRecipe;
-				Members.RecipeToCompoundRecipe[compoundRecipe.Compound] = compoundRecipe;
+				CompoundRecipes[i] = compoundRecipe;
+				RecipeToCompoundRecipe[compoundRecipe.Compound] = compoundRecipe;
 			}
 		}
 
@@ -62,9 +67,9 @@ namespace MagicStorage
 		private static void StrongRef_Unload()
 		{
 
-			Members.RecipeInfoCache = null!;
-			Members.CompoundRecipes = null!;
-			Members.RecipeToCompoundRecipe = null!;
+			RecipeInfoCache = null!;
+			CompoundRecipes = null!;
+			RecipeToCompoundRecipe = null!;
 		}
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
@@ -109,17 +114,14 @@ namespace MagicStorage
 
 		private static void FindRecipes(Dictionary<int, int> inventory)
 		{
-			Members.RecipeInfoCache.Clear();
+			RecipeInfoCache.Clear();
 			RecursiveSearch recursiveSearch = new(inventory);
 
 			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
 				Recipe recipe = Main.recipe[i];
 
-				if (recipe.Disabled)
-					continue;
-
-				if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+				if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 				{
 					ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
 					recipe = compoundRecipe.OverridenRecipe;
@@ -129,7 +131,7 @@ namespace MagicStorage
 				if (recipeInfo != null)
 				{
 					if (recipeInfo.RecipeUsed.Count > 1)
-						Members.RecipeInfoCache.Add(recipe, recipeInfo);
+						RecipeInfoCache.Add(recipe, recipeInfo);
 				}
 			}
 		}
@@ -145,22 +147,22 @@ namespace MagicStorage
 			return FlatDict(heart.GetStoredItems());
 		}
 
-		public static bool IsCompoundRecipe(Recipe recipe) => Members.RecipeToCompoundRecipe.ContainsKey(recipe);
+		public static bool IsCompoundRecipe(Recipe recipe) => RecipeToCompoundRecipe.ContainsKey(recipe);
 
 		public static bool HasCompoundVariant(Recipe recipe)
 		{
-			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
 				recipe = compoundRecipe.OverridenRecipe;
 			}
 
-			return Members.RecipeInfoCache.ContainsKey(recipe);
+			return RecipeInfoCache.ContainsKey(recipe);
 		}
 
 		public static Recipe GetOverriddenRecipe(Recipe recipe)
 		{
-			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
 				return compoundRecipe.OverridenRecipe;
@@ -171,29 +173,20 @@ namespace MagicStorage
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
-			if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
+			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
 				recipe = compoundRecipe.OverridenRecipe;
 			}
 
-			if (!Members.RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
+			if (!RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe); // Can this simply be `recipe.RecipeIndex`
-			compoundRecipe = Members.CompoundRecipes[index];
+			compoundRecipe = CompoundRecipes[index];
 			compoundRecipe.Apply(index, recipeInfo);
 
 			return compoundRecipe.Compound;
-		}
-
-		// TODO: test if the new tml JIT system allows these to be regular fields
-		[JITWhenModsEnabled(RecursiveCraftModName)]
-		private static class Members
-		{
-			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
-			public static CompoundRecipe[] CompoundRecipes = null!;
-			public static Dictionary<Recipe, CompoundRecipe> RecipeToCompoundRecipe = null!;
 		}
 	}
 }
