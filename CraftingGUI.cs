@@ -122,8 +122,8 @@ namespace MagicStorage
 		private static FilterMode filterMode;
 
 		private static Dictionary<int, List<Recipe>> _productToRecipes;
-		public static bool compoundCrafting;
-		public static List<Item> compoundCraftSurplus = new();
+		public static bool CatchDroppedItems;
+		public static List<Item> DroppedItems = new();
 
 		private static bool[] adjTiles = new bool[TileLoader.TileCount];
 		private static bool adjWater;
@@ -1760,21 +1760,14 @@ namespace MagicStorage
 			resultItem.Prefix(-1);
 			var resultItems = new List<Item> { resultItem };
 
-			bool isCompound = RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe);
-			if (isCompound)
-			{
-				compoundCrafting = true;
-				compoundCraftSurplus.Clear();
-			}
+			CatchDroppedItems = true;
 
 			RecipeLoader.OnCraft(resultItem, selectedRecipe);
 			ItemLoader.OnCreate(resultItem, new RecipeCreationContext { recipe = selectedRecipe });
 
-			if (isCompound)
-			{
-				compoundCrafting = false;
-				resultItems.AddRange(compoundCraftSurplus);
-			}
+			CatchDroppedItems = false;
+			resultItems.AddRange(DroppedItems);
+			DroppedItems.Clear();
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
