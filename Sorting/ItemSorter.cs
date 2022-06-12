@@ -45,6 +45,7 @@ namespace MagicStorage.Sorting
 				.AsParallel()
 				.AsOrdered()
 				.Take(Recipe.numRecipes)
+				.Where(r => !r.Disabled)
 				.Where(recipe => filter(recipe.createItem) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 
 			CompareFunction sortFunction = MakeSortFunction(sortMode);

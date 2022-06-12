@@ -118,6 +118,9 @@ namespace MagicStorage
 			{
 				Recipe recipe = Main.recipe[i];
 
+				if (recipe.Disabled)
+					continue;
+
 				if (Members.RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 				{
 					ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
@@ -179,27 +182,12 @@ namespace MagicStorage
 			if (!Members.RecipeInfoCache.TryGetValue(recipe, out var recipeInfo))
 				return recipe;
 
-			int index = Array.IndexOf(Main.recipe, recipe);
+			int index = Array.IndexOf(Main.recipe, recipe); // Can this simply be `recipe.RecipeIndex`
 			compoundRecipe = Members.CompoundRecipes[index];
 			compoundRecipe.Apply(index, recipeInfo);
 
 			return compoundRecipe.Compound;
 		}
-
-		/*
-		public static Recipe ApplyThreadCompoundRecipe(Recipe recipe)
-		{
-			if (recipe == Members.ThreadCompoundRecipe.Compound)
-				recipe = Members.ThreadCompoundRecipe.OverridenRecipe!;
-
-			if (!Members.RecipeInfoCache.TryGetValue(recipe, out RecipeInfo recipeInfo))
-				return recipe;
-
-			int index = Array.IndexOf(Main.recipe, recipe);
-			Members.ThreadCompoundRecipe.Apply(index, recipeInfo);
-			return Members.ThreadCompoundRecipe.Compound;
-		}
-		*/
 
 		// TODO: test if the new tml JIT system allows these to be regular fields
 #if !TML_2022_04
