@@ -505,9 +505,8 @@ namespace MagicStorage
 					else
 						Main.mouseItem.stack += result.stack;
 
-					SoundEngine.PlaySound(SoundID.MenuTick);
-
 					RefreshItems();
+					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 
 				rightClickTimer--;
