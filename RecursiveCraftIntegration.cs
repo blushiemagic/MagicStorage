@@ -9,9 +9,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage
 {
-#if !TML_2022_04
 	[JITWhenModsEnabled(RecursiveCraftModName)]
-#endif
 	public sealed class RecursiveCraftIntegration : ModSystem
 	{
 		private const string RecursiveCraftModName = "RecursiveCraft";
@@ -190,9 +188,7 @@ namespace MagicStorage
 		}
 
 		// TODO: test if the new tml JIT system allows these to be regular fields
-#if !TML_2022_04
 		[JITWhenModsEnabled(RecursiveCraftModName)]
-#endif
 		private static class Members
 		{
 			public static Dictionary<Recipe, RecipeInfo> RecipeInfoCache = null!;
