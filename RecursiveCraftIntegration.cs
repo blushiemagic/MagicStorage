@@ -5,9 +5,7 @@ using System.Runtime.CompilerServices;
 using MagicStorage.Components;
 using RecursiveCraft;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
-using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage
 {
@@ -31,7 +29,6 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Load()
 		{
-			OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
 
 			Members.RecipeInfoCache = new();
 		}
@@ -66,24 +63,10 @@ namespace MagicStorage
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void StrongRef_Unload()
 		{
-			OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
 
 			Members.RecipeInfoCache = null!;
 			Members.CompoundRecipes = null!;
 			Members.RecipeToCompoundRecipe = null!;
-		}
-
-		private static int OnPlayerQuickSpawnItem_IEntitySource_int_int(OnPlayer.orig_QuickSpawnItem_IEntitySource_int_int orig,
-			Player self, IEntitySource source, int type, int stack)
-		{
-			if (CraftingGUI.compoundCrafting)
-			{
-				Item item = new(type, stack);
-				CraftingGUI.compoundCraftSurplus.Add(item);
-				return -1; // return invalid value since this should never be used
-			}
-
-			return orig(self, source, type, stack);
 		}
 
 		private static Dictionary<int, int> FlatDict(IEnumerable<Item> items)
