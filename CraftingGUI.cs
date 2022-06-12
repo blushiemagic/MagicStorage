@@ -968,7 +968,7 @@ namespace MagicStorage
 
 			var allRecipes = Main.recipe
 				.Take(Recipe.numRecipes)
-				.Where(x => x.createItem.type > ItemID.None);
+				.Where(x => !x.Disabled && x.createItem.type > ItemID.None);
 
 			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 		}
