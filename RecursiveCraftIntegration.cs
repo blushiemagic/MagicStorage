@@ -121,6 +121,9 @@ namespace MagicStorage
 			{
 				Recipe recipe = Main.recipe[i];
 
+				if (recipe.Disabled)
+					continue;
+
 				if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 				{
 					ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
