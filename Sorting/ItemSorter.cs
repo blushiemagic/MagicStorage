@@ -35,7 +35,7 @@ namespace MagicStorage.Sorting
 				}
 
 				var lastItem = stackedItems[^1];
-				if (lastItem.stack + item.stack > 0)
+				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
 					lastItem.stack += item.stack;
 				}
