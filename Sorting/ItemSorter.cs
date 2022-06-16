@@ -24,18 +24,28 @@ namespace MagicStorage.Sorting
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
 		{
-			Dictionary<ItemData, Item> dict = new();
+			List<Item> stackedItems = new();
 
-			foreach (Item item in items)
+			foreach (Item item in items.OrderBy(i => i.type))
 			{
-				ItemData itemData = new(item);
-				if (dict.TryGetValue(itemData, out Item i))
-					i.stack += item.stack;
+				if (stackedItems.Count <= 0)
+				{
+					stackedItems.Add(item.Clone());
+					continue;
+				}
+
+				var lastItem = stackedItems[^1];
+				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0)
+				{
+					lastItem.stack += item.stack;
+				}
 				else
-					dict.Add(itemData, item.Clone());
+				{
+					stackedItems.Add(item.Clone());
+				}
 			}
 
-			return dict.Values;
+			return stackedItems;
 		}
 
 		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
