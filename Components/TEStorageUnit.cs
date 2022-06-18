@@ -102,8 +102,8 @@ namespace MagicStorage.Components
 			Item original = toDeposit.Clone();
 			bool finished = false;
 			bool hasChange = false;
-			foreach (Item item in items)
-				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack)
+			foreach (Item item in items) {
+				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack && MagicSystem.CanCombineIgnoreType(toDeposit, item))
 				{
 					int total = item.stack + toDeposit.stack;
 					int newStack = total;
@@ -125,6 +125,7 @@ namespace MagicStorage.Components
 						break;
 					}
 				}
+			}
 
 			if (!finished && !IsFull)
 			{

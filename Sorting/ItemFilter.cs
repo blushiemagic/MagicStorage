@@ -10,6 +10,23 @@ namespace MagicStorage.Sorting
 	{
 		public delegate bool Filter(Item item);
 
+		public static FilterMode GetFilter(int choice) {
+			if (MagicStorageConfig.ExtraFilterIcons) {
+				return (FilterMode)choice;
+			} else {
+				return choice switch {
+					0 => FilterMode.All,
+					1 => FilterMode.WeaponsMelee,
+					2 => FilterMode.Tools,
+					3 => FilterMode.Armor,
+					4 => FilterMode.Potions,
+					5 => FilterMode.Placeables,
+					6 => FilterMode.Misc,
+					_ => FilterMode.All  //Default to All
+				};
+			}
+		}
+
 		public static readonly Filter All = item => true;
 
 		public static readonly Filter Weapon = item =>

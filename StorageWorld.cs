@@ -91,18 +91,10 @@ namespace MagicStorage
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
-
-			Volatile.Write(ref TileToCreatingItem, new Dictionary<int, List<int>>()); // used from threaded RefreshRecipes
 		}
 
-		public override void PostUpdateWorld()
-		{
-			if (TileToCreatingItem.Count != 0)
-				return;
-
-			#region Initialize TileToCreatingItem
-
-			Dictionary<int, List<int>> tileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount)
+		public override void PostSetupRecipes() {
+			TileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount)
 				.Select((_, i) =>
 				{
 					Item item = new();
@@ -153,10 +145,6 @@ namespace MagicStorage
 				.SelectMany(x => x.tiles.Select(tile => (tile, x.item)))
 				.GroupBy(x => x.tile)
 				.ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
-
-			Volatile.Write(ref TileToCreatingItem, tileToCreatingItem);
-
-			#endregion
 		}
 	}
 }

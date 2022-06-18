@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -38,10 +39,6 @@ namespace MagicStorage
 		private const int StartMaxRightClickTimer = 20;
 		private const float ScrollBar2ViewSize = 1f;
 		private const float RecipeScrollBarViewSize = 1f;
-
-		private static HashSet<int> ItemChecklistFoundItems;
-		private static Mod itemChecklistMod;
-		private static volatile bool wasItemChecklistRetrieved;
 
 		private static MouseState curMouse;
 		private static MouseState oldMouse;
@@ -757,7 +754,7 @@ namespace MagicStorage
 				recipeScrollBar.ViewPosition += difference;
 			}
 		}
-
+		
 		private static void UpdateCraftButton()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
@@ -788,6 +785,10 @@ namespace MagicStorage
 				{
 					if (Main.keyState.IsKeyDown(Keys.LeftControl))
 					{
+						tryCraftPostponeMessages = Main.netMode == NetmodeID.MultiplayerClient;
+						tryCraftCompoundRequestWithdraws = null;
+						tryCraftCompoundRequestResults = null;
+						
 						while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 						{
 							TryCraft();
@@ -799,6 +800,15 @@ namespace MagicStorage
 							}
 
 							RefreshItems();
+						}
+
+						if (tryCraftPostponeMessages) {
+							tryCraftPostponeMessages = false;
+
+							NetHelper.SendCraftRequest(GetHeart().ID, CompactItemList(tryCraftCompoundRequestWithdraws), CompactItemList(tryCraftCompoundRequestResults));
+
+							tryCraftCompoundRequestWithdraws = null;
+							tryCraftCompoundRequestResults = null;
 						}
 
 						SoundEngine.PlaySound(SoundID.Grab);
@@ -913,52 +923,31 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			GetKnownItems(out HashSet<int> foundItems, out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes);
-			foundItems.UnionWith(asKnownRecipes);
+			GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes);
 
 			var favoritesCopy = new HashSet<int>(modPlayer.FavoritedRecipes.Items.Select(x => x.type));
 
 			EnsureProductToRecipesInited();
 
 			sortMode = (SortMode) sortButtons.Choice;
-			filterMode = (FilterMode) filterButtons.Choice;
-			ItemChecklistFoundItems = foundItems;
+			filterMode = ItemFilter.GetFilter(filterButtons.Choice);
 			RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy);
 		}
 
 		public static HashSet<int> GetKnownItems()
 		{
-			GetKnownItems(out HashSet<int> a, out HashSet<int> b, out HashSet<int> c, out HashSet<int> d);
+			GetKnownItems(out HashSet<int> a, out HashSet<int> b, out HashSet<int> c);
 			a.UnionWith(b);
 			a.UnionWith(c);
-			a.UnionWith(d);
 			return a;
 		}
 
-		private static void GetKnownItems(out HashSet<int> foundItems, out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes)
+		private static void GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes)
 		{
-			foundItems = new HashSet<int>(RetrieveFoundItemsChecklist());
-
 			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
 			hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
 			craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
 			asKnownRecipes = new HashSet<int>(modPlayer.AsKnownRecipes.Items.Select(x => x.type));
-		}
-
-		private static IEnumerable<int> RetrieveFoundItemsChecklist()
-		{
-			if (itemChecklistMod is null)
-				ModLoader.TryGetMod("ItemChecklist", out itemChecklistMod);
-
-			object response = itemChecklistMod?.Call("RequestFoundItems");
-
-			if (response is bool[] { Length: > 0 } found)
-			{
-				wasItemChecklistRetrieved = true;
-				return found.Select((wasFound, type) => (found: wasFound, type)).Where(x => x.found).Select(x => x.type);
-			}
-
-			return Array.Empty<int>();
 		}
 
 		private static void EnsureProductToRecipesInited()
@@ -973,92 +962,11 @@ namespace MagicStorage
 			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 		}
 
-		/// <summary>
-		///     Checks all crafting tree until it finds already available ingredients
-		/// </summary>
-		private static bool IsKnownRecursively(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
-		{
-			if (cache.TryGetValue(recipe, out bool v))
-				return v;
-
-			foreach (int tile in recipe.requiredTile)
-			{
-				if (!StorageWorld.TileToCreatingItem.TryGetValue(tile, out List<int> possibleItems))
-					continue;
-
-				if (!possibleItems.Any(x => CheckIngredient(x, availableSet, recursionTree, cache)))
-				{
-					cache[recipe] = false;
-					return false;
-				}
-			}
-
-			int ingredients = 0;
-			foreach (Item item in recipe.requiredItem)
-			{
-				ingredients++;
-				if (CheckIngredient(item.type, availableSet, recursionTree, cache))
-					continue;
-				if (CheckAcceptedGroupsForIngredient(recipe, availableSet, recursionTree, cache, item.type))
-					continue;
-				cache[recipe] = false;
-				return false;
-			}
-
-			if (ingredients > 0)
-			{
-				cache[recipe] = true;
-				return true;
-			}
-
-			cache[recipe] = false;
-			return false;
-
-			#region Check Functions
-
-			static bool CheckIngredient(int t, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache)
-			{
-				if (availableSet.Contains(t))
-					return true;
-				if (!recursionTree.Add(t))
-					return false;
-				try
-				{
-					if (!_productToRecipes.TryGetValue(t, out List<Recipe> ingredientRecipes))
-						return false;
-					if (ingredientRecipes.Count == 0 || ingredientRecipes.All(x => !IsKnownRecursively(x, availableSet, recursionTree, cache)))
-						return false;
-				}
-				finally
-				{
-					recursionTree.Remove(t);
-				}
-
-				return true;
-			}
-
-			static bool CheckAcceptedGroupsForIngredient(Recipe recipe, HashSet<int> availableSet, HashSet<int> recursionTree, Dictionary<Recipe, bool> cache, int t)
-			{
-				foreach (RecipeGroup g in recipe.acceptedGroups.Select(j => RecipeGroup.recipeGroups[j]))
-					if (g.ContainsItem(t))
-						foreach (int groupItemType in g.ValidItems)
-							if (groupItemType != t && CheckIngredient(groupItemType, availableSet, recursionTree, cache))
-								return true;
-
-				return false;
-			}
-
-			#endregion
-		}
-
 		private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes, HashSet<int> favorited)
 		{
 			try
 			{
-				var availableItemsMutable = new HashSet<int>(hiddenRecipes.Concat(craftedRecipes).Concat(ItemChecklistFoundItems));
-
-				var temp = new HashSet<int>();
-				var tempCache = new Dictionary<Recipe, bool>();
+				var availableItemsMutable = new HashSet<int>(hiddenRecipes.Concat(craftedRecipes));
 
 				int modFilterIndex = modSearchBox.ModIndex;
 
@@ -1070,8 +978,6 @@ namespace MagicStorage
 						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
 						// show only favorited items if selected
 						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
-						// hard check if this item can be crafted from available items and their recursive products
-						.Where(x => !wasItemChecklistRetrieved || IsKnownRecursively(x, availableItemsMutable, temp, tempCache))
 						// favorites first
 						.OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1)
 						.ThenBy(x => x.createItem, sortFunction)
@@ -1588,19 +1494,10 @@ namespace MagicStorage
 				EnsureProductToRecipesInited();
 				if (_productToRecipes.TryGetValue(item.type, out List<Recipe> itemRecipes))
 				{
-					HashSet<int> knownItems = GetKnownItems();
-
-					var recursionTree = new HashSet<int>();
-					var cache = new Dictionary<Recipe, bool>();
-
 					Recipe selected = null;
 
 					foreach (Recipe r in itemRecipes)
 					{
-						if (!IsKnownRecursively(r, knownItems, recursionTree, cache))
-							continue;
-
-						selected ??= r;
 						if (IsAvailable(r))
 						{
 							selected = r;
@@ -1727,6 +1624,48 @@ namespace MagicStorage
 			maxRightClickTimer = StartMaxRightClickTimer;
 		}
 
+		private static List<Item> tryCraftCompoundRequestWithdraws, tryCraftCompoundRequestResults;
+		private static bool tryCraftPostponeMessages;
+
+		private static List<Item> CompactItemList(List<Item> items) {
+			List<Item> compacted = new();
+
+			for (int i = 0; i < items.Count; i++) {
+				Item item = items[i];
+
+				if (item.IsAir)
+					continue;
+
+				bool fullyCompacted = false;
+				for (int j = 0; j < compacted.Count; j++) {
+					Item existing = compacted[j];
+
+					if (ItemData.Matches(item, existing)) {
+						if (existing.stack + item.stack <= existing.maxStack) {
+							existing.stack += item.stack;
+							item.stack = 0;
+
+							fullyCompacted = true;
+						} else {
+							int diff = existing.maxStack - existing.stack;
+							existing.stack = existing.maxStack;
+							item.stack -= diff;
+						}
+						
+						break;
+					}
+				}
+
+				if (item.IsAir)
+					continue;
+
+				if (!fullyCompacted)
+					compacted.Add(item);
+			}
+
+			return compacted;
+		}
+		
 		private static void TryCraft()
 		{
 			var toWithdraw = new List<Item>();
@@ -1775,11 +1714,20 @@ namespace MagicStorage
 			resultItems.AddRange(DroppedItems);
 			DroppedItems.Clear();
 
-			if (Main.netMode == NetmodeID.SinglePlayer)
+			if (Main.netMode == NetmodeID.SinglePlayer) {
 				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-			else if (Main.netMode == NetmodeID.MultiplayerClient)
-				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				if (!tryCraftPostponeMessages) {
+					NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
+				} else {
+					tryCraftCompoundRequestWithdraws ??= new();
+					tryCraftCompoundRequestWithdraws.AddRange(toWithdraw);
+
+					tryCraftCompoundRequestResults ??= new();
+					tryCraftCompoundRequestResults.AddRange(resultItems);
+				}
+			}
 		}
 
 		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)

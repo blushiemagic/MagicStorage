@@ -18,8 +18,22 @@ namespace MagicStorage.Sorting
 
 			filteredItems = Aggregate(filteredItems);
 
-			CompareFunction func = MakeSortFunction(sortMode);
-			return func is null ? filteredItems : filteredItems.OrderBy(x => x, func).ThenBy(x => x.type).ThenBy(x => x.value);
+			if (sortMode == SortMode.AsIs)
+				return filteredItems;
+
+			//Apply "fuzzy" sorting since it's faster, but less accurate
+			filteredItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
+
+			if (sortMode == SortMode.Value) {
+				// Ignore sorting by type
+				return filteredItems.OrderBy(x => x.value);
+			} else if (sortMode == SortMode.Dps) {
+				//Sort again by DPS due to it using variable item data
+				var func = MakeSortFunction(SortMode.Dps);
+				filteredItems = filteredItems.OrderBy(x => func);
+			}
+
+			return filteredItems.OrderBy(x => x.type).ThenBy(x => x.value);
 		}
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
@@ -35,7 +49,7 @@ namespace MagicStorage.Sorting
 				}
 
 				var lastItem = stackedItems[^1];
-				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0)
+				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0 && MagicSystem.CanCombineIgnoreType(item, lastItem))
 				{
 					lastItem.stack += item.stack;
 				}
@@ -51,16 +65,14 @@ namespace MagicStorage.Sorting
 		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			var filter = MakeFilter(filterMode);
-			var filteredRecipes = Main.recipe
+			var filteredRecipes = MagicSystem.EnabledRecipes
 				.AsParallel()
-				.Take(Recipe.numRecipes)
-				.Where(r => !r.Disabled)
-				.Where(recipe => filter(recipe.createItem) && FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex) && filter(recipe.createItem));
 
 			return (filteredRecipes, MakeSortFunction(sortMode));
 		}
 
-		private static CompareFunction MakeSortFunction(SortMode sortMode)
+		internal static CompareFunction MakeSortFunction(SortMode sortMode)
 		{
 			CompareFunction func = sortMode switch
 			{
@@ -75,7 +87,7 @@ namespace MagicStorage.Sorting
 			return func;
 		}
 
-		private static ItemFilter.Filter MakeFilter(FilterMode filterMode)
+		internal static ItemFilter.Filter MakeFilter(FilterMode filterMode)
 		{
 			return filterMode switch
 			{

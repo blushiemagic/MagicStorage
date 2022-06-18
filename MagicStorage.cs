@@ -676,5 +676,37 @@ namespace MagicStorage {
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
+
+		public override object Call(params object[] args) {
+			if (args.Length < 1)
+				throw new ArgumentException("Call requires at least one argument");
+
+			string function = "";
+
+			void TryParseAs<T>(int arg, out T value) {
+				if (args.Length < arg)
+					throw new ArgumentException($"Call \"{function}\" requires at least {arg} arguments");
+
+				if (args[arg] is T v)
+					value = v;
+				else
+					throw new ArgumentException($"Call requires argument #{arg + 1} to be of type {typeof(T).GetSimplifiedGenericTypeName()}");
+			}
+
+			TryParseAs(0, out function);
+
+			switch (function) {
+				case "Register Sorting":
+					TryParseAs(1, out int itemType);
+					TryParseAs(2, out Func<Item, Item, bool> canCombine);
+
+					MagicSystem.canCombineByType[itemType] = canCombine;
+					break;
+				default:
+					throw new ArgumentException("Call does not support the function \"" + function + "\"");
+			}
+
+			return null;
+		}
 	}
 }

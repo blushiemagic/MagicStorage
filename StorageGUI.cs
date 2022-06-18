@@ -328,7 +328,7 @@ namespace MagicStorage
 			InitFilterButtons();
 			SortMode sortMode = (SortMode)sortButtons.Choice;
 
-			FilterMode filterMode = (FilterMode)filterButtons.Choice;
+			FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
 			int modFilterIndex = modSearchBox.ModIndex;
 
 			void DoFiltering()
