@@ -1,0 +1,36 @@
+﻿Mods: {
+	MagicStorage: {
+		Config: {
+			Label: "Magic Storage Config"
+
+			glowNewItems: {
+				Label: "Display new items/recipes"
+				Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
+			}
+			useConfigFilter: {
+				Label: "Use default filter"
+				Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
+			}
+			showAllRecipes: {
+				Label: "Default recipe filter"
+				Tooltip: "Enable to default to all recipes, disable to default to available recipes"
+			}
+			quickStackDepositMode: {
+				Label: "Quick stack deposit mode"
+				Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
+			}
+			clearSearchText: {
+				Label: "Clear search text"
+				Tooltip: "Enable to clear the search text when opening the UI"
+			}
+			extraFilterIcons: {
+				Label: "Display extra sorting icons"
+				Tooltip: "Enable to have the extra sorting options available"
+			}
+			showDps: {
+				Label: "Estimate the dps of weapons"
+				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+			}
+		}
+	}
+}
