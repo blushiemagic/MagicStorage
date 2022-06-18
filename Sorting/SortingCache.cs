@@ -51,11 +51,12 @@ namespace MagicStorage.Sorting {
 				.ToList();
 
 			int[] indices = new int[items.Count];
+			Array.Fill(indices, -1);
 
 			for (int i = 0; i < items.Count; i++) {
 				(Item item, int type) = items[i];
 
-				indices[type] = item.IsAir ? -1 : item.type;
+				indices[type] = item.IsAir ? -1 : i;
 			}
 
 			return new Entry() { indexByType = indices };
