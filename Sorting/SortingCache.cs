@@ -94,14 +94,4 @@ namespace MagicStorage.Sorting {
 			return aggregate.Where(e => e is not null).SelectMany(e => e);
 		}
 	}
-
-	internal struct SortingCacheEntry {
-		public readonly SortMode sort;
-		public readonly int item;
-
-		public SortingCacheEntry(SortMode sort, int item) {
-			this.sort = sort;
-			this.item = item;
-		}
-	}
 }
