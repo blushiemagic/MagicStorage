@@ -71,27 +71,13 @@ namespace MagicStorage.Sorting {
 		/// Sorts the items based on the cached item order
 		/// </summary>
 		/// <returns>A sorted collection</returns>
-		public IEnumerable<Item> SortFuzzy(IEnumerable<Item> items, SortMode mode) {
+		public IOrderedEnumerable<Item> SortFuzzy(IEnumerable<Item> items, SortMode mode) {
 			Entry entry = cache[mode];
 
 			if (entry.indexByType is null)
-				return items;
+				return items.OrderBy(_ => 1);  //Preserve item order
 
-			List<Item>[] aggregate = new List<Item>[entry.indexByType.Length];
-			
-			foreach (Item item in items) {
-				int index = entry.FindIndex(item.type);
-
-				if (index < 0)
-					continue;
-
-				if (aggregate[index] is not List<Item> list)
-					list = aggregate[index] = new();
-
-				list.Add(item);
-			}
-
-			return aggregate.Where(e => e is not null).SelectMany(e => e);
+			return items.OrderBy(i => entry.FindIndex(i.type));
 		}
 	}
 }

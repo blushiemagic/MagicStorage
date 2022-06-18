@@ -22,18 +22,18 @@ namespace MagicStorage.Sorting
 				return filteredItems;
 
 			//Apply "fuzzy" sorting since it's faster, but less accurate
-			filteredItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
+			IOrderedEnumerable<Item> orderedItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
 
 			if (sortMode == SortMode.Value) {
-				// Ignore sorting by type
-				return filteredItems.OrderBy(x => x.value);
+				//Ignore sorting by type
+				return orderedItems.ThenBy(x => x.value);
 			} else if (sortMode == SortMode.Dps) {
 				//Sort again by DPS due to it using variable item data
 				var func = MakeSortFunction(SortMode.Dps);
-				filteredItems = filteredItems.OrderBy(x => func);
+				return orderedItems.ThenBy(x => func).ThenBy(x => x.value);
 			}
 
-			return filteredItems.OrderBy(x => x.type).ThenBy(x => x.value);
+			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
 		}
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
