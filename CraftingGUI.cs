@@ -113,7 +113,6 @@ namespace MagicStorage
 
 		private static int maxRightClickTimer = StartMaxRightClickTimer;
 
-		private static Dictionary<int, Recipe[]> _productToRecipes;
 		public static bool CatchDroppedItems;
 		public static List<Item> DroppedItems = new();
 
@@ -534,7 +533,7 @@ namespace MagicStorage
 								 // context == 0 - Available - Default Blue
 				if (context != 0)
 				{
-					bool craftable = _productToRecipes.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
+					bool craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => AmountCraftable(recipe) > 0);
 					if (craftable)
 						context = 6; // Craftable - Light green
 				}
@@ -831,21 +830,7 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			EnsureProductToRecipesInited();
-
 			RefreshRecipes();
-		}
-
-		private static void EnsureProductToRecipesInited()
-		{
-			if (_productToRecipes is not null)
-				return;
-
-			var allRecipes = Main.recipe
-				.Take(Recipe.numRecipes)
-				.Where(x => !x.Disabled && x.createItem.type > ItemID.None);
-
-			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToArray());
 		}
 
 		private static void RefreshRecipes()
@@ -1376,8 +1361,7 @@ namespace MagicStorage
 			if (RightMouseClicked)
 			{
 				Item item = selectedRecipe.requiredItem[slot];
-				EnsureProductToRecipesInited();
-				if (_productToRecipes.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0)
+				if (MagicCache.ResultToRecipe.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0)
 				{
 					Recipe selected = itemRecipes[0];
 

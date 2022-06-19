@@ -117,12 +117,9 @@ namespace MagicStorage
 			RecipeInfoCache.Clear();
 			RecursiveSearch recursiveSearch = new(inventory);
 
-			for (int i = 0; i < Recipe.numRecipes; i++)
+			foreach (var r in MagicCache.EnabledRecipes)
 			{
-				Recipe recipe = Main.recipe[i];
-
-				if (recipe.Disabled)
-					continue;
+				var recipe = r;
 
 				if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 				{
@@ -130,7 +127,7 @@ namespace MagicStorage
 					recipe = compoundRecipe.OverridenRecipe;
 				}
 
-				RecipeInfo? recipeInfo = recursiveSearch.FindIngredientsForRecipe(recipe);
+				var recipeInfo = recursiveSearch.FindIngredientsForRecipe(recipe);
 				if (recipeInfo != null)
 				{
 					if (recipeInfo.RecipeUsed.Count > 1)

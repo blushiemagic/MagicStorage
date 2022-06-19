@@ -49,7 +49,7 @@ namespace MagicStorage.Sorting
 				}
 
 				var lastItem = stackedItems[^1];
-				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0 && MagicSystem.CanCombineIgnoreType(item, lastItem))
+				if (MagicCache.CanCombine(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
 					lastItem.stack += item.stack;
 				}
@@ -65,7 +65,7 @@ namespace MagicStorage.Sorting
 		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			var filter = MakeFilter(filterMode);
-			var filteredRecipes = MagicSystem.EnabledRecipes
+			var filteredRecipes = MagicCache.EnabledRecipes
 				.AsParallel()
 				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex) && filter(recipe.createItem));
 

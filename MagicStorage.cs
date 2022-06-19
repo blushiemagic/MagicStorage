@@ -334,7 +334,7 @@ namespace MagicStorage {
 				{
 					Recipe copy = CloneRecipe(recipe);
 
-					copy.requiredTile.Clear();
+					copy.requiredTile.Clear(); // Should this be cleared?
 					copy.AddTile<CombinedStations4Tile>();
 
 					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
@@ -695,7 +695,7 @@ namespace MagicStorage {
 					TryParseAs(1, out int itemType);
 					TryParseAs(2, out Func<Item, Item, bool> canCombine);
 
-					MagicSystem.canCombineByType[itemType] = canCombine;
+					MagicCache.canCombineByType[itemType] = canCombine;
 					break;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");

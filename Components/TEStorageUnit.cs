@@ -100,7 +100,7 @@ namespace MagicStorage.Components
 			bool finished = false;
 			bool hasChange = false;
 			foreach (Item item in items) {
-				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack && MagicSystem.CanCombineIgnoreType(toDeposit, item))
+				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack && MagicCache.CanCombineIgnoreType(toDeposit, item))
 				{
 					int total = item.stack + toDeposit.stack;
 					int newStack = total;
