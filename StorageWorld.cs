@@ -30,8 +30,6 @@ namespace MagicStorage
 		public static bool queenSlimeDiamond;
 		public static bool empressDiamond;
 
-		public static Dictionary<int, List<int>> TileToCreatingItem = new();
-
 		public override void OnWorldLoad()
 		{
 			kingSlimeDiamond = false;
@@ -91,60 +89,6 @@ namespace MagicStorage
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
-		}
-
-		public override void PostSetupRecipes() {
-			TileToCreatingItem = Enumerable.Range(0, ItemLoader.ItemCount)
-				.Select((_, i) =>
-				{
-					Item item = new();
-					// provide items
-					try
-					{
-						item.SetDefaults(i, true);
-					}
-					catch
-					{
-						return null;
-					}
-
-					return item;
-				})
-				.Where(item => item is not null)
-				.Where(item => item.type > ItemID.None && item.createTile >= TileID.Dirt)
-				.Select(item =>
-				{
-					// provide item and its tiles
-					List<int> tiles = new() { item.createTile };
-					switch (item.createTile)
-					{
-						case TileID.GlassKiln:
-						case TileID.Hellforge:
-							tiles.Add(TileID.Furnaces);
-							break;
-						case TileID.AdamantiteForge:
-							tiles.Add(TileID.Furnaces);
-							tiles.Add(TileID.Hellforge);
-							break;
-						case TileID.MythrilAnvil:
-							tiles.Add(TileID.Anvils);
-							break;
-						case TileID.BewitchingTable:
-						case TileID.Tables2:
-							tiles.Add(TileID.Tables);
-							break;
-						case TileID.AlchemyTable:
-							tiles.Add(TileID.Bottles);
-							tiles.Add(TileID.Tables);
-							break;
-					}
-
-					return (item, tiles);
-				})
-				// flatten - tile, item
-				.SelectMany(x => x.tiles.Select(tile => (tile, x.item)))
-				.GroupBy(x => x.tile)
-				.ToDictionary(x => x.Key, x => x.Select(y => y.item.type).ToList());
 		}
 	}
 }
