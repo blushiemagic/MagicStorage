@@ -30,6 +30,14 @@ namespace MagicStorage
 			canCombineByType = new();
 		}
 
+		public override void Unload()
+		{
+			hasIngredient = null;
+			hasTile = null;
+			canCombineByType = null;
+			EnabledRecipes = null;
+		}
+
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			InterfaceHelper.ModifyInterfaceLayers(layers);
@@ -51,12 +59,8 @@ namespace MagicStorage
 
 		public override void PostSetupRecipes()
 		{
-			hasIngredient?.Clear();
 			hasIngredient = new();
-
-			hasTile?.Clear();
 			hasTile = new();
-
 			EnabledRecipes = new(Recipe.numRecipes);
 
 			//Initialize the lookup tables
