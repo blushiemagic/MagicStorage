@@ -278,19 +278,19 @@ namespace MagicStorage.Sorting
 	public class DefaultSortClass
 	{
 		public delegate bool PassFilter(Item item);
+
 		public delegate int CompareFilter(Item item1, Item item2);
 
-		private readonly PassFilter passFunc;
-		private readonly CompareFilter compareFunc;
+		public PassFilter Pass { get; }
+		public CompareFilter Compare { get; }
 
 		public DefaultSortClass(PassFilter passFunc, CompareFilter compareFunc)
 		{
-			this.passFunc = passFunc;
-			this.compareFunc = compareFunc;
+			ArgumentNullException.ThrowIfNull(passFunc);
+			ArgumentNullException.ThrowIfNull(compareFunc);
+
+			Pass = passFunc;
+			Compare = compareFunc;
 		}
-
-		public bool Pass(Item item) => passFunc(item);
-
-		public int Compare(Item item1, Item item2) => compareFunc(item1, item2);
 	}
 }
