@@ -25,7 +25,8 @@ namespace MagicStorage
 
 		internal static bool CanCombineIgnoreType(Item item1, Item item2) => !canCombineByType.TryGetValue(item1.type, out var func) || func(item1, item2);
 
-		public override void Load() {
+		public override void Load()
+		{
 			canCombineByType = new();
 		}
 
@@ -43,37 +44,45 @@ namespace MagicStorage
 			CraftingGUI.Update(null);
 		}
 
-		public override void PostSetupContent() {
+		public override void PostSetupContent()
+		{
 			SortingCache.dictionary.Fill();
 		}
 
-		public override void PostSetupRecipes() {
+		public override void PostSetupRecipes()
+		{
 			hasIngredient?.Clear();
 			hasIngredient = new();
 
 			hasTile?.Clear();
 			hasTile = new();
 
+			EnabledRecipes = new(Recipe.numRecipes);
+
 			//Initialize the lookup tables
-			for (int i = 0; i < Recipe.numRecipes; i++) {
+			for (int i = 0; i < Recipe.numRecipes; i++)
+			{
 				Recipe recipe = Main.recipe[i];
 
-				foreach (var item in recipe.requiredItem) {
+				if (!recipe.Disabled)
+					EnabledRecipes.Add(recipe);
+
+				foreach (var item in recipe.requiredItem)
+				{
 					if (!hasIngredient.TryGetValue(item.type, out var list))
 						hasIngredient[item.type] = list = new();
 
 					list.Add(recipe);
 				}
 
-				foreach (var tile in recipe.requiredTile) {
+				foreach (var tile in recipe.requiredTile)
+				{
 					if (!hasTile.TryGetValue(tile, out var list))
 						hasTile[tile] = list = new();
 
 					list.Add(recipe);
 				}
 			}
-
-			EnabledRecipes = Main.recipe.AsParallel().Take(Recipe.numRecipes).Where(r => !r.Disabled).ToList();
 		}
 	}
 }
