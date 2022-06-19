@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Components;
@@ -111,9 +112,6 @@ namespace MagicStorage
 		private static int rightClickTimer;
 
 		private static int maxRightClickTimer = StartMaxRightClickTimer;
-
-		private static SortMode sortMode;
-		private static FilterMode filterMode;
 
 		private static Dictionary<int, List<Recipe>> _productToRecipes;
 		public static bool CatchDroppedItems;
@@ -835,8 +833,6 @@ namespace MagicStorage
 
 			EnsureProductToRecipesInited();
 
-			sortMode = (SortMode) sortButtons.Choice;
-			filterMode = ItemFilter.GetFilter(filterButtons.Choice);
 			RefreshRecipes();
 		}
 
@@ -854,23 +850,23 @@ namespace MagicStorage
 
 		private static void RefreshRecipes()
 		{
+			int length = ItemLoader.ItemCount;
+
+			bool[] hiddenRecipes = ArrayPool<bool>.Shared.Rent(length);
+			bool[] favorited = ArrayPool<bool>.Shared.Rent(length);
+
 			try
 			{
-				var hiddenRecipes = new HashSet<int>(StoragePlayer.LocalPlayer.HiddenRecipes.Items.Select(x => x.type));
-				var favorited = new HashSet<int>(StoragePlayer.LocalPlayer.FavoritedRecipes.Items.Select(x => x.type));
-
-				int modFilterIndex = modSearchBox.ModIndex;
-
-				void DoFiltering()
+				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, bool[] hiddenRecipes, bool[] favorited)
 				{
 					var (filteredRecipes, sortFunction) = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text);
 					filteredRecipes = filteredRecipes
 						// show only blacklisted recipes only if choice = 2, otherwise show all other
-						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
+						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes[x.createItem.type])
 						// show only favorited items if selected
-						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
+						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited[x.createItem.type])
 						// favorites first
-						.OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1)
+						.OrderBy(x => favorited[x.createItem.type] ? 0 : 1)
 						.ThenBy(x => x.createItem, sortFunction)
 						.ThenBy(x => x.createItem.type)
 						.ThenBy(x => x.createItem.value);
@@ -893,16 +889,29 @@ namespace MagicStorage
 				if (RecursiveCraftIntegration.Enabled)
 					RecursiveCraftIntegration.RefreshRecursiveRecipes();
 
-				DoFiltering();
+				Array.Clear(hiddenRecipes, 0, length);
+				Array.Clear(favorited, 0, length);
+
+				foreach (var item in StoragePlayer.LocalPlayer.HiddenRecipes.Items)
+					hiddenRecipes[item.type] = true;
+
+				foreach (var item in StoragePlayer.LocalPlayer.FavoritedRecipes.Items)
+					favorited[item.type] = true;
+
+				SortMode sortMode = (SortMode) sortButtons.Choice;
+				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
+				int modFilterIndex = modSearchBox.ModIndex;
+
+				DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 
 				// now if nothing found we disable filters one by one
 				if (searchBar.Text.Length > 0)
 				{
-					if (recipes.Count == 0 && hiddenRecipes.Count > 0)
+					if (recipes.Count == 0 && hiddenRecipes.Length > 0)
 					{
 						// search hidden recipes too
-						hiddenRecipes = new HashSet<int>();
-						DoFiltering();
+						Array.Clear(hiddenRecipes);
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 
 					/*
@@ -910,7 +919,7 @@ namespace MagicStorage
 					{
 						// any category
 						filterMode = FilterMode.All;
-						DoFiltering();
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 					*/
 
@@ -918,7 +927,7 @@ namespace MagicStorage
 					{
 						// search all mods
 						modFilterIndex = ModSearchBox.ModIndexAll;
-						DoFiltering();
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 				}
 
@@ -959,6 +968,11 @@ namespace MagicStorage
 			catch (Exception e)
 			{
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
+			}
+			finally
+			{
+				ArrayPool<bool>.Shared.Return(hiddenRecipes);
+				ArrayPool<bool>.Shared.Return(favorited);
 			}
 		}
 
