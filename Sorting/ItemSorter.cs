@@ -38,28 +38,28 @@ namespace MagicStorage.Sorting
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
 		{
-			List<Item> stackedItems = new();
+			Item lastItem = null;
 
 			foreach (Item item in items.OrderBy(i => i.type))
 			{
-				if (stackedItems.Count <= 0)
+				if (lastItem is null)
 				{
-					stackedItems.Add(item.Clone());
+					lastItem = item.Clone();
 					continue;
 				}
 
-				var lastItem = stackedItems[^1];
 				if (MagicCache.CanCombine(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
 					lastItem.stack += item.stack;
 				}
 				else
 				{
-					stackedItems.Add(item.Clone());
+					yield return lastItem;
+					lastItem = item.Clone();
 				}
 			}
 
-			return stackedItems;
+			yield return lastItem;
 		}
 
 		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(
