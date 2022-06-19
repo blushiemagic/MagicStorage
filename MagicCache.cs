@@ -5,15 +5,17 @@ using MagicStorage.Sorting;
 using Terraria;
 using Terraria.ModLoader;
 
+#nullable enable
+
 namespace MagicStorage;
 
 public class MagicCache : ModSystem
 {
-	public static Recipe[] EnabledRecipes { get; private set; }
-	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; }
-	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; }
-	public static Dictionary<int, List<Recipe>> hasTile { get; private set; }
-	public static Dictionary<int, Func<Item, Item, bool>> canCombineByType { get; private set; }
+	public static Recipe[] EnabledRecipes { get; private set; } = null!;
+	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
+	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; } = null!;
+	public static Dictionary<int, List<Recipe>> hasTile { get; private set; } = null!;
+	public static Dictionary<int, Func<Item, Item, bool>> canCombineByType { get; private set; } = null!;
 
 	public static bool CanCombine(Item item1, Item item2) => ItemData.Matches(item1, item2) && (!canCombineByType.TryGetValue(item1.type, out var func) || func(item1, item2));
 
@@ -26,11 +28,11 @@ public class MagicCache : ModSystem
 
 	public override void Unload()
 	{
-		EnabledRecipes = null;
-		ResultToRecipe = null;
-		hasIngredient = null;
-		hasTile = null;
-		canCombineByType = null;
+		EnabledRecipes = null!;
+		ResultToRecipe = null!;
+		hasIngredient = null!;
+		hasTile = null!;
+		canCombineByType = null!;
 	}
 
 	public override void PostSetupContent()
