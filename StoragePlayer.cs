@@ -8,7 +8,6 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
-using System;
 
 namespace MagicStorage
 {
@@ -20,7 +19,6 @@ namespace MagicStorage
 
 		private readonly ItemTypeOrderedSet _hiddenRecipes = new("HiddenItems");
 
-		private TEStorageHeart _latestAccessedStorage;
 		public bool remoteAccess;
 		private Point16 storageAccess = Point16.NegativeOne;
 
@@ -39,8 +37,6 @@ namespace MagicStorage
 		public ItemTypeOrderedSet TestedRecipes { get; } = new("TestedRecipes");
 
 		public ItemTypeOrderedSet AsKnownRecipes { get; } = new("AsKnownRecipes");
-
-		public TEStorageHeart LatestAccessedStorage => _latestAccessedStorage is { IsAlive: true } ? _latestAccessedStorage : null;
 
 		public bool IsRecipeHidden(Item item) => _hiddenRecipes.Contains(item);
 
@@ -120,7 +116,6 @@ namespace MagicStorage
 		{
 			storageAccess = point;
 			remoteAccess = remote;
-			_latestAccessedStorage = GetStorageHeart();
 
 			if (MagicStorageConfig.UseConfigFilter && CraftingGUI.recipeButtons is not null)
 			{

@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using MagicStorage.Components;
 using MagicStorage.Items;
@@ -16,7 +14,6 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Map;
@@ -384,44 +381,6 @@ namespace MagicStorage
 		{
 			try
 			{
-				// TODO this needs to be in a better place. What's the hook for doing Keybinds?
-				if (MagicStorage.IsItemKnownHotKey is not null &&
-					PlayerInput.CurrentProfile.InputModes[InputMode.Keyboard].KeyStatus.ContainsKey("Is This Item Known?") &&
-					MagicStorage.IsItemKnownHotKey.GetAssignedKeys().Count > 0 &&
-					MagicStorage.IsItemKnownHotKey.JustPressed &&
-					Main.HoverItem is not null &&
-					!Main.HoverItem.IsAir)
-				{
-					string s = Main.HoverItem.Name + " is ";
-					int t = Main.HoverItem.type;
-					if (GetKnownItems().Contains(t))
-					{
-						s += "known";
-						int sum = StoragePlayer.LocalPlayer
-									  .LatestAccessedStorage?.GetStoredItems()
-									  .Where(x => x.type == t)
-									  .Select(x => x.stack)
-									  .DefaultIfEmpty()
-									  .Sum() ??
-								  0;
-						if (sum > 0)
-							s += $" ({sum} in l.a.s.)";
-					}
-					else
-					{
-						s += "new";
-					}
-
-					Main.NewTextMultiline(s);
-				}
-			}
-			catch (KeyNotFoundException)
-			{
-				// ignore
-			}
-
-			try
-			{
 				oldMouse = StorageGUI.oldMouse;
 				curMouse = StorageGUI.curMouse;
 				if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
@@ -754,7 +713,7 @@ namespace MagicStorage
 				recipeScrollBar.ViewPosition += difference;
 			}
 		}
-		
+
 		private static void UpdateCraftButton()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
@@ -788,7 +747,7 @@ namespace MagicStorage
 						tryCraftPostponeMessages = Main.netMode == NetmodeID.MultiplayerClient;
 						tryCraftCompoundRequestWithdraws = null;
 						tryCraftCompoundRequestResults = null;
-						
+
 						while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 						{
 							TryCraft();
@@ -1651,7 +1610,7 @@ namespace MagicStorage
 							existing.stack = existing.maxStack;
 							item.stack -= diff;
 						}
-						
+
 						break;
 					}
 				}
@@ -1665,7 +1624,7 @@ namespace MagicStorage
 
 			return compacted;
 		}
-		
+
 		private static void TryCraft()
 		{
 			var toWithdraw = new List<Item>();

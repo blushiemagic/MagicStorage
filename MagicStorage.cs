@@ -1,7 +1,6 @@
 ﻿using MagicStorage.Edits;
 using MagicStorage.Items;
 using MagicStorage.Stations;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,8 +19,6 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		public static ModKeybind IsItemKnownHotKey { get; private set; }
-
 		public static ImmutableArray<Mod> AllMods { get; private set; }
 		public static Dictionary<Mod, int> IndexByMod { get; private set; }
 
@@ -36,7 +33,6 @@ namespace MagicStorage {
 
 			InterfaceHelper.Initialize();
 			AddTranslations();
-			IsItemKnownHotKey = KeybindLoader.RegisterKeybind(this, "Is This Item Known?", Keys.Q);
 
 			EditsLoader.Load();
 
@@ -45,7 +41,6 @@ namespace MagicStorage {
 
 		public override void Unload()
 		{
-			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
 
