@@ -910,7 +910,7 @@ namespace MagicStorage
 					if (recipes.Count == 0 && hiddenRecipes.Length > 0)
 					{
 						// search hidden recipes too
-						Array.Clear(hiddenRecipes);
+						Array.Clear(hiddenRecipes, 0, length);
 						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 
