@@ -951,10 +951,7 @@ namespace MagicStorage
 						{
 							Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
 							int index = recipes.IndexOf(overridden);
-							if (index != -1 && recipeAvailable[index])
-								GuttedSetSelectedRecipe(overridden, index);
-							else
-								GuttedSetSelectedRecipe(overridden, index);
+							GuttedSetSelectedRecipe(overridden, index);
 						}
 						// If the selectedRecipe(which isn't compound) is uncraftable but is in the available list, this means it's compound version is craftable
 						else if (!IsAvailable(selectedRecipe, false))
