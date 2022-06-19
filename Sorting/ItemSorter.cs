@@ -8,8 +8,8 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter,
-			int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(
+			IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
 		{
 			var filter = MakeFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
@@ -62,7 +62,8 @@ namespace MagicStorage.Sorting
 			return stackedItems;
 		}
 
-		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
+		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(
+			SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
 			var filter = MakeFilter(filterMode);
 			var filteredRecipes = MagicCache.EnabledRecipes
@@ -76,11 +77,11 @@ namespace MagicStorage.Sorting
 		{
 			CompareFunction func = sortMode switch
 			{
-				SortMode.Default => new CompareDefault(),
-				SortMode.Id      => new CompareID(),
-				SortMode.Name    => new CompareName(),
-				SortMode.Value   => new CompareValue(),
-				SortMode.Dps     => new CompareDps(),
+				SortMode.Default => CompareDefault.Instance,
+				SortMode.Id      => CompareID.Instance,
+				SortMode.Name    => CompareName.Instance,
+				SortMode.Value   => CompareValue.Instance,
+				SortMode.Dps     => CompareDps.Instance,
 				_                => null,
 			};
 

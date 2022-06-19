@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
-	public class CompareDefault : CompareFunction
+	public class CompareDefault : CompareFunction<CompareDefault>
 	{
 		public CompareDefault()
 		{

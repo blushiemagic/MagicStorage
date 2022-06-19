@@ -12,34 +12,42 @@ namespace MagicStorage.Sorting
 		{
 			if (object1 is Item item1 && object2 is Item item2)
 				return Compare(item1, item2);
+
 			if (object1 is Recipe recipe1 && object2 is Recipe recipe2)
 				return Compare(recipe1.createItem, recipe2.createItem);
+
 			return 0;
 		}
 	}
 
-	public class CompareID : CompareFunction
+	public abstract class CompareFunction<T> : CompareFunction
+		where T : CompareFunction<T>, new()
+	{
+		public static T Instance { get; } = new();
+	}
+
+	public class CompareID : CompareFunction<CompareID>
 	{
 		public override int Compare(Item item1, Item item2) => item1.type - item2.type;
 	}
 
-	public class CompareName : CompareFunction
+	public class CompareName : CompareFunction<CompareName>
 	{
 		public override int Compare(Item item1, Item item2) => string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 	}
 
-	public class CompareQuantity : CompareFunction
+	public class CompareQuantity : CompareFunction<CompareQuantity>
 	{
 		public override int Compare(Item item1, Item item2) =>
 			(int) Math.Ceiling(item2.stack / (float) item2.maxStack) - (int) Math.Ceiling(item1.stack / (float) item1.maxStack);
 	}
 
-	public class CompareValue : CompareFunction
+	public class CompareValue : CompareFunction<CompareValue>
 	{
 		public override int Compare(Item item1, Item item2) => item2.value - item1.value;
 	}
 
-	public class CompareDps : CompareFunction
+	public class CompareDps : CompareFunction<CompareDps>
 	{
 		public override int Compare(Item item1, Item item2) => (int) ((GetDps(item2) - GetDps(item1)) * 100);
 
