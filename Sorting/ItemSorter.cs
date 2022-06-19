@@ -110,7 +110,7 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		private static bool FilterName(Item item, string filter) => item.Name.ToLowerInvariant().Contains(filter.Trim().ToLowerInvariant());
+		private static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.InvariantCultureIgnoreCase);
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{
