@@ -96,9 +96,6 @@ namespace MagicStorage.Components
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
 
-			if (CraftingGUI.IsTestItem(toDeposit))
-				return;
-
 			Item original = toDeposit.Clone();
 			bool finished = false;
 			bool hasChange = false;

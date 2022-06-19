@@ -483,12 +483,6 @@ namespace MagicStorage
 					item = item.Clone();
 					item.favorited = true;
 				}
-
-				if (!StoragePlayer.LocalPlayer.SeenRecipes.Contains(item))
-				{
-					item = item.Clone();
-					item.newAndShiny = MagicStorageConfig.GlowNewItems;
-				}
 			}
 
 			return item;
@@ -796,8 +790,6 @@ namespace MagicStorage
 
 						craftTimer--;
 						stillCrafting = true;
-						if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
-							RefreshItems();
 					}
 				}
 			}
@@ -818,42 +810,6 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool CanItemBeTakenForTest(Item item) =>
-			Main.netMode == NetmodeID.SinglePlayer &&
-			!item.consumable &&
-			(item.mana > 0 ||
-			 item.CountsAsClass(DamageClass.Magic) ||
-			 item.CountsAsClass(DamageClass.Ranged) ||
-			 item.CountsAsClass(DamageClass.Throwing) ||
-			 item.CountsAsClass(DamageClass.Melee) ||
-			 item.headSlot >= 0 ||
-			 item.bodySlot >= 0 ||
-			 item.legSlot >= 0 ||
-			 item.accessory ||
-			 Main.projHook[item.shoot] ||
-			 item.pick > 0 ||
-			 item.axe > 0 ||
-			 item.hammer > 0) &&
-			!item.CountsAsClass(DamageClass.Summon) &&
-			item.createTile < TileID.Dirt &&
-			item.createWall < 0 &&
-			!item.potion &&
-			item.fishingPole <= 1 &&
-			item.ammo == AmmoID.None &&
-			!StoragePlayer.LocalPlayer.TestedRecipes.Contains(item);
-
-		public static void MarkAsTestItem(Item testItem)
-		{
-			testItem.value = 0;
-			testItem.shopCustomPrice = 0;
-			testItem.material = false;
-			testItem.rare = -11;
-			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-		}
-
-		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-
-
 		private static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
 		private static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
@@ -862,11 +818,6 @@ namespace MagicStorage
 
 		public static void RefreshItems()
 		{
-			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
-			if (modPlayer.SeenRecipes.Count == 0)
-				foreach (int item in GetKnownItems())
-					modPlayer.SeenRecipes.Add(item);
-
 			items.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
@@ -882,31 +833,11 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes);
-
-			var favoritesCopy = new HashSet<int>(modPlayer.FavoritedRecipes.Items.Select(x => x.type));
-
 			EnsureProductToRecipesInited();
 
 			sortMode = (SortMode) sortButtons.Choice;
 			filterMode = ItemFilter.GetFilter(filterButtons.Choice);
-			RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy);
-		}
-
-		public static HashSet<int> GetKnownItems()
-		{
-			GetKnownItems(out HashSet<int> a, out HashSet<int> b, out HashSet<int> c);
-			a.UnionWith(b);
-			a.UnionWith(c);
-			return a;
-		}
-
-		private static void GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes)
-		{
-			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
-			hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
-			craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
-			asKnownRecipes = new HashSet<int>(modPlayer.AsKnownRecipes.Items.Select(x => x.type));
+			RefreshRecipes();
 		}
 
 		private static void EnsureProductToRecipesInited()
@@ -921,11 +852,12 @@ namespace MagicStorage
 			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
 		}
 
-		private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes, HashSet<int> favorited)
+		private static void RefreshRecipes()
 		{
 			try
 			{
-				var availableItemsMutable = new HashSet<int>(hiddenRecipes.Concat(craftedRecipes));
+				var hiddenRecipes = new HashSet<int>(StoragePlayer.LocalPlayer.HiddenRecipes.Items.Select(x => x.type));
+				var favorited = new HashSet<int>(StoragePlayer.LocalPlayer.FavoritedRecipes.Items.Select(x => x.type));
 
 				int modFilterIndex = modSearchBox.ModIndex;
 
@@ -1360,33 +1292,18 @@ namespace MagicStorage
 					{
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
-							if (storagePlayer.RemoveFromHiddenRecipes(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem))
 								RefreshItems();
 						}
 						else
 						{
-							if (storagePlayer.AddToHiddenRecipes(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Add(recipe.createItem))
 								RefreshItems();
 						}
 					}
 					else
 					{
 						SetSelectedRecipe(recipe);
-					}
-				}
-				else if (RightMouseClicked)
-				{
-					if (recipe == selectedRecipe || recipeButtons.Choice != RecipeButtonsAvailableChoice)
-					{
-						if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
-						{
-							storagePlayer.AsKnownRecipes.Add(recipe.createItem);
-							RefreshItems();
-						}
-						else
-						{
-							storagePlayer.AsKnownRecipes.Remove(recipe.createItem);
-						}
 					}
 				}
 
@@ -1397,8 +1314,6 @@ namespace MagicStorage
 		private static void SetSelectedRecipe(Recipe recipe)
 		{
 			ArgumentNullException.ThrowIfNull(recipe);
-
-			StoragePlayer.LocalPlayer.SeenRecipes.Add(recipe.createItem);
 
 			if (RecursiveCraftIntegration.Enabled)
 			{

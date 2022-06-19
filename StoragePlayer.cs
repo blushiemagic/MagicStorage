@@ -15,10 +15,6 @@ namespace MagicStorage
 	{
 		public static StoragePlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 
-		private readonly ItemTypeOrderedSet _craftedRecipes = new("CraftedRecipes");
-
-		private readonly ItemTypeOrderedSet _hiddenRecipes = new("HiddenItems");
-
 		public bool remoteAccess;
 		private Point16 storageAccess = Point16.NegativeOne;
 
@@ -26,44 +22,20 @@ namespace MagicStorage
 
 		protected override bool CloneNewInstances => false;
 
-		public IEnumerable<Item> HiddenRecipes => _hiddenRecipes.Items;
-
-		public IEnumerable<Item> CraftedRecipes => _craftedRecipes.Items;
+		public ItemTypeOrderedSet HiddenRecipes { get; } = new("HiddenItems");
 
 		public ItemTypeOrderedSet FavoritedRecipes { get; } = new("FavoritedRecipes");
 
-		public ItemTypeOrderedSet SeenRecipes { get; } = new("SeenRecipes");
-
-		public ItemTypeOrderedSet TestedRecipes { get; } = new("TestedRecipes");
-
-		public ItemTypeOrderedSet AsKnownRecipes { get; } = new("AsKnownRecipes");
-
-		public bool IsRecipeHidden(Item item) => _hiddenRecipes.Contains(item);
-
-		public bool AddToHiddenRecipes(Item item) => _hiddenRecipes.Add(item);
-
-		public bool RemoveFromHiddenRecipes(Item item) => _hiddenRecipes.Remove(item);
-
-		public bool AddToCraftedRecipes(Item item) => _craftedRecipes.Add(item);
-
 		public override void SaveData(TagCompound tag)
 		{
-			_hiddenRecipes.Save(tag);
-			_craftedRecipes.Save(tag);
+			HiddenRecipes.Save(tag);
 			FavoritedRecipes.Save(tag);
-			SeenRecipes.Save(tag);
-			TestedRecipes.Save(tag);
-			AsKnownRecipes.Save(tag);
 		}
 
 		public override void LoadData(TagCompound tag)
 		{
-			_hiddenRecipes.Load(tag);
-			_craftedRecipes.Load(tag);
+			HiddenRecipes.Load(tag);
 			FavoritedRecipes.Load(tag);
-			SeenRecipes.Load(tag);
-			TestedRecipes.Load(tag);
-			AsKnownRecipes.Load(tag);
 		}
 
 		public override void UpdateDead()
@@ -230,37 +202,5 @@ namespace MagicStorage
 		}
 
 		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
-
-		public override void ModifyHitByNPC(NPC npc, ref int damage, ref bool crit)
-		{
-			foreach (Item item in Player.inventory.Concat(Player.armor).Concat(Player.dye).Concat(Player.miscDyes).Concat(Player.miscEquips))
-				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
-				{
-					damage *= 5;
-					break;
-				}
-		}
-
-		public override bool CanHitPvp(Item item, Player target)
-		{
-			if (CraftingGUI.IsTestItem(item))
-				return false;
-			return base.CanHitPvp(item, target);
-		}
-
-		public override void OnRespawn(Player player)
-		{
-			foreach (Item item in player.inventory.Concat(player.armor).Concat(player.dye).Concat(player.miscDyes).Concat(player.miscEquips))
-				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
-					item.TurnToAir();
-
-			{
-				Item item = player.trashItem;
-				if (item is not null && !item.IsAir && CraftingGUI.IsTestItem(item))
-					item.TurnToAir();
-			}
-
-			base.OnRespawn(player);
-		}
 	}
 }
