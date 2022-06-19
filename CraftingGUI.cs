@@ -408,7 +408,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
@@ -445,7 +445,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
@@ -958,7 +958,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
