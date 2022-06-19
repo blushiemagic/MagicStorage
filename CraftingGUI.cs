@@ -712,25 +712,6 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				craftButton.BackgroundColor = new Color(73, 94, 171);
-				//The "Test Item" feature is very cheaty and I don't want that in Magic Storage.
-				//However, just deleting the code would be a waste, so it's commented out instead.
-				// - absoluteAquarian
-				// TODO: make this a config option
-				/*
-				if (RightMouseClicked && selectedRecipe is not null && Main.mouseItem.IsAir)
-				{
-					Item item = selectedRecipe.createItem;
-					if (CanItemBeTakenForTest(item))
-					{
-						int type = item.type;
-						Item testItem = new();
-						testItem.SetDefaults(type, true);
-						MarkAsTestItem(testItem);
-						Main.mouseItem = testItem;
-						StoragePlayer.LocalPlayer.TestedRecipes.Add(selectedRecipe.createItem);
-					}
-				}
-				else */
 				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
 					if (Main.keyState.IsKeyDown(Keys.LeftControl))
