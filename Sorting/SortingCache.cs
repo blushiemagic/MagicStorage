@@ -56,7 +56,7 @@ public class SortingCacheDictionary
 	{
 		var items = ContentSamples.ItemsByType
 			.Select((pair, i) => (item: pair.Value, type: i))
-			.OrderBy(x => x.item, ItemSorter.MakeSortFunction(mode))
+			.OrderBy(x => x.item, ItemSorter.GetSortFunction(mode))
 			.ToArray();
 
 		int[] indices = new int[items.Length];

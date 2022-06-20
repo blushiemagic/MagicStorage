@@ -11,7 +11,7 @@ namespace MagicStorage.Sorting
 		public static IEnumerable<Item> SortAndFilter(
 			IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
 		{
-			var filter = MakeFilter(filterMode);
+			var filter = GetFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
@@ -29,7 +29,7 @@ namespace MagicStorage.Sorting
 				return orderedItems.ThenBy(x => x.value);
 			} else if (sortMode == SortMode.Dps) {
 				//Sort again by DPS due to it using variable item data
-				var func = MakeSortFunction(SortMode.Dps);
+				var func = GetSortFunction(SortMode.Dps);
 				return orderedItems.ThenBy(x => func).ThenBy(x => x.value);
 			}
 
@@ -65,15 +65,15 @@ namespace MagicStorage.Sorting
 		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(
 			SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
 		{
-			var filter = MakeFilter(filterMode);
+			var filter = GetFilter(filterMode);
 			var filteredRecipes = MagicCache.EnabledRecipes
 				.AsParallel()
 				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex) && filter(recipe.createItem));
 
-			return (filteredRecipes, MakeSortFunction(sortMode));
+			return (filteredRecipes, GetSortFunction(sortMode));
 		}
 
-		internal static CompareFunction MakeSortFunction(SortMode sortMode)
+		internal static CompareFunction GetSortFunction(SortMode sortMode)
 		{
 			CompareFunction func = sortMode switch
 			{
@@ -88,7 +88,7 @@ namespace MagicStorage.Sorting
 			return func;
 		}
 
-		internal static ItemFilter.Filter MakeFilter(FilterMode filterMode)
+		internal static ItemFilter.Filter GetFilter(FilterMode filterMode)
 		{
 			return filterMode switch
 			{
