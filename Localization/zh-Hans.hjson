@@ -1,0 +1,45 @@
+﻿Mods: {
+	MagicStorage: {
+		Active: "已启用"
+		Inactive: "已禁用"
+		FilterAllMods: "所有物品"
+		CookedMarshmallowCondition: "存放于制作存储单元的生态球"
+		Capacity: "容量: {0} / {1}"
+		LocatorSet: "该定位器已设置于位于 [{0}, {1}] 的存储核心"
+		StorageAccessFail: "无法加载存储核心！"
+		StorageAccessFailAlt: "该存储装置没有与存储核心连接！"
+		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
+		Config: {
+			Label: "魔法存储配置"
+
+			glowNewItems: {
+				Label: "显示新物品/配方"
+				Tooltip: "存储核心/制作存储单元中的新物品/配方是否会突出显示"
+			}
+			useConfigFilter: {
+				Label: "使用默认筛选项"
+				Tooltip: "开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）"
+			}
+			showAllRecipes: {
+				Label: "显示所有制作配方"
+				Tooltip: "开启以显示所有制作配方，关闭则只会显示可用的制作配方"
+			}
+			quickStackDepositMode: {
+				Label: "快速堆叠与捕获快捷键"
+				Tooltip: "若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可\n将指针移动到存储核心的“快速存入”按钮上以了解具体信息"
+			}
+			clearSearchText: {
+				Label: "自动清除搜索文本"
+				Tooltip: "开启后，每次打开存储核心的UI界面都会自动清除上一次键入的搜索文本"
+			}
+			extraFilterIcons: {
+				Label: "显示更多排序选项"
+				Tooltip: "开启后，在存储核心的UI界面会显示更多排序选项"
+			}
+			showDps: {
+				Label: "武器DPS预测"
+				Tooltip: "开启后，在武器简介里会显示预计DPS值"
+			}
+		}
+	}
+}

@@ -1,4 +1,6 @@
-﻿using Terraria.ID;
+﻿using System.Collections.Generic;
+using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
@@ -11,10 +13,19 @@ namespace MagicStorage.Stations
 
 		public override string ItemDescription => "Combines the functionality of several crafting stations";
 
+		public override Dictionary<GameCulture, string> ItemNameLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "高级组合制作站" }
+				};
+
+		public override Dictionary<GameCulture, string> ItemDescriptionLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "结合了部分高级制作站的功能" }
+				};
+
 		public override int Rarity => ItemRarityID.Yellow;
 
-		public override void SafeSetDefaults()
-		{
+		public override void SafeSetDefaults() {
 			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedStations2Item>(), 1),
 				(ItemID.ImbuingStation, 1),
 				(ItemID.MythrilAnvil, 1),
@@ -25,14 +36,12 @@ namespace MagicStorage.Stations
 				(ItemID.MeatGrinder, 1));
 		}
 
-		public override void GetItemDimensions(out int width, out int height)
-		{
+		public override void GetItemDimensions(out int width, out int height) {
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes() {
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedStations2Item>())
 				.AddIngredient(ItemID.ImbuingStation)

@@ -8,68 +8,69 @@ using Terraria.ModLoader.Config;
 
 namespace MagicStorage
 {
-	public class MagicStorageConfig : ModConfig
-	{
-		[Label("Display new items/recipes")]
-		[Tooltip("Toggles whether new items in the storage will glow to indicate they're new")]
-		[DefaultValue(false)]
-		public bool glowNewItems;
+    [Label("$Mods.MagicStorage.Config.Label")]
+    public class MagicStorageConfig : ModConfig
+    {
+        [Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.glowNewItems.Tooltip")]
+        [DefaultValue(false)]
+        public bool glowNewItems;
 
-		[Label("Use default filter")]
-		[Tooltip("Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)")]
-		[DefaultValue(true)]
-		public bool useConfigFilter;
+        [Label("$Mods.MagicStorage.Config.useConfigFilter.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.useConfigFilter.Tooltip")]
+        [DefaultValue(true)]
+        public bool useConfigFilter;
 
-		[Label("Default recipe filter")]
-		[Tooltip("Enable to default to all recipes, disable to default to available recipes")]
-		[DefaultValue(false)]
-		public bool showAllRecipes;
+        [Label("$Mods.MagicStorage.Config.showAllRecipes.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.showAllRecipes.Tooltip")]
+        [DefaultValue(false)]
+        public bool showAllRecipes;
 
-		[Label("Quick stack deposit mode")]
-		[Tooltip("Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released")]
-		[DefaultValue(false)]
-		public bool quickStackDepositMode;
+        [Label("$Mods.MagicStorage.Config.quickStackDepositMode.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip")]
+        [DefaultValue(false)]
+        public bool quickStackDepositMode;
 
-		[Label("Clear search text")]
-		[Tooltip("Enable to clear the search text when opening the UI")]
-		[DefaultValue(false)]
-		public bool clearSearchText;
+        [Label("$Mods.MagicStorage.Config.clearSearchText.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.clearSearchText.Tooltip")]
+        [DefaultValue(false)]
+        public bool clearSearchText;
 
-		[Label("Display extra sorting icons")]
-		[Tooltip("Enable to have the extra sorting options available")]
-		[DefaultValue(true)]
-		[ReloadRequired]
-		public bool extraFilterIcons;
+        [Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.extraFilterIcons.Tooltip")]
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool extraFilterIcons;
 
-		[Label("Estimate the dps of weapons")]
-		[Tooltip("Enable to show a tooltip with the estimated dps of the item")]
-		[DefaultValue(true)]
-		[ReloadRequired]
-		public bool showDps;
+        [Label("$Mods.MagicStorage.Config.showDps.Label")]
+        [Tooltip("$Mods.MagicStorage.Config.showDps.Tooltip")]
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool showDps;
 
-		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
+        public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
-		[JsonIgnore]
-		public static bool GlowNewItems => Instance.glowNewItems;
+        [JsonIgnore]
+        public static bool GlowNewItems => Instance.glowNewItems;
 
-		[JsonIgnore]
-		public static bool UseConfigFilter => Instance.useConfigFilter;
+        [JsonIgnore]
+        public static bool UseConfigFilter => Instance.useConfigFilter;
 
-		[JsonIgnore]
-		public static bool ShowAllRecipes => Instance.showAllRecipes;
+        [JsonIgnore]
+        public static bool ShowAllRecipes => Instance.showAllRecipes;
 
-		[JsonIgnore]
-		public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
+        [JsonIgnore]
+        public static bool QuickStackDepositMode => Instance.quickStackDepositMode;
 
-		[JsonIgnore]
-		public static bool ClearSearchText => Instance.clearSearchText;
+        [JsonIgnore]
+        public static bool ClearSearchText => Instance.clearSearchText;
 
-		[JsonIgnore]
-		public static bool ExtraFilterIcons => Instance.extraFilterIcons;
+        [JsonIgnore]
+        public static bool ExtraFilterIcons => Instance.extraFilterIcons;
 
-		[JsonIgnore]
-		public static bool ShowDps => Instance.showDps;
+        [JsonIgnore]
+        public static bool ShowDps => Instance.showDps;
 
-		public override ConfigScope Mode => ConfigScope.ClientSide;
-	}
+        public override ConfigScope Mode => ConfigScope.ClientSide;
+    }
 }

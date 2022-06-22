@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage
@@ -51,7 +52,7 @@ namespace MagicStorage
 		{
 			string name = ModIndex switch
 			{
-				ModIndexAll      => "All mods",
+				ModIndexAll      => Language.GetTextValue("Mods.MagicStorage.FilterAllMods"),
 				ModIndexBaseGame => "Terraria",
 				_                => MagicStorage.AllMods[ModIndex].Name
 			};

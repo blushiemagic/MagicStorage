@@ -4,15 +4,13 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
-namespace MagicStorage.Components
-{
-	public class StorageUnit : StorageComponent
-	{
-		public override void ModifyObjectData()
-		{
+namespace MagicStorage.Components {
+	public class StorageUnit : StorageComponent {
+		public override void ModifyObjectData() {
 			TileObjectData.newTile.StyleHorizontal = true;
 			TileObjectData.newTile.StyleMultiplier = 6;
 			TileObjectData.newTile.StyleWrapLimit = 6;
@@ -20,16 +18,13 @@ namespace MagicStorage.Components
 
 		public override TEStorageUnit GetTileEntity() => ModContent.GetInstance<TEStorageUnit>();
 
-		public override void MouseOver(int i, int j)
-		{
+		public override void MouseOver(int i, int j) {
 			Main.LocalPlayer.noThrow = 2;
 		}
 
-		public override int ItemType(int frameX, int frameY)
-		{
+		public override int ItemType(int frameX, int frameY) {
 			int style = frameY / 36;
-			int type = style switch
-			{
+			int type = style switch {
 				1 => ModContent.ItemType<StorageUnitDemonite>(),
 				2 => ModContent.ItemType<StorageUnitCrimtane>(),
 				3 => ModContent.ItemType<StorageUnitHellstone>(),
@@ -43,8 +38,7 @@ namespace MagicStorage.Components
 			return type;
 		}
 
-		public override bool CanKillTile(int i, int j, ref bool blockDamage)
-		{
+		public override bool CanKillTile(int i, int j, ref bool blockDamage) {
 			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
@@ -56,8 +50,7 @@ namespace MagicStorage.Components
 			return Main.tile[i, j].TileFrameX / 36 % 3 == 0;
 		}
 
-		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
-		{
+		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem) {
 			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
@@ -67,8 +60,7 @@ namespace MagicStorage.Components
 				fail = true;
 		}
 
-		public override bool RightClick(int i, int j)
-		{
+		public override bool RightClick(int i, int j) {
 			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
@@ -80,14 +72,13 @@ namespace MagicStorage.Components
 				return false;
 
 			Main.LocalPlayer.tileInteractionHappened = true;
-			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
-			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
+			string activeString = storageUnit.Inactive ? Language.GetTextValue("Mods.MagicStorage.Inactive") : Language.GetTextValue("Mods.MagicStorage.Active");
+			string fullnessString = Language.GetTextValue("Mods.MagicStorage.Capacity", storageUnit.NumItems, storageUnit.Capacity);
 			Main.NewText(activeString + ", " + fullnessString);
 			return base.RightClick(i, j);
 		}
 
-		private static bool TryUpgrade(int i, int j)
-		{
+		private static bool TryUpgrade(int i, int j) {
 			Player player = Main.LocalPlayer;
 			Item item = player.HeldItem;
 			int style = Main.tile[i, j].TileFrameY / 36;
@@ -156,16 +147,14 @@ namespace MagicStorage.Components
 			return false;
 		}
 
-		private static void SetStyle(int i, int j, int style)
-		{
-			Main.tile[i, j].TileFrameY = (short) (36 * style);
-			Main.tile[i + 1, j].TileFrameY = (short) (36 * style);
-			Main.tile[i, j + 1].TileFrameY = (short) (36 * style + 18);
-			Main.tile[i + 1, j + 1].TileFrameY = (short) (36 * style + 18);
+		private static void SetStyle(int i, int j, int style) {
+			Main.tile[i, j].TileFrameY = (short)(36 * style);
+			Main.tile[i + 1, j].TileFrameY = (short)(36 * style);
+			Main.tile[i, j + 1].TileFrameY = (short)(36 * style + 18);
+			Main.tile[i + 1, j + 1].TileFrameY = (short)(36 * style + 18);
 		}
 
-		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
-		{
+		public override void PostDraw(int i, int j, SpriteBatch spriteBatch) {
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;

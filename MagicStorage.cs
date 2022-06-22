@@ -29,8 +29,7 @@ namespace MagicStorage {
 
 		public static readonly Version requiredVersion = new Version(0, 12);
 
-		public override void Load()
-		{
+		public override void Load() {
 			if (TModLoaderVersion < requiredVersion)
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
 
@@ -43,8 +42,7 @@ namespace MagicStorage {
 			DirectDetourManager.Load();
 		}
 
-		public override void Unload()
-		{
+		public override void Unload() {
 			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
@@ -58,7 +56,7 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ustawione na: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Mis à: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ajustado a: X={0}, Y={1}");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "已设置为: X={0}, Y={1}");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "已设置于位于 [{0}, {1}] 的存储核心");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "SnowBiomeBlock");
@@ -94,6 +92,7 @@ namespace MagicStorage {
 
 			text = LocalizationLoader.CreateTranslation(this, "CraftAmount");
 			text.SetDefault("Craft amount");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "制作数量");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "SearchMod");
@@ -133,7 +132,7 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировать по стопкам");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Trier par piles");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ordenar por pilas");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按堆栈排序");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按堆叠量排序");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "SortValue");
@@ -141,7 +140,7 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Сортировать по значению");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Trier par valeur");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Ordenar por valor");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按值排序");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "按价格排序");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterAll");
@@ -173,39 +172,47 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Фильтр (Снаряжения)");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Filtrer par Équipement");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Filtrar por equipamiento");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选装备");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选饰品");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsMelee");
 			text.SetDefault("Filter Melee Weapons");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选近战武器");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsRanged");
 			text.SetDefault("Filter Ranged Weapons");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选远程武器");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsMagic");
 			text.SetDefault("Filter Magic Weapons");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选魔法武器");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsSummon");
 			text.SetDefault("Filter Summons");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选召唤武器");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterWeaponsThrown");
 			text.SetDefault("Filter Throwing Weapons");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选投掷武器");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterAmmo");
 			text.SetDefault("Filter Ammo");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选弹药");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterArmor");
 			text.SetDefault("Filter Armor");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选盔甲");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterVanity");
 			text.SetDefault("Filter Vanity Items");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选时装");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterPotions");
@@ -234,6 +241,7 @@ namespace MagicStorage {
 
 			text = LocalizationLoader.CreateTranslation(this, "FilterRecent");
 			text.SetDefault("Filter New Recently Added Items");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "筛选最近存入的物品");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "CraftingStations");
@@ -241,7 +249,7 @@ namespace MagicStorage {
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Станции создания");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Stations d'artisanat");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Estaciones de elaboración");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "制作站");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "制作站 (翻译: -Cyril-, 抗药又坚硬汉化组)");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "Recipes");
@@ -289,22 +297,27 @@ namespace MagicStorage {
 
 			text = LocalizationLoader.CreateTranslation(this, "RecipeBlacklist");
 			text.SetDefault("Show hidden recipes (ctrl+click on recipe to (un)hide)");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "显示被隐藏的配方（左键单击任意配方以切换隐藏状态）");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "SortDps");
 			text.SetDefault("Sort by DPS");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "根据DPS排序");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "ShowOnlyFavorited");
 			text.SetDefault("Only Favorited");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "显示收藏配方");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "DepositTooltip");
 			text.SetDefault("Quick Stack - click, Deposit All - ctrl+click, Restock - right click");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "DepositTooltipAlt");
 			text.SetDefault("Quick Stack - ctrl+click, Deposit All - click, Restock - right click");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "CraftTooltip");
@@ -312,6 +325,7 @@ namespace MagicStorage {
 			//See explanation in CraftingGUI.UpdateCraftButton() for why the test feature was removed
 			// text.SetDefault("Left click to Craft, Right click to get item for a test (only for new items)");
 			text.SetDefault("Left click to Craft (ctrl to get max)");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "左键单击以制作（按住Ctrl全部制作）");
 			LocalizationLoader.AddTranslation(text);
 
 			text = LocalizationLoader.CreateTranslation(this, "TestItemSuffix");
@@ -319,10 +333,10 @@ namespace MagicStorage {
 			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes(){
+		public override void AddRecipes() {
 			CreateRecipe(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
-				.AddCondition(new Recipe.Condition(NetworkText.FromLiteral("Biome Globe in a Crafting Interface"), recipe => CraftingGUI.Campfire))
+				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
@@ -349,8 +363,7 @@ namespace MagicStorage {
 			}
 		}
 
-		public override void PostSetupContent()
-		{
+		public override void PostSetupContent() {
 			AllMods = ModLoader.Mods
 				.Where(mod => mod.GetContent<ModItem>().Any())
 				.ToImmutableArray();
@@ -364,8 +377,7 @@ namespace MagicStorage {
 			}
 		}
 
-		public override void AddRecipeGroups()
-		{
+		public override void AddRecipeGroups() {
 			string any = Language.GetTextValue("LegacyMisc.37");
 
 			int[] items =
@@ -695,7 +707,8 @@ namespace MagicStorage {
 
 			TryParseAs(0, out function);
 
-			switch (function) {
+			switch (function)
+			{
 				case "Register Sorting":
 					TryParseAs(1, out int itemType);
 					TryParseAs(2, out Func<Item, Item, bool> canCombine);

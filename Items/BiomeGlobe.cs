@@ -5,114 +5,125 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
-	public class BiomeGlobe : ModItem
-	{
-		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("Biome Globe");
-			Tooltip.SetDefault("'The world's power is at your fingertips'" +
-							   "\nAllows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey" +
-							   "\nCan be in the inventory or a Crafting Interface's station slot" +
-							   "\nWhile in the inventory, Marshmallows can be cooked without needing to stand near a Campfire" +
-							   "\nAllows crafting of Cooked Marshmallows in the Crafting Interface" +
-							   "\nActs like a Beach Ball when thrown");
+    public class BiomeGlobe : ModItem
+    {
+        public override void SetStaticDefaults()
+        {
+            DisplayName.SetDefault("Biom Globe");
+            DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "生态球");
 
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
-		}
+            Tooltip.SetDefault("'The world's power is at your fingertips'" +
+                               "\nAllows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey" +
+                               "\nCan be in the inventory or a Crafting Interface's station slot" +
+                               "\nWhile in the inventory, Marshmallows can be cooked without needing to stand near a Campfire" +
+                               "\nAllows crafting of Cooked Marshmallows in the Crafting Interface" +
+                               "\nActs like a Beach Ball when thrown");
+            Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese),
+                "“你掌握着世界的力量”" +
+                "\n制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁" +
+                "\n放在物品栏或制作存储单元的制作站槽位内即可生效" +
+                "\n放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟" +
+                "\n可在制作界面直接用棉花糖制作熟棉花糖" +
+                "\n丢出去之后会像沙滩球一样弹弹弹");
 
-		public override void SetDefaults()
-		{
-			Item.DefaultToThrownWeapon(ModContent.ProjectileType<BiomeGlobeThrown>(), 20, 6f, false);
-			Item.width = 50;
-			Item.height = 50;
-			Item.rare = ItemRarityID.LightRed;
-			Item.value = Item.sellPrice(silver: 15);
-			Item.maxStack = 99;
-			Item.noUseGraphic = true;
-			Item.noMelee = true;
-			Item.consumable = false;
-			Item.UseSound = SoundID.Item1;
-		}
+            CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
+        }
 
-		public override void UpdateInventory(Player player)
-		{
-			player.GetModPlayer<BiomePlayer>().biomeGlobe = true;
-		}
+        public override void SetDefaults()
+        {
+            Item.DefaultToThrownWeapon(ModContent.ProjectileType<BiomeGlobeThrown>(), 20, 6f, false);
+            Item.width = 50;
+            Item.height = 50;
+            Item.rare = ItemRarityID.LightRed;
+            Item.value = Item.sellPrice(silver: 15);
+            Item.maxStack = 99;
+            Item.noUseGraphic = true;
+            Item.noMelee = true;
+            Item.consumable = false;
+            Item.UseSound = SoundID.Item1;
+        }
 
-		public override void AddRecipes()
-		{
-			CreateRecipe()
-				.AddRecipeGroup("MagicStorage:AnyTombstone", 5)
-				.AddIngredient<SnowBiomeEmulator>()
-				.AddIngredient(ItemID.WaterBucket)
-				.AddIngredient(ItemID.LavaBucket)
-				.AddIngredient(ItemID.HoneyBucket)
-				.AddRecipeGroup("MagicStorage:AnyCampfire", 3)
-				.AddRecipeGroup("MagicStorage:AnyDemonAltar")
-				.Register();
-		}
+        public override void UpdateInventory(Player player)
+        {
+            player.GetModPlayer<BiomePlayer>().biomeGlobe = true;
+        }
 
-		public override bool CanUseItem(Player player)
-			=> player.ownedProjectileCounts[Item.shoot] < 1;
+        public override void AddRecipes()
+        {
+            CreateRecipe()
+                .AddRecipeGroup("MagicStorage:AnyTombstone", 5)
+                .AddIngredient<SnowBiomeEmulator>()
+                .AddIngredient(ItemID.WaterBucket)
+                .AddIngredient(ItemID.LavaBucket)
+                .AddIngredient(ItemID.HoneyBucket)
+                .AddRecipeGroup("MagicStorage:AnyCampfire", 3)
+                .AddRecipeGroup("MagicStorage:AnyDemonAltar")
+                .Register();
+        }
 
-		public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI){
-			Texture2D texture = TextureAssets.Projectile[ModContent.ProjectileType<BiomeGlobeThrown>()].Value;
+        public override bool CanUseItem(Player player)
+            => player.ownedProjectileCounts[Item.shoot] < 1;
 
-			spriteBatch.Draw(texture, Item.Center - Main.screenPosition, null, lightColor, rotation, texture.Size() / 2f, scale, SpriteEffects.None, 0);
+        public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI)
+        {
+            Texture2D texture = TextureAssets.Projectile[ModContent.ProjectileType<BiomeGlobeThrown>()].Value;
 
-			return false;
-		}
-	}
+            spriteBatch.Draw(texture, Item.Center - Main.screenPosition, null, lightColor, rotation, texture.Size() / 2f, scale, SpriteEffects.None, 0);
 
-	public class BiomePlayer : ModPlayer
-	{
-		public bool biomeGlobe;
+            return false;
+        }
+    }
 
-		public override void ResetEffects()
-		{
-			biomeGlobe = false;
-		}
-	}
+    public class BiomePlayer : ModPlayer
+    {
+        public bool biomeGlobe;
 
-	public class BiomeOverrideItem : GlobalItem
-	{
-		public override void HoldItem(Item item, Player player)
-		{
-			Item sItem = player.itemAnimation > 0 ? player.lastVisualizedSelectedItem : player.HeldItem;
+        public override void ResetEffects()
+        {
+            biomeGlobe = false;
+        }
+    }
 
-			//Near-copy of the Marshmallow on a Stick hold code, since the IL edit forces the original code to not run should this accessory flag be true
-			if (player.whoAmI == Main.myPlayer && item.type == ItemID.MarshmallowonaStick && player.GetModPlayer<BiomePlayer>().biomeGlobe)
-			{
-				player.miscTimer++;
-				if (Main.rand.NextBool(5))
-					player.miscTimer++;
+    public class BiomeOverrideItem : GlobalItem
+    {
+        public override void HoldItem(Item item, Player player)
+        {
+            Item sItem = player.itemAnimation > 0 ? player.lastVisualizedSelectedItem : player.HeldItem;
 
-				if (player.miscTimer > 900)
-				{
-					player.miscTimer = 0;
-					sItem.SetDefaults(ItemID.CookedMarshmallow);
+            //Near-copy of the Marshmallow on a Stick hold code, since the IL edit forces the original code to not run should this accessory flag be true
+            if (player.whoAmI == Main.myPlayer && item.type == ItemID.MarshmallowonaStick && player.GetModPlayer<BiomePlayer>().biomeGlobe)
+            {
+                player.miscTimer++;
+                if (Main.rand.NextBool(5))
+                    player.miscTimer++;
 
-					if (player.selectedItem == 58)
-						Main.mouseItem.SetDefaults(ItemID.CookedMarshmallow);
+                if (player.miscTimer > 900)
+                {
+                    player.miscTimer = 0;
+                    sItem.SetDefaults(ItemID.CookedMarshmallow);
 
-					for (int k = 0; k < 58; k++)
-					{
-						if (player.inventory[k].type == sItem.type && k != player.selectedItem && player.inventory[k].stack < player.inventory[k].maxStack)
-						{
-							SoundEngine.PlaySound(SoundID.Grab);
-							player.inventory[k].stack++;
-							sItem.SetDefaults();
+                    if (player.selectedItem == 58)
+                        Main.mouseItem.SetDefaults(ItemID.CookedMarshmallow);
 
-							if (player.selectedItem == 58)
-								Main.mouseItem.SetDefaults();
-						}
-					}
-				}
-			}
-		}
-	}
+                    for (int k = 0; k < 58; k++)
+                    {
+                        if (player.inventory[k].type == sItem.type && k != player.selectedItem && player.inventory[k].stack < player.inventory[k].maxStack)
+                        {
+                            SoundEngine.PlaySound(SoundID.Grab);
+                            player.inventory[k].stack++;
+                            sItem.SetDefaults();
+
+                            if (player.selectedItem == 58)
+                                Main.mouseItem.SetDefaults();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
