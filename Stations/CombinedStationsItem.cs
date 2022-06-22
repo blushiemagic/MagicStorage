@@ -39,11 +39,11 @@ namespace MagicStorage.Stations
 
 		public abstract void GetItemDimensions(out int width, out int height);
 
-		public virtual void SafeSetDefaults() 
+		public virtual void SafeSetDefaults()
 		{
 		}
 
-		public sealed override void SetDefaults() 
+		public sealed override void SetDefaults()
 		{
 			SafeSetDefaults();
 			Item.DamageType = DamageClass.Default;

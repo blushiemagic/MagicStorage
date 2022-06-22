@@ -41,7 +41,7 @@ namespace MagicStorage.Stations
 			height = 30;
 		}
 
-		public override void AddRecipes() 
+		public override void AddRecipes()
 		{
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedStations3Item>())

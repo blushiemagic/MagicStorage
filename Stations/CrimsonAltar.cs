@@ -15,7 +15,7 @@ namespace MagicStorage.Stations
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "可放置的猩红祭坛复制品，试图挖掉的话什么都不会发生");
 		}
 
-		public override void SetDefaults() 
+		public override void SetDefaults()
 		{
 			Item.width = 48;
 			Item.height = 34;

@@ -52,8 +52,7 @@ namespace MagicStorage {
 			DirectDetourManager.Unload();
 		}
 
-		private void AddTranslations()
-		{
+		private void AddTranslations() {
 			ModTranslation text = LocalizationLoader.CreateTranslation(this, "SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ustawione na: X={0}, Y={1}");
@@ -336,16 +335,14 @@ namespace MagicStorage {
 			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes()
-		{
+		public override void AddRecipes(){
 			CreateRecipe(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
-		public override void PostAddRecipes()
-		{
+		public override void PostAddRecipes() {
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
 			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
@@ -692,13 +689,11 @@ namespace MagicStorage {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar", group);
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI)
-		{
+		public override void HandlePacket(BinaryReader reader, int whoAmI) {
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override object Call(params object[] args)
-		{
+		public override object Call(params object[] args) {
 			if (args.Length < 1)
 				throw new ArgumentException("Call requires at least one argument");
 
