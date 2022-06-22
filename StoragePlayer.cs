@@ -115,9 +115,10 @@ namespace MagicStorage
 			if (toMouse && Main.playerInventory && Main.mouseItem.IsAir)
 			{
 				Main.mouseItem = item;
-				item = new Item();
+				return;
 			}
-			else if (toMouse && Main.playerInventory && Main.mouseItem.type == item.type)
+
+			if (toMouse && Main.playerInventory && Main.mouseItem.type == item.type)
 			{
 				int total = Main.mouseItem.stack + item.stack;
 				if (total > Main.mouseItem.maxStack)
@@ -127,24 +128,26 @@ namespace MagicStorage
 				item.stack -= difference;
 			}
 
-			if (!item.IsAir)
+			if (item.IsAir)
+				return;
+
+			item = player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
+			if (item.IsAir)
+				return;
+
+			if (Main.mouseItem.IsAir)
 			{
-				item = player.GetItem(Main.myPlayer, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-				if (!item.IsAir && Main.mouseItem.IsAir)
-				{
-					Main.mouseItem = item;
-					item = new Item();
-				}
-
-				if (!item.IsAir && Main.mouseItem.type == item.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
-				{
-					Main.mouseItem.stack += item.stack;
-					item = new Item();
-				}
-
-				if (!item.IsAir)
-					player.QuickSpawnClonedItem(source, item, item.stack);
+				Main.mouseItem = item;
+				return;
 			}
+
+			if (MagicCache.CanCombine(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
+			{
+				Main.mouseItem.stack += item.stack;
+				return;
+			}
+
+			player.QuickSpawnClonedItem(source, item, item.stack);
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)

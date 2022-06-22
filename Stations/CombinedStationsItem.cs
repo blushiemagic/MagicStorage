@@ -49,9 +49,10 @@ namespace MagicStorage.Stations
 		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks){
 			int price = 0;
 
-			for(int i = 0; i < typeStacks.Length; i++){
-				Item tItem = new Item(typeStacks[i].type);
-				price += tItem.value * typeStacks[i].stack;
+			foreach ((int type, int stack) in typeStacks)
+			{
+				Item tItem = ContentSamples.ItemsByType[type];
+				price += tItem.value * stack;
 			}
 
 			return price;

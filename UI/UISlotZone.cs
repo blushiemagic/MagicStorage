@@ -17,6 +17,7 @@ namespace MagicStorage.UI
 		private const int Padding = 4;
 
 		private static readonly Asset<Texture2D> InventoryBack = TextureAssets.InventoryBack;
+		private static readonly Item[] DummyItems = new Item[11];
 
 		private readonly GetItem getItem;
 		private readonly float inventoryScale;
@@ -67,7 +68,6 @@ namespace MagicStorage.UI
 			Vector2 origin = GetDimensions().Position();
 			float oldScale = Main.inventoryScale;
 			Main.inventoryScale = inventoryScale;
-			var temp = new Item[11];
 			for (int k = 0; k < numColumns * numRows; k++)
 			{
 				int context = 0;
@@ -77,8 +77,8 @@ namespace MagicStorage.UI
 				float x = (slotWidth + Padding) * col;
 				float y = (slotHeight + Padding) * row;
 				Vector2 drawPos = origin + new Vector2(x, y);
-				temp[10] = item;
-				ItemSlot.Draw(Main.spriteBatch, temp, context, 10, drawPos);
+				DummyItems[10] = item;
+				ItemSlot.Draw(Main.spriteBatch, DummyItems, context, 10, drawPos);
 			}
 
 			Main.inventoryScale = oldScale;

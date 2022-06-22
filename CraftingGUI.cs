@@ -467,6 +467,7 @@ namespace MagicStorage
 		{
 			int index = slot + RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
+
 			if (!item.IsAir)
 			{
 				// TODO can this be nicer?
@@ -489,6 +490,7 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 				return new Item();
 
+			// TODO: Can we simply return `selectedRecipe.createItem`
 			Item item = selectedRecipe.createItem;
 			if (item.IsAir)
 				item = new Item(item.type, 0);
@@ -526,15 +528,15 @@ namespace MagicStorage
 			if (!item.IsAir)
 			{
 				if (storageItem.IsAir && totalGroupStack == 0)
-					context = 3; // Unavailable - Red
+					context = 3; // Unavailable - Red // ItemSlot.Context.ChestItem
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
-					context = 4; // Partially in stock - Pinkish
-								 // context == 0 - Available - Default Blue
+					context = 4; // Partially in stock - Pinkish // ItemSlot.Context.BankItem
+				// context == 0 - Available - Default Blue
 				if (context != 0)
 				{
 					bool craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => AmountCraftable(recipe) > 0);
 					if (craftable)
-						context = 6; // Craftable - Light green
+						context = 6; // Craftable - Light green // ItemSlot.Context.TrashItem
 				}
 			}
 
@@ -586,7 +588,7 @@ namespace MagicStorage
 			int index = slot + IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
 			if (blockStorageItems.Contains(new ItemData(item)))
-				context = 3;
+				context = 3; // Red // ItemSlot.Context.ChestItem
 
 			return item;
 		}

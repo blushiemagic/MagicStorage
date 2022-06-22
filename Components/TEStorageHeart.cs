@@ -483,18 +483,18 @@ namespace MagicStorage.Components
 
 		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite, bool toInventory = false)
 		{
-			Item item = new Item();
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareClientRequest((toInventory ? Operation.WithdrawToInventory : Operation.Withdraw));
+				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventory : Operation.Withdraw);
 				packet.Write(keepOneIfFavorite);
 				ItemIO.Send(lookFor, packet, true, true);
 				packet.Send();
+
+				return new Item();
 			}
-			else
-			{
-				item = Withdraw(lookFor, keepOneIfFavorite);
-			}
+
+			var item = Withdraw(lookFor, keepOneIfFavorite);
+
 			return item;
 		}
 
