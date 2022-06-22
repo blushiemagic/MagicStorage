@@ -826,8 +826,11 @@ namespace MagicStorage
 						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
 						// show only favorited items if selected
 						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
+						.Select((r, i) => (r, i))
 						// favorites first
-						.OrderBy(x => favorited.Contains(x.createItem) ? 0 : 1);
+						.OrderBy(x => favorited.Contains(x.r.createItem) ? 0 : 1)
+						.ThenBy(x => x.i)
+						.Select(x => x.r);
 
 					recipes.Clear();
 					recipeAvailable.Clear();
