@@ -821,16 +821,14 @@ namespace MagicStorage
 			{
 				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
 				{
-					var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text)
+					var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text, out var sortComparer)
 						// show only blacklisted recipes only if choice = 2, otherwise show all other
 						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
 						// show only favorited items if selected
 						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
-						.Select((r, i) => (r, i))
 						// favorites first
-						.OrderBy(x => favorited.Contains(x.r.createItem) ? 0 : 1)
-						.ThenBy(x => x.i)
-						.Select(x => x.r);
+						.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
+						.ThenBy(r => r.createItem, sortComparer);
 
 					recipes.Clear();
 					recipeAvailable.Clear();

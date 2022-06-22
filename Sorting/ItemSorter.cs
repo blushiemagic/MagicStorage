@@ -61,11 +61,14 @@ namespace MagicStorage.Sorting
 			yield return lastItem;
 		}
 
-		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter) =>
-			MagicCache.SortFilterRecipeCache[(sortMode, filterMode)]
+		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, out IComparer<Item> sortComparer)
+		{
+			sortComparer = GetSortFunction(sortMode);
+			return MagicCache.FilteredRecipesCache[filterMode]
 				.AsParallel()
 				.AsOrdered()
 				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+		}
 
 		internal static IComparer<Item> GetSortFunction(SortMode sortMode)
 		{

@@ -13,7 +13,7 @@ public class MagicCache : ModSystem
 {
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
-	public static Dictionary<(SortMode, FilterMode), Recipe[]> SortFilterRecipeCache { get; private set; } = null!;
+	public static Dictionary<FilterMode, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
 	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; } = null!;
 	public static Dictionary<int, List<Recipe>> hasTile { get; private set; } = null!;
 	public static Dictionary<int, Func<Item, Item, bool>> canCombineByType { get; private set; } = null!;
@@ -31,7 +31,7 @@ public class MagicCache : ModSystem
 	{
 		EnabledRecipes = null!;
 		ResultToRecipe = null!;
-		SortFilterRecipeCache = null!;
+		FilteredRecipesCache = null!;
 		hasIngredient = null!;
 		hasTile = null!;
 		canCombineByType = null!;
@@ -75,7 +75,7 @@ public class MagicCache : ModSystem
 
 	private static void SetupSortFilterRecipeCache()
 	{
-		SortFilterRecipeCache = new();
+		FilteredRecipesCache = new();
 
 		foreach (var filterMode in Enum.GetValues<FilterMode>())
 		{
@@ -84,24 +84,9 @@ public class MagicCache : ModSystem
 
 			var filter = ItemSorter.GetFilter(filterMode);
 
-			var recipes = EnabledRecipes.Where(r => filter(r.createItem)).ToArray();
+			var recipes = EnabledRecipes.Where(r => filter(r.createItem));
 
-			foreach (var sortMode in Enum.GetValues<SortMode>())
-			{
-
-				var sortFunction = ItemSorter.GetSortFunction(sortMode);
-
-				if (sortFunction is not null)
-				{
-					recipes = recipes
-						.OrderBy(r => r.createItem, sortFunction)
-						.ThenBy(r => r.createItem.type)
-						.ThenBy(r => r.createItem.value)
-						.ToArray();
-				}
-
-				SortFilterRecipeCache[(sortMode, filterMode)] = recipes;
-			}
+			FilteredRecipesCache[filterMode] = recipes.ToArray();
 		}
 	}
 }
