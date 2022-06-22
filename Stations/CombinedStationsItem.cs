@@ -46,12 +46,13 @@ namespace MagicStorage.Stations
 			Item.rare = Rarity;
 		}
 
-		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks){
+		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks)
+		{
 			int price = 0;
 
 			foreach ((int type, int stack) in typeStacks)
 			{
-				Item tItem = ContentSamples.ItemsByType[type];
+				Item tItem = new Item(type); // Wish we could use ContentSamples here, but it's too early
 				price += tItem.value * stack;
 			}
 
