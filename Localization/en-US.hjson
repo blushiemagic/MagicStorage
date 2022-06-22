@@ -1,4 +1,7 @@
-﻿Mods: {
+﻿# I recommend using the hjson key to translate all future text additions
+# Also add them into other hjsons, but mark them with "#", and wait for translators to translate the text
+# -Crapsky233
+Mods: {
 	MagicStorage: {
 		Active: "Active"
 		Inactive: "Inactive"
@@ -24,6 +27,58 @@
 		StorageAccessFail: "Could not load Storage Heart tile entity!"
 		StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
+
+		TestItemSuffix: " !UNTIL RESPAWN!"
+		SetTo: "Set to: X={0}, Y={1}"
+		SnowBiomeBlock: "Snow Biome Block"
+		DepositAll: "Deposit All"
+		CraftAmount: "Craft amount"
+		CraftingStations: "Crafting Stations"
+		CraftTooltip: "Left click to Craft (ctrl to get max)"
+
+		Search: "Search"
+		SearchName: "Search Name"
+		SearchMod: "Search Mod"
+
+		Recipes: "Recipes"
+		RecipeAvailable: "Show available recipes"
+		RecipeAll: "Show all known recipes"
+		RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
+		SelectedRecipe: "Selected Recipe" 
+		Ingredients: "Ingredients"
+		StoredItems: "Stored Ingredients"
+		ShowOnlyFavorited: "Only Favorited"
+
+		DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
+		DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
+
+		Filters: {
+			All: "Filter All"
+			Weapons: "Filter Weapons"
+			Tools: "Filter Tools"
+			Equips: "Filter Equipment"
+			WeaponsMelee: "Filter Melee Weapons"
+			WeaponsRanged: "Filter Ranged Weapons"
+			WeaponsMagic: "Filter Magic Weapons"
+			WeaponsSummon: "Filter Summons"
+			WeaponsThrown: "Filter Throwing Weapons"
+			Ammo: "Filter Ammo"
+			Armor: "Filter Armor"
+			Vanity: "Filter Vanity Items"
+			Potions: "Filter Potions"
+			Tiles: "Filter Placeables"
+			Misc: "Filter Misc"
+			Recent: "Filter New Recently Added Items"
+		}
+
+		Sort: {
+			Default: "Default Sorting"
+			ID: "Sort by ID"
+			Name: "Sort by Name"
+			Stack: "Sort by Stacks" # This text is never used?
+			Value: "Sort by Value"
+			Dps: "Sort by DPS"
+		}
 
 		Config: {
 			Label: "Magic Storage Config"

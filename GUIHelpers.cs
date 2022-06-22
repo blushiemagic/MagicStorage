@@ -22,11 +22,11 @@ namespace MagicStorage
 				MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortNumber", AssetRequestMode.ImmediateLoad)
 			}, new[]
 			{
-				Language.GetText("Mods.MagicStorage.SortDefault"),
-				Language.GetText("Mods.MagicStorage.SortID"),
-				Language.GetText("Mods.MagicStorage.SortName"),
-				Language.GetText("Mods.MagicStorage.SortValue"),
-				Language.GetText("Mods.MagicStorage.SortDps")
+				Language.GetText("Mods.MagicStorage.Sort.Default"),
+				Language.GetText("Mods.MagicStorage.Sort.ID"),
+				Language.GetText("Mods.MagicStorage.Sort.Name"),
+				Language.GetText("Mods.MagicStorage.Sort.Value"),
+				Language.GetText("Mods.MagicStorage.Sort.Dps")
 			});
 		}
 
@@ -63,30 +63,30 @@ namespace MagicStorage
 			List<LocalizedText> texts = MagicStorageConfig.ExtraFilterIcons
 				? new()
 				{
-					Language.GetText("Mods.MagicStorage.FilterAll"),
-					Language.GetText("Mods.MagicStorage.FilterWeaponsMelee"),
-					Language.GetText("Mods.MagicStorage.FilterWeaponsRanged"),
-					Language.GetText("Mods.MagicStorage.FilterWeaponsMagic"),
-					Language.GetText("Mods.MagicStorage.FilterWeaponsSummon"),
-					Language.GetText("Mods.MagicStorage.FilterWeaponsThrown"),
-					Language.GetText("Mods.MagicStorage.FilterAmmo"),
-					Language.GetText("Mods.MagicStorage.FilterTools"),
-					Language.GetText("Mods.MagicStorage.FilterArmor"),
-					Language.GetText("Mods.MagicStorage.FilterEquips"),
-					Language.GetText("Mods.MagicStorage.FilterVanity"),
-					Language.GetText("Mods.MagicStorage.FilterPotions"),
-					Language.GetText("Mods.MagicStorage.FilterTiles"),
-					Language.GetText("Mods.MagicStorage.FilterMisc")
+					Language.GetText("Mods.MagicStorage.Filters.All"),
+					Language.GetText("Mods.MagicStorage.Filters.WeaponsMelee"),
+					Language.GetText("Mods.MagicStorage.Filters.WeaponsRanged"),
+					Language.GetText("Mods.MagicStorage.Filters.WeaponsMagic"),
+					Language.GetText("Mods.MagicStorage.Filters.WeaponsSummon"),
+					Language.GetText("Mods.MagicStorage.Filters.WeaponsThrown"),
+					Language.GetText("Mods.MagicStorage.Filters.Ammo"),
+					Language.GetText("Mods.MagicStorage.Filters.Tools"),
+					Language.GetText("Mods.MagicStorage.Filters.Armor"),
+					Language.GetText("Mods.MagicStorage.Filters.Equips"),
+					Language.GetText("Mods.MagicStorage.Filters.Vanity"),
+					Language.GetText("Mods.MagicStorage.Filters.Potions"),
+					Language.GetText("Mods.MagicStorage.Filters.Tiles"),
+					Language.GetText("Mods.MagicStorage.Filters.Misc")
 				}
 				: new()
 				{
-					Language.GetText("Mods.MagicStorage.FilterAll"),
-					Language.GetText("Mods.MagicStorage.FilterWeapons"),
-					Language.GetText("Mods.MagicStorage.FilterTools"),
-					Language.GetText("Mods.MagicStorage.FilterEquips"),
-					Language.GetText("Mods.MagicStorage.FilterPotions"),
-					Language.GetText("Mods.MagicStorage.FilterTiles"),
-					Language.GetText("Mods.MagicStorage.FilterMisc")
+					Language.GetText("Mods.MagicStorage.Filters.All"),
+					Language.GetText("Mods.MagicStorage.Filters.Weapons"),
+					Language.GetText("Mods.MagicStorage.Filters.Tools"),
+					Language.GetText("Mods.MagicStorage.Filters.Equips"),
+					Language.GetText("Mods.MagicStorage.Filters.Potions"),
+					Language.GetText("Mods.MagicStorage.Filters.Tiles"),
+					Language.GetText("Mods.MagicStorage.Filters.Misc")
 				};
 			if (withHistory)
 			{
