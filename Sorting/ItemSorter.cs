@@ -29,7 +29,7 @@ namespace MagicStorage.Sorting
 			} else if (sortMode == SortMode.Dps) {
 				//Sort again by DPS due to it using variable item data
 				var func = GetSortFunction(SortMode.Dps);
-				return orderedItems.ThenBy(x => func).ThenBy(x => x.value);
+				return orderedItems.ThenBy(x => x, func).ThenBy(x => x.value);
 			}
 
 			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
