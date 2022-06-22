@@ -77,26 +77,31 @@ public class MagicCache : ModSystem
 	{
 		SortFilterRecipeCache = new();
 
-		foreach (var sortMode in Enum.GetValues<SortMode>())
 		foreach (var filterMode in Enum.GetValues<FilterMode>())
 		{
 			if (filterMode is FilterMode.Recent)
 				continue;
 
-			var sortFunction = ItemSorter.GetSortFunction(sortMode);
 			var filter = ItemSorter.GetFilter(filterMode);
 
-			var recipes = EnabledRecipes.Where(r => filter(r.createItem));
+			var recipes = EnabledRecipes.Where(r => filter(r.createItem)).ToArray();
 
-			if (sortFunction is not null)
+			foreach (var sortMode in Enum.GetValues<SortMode>())
 			{
-				recipes = recipes
-					.OrderBy(r => r.createItem, sortFunction)
-					.ThenBy(r => r.createItem.type)
-					.ThenBy(r => r.createItem.value);
-			}
 
-			SortFilterRecipeCache[(sortMode, filterMode)] = recipes.ToArray();
+				var sortFunction = ItemSorter.GetSortFunction(sortMode);
+
+				if (sortFunction is not null)
+				{
+					recipes = recipes
+						.OrderBy(r => r.createItem, sortFunction)
+						.ThenBy(r => r.createItem.type)
+						.ThenBy(r => r.createItem.value)
+						.ToArray();
+				}
+
+				SortFilterRecipeCache[(sortMode, filterMode)] = recipes;
+			}
 		}
 	}
 }
