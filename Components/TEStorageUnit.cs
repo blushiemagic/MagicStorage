@@ -99,8 +99,9 @@ namespace MagicStorage.Components
 			Item original = toDeposit.Clone();
 			bool finished = false;
 			bool hasChange = false;
-			foreach (Item item in items) {
-				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack && MagicCache.CanCombineIgnoreType(toDeposit, item))
+			foreach (Item item in items)
+			{
+				if (MagicCache.CanCombine(toDeposit, item) && item.stack < item.maxStack)
 				{
 					int total = item.stack + toDeposit.stack;
 					int newStack = total;
