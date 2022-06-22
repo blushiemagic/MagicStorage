@@ -312,14 +312,20 @@ namespace MagicStorage {
 			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes(){
+		public override void AddRecipes()
+		{
+#if TML_2022_05
 			CreateRecipe(ItemID.CookedMarshmallow)
+#else
+			Recipe.Create(ItemID.CookedMarshmallow)
+#endif
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromLiteral("Biome Globe in a Crafting Interface"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
-		public override void PostAddRecipes() {
+		public override void PostAddRecipes()
+		{
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
 			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
@@ -330,7 +336,11 @@ namespace MagicStorage {
 
 				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
+#if TML_2022_05
 					Recipe copy = CloneRecipe(recipe);
+#else
+					Recipe copy = recipe.Clone();
+#endif
 
 					copy.requiredTile.Clear(); // Should this be cleared?
 					copy.AddTile<CombinedStations4Tile>();
