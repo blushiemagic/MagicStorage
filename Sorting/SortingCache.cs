@@ -28,10 +28,10 @@ public class SortingCacheDictionary
 
 		public int FindIndex(int itemType)
 		{
-			if (IndexByType is null)
+			if (IndexByType is null || itemType < 0 || itemType >= IndexByType.Length)
 				return -1;
 
-			return itemType < 0 || itemType >= IndexByType.Length ? -1 : IndexByType[itemType];
+			return IndexByType[itemType];
 		}
 	}
 
@@ -44,12 +44,12 @@ public class SortingCacheDictionary
 		cache.Clear();
 
 		cache[SortMode.Default] = Create(SortMode.Default);
-		cache[SortMode.Id] = Create(SortMode.Id);
-		cache[SortMode.Name] = Create(SortMode.Name);
+		cache[SortMode.Id]      = Create(SortMode.Id);
+		cache[SortMode.Name]    = Create(SortMode.Name);
 		//These two (value and dps) are variable on item stats, but having a baseline will make the actual sorting slightly more efficient
-		cache[SortMode.Value] = Create(SortMode.Value);
-		cache[SortMode.Dps] = Create(SortMode.Dps);
-		cache[SortMode.AsIs] = new();
+		cache[SortMode.Value]   = Create(SortMode.Value);
+		cache[SortMode.Dps]     = Create(SortMode.Dps);
+		cache[SortMode.AsIs]    = new();
 	}
 
 	private static Entry Create(SortMode mode)
