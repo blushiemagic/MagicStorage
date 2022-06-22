@@ -26,7 +26,7 @@ namespace MagicStorage.Items
 				"améliore la capacité de unité de stockage à 320" + "\n<right> l'unité de stockage (Chlorophylle Bleu) pour utiliser");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
 				"Capacidad de unidad de almacenamiento mejorada a 320" + "\n<right> en la unidad de almacenamiento (Clorofita Azul) para utilizar");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至320容量" + "\n<right>一个存储单元(夜明)可镶嵌");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至320容量" + "\n<right>一个存储单元(蓝色叶绿)可镶嵌");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 5;
 		}
