@@ -8,8 +8,10 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Items{
-	public class BiomeGlobe : ModItem{
+namespace MagicStorage.Items
+{
+	public class BiomeGlobe : ModItem
+	{
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Biome Globe");

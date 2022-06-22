@@ -29,7 +29,8 @@ namespace MagicStorage.Components
 		public override int ItemType(int frameX, int frameY)
 		{
 			int style = frameY / 36;
-			int type = style switch {
+			int type = style switch
+			{
 				1 => ModContent.ItemType<StorageUnitDemonite>(),
 				2 => ModContent.ItemType<StorageUnitCrimtane>(),
 				3 => ModContent.ItemType<StorageUnitHellstone>(),
