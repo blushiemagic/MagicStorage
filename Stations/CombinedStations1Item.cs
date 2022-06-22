@@ -43,7 +43,7 @@ namespace MagicStorage.Stations
 			height = 30;
 		}
 
-		public override void AddRecipes() 
+		public override void AddRecipes()
 		{
 			CreateRecipe()
 				.AddRecipeGroup("MagicStorage:AnyWorkBench")
