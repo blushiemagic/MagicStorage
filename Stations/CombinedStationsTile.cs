@@ -7,7 +7,6 @@ using Terraria.ObjectData;
 
 namespace MagicStorage.Stations
 {
-	[Autoload(false)]
 	public abstract class CombinedStationsTile<TItem> : ModTile where TItem : ModItem
 	{
 		public abstract Color MapColor { get; }

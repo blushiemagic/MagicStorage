@@ -5,7 +5,6 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	[Autoload(false)]
 	public abstract class CombinedStationsItem<TTile> : ModItem where TTile : ModTile
 	{
 		public abstract string ItemName { get; }

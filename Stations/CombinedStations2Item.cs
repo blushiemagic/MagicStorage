@@ -3,8 +3,6 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	//Overwrite the base class logic
-	[Autoload(true)]
 	public class CombinedStations2Item : CombinedStationsItem<CombinedStations2Tile>
 	{
 		public override string ItemName => "Combined Stations (Tier 2)";

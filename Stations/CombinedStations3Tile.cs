@@ -4,8 +4,6 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	//Overwrite the base class logic
-	[Autoload(true)]
 	public class CombinedStations3Tile : CombinedStationsTile<CombinedStations3Item>
 	{
 		public override Color MapColor => Color.Orange;
