@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using MagicStorage.Edits;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
