@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
@@ -62,20 +61,15 @@ namespace MagicStorage.Sorting
 			yield return lastItem;
 		}
 
-		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(
-			SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
-		{
-			var filter = GetFilter(filterMode);
-			var filteredRecipes = MagicCache.EnabledRecipes
+		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter) =>
+			MagicCache.SortFilterRecipeCache[(sortMode, filterMode)]
 				.AsParallel()
-				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex) && filter(recipe.createItem));
+				.AsOrdered()
+				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 
-			return (filteredRecipes, GetSortFunction(sortMode));
-		}
-
-		internal static CompareFunction GetSortFunction(SortMode sortMode)
+		internal static IComparer<Item> GetSortFunction(SortMode sortMode)
 		{
-			CompareFunction func = sortMode switch
+			return sortMode switch
 			{
 				SortMode.Default => CompareDefault.Instance,
 				SortMode.Id      => CompareID.Instance,
@@ -84,8 +78,6 @@ namespace MagicStorage.Sorting
 				SortMode.Dps     => CompareDps.Instance,
 				_                => null,
 			};
-
-			return func;
 		}
 
 		internal static ItemFilter.Filter GetFilter(FilterMode filterMode)
@@ -111,7 +103,7 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		private static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.InvariantCultureIgnoreCase);
+		private static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{

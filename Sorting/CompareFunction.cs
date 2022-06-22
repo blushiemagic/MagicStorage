@@ -4,26 +4,11 @@ using Terraria;
 
 namespace MagicStorage.Sorting
 {
-	public abstract class CompareFunction : IComparer<Item>
-	{
-		public abstract int Compare(Item item1, Item item2);
-
-		public int Compare(object object1, object object2)
-		{
-			if (object1 is Item item1 && object2 is Item item2)
-				return Compare(item1, item2);
-
-			if (object1 is Recipe recipe1 && object2 is Recipe recipe2)
-				return Compare(recipe1.createItem, recipe2.createItem);
-
-			return 0;
-		}
-	}
-
-	public abstract class CompareFunction<T> : CompareFunction
+	public abstract class CompareFunction<T> : IComparer<Item>
 		where T : CompareFunction<T>, new()
 	{
 		public static T Instance { get; } = new();
+		public abstract int Compare(Item item1, Item item2);
 	}
 
 	public class CompareID : CompareFunction<CompareID>

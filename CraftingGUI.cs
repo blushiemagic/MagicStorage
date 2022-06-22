@@ -816,26 +816,17 @@ namespace MagicStorage
 
 		private static void RefreshRecipes()
 		{
-			int length = ItemLoader.ItemCount;
-
-			bool[] hiddenRecipes = ArrayPool<bool>.Shared.Rent(length);
-			bool[] favorited = ArrayPool<bool>.Shared.Rent(length);
-
 			try
 			{
-				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, bool[] hiddenRecipes, bool[] favorited)
+				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
 				{
-					var (filteredRecipes, sortFunction) = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text);
-					filteredRecipes = filteredRecipes
+					var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text)
 						// show only blacklisted recipes only if choice = 2, otherwise show all other
-						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes[x.createItem.type])
+						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
 						// show only favorited items if selected
-						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited[x.createItem.type])
+						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
 						// favorites first
-						.OrderBy(x => favorited[x.createItem.type] ? 0 : 1)
-						.ThenBy(x => x.createItem, sortFunction)
-						.ThenBy(x => x.createItem.type)
-						.ThenBy(x => x.createItem.value);
+						.OrderBy(x => favorited.Contains(x.createItem) ? 0 : 1);
 
 					recipes.Clear();
 					recipeAvailable.Clear();
@@ -855,28 +846,22 @@ namespace MagicStorage
 				if (RecursiveCraftIntegration.Enabled)
 					RecursiveCraftIntegration.RefreshRecursiveRecipes();
 
-				Array.Clear(hiddenRecipes, 0, length);
-				Array.Clear(favorited, 0, length);
-
-				foreach (var item in StoragePlayer.LocalPlayer.HiddenRecipes.Items)
-					hiddenRecipes[item.type] = true;
-
-				foreach (var item in StoragePlayer.LocalPlayer.FavoritedRecipes.Items)
-					favorited[item.type] = true;
-
 				SortMode sortMode = (SortMode) sortButtons.Choice;
 				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
 				int modFilterIndex = modSearchBox.ModIndex;
+
+				var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
+				var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
 
 				DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 
 				// now if nothing found we disable filters one by one
 				if (searchBar.Text.Length > 0)
 				{
-					if (recipes.Count == 0 && hiddenRecipes.Length > 0)
+					if (recipes.Count == 0 && hiddenRecipes.Count > 0)
 					{
 						// search hidden recipes too
-						Array.Clear(hiddenRecipes, 0, length);
+						hiddenRecipes = ItemTypeOrderedSet.Empty;
 						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 
@@ -931,11 +916,6 @@ namespace MagicStorage
 			catch (Exception e)
 			{
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
-			}
-			finally
-			{
-				ArrayPool<bool>.Shared.Return(hiddenRecipes);
-				ArrayPool<bool>.Shared.Return(favorited);
 			}
 		}
 
