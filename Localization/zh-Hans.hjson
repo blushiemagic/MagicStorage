@@ -2,6 +2,8 @@
 	MagicStorage: {
 		Active: "已启用"
 		Inactive: "已禁用"
+		StorageUnitActivated: "该存储单元已被启用"
+		StorageUnitDeactivated: "该存储单元已被禁用"
 		FilterAllMods: "所有物品"
 		CookedMarshmallowCondition: "存放于制作存储单元的生态球"
 		Capacity: "容量: {0} / {1}"

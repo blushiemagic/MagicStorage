@@ -2,6 +2,8 @@
 	MagicStorage: {
 		Active: "Active"
 		Inactive: "Inactive"
+		StorageUnitActivated: "Storage Unit has been Activated"
+		StorageUnitDeactivated: "Storage Unit has been Deactivated"
 		FilterAllMods: "All mods"
 		CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
 		Capacity: "{0} / {1} Items"
