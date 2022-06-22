@@ -2,18 +2,29 @@
 	MagicStorage: {
 		Active: "Active"
 		Inactive: "Inactive"
+
+		PortableAccessUnlocated: "Locator is not set to any Storage Heart"
+		PortableAccessMissing: "Storage Heart is missing!"
+
 		RemoteAccessSuccess: "Success!"
 		RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
-		RemoteAccessNoLocated: "The locator has not been set to a destination"
+		RemoteAccessUnlocated: "The locator has not been set to a destination"
+
 		StorageUnitActivated: "Storage Unit has been Activated"
 		StorageUnitDeactivated: "Storage Unit has been Deactivated"
+
 		FilterAllMods: "All mods"
+
 		CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+
 		Capacity: "{0} / {1} Items"
+
 		LocatorSet: "Locator successfully set to: X={0}, Y={1}"
+
 		StorageAccessFail: "Could not load Storage Heart tile entity!"
 		StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
+
 		Config: {
 			Label: "Magic Storage Config"
 

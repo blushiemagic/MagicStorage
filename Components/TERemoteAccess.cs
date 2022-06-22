@@ -51,7 +51,7 @@ namespace MagicStorage.Components
 
 			if (toLocate.X < 0 || toLocate.Y < 0)
 			{
-				message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessNoLocated");
+				message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessUnlocated");
 				return false;
 			}
 

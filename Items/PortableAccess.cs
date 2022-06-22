@@ -47,13 +47,13 @@ namespace MagicStorage.Items
 				{
 					Tile tile = Main.tile[location.X, location.Y];
 					if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.StorageHeart>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
-						Main.NewText("Storage Heart is missing!");
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessMissing"));
 					else
 						OpenStorage(player);
 				}
 				else
 				{
-					Main.NewText("Locator is not set to any Storage Heart");
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessUnlocated"));
 				}
 			}
 
