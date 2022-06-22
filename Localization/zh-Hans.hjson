@@ -26,7 +26,7 @@
 		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
 
 		Config: {
-			Label: "魔法存储配置"
+			Label: "魔法储存配置"
 
 			glowNewItems: {
 				Label: "显示新物品/配方"
