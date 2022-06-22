@@ -2,6 +2,9 @@
 	MagicStorage: {
 		Active: "Active"
 		Inactive: "Inactive"
+		RemoteAccessSuccess: "Success!"
+		RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
+		RemoteAccessNoLocated: "The locator has not been set to a destination"
 		StorageUnitActivated: "Storage Unit has been Activated"
 		StorageUnitDeactivated: "Storage Unit has been Deactivated"
 		FilterAllMods: "All mods"

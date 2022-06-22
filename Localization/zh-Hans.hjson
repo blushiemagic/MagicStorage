@@ -2,6 +2,9 @@
 	MagicStorage: {
 		Active: "已启用"
 		Inactive: "已禁用"
+		RemoteAccessSuccess: "已成功连接远程存储装置！"
+		RemoteAccessHasLocator: "该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点"
+		RemoteAccessNoLocated: "当前定位器尚未设置定位点"
 		StorageUnitActivated: "该存储单元已被启用"
 		StorageUnitDeactivated: "该存储单元已被禁用"
 		FilterAllMods: "所有物品"
