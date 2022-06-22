@@ -8,6 +8,7 @@ namespace MagicStorage.Sorting
 		where T : CompareFunction<T>, new()
 	{
 		public static T Instance { get; } = new();
+
 		public abstract int Compare(Item item1, Item item2);
 	}
 

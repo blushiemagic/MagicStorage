@@ -284,13 +284,13 @@ namespace MagicStorage.Sorting
 		public PassFilter Pass { get; }
 		public CompareFilter Compare { get; }
 
-		public DefaultSortClass(PassFilter passFunc, CompareFilter compareFunc)
+		public DefaultSortClass(PassFilter pass, CompareFilter compare)
 		{
-			ArgumentNullException.ThrowIfNull(passFunc);
-			ArgumentNullException.ThrowIfNull(compareFunc);
+			ArgumentNullException.ThrowIfNull(pass);
+			ArgumentNullException.ThrowIfNull(compare);
 
-			Pass = passFunc;
-			Compare = compareFunc;
+			Pass = pass;
+			Compare = compare;
 		}
 	}
 }
