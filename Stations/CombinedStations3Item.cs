@@ -25,7 +25,8 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Yellow;
 
-		public override void SafeSetDefaults() {
+		public override void SafeSetDefaults()
+		{
 			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedStations2Item>(), 1),
 				(ItemID.ImbuingStation, 1),
 				(ItemID.MythrilAnvil, 1),
@@ -36,12 +37,14 @@ namespace MagicStorage.Stations
 				(ItemID.MeatGrinder, 1));
 		}
 
-		public override void GetItemDimensions(out int width, out int height) {
+		public override void GetItemDimensions(out int width, out int height)
+		{
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedStations2Item>())
 				.AddIngredient(ItemID.ImbuingStation)

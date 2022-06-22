@@ -25,7 +25,8 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Green;
 
-		public override void SafeSetDefaults() {
+		public override void SafeSetDefaults()
+		{
 			Item.value = BasePriceFromItems((ItemID.BoneWelder, 1),
 				(ItemID.GlassKiln, 1),
 				(ItemID.HoneyDispenser, 1),
@@ -35,12 +36,14 @@ namespace MagicStorage.Stations
 				(ItemID.Solidifier, 1));
 		}
 
-		public override void GetItemDimensions(out int width, out int height) {
+		public override void GetItemDimensions(out int width, out int height)
+		{
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			CreateRecipe()
 				.AddIngredient(ItemID.BoneWelder)
 				.AddIngredient(ItemID.GlassKiln)

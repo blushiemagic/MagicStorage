@@ -25,7 +25,8 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Pink;
 
-		public override void SafeSetDefaults() {
+		public override void SafeSetDefaults()
+		{
 			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedFurnitureStations1Item>(), 1),
 				(ItemID.LesionStation, 1),
 				(ItemID.FleshCloningVaat, 1),
@@ -33,12 +34,14 @@ namespace MagicStorage.Stations
 				(ItemID.LihzahrdFurnace, 1));
 		}
 
-		public override void GetItemDimensions(out int width, out int height) {
+		public override void GetItemDimensions(out int width, out int height)
+		{
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedFurnitureStations1Item>())
 				.AddIngredient(ItemID.LesionStation)

@@ -29,7 +29,8 @@ namespace MagicStorage {
 
 		public static readonly Version requiredVersion = new Version(0, 12);
 
-		public override void Load() {
+		public override void Load()
+		{
 			if (TModLoaderVersion < requiredVersion)
 				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
 
@@ -42,7 +43,8 @@ namespace MagicStorage {
 			DirectDetourManager.Load();
 		}
 
-		public override void Unload() {
+		public override void Unload()
+		{
 			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
@@ -50,7 +52,8 @@ namespace MagicStorage {
 			DirectDetourManager.Unload();
 		}
 
-		private void AddTranslations() {
+		private void AddTranslations()
+		{
 			ModTranslation text = LocalizationLoader.CreateTranslation(this, "SetTo");
 			text.SetDefault("Set to: X={0}, Y={1}");
 			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ustawione na: X={0}, Y={1}");
@@ -333,14 +336,16 @@ namespace MagicStorage {
 			LocalizationLoader.AddTranslation(text);
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			CreateRecipe(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
-		public override void PostAddRecipes() {
+		public override void PostAddRecipes()
+		{
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
 			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
@@ -363,7 +368,8 @@ namespace MagicStorage {
 			}
 		}
 
-		public override void PostSetupContent() {
+		public override void PostSetupContent()
+		{
 			AllMods = ModLoader.Mods
 				.Where(mod => mod.GetContent<ModItem>().Any())
 				.ToImmutableArray();
@@ -377,7 +383,8 @@ namespace MagicStorage {
 			}
 		}
 
-		public override void AddRecipeGroups() {
+		public override void AddRecipeGroups()
+		{
 			string any = Language.GetTextValue("LegacyMisc.37");
 
 			int[] items =
@@ -685,11 +692,13 @@ namespace MagicStorage {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar", group);
 		}
 
-		public override void HandlePacket(BinaryReader reader, int whoAmI) {
+		public override void HandlePacket(BinaryReader reader, int whoAmI)
+		{
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override object Call(params object[] args) {
+		public override object Call(params object[] args)
+		{
 			if (args.Length < 1)
 				throw new ArgumentException("Call requires at least one argument");
 
@@ -707,8 +716,7 @@ namespace MagicStorage {
 
 			TryParseAs(0, out function);
 
-			switch (function)
-			{
+			switch (function) {
 				case "Register Sorting":
 					TryParseAs(1, out int itemType);
 					TryParseAs(2, out Func<Item, Item, bool> canCombine);

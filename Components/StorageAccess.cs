@@ -9,13 +9,16 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace MagicStorage.Components {
-	public class StorageAccess : StorageComponent {
+namespace MagicStorage.Components
+{
+	public class StorageAccess : StorageComponent
+	{
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageAccess>();
 
 		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
 
-		public virtual TEStorageHeart GetHeart(int i, int j) {
+		public virtual TEStorageHeart GetHeart(int i, int j)
+		{
 			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
 			if (point.X < 0 || point.Y < 0)
 				return null;
@@ -26,7 +29,8 @@ namespace MagicStorage.Components {
 			return null;
 		}
 
-		public override void MouseOver(int i, int j) {
+		public override void MouseOver(int i, int j)
+		{
 			Player player = Main.LocalPlayer;
 			Tile tile = Main.tile[i, j];
 			player.cursorItemIconEnabled = true;
@@ -34,7 +38,8 @@ namespace MagicStorage.Components {
 			player.noThrow = 2;
 		}
 
-		public override bool RightClick(int i, int j) {
+		public override bool RightClick(int i, int j)
+		{
 			if (Main.tile[i, j].TileFrameX % 36 == 18)
 				i--;
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
@@ -109,7 +114,8 @@ namespace MagicStorage.Components {
 			return true;
 		}
 
-		public override void PostDraw(int i, int j, SpriteBatch spriteBatch) {
+		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
+		{
 			Tile tile = Main.tile[i, j];
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;

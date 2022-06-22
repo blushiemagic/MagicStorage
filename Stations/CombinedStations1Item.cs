@@ -25,7 +25,8 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Green;
 
-		public override void SafeSetDefaults() {
+		public override void SafeSetDefaults()
+		{
 			Item.value = BasePriceFromItems((ItemID.WorkBench, 1),
 				(ItemID.Furnace, 1),
 				(ItemID.IronAnvil, 1),
@@ -36,12 +37,14 @@ namespace MagicStorage.Stations
 				(ItemID.WoodenTable, 1));
 		}
 
-		public override void GetItemDimensions(out int width, out int height) {
+		public override void GetItemDimensions(out int width, out int height)
+		{
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes() 
+		{
 			CreateRecipe()
 				.AddRecipeGroup("MagicStorage:AnyWorkBench")
 				.AddIngredient(ItemID.Furnace)

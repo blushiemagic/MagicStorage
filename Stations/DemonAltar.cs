@@ -7,14 +7,16 @@ namespace MagicStorage.Stations
 {
 	public class DemonAltar : ModItem
 	{
-		public override void SetStaticDefaults() {
+		public override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault("Demon Altar");
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "恶魔祭坛");
 			Tooltip.SetDefault("A placeable Demon Altar. Cannot be mined to get hardmode ores");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "可放置的恶魔祭坛复制品，试图挖掉的话什么都不会发生");
 		}
 
-		public override void SetDefaults() {
+		public override void SetDefaults()
+		{
 			Item.width = 48;
 			Item.height = 34;
 			Item.rare = ItemRarityID.Green;
@@ -29,7 +31,8 @@ namespace MagicStorage.Stations
 			Item.useTurn = true;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes()
+		{
 			CreateRecipe()
 				.AddIngredient(ItemID.DemoniteBar, 10)
 				.AddIngredient(ItemID.ShadowScale, 15)

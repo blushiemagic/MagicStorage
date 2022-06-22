@@ -20,7 +20,8 @@ namespace MagicStorage.Stations
 
 		public abstract int Rarity { get; }
 
-		public sealed override void SetStaticDefaults() {
+		public sealed override void SetStaticDefaults()
+		{
 			DisplayName.SetDefault(ItemName);
 			Tooltip.SetDefault(ItemDescription);
 
@@ -38,10 +39,12 @@ namespace MagicStorage.Stations
 
 		public abstract void GetItemDimensions(out int width, out int height);
 
-		public virtual void SafeSetDefaults() {
+		public virtual void SafeSetDefaults() 
+		{
 		}
 
-		public sealed override void SetDefaults() {
+		public sealed override void SetDefaults() 
+		{
 			SafeSetDefaults();
 			Item.DamageType = DamageClass.Default;
 			Item.damage = 0;
@@ -57,11 +60,10 @@ namespace MagicStorage.Stations
 			Item.rare = Rarity;
 		}
 
-		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks) {
+		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks){
 			int price = 0;
 
-			for (int i = 0; i < typeStacks.Length; i++)
-			{
+			for(int i = 0; i < typeStacks.Length; i++){
 				Item tItem = new Item(typeStacks[i].type);
 				price += tItem.value * typeStacks[i].stack;
 			}

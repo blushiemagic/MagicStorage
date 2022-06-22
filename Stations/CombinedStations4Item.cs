@@ -25,7 +25,8 @@ namespace MagicStorage.Stations
 
 		public override int Rarity => ItemRarityID.Purple;
 
-		public override void SafeSetDefaults() {
+		public override void SafeSetDefaults()
+		{
 			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedStations3Item>(), 1),
 				(ModContent.ItemType<CombinedFurnitureStations2Item>(), 1),
 				(ItemID.Autohammer, 1),
@@ -34,12 +35,14 @@ namespace MagicStorage.Stations
 				(ItemID.HoneyBucket, 30));
 		}
 
-		public override void GetItemDimensions(out int width, out int height) {
+		public override void GetItemDimensions(out int width, out int height)
+		{
 			width = 30;
 			height = 30;
 		}
 
-		public override void AddRecipes() {
+		public override void AddRecipes() 
+		{
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedStations3Item>())
 				.AddIngredient(ModContent.ItemType<CombinedFurnitureStations2Item>())
