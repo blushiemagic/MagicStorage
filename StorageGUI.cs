@@ -174,7 +174,7 @@ namespace MagicStorage
 						capacity += storageUnit.Capacity;
 					}
 
-			capacityText.SetText(numItems + "/" + capacity + " Items");
+			capacityText.SetText(Language.GetTextValue("Mods.MagicStorage.Capacity", numItems, capacity));
 			bottomBar.Append(capacityText);
 		}
 

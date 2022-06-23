@@ -15,7 +15,7 @@ namespace MagicStorage.Items
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ulepszenie jednostki magazynującej (Karmazynit)");
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Amélioration d'Unité de stockage (Carmitane)");
 			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Actualización de Unidad de Almacenamiento (Carmesí)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(血腥))");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(猩红))");
 
 			Tooltip.SetDefault("Upgrades Storage Unit to 80 capacity" + "\n<right> a Storage Unit to use");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
@@ -26,7 +26,7 @@ namespace MagicStorage.Items
 				"améliore la capacité de unité de stockage à 80" + "\n<right> l'unité de stockage pour utiliser");
 			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
 				"Capacidad de unidad de almacenamiento mejorada a 80" + "\n<right> en la unidad de almacenamiento para utilizar");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至80容量" + "\n<right>一个存储单元(血腥)可镶嵌");
+			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至80容量" + "\n<right>一个存储单元可镶嵌");
 
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
 		}

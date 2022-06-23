@@ -1,0 +1,114 @@
+﻿# If some text marked with "#" is translated, please remove the "#" sign.
+Mods: {
+	MagicStorage: {
+		# Active: "Active"
+		# Inactive: "Inactive"
+
+		# PortableAccessUnlocated: "Locator is not set to any Storage Heart"
+		# PortableAccessMissing: "Storage Heart is missing!"
+
+		# RemoteAccessSuccess: "Success!"
+		# RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
+		# RemoteAccessUnlocated: "The locator has not been set to a destination"
+
+		# StorageUnitActivated: "Storage Unit has been Activated"
+		# StorageUnitDeactivated: "Storage Unit has been Deactivated"
+
+		# FilterAllMods: "All mods"
+
+		# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+
+		# Capacity: "{0} / {1} Items"
+
+		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
+
+		# StorageAccessFail: "Could not load Storage Heart tile entity!"
+		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
+		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
+		
+		# TestItemSuffix: " !UNTIL RESPAWN!"
+		SetTo: "Ustawione na: X={0}, Y={1}"
+		# SnowBiomeBlock: "Snow Biome Block"
+		# DepositAll: "Deposit All"
+		# CraftAmount: "Craft amount"
+		# CraftingStations: "Crafting Stations"
+		# CraftTooltip: "Left click to Craft (ctrl to get max)"
+
+		# Search: "Search"
+		# SearchName: "Search Name"
+		# SearchMod: "Search Mod"
+
+		# Recipes: "Recipes"
+		# RecipeAvailable: "Show available recipes"
+		# RecipeAll: "Show all known recipes"
+		# RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
+		# SelectedRecipe: "Selected Recipe" 
+		# Ingredients: "Ingredients"
+		# StoredItems: "Stored Ingredients"
+		# ShowOnlyFavorited: "Only Favorited"
+
+		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
+		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
+
+		Filters: {
+			# All: "Filter All"
+			# Weapons: "Filter Weapons"
+			# Tools: "Filter Tools"
+			# Equips: "Filter Equipment"
+			# WeaponsMelee: "Filter Melee Weapons"
+			# WeaponsRanged: "Filter Ranged Weapons"
+			# WeaponsMagic: "Filter Magic Weapons"
+			# WeaponsSummon: "Filter Summons"
+			# WeaponsThrown: "Filter Throwing Weapons"
+			# Ammo: "Filter Ammo"
+			# Armor: "Filter Armor"
+			# Vanity: "Filter Vanity Items"
+			# Potions: "Filter Potions"
+			# Tiles: "Filter Placeables"
+			# Misc: "Filter Misc"
+			# Recent: "Filter New Recently Added Items"
+		}
+
+		Sort: {
+			# Default: "Default Sorting"
+			# ID: "Sort by ID"
+			# Name: "Sort by Name"
+			# Stack: "Sort by Stacks" # This text is never used?
+			# Value: "Sort by Value"
+			# Dps: "Sort by DPS"
+		}
+
+		Config: {
+			# Label: "Magic Storage Config"
+
+			glowNewItems: {
+				# Label: "Display new items/recipes"
+				# Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
+			}
+			useConfigFilter: {
+				# Label: "Use default filter"
+				# Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
+			}
+			showAllRecipes: {
+				# Label: "Default recipe filter"
+				# Tooltip: "Enable to default to all recipes, disable to default to available recipes"
+			}
+			quickStackDepositMode: {
+				# Label: "Quick stack deposit mode"
+				# Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
+			}
+			clearSearchText: {
+				# Label: "Clear search text"
+				# Tooltip: "Enable to clear the search text when opening the UI"
+			}
+			extraFilterIcons: {
+				# Label: "Display extra sorting icons"
+				# Tooltip: "Enable to have the extra sorting options available"
+			}
+			showDps: {
+				# Label: "Estimate the dps of weapons"
+				# Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+			}
+		}
+	}
+}

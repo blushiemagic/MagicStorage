@@ -1,6 +1,7 @@
 using MagicStorage.Items;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Components
@@ -33,7 +34,7 @@ namespace MagicStorage.Components
 				locator.location = new Point16(i, j);
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
-				Main.NewText("Locator successfully set to: X=" + i + ", Y=" + j);
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", i, j));
 				return true;
 			}
 

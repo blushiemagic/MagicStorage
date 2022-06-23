@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -80,8 +81,8 @@ namespace MagicStorage.Components
 				return false;
 
 			Main.LocalPlayer.tileInteractionHappened = true;
-			string activeString = storageUnit.Inactive ? "Inactive" : "Active";
-			string fullnessString = storageUnit.NumItems + " / " + storageUnit.Capacity + " Items";
+			string activeString = storageUnit.Inactive ? Language.GetTextValue("Mods.MagicStorage.Inactive") : Language.GetTextValue("Mods.MagicStorage.Active");
+			string fullnessString = Language.GetTextValue("Mods.MagicStorage.Capacity", storageUnit.NumItems, storageUnit.Capacity);
 			Main.NewText(activeString + ", " + fullnessString);
 			return base.RightClick(i, j);
 		}

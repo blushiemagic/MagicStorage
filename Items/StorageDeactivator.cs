@@ -60,7 +60,7 @@ namespace MagicStorage.Items
 				{
 					storage.Inactive = !storage.Inactive;
 					string activeText = storage.Inactive ? "Deactivated" : "Activated";
-					Main.NewText("Storage Unit has been " + activeText);
+					Main.NewText(Language.GetTextValue($"Mods.MagicStorage.StorageUnit{activeText}"));
 					if (storage is TEStorageUnit storageUnit)
 					{
 						if (Main.netMode == NetmodeID.MultiplayerClient)

@@ -1,6 +1,7 @@
 using System.IO;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -44,17 +45,17 @@ namespace MagicStorage.Components
 		{
 			if (locator.X >= 0 && locator.Y >= 0)
 			{
-				message = "This Access already has a locator, please mine then replace to reset it";
+				message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessHasLocator");
 				return false;
 			}
 
 			if (toLocate.X < 0 || toLocate.Y < 0)
 			{
-				message = "The locator has not been set to a destination";
+				message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessUnlocated");
 				return false;
 			}
 
-			message = "Success!";
+			message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessSuccess");
 			locator = toLocate;
 			NetHelper.ClientSendTEUpdate(ID);
 			return true;

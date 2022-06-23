@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items{
@@ -7,6 +8,7 @@ namespace MagicStorage.Items{
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Biome Globe");
+			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "生态球");
 		}
 
 		public override void SetDefaults()

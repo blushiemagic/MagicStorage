@@ -1,4 +1,6 @@
-﻿using Terraria.ID;
+﻿using System.Collections.Generic;
+using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
@@ -8,6 +10,16 @@ namespace MagicStorage.Stations
 		public override string ItemName => "Combined Stations (Final Tier)";
 
 		public override string ItemDescription => "Combines the functionality of all crafting stations and liquids";
+
+		public override Dictionary<GameCulture, string> ItemNameLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "最终制作站" }
+				};
+
+		public override Dictionary<GameCulture, string> ItemDescriptionLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "结合了一切制作站和液体需求" }
+				};
 
 		public override int Rarity => ItemRarityID.Purple;
 

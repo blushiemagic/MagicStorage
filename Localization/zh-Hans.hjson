@@ -1,0 +1,114 @@
+﻿# If some text marked with "#" is translated, please remove the "#" sign.
+Mods: {
+	MagicStorage: {
+		Active: "已启用"
+		Inactive: "已禁用"
+
+		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
+		PortableAccessMissing: "定位器目标点没有存储核心！"
+
+		RemoteAccessSuccess: "已成功连接远程存储装置！"
+		RemoteAccessHasLocator: "该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点"
+		RemoteAccessUnlocated: "当前定位器尚未设置定位点"
+
+		StorageUnitActivated: "该存储单元已被启用"
+		StorageUnitDeactivated: "该存储单元已被禁用"
+
+		FilterAllMods: "所有物品"
+
+		CookedMarshmallowCondition: "存放于制作存储单元的生态球"
+
+		Capacity: "容量: {0} / {1}"
+
+		LocatorSet: "该定位器已设置于位于 [{0}, {1}] 的存储核心"
+
+		StorageAccessFail: "无法加载存储核心！"
+		StorageAccessFailAlt: "该存储装置没有与存储核心连接！"
+		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
+		
+		# TestItemSuffix: " !UNTIL RESPAWN!"
+		SetTo: "已设置于位于 [{0}, {1}] 的存储核心"
+		SnowBiomeBlock: "雪地环境方块"
+		DepositAll: "全部存入"
+		CraftAmount: "制作数量"
+		CraftingStations: "制作站 (翻译: -Cyril-, 抗药又坚硬汉化组）"
+		CraftTooltip: "左键单击以制作（按住Ctrl全部制作）"
+
+		Search: "搜索"
+		SearchName: "搜索名称"
+		SearchMod: "搜索模组"
+
+		Recipes: "合成配方"
+		RecipeAvailable: "显示可合成配方"
+		RecipeAll: "显示全部配方"
+		RecipeBlacklist: "显示被隐藏的配方（Ctrl+左键单击任意配方以切换隐藏状态）"
+		SelectedRecipe: "选择配方"
+		Ingredients: "材料"
+		StoredItems: "存储中的材料"
+		ShowOnlyFavorited: "显示被收藏"
+
+		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
+		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
+
+		Filters: {
+			All: "筛选全部"
+			Weapons: "筛选武器"
+			Tools: "筛选工具"
+			Equips: "筛选饰品"
+			WeaponsMelee: "筛选近战武器"
+			WeaponsRanged: "筛选远程武器"
+			WeaponsMagic: "筛选魔法武器"
+			WeaponsSummon: "筛选召唤武器"
+			WeaponsThrown: "筛选投掷武器"
+			Ammo: "筛选弹药"
+			Armor: "筛选盔甲"
+			Vanity: "筛选时装"
+			Potions: "筛选药水"
+			Tiles: "筛选放置物"
+			Misc: "筛选杂项"
+			Recent: "筛选最近存入的物品"
+		}
+
+		Sort: {
+			Default: "默认排序"
+			ID: "按ID排序"
+			Name: "按名称排序"
+			Stack: "按堆叠量排序"
+			Value: "按价格排序"
+			Dps: "按DPS排序"
+		}
+
+		Config: {
+			Label: "魔法储存配置"
+
+			glowNewItems: {
+				Label: "显示新物品/配方"
+				Tooltip: "存储核心/制作存储单元中的新物品/配方是否会突出显示"
+			}
+			useConfigFilter: {
+				Label: "使用默认筛选项"
+				Tooltip: "开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）"
+			}
+			showAllRecipes: {
+				Label: "显示所有制作配方"
+				Tooltip: "开启以显示所有制作配方，关闭则只会显示可用的制作配方"
+			}
+			quickStackDepositMode: {
+				Label: "快速堆叠与捕获快捷键"
+				Tooltip: "若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可\n将指针移动到存储核心的“快速存入”按钮上以了解具体信息"
+			}
+			clearSearchText: {
+				Label: "自动清除搜索文本"
+				Tooltip: "开启后，每次打开存储核心的UI界面都会自动清除上一次键入的搜索文本"
+			}
+			extraFilterIcons: {
+				Label: "显示更多排序选项"
+				Tooltip: "开启后，在存储核心的UI界面会显示更多排序选项"
+			}
+			showDps: {
+				Label: "武器DPS预测"
+				Tooltip: "开启后，在武器简介里会显示预计DPS值"
+			}
+		}
+	}
+}

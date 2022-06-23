@@ -1,8 +1,9 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -39,6 +40,7 @@ namespace MagicStorage.Components
 
 			ModTranslation text = CreateMapEntryName();
 			text.SetDefault("Magic Storage");
+			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "魔法储存元件");
 			AddMapEntry(new Color(153, 107, 61), text);
 			DustType = 7;
 			TileID.Sets.DisableSmartCursor[Type] = true;
