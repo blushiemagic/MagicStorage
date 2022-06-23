@@ -52,7 +52,8 @@ namespace MagicStorage {
 		// private void AddTranslations() {
 		// }
 
-		public override void AddRecipes(){
+		public override void AddRecipes()
+		{
 #if TML_2022_05
 			CreateRecipe(ItemID.CookedMarshmallow)
 #else
