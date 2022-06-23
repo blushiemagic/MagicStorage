@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using MagicStorage.Components;
 using MagicStorage.Items;
@@ -16,7 +14,6 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Map;
@@ -115,10 +112,6 @@ namespace MagicStorage
 
 		private static int maxRightClickTimer = StartMaxRightClickTimer;
 
-		private static SortMode sortMode;
-		private static FilterMode filterMode;
-
-		private static Dictionary<int, List<Recipe>> _productToRecipes;
 		public static bool CatchDroppedItems;
 		public static List<Item> DroppedItems = new();
 
@@ -384,44 +377,6 @@ namespace MagicStorage
 		{
 			try
 			{
-				// TODO this needs to be in a better place. What's the hook for doing Keybinds?
-				if (MagicStorage.IsItemKnownHotKey is not null &&
-					PlayerInput.CurrentProfile.InputModes[InputMode.Keyboard].KeyStatus.ContainsKey("Is This Item Known?") &&
-					MagicStorage.IsItemKnownHotKey.GetAssignedKeys().Count > 0 &&
-					MagicStorage.IsItemKnownHotKey.JustPressed &&
-					Main.HoverItem is not null &&
-					!Main.HoverItem.IsAir)
-				{
-					string s = Main.HoverItem.Name + " is ";
-					int t = Main.HoverItem.type;
-					if (GetKnownItems().Contains(t))
-					{
-						s += "known";
-						int sum = StoragePlayer.LocalPlayer
-									  .LatestAccessedStorage?.GetStoredItems()
-									  .Where(x => x.type == t)
-									  .Select(x => x.stack)
-									  .DefaultIfEmpty()
-									  .Sum() ??
-								  0;
-						if (sum > 0)
-							s += $" ({sum} in l.a.s.)";
-					}
-					else
-					{
-						s += "new";
-					}
-
-					Main.NewTextMultiline(s);
-				}
-			}
-			catch (KeyNotFoundException)
-			{
-				// ignore
-			}
-
-			try
-			{
 				oldMouse = StorageGUI.oldMouse;
 				curMouse = StorageGUI.curMouse;
 				if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && StoragePlayer.IsStorageCrafting())
@@ -449,7 +404,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
@@ -486,7 +441,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
@@ -512,6 +467,7 @@ namespace MagicStorage
 		{
 			int index = slot + RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
+
 			if (!item.IsAir)
 			{
 				// TODO can this be nicer?
@@ -524,12 +480,6 @@ namespace MagicStorage
 					item = item.Clone();
 					item.favorited = true;
 				}
-
-				if (!StoragePlayer.LocalPlayer.SeenRecipes.Contains(item))
-				{
-					item = item.Clone();
-					item.newAndShiny = MagicStorageConfig.GlowNewItems;
-				}
 			}
 
 			return item;
@@ -540,6 +490,7 @@ namespace MagicStorage
 			if (selectedRecipe == null)
 				return new Item();
 
+			// TODO: Can we simply return `selectedRecipe.createItem`
 			Item item = selectedRecipe.createItem;
 			if (item.IsAir)
 				item = new Item(item.type, 0);
@@ -577,15 +528,15 @@ namespace MagicStorage
 			if (!item.IsAir)
 			{
 				if (storageItem.IsAir && totalGroupStack == 0)
-					context = 3; // Unavailable - Red
+					context = 3; // Unavailable - Red // ItemSlot.Context.ChestItem
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
-					context = 4; // Partially in stock - Pinkish
-								 // context == 0 - Available - Default Blue
+					context = 4; // Partially in stock - Pinkish // ItemSlot.Context.BankItem
+				// context == 0 - Available - Default Blue
 				if (context != 0)
 				{
-					bool craftable = _productToRecipes.TryGetValue(item.type, out List<Recipe> r) && r.Any(recipe => IsAvailable(recipe) && AmountCraftable(recipe) > 0);
+					bool craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => AmountCraftable(recipe) > 0);
 					if (craftable)
-						context = 6; // Craftable - Light green
+						context = 6; // Craftable - Light green // ItemSlot.Context.TrashItem
 				}
 			}
 
@@ -637,7 +588,7 @@ namespace MagicStorage
 			int index = slot + IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
 			if (blockStorageItems.Contains(new ItemData(item)))
-				context = 3;
+				context = 3; // Red // ItemSlot.Context.ChestItem
 
 			return item;
 		}
@@ -754,7 +705,7 @@ namespace MagicStorage
 				recipeScrollBar.ViewPosition += difference;
 			}
 		}
-		
+
 		private static void UpdateCraftButton()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
@@ -762,25 +713,6 @@ namespace MagicStorage
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 			{
 				craftButton.BackgroundColor = new Color(73, 94, 171);
-				//The "Test Item" feature is very cheaty and I don't want that in Magic Storage.
-				//However, just deleting the code would be a waste, so it's commented out instead.
-				// - absoluteAquarian
-				// TODO: make this a config option
-				/*
-				if (RightMouseClicked && selectedRecipe is not null && Main.mouseItem.IsAir)
-				{
-					Item item = selectedRecipe.createItem;
-					if (CanItemBeTakenForTest(item))
-					{
-						int type = item.type;
-						Item testItem = new();
-						testItem.SetDefaults(type, true);
-						MarkAsTestItem(testItem);
-						Main.mouseItem = testItem;
-						StoragePlayer.LocalPlayer.TestedRecipes.Add(selectedRecipe.createItem);
-					}
-				}
-				else */
 				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 				{
 					if (Main.keyState.IsKeyDown(Keys.LeftControl))
@@ -788,7 +720,7 @@ namespace MagicStorage
 						tryCraftPostponeMessages = Main.netMode == NetmodeID.MultiplayerClient;
 						tryCraftCompoundRequestWithdraws = null;
 						tryCraftCompoundRequestResults = null;
-						
+
 						while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
 						{
 							TryCraft();
@@ -837,8 +769,6 @@ namespace MagicStorage
 
 						craftTimer--;
 						stillCrafting = true;
-						if (StoragePlayer.LocalPlayer.AddToCraftedRecipes(selectedRecipe.createItem))
-							RefreshItems();
 					}
 				}
 			}
@@ -859,42 +789,6 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool CanItemBeTakenForTest(Item item) =>
-			Main.netMode == NetmodeID.SinglePlayer &&
-			!item.consumable &&
-			(item.mana > 0 ||
-			 item.CountsAsClass(DamageClass.Magic) ||
-			 item.CountsAsClass(DamageClass.Ranged) ||
-			 item.CountsAsClass(DamageClass.Throwing) ||
-			 item.CountsAsClass(DamageClass.Melee) ||
-			 item.headSlot >= 0 ||
-			 item.bodySlot >= 0 ||
-			 item.legSlot >= 0 ||
-			 item.accessory ||
-			 Main.projHook[item.shoot] ||
-			 item.pick > 0 ||
-			 item.axe > 0 ||
-			 item.hammer > 0) &&
-			!item.CountsAsClass(DamageClass.Summon) &&
-			item.createTile < TileID.Dirt &&
-			item.createWall < 0 &&
-			!item.potion &&
-			item.fishingPole <= 1 &&
-			item.ammo == AmmoID.None &&
-			!StoragePlayer.LocalPlayer.TestedRecipes.Contains(item);
-
-		public static void MarkAsTestItem(Item testItem)
-		{
-			testItem.value = 0;
-			testItem.shopCustomPrice = 0;
-			testItem.material = false;
-			testItem.rare = -11;
-			testItem.SetNameOverride(Lang.GetItemNameValue(testItem.type) + Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-		}
-
-		public static bool IsTestItem(Item item) => item.Name.EndsWith(Language.GetTextValue("Mods.MagicStorage.TestItemSuffix"));
-
-
 		private static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
 		private static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
@@ -903,11 +797,6 @@ namespace MagicStorage
 
 		public static void RefreshItems()
 		{
-			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
-			if (modPlayer.SeenRecipes.Count == 0)
-				foreach (int item in GetKnownItems())
-					modPlayer.SeenRecipes.Add(item);
-
 			items.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
@@ -923,66 +812,23 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes);
-
-			var favoritesCopy = new HashSet<int>(modPlayer.FavoritedRecipes.Items.Select(x => x.type));
-
-			EnsureProductToRecipesInited();
-
-			sortMode = (SortMode) sortButtons.Choice;
-			filterMode = ItemFilter.GetFilter(filterButtons.Choice);
-			RefreshRecipes(hiddenRecipes, craftedRecipes, favoritesCopy);
+			RefreshRecipes();
 		}
 
-		public static HashSet<int> GetKnownItems()
-		{
-			GetKnownItems(out HashSet<int> a, out HashSet<int> b, out HashSet<int> c);
-			a.UnionWith(b);
-			a.UnionWith(c);
-			return a;
-		}
-
-		private static void GetKnownItems(out HashSet<int> hiddenRecipes, out HashSet<int> craftedRecipes, out HashSet<int> asKnownRecipes)
-		{
-			StoragePlayer modPlayer = StoragePlayer.LocalPlayer;
-			hiddenRecipes = new HashSet<int>(modPlayer.HiddenRecipes.Select(x => x.type));
-			craftedRecipes = new HashSet<int>(modPlayer.CraftedRecipes.Select(x => x.type));
-			asKnownRecipes = new HashSet<int>(modPlayer.AsKnownRecipes.Items.Select(x => x.type));
-		}
-
-		private static void EnsureProductToRecipesInited()
-		{
-			if (_productToRecipes is not null)
-				return;
-
-			var allRecipes = Main.recipe
-				.Take(Recipe.numRecipes)
-				.Where(x => !x.Disabled && x.createItem.type > ItemID.None);
-
-			_productToRecipes = allRecipes.GroupBy(x => x.createItem.type).ToDictionary(x => x.Key, x => x.ToList());
-		}
-
-		private static void RefreshRecipes(HashSet<int> hiddenRecipes, HashSet<int> craftedRecipes, HashSet<int> favorited)
+		private static void RefreshRecipes()
 		{
 			try
 			{
-				var availableItemsMutable = new HashSet<int>(hiddenRecipes.Concat(craftedRecipes));
-
-				int modFilterIndex = modSearchBox.ModIndex;
-
-				void DoFiltering()
+				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
 				{
-					var (filteredRecipes, sortFunction) = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text);
-					filteredRecipes = filteredRecipes
+					var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text, out var sortComparer)
 						// show only blacklisted recipes only if choice = 2, otherwise show all other
-						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem.type))
+						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
 						// show only favorited items if selected
-						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem.type))
+						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
 						// favorites first
-						.OrderBy(x => favorited.Contains(x.createItem.type) ? 0 : 1)
-						.ThenBy(x => x.createItem, sortFunction)
-						.ThenBy(x => x.createItem.type)
-						.ThenBy(x => x.createItem.value);
+						.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
+						.ThenBy(r => r.createItem, sortComparer);
 
 					recipes.Clear();
 					recipeAvailable.Clear();
@@ -1002,7 +848,14 @@ namespace MagicStorage
 				if (RecursiveCraftIntegration.Enabled)
 					RecursiveCraftIntegration.RefreshRecursiveRecipes();
 
-				DoFiltering();
+				SortMode sortMode = (SortMode) sortButtons.Choice;
+				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
+				int modFilterIndex = modSearchBox.ModIndex;
+
+				var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
+				var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
+
+				DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 
 				// now if nothing found we disable filters one by one
 				if (searchBar.Text.Length > 0)
@@ -1010,8 +863,8 @@ namespace MagicStorage
 					if (recipes.Count == 0 && hiddenRecipes.Count > 0)
 					{
 						// search hidden recipes too
-						hiddenRecipes = new HashSet<int>();
-						DoFiltering();
+						hiddenRecipes = ItemTypeOrderedSet.Empty;
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 
 					/*
@@ -1019,7 +872,7 @@ namespace MagicStorage
 					{
 						// any category
 						filterMode = FilterMode.All;
-						DoFiltering();
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 					*/
 
@@ -1027,7 +880,7 @@ namespace MagicStorage
 					{
 						// search all mods
 						modFilterIndex = ModSearchBox.ModIndexAll;
-						DoFiltering();
+						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
 					}
 				}
 
@@ -1051,10 +904,7 @@ namespace MagicStorage
 						{
 							Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
 							int index = recipes.IndexOf(overridden);
-							if (index != -1 && recipeAvailable[index])
-								GuttedSetSelectedRecipe(overridden, index);
-							else
-								GuttedSetSelectedRecipe(overridden, index);
+							GuttedSetSelectedRecipe(overridden, index);
 						}
 						// If the selectedRecipe(which isn't compound) is uncraftable but is in the available list, this means it's compound version is craftable
 						else if (!IsAvailable(selectedRecipe, false))
@@ -1067,7 +917,7 @@ namespace MagicStorage
 			}
 			catch (Exception e)
 			{
-				Main.NewTextMultiline(e.ToString());
+				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
 		}
 
@@ -1401,33 +1251,18 @@ namespace MagicStorage
 					{
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
-							if (storagePlayer.RemoveFromHiddenRecipes(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem))
 								RefreshItems();
 						}
 						else
 						{
-							if (storagePlayer.AddToHiddenRecipes(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Add(recipe.createItem))
 								RefreshItems();
 						}
 					}
 					else
 					{
 						SetSelectedRecipe(recipe);
-					}
-				}
-				else if (RightMouseClicked)
-				{
-					if (recipe == selectedRecipe || recipeButtons.Choice != RecipeButtonsAvailableChoice)
-					{
-						if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
-						{
-							storagePlayer.AsKnownRecipes.Add(recipe.createItem);
-							RefreshItems();
-						}
-						else
-						{
-							storagePlayer.AsKnownRecipes.Remove(recipe.createItem);
-						}
 					}
 				}
 
@@ -1438,8 +1273,6 @@ namespace MagicStorage
 		private static void SetSelectedRecipe(Recipe recipe)
 		{
 			ArgumentNullException.ThrowIfNull(recipe);
-
-			StoragePlayer.LocalPlayer.SeenRecipes.Add(recipe.createItem);
 
 			if (RecursiveCraftIntegration.Enabled)
 			{
@@ -1491,12 +1324,11 @@ namespace MagicStorage
 			if (RightMouseClicked)
 			{
 				Item item = selectedRecipe.requiredItem[slot];
-				EnsureProductToRecipesInited();
-				if (_productToRecipes.TryGetValue(item.type, out List<Recipe> itemRecipes))
+				if (MagicCache.ResultToRecipe.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0)
 				{
-					Recipe selected = null;
+					Recipe selected = itemRecipes[0];
 
-					foreach (Recipe r in itemRecipes)
+					foreach (Recipe r in itemRecipes[1..])
 					{
 						if (IsAvailable(r))
 						{
@@ -1505,8 +1337,7 @@ namespace MagicStorage
 						}
 					}
 
-					if (selected is not null)
-						SetSelectedRecipe(selected);
+					SetSelectedRecipe(selected);
 				}
 			}
 
@@ -1651,7 +1482,7 @@ namespace MagicStorage
 							existing.stack = existing.maxStack;
 							item.stack -= diff;
 						}
-						
+
 						break;
 					}
 				}
@@ -1665,7 +1496,7 @@ namespace MagicStorage
 
 			return compacted;
 		}
-		
+
 		private static void TryCraft()
 		{
 			var toWithdraw = new List<Item>();

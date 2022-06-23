@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter,
-			int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(
+			IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
 		{
-			var filter = MakeFilter(filterMode);
+			var filter = GetFilter(filterMode);
 			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
@@ -29,8 +28,8 @@ namespace MagicStorage.Sorting
 				return orderedItems.ThenBy(x => x.value);
 			} else if (sortMode == SortMode.Dps) {
 				//Sort again by DPS due to it using variable item data
-				var func = MakeSortFunction(SortMode.Dps);
-				return orderedItems.ThenBy(x => func).ThenBy(x => x.value);
+				var func = GetSortFunction(SortMode.Dps);
+				return orderedItems.ThenBy(x => x, func).ThenBy(x => x.value);
 			}
 
 			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
@@ -38,56 +37,53 @@ namespace MagicStorage.Sorting
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
 		{
-			List<Item> stackedItems = new();
+			Item lastItem = null;
 
 			foreach (Item item in items.OrderBy(i => i.type))
 			{
-				if (stackedItems.Count <= 0)
+				if (lastItem is null)
 				{
-					stackedItems.Add(item.Clone());
+					lastItem = item.Clone();
 					continue;
 				}
 
-				var lastItem = stackedItems[^1];
-				if (ItemData.Matches(item, lastItem) && lastItem.stack + item.stack > 0 && MagicSystem.CanCombineIgnoreType(item, lastItem))
+				if (MagicCache.CanCombine(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
 					lastItem.stack += item.stack;
 				}
 				else
 				{
-					stackedItems.Add(item.Clone());
+					yield return lastItem;
+					lastItem = item.Clone();
 				}
 			}
 
-			return stackedItems;
+			yield return lastItem;
 		}
 
-		public static (ParallelQuery<Recipe> recipes, IComparer<Item> sortFunction) GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter)
+		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, out IComparer<Item> sortComparer)
 		{
-			var filter = MakeFilter(filterMode);
-			var filteredRecipes = MagicSystem.EnabledRecipes
+			sortComparer = GetSortFunction(sortMode);
+			return MagicCache.FilteredRecipesCache[filterMode]
 				.AsParallel()
-				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex) && filter(recipe.createItem));
-
-			return (filteredRecipes, MakeSortFunction(sortMode));
+				.AsOrdered()
+				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
 		}
 
-		internal static CompareFunction MakeSortFunction(SortMode sortMode)
+		internal static IComparer<Item> GetSortFunction(SortMode sortMode)
 		{
-			CompareFunction func = sortMode switch
+			return sortMode switch
 			{
-				SortMode.Default => new CompareDefault(),
-				SortMode.Id      => new CompareID(),
-				SortMode.Name    => new CompareName(),
-				SortMode.Value   => new CompareValue(),
-				SortMode.Dps     => new CompareDps(),
+				SortMode.Default => CompareDefault.Instance,
+				SortMode.Id      => CompareID.Instance,
+				SortMode.Name    => CompareName.Instance,
+				SortMode.Value   => CompareValue.Instance,
+				SortMode.Dps     => CompareDps.Instance,
 				_                => null,
 			};
-
-			return func;
 		}
 
-		internal static ItemFilter.Filter MakeFilter(FilterMode filterMode)
+		internal static ItemFilter.Filter GetFilter(FilterMode filterMode)
 		{
 			return filterMode switch
 			{
@@ -110,7 +106,7 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		private static bool FilterName(Item item, string filter) => item.Name.ToLowerInvariant().Contains(filter.Trim().ToLowerInvariant());
+		private static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
 
 		private static bool FilterMod(Item item, int modFilterIndex)
 		{

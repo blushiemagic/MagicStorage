@@ -5,7 +5,6 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
-	[Autoload(false)]
 	public abstract class CombinedStationsItem<TTile> : ModItem where TTile : ModTile
 	{
 		public abstract string ItemName { get; }
@@ -46,12 +45,14 @@ namespace MagicStorage.Stations
 			Item.rare = Rarity;
 		}
 
-		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks){
+		protected int BasePriceFromItems(params (int type, int stack)[] typeStacks)
+		{
 			int price = 0;
 
-			for(int i = 0; i < typeStacks.Length; i++){
-				Item tItem = new Item(typeStacks[i].type);
-				price += tItem.value * typeStacks[i].stack;
+			foreach ((int type, int stack) in typeStacks)
+			{
+				Item tItem = new Item(type); // Wish we could use ContentSamples here, but it's too early
+				price += tItem.value * stack;
 			}
 
 			return price;
