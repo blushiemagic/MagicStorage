@@ -33,18 +33,12 @@ namespace MagicStorage {
 
 			InterfaceHelper.Initialize();
 			AddTranslations();
-
-			EditsLoader.Load();
-
-			DirectDetourManager.Load();
 		}
 
 		public override void Unload()
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
-
-			DirectDetourManager.Unload();
 		}
 
 		private void AddTranslations() {
