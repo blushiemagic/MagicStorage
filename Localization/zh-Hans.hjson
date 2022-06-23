@@ -45,7 +45,7 @@ Mods: {
 		SelectedRecipe: "选择配方"
 		Ingredients: "材料"
 		StoredItems: "存储中的材料"
-		ShowOnlyFavorited: "显示收藏配方"
+		ShowOnlyFavorited: "显示被收藏"
 
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
