@@ -5,7 +5,6 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using System;
 using System.Collections.Concurrent;
 using Terraria.DataStructures;
 
@@ -184,29 +183,28 @@ namespace MagicStorage.Components
 
 		private Item WithdrawStation(int slot)
 		{
-			Item item = new Item();
-			if (slot < stations.Count)
-			{
-				item = stations[slot];
-				stations.RemoveAt(slot);
-			}
+			if (slot >= stations.Count)
+				return new Item();
+
+			var item = stations[slot];
+			stations.RemoveAt(slot);
+
 			return item;
 		}
 
 		public Item TryWithdrawStation(int slot, bool toInventory = false)
 		{
-			Item item = new Item();
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventory : Operation.Withdraw);
-				packet.Write((byte)slot);
+				packet.Write((byte) slot);
 				packet.Send();
+
+				return new Item();
 			}
-			else
-			{
-				item = WithdrawStation(slot);
-				StoragePlayer.GetItem(new EntitySource_TileEntity(this), item, !toInventory);
-			}
+
+			var item = WithdrawStation(slot);
+			StoragePlayer.GetItem(new EntitySource_TileEntity(this), item, !toInventory);
 
 			return item;
 		}
