@@ -8,7 +8,7 @@ namespace MagicStorage
 {
 	public class ItemTypeOrderedSet
 	{
-		public static ItemTypeOrderedSet Empty { get; } = new("Empty");
+		public static ItemTypeOrderedSet Empty => new("Empty");
 
 		private const string Suffix = "~v2";
 		private readonly string _name;
