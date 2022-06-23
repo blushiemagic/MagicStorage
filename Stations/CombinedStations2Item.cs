@@ -1,4 +1,6 @@
-﻿using Terraria.ID;
+﻿using System.Collections.Generic;
+using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
@@ -8,6 +10,16 @@ namespace MagicStorage.Stations
 		public override string ItemName => "Combined Stations (Tier 2)";
 
 		public override string ItemDescription => "Combines the functionality of several crafting stations";
+
+		public override Dictionary<GameCulture, string> ItemNameLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "进阶组合制作站" }
+				};
+
+		public override Dictionary<GameCulture, string> ItemDescriptionLocalized => new Dictionary<GameCulture, string>
+				{
+					{ GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "结合了部分进阶制作站的功能" }
+				};
 
 		public override int Rarity => ItemRarityID.Pink;
 

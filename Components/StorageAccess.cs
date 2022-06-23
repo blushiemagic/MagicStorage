@@ -45,10 +45,11 @@ namespace MagicStorage.Components
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
-			string text = this is StorageHeart ? "Could not load Storage Heart tile entity!" : "This access is not connected to a Storage Heart!";
+			// the translation key is in en-US.hjson  -Crapsky233
+			string text = Language.GetTextValue($"Mods.MagicStorage.StorageAccessFail{(this is StorageHeart ? "" : "Alt")}");
 			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
 				if (tileEntity is TERemoteAccess remoteAccess && !remoteAccess.Loaded)
-					text = "Storage Heart area not loaded! Try again.";
+					text = Language.GetTextValue($"Mods.MagicStorage.StorageAccessFailLoad");
 
 			if (GetHeart(i, j) == null)
 			{
