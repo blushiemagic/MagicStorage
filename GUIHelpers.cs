@@ -91,7 +91,7 @@ namespace MagicStorage
 			if (withHistory)
 			{
 				textures.Add(MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterAll", AssetRequestMode.ImmediateLoad));
-				texts.Add(Language.GetText("Mods.MagicStorage.FilterRecent"));
+				texts.Add(Language.GetText("Mods.MagicStorage.Filters.Recent"));
 			}
 
 			return new UIButtonChoice(onChanged, textures.ToArray(), texts.ToArray(),
