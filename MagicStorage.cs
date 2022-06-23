@@ -1,7 +1,6 @@
 ﻿using MagicStorage.Edits;
 using MagicStorage.Items;
 using MagicStorage.Stations;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,8 +19,6 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		public static ModKeybind IsItemKnownHotKey { get; private set; }
-
 		public static ImmutableArray<Mod> AllMods { get; private set; }
 		public static Dictionary<Mod, int> IndexByMod { get; private set; }
 
@@ -37,7 +34,6 @@ namespace MagicStorage {
 			InterfaceHelper.Initialize();
 			// AddTranslations() removed, now use hjsons in Localization/
 			// AddTranslations();
-			IsItemKnownHotKey = KeybindLoader.RegisterKeybind(this, "Is This Item Known?", Keys.Q);
 
 			EditsLoader.Load();
 
@@ -46,7 +42,6 @@ namespace MagicStorage {
 
 		public override void Unload()
 		{
-			IsItemKnownHotKey = null;
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
 
@@ -58,13 +53,18 @@ namespace MagicStorage {
 		// }
 
 		public override void AddRecipes(){
+#if TML_2022_05
 			CreateRecipe(ItemID.CookedMarshmallow)
+#else
+			Recipe.Create(ItemID.CookedMarshmallow)
+#endif
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
 				.Register();
 		}
 
-		public override void PostAddRecipes() {
+		public override void PostAddRecipes()
+		{
 			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
 			for (int i = 0; i < Recipe.numRecipes; i++)
 			{
@@ -75,9 +75,13 @@ namespace MagicStorage {
 
 				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
+#if TML_2022_05
 					Recipe copy = CloneRecipe(recipe);
+#else
+					Recipe copy = recipe.Clone();
+#endif
 
-					copy.requiredTile.Clear();
+					copy.requiredTile.Clear(); // Should this be cleared?
 					copy.AddTile<CombinedStations4Tile>();
 
 					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
@@ -438,7 +442,7 @@ namespace MagicStorage {
 					TryParseAs(1, out int itemType);
 					TryParseAs(2, out Func<Item, Item, bool> canCombine);
 
-					MagicSystem.canCombineByType[itemType] = canCombine;
+					MagicCache.canCombineByType[itemType] = canCombine;
 					break;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");

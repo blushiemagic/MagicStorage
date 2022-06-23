@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using MagicStorage.Edits;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -96,14 +95,12 @@ namespace MagicStorage.Components
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
 
-			if (CraftingGUI.IsTestItem(toDeposit))
-				return;
-
 			Item original = toDeposit.Clone();
 			bool finished = false;
 			bool hasChange = false;
-			foreach (Item item in items) {
-				if (ItemData.Matches(toDeposit, item) && item.stack < item.maxStack && MagicSystem.CanCombineIgnoreType(toDeposit, item))
+			foreach (Item item in items)
+			{
+				if (MagicCache.CanCombine(toDeposit, item) && item.stack < item.maxStack)
 				{
 					int total = item.stack + toDeposit.stack;
 					int newStack = total;
