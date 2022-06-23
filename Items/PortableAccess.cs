@@ -138,17 +138,6 @@ namespace MagicStorage.Items
 			recipe.AddIngredient(ItemID.Ruby, 3);
 			recipe.AddTile(TileID.LunarCraftingStation);
 			recipe.Register();
-
-			if (ModLoader.TryGetMod("CalamityMod", out Mod calamityMod))
-			{
-				recipe = CreateRecipe();
-				recipe.AddIngredient(Mod, "LocatorDisk");
-				recipe.AddIngredient(calamityMod, "CosmiliteBar", 20);
-				recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-				recipe.AddIngredient(ItemID.Ruby, 3);
-				recipe.AddTile(TileID.LunarCraftingStation);
-				recipe.Register();
-			}
 		}
 	}
 }
