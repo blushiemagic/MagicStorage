@@ -38,7 +38,7 @@ namespace MagicStorage
 			_modButton?.SetText(MakeModButtonText());
 			ModName = "";
 			if (index > -1)
-				ModName = MagicStorage.AllMods[index].Name;
+				ModName = MagicCache.AllMods[index].Name;
 			if (!silent)
 				OnChanged?.Invoke();
 		}
@@ -54,7 +54,7 @@ namespace MagicStorage
 			{
 				ModIndexAll      => Language.GetTextValue("Mods.MagicStorage.FilterAllMods"),
 				ModIndexBaseGame => "Terraria",
-				_                => MagicStorage.AllMods[ModIndex].Name
+				_                => MagicCache.AllMods[ModIndex].Name
 			};
 
 			if (name == "ModLoader")
@@ -70,7 +70,7 @@ namespace MagicStorage
 			{
 				_modButton.BackgroundColor = new Color(73, 94, 171);
 
-				var allMods = MagicStorage.AllMods;
+				var allMods = MagicCache.AllMods;
 				int index = ModIndex;
 
 				if (curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)

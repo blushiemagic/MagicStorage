@@ -15,37 +15,24 @@ namespace MagicStorage {
 	public class MagicStorage : Mod {
 		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
 
-		// TODO can these 2 be const?
+		// Integration with ModHelpers
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		public static ImmutableArray<Mod> AllMods { get; private set; }
-		public static Dictionary<Mod, int> IndexByMod { get; private set; }
-
 		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
-
-		public static readonly Version requiredVersion = new Version(0, 12);
 
 		public override void Load()
 		{
-			if (TModLoaderVersion < requiredVersion)
-				throw new Exception("Magic storage requires a tModLoader version of at least " + requiredVersion);
-
 			InterfaceHelper.Initialize();
+      
 			// AddTranslations() removed, now use hjsons in Localization/
 			// AddTranslations();
-
-			EditsLoader.Load();
-
-			DirectDetourManager.Load();
 		}
 
 		public override void Unload()
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
-
-			DirectDetourManager.Unload();
 		}
 
 		// AddTranslations() removed, now use hjsons in Localization/
@@ -89,21 +76,6 @@ namespace MagicStorage {
 
 					copy.Register();
 				}
-			}
-		}
-
-		public override void PostSetupContent()
-		{
-			AllMods = ModLoader.Mods
-				.Where(mod => mod.GetContent<ModItem>().Any())
-				.ToImmutableArray();
-
-			IndexByMod = new();
-
-			for (int i = 0; i < AllMods.Length; i++)
-			{
-				var mod = AllMods[i];
-				IndexByMod[mod] = i;
 			}
 		}
 
