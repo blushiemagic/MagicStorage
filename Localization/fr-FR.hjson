@@ -1,6 +1,10 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			# StorageComponent: Magic Storage
+		}
+
 		# Active: "Active"
 		# Inactive: "Inactive"
 
@@ -25,7 +29,7 @@ Mods: {
 		# StorageAccessFail: "Could not load Storage Heart tile entity!"
 		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
-		
+
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "Mis à: X={0}, Y={1}"
 		SnowBiomeBlock: "Bloc de biome de neige"
@@ -64,7 +68,7 @@ Mods: {
 			# Armor: "Filter Armor"
 			# Vanity: "Filter Vanity Items"
 			Potions: "Filtrer par potions"
-			Tiles: "Filtrer par placeable" 
+			Tiles: "Filtrer par placeable"
 			Misc: "Filtrer par miscellanées"
 			# Recent: "Filter New Recently Added Items"
 		}

@@ -38,10 +38,9 @@ namespace MagicStorage.Components
 
 			TileObjectData.addTile(Type);
 
-			ModTranslation text = CreateMapEntryName();
-			text.SetDefault("Magic Storage");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "魔法储存元件");
-			AddMapEntry(new Color(153, 107, 61), text);
+			// We don't need to call SetDefault() on CreateMapEntryName()'s return value if we have .hjson files.
+			AddMapEntry(new Color(153, 107, 61), CreateMapEntryName());
+
 			DustType = 7;
 			TileID.Sets.DisableSmartCursor[Type] = true;
 			// Old: TileID.Sets.HasOutlines[Type] = HasSmartInteract();

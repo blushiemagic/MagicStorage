@@ -1,6 +1,10 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			# StorageComponent: Magic Storage
+		}
+
 		# Active: "Active"
 		# Inactive: "Inactive"
 

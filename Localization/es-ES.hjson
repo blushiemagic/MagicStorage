@@ -1,6 +1,10 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			# StorageComponent: Magic Storage
+		}
+
 		# Active: "Active"
 		# Inactive: "Inactive"
 
@@ -25,7 +29,7 @@ Mods: {
 		# StorageAccessFail: "Could not load Storage Heart tile entity!"
 		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
-		
+
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "Ajustado a: X={0}, Y={1}"
 		SnowBiomeBlock: "Bloque de Biomas de la Nieve"

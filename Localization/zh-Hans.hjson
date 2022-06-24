@@ -1,6 +1,11 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			StorageComponent: "魔法储存元件"
+			StorageConnector: "魔法储存元件"
+		}
+
 		Active: "已启用"
 		Inactive: "已禁用"
 
@@ -25,7 +30,7 @@ Mods: {
 		StorageAccessFail: "无法加载存储核心！"
 		StorageAccessFailAlt: "该存储装置没有与存储核心连接！"
 		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
-		
+
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "已设置于位于 [{0}, {1}] 的存储核心"
 		SnowBiomeBlock: "雪地环境方块"

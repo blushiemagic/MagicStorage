@@ -3,6 +3,11 @@
 # -Crapsky233
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			StorageComponent: Magic Storage
+			StorageConnector: Magic Storage
+		}
+
 		Active: "Active"
 		Inactive: "Inactive"
 
@@ -44,7 +49,7 @@ Mods: {
 		RecipeAvailable: "Show available recipes"
 		RecipeAll: "Show all known recipes"
 		RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
-		SelectedRecipe: "Selected Recipe" 
+		SelectedRecipe: "Selected Recipe"
 		Ingredients: "Ingredients"
 		StoredItems: "Stored Ingredients"
 		ShowOnlyFavorited: "Only Favorited"

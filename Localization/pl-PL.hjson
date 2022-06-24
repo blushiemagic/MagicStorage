@@ -1,6 +1,10 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		MapObject: {
+			# StorageComponent: Magic Storage
+		}
+
 		# Active: "Active"
 		# Inactive: "Inactive"
 
@@ -25,7 +29,7 @@ Mods: {
 		# StorageAccessFail: "Could not load Storage Heart tile entity!"
 		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
-		
+
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "Ustawione na: X={0}, Y={1}"
 		# SnowBiomeBlock: "Snow Biome Block"
@@ -42,7 +46,7 @@ Mods: {
 		# RecipeAvailable: "Show available recipes"
 		# RecipeAll: "Show all known recipes"
 		# RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
-		# SelectedRecipe: "Selected Recipe" 
+		# SelectedRecipe: "Selected Recipe"
 		# Ingredients: "Ingredients"
 		# StoredItems: "Stored Ingredients"
 		# ShowOnlyFavorited: "Only Favorited"
