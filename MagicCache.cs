@@ -89,7 +89,7 @@ public class MagicCache : ModSystem
 
 		// TODO: Split into mods with recipe and mods with items. Also have to account for it in ModSearchBox
 		AllMods = ModLoader.Mods
-			.Where(mod => (RecipesByMod.TryGetValue(mod, out var modReicpes) && modReicpes.Length > 0) || mod.GetContent<ModItem>().Any())
+			.Where(mod => (RecipesByMod.ContainsKey(mod)) || mod.GetContent<ModItem>().Any())
 			.ToArray();
 
 		IndexByMod = AllMods
