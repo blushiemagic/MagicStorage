@@ -87,8 +87,9 @@ public class MagicCache : ModSystem
 		RecipesByMod = groupedByMod.Where(x => x.Key is not null).ToDictionary(x => x.Key, x => x.ToArray());
 		VanillaRecipes = groupedByMod.Where(x => x.Key is null).SelectMany(x => x.ToArray()).ToArray();
 
+		// TODO: Split into mods with recipe and mods with items. Also have to account for it in ModSearchBox
 		AllMods = ModLoader.Mods
-			.Where(mod => RecipesByMod[mod].Length > 0 || mod.GetContent<ModItem>().Any())
+			.Where(mod => (RecipesByMod.TryGetValue(mod, out var modReicpes) && modReicpes.Length > 0) || mod.GetContent<ModItem>().Any())
 			.ToArray();
 
 		IndexByMod = AllMods
