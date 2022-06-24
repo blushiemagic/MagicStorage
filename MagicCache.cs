@@ -36,7 +36,6 @@ public class MagicCache : ModSystem
 	{
 		EnabledRecipes = null!;
 		ResultToRecipe = null!;
-		RecipesByMod = null!;
 		FilteredRecipesCache = null!;
 
 		hasIngredient = null!;
@@ -46,6 +45,7 @@ public class MagicCache : ModSystem
 		AllMods = null!;
 		IndexByMod = null!;
 		RecipesByMod = null!;
+		VanillaRecipes = null!;
 	}
 
 	public override void PostSetupContent()
