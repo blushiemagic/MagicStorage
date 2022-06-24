@@ -44,7 +44,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			'The world's power is at your fingertips'
 			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
 			Can be in the inventory or a Crafting Interface's station slot
@@ -52,82 +53,104 @@ Mods: {
 			Allows crafting of Cooked Marshmallows in the Crafting Interface
 			Acts like a Beach Ball when thrown
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right> по Cердцу Хранилища чтобы запомнить его местоположение
 			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right> по Cердцу Хранилища чтобы запомнить его местоположение"
 			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища"
 			Не пропадает при использовании
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right> по Cердцу Хранилища чтобы запомнить его местоположение
 			В данный момент Сердце Хранилища не привязанно
 			Используйте что бы получить доступ к вашему Хранилищу
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'Блестит ослепительным светом'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			Следы света все еще мелькают внутри
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			Позволяет Модулю Создания Предметов создавать предметы требующие нахождения игрока в снежном биоме
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right> на Ячейке Хранилища что бы активировать/деактивировать ее
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 240
 			<right> на Святой Ячейке Хранилища для улучшения
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 80
 			<right> на Ячейке Хранилища для улучшения
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 80
 			<right> на Ячейке Хранилища для улучшения
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 160
 			<right> на Адской Ячейке Хранилища для улучшения
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 120
 			<right> на Демонитовой/Кримтановой Ячейке Хранилища для улучшения
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 320
 			<right> на Синей Хлорофитовой Ячейке Хранилища для улучшения
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			Увеличивает количество слотов в Ячейке Хранилища до 640
 			<right> на Люминитовой Ячейке Хранилища для улучшения
 			'''
-			# CrimsonAltar: '''
+			# CrimsonAltar:
+			# '''
 			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
 			# '''
-			# DemonAltar: '''
+			# DemonAltar:
+			# '''
 			# A placeable Demon Altar. Cannot be mined to get hardmode ores
 			# '''
-			# CombinedFurnitureStations1Item: '''
+			# CombinedFurnitureStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedFurnitureStations2Item: '''
+			# CombinedFurnitureStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedStations1Item: '''
+			# CombinedStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations2Item: '''
+			# CombinedStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations3Item: '''
+			# CombinedStations3Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations4Item: '''
+			# CombinedStations4Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
 		}

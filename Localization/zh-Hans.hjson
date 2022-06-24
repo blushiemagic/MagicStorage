@@ -44,7 +44,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			“你掌握着世界的力量”
 			\n制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
 			\n放在物品栏或制作存储单元的制作站槽位内即可生效
@@ -52,82 +53,104 @@ Mods: {
 			\n可在制作界面直接用棉花糖制作熟棉花糖
 			\n丢出去之后会像沙滩球一样弹弹弹
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right>存储核心可储存其定位点
 			<right>远程存储装置以设置其定位点
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right>存储核心可储存其定位点
 			<right>远程存储装置以设置其定位点
 			使用后不再损坏
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right>存储核心可储存其定位点
 			目前未设置为任何位置
 			使用可直接访问你的存储
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'闪耀着耀眼的光芒'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			那道光所余留的痕迹依旧
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			允许制作存储单元拥有雪地环境
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right>存储单元使其切换启用/禁用
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			将存储单元升级至240容量
 			<right>一个存储单元(神圣)可镶嵌
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			将存储单元升级至80容量
 			<right>一个存储单元可镶嵌
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			将存储单元升级至80容量
 			<right>一个存储单元可镶嵌
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			将存储单元升级至160容量
 			<right>一个存储单元(狱岩)可镶嵌
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			将存储单元升级至120容量
 			<right>一个存储单元(猩红/魔金)可镶嵌
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			将存储单元升级至320容量
 			<right>一个存储单元(蓝色叶绿)可镶嵌
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			将存储单元升级至640容量
 			<right>一个存储单元(夜明)可镶嵌
 			'''
-			CrimsonAltar: '''
+			CrimsonAltar:
+			'''
 			可放置的猩红祭坛复制品，试图挖掉的话什么都不会发生
 			'''
-			DemonAltar: '''
+			DemonAltar:
+			'''
 			可放置的恶魔祭坛复制品，试图挖掉的话什么都不会发生
 			'''
-			CombinedFurnitureStations1Item: '''
+			CombinedFurnitureStations1Item:
+			'''
 			基础组合家具制作站
 			'''
-			CombinedFurnitureStations2Item: '''
+			CombinedFurnitureStations2Item:
+			'''
 			结合了部分进阶家具制作站的功能
 			'''
-			CombinedStations1Item: '''
+			CombinedStations1Item:
+			'''
 			结合了部分基础制作站的功能
 			'''
-			CombinedStations2Item: '''
+			CombinedStations2Item:
+			'''
 			结合了部分进阶制作站的功能
 			'''
-			CombinedStations3Item: '''
+			CombinedStations3Item:
+			'''
 			结合了部分高级制作站的功能
 			'''
-			CombinedStations4Item: '''
+			CombinedStations4Item:
+			'''
 			结合了一切制作站和液体需求
 			'''
 		}

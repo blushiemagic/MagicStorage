@@ -46,7 +46,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			'The world's power is at your fingertips'
 			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
 			Can be in the inventory or a Crafting Interface's station slot
@@ -54,82 +55,104 @@ Mods: {
 			Allows crafting of Cooked Marshmallows in the Crafting Interface
 			Acts like a Beach Ball when thrown
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right> Storage Heart to store location
 			<right> Remote Storage Access to set it
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right> Storage Heart to store location
 			<right> Remote Storage Access to set it
 			Does not get destroyed upon use
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'Shines with a dazzling light'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			Traces of light still linger inside
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			Allows the Storage Crafting Interface to craft snow biome recipes
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right> Storage Unit to toggle between Active/Inactive
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			Upgrades Storage Unit to 240 capacity
 			<right> a Hallowed Storage Unit to use
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			Upgrades Storage Unit to 80 capacity
 			<right> a Storage Unit to use
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			Upgrades Storage Unit to 80 capacity
 			<right> a Storage Unit to use
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			Upgrades Storage Unit to 160 capacity
 			<right> a Hellstone Storage Unit to use
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			Upgrades Storage Unit to 120 capacity
 			<right> a Demonite/Crimtane Storage Unit to use
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			Upgrades Storage Unit to 320 capacity
 			<right> a Blue Chlorophyte Storage Unit to use
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			Upgrades Storage Unit to 640 capacity
 			<right> a Luminite Storage Unit to use
 			'''
-			CrimsonAltar: '''
+			CrimsonAltar:
+			'''
 			A placeable Crimson Altar. Cannot be mined to get hardmode ores
 			'''
-			DemonAltar: '''
+			DemonAltar:
+			'''
 			A placeable Demon Altar. Cannot be mined to get hardmode ores
 			'''
-			CombinedFurnitureStations1Item: '''
+			CombinedFurnitureStations1Item:
+			'''
 			Combines the functionality of several crafting stations for furniture
 			'''
-			CombinedFurnitureStations2Item: '''
+			CombinedFurnitureStations2Item:
+			'''
 			Combines the functionality of several crafting stations for furniture
 			'''
-			CombinedStations1Item: '''
+			CombinedStations1Item:
+			'''
 			Combines the functionality of several crafting stations
 			'''
-			CombinedStations2Item: '''
+			CombinedStations2Item:
+			'''
 			Combines the functionality of several crafting stations
 			'''
-			CombinedStations3Item: '''
+			CombinedStations3Item:
+			'''
 			Combines the functionality of several crafting stations
 			'''
-			CombinedStations4Item: '''
+			CombinedStations4Item:
+			'''
 			Combines the functionality of several crafting stations
 			'''
 		}

@@ -44,7 +44,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			'The world's power is at your fingertips'
 			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
 			Can be in the inventory or a Crafting Interface's station slot
@@ -52,82 +53,104 @@ Mods: {
 			Allows crafting of Cooked Marshmallows in the Crafting Interface
 			Acts like a Beach Ball when thrown
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right> le Cœur de Stockage pour enregistrer son emplacement
 			<right> le Stockage Éloigné pour le mettre en place
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right> Cœur du Stockage pour enregistrer son emplacement"
 			<right> Stockage Éloigné pour le mettre en place"
 			N'est pas détruit lors de son utilisation
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'Il brille avec une lumière aveuglante'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			Des traces de lumière s'attarde encore à l'intérieur
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			Permet à L'interface de Stockage Artisanat de créer des recettes de biome de neige
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right> pour changer l'unité de stockage actif/inactif
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			Améliore la capacité de unité de stockage à 240
 			<right> l'unité de stockage (Sacré) pour utiliser
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			Améliore la capacité de unité de stockage à 80
 			<right> l'unité de stockage pour utiliser
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			Améliore la capacité de unité de stockage à 80
 			<right> l'unité de stockage pour utiliser
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			Améliore la capacité de unité de stockage à 160
 			<right> l'unité de stockage (Infernale) pour utiliser
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			Améliore la capacité de unité de stockage à 120
 			\n<right> l'unité de stockage (Démonite/Carmitane) pour utiliser
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			Améliore la capacité de unité de stockage à 320
 			\n<right> l'unité de stockage (Chlorophylle Bleu) pour utiliser
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			Améliore la capacité de unité de stockage à 640
 			\n<right> l'unité de stockage (Luminite) pour utiliser
 			'''
-			# CrimsonAltar: '''
+			# CrimsonAltar:
+			# '''
 			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
 			# '''
-			# DemonAltar: '''
+			# DemonAltar:
+			# '''
 			# A placeable Demon Altar. Cannot be mined to get hardmode ores
 			# '''
-			# CombinedFurnitureStations1Item: '''
+			# CombinedFurnitureStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedFurnitureStations2Item: '''
+			# CombinedFurnitureStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedStations1Item: '''
+			# CombinedStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations2Item: '''
+			# CombinedStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations3Item: '''
+			# CombinedStations3Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations4Item: '''
+			# CombinedStations4Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
 		}

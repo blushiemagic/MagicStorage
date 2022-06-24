@@ -44,7 +44,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			'The world's power is at your fingertips'
 			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
 			Can be in the inventory or a Crafting Interface's station slot
@@ -52,82 +53,104 @@ Mods: {
 			Allows crafting of Cooked Marshmallows in the Crafting Interface
 			Acts like a Beach Ball when thrown
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right> na serce jednostki magazynującej, aby zapisać jej lokalizację
 			<right> na bezprzewodowe okno dostępu aby je ustawić
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right> na serce jednostki magazynującej, aby zapisać jej lokalizację
 			<right> na bezprzewodowe okno dostępu aby je ustawić
 			Nie niszczy się po użyciu
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'Świeci oślepiającym światłem'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			Ślady światła wciąż pozostają w środku
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			Dodaje funkcje do Interfejsu Rzemieślniczego, pozwalającą na wytwarzanie przedmiotów dostępnych jedynie w Śnieżnym Biomie
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			Ulepsza jednostkę magazynującą do 240 miejsc
 			<right> na Jednostkę magazynującą (Święconą), aby użyć
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			Ulepsza jednostkę magazynującą do 80 miejsc
 			<right> na Jednostkę magazynującą (Standardową), aby użyć
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			Ulepsza jednostkę magazynującą do 80 miejsc
 			<right> na Jednostkę magazynującą (Standardową), aby użyć
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			Ulepsza jednostkę magazynującą do 160 miejsc
 			<right> na Jednostkę magazynującą (Piekielny kamień), aby użyć
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			Ulepsza jednostkę magazynującą do 120 miejsc
 			<right> na Jednostkę magazynującą (Karmazynit/Demonit), aby użyć
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			Ulepsza jednostkę magazynującą do 320 miejsc
 			<right> na Jednostkę magazynującą (Niebieski Chlorofit), aby użyć
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			Ulepsza jednostkę magazynującą do 640 miejsc
 			<right> na Jednostkę magazynującą (Luminowaną), aby użyć
 			'''
-			# CrimsonAltar: '''
+			# CrimsonAltar:
+			# '''
 			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
 			# '''
-			# DemonAltar: '''
+			# DemonAltar:
+			# '''
 			# A placeable Demon Altar. Cannot be mined to get hardmode ores
 			# '''
-			# CombinedFurnitureStations1Item: '''
+			# CombinedFurnitureStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedFurnitureStations2Item: '''
+			# CombinedFurnitureStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedStations1Item: '''
+			# CombinedStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations2Item: '''
+			# CombinedStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations3Item: '''
+			# CombinedStations3Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations4Item: '''
+			# CombinedStations4Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
 		}

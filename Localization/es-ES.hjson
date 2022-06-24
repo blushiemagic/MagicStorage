@@ -44,7 +44,8 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe: '''
+			BiomeGlobe:
+			'''
 			'The world's power is at your fingertips'
 			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
 			Can be in the inventory or a Crafting Interface's station slot
@@ -52,83 +53,105 @@ Mods: {
 			Allows crafting of Cooked Marshmallows in the Crafting Interface
 			Acts like a Beach Ball when thrown
 			'''
-			Locator: '''
+			Locator:
+			'''
 			<right> el Corazón de Almacenamiento para registrar su ubicación
 			<right> el Acceso de Almacenamiento Remoto para establecerlo
 			<right> Stockage Éloigné pour le mettre en place
 			'''
-			LocatorDisk: '''
+			LocatorDisk:
+			'''
 			<right> el Corazón de Almacenamiento para registrar su ubicación
 			<right> el Acceso de Almacenamiento Remoto para establecerlo
 			No se destruye cuando se usa
 			'''
-			PortableAccess: '''
+			PortableAccess:
+			'''
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
 			'''
-			RadiantJewel: '''
+			RadiantJewel:
+			'''
 			'Brilla con una luz deslumbrante'
 			'''
-			ShadowDiamond: '''
+			ShadowDiamond:
+			'''
 			Sigue habiendo huellas de luz en el interior
 			'''
-			SnowBiomeEmulator: '''
+			SnowBiomeEmulator:
+			'''
 			Permite la Interfaz de Elaboración de almacenamiento a hacer de recetas de bioma de la nieve
 			'''
-			StorageDeactivator: '''
+			StorageDeactivator:
+			'''
 			<right> para cambiar el unidad de almacenamiento activo/inactivo
 			'''
-			UpgradeBlueChlorophyte: '''
+			UpgradeBlueChlorophyte:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 240
 			<right> en la unidad de almacenamiento (Sagrado) para utilizar
 			'''
-			UpgradeCrimtane: '''
+			UpgradeCrimtane:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 80
 			<right> en la unidad de almacenamiento para utilizar
 			'''
-			UpgradeDemonite: '''
+			UpgradeDemonite:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 80
 			<right> en la unidad de almacenamiento para utilizar
 			'''
-			UpgradeHallowed: '''
+			UpgradeHallowed:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 160
 			<right> en la unidad de almacenamiento (Piedra Infernal) para utilizar
 			'''
-			UpgradeHellstone: '''
+			UpgradeHellstone:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 120
 			<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar
 			'''
-			UpgradeLuminite: '''
+			UpgradeLuminite:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 320
 			<right> en la unidad de almacenamiento (Clorofita Azul) para utilizar
 			'''
-			UpgradeTerra: '''
+			UpgradeTerra:
+			'''
 			Capacidad de unidad de almacenamiento mejorada a 640
 			<right> en la unidad de almacenamiento (Luminita) para utilizar
 			'''
-			# CrimsonAltar: '''
+			# CrimsonAltar:
+			# '''
 			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
 			# '''
-			# DemonAltar: '''
+			# DemonAltar:
+			# '''
 			# A placeable Demon Altar. Cannot be mined to get hardmode ores
 			# '''
-			# CombinedFurnitureStations1Item: '''
+			# CombinedFurnitureStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedFurnitureStations2Item: '''
+			# CombinedFurnitureStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations for furniture
 			# '''
-			# CombinedStations1Item: '''
+			# CombinedStations1Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations2Item: '''
+			# CombinedStations2Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations3Item: '''
+			# CombinedStations3Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
-			# CombinedStations4Item: '''
+			# CombinedStations4Item:
+			# '''
 			# Combines the functionality of several crafting stations
 			# '''
 		}
