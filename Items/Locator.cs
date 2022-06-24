@@ -16,26 +16,6 @@ namespace MagicStorage.Items
 
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Локатор");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Lokalizator");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Localisateur");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Locador");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "定位器");
-
-			Tooltip.SetDefault("<right> Storage Heart to store location" + "\n<right> Remote Storage Access to set it");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
-				"<right> по Cердцу Хранилища чтобы запомнить его местоположение" +
-				"\n<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish),
-				"<right> na serce jednostki magazynującej, aby zapisać jej lokalizację" + "\n<right> na bezprzewodowe okno dostępu aby je ustawić");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French),
-				"<right> le Cœur de Stockage pour enregistrer son emplacement" + "\n<right> le Stockage Éloigné pour le mettre en place");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
-				"<right> el Corazón de Almacenamiento para registrar su ubicación" +
-				"\n<right> el Acceso de Almacenamiento Remoto para establecerlo" +
-				"\n<right> Stockage Éloigné pour le mettre en place");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储核心可储存其定位点" + "\n<right>远程存储装置以设置其定位点");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 5;
 		}
 

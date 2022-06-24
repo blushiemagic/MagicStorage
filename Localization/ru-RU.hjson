@@ -1,8 +1,144 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		ItemName: {
+			# BiomeGlobe: Biome Globe
+			CraftingAccess: Модуль Создания Предметов
+			CreativeStorageUnit: Креативная Ячейка Хранилища
+			Locator: Локатор
+			LocatorDisk: Локатор с CD Приводом
+			PortableAccess: Портативный Модуль Удаленного Доступа к Хранилищу
+			RadiantJewel: Сияющая Драгоценность
+			RemoteAccess: Модуль Удаленного Доступа к Хранилищу
+			ShadowDiamond: Теневой Алмаз
+			SnowBiomeEmulator: Сломанная Снежная Сфера
+			StorageAccess: Модуль Доступа к Хранилищу
+			StorageComponent: Компонент Хранилища
+			StorageConnector: Соединитель Ячеек Хранилища
+			StorageDeactivator: Жезл Ячейки Хранилища
+			StorageHeart: Сердце Хранилища
+			StorageUnit: Ячейка Хранилища
+			StorageUnitBlueChlorophyte: Синяя Хлорофитовая Ячейка Хранилища
+			StorageUnitCrimtane: Кримтановая Ячейка Хранилища
+			StorageUnitDemonite: Демонитовая Ячейка Хранилища
+			StorageUnitHallowed: Святая Ячейка Хранилища
+			StorageUnitHellstone: Адская Ячейка Хранилища
+			StorageUnitLuminite: Люминитовая Ячейка Хранилища
+			StorageUnitTerra: Терра Ячейка Хранилища
+			StorageUnitTiny: Малая Ячейка Хранилища
+			UpgradeBlueChlorophyte: Синее Хлорофитовое Улучшение Ячейки
+			UpgradeCrimtane: Кримтановое Улучшение Ячейки Хранилища
+			UpgradeDemonite: Демонитовое Улучшение Ячейки Хранилища
+			UpgradeHallowed: Святое Улучшение Ячейки Хранилища
+			UpgradeHellstone: Адское Улучшение Ячейки Хранилища
+			UpgradeLuminite: Люминитовое Улучшение Ячейки Хранилища
+			UpgradeTerra:Терра Улучшение Ячейки Хранилища
+			# CrimsonAltar: Crimson Altar
+			# DemonAltar: Demon Altar
+			# CombinedFurnitureStations1Item: Combined Furniture Stations (Tier 1)
+			# CombinedFurnitureStations2Item: Combined Furniture Stations (Tier 2)
+			# CombinedStations1Item: Combined Stations (Tier 1)
+			# CombinedStations2Item: Combined Stations (Tier 2)
+			# CombinedStations3Item: Combined Stations (Tier 3)
+			# CombinedStations4Item: Combined Stations (Final Tier)
+		}
+
+		ItemTooltip: {
+			BiomeGlobe: '''
+			'The world's power is at your fingertips'
+			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
+			Can be in the inventory or a Crafting Interface's station slot
+			While in the inventory, Marshmallows can be cooked without needing to stand near a Campfire
+			Allows crafting of Cooked Marshmallows in the Crafting Interface
+			Acts like a Beach Ball when thrown
+			'''
+			Locator: '''
+			<right> по Cердцу Хранилища чтобы запомнить его местоположение
+			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища
+			'''
+			LocatorDisk: '''
+			<right> по Cердцу Хранилища чтобы запомнить его местоположение"
+			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища"
+			Не пропадает при использовании
+			'''
+			PortableAccess: '''
+			<right> по Cердцу Хранилища чтобы запомнить его местоположение
+			В данный момент Сердце Хранилища не привязанно
+			Используйте что бы получить доступ к вашему Хранилищу
+			'''
+			RadiantJewel: '''
+			'Блестит ослепительным светом'
+			'''
+			ShadowDiamond: '''
+			Следы света все еще мелькают внутри
+			'''
+			SnowBiomeEmulator: '''
+			Позволяет Модулю Создания Предметов создавать предметы требующие нахождения игрока в снежном биоме
+			'''
+			StorageDeactivator: '''
+			<right> на Ячейке Хранилища что бы активировать/деактивировать ее
+			'''
+			UpgradeBlueChlorophyte: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 240
+			<right> на Святой Ячейке Хранилища для улучшения
+			'''
+			UpgradeCrimtane: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 80
+			<right> на Ячейке Хранилища для улучшения
+			'''
+			UpgradeDemonite: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 80
+			<right> на Ячейке Хранилища для улучшения
+			'''
+			UpgradeHallowed: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 160
+			<right> на Адской Ячейке Хранилища для улучшения
+			'''
+			UpgradeHellstone: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 120
+			<right> на Демонитовой/Кримтановой Ячейке Хранилища для улучшения
+			'''
+			UpgradeLuminite: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 320
+			<right> на Синей Хлорофитовой Ячейке Хранилища для улучшения
+			'''
+			UpgradeTerra: '''
+			Увеличивает количество слотов в Ячейке Хранилища до 640
+			<right> на Люминитовой Ячейке Хранилища для улучшения
+			'''
+			# CrimsonAltar: '''
+			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
+			# '''
+			# DemonAltar: '''
+			# A placeable Demon Altar. Cannot be mined to get hardmode ores
+			# '''
+			# CombinedFurnitureStations1Item: '''
+			# Combines the functionality of several crafting stations for furniture
+			# '''
+			# CombinedFurnitureStations2Item: '''
+			# Combines the functionality of several crafting stations for furniture
+			# '''
+			# CombinedStations1Item: '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations2Item: '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations3Item: '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations4Item: '''
+			# Combines the functionality of several crafting stations
+			# '''
+		}
+
+		ProjectileName: {
+			BiomeGlobeThrown: Biome Globe
+		}
+
 		MapObject: {
-			# StorageComponent: Magic Storage
+			StorageComponent: Magic Storage
+			StorageConnector: Magic Storage
 		}
 
 		# Active: "Active"

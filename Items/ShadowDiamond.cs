@@ -2,7 +2,6 @@
 using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -11,19 +10,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Теневой Алмаз");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Mroczny Diament");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Diamant sombre");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Diamante sombreado");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "暗影钻石");
-
-			Tooltip.SetDefault("Traces of light still linger inside");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Следы света все еще мелькают внутри");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ślady światła wciąż pozostają w środku");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Des traces de lumière s'attarde encore à l'intérieur");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Sigue habiendo huellas de luz en el interior");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "那道光所余留的痕迹依旧");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
 		}
 

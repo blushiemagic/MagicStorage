@@ -1,9 +1,144 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		ItemName: {
+			BiomeGlobe: 生态球
+			CraftingAccess: 制作存储单元
+			CreativeStorageUnit: 创造储存单元
+			Locator: 定位器
+			LocatorDisk: 定位器驱动
+			PortableAccess: 便携式远程存储装置
+			RadiantJewel: 光芒四射的宝石
+			RemoteAccess: 远程存储装置
+			ShadowDiamond: 暗影钻石
+			SnowBiomeEmulator: 雪地环境模拟器
+			StorageAccess: 存储装置
+			StorageComponent: 存储组件
+			StorageConnector: 存储连接器
+			StorageDeactivator: 存储单元魔杖
+			StorageHeart: 存储核心
+			StorageUnit: 存储单元
+			StorageUnitBlueChlorophyte: 存储单元(蓝色叶绿)
+			StorageUnitCrimtane: 存储单元(猩红)
+			StorageUnitDemonite: 存储单元(魔金)
+			StorageUnitHallowed: 存储单元(神圣)
+			StorageUnitHellstone: 存储单元(狱岩)
+			StorageUnitLuminite: 存储单元(夜明)
+			StorageUnitTerra: 存储单元(泰拉)
+			StorageUnitTiny: 存储单元(小)
+			UpgradeBlueChlorophyte: 存储升级珠(蓝色叶绿)
+			UpgradeCrimtane: 存储升级珠(猩红))
+			UpgradeDemonite: 存储升级珠(魔金)
+			UpgradeHallowed: 存储升级珠(神圣)
+			UpgradeHellstone: 存储升级珠(狱岩)
+			UpgradeLuminite: 存储升级珠(夜明)
+			UpgradeTerra: 存储升级珠(泰拉)
+			CrimsonAltar: 猩红祭坛
+			DemonAltar: 恶魔祭坛
+			CombinedFurnitureStations1Item: 基础组合家具制作站
+			CombinedFurnitureStations2Item: 进阶组合家具制作站
+			CombinedStations1Item: 基础组合制作站
+			CombinedStations2Item: 进阶组合制作站
+			CombinedStations3Item: 高级组合制作站
+			CombinedStations4Item: 最终制作站
+		}
+
+		ItemTooltip: {
+			BiomeGlobe: '''
+			“你掌握着世界的力量”
+			\n制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
+			\n放在物品栏或制作存储单元的制作站槽位内即可生效
+			\n放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
+			\n可在制作界面直接用棉花糖制作熟棉花糖
+			\n丢出去之后会像沙滩球一样弹弹弹
+			'''
+			Locator: '''
+			<right>存储核心可储存其定位点
+			<right>远程存储装置以设置其定位点
+			'''
+			LocatorDisk: '''
+			<right>存储核心可储存其定位点
+			<right>远程存储装置以设置其定位点
+			使用后不再损坏
+			'''
+			PortableAccess: '''
+			<right>存储核心可储存其定位点
+			目前未设置为任何位置
+			使用可直接访问你的存储
+			'''
+			RadiantJewel: '''
+			'闪耀着耀眼的光芒'
+			'''
+			ShadowDiamond: '''
+			那道光所余留的痕迹依旧
+			'''
+			SnowBiomeEmulator: '''
+			允许制作存储单元拥有雪地环境
+			'''
+			StorageDeactivator: '''
+			<right>存储单元使其切换启用/禁用
+			'''
+			UpgradeBlueChlorophyte: '''
+			将存储单元升级至240容量
+			<right>一个存储单元(神圣)可镶嵌
+			'''
+			UpgradeCrimtane: '''
+			将存储单元升级至80容量
+			<right>一个存储单元可镶嵌
+			'''
+			UpgradeDemonite: '''
+			将存储单元升级至80容量
+			<right>一个存储单元可镶嵌
+			'''
+			UpgradeHallowed: '''
+			将存储单元升级至160容量
+			<right>一个存储单元(狱岩)可镶嵌
+			'''
+			UpgradeHellstone: '''
+			将存储单元升级至120容量
+			<right>一个存储单元(猩红/魔金)可镶嵌
+			'''
+			UpgradeLuminite: '''
+			将存储单元升级至320容量
+			<right>一个存储单元(蓝色叶绿)可镶嵌
+			'''
+			UpgradeTerra: '''
+			将存储单元升级至640容量
+			<right>一个存储单元(夜明)可镶嵌
+			'''
+			CrimsonAltar: '''
+			可放置的猩红祭坛复制品，试图挖掉的话什么都不会发生
+			'''
+			DemonAltar: '''
+			可放置的恶魔祭坛复制品，试图挖掉的话什么都不会发生
+			'''
+			CombinedFurnitureStations1Item: '''
+			基础组合家具制作站
+			'''
+			CombinedFurnitureStations2Item: '''
+			结合了部分进阶家具制作站的功能
+			'''
+			CombinedStations1Item: '''
+			结合了部分基础制作站的功能
+			'''
+			CombinedStations2Item: '''
+			结合了部分进阶制作站的功能
+			'''
+			CombinedStations3Item: '''
+			结合了部分高级制作站的功能
+			'''
+			CombinedStations4Item: '''
+			结合了一切制作站和液体需求
+			'''
+		}
+
+		ProjectileName: {
+			BiomeGlobeThrown: 生态球
+		}
+
 		MapObject: {
-			StorageComponent: "魔法储存元件"
-			StorageConnector: "魔法储存元件"
+			StorageComponent: 魔法储存元件
+			StorageConnector: 魔法储存元件
 		}
 
 		Active: "已启用"

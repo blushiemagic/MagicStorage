@@ -13,17 +13,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Portable Remote Storage Access");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Портативный Модуль Удаленного Доступа к Хранилищу");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "便携式远程存储装置");
-
-			Tooltip.SetDefault("<right> Storage Heart to store location" + "\nCurrently not set to any location" + "\nUse item to access your storage");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
-				"<right> по Cердцу Хранилища чтобы запомнить его местоположение" +
-				"\nВ данный момент Сердце Хранилища не привязанно" +
-				"\nИспользуйте что бы получить доступ к вашему Хранилищу");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储核心可储存其定位点" + "\n目前未设置为任何位置" + "\n使用可直接访问你的存储");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 
@@ -132,8 +121,8 @@ namespace MagicStorage.Items
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(Mod, "LocatorDisk");
-			recipe.AddIngredient(Mod, "RadiantJewel");
+			recipe.AddIngredient<LocatorDisk>();
+			recipe.AddIngredient<RadiantJewel>();
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			recipe.AddIngredient(ItemID.Ruby, 3);
 			recipe.AddTile(TileID.LunarCraftingStation);

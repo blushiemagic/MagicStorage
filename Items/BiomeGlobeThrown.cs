@@ -1,16 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items{
-	public class BiomeGlobeThrown : ModProjectile{
-		public override void SetStaticDefaults()
-		{
-			DisplayName.SetDefault("Biome Globe");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "生态球");
-		}
-
+	public class BiomeGlobeThrown : ModProjectile
+	{
 		public override void SetDefaults()
 		{
 			Projectile.width = 50;
