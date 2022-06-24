@@ -1,11 +1,7 @@
-﻿using MagicStorage.Edits;
-using MagicStorage.Items;
+﻿using MagicStorage.Items;
 using MagicStorage.Stations;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -24,9 +20,6 @@ namespace MagicStorage {
 		public override void Load()
 		{
 			InterfaceHelper.Initialize();
-      
-			// AddTranslations() removed, now use hjsons in Localization/
-			// AddTranslations();
 		}
 
 		public override void Unload()
@@ -34,10 +27,6 @@ namespace MagicStorage {
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
 		}
-
-		// AddTranslations() removed, now use hjsons in Localization/
-		// private void AddTranslations() {
-		// }
 
 		public override void AddRecipes()
 		{

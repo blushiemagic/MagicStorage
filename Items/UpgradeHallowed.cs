@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,24 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Hallowed Storage Upgrade");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Святое Улучшение Ячейки Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Ulepszenie jednostki magazynującej (Święcone)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Amélioration d'Unité de stockage (Sacré)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Actualización de Unidad de Almacenamiento (Sagrado)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储升级珠(神圣)");
-
-			Tooltip.SetDefault("Upgrades Storage Unit to 160 capacity" + "\n<right> a Hellstone Storage Unit to use");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian),
-				"Увеличивает количество слотов в Ячейке Хранилища до 160" + "\n<right> на Адской Ячейке Хранилища для улучшения");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish),
-				"Ulepsza jednostkę magazynującą do 160 miejsc" + "\n<right> na Jednostkę magazynującą (Piekielny kamień), aby użyć");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French),
-				"améliore la capacité de unité de stockage à 160" + "\n<right> l'unité de stockage (Infernale) pour utiliser");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish),
-				"Capacidad de unidad de almacenamiento mejorada a 160" + "\n<right> en la unidad de almacenamiento (Piedra Infernal) para utilizar");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "将存储单元升级至160容量" + "\n<right>一个存储单元(狱岩)可镶嵌");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
 		}
 

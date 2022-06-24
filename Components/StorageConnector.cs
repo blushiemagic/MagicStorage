@@ -24,10 +24,10 @@ namespace MagicStorage.Components
 			TileObjectData.newTile.UsesCustomCanPlace = true;
 			TileObjectData.newTile.HookPostPlaceMyPlayer = new PlacementHook(Hook_AfterPlacement, -1, 0, false);
 			TileObjectData.addTile(Type);
-			ModTranslation text = CreateMapEntryName();
-			text.SetDefault("Magic Storage");
-			text.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "魔法储存元件");
-			AddMapEntry(new Color(153, 107, 61), text);
+
+			// We don't need to call SetDefault() on CreateMapEntryName()'s return value if we have .hjson files.
+			AddMapEntry(new Color(153, 107, 61), CreateMapEntryName());
+
 			DustType = 7;
 			ItemDrop = ModContent.ItemType<Items.StorageConnector>();
 		}

@@ -1,6 +1,5 @@
 ﻿using Terraria;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
@@ -9,10 +8,6 @@ namespace MagicStorage.Stations
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Crimson Altar");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "猩红祭坛");
-			Tooltip.SetDefault("A placeable Crimson Altar. Cannot be mined to get hardmode ores");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "可放置的猩红祭坛复制品，试图挖掉的话什么都不会发生");
 		}
 
 		public override void SetDefaults()

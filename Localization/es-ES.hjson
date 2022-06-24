@@ -1,6 +1,176 @@
 ﻿# If some text marked with "#" is translated, please remove the "#" sign.
 Mods: {
 	MagicStorage: {
+		ItemName: {
+			# BiomeGlobe: Biome Globe
+			CraftingAccess: Interfaz de Elaboración de almacenamiento
+			CreativeStorageUnit: Unidad de Almacenamiento Creativa
+			Locator: Locador
+			LocatorDisk: Disco Locador
+			# PortableAccess: Portable Remote Storage Access
+			RadiantJewel: Joya Radiante
+			RemoteAccess: Acceso a Almacenamiento Remoto
+			ShadowDiamond: Diamante sombreado
+			SnowBiomeEmulator: Emulador de bioma de la nieve
+			StorageAccess: Acceso de Almacenamiento
+			StorageComponent: Componente de Almacenamiento
+			StorageConnector: Conector de Almacenamiento
+			StorageDeactivator: Varita de unidad de almacenamiento
+			StorageHeart: Corazón de Almacenamiento
+			StorageUnit: Unidad de Almacenamiento
+			StorageUnitBlueChlorophyte: Unidad de Almacenamiento (Clorofita Azul)
+			StorageUnitCrimtane: Unidad de Almacenamiento (Carmesí)
+			StorageUnitDemonite: Unidad de Almacenamiento (Endemoniado)
+			StorageUnitHallowed: Unidad de Almacenamiento (Sagrado)
+			StorageUnitHellstone: Unidad de Almacenamiento (Piedra Infernal)
+			StorageUnitLuminite: Unidad de Almacenamiento (Luminita)
+			StorageUnitTerra: Unidad de Almacenamiento (Tierra)
+			StorageUnitTiny: Unidad de Almacenamiento Minúsculo
+			UpgradeBlueChlorophyte: Actualización de Unidad de Almacenamiento (Clorofita Azul)
+			UpgradeCrimtane: Actualización de Unidad de Almacenamiento (Carmesí)
+			UpgradeDemonite: Actualización de Unidad de Almacenamiento (Endemoniado)
+			UpgradeHallowed: Actualización de Unidad de Almacenamiento (Sagrado)
+			UpgradeHellstone: Actualización de Unidad de Almacenamiento (Piedra Infernal)
+			UpgradeLuminite: Actualización de Unidad de Almacenamiento (Luminita)
+			UpgradeTerra: Actualización de Unidad de Almacenamiento (Tierra)
+			# CrimsonAltar: Crimson Altar
+			# DemonAltar: Demon Altar
+			# CombinedFurnitureStations1Item: Combined Furniture Stations (Tier 1)
+			# CombinedFurnitureStations2Item: Combined Furniture Stations (Tier 2)
+			# CombinedStations1Item: Combined Stations (Tier 1)
+			# CombinedStations2Item: Combined Stations (Tier 2)
+			# CombinedStations3Item: Combined Stations (Tier 3)
+			# CombinedStations4Item: Combined Stations (Final Tier)
+		}
+
+		ItemTooltip: {
+			BiomeGlobe:
+			'''
+			'The world's power is at your fingertips'
+			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
+			Can be in the inventory or a Crafting Interface's station slot
+			While in the inventory, Marshmallows can be cooked without needing to stand near a Campfire
+			Allows crafting of Cooked Marshmallows in the Crafting Interface
+			Acts like a Beach Ball when thrown
+			'''
+			Locator:
+			'''
+			<right> el Corazón de Almacenamiento para registrar su ubicación
+			<right> el Acceso de Almacenamiento Remoto para establecerlo
+			<right> Stockage Éloigné pour le mettre en place
+			'''
+			LocatorDisk:
+			'''
+			<right> el Corazón de Almacenamiento para registrar su ubicación
+			<right> el Acceso de Almacenamiento Remoto para establecerlo
+			No se destruye cuando se usa
+			'''
+			PortableAccess:
+			'''
+			<right> Storage Heart to store location
+			Currently not set to any location
+			Use item to access your storage
+			'''
+			RadiantJewel:
+			'''
+			'Brilla con una luz deslumbrante'
+			'''
+			ShadowDiamond:
+			'''
+			Sigue habiendo huellas de luz en el interior
+			'''
+			SnowBiomeEmulator:
+			'''
+			Permite la Interfaz de Elaboración de almacenamiento a hacer de recetas de bioma de la nieve
+			'''
+			StorageDeactivator:
+			'''
+			<right> para cambiar el unidad de almacenamiento activo/inactivo
+			'''
+			UpgradeBlueChlorophyte:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 240
+			<right> en la unidad de almacenamiento (Sagrado) para utilizar
+			'''
+			UpgradeCrimtane:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 80
+			<right> en la unidad de almacenamiento para utilizar
+			'''
+			UpgradeDemonite:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 80
+			<right> en la unidad de almacenamiento para utilizar
+			'''
+			UpgradeHallowed:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 160
+			<right> en la unidad de almacenamiento (Piedra Infernal) para utilizar
+			'''
+			UpgradeHellstone:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 120
+			<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar
+			'''
+			UpgradeLuminite:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 320
+			<right> en la unidad de almacenamiento (Clorofita Azul) para utilizar
+			'''
+			UpgradeTerra:
+			'''
+			Capacidad de unidad de almacenamiento mejorada a 640
+			<right> en la unidad de almacenamiento (Luminita) para utilizar
+			'''
+			# CrimsonAltar:
+			# '''
+			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
+			# '''
+			# DemonAltar:
+			# '''
+			# A placeable Demon Altar. Cannot be mined to get hardmode ores
+			# '''
+			# CombinedFurnitureStations1Item:
+			# '''
+			# Combines the functionality of several crafting stations for furniture
+			# '''
+			# CombinedFurnitureStations2Item:
+			# '''
+			# Combines the functionality of several crafting stations for furniture
+			# '''
+			# CombinedStations1Item:
+			# '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations2Item:
+			# '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations3Item:
+			# '''
+			# Combines the functionality of several crafting stations
+			# '''
+			# CombinedStations4Item:
+			# '''
+			# Combines the functionality of several crafting stations
+			# '''
+		}
+
+		ProjectileName: {
+			BiomeGlobeThrown: Biome Globe
+		}
+
+		MapObject: {
+			CraftingAccess: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
+			CreativeStorageUnit:  "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
+			RemoteAccess:  "{$Mods.MagicStorage.ItemName.RemoteAccess}"
+			StorageAccess:  "{$Mods.MagicStorage.ItemName.StorageAccess}"
+			StorageComponent:  "{$Mods.MagicStorage.ItemName.StorageComponent}"
+			StorageConnector:  "{$Mods.MagicStorage.ItemName.StorageConnector}"
+			StorageHeart:  "{$Mods.MagicStorage.ItemName.StorageHeart}"
+			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
+		}
+
 		# Active: "Active"
 		# Inactive: "Inactive"
 
@@ -25,7 +195,7 @@ Mods: {
 		# StorageAccessFail: "Could not load Storage Heart tile entity!"
 		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
-		
+
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "Ajustado a: X={0}, Y={1}"
 		SnowBiomeBlock: "Bloque de Biomas de la Nieve"

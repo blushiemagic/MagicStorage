@@ -21,6 +21,7 @@ public class MagicCache : ModSystem
 	public static Mod[] AllMods { get; private set; } = null!;
 	public static Dictionary<Mod, int> IndexByMod { get; private set; } = null!;
 	public static Dictionary<Mod, Recipe[]> RecipesByMod { get; private set; } = null!;
+	public static Recipe[] VanillaRecipes { get; private set; } = null!;
 
 	public static bool CanCombine(Item item1, Item item2) => ItemData.Matches(item1, item2) && (!canCombineByType.TryGetValue(item1.type, out var func) || func(item1, item2));
 
@@ -35,7 +36,6 @@ public class MagicCache : ModSystem
 	{
 		EnabledRecipes = null!;
 		ResultToRecipe = null!;
-		RecipesByMod = null!;
 		FilteredRecipesCache = null!;
 
 		hasIngredient = null!;
@@ -45,6 +45,7 @@ public class MagicCache : ModSystem
 		AllMods = null!;
 		IndexByMod = null!;
 		RecipesByMod = null!;
+		VanillaRecipes = null!;
 	}
 
 	public override void PostSetupContent()
@@ -82,10 +83,13 @@ public class MagicCache : ModSystem
 
 		SetupSortFilterRecipeCache();
 
-		RecipesByMod = EnabledRecipes.GroupBy(r => r.Mod).ToDictionary(x => x.Key, x => x.ToArray());
+		var groupedByMod = EnabledRecipes.GroupBy(r => r.Mod).ToArray();
+		RecipesByMod = groupedByMod.Where(x => x.Key is not null).ToDictionary(x => x.Key, x => x.ToArray());
+		VanillaRecipes = groupedByMod.Where(x => x.Key is null).SelectMany(x => x.ToArray()).ToArray();
 
+		// TODO: Split into mods with recipe and mods with items. Also have to account for it in ModSearchBox
 		AllMods = ModLoader.Mods
-			.Where(mod => RecipesByMod[mod].Length > 0 || mod.GetContent<ModItem>().Any())
+			.Where(mod => (RecipesByMod.ContainsKey(mod)) || mod.GetContent<ModItem>().Any())
 			.ToArray();
 
 		IndexByMod = AllMods
