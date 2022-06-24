@@ -60,7 +60,7 @@ namespace MagicStorage.Items
 			return true;
 		}
 
-		private void OpenStorage(Player player)
+		protected void OpenStorage(Player player)
 		{
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1)

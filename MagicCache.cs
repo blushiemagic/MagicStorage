@@ -82,7 +82,7 @@ public class MagicCache : ModSystem
 
 		SetupSortFilterRecipeCache();
 
-		RecipesByMod = EnabledRecipes.GroupBy(r => r.Mod).ToDictionary(x => x.Key, x => x.ToArray());
+		RecipesByMod = EnabledRecipes.GroupBy(r => r.Mod).Where(r => r is not null).ToDictionary(x => x.Key, x => x.ToArray());
 
 		AllMods = ModLoader.Mods
 			.Where(mod => RecipesByMod[mod].Length > 0 || mod.GetContent<ModItem>().Any())

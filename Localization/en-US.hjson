@@ -9,6 +9,9 @@ Mods: {
 		PortableAccessUnlocated: "Locator is not set to any Storage Heart"
 		PortableAccessMissing: "Storage Heart is missing!"
 
+		PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
+		PortableCraftingMissing: "Crafting Access is missing!"
+
 		RemoteAccessSuccess: "Success!"
 		RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
 		RemoteAccessUnlocated: "The locator has not been set to a destination"

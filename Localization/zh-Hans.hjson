@@ -7,6 +7,9 @@ Mods: {
 		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
 		PortableAccessMissing: "定位器目标点没有存储核心！"
 
+		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
+		# PortableCraftingMissing: "Crafting Access is missing!"
+
 		RemoteAccessSuccess: "已成功连接远程存储装置！"
 		RemoteAccessHasLocator: "该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点"
 		RemoteAccessUnlocated: "当前定位器尚未设置定位点"

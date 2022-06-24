@@ -13,7 +13,7 @@ namespace MagicStorage
 	{
 		public static StoragePlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 
-		public bool remoteAccess;
+		public bool remoteAccess, remoteCrafting;
 		private Point16 storageAccess = Point16.NegativeOne;
 
 		public int timeSinceOpen = 1;
@@ -73,11 +73,15 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType) is not StorageAccess)
+				else
 				{
-					SoundEngine.PlaySound(SoundID.MenuClose);
-					CloseStorage();
-					Recipe.FindRecipes();
+					ModTile tile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
+
+					if ((tile is not StorageAccess and not CraftingAccess) || (tile is not StorageAccess && remoteCrafting) || (tile is not CraftingAccess && !remoteCrafting)) {
+						SoundEngine.PlaySound(SoundID.MenuClose);
+						CloseStorage();
+						Recipe.FindRecipes();
+					}
 				}
 			}
 		}

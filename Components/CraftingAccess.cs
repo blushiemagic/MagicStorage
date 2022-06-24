@@ -1,6 +1,8 @@
+using MagicStorage.Items;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Components
@@ -35,6 +37,27 @@ namespace MagicStorage.Components
 
 			if (access.stations.Any(item => !item.IsAir))
 				fail = true;
+		}
+
+		public override bool RightClick(int i, int j)
+		{
+			Player player = Main.LocalPlayer;
+			Item item = player.HeldItem;
+			if (item.type == ModContent.ItemType<PortableCraftingAccess>())
+			{
+				if (Main.tile[i, j].TileFrameX % 36 == 18)
+					i--;
+				if (Main.tile[i, j].TileFrameY % 36 == 18)
+					j--;
+				Locator locator = (Locator) item.ModItem;
+				locator.location = new Point16(i, j);
+				if (player.selectedItem == 58)
+					Main.mouseItem = item.Clone();
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", i, j));
+				return true;
+			}
+
+			return base.RightClick(i, j);
 		}
 	}
 }
