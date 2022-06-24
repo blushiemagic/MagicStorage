@@ -5,7 +5,6 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -14,24 +13,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Biome Globe");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "生态球");
-
-			Tooltip.SetDefault("'The world's power is at your fingertips'" +
-							   "\nAllows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey" +
-							   "\nCan be in the inventory or a Crafting Interface's station slot" +
-							   "\nWhile in the inventory, Marshmallows can be cooked without needing to stand near a Campfire" +
-							   "\nAllows crafting of Cooked Marshmallows in the Crafting Interface" +
-							   "\nActs like a Beach Ball when thrown");
-
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese),
-				"“你掌握着世界的力量”" +
-				"\n制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁" +
-				"\n放在物品栏或制作存储单元的制作站槽位内即可生效" +
-				"\n放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟" +
-				"\n可在制作界面直接用棉花糖制作熟棉花糖" +
-				"\n丢出去之后会像沙滩球一样弹弹弹");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 

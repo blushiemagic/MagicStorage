@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,13 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Blue Chlorophyte Storage Unit");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Синяя Хлорофитовая Ячейка Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca (Niebieski Chlorofit)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage (Chlorophylle Bleu)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento (Clorofita Azul)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元(蓝色叶绿)");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
 		}
 
@@ -40,8 +32,8 @@ namespace MagicStorage.Items
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ModContent.ItemType<StorageUnitHallowed>());
-			recipe.AddIngredient(ModContent.ItemType<UpgradeBlueChlorophyte>());
+			recipe.AddIngredient<StorageUnitHallowed>();
+			recipe.AddIngredient<UpgradeBlueChlorophyte>();
 			recipe.Register();
 		}
 	}

@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,12 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Модуль Доступа к Хранилищу");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Okno dostępu do magazynu");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Access de Stockage");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Acceso de Almacenamiento");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储装置");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 5;
 		}
 
@@ -38,7 +31,7 @@ namespace MagicStorage.Items
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(null, "StorageComponent");
+			recipe.AddIngredient<StorageComponent>();
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 			recipe.AddIngredient(ItemID.Topaz, 3);
 			recipe.AddTile(TileID.WorkBenches);

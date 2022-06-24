@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,12 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Компонент Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Komponent Magazynu");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Composant de Stockage");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Componente de Almacenamiento");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储组件");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 30;
 		}
 

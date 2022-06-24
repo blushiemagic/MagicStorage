@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,13 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Terra Storage Unit");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Терра Ячейка Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca (Terra)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage (Terra)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento (Tierra)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元(泰拉)");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 
@@ -40,8 +32,8 @@ namespace MagicStorage.Items
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ModContent.ItemType<StorageUnitLuminite>());
-			recipe.AddIngredient(ModContent.ItemType<UpgradeTerra>());
+			recipe.AddIngredient<StorageUnitLuminite>();
+			recipe.AddIngredient<UpgradeTerra>();
 			recipe.Register();
 		}
 	}

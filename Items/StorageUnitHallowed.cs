@@ -1,7 +1,6 @@
 ﻿using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
@@ -10,13 +9,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Hallowed Storage Unit");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Святая Ячейка Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Jednostka magazynująca (Święcona)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Unité de stockage (Sacré)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Unidad de Almacenamiento (Sagrado)");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元(神圣)");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
 		}
 
@@ -40,8 +32,8 @@ namespace MagicStorage.Items
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ModContent.ItemType<StorageUnitHellstone>());
-			recipe.AddIngredient(ModContent.ItemType<UpgradeHallowed>());
+			recipe.AddIngredient<StorageUnitHellstone>();
+			recipe.AddIngredient<UpgradeHallowed>();
 			recipe.Register();
 		}
 	}

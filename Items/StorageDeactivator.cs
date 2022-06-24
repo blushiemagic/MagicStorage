@@ -12,21 +12,6 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			DisplayName.SetDefault("Storage Unit Wand");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "Жезл Ячейки Хранилища");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "Różdżka jednostki magazynującej");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Baguette d'unité de stockage");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "Varita de unidad de almacenamiento");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "Baguetter d'unité de stockage");
-			DisplayName.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "存储单元魔杖");
-
-			Tooltip.SetDefault("<right> Storage Unit to toggle between Active/Inactive");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Russian), "<right> на Ячейке Хранилища что бы активировать/деактивировать ее");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Polish), "<right> aby przełączyć Jednostkę Magazynującą (wł./wył.)");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.French), "<right> pour changer l'unité de stockage actif/inactif");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Spanish), "<right> para cambiar el unidad de almacenamiento activo/inactivo");
-			Tooltip.AddTranslation(GameCulture.FromCultureName(GameCulture.CultureName.Chinese), "<right>存储单元使其切换启用/禁用");
-
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 
@@ -83,7 +68,7 @@ namespace MagicStorage.Items
 		{
 			Recipe recipe = CreateRecipe();
 			recipe.AddIngredient(ItemID.ActuationRod);
-			recipe.AddIngredient(null, "StorageComponent");
+			recipe.AddIngredient<StorageComponent>();
 			recipe.AddTile(TileID.Anvils);
 			recipe.Register();
 		}
