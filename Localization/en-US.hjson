@@ -10,6 +10,7 @@ Mods: {
 			Locator: Locator
 			LocatorDisk: Locator Drive
 			PortableAccess: Portable Remote Storage Access
+			PortableCraftingAcces: Portable Remote Crafting Access
 			RadiantJewel: Radiant Jewel
 			RemoteAccess: Remote Storage Access
 			ShadowDiamond: Shadow Diamond
@@ -71,6 +72,12 @@ Mods: {
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
+			'''
+			PortableCraftingAccess:
+			'''
+			<right> Crafting Access to store location
+			Currently not set to any location
+			Use item to access your crafting
 			'''
 			RadiantJewel:
 			'''
@@ -204,9 +211,20 @@ Mods: {
 		SetTo: "Set to: X={0}, Y={1}"
 		SnowBiomeBlock: "Snow Biome Block"
 		DepositAll: "Deposit All"
-		CraftAmount: "Craft amount"
 		CraftingStations: "Crafting Stations"
-		CraftTooltip: "Left click to Craft (ctrl to get max)"
+		CraftTooltip: "Left click to Craft"
+
+		Crafting: {
+			Plus1: "+1"
+			Plus10: "+10"
+			Plus100: "+100"
+			Minus1: "-1"
+			Minus10: "-10"
+			Minus100: "-100"
+			MaxStack: "Max. Stack"
+			Reset: "Reset"
+			Amount: "Crafting: {0}"
+		}
 
 		Search: "Search"
 		SearchName: "Search Name"

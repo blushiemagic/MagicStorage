@@ -6,10 +6,6 @@ using Terraria.ModLoader;
 namespace MagicStorage.Items {
 	public class PortableCraftingAccess : PortableAccess {
 		public override void SetStaticDefaults() {
-			DisplayName.SetDefault("Portable Remote Crafting Access");
-
-			Tooltip.SetDefault("<right> Crafting Access to store location" + "\nCurrently not set to any location" + "\nUse item to access your crafting");
-
 			SacrificeTotal = 1;
 		}
 
@@ -33,13 +29,13 @@ namespace MagicStorage.Items {
 				{
 					Tile tile = Main.tile[location.X, location.Y];
 					if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.CraftingAccess>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
-						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessMissing"));
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingMissing"));
 					else
 						OpenStorage(player);
 				}
 				else
 				{
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessUnlocated"));
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingUnlocated"));
 				}
 			}
 
@@ -49,7 +45,7 @@ namespace MagicStorage.Items {
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(Mod, "LocatorDisk");
+			recipe.AddIngredient<LocatorDisk>();
 			recipe.AddIngredient(ItemID.LunarBar, 15);
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
 			recipe.AddIngredient(ItemID.Sapphire, 3);

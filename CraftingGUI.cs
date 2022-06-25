@@ -101,7 +101,10 @@ namespace MagicStorage
 		private static readonly UIScrollbar storageScrollBar = new();
 		private static float storageScrollBarMaxViewSize = 2f;
 
+		private static int craftAmountTarget;
 		private static UITextPanel<LocalizedText> craftButton;
+		private static UITextPanel<LocalizedText> craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
+		private static UITextPanel<LocalizedText> craftAmount;
 		private static readonly ModSearchBox modSearchBox = new(RefreshItems);
 
 		private static Item result;
@@ -293,7 +296,7 @@ namespace MagicStorage
 			storageZone.Height.Set(-storageZoneTop - 36, 1f);
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
-			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
+			displayRows2 = (int)(storageZone.GetDimensions().Height * 0.6f) / ((int)smallSlotHeight + Padding);
 			storageZone.SetDimensions(IngredientColumns, displayRows2);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
@@ -304,12 +307,83 @@ namespace MagicStorage
 			storageScrollBar.SetView(ScrollBar2ViewSize, storageScrollBarMaxViewSize);
 			storageZone.Append(storageScrollBar);
 
-			craftButton.Top.Set(-32f, 1f);
+			craftButton.Top.Set(-90f, 1f);
 			craftButton.Width.Set(100f, 0f);
 			craftButton.Height.Set(24f, 0f);
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
+
+			craftAmountTarget = 1;
+
+			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
+			craftButton.Width.Set(250f, 0f);
+			craftButton.Height.Set(24f * SmallScale, 0f);
+			craftButton.PaddingTop = 0;
+			craftButton.PaddingBottom = 0;
+			recipePanel.Append(craftAmount);
+
+			craftP1.Top.Set(-62, 1f);
+			craftP1.Width.Set(60, 0f);
+			craftP1.Height.Set(24f * SmallScale, 0f);
+			craftP1.PaddingTop = 8f;
+			craftP1.PaddingBottom = 8f;
+			recipePanel.Append(craftP1);
+
+			craftP10.Top.Set(-62, 1f);
+			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 10, 0f);
+			craftP10.Width.Set(60, 0f);
+			craftP10.Height.Set(24f * SmallScale, 0f);
+			craftP10.PaddingTop = 8f;
+			craftP10.PaddingBottom = 8f;
+			recipePanel.Append(craftP10);
+
+			craftP100.Top.Set(-62, 1f);
+			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 10, 0f);
+			craftP100.Width.Set(60, 0f);
+			craftP100.Height.Set(24f * SmallScale, 0f);
+			craftP100.PaddingTop = 8f;
+			craftP100.PaddingBottom = 8f;
+			recipePanel.Append(craftP100);
+
+			craftM1.Top.Set(-34, 1f);
+			craftM1.Width.Set(60, 0f);
+			craftM1.Height.Set(24f * SmallScale, 0f);
+			craftM1.PaddingTop = 8f;
+			craftM1.PaddingBottom = 8f;
+			recipePanel.Append(craftM1);
+
+			craftM10.Top.Set(-34, 1f);
+			craftM10.Left.Set(craftM1.Left.Pixels + craftM1.Width.Pixels + 10, 0f);
+			craftM10.Width.Set(60, 0f);
+			craftM10.Height.Set(24f * SmallScale, 0f);
+			craftM10.PaddingTop = 8f;
+			craftM10.PaddingBottom = 8f;
+			recipePanel.Append(craftM10);
+
+			craftM100.Top.Set(-34, 1f);
+			craftM100.Left.Set(craftM10.Left.Pixels + craftM10.Width.Pixels + 10, 0f);
+			craftM100.Width.Set(60, 0f);
+			craftM100.Height.Set(24f * SmallScale, 0f);
+			craftM100.PaddingTop = 8f;
+			craftM100.PaddingBottom = 8f;
+			recipePanel.Append(craftM100);
+
+			craftMax.Top.Set(-62, 1f);
+			craftMax.Left.Set(craftP100.Left.Pixels + craftP100.Width.Pixels + 10, 0f);
+			craftMax.Width.Set(160f * SmallScale, 0f);
+			craftMax.Height.Set(24f * SmallScale, 0f);
+			craftMax.PaddingTop = 8f;
+			craftMax.PaddingBottom = 8f;
+			recipePanel.Append(craftMax);
+
+			craftReset.Top.Set(-34, 1f);
+			craftReset.Left.Set(craftM100.Left.Pixels + craftM100.Width.Pixels + 10, 0f);
+			craftReset.Width.Set(100f * SmallScale, 0f);
+			craftReset.Height.Set(24f * SmallScale, 0f);
+			craftReset.PaddingTop = 8f;
+			craftReset.PaddingBottom = 8f;
+			recipePanel.Append(craftReset);
 
 			resultZone.SetDimensions(1, 1);
 			resultZone.Left.Set(-itemSlotWidth, 1f);
@@ -330,6 +404,18 @@ namespace MagicStorage
 			reqObjText2 ??= new UIText("");
 			storedItemsText ??= new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
 			craftButton ??= new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"));
+			craftP1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
+			craftP10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
+			craftP100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
+			craftM1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
+			craftM10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
+			craftM100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
+			craftMax ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"));
+			craftReset ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallScale);
+			craftAmount ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Amount"), SmallScale) {
+				BorderColor = Color.Transparent,
+				BackgroundColor = Color.Transparent
+			};
 			modSearchBox.InitLangStuff();
 		}
 
@@ -388,7 +474,7 @@ namespace MagicStorage
 					recipePanel?.Update(gameTime);
 					UpdateRecipeText();
 					UpdateScrollBar();
-					UpdateCraftButton();
+					UpdateCraftButtons();
 					modSearchBox.Update(curMouse, oldMouse);
 				}
 				else
@@ -399,6 +485,7 @@ namespace MagicStorage
 					recipeScrollBarFocus = 0;
 					craftTimer = 0;
 					maxCraftTimer = StartMaxCraftTimer;
+					craftAmountTarget = 1;
 					ResetSlotFocus();
 				}
 			}
@@ -437,7 +524,7 @@ namespace MagicStorage
 				recipeButtons.DrawText();
 				filterButtons.DrawText();
 
-				DrawCraftButton();
+				DrawCraftButtonHoverText();
 			}
 			catch (Exception e)
 			{
@@ -445,7 +532,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static void DrawCraftButton()
+		private static void DrawCraftButtonHoverText()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 
@@ -706,7 +793,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static void UpdateCraftButton()
+		private static void UpdateCraftButtons()
 		{
 			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
 			bool stillCrafting = false;

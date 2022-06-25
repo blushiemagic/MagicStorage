@@ -202,9 +202,20 @@ Mods: {
 		SetTo: "已设置于位于 [{0}, {1}] 的存储核心"
 		SnowBiomeBlock: "雪地环境方块"
 		DepositAll: "全部存入"
-		CraftAmount: "制作数量"
 		CraftingStations: "制作站 (翻译: -Cyril-, 抗药又坚硬汉化组）"
-		CraftTooltip: "左键单击以制作（按住Ctrl全部制作）"
+		CraftTooltip: "左键单击以制作"
+
+		Crafting: {
+			# Plus1: "+1"
+			# Plus10: "+10"
+			# Plus100: "+100"
+			# Minus1: "-1"
+			# Minus10: "-10"
+			# Minus100: "-100"
+			# MaxStack: "Max. Stack"
+			# Reset: "Reset"
+			# Amount: "Crafting: {0}"
+		}
 
 		Search: "搜索"
 		SearchName: "搜索名称"

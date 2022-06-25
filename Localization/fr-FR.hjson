@@ -202,9 +202,20 @@ Mods: {
 		SetTo: "Mis à: X={0}, Y={1}"
 		SnowBiomeBlock: "Bloc de biome de neige"
 		DepositAll: "Déposer tout"
-		# CraftAmount: "Craft amount"
 		CraftingStations: "Stations d'artisanat"
-		# CraftTooltip: "Left click to Craft (ctrl to get max)"
+		# CraftTooltip: "Left click to Craft"
+
+		Crafting: {
+			Plus1: "+1"
+			Plus10: "+10"
+			Plus100: "+100"
+			Minus1: "-1"
+			Minus10: "-10"
+			Minus100: "-100"
+			# MaxStack: "Max. Stack"
+			# Reset: "Reset"
+			# Amount: "Crafting: {0}"
+		}
 
 		Search: "Rechercher"
 		SearchName: "Recherche par nom"
