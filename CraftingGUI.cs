@@ -101,10 +101,10 @@ namespace MagicStorage
 		private static readonly UIScrollbar storageScrollBar = new();
 		private static float storageScrollBarMaxViewSize = 2f;
 
-		private static int craftAmountTarget;
+		public static int craftAmountTarget;
 		private static UITextPanel<LocalizedText> craftButton;
 		private static UITextPanel<LocalizedText> craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
-		private static UITextPanel<LocalizedText> craftAmount;
+		private static UIText craftAmount;
 		private static readonly ModSearchBox modSearchBox = new(RefreshItems);
 
 		private static Item result;
@@ -293,10 +293,10 @@ namespace MagicStorage
 			recipePanel.Append(storedItemsText);
 			storageZone.Top.Set(storageZoneTop, 0f);
 			storageZone.Width.Set(0f, 1f);
-			storageZone.Height.Set(-storageZoneTop - 36, 1f);
+			storageZone.Height.Set(-storageZoneTop - 200, 1f);
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
-			displayRows2 = (int)(storageZone.GetDimensions().Height * 0.6f) / ((int)smallSlotHeight + Padding);
+			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
 			storageZone.SetDimensions(IngredientColumns, displayRows2);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
@@ -307,30 +307,38 @@ namespace MagicStorage
 			storageScrollBar.SetView(ScrollBar2ViewSize, storageScrollBarMaxViewSize);
 			storageZone.Append(storageScrollBar);
 
-			craftButton.Top.Set(-90f, 1f);
+			craftButton.Top.Set(-48f, 1f);
 			craftButton.Width.Set(100f, 0f);
 			craftButton.Height.Set(24f, 0f);
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
 
-			craftAmountTarget = 1;
+			resultZone.SetDimensions(1, 1);
+			resultZone.Left.Set(-itemSlotWidth - 15, 1f);
+			resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 40, 0f);
+			resultZone.Width.Set(itemSlotWidth, 0f);
+			resultZone.Height.Set(itemSlotHeight, 0f);
+			recipePanel.Append(resultZone);
 
 			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
-			craftButton.Width.Set(250f, 0f);
-			craftButton.Height.Set(24f * SmallScale, 0f);
-			craftButton.PaddingTop = 0;
-			craftButton.PaddingBottom = 0;
+			craftAmount.Left.Set(12, 0f);
+			craftAmount.Width.Set(250f, 0f);
+			craftAmount.Height.Set(24f * SmallScale, 0f);
+			craftAmount.PaddingTop = 0;
+			craftAmount.PaddingBottom = 0;
+			craftAmount.SetText(Language.GetTextValue("Mods.MagicStorage.Crafting.Amount", craftAmountTarget));
+			craftAmount.TextOriginX = 0f;
 			recipePanel.Append(craftAmount);
 
-			craftP1.Top.Set(-62, 1f);
+			craftP1.Top.Set(resultZone.Top.Pixels - 30, 0f);
 			craftP1.Width.Set(60, 0f);
 			craftP1.Height.Set(24f * SmallScale, 0f);
 			craftP1.PaddingTop = 8f;
 			craftP1.PaddingBottom = 8f;
 			recipePanel.Append(craftP1);
 
-			craftP10.Top.Set(-62, 1f);
+			craftP10.Top = craftP1.Top;
 			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 10, 0f);
 			craftP10.Width.Set(60, 0f);
 			craftP10.Height.Set(24f * SmallScale, 0f);
@@ -338,7 +346,7 @@ namespace MagicStorage
 			craftP10.PaddingBottom = 8f;
 			recipePanel.Append(craftP10);
 
-			craftP100.Top.Set(-62, 1f);
+			craftP100.Top = craftP1.Top;
 			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 10, 0f);
 			craftP100.Width.Set(60, 0f);
 			craftP100.Height.Set(24f * SmallScale, 0f);
@@ -346,14 +354,14 @@ namespace MagicStorage
 			craftP100.PaddingBottom = 8f;
 			recipePanel.Append(craftP100);
 
-			craftM1.Top.Set(-34, 1f);
+			craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 15, 0f);
 			craftM1.Width.Set(60, 0f);
 			craftM1.Height.Set(24f * SmallScale, 0f);
 			craftM1.PaddingTop = 8f;
 			craftM1.PaddingBottom = 8f;
 			recipePanel.Append(craftM1);
 
-			craftM10.Top.Set(-34, 1f);
+			craftM10.Top = craftM1.Top;
 			craftM10.Left.Set(craftM1.Left.Pixels + craftM1.Width.Pixels + 10, 0f);
 			craftM10.Width.Set(60, 0f);
 			craftM10.Height.Set(24f * SmallScale, 0f);
@@ -361,7 +369,7 @@ namespace MagicStorage
 			craftM10.PaddingBottom = 8f;
 			recipePanel.Append(craftM10);
 
-			craftM100.Top.Set(-34, 1f);
+			craftM100.Top = craftM1.Top;
 			craftM100.Left.Set(craftM10.Left.Pixels + craftM10.Width.Pixels + 10, 0f);
 			craftM100.Width.Set(60, 0f);
 			craftM100.Height.Set(24f * SmallScale, 0f);
@@ -369,28 +377,20 @@ namespace MagicStorage
 			craftM100.PaddingBottom = 8f;
 			recipePanel.Append(craftM100);
 
-			craftMax.Top.Set(-62, 1f);
-			craftMax.Left.Set(craftP100.Left.Pixels + craftP100.Width.Pixels + 10, 0f);
+			craftMax.Top.Set(craftM1.Top.Pixels + craftM1.Height.Pixels + 15, 0f);
 			craftMax.Width.Set(160f * SmallScale, 0f);
 			craftMax.Height.Set(24f * SmallScale, 0f);
 			craftMax.PaddingTop = 8f;
 			craftMax.PaddingBottom = 8f;
 			recipePanel.Append(craftMax);
 
-			craftReset.Top.Set(-34, 1f);
-			craftReset.Left.Set(craftM100.Left.Pixels + craftM100.Width.Pixels + 10, 0f);
+			craftReset.Top = craftMax.Top;
+			craftReset.Left.Set(craftMax.Left.Pixels + craftMax.Width.Pixels + 10, 0f);
 			craftReset.Width.Set(100f * SmallScale, 0f);
 			craftReset.Height.Set(24f * SmallScale, 0f);
 			craftReset.PaddingTop = 8f;
 			craftReset.PaddingBottom = 8f;
 			recipePanel.Append(craftReset);
-
-			resultZone.SetDimensions(1, 1);
-			resultZone.Left.Set(-itemSlotWidth, 1f);
-			resultZone.Top.Set(-itemSlotHeight, 1f);
-			resultZone.Width.Set(itemSlotWidth, 0f);
-			resultZone.Height.Set(itemSlotHeight, 0f);
-			recipePanel.Append(resultZone);
 		}
 
 		private static void InitLangStuff()
@@ -410,12 +410,9 @@ namespace MagicStorage
 			craftM1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
 			craftM10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
 			craftM100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
-			craftMax ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"));
+			craftMax ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallScale);
 			craftReset ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallScale);
-			craftAmount ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Amount"), SmallScale) {
-				BorderColor = Color.Transparent,
-				BackgroundColor = Color.Transparent
-			};
+			craftAmount ??= new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), SmallScale);
 			modSearchBox.InitLangStuff();
 		}
 
@@ -795,85 +792,83 @@ namespace MagicStorage
 
 		private static void UpdateCraftButtons()
 		{
-			Rectangle dim = InterfaceHelper.GetFullRectangle(craftButton);
+			ClampCraftAmount();
+
 			bool stillCrafting = false;
-			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
-			{
-				craftButton.BackgroundColor = new Color(73, 94, 171);
-				if (curMouse.LeftButton == ButtonState.Pressed && selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
-				{
-					if (Main.keyState.IsKeyDown(Keys.LeftControl))
-					{
-						tryCraftPostponeMessages = Main.netMode == NetmodeID.MultiplayerClient;
-						tryCraftCompoundRequestWithdraws = null;
-						tryCraftCompoundRequestResults = null;
-
-						while (IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
-						{
-							TryCraft();
-							if (RecursiveCraftIntegration.Enabled)
-							{
-								RecursiveCraftIntegration.RefreshRecursiveRecipes();
-								if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
-									SetSelectedRecipe(selectedRecipe);
-							}
-
-							RefreshItems();
-						}
-
-						if (tryCraftPostponeMessages) {
-							tryCraftPostponeMessages = false;
-
-							NetHelper.SendCraftRequest(GetHeart().ID, CompactItemList(tryCraftCompoundRequestWithdraws), CompactItemList(tryCraftCompoundRequestResults));
-
-							tryCraftCompoundRequestWithdraws = null;
-							tryCraftCompoundRequestResults = null;
-						}
-
-						SoundEngine.PlaySound(SoundID.Grab);
-					}
-					else
-					{
-						if (craftTimer <= 0)
-						{
-							craftTimer = maxCraftTimer;
-							maxCraftTimer = maxCraftTimer * 3 / 4;
-							if (maxCraftTimer <= 0)
-
-								maxCraftTimer = 1;
-
-							TryCraft();
-							if (RecursiveCraftIntegration.Enabled)
-							{
-								RecursiveCraftIntegration.RefreshRecursiveRecipes();
-								if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
-									SetSelectedRecipe(selectedRecipe);
-							}
-
-							RefreshItems();
-							SoundEngine.PlaySound(SoundID.Grab);
-						}
-
-						craftTimer--;
-						stillCrafting = true;
-					}
-				}
-			}
-
-			else
-			{
-				craftButton.BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			}
-
-			if (selectedRecipe == null || !IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
-
-				craftButton.BackgroundColor = new Color(30, 40, 100) * 0.7f;
+			HandleCraftButton(craftButton, false, () => ClickCraftButton(ref stillCrafting));
+			HandleCraftButton(craftP1, true, () => ClickAmountButton(1, true));
+			HandleCraftButton(craftP10, true, () => ClickAmountButton(10, true));
+			HandleCraftButton(craftP100, true, () => ClickAmountButton(100, true));
+			HandleCraftButton(craftM1, true, () => ClickAmountButton(-1, true));
+			HandleCraftButton(craftM10, true, () => ClickAmountButton(-10, true));
+			HandleCraftButton(craftM100, true, () => ClickAmountButton(-100, true));
+			HandleCraftButton(craftMax, true, () => ClickAmountButton(int.MaxValue, false));
+			HandleCraftButton(craftReset, true, () => ClickAmountButton(1, false));
 
 			if (!stillCrafting)
 			{
 				craftTimer = 0;
 				maxCraftTimer = StartMaxCraftTimer;
 			}
+		}
+
+		private static void HandleCraftButton(UITextPanel<LocalizedText> button, bool clickOnly, Action onClicked) {
+			Rectangle dim = InterfaceHelper.GetFullRectangle(button);
+
+			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height) {
+				button.BackgroundColor = new Color(73, 94, 171);
+
+				if (curMouse.LeftButton == ButtonState.Pressed && (!clickOnly || oldMouse.LeftButton == ButtonState.Released) && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
+					onClicked();
+			} else
+				button.BackgroundColor = new Color(63, 82, 151) * 0.7f;
+
+			if (!IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
+				button.BackgroundColor = new Color(30, 40, 100) * 0.7f;
+		}
+
+		private static void ClickCraftButton(ref bool stillCrafting) {
+			if (craftTimer <= 0)
+			{
+				craftTimer = maxCraftTimer;
+				maxCraftTimer = maxCraftTimer * 3 / 4;
+				if (maxCraftTimer <= 0)
+					maxCraftTimer = 1;
+
+				Craft(craftAmountTarget);
+				if (RecursiveCraftIntegration.Enabled)
+				{
+					RecursiveCraftIntegration.RefreshRecursiveRecipes();
+					if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
+						SetSelectedRecipe(selectedRecipe);
+				}
+
+				RefreshItems();
+				SoundEngine.PlaySound(SoundID.Grab);
+			}
+
+			craftTimer--;
+			stillCrafting = true;
+		}
+
+		private static void ClickAmountButton(int amount, bool offset) {
+			if (offset)
+				craftAmountTarget += amount;
+			else
+				craftAmountTarget = amount;
+
+			ClampCraftAmount();
+
+			SoundEngine.PlaySound(SoundID.MenuTick);
+		}
+
+		private static void ClampCraftAmount() {
+			if (craftAmountTarget < 1)
+				craftAmountTarget = 1;
+			else if (!IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
+				craftAmountTarget = 1;
+			else if (craftAmountTarget > selectedRecipe.createItem.maxStack)
+				craftAmountTarget = selectedRecipe.createItem.maxStack;
 		}
 
 		private static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
@@ -1133,6 +1128,9 @@ namespace MagicStorage
 
 		public static bool IsAvailable(Recipe recipe, bool checkCompound = true)
 		{
+			if (recipe is null)
+				return false;
+
 			if (RecursiveCraftIntegration.Enabled && checkCompound)
 				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 
@@ -1542,9 +1540,6 @@ namespace MagicStorage
 			maxRightClickTimer = StartMaxRightClickTimer;
 		}
 
-		private static List<Item> tryCraftCompoundRequestWithdraws, tryCraftCompoundRequestResults;
-		private static bool tryCraftPostponeMessages;
-
 		private static List<Item> CompactItemList(List<Item> items) {
 			List<Item> compacted = new();
 
@@ -1584,11 +1579,42 @@ namespace MagicStorage
 			return compacted;
 		}
 
-		private static void TryCraft()
-		{
-			var toWithdraw = new List<Item>();
+		public static void Craft(int toCraft) {
 			var availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
+			List<Item> toWithdraw = new(), results = new();
 
+			while (toCraft > 0) {
+				if (!AttemptSingleCraft(availableItems, toWithdraw, results))
+					break;  // Could not craft any more items
+
+				Item resultItem = selectedRecipe.createItem.Clone();
+				toCraft -= resultItem.stack;
+
+				resultItem.Prefix(-1);
+				results.Add(resultItem);
+
+				CatchDroppedItems = true;
+				DroppedItems.Clear();
+
+				RecipeLoader.OnCraft(resultItem, selectedRecipe);
+				ItemLoader.OnCreate(resultItem, new RecipeCreationContext { recipe = selectedRecipe });
+
+				CatchDroppedItems = false;
+
+				results.AddRange(DroppedItems);
+			}
+
+			toWithdraw = CompactItemList(toWithdraw);
+			results = CompactItemList(results);
+
+			if (Main.netMode == NetmodeID.SinglePlayer) {
+				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results))
+					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+			} else if (Main.netMode == NetmodeID.MultiplayerClient)
+				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, results);
+		}
+
+		private static bool AttemptSingleCraft(List<Item> available, List<Item> withdraw, List<Item> deposit) {
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
 				int stack = reqItem.stack;
@@ -1598,57 +1624,36 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (Item tryItem in availableItems)
+				foreach (Item tryItem in available)
+				{
 					if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
 					{
 						if (tryItem.stack > stack)
 						{
 							Item temp = tryItem.Clone();
 							temp.stack = stack;
-							toWithdraw.Add(temp);
+							withdraw.Add(temp);
 							tryItem.stack -= stack;
 							stack = 0;
 						}
 						else
 						{
-							toWithdraw.Add(tryItem.Clone());
+							withdraw.Add(tryItem.Clone());
 							stack -= tryItem.stack;
 							tryItem.stack = 0;
 							tryItem.type = ItemID.None;
 						}
 					}
-			}
-
-			Item resultItem = selectedRecipe.createItem.Clone();
-			resultItem.Prefix(-1);
-			var resultItems = new List<Item> { resultItem };
-
-			CatchDroppedItems = true;
-
-			RecipeLoader.OnCraft(resultItem, selectedRecipe);
-			ItemLoader.OnCreate(resultItem, new RecipeCreationContext { recipe = selectedRecipe });
-
-			CatchDroppedItems = false;
-			resultItems.AddRange(DroppedItems);
-			DroppedItems.Clear();
-
-			if (Main.netMode == NetmodeID.SinglePlayer) {
-				foreach (Item item in DoCraft(GetHeart(), toWithdraw, resultItems))
-					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				if (!tryCraftPostponeMessages) {
-					NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, resultItems);
-				} else {
-					tryCraftCompoundRequestWithdraws ??= new();
-					tryCraftCompoundRequestWithdraws.AddRange(toWithdraw);
-
-					tryCraftCompoundRequestResults ??= new();
-					tryCraftCompoundRequestResults.AddRange(resultItems);
 				}
+
+				if (stack > 0)
+					return false;  // Did not have enough items
 			}
+
+			return true;
 		}
 
-		internal static List<Item> DoCraft(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)
+		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)
 		{
 			var items = new List<Item>();
 			foreach (Item tryWithdraw in toWithdraw)
@@ -1694,7 +1699,7 @@ namespace MagicStorage
 		private static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			return heart.TryWithdraw(item, false);
+			return heart.TryWithdraw(item, false, toInventory);
 		}
 	}
 }

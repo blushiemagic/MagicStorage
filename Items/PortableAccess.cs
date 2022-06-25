@@ -49,7 +49,7 @@ namespace MagicStorage.Items
 			return true;
 		}
 
-		protected void OpenStorage(Player player)
+		protected void OpenStorage(Player player, bool crafting = false)
 		{
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			if (player.sign > -1)
@@ -95,6 +95,7 @@ namespace MagicStorage.Items
 			{
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
 				modPlayer.OpenStorage(toOpen, true);
+				modPlayer.remoteCrafting = crafting;
 				modPlayer.timeSinceOpen = 0;
 				Main.playerInventory = true;
 				Main.recBigList = false;

@@ -500,7 +500,7 @@ namespace MagicStorage
 			for (int k = 0; k < resultsCount; k++)
 				results.Add(ItemIO.Receive(reader, true, true));
 
-			List<Item> items = CraftingGUI.DoCraft(heart, toWithdraw, results);
+			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
 			if (items.Count > 0)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();

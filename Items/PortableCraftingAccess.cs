@@ -30,8 +30,9 @@ namespace MagicStorage.Items {
 					Tile tile = Main.tile[location.X, location.Y];
 					if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.CraftingAccess>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
 						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingMissing"));
-					else
-						OpenStorage(player);
+					else {
+						OpenStorage(player, true);
+					}
 				}
 				else
 				{

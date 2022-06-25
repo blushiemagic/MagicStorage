@@ -73,15 +73,11 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else
+				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType) is not StorageAccess)
 				{
-					ModTile tile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
-
-					if ((tile is not StorageAccess and not CraftingAccess) || (tile is not StorageAccess && remoteCrafting) || (tile is not CraftingAccess && !remoteCrafting)) {
-						SoundEngine.PlaySound(SoundID.MenuClose);
-						CloseStorage();
-						Recipe.FindRecipes();
-					}
+					SoundEngine.PlaySound(SoundID.MenuClose);
+					CloseStorage();
+					Recipe.FindRecipes();
 				}
 			}
 		}
