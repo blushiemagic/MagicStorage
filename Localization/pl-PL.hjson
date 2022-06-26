@@ -2,12 +2,12 @@
 Mods: {
 	MagicStorage: {
 		ItemName: {
-			# BiomeGlobe: Biome Globe
+			BiomeGlobe: Kula biomowa
 			CraftingAccess: Interfejs Rzemieślniczy Magazynu
 			CreativeStorageUnit: Kreatywna Jednostka Magazynująca
 			Locator: Lokalizator
 			LocatorDisk: Dysk lokalizatora
-			# PortableAccess: Portable Remote Storage Access
+			PortableAccess: Przenośny dostęp do magazynu
 			RadiantJewel: Promieniejący klejnot
 			RemoteAccess: Zdalna Jednostka Dostępu
 			ShadowDiamond: Mroczny Diament
@@ -33,25 +33,25 @@ Mods: {
 			UpgradeHellstone: Ulepszenie jednostki magazynującej (Piekielny kamień)
 			UpgradeLuminite: Ulepszenie jednostki magazynującej (Luminowany)
 			UpgradeTerra: Ulepszenie jednostki magazynującej (Terra)
-			# CrimsonAltar: Crimson Altar
-			# DemonAltar: Demon Altar
-			# CombinedFurnitureStations1Item: Combined Furniture Stations (Tier 1)
-			# CombinedFurnitureStations2Item: Combined Furniture Stations (Tier 2)
-			# CombinedStations1Item: Combined Stations (Tier 1)
-			# CombinedStations2Item: Combined Stations (Tier 2)
-			# CombinedStations3Item: Combined Stations (Tier 3)
-			# CombinedStations4Item: Combined Stations (Final Tier)
+			CrimsonAltar: Szkarłatny ołtarz
+			DemonAltar: Demoniczny ołtarz
+			CombinedFurnitureStations1Item: Złączone stacje dekoracyjne (Tier 1)
+			CombinedFurnitureStations2Item: Złączone stacje dekoracyjne (Tier 2)
+			CombinedStations1Item: Złączone stacje (Tier 1)
+			CombinedStations2Item: Złączone stacje (Tier 2)
+			CombinedStations3Item: Złączone stacje (Tier 3)
+			CombinedStations4Item: Złączone stacje (Ostatni Tier)
 		}
 
 		ItemTooltip: {
 			BiomeGlobe:
 			'''
-			'The world's power is at your fingertips'
-			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
-			Can be in the inventory or a Crafting Interface's station slot
-			While in the inventory, Marshmallows can be cooked without needing to stand near a Campfire
-			Allows crafting of Cooked Marshmallows in the Crafting Interface
-			Acts like a Beach Ball when thrown
+			'Moc świata jest w twoich rękach'
+			Pozwala tworzyć przedmioty które wymagają Biomu Śnieżnego, Ektomgły, Demonicznego/Szkarłatnego Ołtarzu i w Wodzie/Lawie/Miodzie
+			Może być w ekwipunku lub w slocie Interfejsu Rzemieślniczego
+			Kiedy w ekwipunku, Pianki mogą być upieczone bez potrzeby stania przy Ognisku
+			Pozwala tworzyć Upieczone Pianki W Interfejsie Rzemieślniczym
+			Zachowuje się jak Piłka Plażowa kiedy rzucona
 			'''
 			Locator:
 			'''
@@ -66,9 +66,9 @@ Mods: {
 			'''
 			PortableAccess:
 			'''
-			<right> Storage Heart to store location
-			Currently not set to any location
-			Use item to access your storage
+			<right> na serce jednostki magazynującej, aby zapisać jej lokalizację
+			Obecnie nie jest przypisane do żadnej lokalizacji
+			Użyj przedmiotu aby uzyskać dostęp do swojego magazynu
 			'''
 			RadiantJewel:
 			'''
@@ -121,38 +121,38 @@ Mods: {
 			Ulepsza jednostkę magazynującą do 640 miejsc
 			<right> na Jednostkę magazynującą (Luminowaną), aby użyć
 			'''
-			# CrimsonAltar:
-			# '''
-			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
-			# '''
-			# DemonAltar:
-			# '''
-			# A placeable Demon Altar. Cannot be mined to get hardmode ores
-			# '''
-			# CombinedFurnitureStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedFurnitureStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations3Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations4Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
+			CrimsonAltar:
+			'''
+			Szkarłatny ołtarz który można położyć. Nie można wykopać go aby dostać rudy
+			'''
+			DemonAltar:
+			'''
+			Demoniczny ołtarz który można położyć. Nie można wykopać go aby dostać rudy
+			'''
+			CombinedFurnitureStations1Item:
+			'''
+			Łączy funkcjonalność stacji dekoracyjnych
+			'''
+			CombinedFurnitureStations2Item:
+			'''
+			Łączy funkcjonalność stacji dekoracyjnych
+			'''
+			CombinedStations1Item:
+			'''
+			Łączy funkcjonalność stacji rzemieślniczych
+			'''
+			CombinedStations2Item:
+			'''
+			Łączy funkcjonalność stacji rzemieślniczych
+			'''
+			CombinedStations3Item:
+			'''
+			Łączy funkcjonalność stacji rzemieślniczych
+			'''
+			CombinedStations4Item:
+			'''
+			Łączy funkcjonalność stacji rzemieślniczych
+			'''
 		}
 
 		ProjectileName: {
@@ -193,57 +193,59 @@ Mods: {
 			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
 		}
 
+
+
 		Bestiary: {
-			# Golem:
-			# '''
-			# A living automaton constructed from storage components, powered by the elusive Bluemagic.
-			# It can teach you all there is to know about Magic Storage.
-			# '''
+			Golem:
+			'''
+			Żyjąca maszyna skonstruowana z komponentów magazynujących, zasilana przez niebieską magię.
+			Nauczy cię wszystkiego co trzeba wiedzieć o Magic Storage.
+			'''
 		}
 
 		Dialogue: {
 			Golem: {
-				# Greeting: "Hello {0}. Would you like for this unit to teach you something?"
-				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
-				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
-				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				Greeting: "Witaj {0}. Czy chciałbyś żeby ta jednostka czegoś cię nauczyła?"
+				Wizard: "Dla kogoś biegłego w magii, {0} nie może zrozumieć jak niebieska magia działa. Będąc szczerym, to tak naprawdę nie jest magia."
+				NotLihzahrd: Ta jednostka nie jest skonstruowana z jaszczuhrzych cegieł. Proszę przestań pytać.
+				Bluemagic: Niebieska magia jest zdumiewającym źródłem mocy. Byłoby mądre nie lekceważyc jej możliwości.
 			}
 		}
 
-		# Active: "Active"
-		# Inactive: "Inactive"
+		Active: "Aktywny"
+		Inactive: "Nieaktywny"
 
-		# PortableAccessUnlocated: "Locator is not set to any Storage Heart"
-		# PortableAccessMissing: "Storage Heart is missing!"
+		PortableAccessUnlocated: "Lokator nie jest ustawiony do serca magazynu"
+		PortableAccessMissing: "Brakuje serca magazynu!"
 
-		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
-		# PortableCraftingMissing: "Crafting Access is missing!"
+		PortableCraftingUnlocated: "Lokator nie jest ustawiony do Interfejsu Rzemieślniczego Magazynu"
+		PortableCraftingMissing: "Brakuje Interfejsu Rzemieślniczego Magazynu!"
 
-		# RemoteAccessSuccess: "Success!"
-		# RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
-		# RemoteAccessUnlocated: "The locator has not been set to a destination"
+		RemoteAccessSuccess: "Sukces!"
+		RemoteAccessHasLocator: "To ma już prypisany lokator, proszę wykop to i postaw spowrotem aby to zresetować"
+		RemoteAccessUnlocated: "Lokator nie jest ustawiony do celu"
 
-		# StorageUnitActivated: "Storage Unit has been Activated"
-		# StorageUnitDeactivated: "Storage Unit has been Deactivated"
+		StorageUnitActivated: "Jednoska magazynująca została Aktywowana"
+		StorageUnitDeactivated: "Jednoska magazynująca została Dezaktywowana"
 
-		# FilterAllMods: "All mods"
+		FilterAllMods: "Wszystkie mody"
 
-		# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+		CookedMarshmallowCondition: "Kula biomowa w Interfejsie Rzemieślniczym Magazynu"
 
-		# Capacity: "{0} / {1} Items"
+		Capacity: "{0} / {1} Przedmiotów"
 
-		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
+		LocatorSet: "Lokator pomyślnie prypisany do: X={0}, Y={1}"
 
-		# StorageAccessFail: "Could not load Storage Heart tile entity!"
-		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
-		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
+		StorageAccessFail: "Nie można było załadować Serca Magazynu!"
+		StorageAccessFailAlt: "Ten dostęp nie jest połączony z Sercem Magazynu!"
+		StorageAccessFailLoad: "Obszar Serca Magazynu nie został załadowany! Spróbuj ponownie."
 
 		# TestItemSuffix: " !UNTIL RESPAWN!"
 		SetTo: "Ustawione na: X={0}, Y={1}"
-		# SnowBiomeBlock: "Snow Biome Block"
-		# DepositAll: "Deposit All"
-		# CraftingStations: "Crafting Stations"
-		# CraftTooltip: "Left click to Craft"
+		SnowBiomeBlock: "Blok Biomu Śnieżnego"
+		DepositAll: "Odłóż wszystko"
+		CraftingStations: "Stacje rzemieślnicze"
+		CraftTooltip: "Lewy przycisk myszy aby Tworzyć"
 
 		Crafting: {
 			Plus1: "+1"
@@ -252,85 +254,85 @@ Mods: {
 			Minus1: "-1"
 			Minus10: "-10"
 			Minus100: "-100"
-			# MaxStack: "Max. Stack"
-			# Reset: "Reset"
-			# Amount: "Crafting: {0}"
+			# MaxStack: "Maks. Stack"
+			Reset: "Reset"
+			Amount: "Tworzenie: {0}"
 		}
 
-		# Search: "Search"
-		# SearchName: "Search Name"
-		# SearchMod: "Search Mod"
+		Search: "Szukaj"
+		SearchName: "Szukaj nazwy"
+		SearchMod: "Szukaj moda"
 
-		# Recipes: "Recipes"
-		# RecipeAvailable: "Show available recipes"
-		# RecipeAll: "Show all known recipes"
-		# RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
-		# SelectedRecipe: "Selected Recipe"
-		# Ingredients: "Ingredients"
-		# StoredItems: "Stored Ingredients"
-		# ShowOnlyFavorited: "Only Favorited"
+		Recipes: "Przepisy"
+		RecipeAvailable: "Pojaż dostępne przepisy"
+		RecipeAll: "Pokaż wszystkie znane przepisy"
+		RecipeBlacklist: "Pokaż ukryte przepisy (ctrl+kliknięcie na przepis aby schować/pokazać)"
+		SelectedRecipe: "Wybrany przepis"
+		Ingredients: "Materiały"
+		StoredItems: "Przechowywane Materiały"
+		ShowOnlyFavorited: "Tylko ulubione"
 
-		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
-		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
+		DepositTooltip: "Szybkie łączenie - kliknięcie, Odłóż wszystko - ctrl+kliknięcie, Uzupełnij - prawy przycisk myszy"
+		DepositTooltipAlt: "Szybkie łączenie - kliknięcie, Odłóż wszystko - ctrl+kliknięcie, Uzupełnij - prawy przycisk myszy"
 
 		Filters: {
-			# All: "Filter All"
-			# Weapons: "Filter Weapons"
-			# Tools: "Filter Tools"
-			# Equips: "Filter Equipment"
-			# WeaponsMelee: "Filter Melee Weapons"
-			# WeaponsRanged: "Filter Ranged Weapons"
-			# WeaponsMagic: "Filter Magic Weapons"
-			# WeaponsSummon: "Filter Summons"
-			# WeaponsThrown: "Filter Throwing Weapons"
-			# Ammo: "Filter Ammo"
-			# Armor: "Filter Armor"
-			# Vanity: "Filter Vanity Items"
-			# Potions: "Filter Potions"
-			# Tiles: "Filter Placeables"
-			# Misc: "Filter Misc"
-			# Recent: "Filter New Recently Added Items"
+			All: "Filtruj wsystkie"
+			Weapons: "Filtruj Bronie"
+			Tools: "Filtruj Narzędzia"
+			Equips: "Filtruj Akcesoria"
+			WeaponsMelee: "Filtruj Bronie Wręcz"
+			WeaponsRanged: "Filtruj Bronie na Zasięg"
+			WeaponsMagic: "Filtruj Magiczne Bronie"
+			WeaponsSummon: "Filtruj Przywoływane"
+			WeaponsThrown: "Filtruj Bronie Miotane"
+			Ammo: "Filtruj Amunicję"
+			Armor: "Filtruj Zbroję"
+			Vanity: "Filtruj przedmioty Wyglądu"
+			Potions: "Filtruj Mikstury"
+			Tiles: "Filtruj Bloki"
+			Misc: "Filtruj Inne"
+			Recent: "Filtruj niedawno dodane przedmioty"
 		}
 
 		Sort: {
-			# Default: "Default Sorting"
-			# ID: "Sort by ID"
-			# Name: "Sort by Name"
+			Default: "Domyślne sortowanie"
+			ID: "Sortuj przez ID"
+			Name: "Sortuj przez Nazwę"
 			# Stack: "Sort by Stacks" # This text is never used?
-			# Value: "Sort by Value"
-			# Dps: "Sort by DPS"
+			Value: "Sortuj przez Wartość"
+			Dps: "Sortuj przez DPS"
 		}
 
 		Config: {
-			# Label: "Magic Storage Config"
+			Label: "Konfiguracja Magic Storage"
 
 			glowNewItems: {
-				# Label: "Display new items/recipes"
-				# Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
+				Label: "Wyświetlaj nowe Przedmioty/Przepisy"
+				Tooltip: "Przełącza czy nowe przedmioty w magazynie będą świecić by oznaczyć że są nowe"
 			}
 			useConfigFilter: {
-				# Label: "Use default filter"
-				# Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
+				Label: "Użyj domyślnego filtra"
+				Tooltip: "Włącz żeby używać filtra poniżej, wyłącz by pamiętać ostatni filtr w grze(filtr jest wciąż używany w pierwszym otwarciu po załadowaniu moda)"
 			}
 			showAllRecipes: {
-				# Label: "Default recipe filter"
-				# Tooltip: "Enable to default to all recipes, disable to default to available recipes"
+				Label: "Domyślny filtr przedmiotów"
+				Tooltip: "Włącz by pokazywać wszystkie przepisy, wyłącz by pokazywać dostępne przepisy"
 			}
 			quickStackDepositMode: {
-				# Label: "Quick stack deposit mode"
-				# Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
+				Label: "Tryb szybkiego łączenia"
+				Tooltip: "Włącz by szybko łączyć z (ctrl) wciśniętym, wyłącz by szybko łączyć z (ctrl) zwolnionym"
 			}
 			clearSearchText: {
-				# Label: "Clear search text"
-				# Tooltip: "Enable to clear the search text when opening the UI"
+				Label: "Czyść pasek wyszukiwania"
+				Tooltip: "Włącz by czyścić pasek wyszukiwania kiedy otwierasz UI"
 			}
 			extraFilterIcons: {
-				# Label: "Display extra sorting icons"
-				# Tooltip: "Enable to have the extra sorting options available"
+				Label: "Wyświetlaj ekstra ikony sortowania"
+				Tooltip: "Włącz by pokazywać ekstra opcje sortowania"
 			}
 			showDps: {
-				# Label: "Estimate the dps of weapons"
-				# Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+				Label: "Szacuj dps broni"
+				Tooltip: "Włącz by pokazywać dps broni w jej opisie"
 			}
 		}
 	}
