@@ -852,10 +852,10 @@ namespace MagicStorage
 		}
 
 		private static void ClickAmountButton(int amount, bool offset) {
-			if (offset)
+			if (offset && craftAmountTarget > 1)
 				craftAmountTarget += amount;
 			else
-				craftAmountTarget = amount;
+				craftAmountTarget = amount;  //Snap directly to the amount if the amount target was 1 (this makes clicking 10 when at 1 just go to 10 instead of 11)
 
 			ClampCraftAmount();
 

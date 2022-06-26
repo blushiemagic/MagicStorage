@@ -168,6 +168,29 @@ Mods: {
 			BiomeGlobeThrown: Biome Globe
 		}
 
+		NPCName: {
+			Golem: "Automaton"
+		}
+
+		TownNPCMood: {
+			Golem: {
+				Content: Systems are operational.
+				NoHome: Exposure to elements hastens rusting, requesting home posthaste.
+				LoveSpace: Acceptable living arrangements have been acquired.
+				FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
+				DislikeCrowded: Too many individuals detected in close proximity.
+				HateCrowded: This unit prefers to be more solitary.
+				LikeBiome: "{BiomeName} harmonizes with Bluemagic."
+				LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
+				DislikeBiome: "Bluemagic has lowered efficiency in {BiomeName}."
+				HateBiome: "Bluemagic becomes unstable in {BiomeName}."
+				LikeNPC: "{NPCName} appreciates the power of Bluemagic."
+				LoveNPC: "This unit would not mind if {NPCName} examined its gears."
+				DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
+				HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+			}
+		}
+
 		MapObject: {
 			CraftingAccess: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
 			CreativeStorageUnit:  "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
@@ -177,6 +200,116 @@ Mods: {
 			StorageConnector:  "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			StorageHeart:  "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
+		}
+
+		Bestiary: {
+			Golem:
+			'''
+			A living automaton constructed from storage components, powered by the elusive Bluemagic.
+			It can teach you all there is to know about Magic Storage.
+			'''
+		}
+
+		Dialogue: {
+			Golem: {
+				Greeting: "Hello {0}. Would you like for this unit to teach you something?"
+				Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
+				NotLihzahrd: This unit is not constructed from Lihzahrd Bricks.  Please stop asking.
+				Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				Help1:
+				'''
+				To get started, you will need to craft some Storage Components. This item is the base for all storage system components. Give one to {0} to see what it can be used for!
+				Recipe: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
+				'''
+				Help2:
+				'''
+				Once you've gotten a Storage Component [i:MagicStorage/StorageComponent], you will need to create a Storage Heart. The Storage Heart is where you can access stored items and is required for a storage system to function.
+				Recipe: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
+				'''
+				Help3:
+				'''
+				After placing down the Storage Heart [i:MagicStorage/StorageHeart], you will need to create Storage Units in order to store the items for the Storage Heart.
+				Recipe: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
+				'''
+				Help4:
+				'''
+				In order to craft items in a storage system, you will need to make a Crafting Access.
+				Recipe: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
+				'''
+				Help5:
+				'''
+				The Crafting Access's station slots are more powerful than they seem. Some items can inherit multiple crafting requirements at once!
+				[i:GlassKiln] functions as a [i:Furnace]
+				[i:BewitchingTable] functions as a [i:WoodenTable]
+				[rg:MagicStorage:AnyTombstone] enables Ecto Mist recipes
+				[i:AlchemyTable] functions as a [i:WoodenTable] and [i:Bottle]
+				[rg:MagicStorage:AnyTable] functions as a [i:WoodenChair]
+				'''
+				Help6:
+				'''
+				The Alchemy Table [i:AlchemyTable] retains its 33% chance to not consume potion ingredients.
+				[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] and any other item which places a tile that counts as a Water source enable Water recipes.
+				[i:LavaBucket] enables Lava recipes.
+				[i:HoneyBucket] enables Honey recipes.
+				[i:MagicStorage/DemonAltar] and [i:MagicStorage/CrimsonAltar] enable Demon/Crimson Altar recipes.
+				[i:MagicStorage/SnowBiomeEmulator] enables Snow biome recipes.
+				'''
+				Help7:
+				'''
+				All components of a storage system must be connected together. If you want to spread out your Storage Units [i:MagicStorage/StorageUnit] from your Storage Heart [i:MagicStorage/StorageHeart], you can use Connectors to connect them.
+				Recipe: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
+				'''
+				Help8:
+				'''
+				Hidden within the cores of all vanilla Terraria bosses lies a Shadow Diamond. This cursed jewel can be used as an alternative to a Diamond [i:Diamond] for all Magic Storage recipes. Once you've gotten a Shadow Diamond from a boss, you cannot get any more from it! On the bright side, some bosses drop more than one.
+				'''
+				Help9:
+				'''
+				Running out of storage? Upgrade your Storage Units with Storage Upgrades! A Storage Upgrade for a certain tier can only be applied to a Storage Unit of a previous tier.
+				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane], [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]
+				[i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone], [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]
+				[i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte], [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]
+				[i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
+				'''
+				Help10:
+				'''
+				If you do not want to move your Storage Heart, use a Storage Access instead! This component can be used like the Storage Heart to view the items in your storage.
+				Recipe: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
+				'''
+				Help11:
+				'''
+				biome globe
+				'''
+				Help12:
+				'''
+				Sometimes you want to be able to access your storage at other locations in the world, but having to connect the storage with Connectors is both a hassle and expensive. The solution? Create a Remote Access and link it to the Storage Heart with a Locator [i:MagicStorage/Locator] or Locator Drive [i:MagicStorage/LocatorDisk].
+				Recipe: [i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+				'''
+				Help13:
+				'''
+				You can attach storage components to a Remote Access and still be able to access the main storage system. It's very useful for having a Crafting Access away from the Storage Heart.
+				'''
+				Help14:
+				'''
+				Locator Recipe: [i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+				Locator Drive Recipe: [i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+				'''
+				Help15:
+				'''
+
+				'''
+				Help16:
+				'''
+				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. Its power unlocks the latent potential of the Bluemagic residing in all Storage Hearts: wireless access.
+				'''
+			}
+
+			ChatOptions: {
+				Golem: {
+					NextHelp: Next
+					PrevHelp: Previous
+				}
+			}
 		}
 
 		Active: "Active"

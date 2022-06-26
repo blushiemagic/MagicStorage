@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Items;
+using MagicStorage.NPCs;
 using MagicStorage.Stations;
 using System;
 using System.IO;
@@ -20,6 +21,11 @@ namespace MagicStorage {
 		public override void Load()
 		{
 			InterfaceHelper.Initialize();
+
+			//Census mod support
+			if (ModLoader.TryGetMod("Census", out Mod Census)) {
+				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a Magic Storage item and [i/s50:{ItemID.SilverCoin}] in your inventory");
+			}
 		}
 
 		public override void Unload()
@@ -375,6 +381,10 @@ namespace MagicStorage {
 			items = new[] { ModContent.ItemType<DemonAltar>(), ModContent.ItemType<CrimsonAltar>() };
 			group = new RecipeGroup(() => $"{any} {Language.GetTextValue("MapObject.DemonAltar")}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar", group);
+
+			items = new int[] { ItemID.SilverBar, ItemID.TungstenBar };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.SilverBar)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnySilverBar", group);
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {

@@ -33,14 +33,7 @@ namespace MagicStorage.Items
 			Recipe recipe = CreateRecipe();
 			recipe.AddIngredient<StorageComponent>();
 			recipe.AddRecipeGroup("MagicStorage:AnyChest");
-			recipe.AddIngredient(ItemID.SilverBar, 10);
-			recipe.AddTile(TileID.WorkBenches);
-			recipe.Register();
-
-			recipe = CreateRecipe();
-			recipe.AddIngredient<StorageComponent>();
-			recipe.AddRecipeGroup("MagicStorage:AnyChest");
-			recipe.AddIngredient(ItemID.TungstenBar, 10);
+			recipe.AddRecipeGroup("MagicStorage:AnySilverBar", 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.Register();
 		}
