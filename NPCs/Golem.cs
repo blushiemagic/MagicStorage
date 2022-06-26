@@ -148,14 +148,21 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 11;
+		public const int maxHelp = 17;
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
-			if (helpOption < 1)
-				helpOption = 1;
-
 			int guide = NPC.FindFirstNPC(NPCID.Guide);
 			string guideName = guide >= 0 ? Main.npc[guide].GivenName : "a Guide";
+
+			if (firstButton)
+				helpOption++;
+			else
+				helpOption--;
+
+			if (helpOption > maxHelp)
+				helpOption = maxHelp;
+			else if (helpOption < 1)
+				helpOption = 1;
 
 			Main.npcChatText = helpOption switch {
 				1 => Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help1", guideName),
@@ -169,26 +176,19 @@ namespace MagicStorage.NPCs {
 				9 => ModContent.ItemType<StorageUnit>(),
 				4 or
 				5 or
-				6 => ModContent.ItemType<CraftingAccess>(),
+				6 or
+				15 or
+				16 => ModContent.ItemType<CraftingAccess>(),
 				7 => ModContent.ItemType<StorageConnector>(),
 				8 => ModContent.ItemType<ShadowDiamond>(),
 				10 => ModContent.ItemType<StorageAccess>(),
 				11 => ModContent.ItemType<BiomeGlobe>(),
 				12 or
 				13 => ModContent.ItemType<RemoteAccess>(),
-				14 => ModContent.ItemType<Locator>(),
-				15 => 0,
-				16 => ModContent.ItemType<RadiantJewel>(),
+				14 => ModContent.ItemType<StorageDeactivator>(),
+				17 => ModContent.ItemType<RadiantJewel>(),
 				_ => 0
 			};
-
-			if (firstButton)
-				helpOption++;
-			else
-				helpOption--;
-
-			if (helpOption > maxHelp || helpOption < 1)
-				helpOption = 1;
 		}
 
 		// Make this Town NPC teleport to the King and/or Queen statue when triggered.

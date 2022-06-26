@@ -188,6 +188,7 @@ namespace MagicStorage {
 
 			items = new int[]
 			{
+				ItemID.MetalSink,
 				ItemID.BambooSink,
 				ItemID.BlueDungeonSink,
 				ItemID.BoneSink,
@@ -208,7 +209,6 @@ namespace MagicStorage {
 				ItemID.LivingWoodSink,
 				ItemID.MarbleSink,
 				ItemID.MartianSink,
-				ItemID.MetalSink,
 				ItemID.MeteoriteSink,
 				ItemID.MushroomSink,
 				ItemID.NebulaSink,
@@ -235,6 +235,7 @@ namespace MagicStorage {
 
 			items = new int[]
 			{
+				ItemID.WoodenTable,
 				ItemID.BambooTable,
 				ItemID.BanquetTable,
 				ItemID.BlueDungeonTable,
@@ -278,8 +279,7 @@ namespace MagicStorage {
 				ItemID.SpookyTable,
 				ItemID.StardustTable,
 				ItemID.SteampunkTable,
-				ItemID.VortexTable,
-				ItemID.WoodenTable
+				ItemID.VortexTable
 			};
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WoodenTable)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyTable", group);

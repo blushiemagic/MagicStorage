@@ -223,12 +223,12 @@ Mods: {
 				'''
 				Help2:
 				'''
-				Once you've gotten a Storage Component [i:MagicStorage/StorageComponent], you will need to create a Storage Heart. The Storage Heart is where you can access stored items and is required for a storage system to function.
+				Once you've gotten a [i:MagicStorage/StorageComponent], you will need to create a Storage Heart. The Storage Heart is where you can access stored items and is required for a storage system to function.
 				Recipe: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
 				'''
 				Help3:
 				'''
-				After placing down the Storage Heart [i:MagicStorage/StorageHeart], you will need to create Storage Units in order to store the items for the Storage Heart.
+				After placing down the [i:MagicStorage/StorageHeart], you will need to create Storage Units in order to store the items for the Storage Heart.
 				Recipe: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
 				'''
 				Help4:
@@ -247,7 +247,7 @@ Mods: {
 				'''
 				Help6:
 				'''
-				The Alchemy Table [i:AlchemyTable] retains its 33% chance to not consume potion ingredients.
+				The [i:AlchemyTable] retains its 33% chance to not consume potion ingredients.
 				[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] and any other item which places a tile that counts as a Water source enable Water recipes.
 				[i:LavaBucket] enables Lava recipes.
 				[i:HoneyBucket] enables Honey recipes.
@@ -256,19 +256,19 @@ Mods: {
 				'''
 				Help7:
 				'''
-				All components of a storage system must be connected together. If you want to spread out your Storage Units [i:MagicStorage/StorageUnit] from your Storage Heart [i:MagicStorage/StorageHeart], you can use Connectors to connect them.
+				All components of a storage system must be connected together. If you want to spread out your [i:MagicStorage/StorageUnit] from your [i:MagicStorage/StorageHeart], you can use Connectors to connect them.
 				Recipe: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
 				'''
 				Help8:
 				'''
-				Hidden within the cores of all vanilla Terraria bosses lies a Shadow Diamond. This cursed jewel can be used as an alternative to a Diamond [i:Diamond] for all Magic Storage recipes. Once you've gotten a Shadow Diamond from a boss, you cannot get any more from it! On the bright side, some bosses drop more than one.
+				Hidden within the cores of all vanilla Terraria bosses lies a Shadow Diamond. This cursed jewel can be used as an alternative to a [i:Diamond] for all Magic Storage recipes. Once you've gotten a Shadow Diamond from a boss, you cannot get any more from it! On the bright side, some bosses drop more than one.
 				'''
 				Help9:
 				'''
 				Running out of storage? Upgrade your Storage Units with Storage Upgrades! A Storage Upgrade for a certain tier can only be applied to a Storage Unit of a previous tier.
-				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane], [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]
-				[i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone], [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]
-				[i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte], [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]
+				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]
+				[i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]
+				[i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]
 				[i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
 				'''
 				Help10:
@@ -278,12 +278,15 @@ Mods: {
 				'''
 				Help11:
 				'''
-				biome globe
+				As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides the Biome Globe item. This item enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars. You can even hold it in your inventory and cook Marshmallows without needing to stand next to a Campfire!
+				Recipe: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyCampfire] @ hand = [i:MagicStorage/BiomeGlobe]
 				'''
 				Help12:
 				'''
 				Sometimes you want to be able to access your storage at other locations in the world, but having to connect the storage with Connectors is both a hassle and expensive. The solution? Create a Remote Access and link it to the Storage Heart with a Locator [i:MagicStorage/Locator] or Locator Drive [i:MagicStorage/LocatorDisk].
 				Recipe: [i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+				Locator Recipe: [i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+				Locator Drive Recipe: [i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 				'''
 				Help13:
 				'''
@@ -291,14 +294,25 @@ Mods: {
 				'''
 				Help14:
 				'''
-				Locator Recipe: [i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
-				Locator Drive Recipe: [i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+				The Storage Deactivator lets you disable a [i:MagicStorage/StorageUnit]. A disabled [i:MagicStorage/StorageUnit] cannot store items and will quickly attempt to move its items to connected [i:MagicStorage/StorageUnit] tiles. If it cannot move its items, the items remain in the disabled [i:MagicStorage/StorageUnit].
 				'''
 				Help15:
 				'''
-
+				As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
+				Recipes:
+				[rg:MagicStorage:AnyWorkbench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
+				[i:MagicStorage/CombinedStations1Item] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
+				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ hand = [i:MagicStorage/CombinedStations3Item]
 				'''
 				Help16:
+				'''
+				As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
+				Recipes:
+				[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
+				[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+				'''
+				Help17:
 				'''
 				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. Its power unlocks the latent potential of the Bluemagic residing in all Storage Hearts: wireless access.
 				'''
