@@ -157,7 +157,30 @@ Mods: {
 		}
 
 		ProjectileName: {
-			BiomeGlobeThrown: Biome Globe
+			# BiomeGlobeThrown: Biome Globe
+		}
+
+		NPCName: {
+			# Golem: "Automaton"
+		}
+
+		TownNPCMood: {
+			Golem: {
+				# Content: Systems are operational.
+				# NoHome: Exposure to elements hastens rusting, requesting home posthaste.
+				# LoveSpace: Acceptable living arrangements have been acquired.
+				# FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
+				# DislikeCrowded: Too many individuals detected in close proximity.
+				# HateCrowded: This unit prefers to be more solitary.
+				# LikeBiome: "{BiomeName} harmonizes with Bluemagic."
+				# LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
+				# DislikeBiome: "Bluemagic has lowered efficiency in {BiomeName}."
+				# HateBiome: "Bluemagic becomes unstable in {BiomeName}."
+				# LikeNPC: "{NPCName} appreciates the power of Bluemagic."
+				# LoveNPC: "This unit would not mind if {NPCName} examined its gears."
+				# DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
+				# HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+			}
 		}
 
 		MapObject: {
@@ -169,6 +192,23 @@ Mods: {
 			StorageConnector:  "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			StorageHeart:  "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
+		}
+
+		Bestiary: {
+			# Golem:
+			# '''
+			# A living automaton constructed from storage components, powered by the elusive Bluemagic.
+			# It can teach you all there is to know about Magic Storage.
+			# '''
+		}
+
+		Dialogue: {
+			Golem: {
+				# Greeting: "Hello {0}. Would you like for this unit to teach you something?"
+				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
+				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
+				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+			}
 		}
 
 		# Active: "Active"

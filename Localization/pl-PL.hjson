@@ -156,7 +156,30 @@ Mods: {
 		}
 
 		ProjectileName: {
-			BiomeGlobeThrown: Biome Globe
+			# BiomeGlobeThrown: Biome Globe
+		}
+
+		NPCName: {
+			# Golem: "Automaton"
+		}
+
+		TownNPCMood: {
+			Golem: {
+				# Content: Systems are operational.
+				# NoHome: Exposure to elements hastens rusting, requesting home posthaste.
+				# LoveSpace: Acceptable living arrangements have been acquired.
+				# FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
+				# DislikeCrowded: Too many individuals detected in close proximity.
+				# HateCrowded: This unit prefers to be more solitary.
+				# LikeBiome: "{BiomeName} harmonizes with Bluemagic."
+				# LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
+				# DislikeBiome: "Bluemagic has lowered efficiency in {BiomeName}."
+				# HateBiome: "Bluemagic becomes unstable in {BiomeName}."
+				# LikeNPC: "{NPCName} appreciates the power of Bluemagic."
+				# LoveNPC: "This unit would not mind if {NPCName} examined its gears."
+				# DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
+				# HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+			}
 		}
 
 		MapObject: {
@@ -168,6 +191,25 @@ Mods: {
 			StorageConnector:  "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			StorageHeart:  "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
+		}
+
+
+
+		Bestiary: {
+			Golem:
+			'''
+			Żyjąca maszyna skonstruowana z komponentów magazynujących, zasilana przez niebieską magię.
+			Nauczy cię wszystkiego co trzeba wiedzieć o Magic Storage.
+			'''
+		}
+
+		Dialogue: {
+			Golem: {
+				Greeting: "Witaj {0}. Czy chciałbyś żeby ta jednostka czegoś cię nauczyła?"
+				Wizard: "Dla kogoś biegłego w magii, {0} nie może zrozumieć jak niebieska magia działa. Będąc szczerym, to tak naprawdę nie jest magia."
+				NotLihzahrd: Ta jednostka nie jest skonstruowana z jaszczuhrzych cegieł. Proszę przestań pytać.
+				Bluemagic: Niebieska magia jest zdumiewającym źródłem mocy. Byłoby mądre nie lekceważyc jej możliwości.
+			}
 		}
 
 		Active: "Aktywny"
