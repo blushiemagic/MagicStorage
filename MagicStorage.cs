@@ -17,6 +17,8 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
+		public static readonly Recipe.Condition HasCampfire = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire);
+
 		public override void Load()
 		{
 			InterfaceHelper.Initialize();
@@ -41,7 +43,7 @@ namespace MagicStorage {
 			Recipe.Create(ItemID.CookedMarshmallow)
 #endif
 				.AddIngredient(ItemID.Marshmallow)
-				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
+				.AddCondition(HasCampfire)
 				.Register();
 		}
 
@@ -466,6 +468,8 @@ namespace MagicStorage {
 						ThrowWithMessage("Normal mode drop stack must be positive");
 
 					return ShadowDiamondDrop.DropDiamond(dropNormal, dropExpert);
+				case "Get Campfire Condition":
+					return HasCampfire;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
 			}

@@ -1172,10 +1172,22 @@ namespace MagicStorage
 
 			Player player = Main.LocalPlayer;
 			bool[] origAdjTile = player.adjTile;
+			bool oldAdjWater = player.adjWater;
+			bool oldAdjLava = player.adjLava;
+			bool oldAdjHoney = player.adjHoney;
+			bool oldAlchemyTable = player.alchemyTable;
+			bool oldSnow = player.ZoneSnow;
+			bool oldGraveyard = player.ZoneGraveyard;
 
 			try
 			{
 				player.adjTile = adjTiles;
+				player.adjWater = false;
+				player.adjLava = false;
+				player.adjHoney = false;
+				player.alchemyTable = false;
+				player.ZoneSnow = false;
+				player.ZoneGraveyard = false;
 
 				// TODO: test if this allows environmental effects such as nearby water
 				if (adjWater)
@@ -1196,6 +1208,12 @@ namespace MagicStorage
 			finally
 			{
 				player.adjTile = origAdjTile;
+				player.adjWater = oldAdjWater;
+				player.adjLava = oldAdjLava;
+				player.adjHoney = oldAdjHoney;
+				player.alchemyTable = oldAlchemyTable;
+				player.ZoneSnow = oldSnow;
+				player.ZoneGraveyard = oldGraveyard;
 			}
 		}
 

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace MagicStorage {
 	public static class Utility {
-		public static string? GetSimplifiedGenericTypeName(this Type type) {
+		public static string GetSimplifiedGenericTypeName(this Type type) {
 			//Handle all invalid cases here:
 			if (type.FullName is null)
 				return type.Name;
