@@ -1,4 +1,8 @@
-﻿using Terraria.ModLoader;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria.GameContent.ItemDropRules;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage
@@ -25,6 +29,18 @@ namespace MagicStorage
 		public static bool queenSlimeDiamond;
 		public static bool empressDiamond;
 
+		//Modded support
+		public static HashSet<string> moddedDiamonds;
+
+		internal static HashSet<int> disallowDropModded;
+		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
+		internal static Dictionary<int, IItemDropRule> moddedDiamondDropRulesByType;
+
+		public override void Load() {
+			disallowDropModded = new();
+			moddedDiamondDropRulesByType = new();
+		}
+
 		public override void OnWorldLoad()
 		{
 			kingSlimeDiamond = false;
@@ -43,6 +59,8 @@ namespace MagicStorage
 			moonlordDiamond = false;
 			queenSlimeDiamond = false;
 			empressDiamond = false;
+
+			moddedDiamonds = new();
 		}
 
 		public override void SaveWorldData(TagCompound tag)
@@ -64,6 +82,7 @@ namespace MagicStorage
 			tag["moonlordDiamond"] = moonlordDiamond;
 			tag["queenSlimeDiamond"] = queenSlimeDiamond;
 			tag["empressDiamond"] = empressDiamond;
+			tag["modded"] = moddedDiamonds.ToList();
 		}
 
 		public override void LoadWorldData(TagCompound tag)
@@ -84,6 +103,9 @@ namespace MagicStorage
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
+
+			if (tag.GetList<string>("modded") is List<string> list)
+				moddedDiamonds = new(list);
 		}
 	}
 }

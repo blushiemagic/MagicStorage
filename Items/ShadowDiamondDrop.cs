@@ -9,13 +9,15 @@ namespace MagicStorage.Items
 	{
 		public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
 		{
+			IItemDropRule rule = null;
+
 			switch (npc.type)
 			{
 				case NPCID.KingSlime:
-					DropDiamond(1, npcLoot);
+					rule = DropDiamond(1);
 					break;
 				case NPCID.EyeofCthulhu:
-					DropDiamond(Main.expertMode ? 2 : 1, npcLoot);
+					rule = DropDiamond(1, 2);
 					break;
 				case NPCID.EaterofWorldsHead:
 				case NPCID.EaterofWorldsBody:
@@ -23,33 +25,39 @@ namespace MagicStorage.Items
 				case NPCID.BrainofCthulhu:
 				case NPCID.SkeletronHead:
 				case NPCID.QueenBee:
-					DropDiamond(1, npcLoot);
+					rule = DropDiamond(1);
 					break;
 				case NPCID.WallofFlesh:
-					DropDiamond(2, npcLoot);
+					rule = DropDiamond(2);
 					break;
 				case NPCID.TheDestroyer:
 				case NPCID.Retinazer:
 				case NPCID.Spazmatism:
 				case NPCID.SkeletronPrime:
-					DropDiamond(1, npcLoot);
+					rule = DropDiamond(1);
 					break;
 				case NPCID.Plantera:
-					DropDiamond(Main.expertMode ? 2 : 1, npcLoot);
+					rule = DropDiamond(1, 2);
 					break;
 				case NPCID.Golem:
 				case NPCID.DukeFishron:
 				case NPCID.CultistBoss:
-					DropDiamond(1, npcLoot);
+					rule = DropDiamond(1);
 					break;
 				case NPCID.MoonLordCore:
-					DropDiamond(Main.expertMode ? 3 : 2, npcLoot);
+					rule = DropDiamond(2, 3);
 					break;
 				case NPCID.QueenSlimeBoss:
 				case NPCID.HallowBoss:
-					DropDiamond(1, npcLoot);
+					rule = DropDiamond(1);
 					break;
 			}
+
+			if (CanModdedNPCDrop(npc) && StorageWorld.moddedDiamondDropRulesByType.TryGetValue(npc.type, out IItemDropRule dropRule))
+				rule = dropRule;
+
+			if (rule is not null)
+				npcLoot.Add(rule);
 		}
 
 		public override void OnKill(NPC npc)
@@ -110,17 +118,28 @@ namespace MagicStorage.Items
 					NPC.SetEventFlagCleared(ref StorageWorld.empressDiamond, -1);
 					break;
 			}
+
+			if (CanModdedNPCDrop(npc)) {
+				string identifier = npc.ModNPC.Mod.Name + ":" + npc.ModNPC.Name;
+				bool exists = StorageWorld.moddedDiamonds.Contains(identifier);
+
+				NPC.SetEventFlagCleared(ref exists, -1);
+
+				StorageWorld.moddedDiamonds.Add(identifier);
+			}
 		}
 
-		private static void DropDiamond(int stack, NPCLoot npcLoot)
+		private static IItemDropRule Drop(int count) => ItemDropRule.Common(ModContent.ItemType<ShadowDiamond>(), minimumDropped: count, maximumDropped: count);
+
+		public static IItemDropRule DropDiamond(int stack, int expertStack = -1)
 		{
-			LeadingConditionRule rule = new(new ShadowDiamondCondition());
+			IItemDropRule rule = new LeadingConditionRule(new ShadowDiamondCondition());
+			rule.OnSuccess(expertStack < 0 ? Drop(stack) : new DropBasedOnExpertMode(Drop(stack), Drop(expertStack)));
 
-			//Guaranteed chance to drop 1 item, if the condition succeeds
-			rule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<ShadowDiamond>(), minimumDropped: stack, maximumDropped: stack));
-
-			npcLoot.Add(rule);
+			return rule;
 		}
+
+		public static bool CanModdedNPCDrop(NPC npc) => npc.ModNPC is not null && npc.boss && !StorageWorld.disallowDropModded.Contains(npc.type);
 	}
 
 	internal class ShadowDiamondCondition : IItemDropRuleCondition
@@ -150,10 +169,11 @@ namespace MagicStorage.Items
 				NPCID.QueenSlimeBoss    => !StorageWorld.queenSlimeDiamond,
 				NPCID.HallowBoss        => !StorageWorld.empressDiamond,
 				_                       => false //Default to false to shove everything else under the rug
-			};
+			}
+			|| ShadowDiamondDrop.CanModdedNPCDrop(info.npc);
 
 		public bool CanShowItemDropInUI() => true; //Don't make the item show up in the bestiary
 
-		public string GetConditionDescription() => "Dropped on first kill of every vanilla boss";
+		public string GetConditionDescription() => "Dropped on first kill of every boss";
 	}
 }

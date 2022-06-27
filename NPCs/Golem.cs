@@ -95,8 +95,8 @@ namespace MagicStorage.NPCs {
 				if (!player.active)
 					continue;
 
-				// Player has to have any item from Magic Storage in their inventory and at least 50 silvers for the NPC to spawn
-				if (player.inventory.Any(item => !item.IsAir && item.ModItem?.Mod == magicMod))
+				// Player has to have a chest and at least 50 silvers for the NPC to spawn
+				if (player.inventory.Any(item => !item.IsAir && item.createTile >= TileID.Dirt && TileID.Sets.BasicChest[item.createTile]))
 					return money >= Item.buyPrice(silver: 50);
 			}
 
