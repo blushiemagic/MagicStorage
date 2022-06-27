@@ -1337,7 +1337,7 @@ namespace MagicStorage
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
 							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem)) {
-								Main.NewText($"Recipe for \"{Lang.GetItemNameValue(recipe.createItem.type)}\" was unhidden");
+								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(recipe.createItem.type)));
 
 								RefreshItems();
 							}
@@ -1345,7 +1345,7 @@ namespace MagicStorage
 						else
 						{
 							if (storagePlayer.HiddenRecipes.Add(recipe.createItem)) {
-								Main.NewText($"Recipe for \"{Lang.GetItemNameValue(recipe.createItem.type)}\" was hidden");
+								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(recipe.createItem.type)));
 
 								RefreshItems();
 							}

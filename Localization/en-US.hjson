@@ -387,6 +387,15 @@ Mods: {
 		StoredItems: "Stored Ingredients"
 		ShowOnlyFavorited: "Only Favorited"
 
+		RecipeHidden:
+		'''
+		Recipe for item "{0}" was blacklisted.
+		'''
+		RecipeRevealed:
+		'''
+		Recipe for item "{0}" was whitelisted.
+		'''
+
 		DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
 
