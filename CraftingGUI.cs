@@ -1170,39 +1170,32 @@ namespace MagicStorage
 		{
 			ArgumentNullException.ThrowIfNull(action);
 
-			// TODO: figure out a way to remove this lock
-			// can't really do it with this design because this method runs many times in parallel
-			lock (BlockRecipes.ActiveLock)
+			Player player = Main.LocalPlayer;
+			bool[] origAdjTile = player.adjTile;
+
+			try
 			{
-				Player player = Main.LocalPlayer;
-				bool[] origAdjTile = player.adjTile;
+				player.adjTile = adjTiles;
 
-				try
-				{
-					player.adjTile = adjTiles;
+				// TODO: test if this allows environmental effects such as nearby water
+				if (adjWater)
+					player.adjWater = true;
+				if (adjLava)
+					player.adjLava = true;
+				if (adjHoney)
+					player.adjHoney = true;
+				if (alchemyTable)
+					player.alchemyTable = true;
+				if (zoneSnow)
+					player.ZoneSnow = true;
+				if (graveyard)
+					player.ZoneGraveyard = true;
 
-					// TODO: test if this allows environmental effects such as nearby water
-					if (adjWater)
-						player.adjWater = true;
-					if (adjLava)
-						player.adjLava = true;
-					if (adjHoney)
-						player.adjHoney = true;
-					if (alchemyTable)
-						player.alchemyTable = true;
-					if (zoneSnow)
-						player.ZoneSnow = true;
-					if (graveyard)
-						player.ZoneGraveyard = true;
-
-					BlockRecipes.Active = false;
-					action();
-				}
-				finally
-				{
-					BlockRecipes.Active = true;
-					player.adjTile = origAdjTile;
-				}
+				action();
+			}
+			finally
+			{
+				player.adjTile = origAdjTile;
 			}
 		}
 

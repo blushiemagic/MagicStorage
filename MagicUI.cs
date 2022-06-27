@@ -17,6 +17,9 @@ public class MagicUI : ModSystem
 		if (!Main.instance.IsActive)
 			return;
 
+		if (StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
+			Main.hidePlayerCraftingMenu = true;
+
 		StorageGUI.Update(null);
 		CraftingGUI.Update(null);
 	}
