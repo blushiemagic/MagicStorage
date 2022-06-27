@@ -3,15 +3,16 @@ Mods: {
 	MagicStorage: {
 		ItemName: {
 			BiomeGlobe: 生态球
-			CraftingAccess: 制作存储单元
-			CreativeStorageUnit: 创造储存单元
+			CraftingAccess: 制作单元
+			CreativeStorageUnit: 创造单元
 			Locator: 定位器
 			LocatorDisk: 定位器驱动
 			PortableAccess: 便携式远程存储装置
-			RadiantJewel: 光芒四射的宝石
+			PortableCraftingAcces: 便携式远程制作装置
+			RadiantJewel: 璀璨棱晶
 			RemoteAccess: 远程存储装置
 			ShadowDiamond: 暗影钻石
-			SnowBiomeEmulator: 雪地环境模拟器
+			SnowBiomeEmulator: 破损雪花球
 			StorageAccess: 存储装置
 			StorageComponent: 存储组件
 			StorageConnector: 存储连接器
@@ -27,7 +28,7 @@ Mods: {
 			StorageUnitTerra: 存储单元(泰拉)
 			StorageUnitTiny: 存储单元(小)
 			UpgradeBlueChlorophyte: 存储升级珠(蓝色叶绿)
-			UpgradeCrimtane: 存储升级珠(猩红))
+			UpgradeCrimtane: 存储升级珠(猩红)
 			UpgradeDemonite: 存储升级珠(魔金)
 			UpgradeHallowed: 存储升级珠(神圣)
 			UpgradeHellstone: 存储升级珠(狱岩)
@@ -46,12 +47,12 @@ Mods: {
 		ItemTooltip: {
 			BiomeGlobe:
 			'''
-			“你掌握着世界的力量”
-			\n制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
-			\n放在物品栏或制作存储单元的制作站槽位内即可生效
-			\n放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
-			\n可在制作界面直接用棉花糖制作熟棉花糖
-			\n丢出去之后会像沙滩球一样弹弹弹
+			“世界的力量凝聚环绕在你的指尖”
+			制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
+			放在物品栏或制作存储单元的制作站槽位内即可生效
+			放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
+			可在制作界面直接用棉花糖制作熟棉花糖
+			丢出去之后会像沙滩球一样弹弹弹
 			'''
 			Locator:
 			'''
@@ -70,9 +71,15 @@ Mods: {
 			目前未设置为任何位置
 			使用可直接访问你的存储
 			'''
+			PortableCraftingAccess:
+			'''
+			<right>制作单元可储存其定位点
+			目前未设置为任何位置
+			使用可直接访问你的制作单元
+			'''
 			RadiantJewel:
 			'''
-			'闪耀着耀眼的光芒'
+			“辐射出耀眼的光芒”
 			'''
 			ShadowDiamond:
 			'''
@@ -80,7 +87,7 @@ Mods: {
 			'''
 			SnowBiomeEmulator:
 			'''
-			允许制作存储单元拥有雪地环境
+			允许制作单元拥有雪地环境
 			'''
 			StorageDeactivator:
 			'''
@@ -160,25 +167,25 @@ Mods: {
 		}
 
 		NPCName: {
-			# Golem: "Automaton"
+			Golem: "自动机"
 		}
 
 		TownNPCMood: {
 			Golem: {
-				# Content: Systems are operational.
-				# NoHome: Exposure to elements hastens rusting, requesting home posthaste.
-				# LoveSpace: Acceptable living arrangements have been acquired.
-				# FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
-				# DislikeCrowded: Too many individuals detected in close proximity.
-				# HateCrowded: This unit prefers to be more solitary.
-				# LikeBiome: "{BiomeName} harmonizes with Bluemagic."
-				# LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
-				# DislikeBiome: "Bluemagic has lowered efficiency in {BiomeName}."
-				# HateBiome: "Bluemagic becomes unstable in {BiomeName}."
-				# LikeNPC: "{NPCName} appreciates the power of Bluemagic."
-				# LoveNPC: "This unit would not mind if {NPCName} examined its gears."
-				# DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
-				# HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+				Content: 运行中。
+				NoHome: 暴露于空气，正在快速生锈，请求获得落脚点。
+				LoveSpace: 已接受当前生活安排。
+				FarFromHome: 本单元必须尽快回家以为蓝魔法电器充电
+				DislikeCrowded: 在附近探测到太多个体。
+				HateCrowded: 本单元请求独处。
+				LikeBiome: "{BiomeName}与蓝魔法相容。"
+				LoveBiome: "{BiomeName}与蓝魔法完美协调。"
+				DislikeBiome: "已检测到{BiomeName}使得蓝魔法效率下降。"
+				HateBiome: "检测到处于{BiomeName}，蓝魔法已停用。"
+				LikeNPC: "检测到{NPCName}欣赏蓝魔法。"
+				LoveNPC: "附近的{NPCName}个体对本单元拥有一切操纵权."
+				DislikeNPC: "本单元不屑于向{NPCName}提及蓝魔法。"
+				HateNPC: "{NPCName}需要改变其试图将蓝魔法用于盈利的想法"
 			}
 		}
 
@@ -194,19 +201,126 @@ Mods: {
 		}
 
 		Bestiary: {
-			# Golem:
-			# '''
-			# A living automaton constructed from storage components, powered by the elusive Bluemagic.
-			# It can teach you all there is to know about Magic Storage.
-			# '''
+			Golem:
+			'''
+			一个由存储部件构成的自动装置，由难以捉摸的蓝魔法驱动。
+			它可以教授你有关魔法存储的一切知识。
+			'''
 		}
 
 		Dialogue: {
 			Golem: {
-				# Greeting: "Hello {0}. Would you like for this unit to teach you something?"
-				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
-				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
-				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				Greeting: "用户{0}您好。请问您是否想要了解一些关于魔法存储的信息？"
+				Wizard: "尽管{0}看上去精通魔法，他仍不能理解蓝魔法的工作方式。因为实际上这并不能算作纯粹的魔法。"
+				NotLihzahrd: 请停止询问，本单元并非由丛林神庙砖构成。
+				Bluemagic: 蓝魔法是一种惊人的力量来源，你不会想要低估它的能力的。
+				Help1:
+				'''
+				首先，你需要合成一些存储组件。存储组件是组件存储网络的基础，你可以在{0}那里询问存储单元的用途。
+				制作配方: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
+				'''
+				Help2:
+				'''
+				如果你已经获得了 [i:MagicStorage/StorageComponent] ，你现在可以去合成存储核心。存储核心可以将你的各种存储组件接连，构成存储网络。
+				制作配方: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
+				'''
+				Help3:
+				'''
+				放下 [i:MagicStorage/StorageHeart] 之后，是时候制作存储单元了。将存储核心连接上存储单元，就可以存储你的物品了。
+				制作配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
+				'''
+				Help4:
+				'''
+				如果你想要通过你的存储网络合成物品，你就需要做一个制作单元。
+				制作配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
+				'''
+				Help5:
+				'''
+				某些制作站存储于制作单元会发挥更大的效果，一些物品可以一次性满足不同的制作条件。
+				[i:GlassKiln] 算作 [i:Furnace]
+				[i:BewitchingTable] 算作 [i:WoodenTable]
+				[rg:MagicStorage:AnyTombstone] 可满足灵雾制作需求
+				[i:AlchemyTable] 算作 [i:WoodenTable] [i:Bottle]
+				[rg:MagicStorage:AnyTable] 算作 [i:WoodenChair]
+				'''
+				Help6:
+				'''
+				[i:AlchemyTable] 仍然保有其33%的几率不消耗材料的效果
+				[i:WaterBucket] [i:BottomlessBucket] [rg:MagicStorage:AnySink] 以及其他算作水源的物品都可以满足需要水的配方
+				[i:LavaBucket] 可满足熔岩制作需求
+				[i:HoneyBucket] 可满足蜂蜜制作需求
+				[i:MagicStorage/DemonAltar] [i:MagicStorage/CrimsonAltar] 算作恶魔祭坛与猩红祭坛
+				[i:MagicStorage/SnowBiomeEmulator] 算作处于雪地环境
+				'''
+				Help7:
+				'''
+				存储网络的一切元件都必须连接在一起，如果你想要从 [i:MagicStorage/StorageHeart] 中扩散你的 [i:MagicStorage/StorageUnit]，你可以用存储连接器将它们相连
+				制作配方: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
+				'''
+				Help8:
+				'''
+				有一颗暗影钻石隐藏于所有原版泰拉瑞亚Boss的核心部位，这种被诅咒的宝石可以用来替代所有魔法储存配方中的[i:Diamond]。一旦你从某个Boss那里得到了暗影钻石，你就不能再从它那里获得了。然而，有些Boss会掉落不止一颗。
+				'''
+				Help9:
+				'''
+				存储网络被物品塞满了？用升级珠升级你的存储单元吧！某个级别的存储升级珠可以升级前一级别的存储单元，以下是级别表。
+				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
+				[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
+				[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+				[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
+				'''
+				Help10:
+				'''
+				如果你不想要移动你的存储核心，试试用存储装置吧！如果将其连接上存储核心，你就可以直接从存储装置打开你的存储核心。
+				合成配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
+				'''
+				Help11:
+				'''
+				以防面临制作单元里存了太多制作站的问题，魔法存储提供了生态球。这个物品可以为雪地生物群落、灵雾、篝火、水、熔岩、蜂蜜、恶魔/猩红祭坛提供配方。如果把它放在物品栏内，还可以直接制作烤棉花糖，而不需要站在篝火旁边等它烤熟。
+				合成配方: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] = [i:MagicStorage/BiomeGlobe] (无合成条件需求)
+				'''
+				Help12:
+				'''
+				有些时候，你想要在世界的其他地区访问你的存储核心，但要用存储连接器接过去既麻烦又昂贵。这时候你可以制作一个远程存储装置，并用定位器 [i:MagicStorage/Locator] 或定位器驱动 [i:MagicStorage/LocatorDisk] 将其连上。
+				合成配方: [i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+				定位器合成配方: [i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+				定位器驱动合成配方: [i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+				'''
+				Help13:
+				'''
+				你可以将存储组件连接到远程存储装置上，这些组件也能够访问主存储网络，这对于拥有一个远离存储核心的制作单元来说非常有用。
+				'''
+				Help14:
+				'''
+				存储单元魔杖可以禁用 [i:MagicStorage/StorageUnit]。被禁用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
+				'''
+				Help15:
+				'''
+				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合制作站。每个组合制作站都继承其制作材料满足的制作条件。
+				制作配方:
+				[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ 无条件 = [i:MagicStorage/CombinedStations1Item]
+				[i:MagicStorage/CombinedStations1Item] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 无条件 = [i:MagicStorage/CombinedStations2Item]
+				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ 无条件 = [i:MagicStorage/CombinedStations3Item]
+				'''
+				Help16:
+				'''
+				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合家具制作站。每个组合家具制作站都继承其制作材料满足的制作条件。
+				制作配方:
+				[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 无条件 = [i:MagicStorage/CombinedFurnitureStations1Item]
+				[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 无条件 = [i:MagicStorage/CombinedFurnitureStations2Item]
+				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ 无条件 = [i:MagicStorage/CombinedStations4Item]
+				'''
+				Help17:
+				'''
+				月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
+				'''
+			}
+
+			ChatOptions: {
+				Golem: {
+					NextHelp: 下一条
+					PrevHelp: 上一条
+				}
 			}
 		}
 
@@ -216,8 +330,8 @@ Mods: {
 		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
 		PortableAccessMissing: "定位器目标点没有存储核心！"
 
-		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
-		# PortableCraftingMissing: "Crafting Access is missing!"
+		PortableCraftingUnlocated: "定位器尚未设置到任何制作单元"
+		PortableCraftingMissing: "定位器目标点没有制作单元！"
 
 		RemoteAccessSuccess: "已成功连接远程存储装置！"
 		RemoteAccessHasLocator: "该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点"
@@ -228,7 +342,7 @@ Mods: {
 
 		FilterAllMods: "所有物品"
 
-		CookedMarshmallowCondition: "存放于制作存储单元的生态球"
+		CookedMarshmallowCondition: "存放于制作单元的生态球"
 
 		Capacity: "容量: {0} / {1}"
 
@@ -238,7 +352,7 @@ Mods: {
 		StorageAccessFailAlt: "该存储装置没有与存储核心连接！"
 		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
 
-		# TestItemSuffix: " !UNTIL RESPAWN!"
+		# TestItemSuffix: " ！UNTIL RESPAWN！"
 		SetTo: "已设置于位于 [{0}, {1}] 的存储核心"
 		SnowBiomeBlock: "雪地环境方块"
 		DepositAll: "全部存入"
@@ -252,9 +366,9 @@ Mods: {
 			# Minus1: "-1"
 			# Minus10: "-10"
 			# Minus100: "-100"
-			# MaxStack: "Max. Stack"
-			# Reset: "Reset"
-			# Amount: "Crafting: {0}"
+			MaxStack: "设为最大"
+			Reset: "重置"
+			Amount: "当前制作数量: {0}"
 		}
 
 		Search: "搜索"
@@ -302,7 +416,7 @@ Mods: {
 		}
 
 		Config: {
-			Label: "魔法储存配置"
+			Label: "魔法存储配置"
 
 			glowNewItems: {
 				Label: "显示新物品/配方"
