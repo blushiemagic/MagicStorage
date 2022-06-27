@@ -1336,13 +1336,19 @@ namespace MagicStorage
 					{
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
-							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem)) {
+								Main.NewText($"Recipe for \"{Lang.GetItemNameValue(recipe.createItem.type)}\" was unhidden");
+
 								RefreshItems();
+							}
 						}
 						else
 						{
-							if (storagePlayer.HiddenRecipes.Add(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Add(recipe.createItem)) {
+								Main.NewText($"Recipe for \"{Lang.GetItemNameValue(recipe.createItem.type)}\" was hidden");
+
 								RefreshItems();
+							}
 						}
 					}
 					else
