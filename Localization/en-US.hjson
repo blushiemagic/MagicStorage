@@ -218,7 +218,7 @@ Mods: {
 				Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
 				Help1:
 				'''
-				To get started, you will need to craft some Storage Components. This item is the base for all storage system components. Give one to {0} to see what it can be used for!
+				To get started, you will need to craft some Storage Components. This item is the base for all storage system components. Give one to a Guide to see what it can be used for!
 				Recipe: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
 				'''
 				Help2:

@@ -151,9 +151,6 @@ namespace MagicStorage.NPCs {
 		public const int maxHelp = 17;
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
-			int guide = NPC.FindFirstNPC(NPCID.Guide);
-			string guideName = guide >= 0 ? Main.npc[guide].GivenName : "a Guide";
-
 			if (firstButton)
 				helpOption++;
 			else
@@ -164,10 +161,7 @@ namespace MagicStorage.NPCs {
 			else if (helpOption < 1)
 				helpOption = 1;
 
-			Main.npcChatText = helpOption switch {
-				1 => Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help1", guideName),
-				_ => Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + helpOption)
-			};
+			Main.npcChatText = Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + helpOption);
 
 			Main.npcChatCornerItem = helpOption switch {
 				1 => ModContent.ItemType<StorageComponent>(),
