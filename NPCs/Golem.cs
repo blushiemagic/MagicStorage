@@ -17,14 +17,14 @@ namespace MagicStorage.NPCs {
 	[AutoloadHead]
 	internal class Golem : ModNPC {
 		public override void SetStaticDefaults() {
-			Main.npcFrameCount[Type] = 26;
+			Main.npcFrameCount[Type] = 25;
 
 			// Generally for Town NPCs, but this is how the NPC does extra things such as sitting in a chair and talking to other NPCs.
 			NPCID.Sets.ExtraFramesCount[Type] = 10;
 			NPCID.Sets.AttackFrameCount[Type] = 5;
 			// The amount of pixels away from the center of the npc that it tries to attack enemies.
 			NPCID.Sets.DangerDetectRange[Type] = 4 * 16;
-			NPCID.Sets.AttackType[Type] = 3;
+			NPCID.Sets.AttackType[Type] = 1;
 			// The amount of time it takes for the NPC's attack animation to be over once it starts.
 			NPCID.Sets.AttackTime[Type] = 20;
 			NPCID.Sets.AttackAverageChance[Type] = 30;
@@ -77,6 +77,10 @@ namespace MagicStorage.NPCs {
 				// You can also use localization keys (see Localization/en-US.lang)
 				new FlavorTextBestiaryInfoElement("Mods.ExampleMod.Bestiary.Golem")
 			});
+		}
+
+		public override void PostAI() {
+			Lighting.AddLight(NPC.Center, (Color.Orange * 0.3f).ToVector3());
 		}
 
 		public override void HitEffect(int hitDirection, double damage) {
@@ -206,6 +210,26 @@ namespace MagicStorage.NPCs {
 		public override void TownNPCAttackSwing(ref int itemWidth, ref int itemHeight) {
 			itemWidth = 48;
 			itemHeight = 48;
+		}
+
+		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
+			float npcHeight = Main.NPCAddHeight(NPC);
+			
+			Texture2D texture = TextureAssets.Npc[Type].Value;
+
+			Vector2 halfSize = new(texture.Width / 2, texture.Height / Main.npcFrameCount[Type] / 2);
+
+			SpriteEffects spriteEffects = SpriteEffects.None;
+			if (NPC.spriteDirection == 1)
+				spriteEffects = SpriteEffects.FlipHorizontally;
+			
+			Texture2D glow = Mod.Assets.Request<Texture2D>(Texture + "_Glow").Value;
+			
+			Vector2 position = NPC.Center - screenPos;
+			position -= new Vector2(glow.Width, glow.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
+			position += halfSize * NPC.scale + new Vector2(0f, npcHeight + NPC.gfxOffY);
+			
+			spriteBatch.Draw(glow, position, NPC.frame, Color.White, NPC.rotation, halfSize, NPC.scale, spriteEffects, 0f);
 		}
 	}
 
