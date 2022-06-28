@@ -214,7 +214,7 @@ namespace MagicStorage.NPCs {
 
 		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
 			float npcHeight = Main.NPCAddHeight(NPC);
-			
+
 			Texture2D texture = TextureAssets.Npc[Type].Value;
 
 			Vector2 halfSize = new(texture.Width / 2, texture.Height / Main.npcFrameCount[Type] / 2);
@@ -222,14 +222,18 @@ namespace MagicStorage.NPCs {
 			SpriteEffects spriteEffects = SpriteEffects.None;
 			if (NPC.spriteDirection == 1)
 				spriteEffects = SpriteEffects.FlipHorizontally;
-			
+
 			Texture2D glow = ModContent.Request<Texture2D>(Texture + "_Glow").Value;
-			
-			Vector2 position = NPC.Center - screenPos;
-			position -= new Vector2(glow.Width, glow.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
-			position += halfSize * NPC.scale + new Vector2(0f, npcHeight + NPC.gfxOffY);
-			
-			spriteBatch.Draw(glow, position, NPC.frame, Color.White, NPC.rotation, halfSize, NPC.scale, spriteEffects, 0f);
+
+			spriteBatch.Draw(glow,
+				new Vector2(NPC.Center.X - glow.Width * NPC.scale / 2f, NPC.Bottom.Y - glow.Height * NPC.scale / Main.npcFrameCount[Type] + 4f + npcHeight + NPC.gfxOffY) - screenPos + halfSize * NPC.scale,
+				NPC.frame,
+				Color.White,
+				NPC.rotation,
+				halfSize,
+				NPC.scale,
+				spriteEffects,
+				0f);
 		}
 	}
 

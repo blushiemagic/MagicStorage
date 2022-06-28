@@ -1100,19 +1100,21 @@ namespace MagicStorage
 						adjWater = true;
 						break;
 					case ItemID.LavaBucket:
+					case ItemID.BottomlessLavaBucket:
 						adjLava = true;
 						break;
 					case ItemID.HoneyBucket:
 						adjHoney = true;
 						break;
 				}
-				if (item.type == ModContent.ItemType<SnowBiomeEmulator>() || item.type == ModContent.ItemType<BiomeGlobe>())
+				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
 				{
 					zoneSnow = true;
 				}
 
 				if (item.type == ModContent.ItemType<BiomeGlobe>())
 				{
+					zoneSnow = true;
 					graveyard = true;
 					Campfire = true;
 					adjWater = true;
