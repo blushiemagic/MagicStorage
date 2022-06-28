@@ -223,7 +223,7 @@ namespace MagicStorage.NPCs {
 			if (NPC.spriteDirection == 1)
 				spriteEffects = SpriteEffects.FlipHorizontally;
 			
-			Texture2D glow = Mod.Assets.Request<Texture2D>(Texture + "_Glow").Value;
+			Texture2D glow = ModContent.Request<Texture2D>(Texture + "_Glow").Value;
 			
 			Vector2 position = NPC.Center - screenPos;
 			position -= new Vector2(glow.Width, glow.Height / Main.npcFrameCount[Type]) * NPC.scale / 2f;
