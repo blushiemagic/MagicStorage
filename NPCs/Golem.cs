@@ -23,7 +23,7 @@ namespace MagicStorage.NPCs {
 			NPCID.Sets.ExtraFramesCount[Type] = 10;
 			NPCID.Sets.AttackFrameCount[Type] = 5;
 			// The amount of pixels away from the center of the npc that it tries to attack enemies.
-			NPCID.Sets.DangerDetectRange[Type] = 4 * 16;
+			NPCID.Sets.DangerDetectRange[Type] = 7 * 16;
 			NPCID.Sets.AttackType[Type] = 1;
 			// The amount of time it takes for the NPC's attack animation to be over once it starts.
 			NPCID.Sets.AttackTime[Type] = 20;
@@ -53,7 +53,7 @@ namespace MagicStorage.NPCs {
 		public override void SetDefaults() {
 			NPC.townNPC = true; // Sets NPC to be a Town NPC
 			NPC.friendly = true; // NPC Will not attack player
-			NPC.width = 18;
+			NPC.width = 36;
 			NPC.height = 40;
 			NPC.aiStyle = 7;
 			NPC.damage = 10;
