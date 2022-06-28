@@ -120,12 +120,11 @@ namespace MagicStorage.Items
 			}
 
 			if (CanModdedNPCDrop(npc)) {
-				string identifier = npc.ModNPC.Mod.Name + ":" + npc.ModNPC.Name;
-				bool exists = StorageWorld.moddedDiamonds.Contains(identifier);
+				bool exists = StorageWorld.moddedDiamonds.Contains(npc.type);
 
 				NPC.SetEventFlagCleared(ref exists, -1);
 
-				StorageWorld.moddedDiamonds.Add(identifier);
+				StorageWorld.moddedDiamonds.Add(npc.type);
 			}
 		}
 
