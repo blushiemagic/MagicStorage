@@ -21,7 +21,7 @@ namespace MagicStorage.NPCs {
 
 			// Generally for Town NPCs, but this is how the NPC does extra things such as sitting in a chair and talking to other NPCs.
 			NPCID.Sets.ExtraFramesCount[Type] = 10;
-			NPCID.Sets.AttackFrameCount[Type] = 5;
+			NPCID.Sets.AttackFrameCount[Type] = 4;
 			// The amount of pixels away from the center of the npc that it tries to attack enemies.
 			NPCID.Sets.DangerDetectRange[Type] = 7 * 16;
 			NPCID.Sets.AttackType[Type] = 1;
