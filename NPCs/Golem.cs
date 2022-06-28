@@ -29,7 +29,7 @@ namespace MagicStorage.NPCs {
 			NPCID.Sets.AttackTime[Type] = 20;
 			NPCID.Sets.AttackAverageChance[Type] = 30;
 			// For when a party is active, the party hat spawns at a Y offset.
-			NPCID.Sets.HatOffsetY[Type] = 4;
+			NPCID.Sets.HatOffsetY[Type] = -7;
 
 			// Influences how the NPC looks in the Bestiary
 			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new NPCID.Sets.NPCBestiaryDrawModifiers(0) {
