@@ -662,9 +662,7 @@ namespace MagicStorage
 				return craftable;
 			}
 
-			maxCraftable = recipe.requiredItem
-				.Where(i => !i.IsAir)  //Safety net for mods having bad recipes
-				.Select(GetAmountCraftable).Prepend(maxCraftable).Min();
+			maxCraftable = recipe.requiredItem.Select(GetAmountCraftable).Prepend(maxCraftable).Min();
 
 			return maxCraftable;
 		}
