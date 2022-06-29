@@ -1572,7 +1572,7 @@ namespace MagicStorage
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (ItemData.Matches(item, existing)) {
+					if (MagicCache.CanCombine(item, existing)) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							existing.stack += item.stack;
 							item.stack = 0;

@@ -26,6 +26,7 @@ namespace MagicStorage.Stations
 		{
 			CreateRecipe()
 				.AddIngredient(ModContent.ItemType<CombinedFurnitureStations1Item>())
+				.AddIngredient(ItemID.MeatGrinder)
 				.AddIngredient(ItemID.LesionStation)
 				.AddIngredient(ItemID.FleshCloningVaat)
 				.AddIngredient(ItemID.SteampunkBoiler)

@@ -23,7 +23,8 @@ namespace MagicStorage.Stations
 				TileID.LivingLoom,
 				TileID.SkyMill,
 				TileID.Solidifier,
-				//Tier 2
+				//Tier 2,
+				TileID.MeatGrinder,
 				TileID.LesionStation,
 				TileID.FleshCloningVat,
 				TileID.SteampunkBoiler,

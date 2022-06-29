@@ -36,7 +36,6 @@ namespace MagicStorage.Stations
 				.AddRecipeGroup("MagicStorage:AnyBookcase")
 				.AddIngredient(ItemID.CrystalBall)
 				.AddIngredient(ItemID.BlendOMatic)
-				.AddIngredient(ItemID.MeatGrinder)
 				.Register();
 		}
 	}

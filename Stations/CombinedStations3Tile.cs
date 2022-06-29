@@ -42,8 +42,7 @@ namespace MagicStorage.Stations
 				TileID.AdamantiteForge,
 				TileID.Bookcases,
 				TileID.CrystalBall,
-				TileID.Blendomatic,
-				TileID.MeatGrinder
+				TileID.Blendomatic
 			};
 
 		public override void SafeSetStaticDefaults()
