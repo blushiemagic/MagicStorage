@@ -95,8 +95,6 @@ namespace MagicStorage.NPCs {
 				return false;
 
 			// Requirements for the town NPC to spawn.
-			MagicStorage magicMod = MagicStorage.Instance;
-
 			for (int k = 0; k < 255; k++) {
 				Player player = Main.player[k];
 				if (!player.active)
