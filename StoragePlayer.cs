@@ -213,7 +213,7 @@ namespace MagicStorage
 
 		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
 
-		public class StorageHeartAccessWrapper {
+		public struct StorageHeartAccessWrapper {
 			public Point16 Storage { get; private set; }
 
 			public Point16 HeartLocation { get; private set; }
@@ -223,7 +223,7 @@ namespace MagicStorage
 			public TEStorageHeart Heart => Valid && TileEntity.ByPosition.TryGetValue(HeartLocation, out TileEntity te) && te is TEStorageHeart heart ? heart : null;
 
 			private Point16 oldPosition = Point16.NegativeOne;
-			private bool oldRemote, oldCrafting;
+			private bool oldRemote = false, oldCrafting = false;
 
 			public StorageHeartAccessWrapper(TEStorageHeart heart) {
 				Storage = HeartLocation = heart?.Position ?? Point16.NegativeOne;
@@ -265,7 +265,7 @@ namespace MagicStorage
 				}
 			}
 
-			private class Disposable : IDisposable {
+			private struct Disposable : IDisposable {
 				public readonly StorageHeartAccessWrapper wrapper;
 
 				public Disposable(StorageHeartAccessWrapper wrapper) => this.wrapper = wrapper;

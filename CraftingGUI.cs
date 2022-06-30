@@ -1189,10 +1189,10 @@ namespace MagicStorage
 			bool oldCampfire = Campfire;
 
 			TEStorageHeart heart = GetHeart();
+			EnvironmentSandbox sandbox = new(player, heart);
 
 			try
 			{
-				EnvironmentSandbox sandbox = new(player, heart);
 				CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
 
 				if (heart is not null) {
@@ -1221,8 +1221,6 @@ namespace MagicStorage
 				player.ZoneSnow = oldSnow;
 				player.ZoneGraveyard = oldGraveyard;
 				Campfire = oldCampfire;
-
-				EnvironmentSandbox sandbox = new(player, heart);
 
 				if (heart is not null) {
 					foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())

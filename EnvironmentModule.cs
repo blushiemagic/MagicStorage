@@ -41,7 +41,7 @@ namespace MagicStorage {
 		public virtual void ResetPlayer(EnvironmentSandbox sandbox) { }
 	}
 
-	public struct EnvironmentSandbox {
+	public readonly struct EnvironmentSandbox {
 		public readonly Player player;
 		public readonly TEStorageHeart heart;
 
