@@ -39,6 +39,7 @@ namespace MagicStorage {
 			EnvironmentModuleLoader.Unload();
 
 			ItemCombining.combiningObjectsByType = null!;
+			ItemCombining.NextID = 0;
 		}
 
 		public override void AddRecipes()

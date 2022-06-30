@@ -9,7 +9,7 @@ namespace MagicStorage {
 	public abstract class ItemCombining : ModType {
 		public int Type { get; private set; }
 
-		private static int NextID;
+		internal static int NextID;
 
 		internal static Dictionary<int, List<ItemCombining>> combiningObjectsByType;
 
