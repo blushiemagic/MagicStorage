@@ -884,7 +884,13 @@ namespace MagicStorage
 			if (heart == null)
 				return;
 
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
+
+			IEnumerable<Item> itemsWithSimulators = heart.GetStoredItems()
+				.Concat(heart.GetModules()
+					.SelectMany(m => m.GetAdditionalItems(sandbox)));
+
+			items.AddRange(ItemSorter.SortAndFilter(itemsWithSimulators, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
 			AnalyzeIngredients();
 			InitLangStuff();
@@ -1180,30 +1186,28 @@ namespace MagicStorage
 			bool oldAlchemyTable = player.alchemyTable;
 			bool oldSnow = player.ZoneSnow;
 			bool oldGraveyard = player.ZoneGraveyard;
+			bool oldCampfire = Campfire;
+
+			TEStorageHeart heart = GetHeart();
 
 			try
 			{
-				player.adjTile = adjTiles;
-				player.adjWater = false;
-				player.adjLava = false;
-				player.adjHoney = false;
-				player.alchemyTable = false;
-				player.ZoneSnow = false;
-				player.ZoneGraveyard = false;
+				EnvironmentSandbox sandbox = new(player, heart);
+				CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
 
-				// TODO: test if this allows environmental effects such as nearby water
-				if (adjWater)
-					player.adjWater = true;
-				if (adjLava)
-					player.adjLava = true;
-				if (adjHoney)
-					player.adjHoney = true;
-				if (alchemyTable)
-					player.alchemyTable = true;
-				if (zoneSnow)
-					player.ZoneSnow = true;
-				if (graveyard)
-					player.ZoneGraveyard = true;
+				if (heart is not null) {
+					foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+						environment.ModifyCraftingZones(sandbox, ref information);
+				}
+
+				player.adjTile = information.adjTiles;
+				player.adjWater = information.water;
+				player.adjLava = information.lava;
+				player.adjHoney = information.honey;
+				player.alchemyTable = information.alchemyTable;
+				player.ZoneSnow = information.snow;
+				player.ZoneGraveyard = information.graveyard;
+				Campfire = information.campfire;
 
 				action();
 			}
@@ -1216,6 +1220,14 @@ namespace MagicStorage
 				player.alchemyTable = oldAlchemyTable;
 				player.ZoneSnow = oldSnow;
 				player.ZoneGraveyard = oldGraveyard;
+				Campfire = oldCampfire;
+
+				EnvironmentSandbox sandbox = new(player, heart);
+
+				if (heart is not null) {
+					foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+						environment.ResetPlayer(sandbox);
+				}
 			}
 		}
 
@@ -1598,12 +1610,40 @@ namespace MagicStorage
 			return compacted;
 		}
 
+		/// <summary>
+		/// Attempts to craft a certain amount of items from a Crafting Access
+		/// </summary>
+		/// <param name="craftingAccess">The tile entity for the Crafting Access to craft items from</param>
+		/// <param name="toCraft">How many items should be crafted</param>
+		public static void Craft(TECraftingAccess craftingAccess, int toCraft) {
+			if (craftingAccess is null)
+				return;
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(craftingAccess);
+
+			//OpenStorage() handles setting the CraftingGUI to use the new storage and Dispose()/CloseStorage() handles reverting it back
+			if (wrapper.Valid) {
+				using (wrapper.OpenStorage())
+					Craft(toCraft);
+			}
+		}
+
+		/// <summary>
+		/// Attempts to craft a certain amount of items from the currently assigned Crafting Access.
+		/// </summary>
+		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
-			var availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
+			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
+			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			List<Item> toWithdraw = new(), results = new();
 
+			TEStorageHeart heart = GetHeart();
+			List<EnvironmentModule> modules = heart?.GetModules().ToList() ?? new();
+
+			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
+
 			while (toCraft > 0) {
-				if (!AttemptSingleCraft(availableItems, toWithdraw, results))
+				if (!AttemptSingleCraft(availableItems, sourceItems, toWithdraw, results, modules, sandbox))
 					break;  // Could not craft any more items
 
 				Item resultItem = selectedRecipe.createItem.Clone();
@@ -1633,9 +1673,13 @@ namespace MagicStorage
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, results);
 		}
 
-		private static bool AttemptSingleCraft(List<Item> available, List<Item> withdraw, List<Item> deposit) {
+		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<Item> withdraw, List<Item> results, List<EnvironmentModule> modules, EnvironmentSandbox sandbox) {
+			int index = -1;
+
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
+				index++;
+
 				int stack = reqItem.stack;
 
 				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);
@@ -1643,27 +1687,45 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (Item tryItem in available)
-				{
-					if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
+				foreach (var module in modules)
+					module.OnConsumeItemForRecipe(sandbox, source[index]);
+
+				bool AttemptToConsumeItem(List<Item> list, bool addToWithdraw) {
+					foreach (Item tryItem in list)
 					{
-						if (tryItem.stack > stack)
+						if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
 						{
-							Item temp = tryItem.Clone();
-							temp.stack = stack;
-							withdraw.Add(temp);
-							tryItem.stack -= stack;
-							stack = 0;
-						}
-						else
-						{
-							withdraw.Add(tryItem.Clone());
-							stack -= tryItem.stack;
-							tryItem.stack = 0;
-							tryItem.type = ItemID.None;
+							if (tryItem.stack > stack)
+							{
+								Item temp = tryItem.Clone();
+								temp.stack = stack;
+
+								if (addToWithdraw)
+									withdraw.Add(temp);
+								
+								tryItem.stack -= stack;
+								stack = 0;
+							}
+							else
+							{
+								if (addToWithdraw)
+									withdraw.Add(tryItem.Clone());
+								
+								stack -= tryItem.stack;
+								tryItem.stack = 0;
+								tryItem.type = ItemID.None;
+							}
+
+							if (stack <= 0)
+								break;
 						}
 					}
+
+					return stack <= 0;
 				}
+
+				if (!AttemptToConsumeItem(available, addToWithdraw: true))
+					AttemptToConsumeItem(results, addToWithdraw: false);
 
 				if (stack > 0)
 					return false;  // Did not have enough items

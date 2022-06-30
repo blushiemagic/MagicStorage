@@ -430,6 +430,7 @@ Mods: {
 
 		Config: {
 			Label: "Magic Storage Config"
+			ServersideLabel: "Magic Storage Server Config"
 
 			glowNewItems: {
 				Label: "Display new items/recipes"
@@ -458,6 +459,11 @@ Mods: {
 			showDps: {
 				Label: "Estimate the dps of weapons"
 				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+			}
+
+			AllowAutomatonToMoveIn: {
+				Label: "Automaton Housing"
+				Tooltip: "Enable to allow the Automaton to be able to move into housing"
 			}
 		}
 	}

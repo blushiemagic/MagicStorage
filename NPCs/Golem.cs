@@ -91,6 +91,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override bool CanTownNPCSpawn(int numTownNPCs, int money) {
+			if (!MagicStorageServerConfig.AllowAutomatonToMoveIn)
+				return false;
+
 			// Requirements for the town NPC to spawn.
 			MagicStorage magicMod = MagicStorage.Instance;
 

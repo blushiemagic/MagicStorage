@@ -73,4 +73,19 @@ namespace MagicStorage
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
+
+	[Label("$Mods.MagicStorage.Config.ServersideLabel")]
+	public class MagicStorageServerConfig : ModConfig {
+		public override ConfigScope Mode => ConfigScope.ServerSide;
+
+		public static MagicStorageServerConfig Instance => ModContent.GetInstance<MagicStorageServerConfig>();
+
+		[Label("$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip")]
+		[DefaultValue(true)]
+		public bool allowAutomatonToMoveIn;
+
+		[JsonIgnore]
+		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
+	}
 }
