@@ -16,21 +16,11 @@ public class MagicCache : ModSystem
 
 	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; } = null!;
 	public static Dictionary<int, List<Recipe>> hasTile { get; private set; } = null!;
-	public static Dictionary<int, Func<Item, Item, bool>> canCombineByType { get; private set; } = null!;
 
 	public static Mod[] AllMods { get; private set; } = null!;
 	public static Dictionary<Mod, int> IndexByMod { get; private set; } = null!;
 	public static Dictionary<Mod, Recipe[]> RecipesByMod { get; private set; } = null!;
 	public static Recipe[] VanillaRecipes { get; private set; } = null!;
-
-	public static bool CanCombine(Item item1, Item item2) => ItemData.Matches(item1, item2) && (!canCombineByType.TryGetValue(item1.type, out var func) || func(item1, item2));
-
-	internal static bool CanCombineIgnoreType(Item item1, Item item2) => !canCombineByType.TryGetValue(item1.type, out var func) || func(item1, item2);
-
-	public override void Load()
-	{
-		canCombineByType = new();
-	}
 
 	public override void Unload()
 	{
@@ -40,7 +30,6 @@ public class MagicCache : ModSystem
 
 		hasIngredient = null!;
 		hasTile = null!;
-		canCombineByType = null!;
 
 		AllMods = null!;
 		IndexByMod = null!;

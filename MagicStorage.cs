@@ -23,6 +23,8 @@ namespace MagicStorage {
 		{
 			InterfaceHelper.Initialize();
 
+			EnvironmentModuleLoader.Load();
+
 			//Census mod support
 			if (ModLoader.TryGetMod("Census", out Mod Census)) {
 				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a [rg:MagicStorage:AnyChest] and [i/s50:{ItemID.SilverCoin}] in your inventory");
@@ -33,6 +35,10 @@ namespace MagicStorage {
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+
+			EnvironmentModuleLoader.Unload();
+
+			ItemCombining.combiningObjectsByType = null!;
 		}
 
 		public override void AddRecipes()
@@ -418,15 +424,6 @@ namespace MagicStorage {
 			TryParseAs(0, out function);
 
 			switch (function) {
-				case "Register Sorting":
-					if (args.Length != 3)
-						ThrowWithMessage("Expected 3 arguments");
-
-					TryParseAs(1, out int itemType);
-					TryParseAs(2, out Func<Item, Item, bool> canCombine);
-
-					MagicCache.canCombineByType[itemType] = canCombine;
-					break;
 				case "Prevent Shadow Diamond Drop":
 					if (args.Length != 2)
 						ThrowWithMessage("Expected 2 arguments");

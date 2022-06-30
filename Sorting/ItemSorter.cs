@@ -47,7 +47,7 @@ namespace MagicStorage.Sorting
 					continue;
 				}
 
-				if (MagicCache.CanCombine(item, lastItem) && lastItem.stack + item.stack > 0)
+				if (ItemCombining.CanCombineItems(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
 					lastItem.stack += item.stack;
 				}

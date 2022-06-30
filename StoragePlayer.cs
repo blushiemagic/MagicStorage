@@ -150,7 +150,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (MagicCache.CanCombine(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
+			if (ItemCombining.CanCombineItems(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
 			{
 				Main.mouseItem.stack += item.stack;
 				return;
