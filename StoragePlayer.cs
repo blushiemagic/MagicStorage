@@ -213,7 +213,7 @@ namespace MagicStorage
 
 		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
 
-		public struct StorageHeartAccessWrapper {
+		public class StorageHeartAccessWrapper {
 			public Point16 Storage { get; private set; }
 
 			public Point16 HeartLocation { get; private set; }
@@ -265,7 +265,7 @@ namespace MagicStorage
 				}
 			}
 
-			private struct Disposable : IDisposable {
+			private class Disposable : IDisposable {
 				public readonly StorageHeartAccessWrapper wrapper;
 
 				public Disposable(StorageHeartAccessWrapper wrapper) => this.wrapper = wrapper;
