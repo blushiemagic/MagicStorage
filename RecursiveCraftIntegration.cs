@@ -50,7 +50,7 @@ namespace MagicStorage
 
 			for (int i = 0; i < Recipe.maxRecipes; i++)
 			{
-				CompoundRecipe compoundRecipe = new(Mod);
+				CompoundRecipe compoundRecipe = new();
 
 				CompoundRecipes[i] = compoundRecipe;
 				RecipeToCompoundRecipe[compoundRecipe.Compound] = compoundRecipe;
