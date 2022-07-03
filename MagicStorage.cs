@@ -23,8 +23,6 @@ namespace MagicStorage {
 		{
 			InterfaceHelper.Initialize();
 
-			EnvironmentModuleLoader.Load();
-
 			//Census mod support
 			if (ModLoader.TryGetMod("Census", out Mod Census)) {
 				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a [rg:MagicStorage:AnyChest] and [i/s50:{ItemID.SilverCoin}] in your inventory");
@@ -35,6 +33,7 @@ namespace MagicStorage {
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+			EnvironmentGUI.Unload();
 
 			EnvironmentModuleLoader.Unload();
 
@@ -44,14 +43,14 @@ namespace MagicStorage {
 
 		public override void AddRecipes()
 		{
-#if TML_2022_05
-			CreateRecipe(ItemID.CookedMarshmallow)
-#else
 			Recipe.Create(ItemID.CookedMarshmallow)
-#endif
 				.AddIngredient(ItemID.Marshmallow)
 				.AddCondition(HasCampfire)
 				.Register();
+		}
+
+		public override void PostSetupContent() {
+			EnvironmentGUI.Initialize();
 		}
 
 		public override void PostAddRecipes()
@@ -66,11 +65,7 @@ namespace MagicStorage {
 
 				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
-#if TML_2022_05
-					Recipe copy = CloneRecipe(recipe);
-#else
 					Recipe copy = recipe.Clone();
-#endif
 
 					copy.requiredTile.Clear(); // Should this be cleared?
 					copy.AddTile<CombinedStations4Tile>();

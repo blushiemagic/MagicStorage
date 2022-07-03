@@ -112,6 +112,12 @@ namespace MagicStorage
 
 		public void CloseStorage()
 		{
+			if (StorageEnvironment()) {
+				NetHelper.ClientRequestForceCraftingGUIRefresh();
+
+				EnvironmentGUI.currentAccess = null;
+			}
+
 			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
 		}
@@ -212,6 +218,15 @@ namespace MagicStorage
 		}
 
 		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
+
+		public bool StorageEnvironment() {
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return false;
+			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
+			return tile.HasTile && tile.TileType == ModContent.TileType<EnvironmentAccess>();
+		}
+
+		public static bool IsStorageEnvironment() => StoragePlayer.LocalPlayer.StorageEnvironment();
 
 		public class StorageHeartAccessWrapper {
 			public Point16 Storage { get; private set; }

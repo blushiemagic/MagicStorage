@@ -391,6 +391,9 @@ namespace MagicStorage
 			craftReset.PaddingTop = 8f;
 			craftReset.PaddingBottom = 8f;
 			recipePanel.Append(craftReset);
+
+			basePanel.Activate();
+			recipePanel.Activate();
 		}
 
 		private static void InitLangStuff()
@@ -485,6 +488,8 @@ namespace MagicStorage
 					craftAmountTarget = 1;
 					ResetSlotFocus();
 				}
+
+				PlayerZoneCache.FreeCache(true);
 			}
 			catch (Exception e)
 			{
@@ -886,9 +891,9 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
-			IEnumerable<Item> itemsWithSimulators = heart.GetStoredItems()
+			IEnumerable<Item> itemsWithSimulators = heart.GetStoredItems().Select(i => i.Clone())
 				.Concat(heart.GetModules()
-					.SelectMany(m => m.GetAdditionalItems(sandbox)));
+					.SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>()));
 
 			items.AddRange(ItemSorter.SortAndFilter(itemsWithSimulators, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
@@ -901,6 +906,11 @@ namespace MagicStorage
 			RefreshStorageItems();
 
 			RefreshRecipes();
+
+			if (heart is not null) {
+				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+					environment.ResetPlayer(sandbox);
+			}
 		}
 
 		private static void RefreshRecipes()
@@ -1066,7 +1076,7 @@ namespace MagicStorage
 						graveyard = true;
 					}
 
-					bool[] oldAdjTile = player.adjTile;
+					bool[] oldAdjTile = (bool[])player.adjTile.Clone();
 					bool oldAdjWater = adjWater;
 					bool oldAdjLava = adjLava;
 					bool oldAdjHoney = adjHoney;
@@ -1131,7 +1141,26 @@ namespace MagicStorage
 					adjTiles[TileID.DemonAltar] = true;
 				}
 			}
+
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
+
+			TEStorageHeart heart = GetHeart();
+			EnvironmentSandbox sandbox = new(player, heart);
+			CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
+
+			if (heart is not null) {
+				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+					environment.ModifyCraftingZones(sandbox, ref information);
+			}
+
+			Campfire = information.campfire;
+			zoneSnow = information.snow;
+			graveyard = information.graveyard;
+			adjWater = information.water;
+			adjLava = information.lava;
+			adjHoney = information.honey;
+			alchemyTable = information.alchemyTable;
+			adjTiles = information.adjTiles;
 		}
 
 		public static bool IsAvailable(Recipe recipe, bool checkCompound = true)
@@ -1158,75 +1187,90 @@ namespace MagicStorage
 
 				if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
 					stack -= amount;
+
 				if (stack > 0)
 					return false;
 			}
 
-
 			bool retValue = true;
 
-			ExecuteInCraftingGuiEnvironment(() =>
-			{
-				if (retValue && !RecipeLoader.RecipeAvailable(recipe))
+			ExecuteInCraftingGuiEnvironment(() => {
+				if (!RecipeLoader.RecipeAvailable(recipe))
 					retValue = false;
 			});
 
 			return retValue;
 		}
 
-		public static void ExecuteInCraftingGuiEnvironment(Action action)
+		public class PlayerZoneCache {
+			public readonly bool[] origAdjTile;
+			public readonly bool oldAdjWater;
+			public readonly bool oldAdjLava;
+			public readonly bool oldAdjHoney;
+			public readonly bool oldAlchemyTable;
+			public readonly bool oldSnow;
+			public readonly bool oldGraveyard;
+
+			private PlayerZoneCache() {
+				Player player = Main.LocalPlayer;
+				origAdjTile = player.adjTile;
+				oldAdjWater = player.adjWater;
+				oldAdjLava = player.adjLava;
+				oldAdjHoney = player.adjHoney;
+				oldAlchemyTable = player.alchemyTable;
+				oldSnow = player.ZoneSnow;
+				oldGraveyard = player.ZoneGraveyard;
+			}
+
+			private static PlayerZoneCache cache;
+
+			public static void Cache() {
+				if (cache is not null)
+					return;
+
+				cache = new PlayerZoneCache();
+			}
+
+			public static void FreeCache(bool destroy) {
+				if (cache is not PlayerZoneCache c)
+					return;
+
+				if (destroy)
+					cache = null;
+
+				Player player = Main.LocalPlayer;
+
+				player.adjTile = c.origAdjTile;
+				player.adjWater = c.oldAdjWater;
+				player.adjLava = c.oldAdjLava;
+				player.adjHoney = c.oldAdjHoney;
+				player.alchemyTable = c.oldAlchemyTable;
+				player.ZoneSnow = c.oldSnow;
+				player.ZoneGraveyard = c.oldGraveyard;
+			}
+		}
+
+		internal static void ExecuteInCraftingGuiEnvironment(Action action)
 		{
 			ArgumentNullException.ThrowIfNull(action);
 
 			Player player = Main.LocalPlayer;
-			bool[] origAdjTile = player.adjTile;
-			bool oldAdjWater = player.adjWater;
-			bool oldAdjLava = player.adjLava;
-			bool oldAdjHoney = player.adjHoney;
-			bool oldAlchemyTable = player.alchemyTable;
-			bool oldSnow = player.ZoneSnow;
-			bool oldGraveyard = player.ZoneGraveyard;
-			bool oldCampfire = Campfire;
 
-			TEStorageHeart heart = GetHeart();
-			EnvironmentSandbox sandbox = new(player, heart);
+			PlayerZoneCache.Cache();
 
 			try
 			{
-				CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
-
-				if (heart is not null) {
-					foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
-						environment.ModifyCraftingZones(sandbox, ref information);
-				}
-
-				player.adjTile = information.adjTiles;
-				player.adjWater = information.water;
-				player.adjLava = information.lava;
-				player.adjHoney = information.honey;
-				player.alchemyTable = information.alchemyTable;
-				player.ZoneSnow = information.snow;
-				player.ZoneGraveyard = information.graveyard;
-				Campfire = information.campfire;
+				player.adjTile = adjTiles;
+				player.adjWater = adjWater;
+				player.adjLava = adjLava;
+				player.adjHoney = adjHoney;
+				player.alchemyTable = alchemyTable;
+				player.ZoneSnow = zoneSnow;
+				player.ZoneGraveyard = graveyard;
 
 				action();
 			}
-			finally
-			{
-				player.adjTile = origAdjTile;
-				player.adjWater = oldAdjWater;
-				player.adjLava = oldAdjLava;
-				player.adjHoney = oldAdjHoney;
-				player.alchemyTable = oldAlchemyTable;
-				player.ZoneSnow = oldSnow;
-				player.ZoneGraveyard = oldGraveyard;
-				Campfire = oldCampfire;
-
-				if (heart is not null) {
-					foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
-						environment.ResetPlayer(sandbox);
-				}
-			}
+			finally { }
 		}
 
 		private static bool PassesBlock(Recipe recipe)
@@ -1686,7 +1730,7 @@ namespace MagicStorage
 					continue;
 
 				foreach (var module in modules)
-					module.OnConsumeItemForRecipe(sandbox, source[index]);
+					module.OnConsumeItemForRecipe(sandbox, source[index], stack);
 
 				bool AttemptToConsumeItem(List<Item> list, bool addToWithdraw) {
 					foreach (Item tryItem in list)

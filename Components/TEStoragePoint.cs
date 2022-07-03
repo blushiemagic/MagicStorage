@@ -7,7 +7,7 @@ namespace MagicStorage.Components
 {
 	public abstract class TEStoragePoint : TEStorageComponent
 	{
-		private Point16 center;
+		internal Point16 center;
 
 		public void ResetAndSearch()
 		{

@@ -318,6 +318,10 @@ Mods: {
 				'''
 				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. Its power unlocks the latent potential of the Bluemagic residing in all Storage Hearts: wireless access.
 				'''
+				Help18:
+				'''
+				The [i:MagicStorage/EnvironmentAccess] is quite the bizarre component. Rumor states that it allows outside tampering of Magic Storage storage systems, but only a mod developer would be able to use its inner workings.
+				'''
 			}
 
 			ChatOptions: {
@@ -399,6 +403,10 @@ Mods: {
 
 		DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
+
+		EnvironmentGUI: {
+			EntryDisabledDefault: This module is currently disabled.
+		}
 
 		Filters: {
 			All: "Filter All"

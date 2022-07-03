@@ -86,11 +86,11 @@ namespace MagicStorage.Components
 			=> TileEntity.ByPosition.Values
 				.Where(e => e is TEEnvironmentAccess)
 				.Select(e => e as TEEnvironmentAccess)
-				.Where(e => e.GetHeart() == this);
+				.Where(e => e.center == Position);
 
 		public IEnumerable<EnvironmentModule> GetModules()
 			=> GetEnvironmentSimulators()
-				.SelectMany(e => e.modules)
+				.SelectMany(e => e.Modules)
 				.DistinctBy(m => m.Type);
 
 		public IEnumerable<Item> GetStoredItems()

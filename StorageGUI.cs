@@ -176,6 +176,8 @@ namespace MagicStorage
 
 			capacityText.SetText(Language.GetTextValue("Mods.MagicStorage.Capacity", numItems, capacity));
 			bottomBar.Append(capacityText);
+
+			basePanel.Activate();
 		}
 
 		private static void InitLangStuff()
@@ -210,7 +212,7 @@ namespace MagicStorage
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
+			if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting() && !StoragePlayer.IsStorageEnvironment())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
@@ -309,6 +311,9 @@ namespace MagicStorage
 				CraftingGUI.RefreshItems();
 				return;
 			}
+
+			if (StoragePlayer.IsStorageEnvironment())
+				return;
 
 			items.Clear();
 			didMatCheck.Clear();

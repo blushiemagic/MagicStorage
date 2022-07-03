@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MagicStorage {
 	public static class EnvironmentModuleLoader {
-		private static List<EnvironmentModule> modules = new();
+		internal static List<EnvironmentModule> modules = new();
 		public static int Count { get; private set; }
 
 		internal static int Add(EnvironmentModule module) {
@@ -14,13 +14,8 @@ namespace MagicStorage {
 
 		public static EnvironmentModule Get(int index) => index < 0 || index >= modules.Count ? null : modules[index];
 
-		internal static void Load() {
-			modules = new();
-			Count = 0;
-		}
-
 		internal static void Unload() {
-			modules = null;
+			modules.Clear();
 			Count = 0;
 		}
 	}

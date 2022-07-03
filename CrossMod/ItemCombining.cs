@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	/// <summary>
@@ -21,10 +22,15 @@ namespace MagicStorage {
 
 			bool combine = true;
 
+			combiningObjectsByType ??= new();
+
 			if (combiningObjectsByType.TryGetValue(item1.type, out var list)) {
 				foreach (var obj in list)
 					combine &= obj.CanCombine(item1, item2);
 			}
+
+			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
+			combine &= ItemIO.ToBase64(item1) != ItemIO.ToBase64(item2);
 
 			return combine;
 		}

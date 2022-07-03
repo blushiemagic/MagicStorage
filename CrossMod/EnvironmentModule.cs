@@ -1,25 +1,49 @@
 ﻿using MagicStorage.Components;
-using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage {
 	/// <summary>
-	/// A module of information for use in an Environmental Simulator
+	/// A module of information for use in an Environmental Simulator. Only one instance is assumed to be active at once.
 	/// </summary>
 	public abstract class EnvironmentModule : ModType {
 		public int Type { get; private set; }
 
+		public ModTranslation DisplayName { get; private set; }
+
+		public ModTranslation DisabledTooltip { get; private set; }
+
 		protected sealed override void Register() {
 			ModTypeLookup<EnvironmentModule>.Register(this);
 			Type = EnvironmentModuleLoader.Add(this);
+
+			DisplayName = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleName.{Name}");
+			DisabledTooltip = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleDisabled.{Name}");
+
+			MagicStorage.Instance.Logger.Debug($"EnvironmentModule \"{FullName}\" added by mod \"{Mod.Name}\"");
 		}
 
-		public sealed override void SetupContent() => SetStaticDefaults();
+		public sealed override void SetupContent() {
+			AutoStaticDefaults();
+			SetStaticDefaults();
+		}
 
 		/// <summary>
-		/// Allows you to specify what additional items are used in the Storage GUI or Crafting GUI
+		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
+		/// </summary>
+		public virtual void AutoStaticDefaults() {
+			if (DisplayName.IsDefault())
+				DisplayName.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
+
+			if (DisabledTooltip.IsDefault())
+				DisabledTooltip.SetDefault(Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault"));
+		}
+
+		/// <summary>
+		/// Allows you to specify what additional items are used in the Crafting GUI
 		/// </summary>
 		public virtual IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => null;
 
@@ -32,13 +56,19 @@ namespace MagicStorage {
 		/// <summary>
 		/// Allows you to specify what happens when an item is consumed for a recipe
 		/// </summary>
-		/// <param name="item">The original item instance retrieved from <see cref="GetAdditionalItems(EnvironmentSandbox)"/></param>
-		public virtual void OnConsumeItemForRecipe(EnvironmentSandbox sandbox, Item item) { }
+		/// <param name="item">The original item instance retrieved from <see cref="GetAdditionalItems(EnvironmentSandbox)"/> or the storage system</param>
+		/// <param name="stack">How many items were consumed</param>
+		public virtual void OnConsumeItemForRecipe(EnvironmentSandbox sandbox, Item item, int stack) { }
 
 		/// <summary>
 		/// Allows you to reset information in the sandbox's player after processing recipes
 		/// </summary>
 		public virtual void ResetPlayer(EnvironmentSandbox sandbox) { }
+
+		/// <summary>
+		/// Allows you to determine when this module is available for use
+		/// </summary>
+		public virtual bool IsAvailable() => true;
 	}
 
 	public readonly struct EnvironmentSandbox {

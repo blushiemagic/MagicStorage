@@ -22,5 +22,6 @@ public class MagicUI : ModSystem
 
 		StorageGUI.Update(null);
 		CraftingGUI.Update(null);
+		EnvironmentGUI.Update(null);
 	}
 }

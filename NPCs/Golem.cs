@@ -153,7 +153,7 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 17;
+		public const int maxHelp = 18;
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			if (firstButton)
@@ -186,6 +186,7 @@ namespace MagicStorage.NPCs {
 				13 => ModContent.ItemType<RemoteAccess>(),
 				14 => ModContent.ItemType<StorageDeactivator>(),
 				17 => ModContent.ItemType<RadiantJewel>(),
+				18 => ModContent.ItemType<EnvironmentAccess>(),
 				_ => 0
 			};
 		}

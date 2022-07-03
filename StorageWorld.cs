@@ -39,6 +39,7 @@ namespace MagicStorage
 
 		public override void Load() {
 			disallowDropModded = new();
+			moddedDiamondsDroppedByType = new();
 			moddedDiamondDropRulesByType = new();
 		}
 
