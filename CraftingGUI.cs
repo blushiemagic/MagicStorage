@@ -263,12 +263,12 @@ namespace MagicStorage
 
 			recipePanel.Append(ingredientText);
 
-			int itemsNeeded = selectedRecipe?.requiredItem.Count ?? IngredientColumns * 2;
+			int itemsNeeded = selectedRecipe?.requiredItem.Count ?? IngredientColumns;
 			int recipeRows = itemsNeeded / IngredientColumns;
 			int extraRow = itemsNeeded % IngredientColumns != 0 ? 1 : 0;
 			int totalRows = recipeRows + extraRow;
-			if (totalRows < 2)
-				totalRows = 2;
+			if (totalRows < 1)
+				totalRows = 1;
 			const float ingredientZoneTop = 54f;
 			float ingredientZoneHeight = 30f * totalRows;
 

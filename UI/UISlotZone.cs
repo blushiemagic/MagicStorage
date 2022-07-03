@@ -38,7 +38,7 @@ namespace MagicStorage.UI
 		{
 			numColumns = columns;
 			numRows = rows;
-			height = (int)(InventoryBack.Value.Height * inventoryScale * Main.UIScale) * rows + Padding;
+			height = (int)(InventoryBack.Value.Height * inventoryScale) * rows + Padding;
 		}
 
 		public override void Update(GameTime gameTime)
