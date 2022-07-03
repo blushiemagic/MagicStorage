@@ -48,6 +48,11 @@ namespace MagicStorage
 		[ReloadRequired]
 		public bool showDps;
 
+		[Label("$Mods.MagicStorage.Config.useOldCraftMenu.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip")]
+		[DefaultValue(false)]
+		public bool useOldCraftMenu;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -70,6 +75,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ShowDps => Instance.showDps;
+
+		[JsonIgnore]
+		public static bool UseOldCraftMenu => Instance.useOldCraftMenu;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

@@ -299,7 +299,7 @@ Mods: {
 				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合制作站。每个组合制作站都继承其制作材料满足的制作条件。
 				制作配方:
 				[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ 无条件 = [i:MagicStorage/CombinedStations1Item]
-				[i:MagicStorage/CombinedStations1Item] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 无条件 = [i:MagicStorage/CombinedStations2Item]
+				[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 无条件 = [i:MagicStorage/CombinedStations2Item]
 				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ 无条件 = [i:MagicStorage/CombinedStations3Item]
 				'''
 				Help16:
@@ -358,6 +358,7 @@ Mods: {
 		DepositAll: "全部存入"
 		CraftingStations: "制作站 (翻译: -Cyril-, 抗药又坚硬汉化组）"
 		CraftTooltip: "左键单击以制作"
+		CraftTooltipOld: "左键单击以制作（按住Ctrl全部制作）"
 
 		Crafting: {
 			# Plus1: "+1"

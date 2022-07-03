@@ -314,12 +314,22 @@ namespace MagicStorage
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
 
+			bool config = MagicStorageConfig.UseOldCraftMenu;
+
 			resultZone.SetDimensions(1, 1);
-			resultZone.Left.Set(-itemSlotWidth - 15, 1f);
-			resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 40, 0f);
+			if (!config) {
+				resultZone.Left.Set(-itemSlotWidth - 15, 1f);
+				resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 40, 0f);
+			} else {
+				resultZone.Left.Set(-itemSlotWidth, 1f);
+				resultZone.Top.Set(-itemSlotHeight, 1f);
+			}
 			resultZone.Width.Set(itemSlotWidth, 0f);
 			resultZone.Height.Set(itemSlotHeight, 0f);
 			recipePanel.Append(resultZone);
+
+			if (config)
+				goto IgnoreNewCraftButtons;
 
 			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
 			craftAmount.Left.Set(12, 0f);
@@ -392,6 +402,8 @@ namespace MagicStorage
 			craftReset.PaddingBottom = 8f;
 			recipePanel.Append(craftReset);
 
+			IgnoreNewCraftButtons:
+
 			basePanel.Activate();
 			recipePanel.Activate();
 		}
@@ -407,15 +419,19 @@ namespace MagicStorage
 			reqObjText2 ??= new UIText("");
 			storedItemsText ??= new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
 			craftButton ??= new UITextPanel<LocalizedText>(Language.GetText("LegacyMisc.72"));
-			craftP1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
-			craftP10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
-			craftP100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
-			craftM1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
-			craftM10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
-			craftM100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
-			craftMax ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallScale);
-			craftReset ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallScale);
-			craftAmount ??= new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), SmallScale);
+
+			if (!MagicStorageConfig.UseOldCraftMenu) {
+				craftP1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
+				craftP10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
+				craftP100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
+				craftM1 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
+				craftM10 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
+				craftM100 ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
+				craftMax ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallScale);
+				craftReset ??= new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallScale);
+				craftAmount ??= new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), SmallScale);
+			}
+
 			modSearchBox.InitLangStuff();
 		}
 
@@ -541,7 +557,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height)
 					if (selectedRecipe is not null && IsAvailable(selectedRecipe, false) && PassesBlock(selectedRecipe))
-						Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip").Value);
+						Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value);
 		}
 
 		private static Item GetStation(int slot, ref int context)
@@ -801,14 +817,17 @@ namespace MagicStorage
 
 			bool stillCrafting = false;
 			HandleCraftButton(craftButton, false, () => ClickCraftButton(ref stillCrafting));
-			HandleCraftButton(craftP1, true, () => ClickAmountButton(1, true));
-			HandleCraftButton(craftP10, true, () => ClickAmountButton(10, true));
-			HandleCraftButton(craftP100, true, () => ClickAmountButton(100, true));
-			HandleCraftButton(craftM1, true, () => ClickAmountButton(-1, true));
-			HandleCraftButton(craftM10, true, () => ClickAmountButton(-10, true));
-			HandleCraftButton(craftM100, true, () => ClickAmountButton(-100, true));
-			HandleCraftButton(craftMax, true, () => ClickAmountButton(int.MaxValue, false));
-			HandleCraftButton(craftReset, true, () => ClickAmountButton(1, false));
+
+			if (!MagicStorageConfig.UseOldCraftMenu) {
+				HandleCraftButton(craftP1, true, () => ClickAmountButton(1, true));
+				HandleCraftButton(craftP10, true, () => ClickAmountButton(10, true));
+				HandleCraftButton(craftP100, true, () => ClickAmountButton(100, true));
+				HandleCraftButton(craftM1, true, () => ClickAmountButton(-1, true));
+				HandleCraftButton(craftM10, true, () => ClickAmountButton(-10, true));
+				HandleCraftButton(craftM100, true, () => ClickAmountButton(-100, true));
+				HandleCraftButton(craftMax, true, () => ClickAmountButton(int.MaxValue, false));
+				HandleCraftButton(craftReset, true, () => ClickAmountButton(1, false));
+			}
 
 			if (!stillCrafting)
 			{
@@ -840,7 +859,12 @@ namespace MagicStorage
 				if (maxCraftTimer <= 0)
 					maxCraftTimer = 1;
 
-				Craft(craftAmountTarget);
+				int amount = craftAmountTarget;
+
+				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
+					amount = int.MaxValue;
+
+				Craft(amount);
 				if (RecursiveCraftIntegration.Enabled)
 				{
 					RecursiveCraftIntegration.RefreshRecursiveRecipes();
