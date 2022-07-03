@@ -339,6 +339,16 @@ namespace MagicStorage.Components
 
 		public bool PackItems()
 		{
+			//Pack items within the storage units first
+			NetHelper.StartUpdateQueue();
+			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits()) {
+				if (abstractStorageUnit is not TEStorageUnit storageUnit)
+					continue;
+
+				storageUnit.PackItems();
+			}
+			NetHelper.ProcessUpdateQueue();
+
 			TEStorageUnit unitWithSpace = null;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
@@ -351,13 +361,8 @@ namespace MagicStorage.Components
 				else if (unitWithSpace is not null && !storageUnit.IsEmpty)
 				{
 					NetHelper.StartUpdateQueue();
-					while (!unitWithSpace.IsFull && !storageUnit.IsEmpty)
-					{
-						Item item = storageUnit.WithdrawStack();
-						unitWithSpace.DepositItem(item);
-						if (!item.IsAir)
-							storageUnit.DepositItem(item);
-					}
+
+					unitWithSpace.Flatten(storageUnit);
 
 					NetHelper.ProcessUpdateQueue();
 					NetHelper.SendRefreshNetworkItems(ID);

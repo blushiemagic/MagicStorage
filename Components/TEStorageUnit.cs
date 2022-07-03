@@ -19,6 +19,8 @@ namespace MagicStorage.Components
 			Deposit,
 			Withdraw,
 			WithdrawStack,
+			PackItems,
+			Flatten
 		}
 
 		private struct NetOperation
@@ -265,6 +267,82 @@ namespace MagicStorage.Components
 			return item;
 		}
 
+		internal void PackItems() {
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+				return;
+
+			if (items.Count < 2)
+				return;
+
+			items = Compact(items, out bool didPack);
+
+			if (didPack && Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.PackItems));
+				}
+				PostChangeContents();
+			}
+		}
+
+		internal void Flatten(TEStorageUnit other) {
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+				return;
+
+			List<Item> both = Compact(items.Concat(other.items), out bool didPack);
+
+			if (!didPack)
+				return;  //Neither unit was modified
+
+			int capacity = Capacity;
+
+			items = new List<Item>(both.Take(capacity));
+			other.items = new List<Item>(both.Skip(capacity));
+
+			if (didPack && Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Clear();
+					other.netOpQueue.Clear();
+					netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+					other.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+				}
+				PostChangeContents();
+			}
+		}
+
+		internal static List<Item> Compact(IEnumerable<Item> items, out bool didPack) {
+			List<Item> packed = new();
+			didPack = false;
+
+			foreach (Item item in items) {
+				foreach (Item pack in packed) {
+					if (pack.IsAir || pack.stack >= pack.maxStack)
+						continue;
+
+					if (Utility.AreStrictlyEqual(item, pack)) {
+						if (item.stack + pack.stack <= pack.maxStack) {
+							pack.stack += item.stack;
+							item.stack = 0;
+						} else {
+							item.stack -= pack.maxStack - pack.stack;
+							pack.stack = pack.maxStack;
+						}
+
+						didPack = true;
+						break;
+					}
+				}
+
+				if (item.stack > 0)
+					packed.Add(item);
+			}
+
+			return packed;
+		}
+
 		public override void SaveData(TagCompound tag)
 		{
 			base.SaveData(tag);
@@ -329,6 +407,8 @@ namespace MagicStorage.Components
 						break;
 					case NetOperations.Deposit:
 						ItemIO.Send(netOp.item, writer, true, true);
+						break;
+					case NetOperations.PackItems:
 						break;
 					default:
 						break;
@@ -413,6 +493,9 @@ namespace MagicStorage.Components
 								break;
 							case NetOperations.Deposit:
 								DepositItem(ItemIO.Receive(reader, true, true));
+								break;
+							case NetOperations.PackItems:
+								PackItems();
 								break;
 							default:
 								break;
