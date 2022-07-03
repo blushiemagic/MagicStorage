@@ -30,7 +30,7 @@ namespace MagicStorage {
 			}
 
 			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
-			combine &= ItemIO.ToBase64(item1) != ItemIO.ToBase64(item2);
+			combine &= ItemIO.ToBase64(item1) == ItemIO.ToBase64(item2);
 
 			return combine;
 		}
