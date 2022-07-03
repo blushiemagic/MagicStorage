@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using Terraria;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	public static class Utility {
@@ -42,11 +44,29 @@ namespace MagicStorage {
 				}
 
 				count += c;
-
 			}
 
 			return count;
+		}
 
+		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false) {
+			if (!ItemData.Matches(item1, item2))
+				return false;
+
+			if (checkStack)
+				return ItemIO.ToBase64(item1) == ItemIO.ToBase64(item2);
+
+			int oldStack1 = item1.stack;
+			item1.stack = 1;
+			int oldStack2 = item2.stack;
+			item2.stack = 1;
+
+			bool equal = ItemIO.ToBase64(item1) == ItemIO.ToBase64(item2);
+
+			item1.stack = oldStack1;
+			item2.stack = oldStack2;
+
+			return equal;
 		}
 	}
 }

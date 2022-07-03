@@ -149,8 +149,7 @@ namespace MagicStorage.Components
 				return new Item();
 
 			Item original = lookFor.Clone();
-			Item result = lookFor.Clone();
-			result.stack = 0;
+			Item result = null;
 			for (int k = items.Count - 1; k >= 0; k--)
 			{
 				Item item = items[k];
@@ -160,32 +159,35 @@ namespace MagicStorage.Components
 					if (item.stack > 0 && item.favorited && keepOneIfFavorite)
 						maxToTake -= 1;
 					int withdraw = Math.Min(lookFor.stack, maxToTake);
+
+					if (result is not null) {
+						//Item data must be the same
+						if (!Utility.AreStrictlyEqual(result, item))
+							continue;
+
+						result.stack += withdraw;
+					} else {
+						result = item.Clone();
+						result.stack = withdraw;
+					}
+
 					item.stack -= withdraw;
 					if (item.stack <= 0)
 						items.RemoveAt(k);
-					result.stack += withdraw;
+
 					lookFor.stack -= withdraw;
+					
 					if (lookFor.stack <= 0)
-					{
-						if (Main.netMode != NetmodeID.MultiplayerClient)
-						{
-							if (Main.netMode == NetmodeID.Server)
-							{
-								netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
-							}
-
-							PostChangeContents();
-						}
-
-						return result;
-					}
+						goto ReturnFromMethod;
 				}
 			}
 
-			if (result.stack == 0)
+			if (result is null || result.IsAir)
 			{
 				return new Item();
 			}
+
+			ReturnFromMethod:
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				if (Main.netMode == NetmodeID.Server)
