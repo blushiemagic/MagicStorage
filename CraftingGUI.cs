@@ -333,8 +333,10 @@ namespace MagicStorage
 			resultZone.Height.Set(itemSlotHeight, 0f);
 			recipePanel.Append(resultZone);
 
-			if (config)
+			if (config) {
+				craftAmountTarget = 1;
 				goto IgnoreNewCraftButtons;
+			}
 
 			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
 			craftAmount.Left.Set(12, 0f);
