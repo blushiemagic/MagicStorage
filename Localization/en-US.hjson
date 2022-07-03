@@ -481,6 +481,10 @@ Mods: {
 				Label: "Estimate the dps of weapons"
 				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
 			}
+			useOldCraftMenu: {
+				Label: "Use old Craft buttons"
+				Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

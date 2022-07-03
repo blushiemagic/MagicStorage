@@ -464,6 +464,15 @@ Mods: {
 				Label: "武器DPS预测"
 				Tooltip: "开启后，在武器简介里会显示预计DPS值"
 			}
+			useOldCraftMenu: {
+				# Label: "Use old Craft buttons"
+				# Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+			}
+
+			AllowAutomatonToMoveIn: {
+				# Label: "Automaton Housing"
+				# Tooltip: "Enable to allow the Automaton to be able to move into housing"
+			}
 		}
 	}
 }
