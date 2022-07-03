@@ -293,7 +293,14 @@ namespace MagicStorage
 			recipePanel.Append(storedItemsText);
 			storageZone.Top.Set(storageZoneTop, 0f);
 			storageZone.Width.Set(0f, 1f);
-			storageZone.Height.Set(-storageZoneTop - 200, 1f);
+
+			bool config = MagicStorageConfig.UseOldCraftMenu;
+
+			if (!config)
+				storageZone.Height.Set(-storageZoneTop - 200, 1f);
+			else
+				storageZone.Height.Set(-storageZoneTop - 36, 1f);
+			
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
 			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
@@ -313,8 +320,6 @@ namespace MagicStorage
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
-
-			bool config = MagicStorageConfig.UseOldCraftMenu;
 
 			resultZone.SetDimensions(1, 1);
 			if (!config) {
