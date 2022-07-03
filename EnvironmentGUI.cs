@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage {
@@ -25,6 +26,8 @@ namespace MagicStorage {
 		private static UIList list;
 
 		internal static Dictionary<string, EnvironmentGUIModEntry> entriesByMod = new();
+
+		private static UIText noModulesLoaded;
 
 		internal static TEEnvironmentAccess currentAccess;
 
@@ -87,6 +90,11 @@ namespace MagicStorage {
 				"Known modules:\n" +
 				"  " + string.Join("\n  ", entriesByMod.Values.SelectMany(entry => entry.Mod.GetContent<EnvironmentModule>().Select(m => m.FullName))));
 			*/
+
+			if (entriesByMod.Count == 0) {
+				noModulesLoaded = new(Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.NoModules"), textScale: 1.3f);
+				list.Add(noModulesLoaded);
+			}
 
 			basePanel.Activate();
 		}

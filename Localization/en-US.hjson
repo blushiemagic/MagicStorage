@@ -407,6 +407,11 @@ Mods: {
 
 		EnvironmentGUI: {
 			EntryDisabledDefault: This module is currently disabled.
+			NoModules:
+			'''
+			No Environment Simulator modules have been detected.
+			Other mods will need to add some for them to appear here.
+			'''
 		}
 
 		Filters: {
