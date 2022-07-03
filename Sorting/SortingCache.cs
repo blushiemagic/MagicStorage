@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ID;
@@ -79,9 +80,12 @@ public class SortingCacheDictionary
 	{
 		Entry entry = cache[mode];
 
-		if (entry.IndexByType is null)
+		if (items is null)
+			return Array.Empty<Item>().OrderBy(_ => 1); //Failsafe - a pointless collection
+
+		if (entry?.IndexByType is null)
 			return items.OrderBy(_ => 1); //Preserve item order
 
-		return items.OrderBy(i => entry.FindIndex(i.type));
+		return items.Where(i => i is not null).OrderBy(i => entry.FindIndex(i.type));
 	}
 }
