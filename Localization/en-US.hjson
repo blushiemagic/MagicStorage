@@ -300,13 +300,20 @@ Mods: {
 				'''
 				Help15:
 				'''
+				For user convenience, Magic Storage adds recipes for placeable Demon Altars and Crimson Altars. Though mining them doesn't give you ores, you can still use them as crafting stations.
+				Recipes:
+				[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
+				[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
+				'''
+				Help16:
+				'''
 				As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
 				Recipes:
 				[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
 				[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
 				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
 				'''
-				Help16:
+				Help17:
 				'''
 				As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
 				Recipes:
@@ -314,11 +321,11 @@ Mods: {
 				[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
 				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 				'''
-				Help17:
+				Help18:
 				'''
 				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. Its power unlocks the latent potential of the Bluemagic residing in all Storage Hearts: wireless access.
 				'''
-				Help18:
+				Help19:
 				'''
 				The [i:MagicStorage/EnvironmentAccess] is quite the bizarre component. Rumor states that it allows outside tampering of Magic Storage storage systems, but only a mod developer would be able to use its inner workings.
 				'''

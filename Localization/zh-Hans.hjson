@@ -294,7 +294,11 @@ Mods: {
 				'''
 				存储单元魔杖可以禁用 [i:MagicStorage/StorageUnit]。被禁用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
 				'''
-				Help15:
+				# Help15:
+				# '''
+				# (See en-US translation)
+				# '''
+				Help16:
 				'''
 				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合制作站。每个组合制作站都继承其制作材料满足的制作条件。
 				制作配方:
@@ -302,7 +306,7 @@ Mods: {
 				[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 无条件 = [i:MagicStorage/CombinedStations2Item]
 				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ 无条件 = [i:MagicStorage/CombinedStations3Item]
 				'''
-				Help16:
+				Help17:
 				'''
 				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合家具制作站。每个组合家具制作站都继承其制作材料满足的制作条件。
 				制作配方:
@@ -310,10 +314,14 @@ Mods: {
 				[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 无条件 = [i:MagicStorage/CombinedFurnitureStations2Item]
 				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ 无条件 = [i:MagicStorage/CombinedStations4Item]
 				'''
-				Help17:
+				Help18:
 				'''
 				月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				'''
+				# Help19:
+				# '''
+				# (See en-US translation)
+				# '''
 			}
 
 			ChatOptions: {

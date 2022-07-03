@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Items;
+using MagicStorage.Stations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -153,7 +154,7 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 18;
+		public const int maxHelp = 19;
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			if (firstButton)
@@ -176,8 +177,8 @@ namespace MagicStorage.NPCs {
 				4 or
 				5 or
 				6 or
-				15 or
-				16 => ModContent.ItemType<CraftingAccess>(),
+				16 or
+				17 => ModContent.ItemType<CraftingAccess>(),
 				7 => ModContent.ItemType<StorageConnector>(),
 				8 => ModContent.ItemType<ShadowDiamond>(),
 				10 => ModContent.ItemType<StorageAccess>(),
@@ -185,8 +186,9 @@ namespace MagicStorage.NPCs {
 				12 or
 				13 => ModContent.ItemType<RemoteAccess>(),
 				14 => ModContent.ItemType<StorageDeactivator>(),
-				17 => ModContent.ItemType<RadiantJewel>(),
-				18 => ModContent.ItemType<EnvironmentAccess>(),
+				15 => ModContent.ItemType<DemonAltar>(),
+				18 => ModContent.ItemType<RadiantJewel>(),
+				19 => ModContent.ItemType<EnvironmentAccess>(),
 				_ => 0
 			};
 		}
