@@ -1,0 +1,30 @@
+﻿Are you tired of having a mess of chests in your base? Never remember where you put your items, and have to run across your entire house to get from chest to chest? This mod will solve all of your problems!
+
+This mod offers a solution to storage problems once and for all. It allows you to construct a central network to store all your items, that you can access from one single block. If desired, you can even set up multiple access points to use your storage from anywhere in the world. You can search your storage for items with a certain name, filter by item types, etc. The magic storage can even craft items for you!
+
+The magic storage scales as you progress in your playthrough. It is accessible very early in the game, but with limited power. As you defeat bosses and earn more materials, you will be able to upgrade your storage to perform more functions and more easily expand the storage capacity.
+
+Are you unable to keep track of the dozens of crafting stations in your base? This mod will help you to keep track of all of them with its Combined Crafting Stations! The Combined Crafting Stations combine the functionality of several crafting stations into each tier, with the next tier having all of the previous tiers' crafting stations.
+
+=== IMPORTANT ===
+Please report bugs/issues to this mod's Discord server: https://discord.gg/FemPG7eev4
+
+The 1.4 version of Magic Storage merges the Magic Storage and Magic Storage - Extra mods from 1.3 tModLoader
+
+=== MAGIC STORAGE TEAM ===
+[b]blushiemagic[/b]
+- Mod Author
+[b]absoluteAquarian[/b]
+- Official maintainer for Magic Storage
+[b]wvlad[/b]
+- Responsible for important fixes that were integrated into Magic Storage - Extra
+[b]Exterminator[/b]
+- Developer for Magic Storage - Extra
+[b]AdipemDragon[/b]
+- Created most of the sprites used in the mod
+[b]Yowave[/b]
+- Created bug fixes and optimizations for the mod during absoluteAquarian's hiatus from 20Oct2021-15Dec2021
+
+TODO:
+Blacklist/Whitelist for specific accesses
+Wait for bug reports

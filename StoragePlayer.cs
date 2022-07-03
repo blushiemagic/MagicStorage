@@ -1,4 +1,5 @@
 using MagicStorage.Components;
+using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -101,8 +102,22 @@ namespace MagicStorage
 			StorageGUI.RefreshItems();
 		}
 
+		//Intended to only be used with StorageHeartAccessWrapper
+		internal void OpenStorageUnsafely(Point16 point) {
+			storageAccess = point;
+			remoteAccess = true;
+
+			StorageGUI.RefreshItems();
+		}
+
 		public void CloseStorage()
 		{
+			if (StorageEnvironment()) {
+				NetHelper.ClientRequestForceCraftingGUIRefresh();
+
+				EnvironmentGUI.currentAccess = null;
+			}
+
 			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
 		}
@@ -141,7 +156,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (MagicCache.CanCombine(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
+			if (ItemCombining.CanCombineItems(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
 			{
 				Main.mouseItem.stack += item.stack;
 				return;
@@ -203,5 +218,75 @@ namespace MagicStorage
 		}
 
 		public static bool IsStorageCrafting() => StoragePlayer.LocalPlayer.StorageCrafting();
+
+		public bool StorageEnvironment() {
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return false;
+			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
+			return tile.HasTile && tile.TileType == ModContent.TileType<EnvironmentAccess>();
+		}
+
+		public static bool IsStorageEnvironment() => StoragePlayer.LocalPlayer.StorageEnvironment();
+
+		public class StorageHeartAccessWrapper {
+			public Point16 Storage { get; private set; }
+
+			public Point16 HeartLocation { get; private set; }
+
+			public bool Valid => Storage.X >= 0 && Storage.Y >= 0 && HeartLocation.X >= 0 && HeartLocation.Y >= 0;
+
+			public TEStorageHeart Heart => Valid && TileEntity.ByPosition.TryGetValue(HeartLocation, out TileEntity te) && te is TEStorageHeart heart ? heart : null;
+
+			private Point16 oldPosition = Point16.NegativeOne;
+			private bool oldRemote = false, oldCrafting = false;
+
+			public StorageHeartAccessWrapper(TEStorageHeart heart) {
+				Storage = HeartLocation = heart?.Position ?? Point16.NegativeOne;
+			}
+
+			public StorageHeartAccessWrapper(TEStorageCenter center) {
+				Storage = center?.Position ?? Point16.NegativeOne;
+				HeartLocation = center?.GetHeart()?.Position ?? Point16.NegativeOne;
+			}
+
+			public StorageHeartAccessWrapper(TECraftingAccess crafting) {
+				Storage = crafting?.Position ?? Point16.NegativeOne;
+
+				TEStorageHeart newHeart = crafting is not null ? ModContent.GetInstance<CraftingAccess>().GetHeart(crafting.Position.X, crafting.Position.Y) : null;
+
+				HeartLocation = newHeart?.Position ?? Point16.NegativeOne;
+			}
+
+			public IDisposable OpenStorage() {
+				oldPosition = LocalPlayer.ViewingStorage();
+				oldRemote = LocalPlayer.remoteAccess;
+				oldCrafting = LocalPlayer.remoteCrafting;
+				LocalPlayer.OpenStorageUnsafely(Storage);
+
+				return new Disposable(this);
+			}
+
+			public void CloseStorage() {
+				if (Storage != Point16.NegativeOne && oldPosition != Point16.NegativeOne) {
+					LocalPlayer.OpenStorageUnsafely(oldPosition);
+					LocalPlayer.remoteAccess = oldRemote;
+					LocalPlayer.remoteCrafting = oldCrafting;
+
+					Storage = Point16.NegativeOne;
+					HeartLocation = Point16.NegativeOne;
+					oldPosition = Point16.NegativeOne;
+					oldRemote = false;
+					oldCrafting = false;
+				}
+			}
+
+			private class Disposable : IDisposable {
+				public readonly StorageHeartAccessWrapper wrapper;
+
+				public Disposable(StorageHeartAccessWrapper wrapper) => this.wrapper = wrapper;
+
+				public void Dispose() => wrapper.CloseStorage();
+			}
+		}
 	}
 }

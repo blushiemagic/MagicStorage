@@ -4,6 +4,7 @@ using MagicStorage.Stations;
 using System;
 using System.IO;
 using Terraria;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -16,7 +17,7 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		// TODO: text prompt to input exact amount of items wanted (hint: make prompt update to max possible, should a user input more, and to 0 should a user input a negative number/invalid string)
+		public static readonly Recipe.Condition HasCampfire = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire);
 
 		public override void Load()
 		{
@@ -24,7 +25,7 @@ namespace MagicStorage {
 
 			//Census mod support
 			if (ModLoader.TryGetMod("Census", out Mod Census)) {
-				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a Magic Storage item and [i/s50:{ItemID.SilverCoin}] in your inventory");
+				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a [rg:MagicStorage:AnyChest] and [i/s50:{ItemID.SilverCoin}] in your inventory");
 			}
 		}
 
@@ -32,18 +33,24 @@ namespace MagicStorage {
 		{
 			StorageGUI.Unload();
 			CraftingGUI.Unload();
+			EnvironmentGUI.Unload();
+
+			EnvironmentModuleLoader.Unload();
+
+			ItemCombining.combiningObjectsByType = null!;
+			ItemCombining.NextID = 0;
 		}
 
 		public override void AddRecipes()
 		{
-#if TML_2022_05
-			CreateRecipe(ItemID.CookedMarshmallow)
-#else
 			Recipe.Create(ItemID.CookedMarshmallow)
-#endif
 				.AddIngredient(ItemID.Marshmallow)
-				.AddCondition(new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire))
+				.AddCondition(HasCampfire)
 				.Register();
+		}
+
+		public override void PostSetupContent() {
+			EnvironmentGUI.Initialize();
 		}
 
 		public override void PostAddRecipes()
@@ -58,11 +65,7 @@ namespace MagicStorage {
 
 				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 				{
-#if TML_2022_05
-					Recipe copy = CloneRecipe(recipe);
-#else
 					Recipe copy = recipe.Clone();
-#endif
 
 					copy.requiredTile.Clear(); // Should this be cleared?
 					copy.AddTile<CombinedStations4Tile>();
@@ -398,7 +401,7 @@ namespace MagicStorage {
 			string function = "";
 
 			void TryParseAs<T>(int arg, out T value) {
-				if (args.Length < arg)
+				if (args.Length < arg + 1)
 					throw new ArgumentException($"Call \"{function}\" requires at least {arg} arguments");
 
 				if (args[arg] is T v)
@@ -407,15 +410,59 @@ namespace MagicStorage {
 					throw new ArgumentException($"Call requires argument #{arg + 1} to be of type {typeof(T).GetSimplifiedGenericTypeName()}");
 			}
 
+			void ThrowWithMessage(string message, int argument = -1) {
+				if (argument < 0)
+					throw new ArgumentException($"Call \"{function}\" could not be performed.\nReason: {message}");
+				else
+					throw new ArgumentException($"Call \"{function}\" had an invalid value for argument #{argument}\nReason: {message}");
+			}
+
 			TryParseAs(0, out function);
 
 			switch (function) {
-				case "Register Sorting":
-					TryParseAs(1, out int itemType);
-					TryParseAs(2, out Func<Item, Item, bool> canCombine);
+				case "Prevent Shadow Diamond Drop":
+					if (args.Length != 2)
+						ThrowWithMessage("Expected 2 arguments");
 
-					MagicCache.canCombineByType[itemType] = canCombine;
+					TryParseAs(1, out int npcID);
+
+					if (npcID < 0)
+						ThrowWithMessage("NPC ID must be positive", 1);
+					else if (npcID < NPCID.Count)
+						ThrowWithMessage("NPC ID must refer to a modded NPC ID", 1);
+
+					StorageWorld.disallowDropModded.Add(npcID);
 					break;
+				case "Set Shadow Diamond Drop Rule":
+					if (args.Length != 3)
+						ThrowWithMessage("Expected 3 arguments");
+
+					TryParseAs(1, out npcID);
+					TryParseAs(2, out IItemDropRule rule);
+
+					if (npcID < 0)
+						ThrowWithMessage("NPC ID must be positive", 1);
+					else if (npcID < NPCID.Count)
+						ThrowWithMessage("NPC ID must refer to a vanilla NPC ID", 1);
+
+					StorageWorld.moddedDiamondDropRulesByType.Add(npcID, rule);
+					break;
+				case "Get Shadow Diamond Drop Rule":
+					if (args.Length < 2 || args.Length > 3)
+						ThrowWithMessage("Expected 2 or 3 arguments");
+
+					TryParseAs(1, out int dropNormal);
+					int dropExpert = -1;
+
+					if (args.Length == 3)
+						TryParseAs(2, out dropExpert);
+
+					if (dropNormal < 1)
+						ThrowWithMessage("Normal mode drop stack must be positive");
+
+					return ShadowDiamondDrop.DropDiamond(dropNormal, dropExpert);
+				case "Get Campfire Condition":
+					return HasCampfire;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
 			}

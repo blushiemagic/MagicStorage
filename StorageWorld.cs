@@ -1,11 +1,16 @@
-﻿using Terraria.ModLoader;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Terraria;
+using Terraria.GameContent.ItemDropRules;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
 	public class StorageWorld : ModSystem
 	{
-		private const int SaveVersion = 0;
 		public static bool kingSlimeDiamond;
 		public static bool boss1Diamond;
 		public static bool boss2Diamond;
@@ -25,6 +30,19 @@ namespace MagicStorage
 		public static bool queenSlimeDiamond;
 		public static bool empressDiamond;
 
+		//Modded support
+		public static HashSet<int> moddedDiamonds;
+
+		internal static HashSet<int> disallowDropModded;
+		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
+		internal static Dictionary<int, IItemDropRule> moddedDiamondDropRulesByType;
+
+		public override void Load() {
+			disallowDropModded = new();
+			moddedDiamondsDroppedByType = new();
+			moddedDiamondDropRulesByType = new();
+		}
+
 		public override void OnWorldLoad()
 		{
 			kingSlimeDiamond = false;
@@ -43,11 +61,12 @@ namespace MagicStorage
 			moonlordDiamond = false;
 			queenSlimeDiamond = false;
 			empressDiamond = false;
+
+			moddedDiamonds = new();
 		}
 
 		public override void SaveWorldData(TagCompound tag)
 		{
-			tag["saveVersion"] = SaveVersion;
 			tag["kingSlimeDiamond"] = kingSlimeDiamond;
 			tag["boss1Diamond"] = boss1Diamond;
 			tag["boss2Diamond"] = boss2Diamond;
@@ -64,6 +83,7 @@ namespace MagicStorage
 			tag["moonlordDiamond"] = moonlordDiamond;
 			tag["queenSlimeDiamond"] = queenSlimeDiamond;
 			tag["empressDiamond"] = empressDiamond;
+			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").ToList();
 		}
 
 		public override void LoadWorldData(TagCompound tag)
@@ -84,6 +104,44 @@ namespace MagicStorage
 			moonlordDiamond = tag.GetBool("moonlordDiamond");
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
+
+			if (tag.GetList<string>("modded") is List<string> list) {
+				foreach (string identifier in list) {
+					string[] split = identifier.Split(':');
+
+					if (split.Length != 2)
+						continue;
+
+					if (ModLoader.TryGetMod(split[0], out Mod source) && source.TryFind(split[1], out ModNPC npc))
+						moddedDiamonds.Add(npc.Type);
+				}
+			}
+		}
+
+		public override void NetSend(BinaryWriter writer) {
+			BitsByte bb = new(kingSlimeDiamond, boss1Diamond, boss2Diamond, boss3Diamond, queenBeeDiamond, hardmodeDiamond, mechBoss1Diamond, mechBoss2Diamond);
+			writer.Write(bb);
+
+			bb = new(mechBoss3Diamond, plantBossDiamond, golemBossDiamond, fishronDiamond, ancientCultistDiamond, moonlordDiamond, queenSlimeDiamond, empressDiamond);
+			writer.Write(bb);
+
+			writer.Write((ushort)moddedDiamonds.Count);
+			foreach (int modded in moddedDiamonds)
+				writer.Write(modded);
+		}
+
+		public override void NetReceive(BinaryReader reader) {
+			BitsByte bb = reader.ReadByte();
+			bb.Retrieve(ref kingSlimeDiamond, ref boss1Diamond, ref boss2Diamond, ref boss3Diamond, ref queenBeeDiamond, ref hardmodeDiamond, ref mechBoss1Diamond, ref mechBoss2Diamond);
+
+			bb = reader.ReadByte();
+			bb.Retrieve(ref mechBoss3Diamond, ref plantBossDiamond, ref golemBossDiamond, ref fishronDiamond, ref ancientCultistDiamond, ref moonlordDiamond, ref queenSlimeDiamond, ref empressDiamond);
+
+			moddedDiamonds.Clear();
+			ushort moddedCount = reader.ReadUInt16();
+
+			for (int i = 0; i < moddedCount; i++)
+				moddedDiamonds.Add(reader.ReadInt32());
 		}
 	}
 }

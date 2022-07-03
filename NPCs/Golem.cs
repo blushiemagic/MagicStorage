@@ -17,19 +17,19 @@ namespace MagicStorage.NPCs {
 	[AutoloadHead]
 	internal class Golem : ModNPC {
 		public override void SetStaticDefaults() {
-			Main.npcFrameCount[Type] = 26;
+			Main.npcFrameCount[Type] = 25;
 
 			// Generally for Town NPCs, but this is how the NPC does extra things such as sitting in a chair and talking to other NPCs.
 			NPCID.Sets.ExtraFramesCount[Type] = 10;
-			NPCID.Sets.AttackFrameCount[Type] = 5;
+			NPCID.Sets.AttackFrameCount[Type] = 4;
 			// The amount of pixels away from the center of the npc that it tries to attack enemies.
-			NPCID.Sets.DangerDetectRange[Type] = 4 * 16;
-			NPCID.Sets.AttackType[Type] = 3;
+			NPCID.Sets.DangerDetectRange[Type] = 7 * 16;
+			NPCID.Sets.AttackType[Type] = 1;
 			// The amount of time it takes for the NPC's attack animation to be over once it starts.
 			NPCID.Sets.AttackTime[Type] = 20;
 			NPCID.Sets.AttackAverageChance[Type] = 30;
 			// For when a party is active, the party hat spawns at a Y offset.
-			NPCID.Sets.HatOffsetY[Type] = 4;
+			NPCID.Sets.HatOffsetY[Type] = -7;
 
 			// Influences how the NPC looks in the Bestiary
 			NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new NPCID.Sets.NPCBestiaryDrawModifiers(0) {
@@ -53,7 +53,7 @@ namespace MagicStorage.NPCs {
 		public override void SetDefaults() {
 			NPC.townNPC = true; // Sets NPC to be a Town NPC
 			NPC.friendly = true; // NPC Will not attack player
-			NPC.width = 18;
+			NPC.width = 36;
 			NPC.height = 40;
 			NPC.aiStyle = 7;
 			NPC.damage = 10;
@@ -79,6 +79,10 @@ namespace MagicStorage.NPCs {
 			});
 		}
 
+		public override void PostAI() {
+			Lighting.AddLight(NPC.Center, (Color.Orange * 0.3f).ToVector3());
+		}
+
 		public override void HitEffect(int hitDirection, double damage) {
 			int num = NPC.life > 0 ? 1 : 5;
 
@@ -87,16 +91,17 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override bool CanTownNPCSpawn(int numTownNPCs, int money) {
-			// Requirements for the town NPC to spawn.
-			MagicStorage magicMod = MagicStorage.Instance;
+			if (!MagicStorageServerConfig.AllowAutomatonToMoveIn)
+				return false;
 
+			// Requirements for the town NPC to spawn.
 			for (int k = 0; k < 255; k++) {
 				Player player = Main.player[k];
 				if (!player.active)
 					continue;
 
-				// Player has to have any item from Magic Storage in their inventory and at least 50 silvers for the NPC to spawn
-				if (player.inventory.Any(item => !item.IsAir && item.ModItem?.Mod == magicMod))
+				// Player has to have a chest and at least 50 silvers for the NPC to spawn
+				if (player.inventory.Any(item => !item.IsAir && item.createTile >= TileID.Dirt && TileID.Sets.BasicChest[item.createTile]))
 					return money >= Item.buyPrice(silver: 50);
 			}
 
@@ -148,12 +153,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 17;
+		public const int maxHelp = 18;
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
-			int guide = NPC.FindFirstNPC(NPCID.Guide);
-			string guideName = guide >= 0 ? Main.npc[guide].GivenName : "a Guide";
-
 			if (firstButton)
 				helpOption++;
 			else
@@ -164,10 +166,7 @@ namespace MagicStorage.NPCs {
 			else if (helpOption < 1)
 				helpOption = 1;
 
-			Main.npcChatText = helpOption switch {
-				1 => Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help1", guideName),
-				_ => Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + helpOption)
-			};
+			Main.npcChatText = Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + helpOption);
 
 			Main.npcChatCornerItem = helpOption switch {
 				1 => ModContent.ItemType<StorageComponent>(),
@@ -187,6 +186,7 @@ namespace MagicStorage.NPCs {
 				13 => ModContent.ItemType<RemoteAccess>(),
 				14 => ModContent.ItemType<StorageDeactivator>(),
 				17 => ModContent.ItemType<RadiantJewel>(),
+				18 => ModContent.ItemType<EnvironmentAccess>(),
 				_ => 0
 			};
 		}
@@ -212,6 +212,30 @@ namespace MagicStorage.NPCs {
 		public override void TownNPCAttackSwing(ref int itemWidth, ref int itemHeight) {
 			itemWidth = 48;
 			itemHeight = 48;
+		}
+
+		public override void PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
+			float npcHeight = Main.NPCAddHeight(NPC);
+
+			Texture2D texture = TextureAssets.Npc[Type].Value;
+
+			Vector2 halfSize = new(texture.Width / 2, texture.Height / Main.npcFrameCount[Type] / 2);
+
+			SpriteEffects spriteEffects = SpriteEffects.None;
+			if (NPC.spriteDirection == 1)
+				spriteEffects = SpriteEffects.FlipHorizontally;
+
+			Texture2D glow = ModContent.Request<Texture2D>(Texture + "_Glow").Value;
+
+			spriteBatch.Draw(glow,
+				new Vector2(NPC.Center.X - glow.Width * NPC.scale / 2f, NPC.Bottom.Y - glow.Height * NPC.scale / Main.npcFrameCount[Type] + 4f + npcHeight + NPC.gfxOffY) - screenPos + halfSize * NPC.scale,
+				NPC.frame,
+				Color.White,
+				NPC.rotation,
+				halfSize,
+				NPC.scale,
+				spriteEffects,
+				0f);
 		}
 	}
 

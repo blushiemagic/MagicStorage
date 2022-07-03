@@ -31,6 +31,11 @@ public class MarshmallowStickILEdit : ILoadable
 
 	private void ILPlayerOnItemCheck_ApplyHoldStyle_Inner(ILContext il)
 	{
+		//Ignore this IL edit if not building on release (Stable/Preview)
+		//Can't check if tML was built for Debug or Release, so this is the next best thing
+		if (BuildInfo.IsDev)
+			return;
+
 		//Jump forward and grab an instruction so we can use it as the branch target
 		ILCursor c = new(il);
 

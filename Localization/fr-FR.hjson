@@ -196,7 +196,7 @@ Mods: {
 		Bestiary: {
 			# Golem:
 			# '''
-			# A living automaton constructed from storage components, powered by the elusive Bluemagic.
+			# A living automaton powered by the elusive Bluemagic.
 			# It can teach you all there is to know about Magic Storage.
 			# '''
 		}
@@ -207,6 +207,81 @@ Mods: {
 				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
 				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
 				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				# Help1:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help2:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help3:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help4:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help5:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help6:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help7:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help8:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help9:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help10:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help11:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help12:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help13:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help14:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help15:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help16:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help17:
+				# '''
+				# (See en-US translation)
+				# '''
+			}
+
+			ChatOptions: {
+				Golem: {
+					# NextHelp: Next
+					# PrevHelp: Previous
+				}
 			}
 		}
 
@@ -269,6 +344,15 @@ Mods: {
 		Ingredients: "Ingrédients"
 		StoredItems: "Ingrédients Stockés"
 		# ShowOnlyFavorited: "Only Favorited"
+
+		# RecipeHidden:
+		# '''
+		# Recipe for item "{0}" was blacklisted.
+		# '''
+		# RecipeRevealed:
+		# '''
+		# Recipe for item "{0}" was whitelisted.
+		# '''
 
 		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"

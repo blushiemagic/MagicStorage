@@ -176,6 +176,8 @@ namespace MagicStorage
 
 			capacityText.SetText(Language.GetTextValue("Mods.MagicStorage.Capacity", numItems, capacity));
 			bottomBar.Append(capacityText);
+
+			basePanel.Activate();
 		}
 
 		private static void InitLangStuff()
@@ -210,7 +212,7 @@ namespace MagicStorage
 		{
 			oldMouse = curMouse;
 			curMouse = Mouse.GetState();
-			if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting())
+			if (Main.playerInventory && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && !StoragePlayer.IsStorageCrafting() && !StoragePlayer.IsStorageEnvironment())
 			{
 				if (curMouse.RightButton == ButtonState.Released)
 					ResetSlotFocus();
@@ -300,13 +302,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static TEStorageHeart GetHeart()
-		{
-			// TODO can be one line expression body
-			Player player = Main.LocalPlayer;
-			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
-			return modPlayer.GetStorageHeart();
-		}
+		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
 		public static void RefreshItems()
 		{
@@ -315,6 +311,9 @@ namespace MagicStorage
 				CraftingGUI.RefreshItems();
 				return;
 			}
+
+			if (StoragePlayer.IsStorageEnvironment())
+				return;
 
 			items.Clear();
 			didMatCheck.Clear();
@@ -513,12 +512,71 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool TryDeposit(Item item)
+		/// <summary>
+		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
+		/// </summary>
+		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
+		/// <param name="item">The item to deposit</param>
+		/// <returns>Whether the deposit was successful</returns>
+		public static bool TryDespoit(TEStorageCenter center, Item item) {
+			if (center is null)
+				return false;
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
+
+			if (wrapper.Valid) {
+				int oldStack = item.stack;
+				TEStorageHeart heart = wrapper.Heart;
+				heart.TryDeposit(item);
+				return oldStack != item.stack;
+			}
+			
+			return false;
+		}
+
+		/// <summary>
+		/// Simulates a deposit attempt into the currently assigned Storage Heart.
+		/// </summary>
+		/// <param name="item">The item to deposit</param>
+		/// <returns>Whether the deposit was successful</returns>
+		public static bool TryDeposit(Item item)
 		{
 			int oldStack = item.stack;
 			TEStorageHeart heart = GetHeart();
 			heart.TryDeposit(item);
 			return oldStack != item.stack;
+		}
+
+		/// <summary>
+		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
+		/// </summary>
+		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
+		/// <param name="items">The items to deposit</param>
+		/// <returns>Whether the deposit was successful</returns>
+		public static bool TryDeposit(TEStorageCenter center, List<Item> items)
+		{
+			if (center is null)
+				return false;
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
+
+			if (wrapper.Valid) {
+				TEStorageHeart heart = wrapper.Heart;
+				return heart.TryDeposit(items);
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Simulates a deposit attempt into the currently assigned Storage Heart.
+		/// </summary>
+		/// <param name="items">The items to deposit</param>
+		/// <returns>Whether the deposit was successful</returns>
+		public static bool TryDeposit(List<Item> items)
+		{
+			TEStorageHeart heart = GetHeart();
+			return heart.TryDeposit(items);
 		}
 
 		private static bool TryDepositAll(bool quickStack)
@@ -562,7 +620,43 @@ namespace MagicStorage
 			return changed;
 		}
 
-		private static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
+		/// <summary>
+		/// Attempts to withdraw an item from a storage center (Storage Heart, Storage Access, etc.).
+		/// </summary>
+		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
+		/// <param name="item">The item to withdraw</param>
+		/// <param name="toInventory">
+		/// Whether the item goes into the player inventory.
+		/// This parameter is only used if <see cref="Main.netMode"/> is <see cref="NetmodeID.MultiplayerClient"/>
+		/// </param>
+		/// <param name="keepOneIfFavorite">Whether at least one item should remain in the storage if it's favourited</param>
+		/// <returns>A valid item instance if the withdrawal was succesful, an air item otherwise.</returns>
+		public static Item DoWithdraw(TEStorageCenter center, Item item, bool toInventory = false, bool keepOneIfFavorite = false)
+		{
+			if (center is null)
+				return new Item();
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
+
+			if (wrapper.Valid) {
+				TEStorageHeart heart = wrapper.Heart;
+				return heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
+			}
+
+			return new Item();
+		}
+
+		/// <summary>
+		/// Attempts to withdraw an item from the currently assigned Storage Heart.
+		/// </summary>
+		/// <param name="item">The item to withdraw</param>
+		/// <param name="toInventory">
+		/// Whether the item goes into the player inventory.
+		/// This parameter is only used if <see cref="Main.netMode"/> is <see cref="NetmodeID.MultiplayerClient"/>
+		/// </param>
+		/// <param name="keepOneIfFavorite">Whether at least one item should remain in the storage if it's favourited</param>
+		/// <returns>A valid item instance if the withdrawal was succesful, an air item otherwise.</returns>
+		public static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
 			TEStorageHeart heart = GetHeart();
 			return heart.TryWithdraw(item, keepOneIfFavorite, toInventory);

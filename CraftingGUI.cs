@@ -391,6 +391,9 @@ namespace MagicStorage
 			craftReset.PaddingTop = 8f;
 			craftReset.PaddingBottom = 8f;
 			recipePanel.Append(craftReset);
+
+			basePanel.Activate();
+			recipePanel.Activate();
 		}
 
 		private static void InitLangStuff()
@@ -485,6 +488,8 @@ namespace MagicStorage
 					craftAmountTarget = 1;
 					ResetSlotFocus();
 				}
+
+				PlayerZoneCache.FreeCache(true);
 			}
 			catch (Exception e)
 			{
@@ -852,7 +857,7 @@ namespace MagicStorage
 		}
 
 		private static void ClickAmountButton(int amount, bool offset) {
-			if (offset && craftAmountTarget > 1)
+			if (offset && (amount == 1 || craftAmountTarget > 1))
 				craftAmountTarget += amount;
 			else
 				craftAmountTarget = amount;  //Snap directly to the amount if the amount target was 1 (this makes clicking 10 when at 1 just go to 10 instead of 11)
@@ -884,7 +889,13 @@ namespace MagicStorage
 			if (heart == null)
 				return;
 
-			items.AddRange(ItemSorter.SortAndFilter(heart.GetStoredItems(), SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
+
+			IEnumerable<Item> itemsWithSimulators = heart.GetStoredItems().Select(i => i.Clone())
+				.Concat(heart.GetModules()
+					.SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>()));
+
+			items.AddRange(ItemSorter.SortAndFilter(itemsWithSimulators, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
 			AnalyzeIngredients();
 			InitLangStuff();
@@ -895,6 +906,11 @@ namespace MagicStorage
 			RefreshStorageItems();
 
 			RefreshRecipes();
+
+			if (heart is not null) {
+				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+					environment.ResetPlayer(sandbox);
+			}
 		}
 
 		private static void RefreshRecipes()
@@ -1060,7 +1076,7 @@ namespace MagicStorage
 						graveyard = true;
 					}
 
-					bool[] oldAdjTile = player.adjTile;
+					bool[] oldAdjTile = (bool[])player.adjTile.Clone();
 					bool oldAdjWater = adjWater;
 					bool oldAdjLava = adjLava;
 					bool oldAdjHoney = adjHoney;
@@ -1100,19 +1116,21 @@ namespace MagicStorage
 						adjWater = true;
 						break;
 					case ItemID.LavaBucket:
+					case ItemID.BottomlessLavaBucket:
 						adjLava = true;
 						break;
 					case ItemID.HoneyBucket:
 						adjHoney = true;
 						break;
 				}
-				if (item.type == ModContent.ItemType<SnowBiomeEmulator>() || item.type == ModContent.ItemType<BiomeGlobe>())
+				if (item.type == ModContent.ItemType<SnowBiomeEmulator>())
 				{
 					zoneSnow = true;
 				}
 
 				if (item.type == ModContent.ItemType<BiomeGlobe>())
 				{
+					zoneSnow = true;
 					graveyard = true;
 					Campfire = true;
 					adjWater = true;
@@ -1123,7 +1141,26 @@ namespace MagicStorage
 					adjTiles[TileID.DemonAltar] = true;
 				}
 			}
+
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
+
+			TEStorageHeart heart = GetHeart();
+			EnvironmentSandbox sandbox = new(player, heart);
+			CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
+
+			if (heart is not null) {
+				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+					environment.ModifyCraftingZones(sandbox, ref information);
+			}
+
+			Campfire = information.campfire;
+			zoneSnow = information.snow;
+			graveyard = information.graveyard;
+			adjWater = information.water;
+			adjLava = information.lava;
+			adjHoney = information.honey;
+			alchemyTable = information.alchemyTable;
+			adjTiles = information.adjTiles;
 		}
 
 		public static bool IsAvailable(Recipe recipe, bool checkCompound = true)
@@ -1150,60 +1187,90 @@ namespace MagicStorage
 
 				if (!useRecipeGroup && itemCounts.TryGetValue(ingredient.type, out int amount))
 					stack -= amount;
+
 				if (stack > 0)
 					return false;
 			}
 
-
 			bool retValue = true;
 
-			ExecuteInCraftingGuiEnvironment(() =>
-			{
-				if (retValue && !RecipeLoader.RecipeAvailable(recipe))
+			ExecuteInCraftingGuiEnvironment(() => {
+				if (!RecipeLoader.RecipeAvailable(recipe))
 					retValue = false;
 			});
 
 			return retValue;
 		}
 
-		public static void ExecuteInCraftingGuiEnvironment(Action action)
+		public class PlayerZoneCache {
+			public readonly bool[] origAdjTile;
+			public readonly bool oldAdjWater;
+			public readonly bool oldAdjLava;
+			public readonly bool oldAdjHoney;
+			public readonly bool oldAlchemyTable;
+			public readonly bool oldSnow;
+			public readonly bool oldGraveyard;
+
+			private PlayerZoneCache() {
+				Player player = Main.LocalPlayer;
+				origAdjTile = player.adjTile;
+				oldAdjWater = player.adjWater;
+				oldAdjLava = player.adjLava;
+				oldAdjHoney = player.adjHoney;
+				oldAlchemyTable = player.alchemyTable;
+				oldSnow = player.ZoneSnow;
+				oldGraveyard = player.ZoneGraveyard;
+			}
+
+			private static PlayerZoneCache cache;
+
+			public static void Cache() {
+				if (cache is not null)
+					return;
+
+				cache = new PlayerZoneCache();
+			}
+
+			public static void FreeCache(bool destroy) {
+				if (cache is not PlayerZoneCache c)
+					return;
+
+				if (destroy)
+					cache = null;
+
+				Player player = Main.LocalPlayer;
+
+				player.adjTile = c.origAdjTile;
+				player.adjWater = c.oldAdjWater;
+				player.adjLava = c.oldAdjLava;
+				player.adjHoney = c.oldAdjHoney;
+				player.alchemyTable = c.oldAlchemyTable;
+				player.ZoneSnow = c.oldSnow;
+				player.ZoneGraveyard = c.oldGraveyard;
+			}
+		}
+
+		internal static void ExecuteInCraftingGuiEnvironment(Action action)
 		{
 			ArgumentNullException.ThrowIfNull(action);
 
-			// TODO: figure out a way to remove this lock
-			// can't really do it with this design because this method runs many times in parallel
-			lock (BlockRecipes.ActiveLock)
+			Player player = Main.LocalPlayer;
+
+			PlayerZoneCache.Cache();
+
+			try
 			{
-				Player player = Main.LocalPlayer;
-				bool[] origAdjTile = player.adjTile;
+				player.adjTile = adjTiles;
+				player.adjWater = adjWater;
+				player.adjLava = adjLava;
+				player.adjHoney = adjHoney;
+				player.alchemyTable = alchemyTable;
+				player.ZoneSnow = zoneSnow;
+				player.ZoneGraveyard = graveyard;
 
-				try
-				{
-					player.adjTile = adjTiles;
-
-					// TODO: test if this allows environmental effects such as nearby water
-					if (adjWater)
-						player.adjWater = true;
-					if (adjLava)
-						player.adjLava = true;
-					if (adjHoney)
-						player.adjHoney = true;
-					if (alchemyTable)
-						player.alchemyTable = true;
-					if (zoneSnow)
-						player.ZoneSnow = true;
-					if (graveyard)
-						player.ZoneGraveyard = true;
-
-					BlockRecipes.Active = false;
-					action();
-				}
-				finally
-				{
-					BlockRecipes.Active = true;
-					player.adjTile = origAdjTile;
-				}
+				action();
 			}
+			finally { }
 		}
 
 		private static bool PassesBlock(Recipe recipe)
@@ -1336,13 +1403,19 @@ namespace MagicStorage
 					{
 						if (recipeButtons.Choice == RecipeButtonsBlacklistChoice)
 						{
-							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Remove(recipe.createItem)) {
+								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(recipe.createItem.type)));
+
 								RefreshItems();
+							}
 						}
 						else
 						{
-							if (storagePlayer.HiddenRecipes.Add(recipe.createItem))
+							if (storagePlayer.HiddenRecipes.Add(recipe.createItem)) {
+								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(recipe.createItem.type)));
+
 								RefreshItems();
+							}
 						}
 					}
 					else
@@ -1553,7 +1626,7 @@ namespace MagicStorage
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (ItemData.Matches(item, existing)) {
+					if (ItemCombining.CanCombineItems(item, existing)) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							existing.stack += item.stack;
 							item.stack = 0;
@@ -1579,12 +1652,40 @@ namespace MagicStorage
 			return compacted;
 		}
 
+		/// <summary>
+		/// Attempts to craft a certain amount of items from a Crafting Access
+		/// </summary>
+		/// <param name="craftingAccess">The tile entity for the Crafting Access to craft items from</param>
+		/// <param name="toCraft">How many items should be crafted</param>
+		public static void Craft(TECraftingAccess craftingAccess, int toCraft) {
+			if (craftingAccess is null)
+				return;
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(craftingAccess);
+
+			//OpenStorage() handles setting the CraftingGUI to use the new storage and Dispose()/CloseStorage() handles reverting it back
+			if (wrapper.Valid) {
+				using (wrapper.OpenStorage())
+					Craft(toCraft);
+			}
+		}
+
+		/// <summary>
+		/// Attempts to craft a certain amount of items from the currently assigned Crafting Access.
+		/// </summary>
+		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
-			var availableItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).Select(item => item.Clone()).ToList();
+			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
+			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			List<Item> toWithdraw = new(), results = new();
 
+			TEStorageHeart heart = GetHeart();
+			List<EnvironmentModule> modules = heart?.GetModules().ToList() ?? new();
+
+			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
+
 			while (toCraft > 0) {
-				if (!AttemptSingleCraft(availableItems, toWithdraw, results))
+				if (!AttemptSingleCraft(availableItems, sourceItems, toWithdraw, results, modules, sandbox))
 					break;  // Could not craft any more items
 
 				Item resultItem = selectedRecipe.createItem.Clone();
@@ -1614,9 +1715,13 @@ namespace MagicStorage
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, results);
 		}
 
-		private static bool AttemptSingleCraft(List<Item> available, List<Item> withdraw, List<Item> deposit) {
+		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<Item> withdraw, List<Item> results, List<EnvironmentModule> modules, EnvironmentSandbox sandbox) {
+			int index = -1;
+
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
+				index++;
+
 				int stack = reqItem.stack;
 
 				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);
@@ -1624,27 +1729,45 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (Item tryItem in available)
-				{
-					if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
+				foreach (var module in modules)
+					module.OnConsumeItemForRecipe(sandbox, source[index], stack);
+
+				bool AttemptToConsumeItem(List<Item> list, bool addToWithdraw) {
+					foreach (Item tryItem in list)
 					{
-						if (tryItem.stack > stack)
+						if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
 						{
-							Item temp = tryItem.Clone();
-							temp.stack = stack;
-							withdraw.Add(temp);
-							tryItem.stack -= stack;
-							stack = 0;
-						}
-						else
-						{
-							withdraw.Add(tryItem.Clone());
-							stack -= tryItem.stack;
-							tryItem.stack = 0;
-							tryItem.type = ItemID.None;
+							if (tryItem.stack > stack)
+							{
+								Item temp = tryItem.Clone();
+								temp.stack = stack;
+
+								if (addToWithdraw)
+									withdraw.Add(temp);
+								
+								tryItem.stack -= stack;
+								stack = 0;
+							}
+							else
+							{
+								if (addToWithdraw)
+									withdraw.Add(tryItem.Clone());
+								
+								stack -= tryItem.stack;
+								tryItem.stack = 0;
+								tryItem.type = ItemID.None;
+							}
+
+							if (stack <= 0)
+								break;
 						}
 					}
+
+					return stack <= 0;
 				}
+
+				if (!AttemptToConsumeItem(available, addToWithdraw: true))
+					AttemptToConsumeItem(results, addToWithdraw: false);
 
 				if (stack > 0)
 					return false;  // Did not have enough items

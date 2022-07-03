@@ -42,7 +42,9 @@ namespace MagicStorage
 					TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
 					if (heart is not null)
 					{
-						if (access is CraftingAccess)
+						if (access is EnvironmentAccess)
+							EnvironmentGUI.Draw();
+						else if (access is CraftingAccess)
 							CraftingGUI.Draw();
 						else
 							StorageGUI.Draw();

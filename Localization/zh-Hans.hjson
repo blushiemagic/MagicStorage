@@ -384,6 +384,15 @@ Mods: {
 		StoredItems: "存储中的材料"
 		ShowOnlyFavorited: "显示被收藏"
 
+		RecipeHidden:
+		'''
+		物品 "{0}" 的制作配方已被隐藏
+		'''
+		RecipeRevealed:
+		'''
+		物品 "{0}" 的制作配方已显示
+		'''
+
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
 

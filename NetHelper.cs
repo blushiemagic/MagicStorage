@@ -73,6 +73,9 @@ namespace MagicStorage
 				case MessageType.SyncStorageUnit:
 					ServerReciveSyncStorageUnit(reader, sender);
 					break;
+				case MessageType.ForceCraftingGUIRefresh:
+					ReceiveClientForceCraftingGUIRefresh(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
@@ -553,6 +556,36 @@ namespace MagicStorage
 		{
 			TileEntity.Read(reader, true);
 		}
+
+		public static void ClientRequestForceCraftingGUIRefresh() {
+			if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart) {
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.ForceCraftingGUIRefresh);
+
+				packet.Write(heart.Position.X);
+				packet.Write(heart.Position.Y);
+
+				packet.Send(ignoreClient: Main.myPlayer);
+			}
+		}
+
+		public static void ReceiveClientForceCraftingGUIRefresh(BinaryReader reader, int sender) {
+			Point16 storage = new(reader.ReadInt16(), reader.ReadInt16());
+
+			if (Main.netMode == NetmodeID.Server) {
+				//Forward the packet
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.ForceCraftingGUIRefresh);
+
+				packet.Write(storage.X);
+				packet.Write(storage.Y);
+
+				packet.Send(ignoreClient: sender);
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting())
+					CraftingGUI.RefreshItems();
+			}
+		}
 	}
 
 	internal enum MessageType : byte
@@ -570,6 +603,7 @@ namespace MagicStorage
 		CraftResult,
 		SectionRequest,
 		SyncStorageUnitToClinet,
-		SyncStorageUnit
+		SyncStorageUnit,
+		ForceCraftingGUIRefresh
 	}
 }

@@ -29,6 +29,7 @@ namespace MagicStorage.Stations
 		{
 			CreateRecipe()
 				.AddIngredient<CombinedStations1Item>()
+				.AddIngredient(ItemID.Hellforge)
 				.AddIngredient(ItemID.AlchemyTable)
 				.AddRecipeGroup("MagicStorage:AnyCookingPot")
 				.AddIngredient(ItemID.TinkerersWorkshop)
