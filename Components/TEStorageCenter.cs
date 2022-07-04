@@ -21,7 +21,8 @@ namespace MagicStorage.Components
 			Queue<Point16> toExplore = new();
 			foreach (Point16 point in AdjacentComponents())
 				toExplore.Enqueue(point);
-			bool changed = false;
+
+			NetHelper.StartUpdateQueue();
 
 			while (toExplore.Count > 0)
 			{
@@ -31,11 +32,8 @@ namespace MagicStorage.Components
 					explored.Add(explore);
 					if (ByPosition.TryGetValue(explore, out TileEntity te) && te is TEAbstractStorageUnit storageUnit)
 					{
-						if (storageUnit.Link(Position))
-						{
-							NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
-							changed = true;
-						}
+						storageUnit.Link(Position);
+						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 
 						storageUnits.Add(explore);
 						hashStorageUnits.Add(explore);
@@ -54,16 +52,13 @@ namespace MagicStorage.Components
 						storageUnit.Unlink();
 						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 					}
-
-					changed = true;
 				}
 
-			if (changed)
-			{
-				TEStorageHeart heart = GetHeart();
-				heart?.ResetCompactStage();
-				NetHelper.SendTEUpdate(ID, Position);
-			}
+			TEStorageHeart heart = GetHeart();
+			heart?.ResetCompactStage();
+			NetHelper.SendTEUpdate(ID, Position);
+
+			NetHelper.ProcessUpdateQueue();
 		}
 
 		public override void OnPlace()
