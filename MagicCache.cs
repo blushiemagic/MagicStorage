@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Sorting;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage;
@@ -22,6 +23,8 @@ public class MagicCache : ModSystem
 	public static Dictionary<Mod, Recipe[]> RecipesByMod { get; private set; } = null!;
 	public static Recipe[] VanillaRecipes { get; private set; } = null!;
 
+	public static Dictionary<int, Recipe[]> RecipesUsingItemType { get; private set; } = null!;
+
 	public override void Unload()
 	{
 		EnabledRecipes = null!;
@@ -35,6 +38,8 @@ public class MagicCache : ModSystem
 		IndexByMod = null!;
 		RecipesByMod = null!;
 		VanillaRecipes = null!;
+
+		RecipesUsingItemType = null!;
 	}
 
 	public override void PostSetupContent()
@@ -84,6 +89,10 @@ public class MagicCache : ModSystem
 		IndexByMod = AllMods
 			.Select((mod, index) => (mod, index))
 			.ToDictionary(x => x.mod, x => x.index);
+
+		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
+			.ToDictionary(kvp => kvp.Key, kvp => EnabledRecipes.Where(r => r.createItem.type == kvp.Key || r.requiredItem.Any(i => i.type == kvp.Key))
+				.ToArray());
 	}
 
 	private static void SetupSortFilterRecipeCache()

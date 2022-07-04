@@ -106,9 +106,9 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		private static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
+		internal static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
 
-		private static bool FilterMod(Item item, int modFilterIndex)
+		internal static bool FilterMod(Item item, int modFilterIndex)
 		{
 			if (modFilterIndex == ModSearchBox.ModIndexAll)
 				return true;

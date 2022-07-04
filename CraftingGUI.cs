@@ -913,8 +913,9 @@ namespace MagicStorage
 
 		private static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
 
-		public static void RefreshItems()
-		{
+		public static void RefreshItems() => RefreshItemsAndSpecificRecipes(null);
+
+		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
 			items.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
@@ -936,7 +937,10 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			RefreshRecipes();
+			if (toRefresh is null)
+				RefreshRecipes();  //Refresh all recipes
+			else
+				RefreshSpecificRecipes(toRefresh);
 
 			if (heart is not null) {
 				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
@@ -1047,6 +1051,81 @@ namespace MagicStorage
 			catch (Exception e)
 			{
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
+			}
+		}
+
+		private static void RefreshSpecificRecipes(Recipe[] toRefresh) {
+			//Assumes that the recipes are visible in the GUI
+			for (int i = 0; i < toRefresh.Length; i++) {
+				ref Recipe check = ref toRefresh[i];
+
+				if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.HasCompoundVariant(check))
+					check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);
+			}
+
+			bool needsResort = false;
+
+			foreach (Recipe recipe in toRefresh) {
+				Recipe orig = recipe;
+				Recipe check = recipe;
+
+				if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(check))
+					check = RecursiveCraftIntegration.GetOverriddenRecipe(check);  //Get the original recipe
+
+				if (check is null)
+					continue;
+
+				int index = recipes.IndexOf(orig);  //Compound recipe is not assigned to the original recipe list
+
+				if (!IsAvailable(check)) {
+					if (index >= 0) {
+						if (recipeButtons.Choice == RecipeButtonsAvailableChoice) {
+							//Remove the recipe
+							recipes.RemoveAt(index);
+							recipeAvailable.RemoveAt(index);
+						} else {
+							//Simply mark the recipe as unavailable
+							recipeAvailable[index] = false;
+						}
+					}
+				} else {
+					if (recipeButtons.Choice == RecipeButtonsAvailableChoice) {
+						//Add the recipe
+						recipes.Add(orig);
+						needsResort = true;
+					} else {
+						//Simply mark the recipe as available
+						recipeAvailable[index] = true;
+					}
+				}
+			}
+
+			if (needsResort) {
+				SortMode sortMode = (SortMode) sortButtons.Choice;
+				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
+				int modFilterIndex = modSearchBox.ModIndex;
+				var sortComparer = ItemSorter.GetSortFunction(sortMode);
+
+				var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
+				var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
+
+				var sorted = recipes
+					.AsParallel()
+					.AsOrdered()
+					.Where(recipe => ItemSorter.FilterName(recipe.createItem, searchBar.Text) && ItemSorter.FilterMod(recipe.createItem, modFilterIndex))
+					// show only blacklisted recipes only if choice = 2, otherwise show all other
+					.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
+					// show only favorited items if selected
+					.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
+					// favorites first
+					.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
+					.ThenBy(r => r.createItem, sortComparer);
+
+				recipes.Clear();
+				recipeAvailable.Clear();
+
+				recipes.AddRange(sorted);
+				recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
 			}
 		}
 
