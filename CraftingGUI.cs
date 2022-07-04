@@ -1061,13 +1061,6 @@ namespace MagicStorage
 
 		private static void RefreshSpecificRecipes(Recipe[] toRefresh) {
 			//Assumes that the recipes are visible in the GUI
-			for (int i = 0; i < toRefresh.Length; i++) {
-				ref Recipe check = ref toRefresh[i];
-
-				if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.HasCompoundVariant(check))
-					check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);
-			}
-
 			bool needsResort = false;
 
 			foreach (Recipe recipe in toRefresh) {
@@ -1075,7 +1068,7 @@ namespace MagicStorage
 				Recipe check = recipe;
 
 				if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(check))
-					check = RecursiveCraftIntegration.GetOverriddenRecipe(check);  //Get the original recipe
+					check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);  //Get the compound recipe
 
 				if (check is null)
 					continue;
@@ -1101,8 +1094,10 @@ namespace MagicStorage
 							needsResort = true;
 						}
 					} else {
-						//Simply mark the recipe as available
-						recipeAvailable[index] = true;
+						if (index >= 0) {
+							//Simply mark the recipe as available
+							recipeAvailable[index] = true;
+						}
 					}
 				}
 			}
