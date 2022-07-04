@@ -74,6 +74,9 @@ namespace MagicStorage.Items
 				case NPCID.EaterofWorldsHead:
 				case NPCID.EaterofWorldsBody:
 				case NPCID.EaterofWorldsTail:
+					if (npc.boss)
+						NPC.SetEventFlagCleared(ref StorageWorld.boss2Diamond, -1);
+					break;
 				case NPCID.BrainofCthulhu:
 					NPC.SetEventFlagCleared(ref StorageWorld.boss2Diamond, -1);
 					break;
