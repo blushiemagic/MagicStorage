@@ -25,11 +25,13 @@ namespace MagicStorage.Items
 				case NPCID.BrainofCthulhu:
 				case NPCID.SkeletronHead:
 				case NPCID.QueenBee:
+				case NPCID.Deerclops:
 					rule = DropDiamond(1);
 					break;
 				case NPCID.WallofFlesh:
 					rule = DropDiamond(2);
 					break;
+				// Hardmode
 				case NPCID.TheDestroyer:
 				case NPCID.Retinazer:
 				case NPCID.Spazmatism:
@@ -48,7 +50,7 @@ namespace MagicStorage.Items
 					rule = DropDiamond(2, 3);
 					break;
 				case NPCID.QueenSlimeBoss:
-				case NPCID.HallowBoss:
+				case NPCID.HallowBoss: // Empress of Light
 					rule = DropDiamond(1);
 					break;
 			}
