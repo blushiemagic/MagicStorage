@@ -1061,6 +1061,19 @@ namespace MagicStorage
 			//Assumes that the recipes are visible in the GUI
 			bool needsResort = false;
 
+			FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
+			int modFilterIndex = modSearchBox.ModIndex;
+
+			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
+			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
+
+			bool CanBeAdded(Recipe r) => Array.IndexOf(MagicCache.FilteredRecipesCache[filterMode], r) >= 0
+				&& ItemSorter.FilterName(r.createItem, searchBar.Text) && ItemSorter.FilterMod(r.createItem, modFilterIndex)
+				// show only blacklisted recipes only if choice = 2, otherwise show all other
+				&& recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(r.createItem)
+				// show only favorited items if selected
+				&& (recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(r.createItem));
+
 			foreach (Recipe recipe in toRefresh) {
 				Recipe orig = recipe;
 				Recipe check = recipe;
@@ -1086,7 +1099,7 @@ namespace MagicStorage
 					}
 				} else {
 					if (recipeButtons.Choice == RecipeButtonsAvailableChoice) {
-						if (index < 0) {
+						if (index < 0 && CanBeAdded(orig)) {
 							//Add the recipe
 							recipes.Add(orig);
 							needsResort = true;
@@ -1102,21 +1115,11 @@ namespace MagicStorage
 
 			if (needsResort) {
 				SortMode sortMode = (SortMode) sortButtons.Choice;
-				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
-				int modFilterIndex = modSearchBox.ModIndex;
 				var sortComparer = ItemSorter.GetSortFunction(sortMode);
 
-				var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
-				var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
-
-				var sorted = recipes
+				var sorted = new List<Recipe>(recipes)
 					.AsParallel()
 					.AsOrdered()
-					.Where(recipe => ItemSorter.FilterName(recipe.createItem, searchBar.Text) && ItemSorter.FilterMod(recipe.createItem, modFilterIndex))
-					// show only blacklisted recipes only if choice = 2, otherwise show all other
-					.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
-					// show only favorited items if selected
-					.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
 					// favorites first
 					.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
 					.ThenBy(r => r.createItem, sortComparer);
