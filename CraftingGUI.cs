@@ -942,85 +942,11 @@ namespace MagicStorage
 
 			RefreshStorageItems();
 
-			if (toRefresh is null)
-				RefreshRecipes();  //Refresh all recipes
-			else
-				RefreshSpecificRecipes(toRefresh);
-
-			if (heart is not null) {
-				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
-					environment.ResetPlayer(sandbox);
-			}
-		}
-
-		private static void RefreshRecipes()
-		{
-			try
-			{
-				static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
-				{
-					var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text, out var sortComparer)
-						// show only blacklisted recipes only if choice = 2, otherwise show all other
-						.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
-						// show only favorited items if selected
-						.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
-						// favorites first
-						.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
-						.ThenBy(r => r.createItem, sortComparer);
-
-					recipes.Clear();
-					recipeAvailable.Clear();
-
-					if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
-					{
-						recipes.AddRange(filteredRecipes.Where(r => IsAvailable(r)));
-						recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
-					}
-					else
-					{
-						recipes.AddRange(filteredRecipes);
-						recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
-					}
-				}
-
-				if (RecursiveCraftIntegration.Enabled)
-					RecursiveCraftIntegration.RefreshRecursiveRecipes();
-
-				SortMode sortMode = (SortMode) sortButtons.Choice;
-				FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
-				int modFilterIndex = modSearchBox.ModIndex;
-
-				var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
-				var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
-
-				DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
-
-				// now if nothing found we disable filters one by one
-				if (searchBar.Text.Length > 0)
-				{
-					if (recipes.Count == 0 && hiddenRecipes.Count > 0)
-					{
-						// search hidden recipes too
-						hiddenRecipes = ItemTypeOrderedSet.Empty;
-						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
-					}
-
-					/*
-					if (recipes.Count == 0 && filterMode != FilterMode.All)
-					{
-						// any category
-						filterMode = FilterMode.All;
-						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
-					}
-					*/
-
-					if (recipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
-					{
-						// search all mods
-						modFilterIndex = ModSearchBox.ModIndexAll;
-						DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
-					}
-				}
+			try {
+				if (toRefresh is null)
+					RefreshRecipes();  //Refresh all recipes
+				else
+					RefreshSpecificRecipes(toRefresh);
 
 				// TODO is there a better way?
 				void GuttedSetSelectedRecipe(Recipe recipe, int index)
@@ -1034,7 +960,7 @@ namespace MagicStorage
 					blockStorageItems.Clear();
 				}
 
-				if (RecursiveCraftIntegration.Enabled)
+				if (RecursiveCraftIntegration.Enabled) {
 					if (selectedRecipe is not null)
 					{
 						// If the selected recipe is compound, replace the overridden recipe with the compound one so it shows as selected in the UI
@@ -1052,10 +978,82 @@ namespace MagicStorage
 								GuttedSetSelectedRecipe(selectedRecipe, index);
 						}
 					}
-			}
-			catch (Exception e)
-			{
+				}
+			}  catch (Exception e) {
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
+			}
+
+			if (heart is not null) {
+				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
+					environment.ResetPlayer(sandbox);
+			}
+		}
+
+		private static void RefreshRecipes()
+		{
+			static void DoFiltering(SortMode sortMode, FilterMode filterMode, int modFilterIndex, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
+			{
+				var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, modFilterIndex, searchBar.Text, out var sortComparer)
+					// show only blacklisted recipes only if choice = 2, otherwise show all other
+					.Where(x => recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem))
+					// show only favorited items if selected
+					.Where(x => recipeButtons.Choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem))
+					// favorites first
+					.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
+					.ThenBy(r => r.createItem, sortComparer);
+
+				recipes.Clear();
+				recipeAvailable.Clear();
+
+				if (recipeButtons.Choice == RecipeButtonsAvailableChoice)
+				{
+					recipes.AddRange(filteredRecipes.Where(r => IsAvailable(r)));
+					recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
+				}
+				else
+				{
+					recipes.AddRange(filteredRecipes);
+					recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
+				}
+			}
+
+			if (RecursiveCraftIntegration.Enabled)
+				RecursiveCraftIntegration.RefreshRecursiveRecipes();
+
+			SortMode sortMode = (SortMode) sortButtons.Choice;
+			FilterMode filterMode = ItemFilter.GetFilter(filterButtons.Choice);
+			int modFilterIndex = modSearchBox.ModIndex;
+
+			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
+			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
+
+			DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
+
+			// now if nothing found we disable filters one by one
+			if (searchBar.Text.Length > 0)
+			{
+				if (recipes.Count == 0 && hiddenRecipes.Count > 0)
+				{
+					// search hidden recipes too
+					hiddenRecipes = ItemTypeOrderedSet.Empty;
+					DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
+				}
+
+				/*
+				if (recipes.Count == 0 && filterMode != FilterMode.All)
+				{
+					// any category
+					filterMode = FilterMode.All;
+					DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
+				}
+				*/
+
+				if (recipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+				{
+					// search all mods
+					modFilterIndex = ModSearchBox.ModIndexAll;
+					DoFiltering(sortMode, filterMode, modFilterIndex, hiddenRecipes, favorited);
+				}
 			}
 		}
 

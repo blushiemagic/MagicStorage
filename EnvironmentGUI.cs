@@ -36,6 +36,9 @@ namespace MagicStorage {
 		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 
 		public static void Initialize() {
+			if (Main.dedServ)
+				return;
+
 			entriesByMod ??= new();
 
 			panelTop = Main.instance.invBottom + 60;
