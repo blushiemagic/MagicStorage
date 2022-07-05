@@ -39,6 +39,14 @@ namespace MagicStorage.Components
 				fail = true;
 		}
 
+		public override bool CanExplode(int i, int j) {
+			bool fail = false, discard = false, discard2 = false;
+
+			KillTile(i, j, ref fail, ref discard, ref discard2);
+
+			return !fail;
+		}
+
 		public override bool RightClick(int i, int j)
 		{
 			Player player = Main.LocalPlayer;

@@ -44,19 +44,6 @@ namespace MagicStorage.Components
 			return type;
 		}
 
-		public override bool CanKillTile(int i, int j, ref bool blockDamage)
-		{
-			if (Main.tile[i, j].TileFrameX % 36 == 18)
-				i--;
-			if (Main.tile[i, j].TileFrameY % 36 == 18)
-				j--;
-
-			if (!TileEntity.ByPosition.ContainsKey(new Point16(i, j)))
-				return true;
-
-			return Main.tile[i, j].TileFrameX / 36 % 3 == 0;
-		}
-
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
 			if (Main.tile[i, j].TileFrameX % 36 == 18)
@@ -66,6 +53,14 @@ namespace MagicStorage.Components
 
 			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && Main.tile[i, j].TileFrameX / 36 % 3 != 0)
 				fail = true;
+		}
+
+		public override bool CanExplode(int i, int j) {
+			bool fail = false, discard = false, discard2 = false;
+
+			KillTile(i, j, ref fail, ref discard, ref discard2);
+
+			return !fail;
 		}
 
 		public override bool RightClick(int i, int j)
