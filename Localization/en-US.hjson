@@ -44,6 +44,7 @@ Mods: {
 			CombinedStations2Item: Combined Stations (Tier 2)
 			CombinedStations3Item: Combined Stations (Tier 3)
 			CombinedStations4Item: Combined Stations (Final Tier)
+			EnvironmentAccess: Environment Simulator
 		}
 
 		ItemTooltip: {
@@ -225,6 +226,11 @@ Mods: {
 			'''
 			A component for storing items in a Magic Storage storage system
 			Can store up to 4 items
+			'''
+			EnvironmentAccess:
+			'''
+			A component for cross-mod accessibility with a Magic Storage storage system
+			Displays a list of toggleable environment modules added by other mods, or nothing if no modules are present
 			'''
 		}
 
