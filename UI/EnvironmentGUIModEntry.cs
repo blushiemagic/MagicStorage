@@ -54,7 +54,7 @@ namespace MagicStorage.UI {
 				label.Height.Set(20, 0f);
 				label.Width.Set(0, 1f);
 				Append(label);
-				
+
 				top += label.Height.Pixels + 6;
 
 				labelsByName[module.Name] = label;

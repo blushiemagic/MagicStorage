@@ -84,8 +84,7 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEEnvironmentAccess> GetEnvironmentSimulators()
 			=> TileEntity.ByPosition.Values
-				.Where(e => e is TEEnvironmentAccess)
-				.Select(e => e as TEEnvironmentAccess)
+				.OfType<TEEnvironmentAccess>()
 				.Where(e => e.center == Position);
 
 		public IEnumerable<EnvironmentModule> GetModules()

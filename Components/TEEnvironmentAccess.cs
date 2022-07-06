@@ -58,14 +58,18 @@ namespace MagicStorage.Components {
 		}
 
 		public override void SaveData(TagCompound tag) {
+			base.SaveData(tag);
+
 			tag["enabled"] = Modules.Select(m => new TagCompound() { ["mod"] = m.Mod.Name, ["name"] = m.Name }).ToList();
 		}
 
 		public override void LoadData(TagCompound tag) {
-			if (tag.GetList<TagCompound>("enabled") is var list) {
+			base.LoadData(tag);
+
+			if (tag.GetList<TagCompound>("enabled") is { } list) {
 				enabled = new(EnvironmentModuleLoader.Count);
 
-				foreach (var module in list.Select(t => t.TryGet("mod", out string mod) && t.TryGet("name", out string name) && ModLoader.TryGetMod(mod, out Mod source) && source.TryFind(name, out EnvironmentModule m) ? m : null).Where(m => m is not null)) {
+				foreach (var module in list.Select(t => t.TryGet("mod", out string mod) && t.TryGet("name", out string name) && ModContent.TryFind(mod, name, out EnvironmentModule m) ? m : null).Where(m => m is not null)) {
 					enabled[module.Type] = true;
 				}
 			} else {
@@ -75,6 +79,8 @@ namespace MagicStorage.Components {
 		}
 
 		public override void NetSend(BinaryWriter writer) {
+			base.NetSend(writer);
+
 			int length = (enabled.Length - 1) / 8 + 1;
 			writer.Write((short)length);
 			byte[] array = new byte[length];
@@ -83,8 +89,9 @@ namespace MagicStorage.Components {
 		}
 
 		public override void NetReceive(BinaryReader reader) {
-			short length = reader.ReadInt16();
+			base.NetReceive(reader);
 
+			short length = reader.ReadInt16();
 			enabled = new(reader.ReadBytes(length));
 			enabled.Length = EnvironmentModuleLoader.Count;
 		}

@@ -300,7 +300,7 @@ namespace MagicStorage
 				storageZone.Height.Set(-storageZoneTop - 200, 1f);
 			else
 				storageZone.Height.Set(-storageZoneTop - 36, 1f);
-			
+
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
 			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
@@ -1857,7 +1857,7 @@ namespace MagicStorage
 
 								if (addToWithdraw)
 									withdraw.Add(temp);
-								
+
 								tryItem.stack -= stack;
 								stack = 0;
 							}
@@ -1865,7 +1865,7 @@ namespace MagicStorage
 							{
 								if (addToWithdraw)
 									withdraw.Add(tryItem.Clone());
-								
+
 								stack -= tryItem.stack;
 								tryItem.stack = 0;
 								tryItem.type = ItemID.None;
