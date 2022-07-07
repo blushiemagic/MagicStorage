@@ -11,6 +11,8 @@ namespace MagicStorage.Components
 
 		public void ResetAndSearch()
 		{
+			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch invoked.  Current unit count: " + storageUnits.Count);
+
 			List<Point16> oldStorageUnits = new(storageUnits);
 			storageUnits.Clear();
 			HashSet<Point16> hashStorageUnits = new();
@@ -53,6 +55,8 @@ namespace MagicStorage.Components
 						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
 					}
 				}
+
+			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch finished.  New unit count: " + storageUnits.Count);
 
 			TEStorageHeart heart = GetHeart();
 			heart?.ResetCompactStage();
