@@ -348,26 +348,43 @@ namespace MagicStorage.Components
 			}
 			NetHelper.ProcessUpdateQueue();
 
-			TEStorageUnit unitWithSpace = null;
+			NetHelper.StartUpdateQueue();
+			int index = -1, index2 = -1;
 			foreach (TEAbstractStorageUnit abstractStorageUnit in GetStorageUnits())
 			{
+				index++;
+
 				if (abstractStorageUnit is not TEStorageUnit storageUnit)
 					continue;
-				if (unitWithSpace is null && !storageUnit.IsFull && !storageUnit.Inactive)
-				{
-					unitWithSpace = storageUnit;
-				}
-				else if (unitWithSpace is not null && !storageUnit.IsEmpty)
-				{
-					NetHelper.StartUpdateQueue();
 
-					unitWithSpace.Flatten(storageUnit);
+				foreach (TEAbstractStorageUnit abstractStorageUnit2 in GetStorageUnits())
+				{
+					index2++;
+
+					//Only flatten to units closer to the heart
+					if (index2 < index)
+						continue;
+
+					if (abstractStorageUnit2 is not TEStorageUnit storageUnit2)
+						continue;
+					
+					//Don't check a unit against itself
+					if (storageUnit.Position == storageUnit2.Position)
+						continue;
+
+					if (!storageUnit.Flatten(storageUnit2))
+						continue;
+
+					NetHelper.Report(true, $"Items flattened between units {storageUnit.ID} and {storageUnit2.ID}");
 
 					NetHelper.ProcessUpdateQueue();
 					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
 			}
+
+			NetHelper.ProcessUpdateQueue();
+			NetHelper.SendRefreshNetworkItems(ID);
 
 			compactStage++;
 			return false;

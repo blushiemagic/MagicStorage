@@ -286,21 +286,21 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal void Flatten(TEStorageUnit other) {
+		internal bool Flatten(TEStorageUnit other) {
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
-				return;
+				return false;
 
 			List<Item> both = Compact(items.Concat(other.items), out bool didPack);
 
 			if (!didPack)
-				return;  //Neither unit was modified
+				return false;  //Neither unit was modified
 
 			int capacity = Capacity;
 
 			items = new List<Item>(both.Take(capacity));
 			other.items = new List<Item>(both.Skip(capacity));
 
-			if (didPack && Main.netMode != NetmodeID.MultiplayerClient)
+			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				if (Main.netMode == NetmodeID.Server)
 				{
@@ -311,6 +311,8 @@ namespace MagicStorage.Components
 				}
 				PostChangeContents();
 			}
+
+			return true;
 		}
 
 		internal static List<Item> Compact(IEnumerable<Item> items, out bool didPack) {
@@ -380,6 +382,12 @@ namespace MagicStorage.Components
 			// too many updates at this point just fully sync
 			if (netOpQueue.Count > Capacity / 2)
 			{
+				netOpQueue.Clear();
+				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+			}
+
+			// There's a full sync present, so only do that
+			if (netOpQueue.Any(q => q.netOperation == NetOperations.FullySync)) {
 				netOpQueue.Clear();
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
