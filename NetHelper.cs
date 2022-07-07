@@ -45,7 +45,7 @@ namespace MagicStorage
 			}
 
 			if (reportTime)
-				message += "Time: " + DateTime.Now.Ticks + "\n";
+				message = "Time: " + DateTime.Now.Ticks + "\n" + message;
 
 			MagicStorage.Instance.Logger.Debug(message);
 		}

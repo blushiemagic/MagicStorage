@@ -381,6 +381,8 @@ namespace MagicStorage.Components
 					NetHelper.SendRefreshNetworkItems(ID);
 					return true;
 				}
+
+				index2 = -1;
 			}
 
 			NetHelper.ProcessUpdateQueue();
