@@ -61,7 +61,7 @@ namespace MagicStorage
 				Console.WriteLine($"Receiving Message Type \"{Enum.GetName(type)}\"");
 			*/
 
-			Report(reportTime: true, "Received message " + type);
+			Report(reportTime: true, "Received message " + type + " from player " + sender);
 
 			switch (type)
 			{
@@ -90,7 +90,7 @@ namespace MagicStorage
 					ReceiveServerStationResult(reader);
 					break;
 				case MessageType.ResetCompactStage:
-					ReceiveResetCompactStage(reader);
+					ReceiveResetCompactStage(reader, sender);
 					break;
 				case MessageType.CraftRequest:
 					ReceiveCraftRequest(reader, sender);
@@ -124,7 +124,7 @@ namespace MagicStorage
 				packet.Write(storageUnitId);
 				packet.Send();
 
-				Report(false, MessageType.SyncStorageUnit + " packet sent from client");
+				Report(false, MessageType.SyncStorageUnit + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -161,7 +161,7 @@ namespace MagicStorage
 					packet.Send(remoteClient);
 				}
 
-				Report(false, MessageType.SyncStorageUnit + " packet received by server");
+				Report(false, MessageType.SyncStorageUnit + " packet received by server from client " + remoteClient);
 			}
 		}
 
@@ -222,7 +222,7 @@ namespace MagicStorage
 				packet.Write((short)j);
 				packet.Send();
 
-				Report(false, MessageType.SearchAndRefreshNetwork + " packet sent from client");
+				Report(false, MessageType.SearchAndRefreshNetwork + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -264,7 +264,7 @@ namespace MagicStorage
 
 			heart.QClientOperation(reader, op, sender);
 
-			Report(false, "Storage operation " + op + " packet recieved by client");
+			Report(false, "Storage operation " + op + " packet recieved by client " + Main.myPlayer);
 		}
 
 		public static void ReciveServerStorageResult(BinaryReader reader)
@@ -305,7 +305,7 @@ namespace MagicStorage
 				}
 			}
 
-			Report(false, "Storage result " + op + " packet received by client");
+			Report(false, "Storage result " + op + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void SendRefreshNetworkItems(int ent)
@@ -317,7 +317,7 @@ namespace MagicStorage
 				packet.Write(ent);
 				packet.Send();
 
-				Report(false, MessageType.RefreshNetworkItems + " packet sent from client");
+				Report(false, MessageType.RefreshNetworkItems + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -330,7 +330,7 @@ namespace MagicStorage
 			if (TileEntity.ByID.ContainsKey(ent))
 				StorageGUI.RefreshItems();
 
-			Report(false, MessageType.RefreshNetworkItems + " packet received by client");
+			Report(false, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void ClientSendDeactivate(int id, bool inActive)
@@ -343,7 +343,7 @@ namespace MagicStorage
 				packet.Write(inActive);
 				packet.Send();
 
-				Report(false, MessageType.ClientSendDeactivate + " packet sent from client");
+				Report(false, MessageType.ClientSendDeactivate + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -365,7 +365,7 @@ namespace MagicStorage
 					}
 				}
 
-				Report(false, MessageType.ClientSendDeactivate + " packet received by server");
+				Report(false, MessageType.ClientSendDeactivate + " packet received by server from client " + sender);
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -374,7 +374,7 @@ namespace MagicStorage
 				// TODO does TileEntity need to be read?
 				//_ = TileEntity.Read(reader, true);
 
-				Report(false, MessageType.ClientSendDeactivate + " packet received by client");
+				Report(false, MessageType.ClientSendDeactivate + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -388,7 +388,7 @@ namespace MagicStorage
 				TileEntity.Write(packet, TileEntity.ByID[id], true);
 				packet.Send();
 
-				Report(false, MessageType.ClientSendTEUpdate + " packet sent from client");
+				Report(false, MessageType.ClientSendTEUpdate + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -407,7 +407,7 @@ namespace MagicStorage
 					heart?.ResetCompactStage();
 				}
 
-				Report(false, MessageType.ClientSendTEUpdate + " packet received by server");
+				Report(false, MessageType.ClientSendTEUpdate + " packet received by server from client " + sender);
 
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, id, ent.Position.X, ent.Position.Y);
 			}
@@ -418,7 +418,7 @@ namespace MagicStorage
 				// TODO does TileEntity need to be read?
 				//_ = TileEntity.Read(reader, true);
 
-				Report(false, MessageType.ClientSendTEUpdate + " packet received by client");
+				Report(false, MessageType.ClientSendTEUpdate + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -447,7 +447,7 @@ namespace MagicStorage
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 
-				Report(false, "SendDepositStation packet sent from client");
+				Report(false, "SendDepositStation packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -459,7 +459,7 @@ namespace MagicStorage
 				packet.Write((byte)slot);
 				packet.Send();
 
-				Report(false, "SendWithdrawStation packet sent from client");
+				Report(false, "SendWithdrawStation packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -487,7 +487,7 @@ namespace MagicStorage
 
 			craftingAccess.QClientOperation(reader, op, sender);
 
-			Report(false, MessageType.ResetCompactStage + " packet received by server");
+			Report(false, MessageType.ResetCompactStage + " packet received by server from client " + sender);
 		}
 
 		public static void ReceiveServerStationResult(BinaryReader reader)
@@ -508,7 +508,7 @@ namespace MagicStorage
 					Main.mouseItem = item;
 				}
 
-				Report(false, "Station operation " + op + " packet received by client");
+				Report(false, "Station operation " + op + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -521,11 +521,11 @@ namespace MagicStorage
 				packet.Write(ent);
 				packet.Send();
 
-				Report(false, MessageType.ResetCompactStage + " packet sent from client");
+				Report(false, MessageType.ResetCompactStage + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
-		public static void ReceiveResetCompactStage(BinaryReader reader)
+		public static void ReceiveResetCompactStage(BinaryReader reader, int sender)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
@@ -533,13 +533,13 @@ namespace MagicStorage
 				if (TileEntity.ByID.TryGetValue(ent, out var te) && te is TEStorageHeart heart)
 					heart.ResetCompactStage();
 
-				Report(false, MessageType.ResetCompactStage + " packet received by server");
+				Report(false, MessageType.ResetCompactStage + " packet received by server from client " + sender);
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				reader.ReadInt32();
 
-				Report(false, MessageType.ResetCompactStage + " packet recevied by client");
+				Report(false, MessageType.ResetCompactStage + " packet recevied by client " + Main.myPlayer);
 			}
 		}
 
@@ -558,7 +558,7 @@ namespace MagicStorage
 					ItemIO.Send(result, packet, true, true);
 				packet.Send();
 
-				Report(false, MessageType.CraftRequest + " packet sent from client");
+				Report(false, MessageType.CraftRequest + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -572,7 +572,6 @@ namespace MagicStorage
 				//Still need to read the data for exceptions to not be thrown
 				for (int i = 0; i < withdrawCount; i++)
 					_ = ItemIO.Receive(reader, true, true);
-
 
 				int count = reader.ReadInt32();
 				for (int i = 0; i < count; i++)
@@ -595,7 +594,7 @@ namespace MagicStorage
 
 			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
 
-			Report(false, MessageType.CraftRequest + " packet received by server");
+			Report(false, MessageType.CraftRequest + " packet received by server from client " + sender);
 
 			if (items.Count > 0)
 			{
@@ -623,7 +622,7 @@ namespace MagicStorage
 				player.QuickSpawnClonedItem(new EntitySource_TileEntity(heart), item, item.stack);
 			}
 
-			Report(false, MessageType.CraftResult + " packet received by client");
+			Report(false, MessageType.CraftResult + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void ClientRequestSection(Point16 coords)
@@ -638,7 +637,7 @@ namespace MagicStorage
 
 				packet.Send();
 
-				Report(false, MessageType.SectionRequest + " packet sent from client");
+				Report(false, MessageType.SectionRequest + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -666,7 +665,7 @@ namespace MagicStorage
 
 				packet.Send(ignoreClient: Main.myPlayer);
 
-				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from client");
+				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -683,12 +682,12 @@ namespace MagicStorage
 
 				packet.Send(ignoreClient: sender);
 
-				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from server");
+				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
 					CraftingGUI.RefreshItems();
 
-					Report(false, MessageType.ForceCraftingGUIRefresh + " packet received by client");
+					Report(false, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
 				}
 			}
 		}
