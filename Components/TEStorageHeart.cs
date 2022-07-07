@@ -556,6 +556,8 @@ namespace MagicStorage.Components
 				writer.Write(remoteAccess.X);
 				writer.Write(remoteAccess.Y);
 			}
+
+			NetHelper.Report(false, "Sent tile entity data for TEStorageHeart");
 		}
 
 		public override void NetReceive(BinaryReader reader)
@@ -564,6 +566,8 @@ namespace MagicStorage.Components
 			int count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)
 				remoteAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
+
+			NetHelper.Report(false, "Received tile entity data for TEStorageHeart");
 		}
 	}
 }

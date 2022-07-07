@@ -432,6 +432,8 @@ namespace MagicStorage.Components
 			/* Sends the buffer through the network */
 			trueWriter.Write((ushort)data.Length);
 			trueWriter.Write(data.ToArray());
+
+			NetHelper.Report(false, "Sent tile entity data for TEStorageUnit");
 		}
 
 		public override void NetReceive(BinaryReader trueReader)
@@ -503,19 +505,26 @@ namespace MagicStorage.Components
 					}
 					else
 					{
-						Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine($"NetRecive Bad OP: {netOp}");
-						Console.ResetColor();
+						if (Main.netMode != NetmodeID.Server)
+							Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
+						else {
+							Console.ForegroundColor = ConsoleColor.Red;
+							Console.WriteLine($"NetRecive Bad OP: {netOp}");
+							Console.ResetColor();
+						}
 					}
 				}
 
 				if (repairMetaData)
 					RepairMetadata();
 				receiving = false;
+
+				NetHelper.Report(false, "Received tile entity data for TEStorageUnit");
 			}
 			else if (serverItemsCount != items.Count) // if there is mismatch between the server and the client then send a sync request
 			{
+				NetHelper.Report(false, "Item count mismatch detected for TEStorageUnit, requesting full sync");
+
 				NetHelper.SyncStorageUnit(ID);
 			}
 		}
