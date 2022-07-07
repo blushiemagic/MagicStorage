@@ -183,6 +183,10 @@ namespace MagicStorage
 				return recipe;
 
 			int index = Array.IndexOf(Main.recipe, recipe); // Can this simply be `recipe.RecipeIndex`
+
+			if (index < -1)
+				return recipe;  //Failsafe -- default to the original recipe
+
 			compoundRecipe = CompoundRecipes[index];
 			compoundRecipe.Apply(index, recipeInfo);
 

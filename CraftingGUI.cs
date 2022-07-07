@@ -96,6 +96,7 @@ namespace MagicStorage
 		private static int numRows2;
 		private static int displayRows2;
 		private static readonly List<Item> storageItems = new();
+		private static readonly List<bool> storageItemsFromModules = new();
 		private static readonly List<ItemData> blockStorageItems = new();
 
 		private static readonly UIScrollbar storageScrollBar = new();
@@ -300,7 +301,7 @@ namespace MagicStorage
 				storageZone.Height.Set(-storageZoneTop - 200, 1f);
 			else
 				storageZone.Height.Set(-storageZoneTop - 36, 1f);
-
+			
 			recipePanel.Append(storageZone);
 			numRows2 = (storageItems.Count + IngredientColumns - 1) / IngredientColumns;
 			displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + Padding);
@@ -920,19 +921,26 @@ namespace MagicStorage
 
 		public static void RefreshItems() => RefreshItemsAndSpecificRecipes(null);
 
+		private static int numItemsWithoutSimulators;
+
 		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
 			items.Clear();
+			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 				return;
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
-			IEnumerable<Item> itemsWithSimulators = heart.GetStoredItems().Select(i => i.Clone())
-				.Concat(heart.GetModules()
-					.SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>()));
+			IEnumerable<Item> heartItems = heart.GetStoredItems().Select(i => i.Clone());
+			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>());
 
-			items.AddRange(ItemSorter.SortAndFilter(itemsWithSimulators, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+			//Keep the simulator items separate
+			items.AddRange(ItemSorter.SortAndFilter(heartItems, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
+
+			numItemsWithoutSimulators = items.Count;
+
+			items.AddRange(ItemSorter.SortAndFilter(simulatorItems, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
 			AnalyzeIngredients();
 			InitLangStuff();
@@ -1422,18 +1430,25 @@ namespace MagicStorage
 		private static void RefreshStorageItems()
 		{
 			storageItems.Clear();
+			storageItemsFromModules.Clear();
 			result = null;
 			if (selectedRecipe is null)
 				return;
 
+			int index = 0;
 			foreach (Item item in items)
 			{
-				foreach (Item reqItem in selectedRecipe.requiredItem)
-					if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type))
+				foreach (Item reqItem in selectedRecipe.requiredItem) {
+					if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type)) {
 						storageItems.Add(item);
+						storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
+					}
+				}
 
 				if (item.type == selectedRecipe.createItem.type)
 					result = item;
+
+				index++;
 			}
 
 			result ??= new Item(selectedRecipe.createItem.type, 0);
@@ -1790,15 +1805,15 @@ namespace MagicStorage
 		public static void Craft(int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
+			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
 			List<Item> toWithdraw = new(), results = new();
 
 			TEStorageHeart heart = GetHeart();
-			List<EnvironmentModule> modules = heart?.GetModules().ToList() ?? new();
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
 			while (toCraft > 0) {
-				if (!AttemptSingleCraft(availableItems, sourceItems, toWithdraw, results, modules, sandbox))
+				if (!AttemptSingleCraft(availableItems, sourceItems, fromModule, toWithdraw, results, sandbox))
 					break;  // Could not craft any more items
 
 				Item resultItem = selectedRecipe.createItem.Clone();
@@ -1828,7 +1843,7 @@ namespace MagicStorage
 				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, results);
 		}
 
-		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<Item> withdraw, List<Item> results, List<EnvironmentModule> modules, EnvironmentSandbox sandbox) {
+		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<bool> fromModule, List<Item> withdraw, List<Item> results, EnvironmentSandbox sandbox) {
 			int index = -1;
 
 			foreach (Item reqItem in selectedRecipe.requiredItem)
@@ -1842,30 +1857,34 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (var module in modules)
-					module.OnConsumeItemForRecipe(sandbox, source[index], stack);
+				foreach (var module in EnvironmentModuleLoader.modules)
+					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
 
 				bool AttemptToConsumeItem(List<Item> list, bool addToWithdraw) {
+					int listIndex = 0;
 					foreach (Item tryItem in list)
 					{
 						if (reqItem.type == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqItem.type))
 						{
+							//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
+							bool canWithdraw = addToWithdraw && !fromModule[listIndex];
+
 							if (tryItem.stack > stack)
 							{
 								Item temp = tryItem.Clone();
 								temp.stack = stack;
 
-								if (addToWithdraw)
+								if (canWithdraw)
 									withdraw.Add(temp);
-
+								
 								tryItem.stack -= stack;
 								stack = 0;
 							}
 							else
 							{
-								if (addToWithdraw)
+								if (canWithdraw)
 									withdraw.Add(tryItem.Clone());
-
+								
 								stack -= tryItem.stack;
 								tryItem.stack = 0;
 								tryItem.type = ItemID.None;
@@ -1874,6 +1893,8 @@ namespace MagicStorage
 							if (stack <= 0)
 								break;
 						}
+
+						listIndex++;
 					}
 
 					return stack <= 0;
@@ -1881,6 +1902,8 @@ namespace MagicStorage
 
 				if (!AttemptToConsumeItem(available, addToWithdraw: true))
 					AttemptToConsumeItem(results, addToWithdraw: false);
+				else
+					AttemptToConsumeItem(source, addToWithdraw: false);  //Consume the source item as well
 
 				if (stack > 0)
 					return false;  // Did not have enough items

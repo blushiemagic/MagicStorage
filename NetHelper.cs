@@ -9,6 +9,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Linq;
+using System.Diagnostics;
 
 namespace MagicStorage
 {
@@ -17,6 +18,37 @@ namespace MagicStorage
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
+
+		[Conditional("DEBUG")]
+		[Conditional("NETPLAY")]
+		public static void Report(bool reportTime, string message) {
+			if (Main.netMode != NetmodeID.Server) {
+				if (reportTime)
+					Main.NewText("Time: " + DateTime.Now.Ticks);
+
+				Main.NewText(message);
+			} else if (Main.dedServ) {
+				if (reportTime) {
+					ConsoleColor fg = Console.ForegroundColor;
+					ConsoleColor bg = Console.BackgroundColor;
+
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.BackgroundColor = ConsoleColor.Black;
+
+					Console.WriteLine("Time: " + DateTime.Now.Ticks);
+
+					Console.ForegroundColor = fg;
+					Console.BackgroundColor = bg;
+				}
+
+				Console.WriteLine(message);
+			}
+
+			if (reportTime)
+				message += "Time: " + DateTime.Now.Ticks + "\n";
+
+			MagicStorage.Instance.Logger.Debug(message);
+		}
 
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
@@ -28,6 +60,8 @@ namespace MagicStorage
 			else if(Main.netMode == NetmodeID.Server)
 				Console.WriteLine($"Receiving Message Type \"{Enum.GetName(type)}\"");
 			*/
+
+			Report(reportTime: true, "Received message " + type);
 
 			switch (type)
 			{
