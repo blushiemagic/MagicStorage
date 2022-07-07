@@ -372,6 +372,10 @@ namespace MagicStorage.Components
 					if (storageUnit.Position == storageUnit2.Position)
 						continue;
 
+					//Ignore empty units
+					if (storageUnit2.IsEmpty)
+						continue;
+
 					if (!storageUnit.Flatten(storageUnit2))
 						continue;
 

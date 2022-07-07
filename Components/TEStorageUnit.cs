@@ -292,7 +292,7 @@ namespace MagicStorage.Components
 
 			List<Item> both = Compact(items.Concat(other.items), out bool didPack);
 
-			if (!didPack)
+			if (IsFull && !didPack)
 				return false;  //Neither unit was modified
 
 			int capacity = Capacity;
@@ -310,6 +310,7 @@ namespace MagicStorage.Components
 					other.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 				}
 				PostChangeContents();
+				other.PostChangeContents();
 			}
 
 			return true;
