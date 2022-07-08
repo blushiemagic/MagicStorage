@@ -440,9 +440,10 @@ namespace MagicStorage.Components
 
 			/* Sends the buffer through the network */
 			trueWriter.Write((ushort)data.Length);
-			trueWriter.Write(data.ToArray());
+			trueWriter.Write(data);
 
-			NetHelper.Report(false, "Sent tile entity data for TEStorageUnit");
+			NetHelper.Report(true, "Sent tile entity data for TEStorageUnit");
+			NetHelper.Report(false, "Bytes sent: " + data.Length);
 		}
 
 		public override void NetReceive(BinaryReader trueReader)
@@ -528,11 +529,11 @@ namespace MagicStorage.Components
 					RepairMetadata();
 				receiving = false;
 
-				NetHelper.Report(false, "Received tile entity data for TEStorageUnit");
+				NetHelper.Report(true, "Received tile entity data for TEStorageUnit");
 			}
 			else if (serverItemsCount != items.Count) // if there is mismatch between the server and the client then send a sync request
 			{
-				NetHelper.Report(false, "Item count mismatch detected for TEStorageUnit, requesting full sync");
+				NetHelper.Report(true, "Item count mismatch detected for TEStorageUnit, requesting full sync");
 
 				NetHelper.SyncStorageUnit(ID);
 			}
