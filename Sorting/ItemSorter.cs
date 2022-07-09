@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MagicStorage.Common.Systems;
 using Terraria;
 
 namespace MagicStorage.Sorting

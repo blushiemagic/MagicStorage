@@ -7,7 +7,7 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace MagicStorage
+namespace MagicStorage.Common.Systems
 {
 	public class StorageWorld : ModSystem
 	{
@@ -37,7 +37,8 @@ namespace MagicStorage
 		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
 		internal static Dictionary<int, IItemDropRule> moddedDiamondDropRulesByType;
 
-		public override void Load() {
+		public override void Load()
+		{
 			disallowDropModded = new();
 			moddedDiamondsDroppedByType = new();
 			moddedDiamondDropRulesByType = new();
@@ -107,8 +108,10 @@ namespace MagicStorage
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
 
-			if (tag.GetList<string>("modded") is List<string> list) {
-				foreach (string identifier in list) {
+			if (tag.GetList<string>("modded") is List<string> list)
+			{
+				foreach (string identifier in list)
+				{
 					string[] split = identifier.Split(':');
 
 					if (split.Length != 2)
@@ -120,7 +123,8 @@ namespace MagicStorage
 			}
 		}
 
-		public override void NetSend(BinaryWriter writer) {
+		public override void NetSend(BinaryWriter writer)
+		{
 			BitsByte bb = new(kingSlimeDiamond, boss1Diamond, boss2Diamond, boss3Diamond, queenBeeDiamond, hardmodeDiamond, mechBoss1Diamond, mechBoss2Diamond);
 			writer.Write(bb);
 
@@ -132,7 +136,8 @@ namespace MagicStorage
 				writer.Write(modded);
 		}
 
-		public override void NetReceive(BinaryReader reader) {
+		public override void NetReceive(BinaryReader reader)
+		{
 			BitsByte bb = reader.ReadByte();
 			bb.Retrieve(ref kingSlimeDiamond, ref boss1Diamond, ref boss2Diamond, ref boss3Diamond, ref queenBeeDiamond, ref hardmodeDiamond, ref mechBoss1Diamond, ref mechBoss2Diamond);
 

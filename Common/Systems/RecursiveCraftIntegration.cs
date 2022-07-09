@@ -7,7 +7,7 @@ using RecursiveCraft;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace MagicStorage
+namespace MagicStorage.Common.Systems
 {
 	[JITWhenModsEnabled(RecursiveCraftModName)]
 	public sealed class RecursiveCraftIntegration : ModSystem
