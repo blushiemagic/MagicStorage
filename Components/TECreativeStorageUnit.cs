@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 #nullable enable
@@ -24,6 +25,9 @@ public class TECreativeStorageUnit : TEAbstractStorageUnit
 
 		for (int i = 0; i < Items.Length; i++)
 		{
+			if (i is 0 || ItemID.Sets.Deprecated[i])
+				continue;
+
 			var item = Items[i];
 
 			if (item is null)
