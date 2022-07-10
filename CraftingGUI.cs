@@ -1911,7 +1911,7 @@ namespace MagicStorage
 				foreach (Item tryItem in source) {
 					if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
 						//Don't attempt to consume the item unless it is from a module, since it doesn't exist in the storage system anyway
-						bool canConsume = !fromModule[listIndex];
+						bool canConsume = fromModule[listIndex];
 
 						if (!canConsume)
 							continue;
