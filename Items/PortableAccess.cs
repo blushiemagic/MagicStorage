@@ -17,6 +17,7 @@ namespace MagicStorage.Items
             DisplayName.SetDefault("Portable Remote Storage Access");
             DisplayName.AddTranslation(GameCulture.Russian, "Портативный Модуль Удаленного Доступа к Хранилищу");
             DisplayName.AddTranslation(GameCulture.Chinese, "便携式远程存储装置");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Acesso de Armazenamento Remoto Portátil");
 
             Tooltip.SetDefault("<right> Storage Heart to store location"
                 + "\nCurrently not set to any location"
@@ -27,6 +28,9 @@ namespace MagicStorage.Items
             Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点"
                 + "\n目前未设置为任何位置"
                 + "\n使用可直接访问你的存储");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "<right> no Núcleo de Armazenamento para guardar a localização"
+                + "\n<right>Atualmente não fixado em nenhum local"
+                + "\nUse o item para acessar seu armazenamento");
         }
 
         public override void SetDefaults()

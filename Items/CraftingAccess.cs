@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Interface de Stockage Artisanat");
             DisplayName.AddTranslation(GameCulture.Spanish, "Interfaz de Elaboración de almacenamiento");
             DisplayName.AddTranslation(GameCulture.Chinese, "制作存储单元");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Interface de Criação de Armazenamento");
         }
 
         public override void SetDefaults()

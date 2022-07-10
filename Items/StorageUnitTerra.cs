@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Unité de stockage (Terra)");
             DisplayName.AddTranslation(GameCulture.Spanish, "Unidad de Almacenamiento (Tierra)");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储单元(泰拉)");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Unidade de Armazenamento (Terra)");
         }
 
         public override void SetDefaults()

@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Bijou Rayonnant");
             DisplayName.AddTranslation(GameCulture.Spanish, "Joya Radiante");
             DisplayName.AddTranslation(GameCulture.Chinese, "光芒四射的宝石");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Jóia Radiante");
 
             Tooltip.SetDefault("'Shines with a dazzling light'");
             Tooltip.AddTranslation(GameCulture.Russian, "'Блестит ослепительным светом'");
@@ -23,6 +24,7 @@ namespace MagicStorage.Items
             Tooltip.AddTranslation(GameCulture.French, "'Il brille avec une lumière aveuglante'");
             Tooltip.AddTranslation(GameCulture.Spanish, "'Brilla con una luz deslumbrante'");
             Tooltip.AddTranslation(GameCulture.Chinese, "'闪耀着耀眼的光芒'");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "'Brilha com uma luz deslumbrante'");
         }
 
         public override void SetDefaults()

@@ -15,6 +15,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Access de Stockage");
             DisplayName.AddTranslation(GameCulture.Spanish, "Acceso de Almacenamiento");
             DisplayName.AddTranslation(GameCulture.Chinese, "存储装置");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Acesso ao Armazenamento");
         }
         
         public override void SetDefaults()

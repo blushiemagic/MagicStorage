@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Diamant sombre");
             DisplayName.AddTranslation(GameCulture.Spanish, "Diamante sombreado");
             DisplayName.AddTranslation(GameCulture.Chinese, "暗影钻石");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Diamante Negro");
 
             Tooltip.SetDefault("Traces of light still linger inside");
             Tooltip.AddTranslation(GameCulture.Russian, "Следы света все еще мелькают внутри");
@@ -23,6 +24,7 @@ namespace MagicStorage.Items
             Tooltip.AddTranslation(GameCulture.French, "Des traces de lumière s'attarde encore à l'intérieur");
             Tooltip.AddTranslation(GameCulture.Spanish, "Sigue habiendo huellas de luz en el interior");
             Tooltip.AddTranslation(GameCulture.Chinese, "那道光所余留的痕迹依旧");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "'É melhor você não tentar comer isso'");
         }
         
 

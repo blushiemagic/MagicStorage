@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Fenêtre d'accès éloigné");
             DisplayName.AddTranslation(GameCulture.Spanish, "Acceso a Almacenamiento Remoto");
             DisplayName.AddTranslation(GameCulture.Chinese, "远程存储装置");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Acesso de Armazenamento Remoto");
         }    
 
         public override void SetDefaults()

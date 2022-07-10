@@ -16,6 +16,7 @@ namespace MagicStorage.Items
             DisplayName.AddTranslation(GameCulture.French, "Disque Localisateur");
             DisplayName.AddTranslation(GameCulture.Spanish, "Disco Locador");
             DisplayName.AddTranslation(GameCulture.Chinese, "定位器驱动");
+            DisplayName.AddTranslation(GameCulture.Portuguese, "Disco Localizador");
 
             Tooltip.SetDefault("<right> Storage Heart to store location"
                 + "\n<right> Remote Storage Access to set it"
@@ -35,6 +36,9 @@ namespace MagicStorage.Items
             Tooltip.AddTranslation(GameCulture.Chinese, "<right>存储核心可储存其定位点"
                 + "\n<right>远程存储装置以设置其定位点"
                 + "\n使用后不再损坏");
+            Tooltip.AddTranslation(GameCulture.Portuguese, "<right> no Núcleo de Armazenamento para guardar a localização"
+                + "\n<right> no Acesso de Armazenamento Remoto para fixá-lo"
+                + "\nNão é destruído quando usado");
         }
 
         public override void SetDefaults()

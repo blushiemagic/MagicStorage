@@ -51,6 +51,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Mis à: X={0}, Y={1}");
             text.AddTranslation(GameCulture.Spanish, "Ajustado a: X={0}, Y={1}");
             text.AddTranslation(GameCulture.Chinese, "已设置为: X={0}, Y={1}");
+            text.AddTranslation(GameCulture.Portuguese, "Ajustar: X={0}, Y={1}");
             AddTranslation(text);
 
             text = CreateTranslation("SnowBiomeBlock");
@@ -58,6 +59,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Bloc de biome de neige");
             text.AddTranslation(GameCulture.Spanish, "Bloque de Biomas de la Nieve");
             text.AddTranslation(GameCulture.Chinese, "雪地环境方块");
+            text.AddTranslation(GameCulture.Portuguese, "Bloco do Bioma de Neve");
             AddTranslation(text);
 
             text = CreateTranslation("DepositAll");
@@ -66,6 +68,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Déposer tout");
             text.AddTranslation(GameCulture.Spanish, "Depositar todo");
             text.AddTranslation(GameCulture.Chinese, "全部存入");
+            text.AddTranslation(GameCulture.Portuguese, "Depositar tudo");
             AddTranslation(text);
 
             text = CreateTranslation("Search");
@@ -74,6 +77,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Rechercher");
             text.AddTranslation(GameCulture.Spanish, "Buscar");
             text.AddTranslation(GameCulture.Chinese, "搜索");
+            text.AddTranslation(GameCulture.Portuguese, "Procurar");
             AddTranslation(text);
 
             text = CreateTranslation("SearchName");
@@ -82,6 +86,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Recherche par nom");
             text.AddTranslation(GameCulture.Spanish, "búsqueda por nombre");
             text.AddTranslation(GameCulture.Chinese, "搜索名称");
+            text.AddTranslation(GameCulture.Portuguese, "Buscar por nome");
             AddTranslation(text);
 
             text = CreateTranslation("SearchMod");
@@ -90,6 +95,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Recherche par mod");
             text.AddTranslation(GameCulture.Spanish, "búsqueda por mod");
             text.AddTranslation(GameCulture.Chinese, "搜索模组");
+            text.AddTranslation(GameCulture.Portuguese, "Buscar por Mod");
             AddTranslation(text);
 
             text = CreateTranslation("SortDefault");
@@ -98,6 +104,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Tri Standard");
             text.AddTranslation(GameCulture.Spanish, "Clasificación por defecto");
             text.AddTranslation(GameCulture.Chinese, "默认排序");
+            text.AddTranslation(GameCulture.Portuguese, "Classificação Padrão");
             AddTranslation(text);
 
             text = CreateTranslation("SortID");
@@ -106,6 +113,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Trier par ID");
             text.AddTranslation(GameCulture.Spanish, "Ordenar por ID");
             text.AddTranslation(GameCulture.Chinese, "按ID排序");
+            text.AddTranslation(GameCulture.Portuguese, "Classificar por ID");
             AddTranslation(text);
 
             text = CreateTranslation("SortName");
@@ -114,6 +122,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Trier par nom");
             text.AddTranslation(GameCulture.Spanish, "Ordenar por nombre");
             text.AddTranslation(GameCulture.Chinese, "按名称排序");
+            text.AddTranslation(GameCulture.Portuguese, "Classificar por nome");
             AddTranslation(text);
 
             text = CreateTranslation("SortStack");
@@ -122,6 +131,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Trier par piles");
             text.AddTranslation(GameCulture.Spanish, "Ordenar por pilas");
             text.AddTranslation(GameCulture.Chinese, "按堆栈排序");
+            text.AddTranslation(GameCulture.Portuguese, "Classificar por pilha");
             AddTranslation(text);
 
             text = CreateTranslation("FilterAll");
@@ -130,6 +140,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer tout");
             text.AddTranslation(GameCulture.Spanish, "Filtrar todo");
             text.AddTranslation(GameCulture.Chinese, "筛选全部");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar tudo");
             AddTranslation(text);
 
             text = CreateTranslation("FilterWeapons");
@@ -138,6 +149,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par armes");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por armas");
             text.AddTranslation(GameCulture.Chinese, "筛选武器");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar armas");
             AddTranslation(text);
 
             text = CreateTranslation("FilterTools");
@@ -146,6 +158,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par outils");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por herramientas");
             text.AddTranslation(GameCulture.Chinese, "筛选工具");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar ferramentas");
             AddTranslation(text);
 
             text = CreateTranslation("FilterEquips");
@@ -154,6 +167,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par Équipement");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por equipamiento");
             text.AddTranslation(GameCulture.Chinese, "筛选装备");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar equipamento");
             AddTranslation(text);
 
             text = CreateTranslation("FilterPotions");
@@ -162,6 +176,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par potions");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por poción");
             text.AddTranslation(GameCulture.Chinese, "筛选药水");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar poções");
             AddTranslation(text);
 
             text = CreateTranslation("FilterTiles");
@@ -170,6 +185,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par placeable");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por metido");
             text.AddTranslation(GameCulture.Chinese, "筛选放置物");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar alocáveis");
             AddTranslation(text);
 
             text = CreateTranslation("FilterMisc");
@@ -178,6 +194,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Filtrer par miscellanées");
             text.AddTranslation(GameCulture.Spanish, "Filtrar por otros");
             text.AddTranslation(GameCulture.Chinese, "筛选杂项");
+            text.AddTranslation(GameCulture.Portuguese, "Filtrar outros");
             AddTranslation(text);
 
             text = CreateTranslation("CraftingStations");
@@ -186,6 +203,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Stations d'artisanat");
             text.AddTranslation(GameCulture.Spanish, "Estaciones de elaboración");
             text.AddTranslation(GameCulture.Chinese, "制作站");
+            text.AddTranslation(GameCulture.Portuguese, "Estações de criação");
             AddTranslation(text);
 
             text = CreateTranslation("Recipes");
@@ -194,6 +212,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Recettes");
             text.AddTranslation(GameCulture.Spanish, "Recetas");
             text.AddTranslation(GameCulture.Chinese, "合成配方");
+            text.AddTranslation(GameCulture.Portuguese, "Receitas");
             AddTranslation(text);
 
             text = CreateTranslation("SelectedRecipe");
@@ -201,6 +220,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Recette sélectionnée");
             text.AddTranslation(GameCulture.Spanish, "Receta seleccionada");
             text.AddTranslation(GameCulture.Chinese, "选择配方");
+            text.AddTranslation(GameCulture.Portuguese, "Receita selecionada");
             AddTranslation(text);
 
             text = CreateTranslation("Ingredients");
@@ -208,6 +228,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Ingrédients");
             text.AddTranslation(GameCulture.Spanish, "Ingredientes");
             text.AddTranslation(GameCulture.Chinese, "材料");
+            text.AddTranslation(GameCulture.Portuguese, "Ingredientes");
             AddTranslation(text);
 
             text = CreateTranslation("StoredItems");
@@ -215,6 +236,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Ingrédients Stockés");
             text.AddTranslation(GameCulture.Spanish, "Ingredientes almacenados");
             text.AddTranslation(GameCulture.Chinese, "存储中的材料");
+            text.AddTranslation(GameCulture.Portuguese, "Ingredientes armazenados");
             AddTranslation(text);
 
             text = CreateTranslation("RecipeAvailable");
@@ -222,6 +244,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Afficher les recettes disponibles");
             text.AddTranslation(GameCulture.Spanish, "Mostrar recetas disponibles");
             text.AddTranslation(GameCulture.Chinese, "显示可合成配方");
+            text.AddTranslation(GameCulture.Portuguese, "Mostrar receitas disponíveis");
             AddTranslation(text);
 
             text = CreateTranslation("RecipeAll");
@@ -229,6 +252,7 @@ namespace MagicStorage
             text.AddTranslation(GameCulture.French, "Afficher toutes les recettes");
             text.AddTranslation(GameCulture.Spanish, "Mostrar todas las recetas");
             text.AddTranslation(GameCulture.Chinese, "显示全部配方");
+            text.AddTranslation(GameCulture.Portuguese, "Mostrar todas as receitas");
             AddTranslation(text);
         }
 
