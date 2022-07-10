@@ -13,10 +13,14 @@ public class MagicUI : ModSystem
 	{
 		int inventoryIndex = layers.FindIndex(layer => layer.Name == "Vanilla: Inventory");
 		if (inventoryIndex != -1)
-			layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", DrawStorageGUI, InterfaceScaleType.UI));
+			layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", () =>
+			{
+				DrawStorageGUI();
+				return true;
+			}, InterfaceScaleType.UI));
 	}
 
-	private static bool DrawStorageGUI()
+	private static void DrawStorageGUI()
 	{
 		Player player = Main.LocalPlayer;
 		StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
@@ -40,8 +44,6 @@ public class MagicUI : ModSystem
 				}
 			}
 		}
-
-		return true;
 	}
 
 	public override void PostUpdateInput()
