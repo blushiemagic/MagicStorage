@@ -5,6 +5,8 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 
+#nullable enable
+
 namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
