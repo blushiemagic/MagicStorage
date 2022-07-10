@@ -29,6 +29,8 @@ public class MagicUI : ModSystem
 				TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
 				if (heart is not null)
 				{
+					Main.hidePlayerCraftingMenu = true;
+
 					if (access is EnvironmentAccess)
 						EnvironmentGUI.Draw();
 					else if (access is CraftingAccess)
@@ -46,9 +48,6 @@ public class MagicUI : ModSystem
 	{
 		if (!Main.instance.IsActive)
 			return;
-
-		if (!Main.gameMenu && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
-			Main.hidePlayerCraftingMenu = true;
 
 		StorageGUI.Update(null);
 		CraftingGUI.Update(null);
