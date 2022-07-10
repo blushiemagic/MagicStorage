@@ -91,23 +91,7 @@ namespace MagicStorage.NPCs {
 				Dust.NewDust(NPC.position, NPC.width, NPC.height, Main.rand.Next(new[] { DustID.Stone, DustID.Iron, DustID.WoodFurniture }));
 		}
 
-		public override bool CanTownNPCSpawn(int numTownNPCs, int money) {
-			if (!MagicStorageServerConfig.AllowAutomatonToMoveIn)
-				return false;
-
-			// Requirements for the town NPC to spawn.
-			for (int k = 0; k < 255; k++) {
-				Player player = Main.player[k];
-				if (!player.active)
-					continue;
-
-				// Player has to have a chest and at least 50 silvers for the NPC to spawn
-				if (player.inventory.Any(item => !item.IsAir && item.createTile >= TileID.Dirt && TileID.Sets.BasicChest[item.createTile]))
-					return money >= Item.buyPrice(silver: 50);
-			}
-
-			return false;
-		}
+		public override bool CanTownNPCSpawn(int numTownNPCs, int money) => MagicStorageServerConfig.AllowAutomatonToMoveIn;
 
 		public override ITownNPCProfile TownNPCProfile() => new GolemProfile();
 

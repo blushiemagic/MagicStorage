@@ -26,7 +26,7 @@ namespace MagicStorage {
 
 			//Census mod support
 			if (ModLoader.TryGetMod("Census", out Mod Census)) {
-				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), $"Have a [rg:MagicStorage:AnyChest] and [i/s50:{ItemID.SilverCoin}] in your inventory");
+				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
 			}
 		}
 
