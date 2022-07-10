@@ -25,25 +25,25 @@ public class MagicUI : ModSystem
 		Player player = Main.LocalPlayer;
 		StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 		Point16 storageAccess = modPlayer.ViewingStorage();
-		if (Main.playerInventory && storageAccess.X >= 0 && storageAccess.Y >= 0)
-		{
-			ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
-			if (modTile is StorageAccess access)
-			{
-				TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
-				if (heart is not null)
-				{
-					Main.hidePlayerCraftingMenu = true;
+		if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
+			return;
 
-					if (access is EnvironmentAccess)
-						EnvironmentGUI.Draw();
-					else if (access is CraftingAccess)
-						CraftingGUI.Draw();
-					else
-						StorageGUI.Draw();
-				}
-			}
-		}
+		ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
+		if (modTile is not StorageAccess access)
+			return;
+
+		TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
+		if (heart is null)
+			return;
+
+		Main.hidePlayerCraftingMenu = true;
+
+		if (access is EnvironmentAccess)
+			EnvironmentGUI.Draw();
+		else if (access is CraftingAccess)
+			CraftingGUI.Draw();
+		else
+			StorageGUI.Draw();
 	}
 
 	public override void PostUpdateInput()
