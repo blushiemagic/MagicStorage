@@ -513,13 +513,13 @@ namespace MagicStorage
 					craftAmountTarget = 1;
 					ResetSlotFocus();
 				}
-
-				PlayerZoneCache.FreeCache(true);
 			}
 			catch (Exception e)
 			{
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
+
+			PlayerZoneCache.FreeCache(true);
 		}
 
 		public static void Draw()
@@ -931,6 +931,8 @@ namespace MagicStorage
 			if (heart == null)
 				return;
 
+			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes invoked");
+
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
 			IEnumerable<Item> heartItems = heart.GetStoredItems().Select(i => i.Clone());
@@ -943,6 +945,9 @@ namespace MagicStorage
 
 			items.AddRange(ItemSorter.SortAndFilter(simulatorItems, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
 
+			NetHelper.Report(false, "Total items: " + items.Count);
+			NetHelper.Report(false, "Items from modules: " + (items.Count - numItemsWithoutSimulators));
+
 			AnalyzeIngredients();
 			InitLangStuff();
 			InitSortButtons();
@@ -952,10 +957,15 @@ namespace MagicStorage
 			RefreshStorageItems();
 
 			try {
+				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
+				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(b => b));
+
 				if (toRefresh is null)
 					RefreshRecipes();  //Refresh all recipes
 				else
 					RefreshSpecificRecipes(toRefresh);
+
+				NetHelper.Report(true, "Recipe refreshing finished");
 
 				// TODO is there a better way?
 				void GuttedSetSelectedRecipe(Recipe recipe, int index)
@@ -996,6 +1006,8 @@ namespace MagicStorage
 				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
 					environment.ResetPlayer(sandbox);
 			}
+
+			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 		}
 
 		private static void RefreshRecipes()
@@ -1025,6 +1037,8 @@ namespace MagicStorage
 					recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
 				}
 			}
+
+			NetHelper.Report(true, "Refreshing all recipes");
 
 			if (RecursiveCraftIntegration.Enabled)
 				RecursiveCraftIntegration.RefreshRecursiveRecipes();
@@ -1067,6 +1081,8 @@ namespace MagicStorage
 		}
 
 		private static void RefreshSpecificRecipes(Recipe[] toRefresh) {
+			NetHelper.Report(true, "Refreshing " + toRefresh.Length + " recipes");
+
 			//Assumes that the recipes are visible in the GUI
 			bool needsResort = false;
 
@@ -1813,6 +1829,9 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
+			int target = toCraft;
+			NetHelper.Report(true, "Attempting to craft " + toCraft + " items");
+
 			while (toCraft > 0) {
 				if (!AttemptSingleCraft(availableItems, sourceItems, fromModule, toWithdraw, results, sandbox))
 					break;  // Could not craft any more items
@@ -1833,6 +1852,8 @@ namespace MagicStorage
 
 				results.AddRange(DroppedItems);
 			}
+
+			NetHelper.Report(true, "Crafted " + (target - toCraft) + " items");
 
 			toWithdraw = CompactItemList(toWithdraw);
 			results = CompactItemList(results);
@@ -1885,6 +1906,38 @@ namespace MagicStorage
 				return stack <= 0;
 			}
 
+			bool AttemptToConsumeFromSource(int reqType, int stack) {
+				int listIndex = 0;
+				foreach (Item tryItem in source) {
+					if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
+						//Don't attempt to consume the item unless it is from a module, since it doesn't exist in the storage system anyway
+						bool canConsume = !fromModule[listIndex];
+
+						if (!canConsume)
+							continue;
+
+						if (tryItem.stack > stack) {
+							Item temp = tryItem.Clone();
+							temp.stack = stack;
+								
+							tryItem.stack -= stack;
+							stack = 0;
+						} else {
+							stack -= tryItem.stack;
+							tryItem.stack = 0;
+							tryItem.type = ItemID.None;
+						}
+
+						if (stack <= 0)
+							break;
+					}
+
+					listIndex++;
+				}
+
+				return stack <= 0;
+			}
+
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
 				int stack = reqItem.stack;
@@ -1913,7 +1966,7 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				AttemptToConsumeItem(source, reqItem.type, stack, addToWithdraw: false);
+				AttemptToConsumeFromSource(reqItem.type, stack);
 			}
 
 			return true;
