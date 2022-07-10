@@ -23,9 +23,9 @@ public class TECreativeStorageUnit : TEAbstractStorageUnit
 	{
 		Items ??= new Item[ItemLoader.ItemCount];
 
-		for (int i = 0; i < Items.Length; i++)
+		for (int i = 1; i < Items.Length; i++)
 		{
-			if (i is 0 || ItemID.Sets.Deprecated[i])
+			if (ItemID.Sets.Deprecated[i])
 				continue;
 
 			var item = Items[i];
