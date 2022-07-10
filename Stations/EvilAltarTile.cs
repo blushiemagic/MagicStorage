@@ -26,7 +26,7 @@ namespace MagicStorage.Stations
 
 			AdjTiles = new int[] { Type, TileID.DemonAltar };
 
-			AddMapEntry(Color.MediumPurple);
+			AddMapEntry(Color.MediumPurple, CreateMapEntryName());
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)

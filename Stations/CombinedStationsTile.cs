@@ -39,7 +39,7 @@ namespace MagicStorage.Stations
 
 			AdjTiles = GetAdjTiles();
 
-			AddMapEntry(MapColor);
+			AddMapEntry(MapColor, CreateMapEntryName());
 		}
 
 		private static int[] CreateArrayFromLength(int length)

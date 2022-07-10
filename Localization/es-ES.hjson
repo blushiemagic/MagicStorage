@@ -183,17 +183,6 @@ Mods: {
 			}
 		}
 
-		MapObject: {
-			CraftingAccess: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
-			CreativeStorageUnit:  "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
-			RemoteAccess:  "{$Mods.MagicStorage.ItemName.RemoteAccess}"
-			StorageAccess:  "{$Mods.MagicStorage.ItemName.StorageAccess}"
-			StorageComponent:  "{$Mods.MagicStorage.ItemName.StorageComponent}"
-			StorageConnector:  "{$Mods.MagicStorage.ItemName.StorageConnector}"
-			StorageHeart:  "{$Mods.MagicStorage.ItemName.StorageHeart}"
-			StorageUnit:  "{$Mods.MagicStorage.ItemName.StorageUnit}"
-		}
-
 		Bestiary: {
 			# Golem:
 			# '''
