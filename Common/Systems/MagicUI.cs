@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace MagicStorage;
+namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
 {

@@ -8,6 +8,7 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	public class MagicStorage : Mod {
