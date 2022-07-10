@@ -8,29 +8,7 @@ namespace MagicStorage.Components;
 
 public class TECreativeStorageUnit : TEAbstractStorageUnit
 {
-	private static Item AirItem = null!;
-	private static Item[] Items = null!;
-
-	public override void Load(Mod mod)
-	{
-		base.Load(mod);
-
-		AirItem = new();
-		Items = new Item[ItemLoader.ItemCount];
-		for (int i = 0; i < Items.Length; i++)
-		{
-			var item = Items[i] = new Item(i);
-			item.stack = item.maxStack;
-		}
-	}
-
-	public override void Unload()
-	{
-		base.Unload();
-
-		AirItem = null!;
-		Items = null!;
-	}
+	private static Item?[]? Items;
 
 	public override bool IsFull => true;
 
@@ -42,10 +20,15 @@ public class TECreativeStorageUnit : TEAbstractStorageUnit
 
 	public override IEnumerable<Item> GetItems()
 	{
+		Items ??= new Item[ItemLoader.ItemCount];
+
 		for (int i = 0; i < Items.Length; i++)
 		{
 			var item = Items[i];
-			if (item.IsAir)
+
+			if (item is null)
+				item = Items[i] = new Item(i);
+			else if (item.type != i || item.IsAir)
 				item.SetDefaults(i);
 
 			item.stack = item.maxStack;
@@ -60,7 +43,7 @@ public class TECreativeStorageUnit : TEAbstractStorageUnit
 	public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 	{
 		if (Inactive)
-			return AirItem;
+			return new Item();
 
 		return lookFor.Clone();
 	}
