@@ -24,13 +24,13 @@ namespace MagicStorage.Components
 		{
 			Player player = Main.LocalPlayer;
 			Item item = player.HeldItem;
-			if (item.type == ModContent.ItemType<Locator>() || item.type == ModContent.ItemType<LocatorDisk>() || item.type == ModContent.ItemType<PortableAccess>())
+
+			if (!item.IsAir && item.ModItem is Locator locator && item.ModItem is not PortableCraftingAccess)
 			{
 				if (Main.tile[i, j].TileFrameX % 36 == 18)
 					i--;
 				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
-				Locator locator = (Locator) item.ModItem;
 				locator.location = new Point16(i, j);
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
