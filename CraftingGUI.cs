@@ -1943,8 +1943,10 @@ namespace MagicStorage
 
 				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);
 
-				if (stack <= 0)
+				if (stack <= 0) {
+					NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\".");
 					continue;
+				}
 
 				int stackOrig = stack;
 				bool consumeSucceeded = AttemptToConsumeItem(available, reqItem.type, ref stack, addToWithdraw: true);
