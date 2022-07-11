@@ -12,7 +12,9 @@ namespace MagicStorage.Sorting
 			IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
 		{
 			var filter = GetFilter(filterMode);
-			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
+			IEnumerable<Item> filteredItems = items.Where(item => filter(item) 
+			&& (FilterName(item, nameFilter) || FilterTooltip(item, nameFilter)) && FilterMod(item, modFilterIndex));
+
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
 
@@ -107,7 +109,26 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		internal static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
+		internal static bool FilterName(Item item, string filter) 
+		{
+			return item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
+		}
+
+		internal static bool FilterTooltip(Item item, string filter)
+		{
+            bool found = false;
+            for (int i = 0; i < item.ToolTip.Lines; i++)
+            {
+                if (item.ToolTip.GetLine(i).Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+					found = true;
+					break;
+				}
+			}
+
+			return found;
+		}
+
 
 		internal static bool FilterMod(Item item, int modFilterIndex)
 		{
