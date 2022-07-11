@@ -59,7 +59,8 @@ namespace MagicStorage.Sorting
 				}
 			}
 
-			yield return lastItem;
+			if (lastItem is not null)
+				yield return lastItem;
 		}
 
 		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, out IComparer<Item> sortComparer)

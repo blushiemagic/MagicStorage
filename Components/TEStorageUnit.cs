@@ -174,8 +174,10 @@ namespace MagicStorage.Components
 					}
 
 					item.stack -= withdraw;
-					if (item.stack <= 0)
+					if (item.stack <= 0) {
 						items.RemoveAt(k);
+						k--;
+					}
 
 					lookFor.stack -= withdraw;
 					

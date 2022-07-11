@@ -19,7 +19,6 @@ namespace MagicStorage
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
 
-		[Conditional("DEBUG")]
 		[Conditional("NETPLAY")]
 		public static void Report(bool reportTime, string message) {
 			if (Main.netMode != NetmodeID.Server) {

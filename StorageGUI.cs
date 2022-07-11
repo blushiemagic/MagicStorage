@@ -29,10 +29,10 @@ namespace MagicStorage
 		public static MouseState oldMouse;
 
 		private static UIPanel basePanel;
-		private static float panelTop;
-		private static float panelLeft;
-		private static float panelWidth;
-		private static float panelHeight;
+		internal static float panelTop;
+		internal static float panelLeft;
+		internal static float panelWidth;
+		internal static float panelHeight;
 
 		private static UIElement topBar;
 
