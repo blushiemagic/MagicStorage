@@ -23,7 +23,7 @@ namespace MagicStorage
 
 		[Label("$Mods.MagicStorage.Config.filterByTooltip.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.filterByTooltip.Tooltip")]
-		[DefaultValue(true)]
+		[DefaultValue(false)]
 		public bool filterByTooltip;
 
 		[Label("$Mods.MagicStorage.Config.showAllRecipes.Label")]
