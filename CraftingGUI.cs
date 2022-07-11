@@ -1093,7 +1093,7 @@ namespace MagicStorage
 			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
 
 			bool CanBeAdded(Recipe r) => Array.IndexOf(MagicCache.FilteredRecipesCache[filterMode], r) >= 0
-				&& ItemSorter.FilterName(r.createItem, searchBar.Text) && ItemSorter.FilterMod(r.createItem, modFilterIndex)
+				&& (ItemSorter.FilterName(r.createItem, searchBar.Text) || ItemSorter.FilterTooltip(r.createItem, searchBar.Text)) && ItemSorter.FilterMod(r.createItem, modFilterIndex)
 				// show only blacklisted recipes only if choice = 2, otherwise show all other
 				&& recipeButtons.Choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(r.createItem)
 				// show only favorited items if selected

@@ -70,7 +70,7 @@ namespace MagicStorage.Sorting
 			return MagicCache.FilteredRecipesCache[filterMode]
 				.AsParallel()
 				.AsOrdered()
-				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+				.Where(recipe => (FilterName(recipe.createItem, nameFilter) || FilterTooltip(recipe.createItem, nameFilter)) && FilterMod(recipe.createItem, modFilterIndex));
 		}
 
 		internal static IComparer<Item> GetSortFunction(SortMode sortMode)
