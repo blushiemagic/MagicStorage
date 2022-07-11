@@ -1866,7 +1866,9 @@ namespace MagicStorage
 		}
 
 		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<bool> fromModule, List<Item> withdraw, List<Item> results, EnvironmentSandbox sandbox) {
-			bool AttemptToConsumeItem(List<Item> list, int reqType, int stack, bool addToWithdraw) {
+			List<Item> origResults = new(results);
+
+			bool AttemptToConsumeItem(List<Item> list, int reqType, ref int stack, bool addToWithdraw) {
 				int listIndex = 0;
 				foreach (Item tryItem in list)
 				{
@@ -1906,20 +1908,17 @@ namespace MagicStorage
 				return stack <= 0;
 			}
 
-			bool AttemptToConsumeFromSource(int reqType, int stack) {
+			void AttemptToConsumeFromSource(int reqType, int stack) {
 				int listIndex = 0;
 				foreach (Item tryItem in source) {
 					if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
 						//Don't attempt to consume the item unless it is from a module, since it doesn't exist in the storage system anyway
-						bool canConsume = !fromModule[listIndex];
+						bool canConsume = fromModule[listIndex];
 
 						if (!canConsume)
 							continue;
 
 						if (tryItem.stack > stack) {
-							Item temp = tryItem.Clone();
-							temp.stack = stack;
-								
 							tryItem.stack -= stack;
 							stack = 0;
 						} else {
@@ -1934,8 +1933,6 @@ namespace MagicStorage
 
 					listIndex++;
 				}
-
-				return stack <= 0;
 			}
 
 			foreach (Item reqItem in selectedRecipe.requiredItem)
@@ -1947,14 +1944,19 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (var module in EnvironmentModuleLoader.modules)
-					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
+				int stackOrig = stack;
+				bool consumeSucceeded = AttemptToConsumeItem(available, reqItem.type, ref stack, addToWithdraw: true);
 
-				if (!AttemptToConsumeItem(available, reqItem.type, stack, addToWithdraw: true))
-					AttemptToConsumeItem(results, reqItem.type, stack, addToWithdraw: false);
+				if (!consumeSucceeded) {
+					stack = stackOrig;
+					consumeSucceeded = AttemptToConsumeItem(results, reqItem.type, ref stack, addToWithdraw: false);
+				}
 
-				if (stack > 0)
+				if (stack > 0 || !consumeSucceeded) {
+					results.Clear();
+					results.AddRange(origResults);
 					return false;  // Did not have enough items
+				}
 			}
 
 			//Consume the source items as well since the craft was successful
@@ -1965,6 +1967,9 @@ namespace MagicStorage
 
 				if (stack <= 0)
 					continue;
+
+				foreach (var module in EnvironmentModuleLoader.modules)
+					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
 
 				AttemptToConsumeFromSource(reqItem.type, stack);
 			}

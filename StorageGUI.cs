@@ -321,6 +321,8 @@ namespace MagicStorage
 			if (heart == null)
 				return;
 
+			NetHelper.Report(true, "Refreshing storage items");
+
 			InitLangStuff();
 			InitSortButtons();
 			InitFilterButtons();
@@ -345,6 +347,8 @@ namespace MagicStorage
 				}
 
 				items.AddRange(itemsLocal.Where(x => !favoritedOnlyButton.Value || x.favorited));
+
+				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
 			}
 
 			DoFiltering();
@@ -356,6 +360,9 @@ namespace MagicStorage
 				{
 					// search all categories
 					filterMode = FilterMode.All;
+
+					NetHelper.Report(false, "No items displayed even though items exist in storage.  Defaulting to \"All\" filter mode");
+
 					DoFiltering();
 				}
 
@@ -363,6 +370,9 @@ namespace MagicStorage
 				{
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
+
+					NetHelper.Report(false, $"No items displayed even though items exist in storage.  Defaulting to \"{Language.GetTextValue("Mods.MagicStorage.FilterAllMods")}\" mod filter");
+
 					DoFiltering();
 				}
 			}
