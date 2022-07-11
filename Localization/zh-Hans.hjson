@@ -433,6 +433,10 @@ Mods: {
 				Label: "使用默认筛选项"
 				Tooltip: "开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）"
 			}
+			filterByTooltip: {
+				# Label: "Filter By Tooltip"
+				# Tooltip: "Allows you to filter your items inside the Crafting and Storage Interface by Tooltip."
+			}
 			showAllRecipes: {
 				Label: "显示所有制作配方"
 				Tooltip: "开启以显示所有制作配方，关闭则只会显示可用的制作配方"

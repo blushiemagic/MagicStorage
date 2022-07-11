@@ -21,6 +21,11 @@ namespace MagicStorage
 		[DefaultValue(true)]
 		public bool useConfigFilter;
 
+		[Label("$Mods.MagicStorage.Config.filterByTooltip.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.filterByTooltip.Tooltip")]
+		[DefaultValue(true)]
+		public bool filterByTooltip;
+
 		[Label("$Mods.MagicStorage.Config.showAllRecipes.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.showAllRecipes.Tooltip")]
 		[DefaultValue(false)]
@@ -60,6 +65,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool UseConfigFilter => Instance.useConfigFilter;
+
+		[JsonIgnore]
+		public static bool FilterByTooltip => Instance.filterByTooltip;
 
 		[JsonIgnore]
 		public static bool ShowAllRecipes => Instance.showAllRecipes;

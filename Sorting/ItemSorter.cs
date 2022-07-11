@@ -116,7 +116,10 @@ namespace MagicStorage.Sorting
 
 		internal static bool FilterTooltip(Item item, string filter)
 		{
-            bool found = false;
+			if (!MagicStorageConfig.FilterByTooltip)
+				return false;
+
+			bool found = false;
             for (int i = 0; i < item.ToolTip.Lines; i++)
             {
                 if (item.ToolTip.GetLine(i).Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase))
