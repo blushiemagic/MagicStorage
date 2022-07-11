@@ -118,11 +118,11 @@ namespace MagicStorage.UI
 			}
 			else if(isLeftOrRightCtrlPressed && KeyTyped(Keys.Left))
             {
-				HandleCtrlCursorPosition(Keys.Left);
+				HandleLeft();
             }
 			else if(isLeftOrRightCtrlPressed && KeyTyped(Keys.Right))
             {
-				HandleCtrlCursorPosition(Keys.Right);
+				HandleRight();
 			}
 
 
@@ -156,19 +156,6 @@ namespace MagicStorage.UI
 				CheckBlockInput();
 			}
 		}
-
-        private void HandleCtrlCursorPosition(Keys direction)
-        {
-            switch (direction)
-            {
-                case Keys.Left:
-                    HandleLeft();
-                    break;
-                case Keys.Right:
-					HandleRight();
-					break;
-            }
-        }
 
         private void HandleRight()
         {
