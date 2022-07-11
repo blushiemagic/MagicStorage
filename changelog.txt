@@ -12,3 +12,4 @@ See [url=https://discord.com/channels/860671977449979914/864921239957012481]#mag
 - removed the requirements for allowing the Automaton to move into housing
 - fixed some bugs causing items to disappear from storage systems when doing anything that would potentially update a Storage Unit
 - fixed the Crafting Access not crafting items properly
+- added a new keybinding and config for helping users check why items aren't able to stack in a storage system
