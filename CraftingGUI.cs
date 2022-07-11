@@ -1935,6 +1935,8 @@ namespace MagicStorage
 				}
 			}
 
+			NetHelper.Report(false, "Attempting one craft operation...");
+
 			foreach (Item reqItem in selectedRecipe.requiredItem)
 			{
 				int stack = reqItem.stack;
@@ -1955,8 +1957,13 @@ namespace MagicStorage
 				if (stack > 0 || !consumeSucceeded) {
 					results.Clear();
 					results.AddRange(origResults);
+
+					NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was not available.");
+
 					return false;  // Did not have enough items
 				}
+
+				NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was available.");
 			}
 
 			//Consume the source items as well since the craft was successful
@@ -1973,6 +1980,8 @@ namespace MagicStorage
 
 				AttemptToConsumeFromSource(reqItem.type, stack);
 			}
+
+			NetHelper.Report(false, "Craft operation succeeded");
 
 			return true;
 		}
