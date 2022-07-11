@@ -109,10 +109,7 @@ namespace MagicStorage.Sorting
 			};
 		}
 
-		internal static bool FilterName(Item item, string filter) 
-		{
-			return item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
-		}
+		internal static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
 
 		internal static bool FilterTooltip(Item item, string filter)
 		{
