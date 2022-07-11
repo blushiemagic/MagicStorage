@@ -115,13 +115,14 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SyncStorageUnit(int storageUnitId)
+		public static void SyncStorageUnit(Point16 position)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.SyncStorageUnit);
-				packet.Write(storageUnitId);
+				packet.Write(position.X);
+				packet.Write(position.Y);
 				packet.Send();
 
 				Report(true, MessageType.SyncStorageUnit + " packet sent from client " + Main.myPlayer);
@@ -133,16 +134,16 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 			{
 				//byte remoteClient = reader.ReadByte();
-				int storageUnitId = reader.ReadInt32();
+				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 
-				if (!TileEntity.ByID.TryGetValue(storageUnitId, out TileEntity tileEntity)) {
+				if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity tileEntity)) {
 					Report(true, MessageType.ResetCompactStage + " packet had a data mismatch");
-					Report(false, "  Tile Entity " + storageUnitId + " does not exist on the server");
+					Report(false, "  A Tile Entity at location (X: " + position.X + ", Y: " + position.Y + ") does not exist on the server");
 					return;
 				}
 
 				if (tileEntity is not TEStorageUnit storageUnit) {
-					Report(true, MessageType.ResetCompactStage + " received an ID for a Tile Entity that isn't a TEStorageUnit: " + storageUnitId);
+					Report(true, MessageType.ResetCompactStage + " received a position for a Tile Entity that isn't a TEStorageUnit: (X: " + position.X + ", Y: " + position.Y + ")");
 					Report(false, "  Tile Entity type was actually " + tileEntity.GetType().FullName);
 					return;
 				}

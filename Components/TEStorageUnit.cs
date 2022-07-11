@@ -535,7 +535,7 @@ namespace MagicStorage.Components
 			{
 				NetHelper.Report(true, "Item count mismatch detected for TEStorageUnit, requesting full sync");
 
-				NetHelper.SyncStorageUnit(ID);
+				NetHelper.SyncStorageUnit(Position);
 			}
 		}
 

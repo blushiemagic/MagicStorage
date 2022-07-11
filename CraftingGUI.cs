@@ -1947,9 +1947,6 @@ namespace MagicStorage
 				if (stack <= 0)
 					continue;
 
-				foreach (var module in EnvironmentModuleLoader.modules)
-					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
-
 				if (!AttemptToConsumeItem(available, reqItem.type, stack, addToWithdraw: true))
 					AttemptToConsumeItem(results, reqItem.type, stack, addToWithdraw: false);
 
@@ -1965,6 +1962,9 @@ namespace MagicStorage
 
 				if (stack <= 0)
 					continue;
+
+				foreach (var module in EnvironmentModuleLoader.modules)
+					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
 
 				AttemptToConsumeFromSource(reqItem.type, stack);
 			}
