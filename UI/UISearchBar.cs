@@ -109,22 +109,15 @@ namespace MagicStorage.UI
 			string newString = Main.GetInputText(prev);
 
 
-            bool isLeftOrRightCtrlPressed = (Main.keyState.IsKeyDown(Keys.LeftControl)
-                            || Main.keyState.IsKeyDown(Keys.RightControl));
-
-            if (isLeftOrRightCtrlPressed && KeyTyped(Keys.Back))
-            {
-				DeleteWord(ref newString);
+			if (Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl))
+			{
+				if (KeyTyped(Keys.Back))
+					DeleteWord(ref newString);
+				else if (KeyTyped(Keys.Left))
+					HandleLeft();
+				else if (KeyTyped(Keys.Right))
+					HandleRight();
 			}
-			else if(isLeftOrRightCtrlPressed && KeyTyped(Keys.Left))
-            {
-				HandleLeft();
-            }
-			else if(isLeftOrRightCtrlPressed && KeyTyped(Keys.Right))
-            {
-				HandleRight();
-			}
-
 
 			if (newString != prev)
 			{
@@ -157,15 +150,15 @@ namespace MagicStorage.UI
 			}
 		}
 
-        private void HandleRight()
-        {
+		private void HandleRight()
+		{
 			if (cursorPosition != Text.Length)
 			{
 				//Check if first character is Whitespace and skip if so
-				if(string.IsNullOrWhiteSpace(Text.Substring(cursorPosition, 1)))
-                {
+				if (char.IsWhiteSpace(Text[cursorPosition]))
+				{
 					cursorPosition += 1;
-                }
+				}
 
 				var newPos = Text.IndexOf(' ', cursorPosition);
 
@@ -180,26 +173,26 @@ namespace MagicStorage.UI
 			}
 		}
 
-        private void HandleLeft()
-        {
-            if (cursorPosition > 0)
-            {
+		private void HandleLeft()
+		{
+			if (cursorPosition > 0)
+			{
 				var newPos = Text.Substring(0, cursorPosition).TrimEnd().LastIndexOf(' ');
 
-				if(newPos == -1)
-                {
+				if (newPos == -1)
+				{
 					cursorPosition = 0;
-                }
-                else
-                {
+				}
+				else
+				{
 					cursorPosition = newPos + 1;
-                }
+				}
 			}
 		}
 
-		
 
-        private static void DeleteWord(ref string newString)
+
+		private static void DeleteWord(ref string newString)
 		{
 			string trimmed = newString.TrimEnd();
 			int index = trimmed.LastIndexOf(" ", trimmed.Length, StringComparison.Ordinal);

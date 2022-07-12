@@ -116,17 +116,16 @@ namespace MagicStorage.Sorting
 			if (!MagicStorageConfig.FilterByTooltip)
 				return false;
 
-			bool found = false;
-            for (int i = 0; i < item.ToolTip.Lines; i++)
-            {
-                if (item.ToolTip.GetLine(i).Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase))
-                {
-					found = true;
-					break;
+
+			for (int i = 0; i < item.ToolTip.Lines; i++)
+			{
+				if (item.ToolTip.GetLine(i).Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase))
+				{
+					return true;
 				}
 			}
 
-			return found;
+			return false;
 		}
 
 
