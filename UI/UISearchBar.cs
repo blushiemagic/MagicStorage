@@ -177,16 +177,7 @@ namespace MagicStorage.UI
 		{
 			if (cursorPosition > 0)
 			{
-				var newPos = Text.Substring(0, cursorPosition).TrimEnd().LastIndexOf(' ');
-
-				if (newPos == -1)
-				{
-					cursorPosition = 0;
-				}
-				else
-				{
-					cursorPosition = newPos + 1;
-				}
+				cursorPosition = Text.AsSpan(0, cursorPosition).TrimEnd().LastIndexOf(' ') + 1;
 			}
 		}
 
