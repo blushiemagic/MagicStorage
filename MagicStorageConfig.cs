@@ -55,8 +55,8 @@ namespace MagicStorage
 
 		[Label("$Mods.MagicStorage.Config.allowItemDataDebug.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip")]
-		[DefaultValue(true)]
-		public bool allowItemDataDebug;
+		[DefaultValue(false)]
+		public bool itemDataDebug;  //Previously "allowItemDataDebug"
 
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
@@ -85,7 +85,7 @@ namespace MagicStorage
 		public static bool UseOldCraftMenu => Instance.useOldCraftMenu;
 
 		[JsonIgnore]
-		public static bool AllowItemDataDebug => Instance.allowItemDataDebug;
+		public static bool ItemDataDebug => Instance.itemDataDebug;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

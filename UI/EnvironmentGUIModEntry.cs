@@ -98,7 +98,7 @@ namespace MagicStorage.UI {
 							label.Toggle();
 							EnvironmentGUI.currentAccess.SetEnabled(module, label.IsOn);
 
-							NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.ID);
+							NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);
 
 						//	Main.NewText($"\"{label.Text.Text}\" label toggled to {label.IsOn}");
 

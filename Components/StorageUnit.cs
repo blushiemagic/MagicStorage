@@ -137,7 +137,7 @@ namespace MagicStorage.Components
 					if (Main.netMode == NetmodeID.SinglePlayer)
 						heart.ResetCompactStage();
 					else if (Main.netMode == NetmodeID.MultiplayerClient)
-						NetHelper.SendResetCompactStage(heart.ID);
+						NetHelper.SendResetCompactStage(heart.Position);
 				}
 
 				item.stack--;

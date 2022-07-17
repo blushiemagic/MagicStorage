@@ -238,7 +238,7 @@ namespace MagicStorage
 
 		public static void ReciveClientStorageOperation(BinaryReader reader, int sender)
 		{
-			int ent = reader.ReadInt32();
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
 			if (Main.netMode != NetmodeID.Server)
@@ -263,7 +263,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
 			heart.QClientOperation(reader, op, sender);
@@ -314,13 +314,14 @@ namespace MagicStorage
 			Report(false, "Operation: " + op);
 		}
 
-		public static void SendRefreshNetworkItems(int ent)
+		public static void SendRefreshNetworkItems(Point16 position)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.RefreshNetworkItems);
-				packet.Write(ent);
+				packet.Write(position.X);
+				packet.Write(position.Y);
 				packet.Send();
 
 				Report(true, MessageType.RefreshNetworkItems + " packet sent from client " + Main.myPlayer);
@@ -329,23 +330,24 @@ namespace MagicStorage
 
 		private static void ReceiveRefreshNetworkItems(BinaryReader reader)
 		{
-			int ent = reader.ReadInt32();
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByID.ContainsKey(ent))
+			if (TileEntity.ByPosition.ContainsKey(position))
 				StorageGUI.RefreshItems();
 
 			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
 		}
 
-		public static void ClientSendDeactivate(int id, bool inActive)
+		public static void ClientSendDeactivate(Point16 position, bool inActive)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendDeactivate);
-				packet.Write(id);
+				packet.Write(position.X);
+				packet.Write(position.Y);
 				packet.Write(inActive);
 				packet.Send();
 
@@ -357,9 +359,9 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				int id = reader.ReadInt32();
+				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 				bool inActive = reader.ReadBoolean();
-				TileEntity ent = TileEntity.ByID[id];
+				TileEntity ent = TileEntity.ByPosition[position];
 				if (ent is TEStorageUnit storageUnit)
 				{
 					storageUnit.Inactive = inActive;
@@ -384,14 +386,15 @@ namespace MagicStorage
 			}
 		}
 
-		public static void ClientSendTEUpdate(int id)
+		public static void ClientSendTEUpdate(Point16 position)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendTEUpdate);
-				packet.Write(id);
-				TileEntity.Write(packet, TileEntity.ByID[id], true);
+				packet.Write(position.X);
+				packet.Write(position.Y);
+				TileEntity.Write(packet, TileEntity.ByPosition[position], true);
 				packet.Send();
 
 				Report(true, MessageType.ClientSendTEUpdate + " packet sent from client " + Main.myPlayer);
@@ -402,11 +405,11 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				int id = reader.ReadInt32();
+				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 				TileEntity ent = TileEntity.Read(reader, true);
-				ent.ID = id;
-				TileEntity.ByID[id] = ent;
-				TileEntity.ByPosition[ent.Position] = ent;
+				ent.Position = position;
+				TileEntity.ByID[ent.ID] = ent;
+				TileEntity.ByPosition[position] = ent;
 				if (ent is TEStorageUnit storageUnit)
 				{
 					TEStorageHeart heart = storageUnit.GetHeart();
@@ -415,12 +418,12 @@ namespace MagicStorage
 
 				Report(true, MessageType.ClientSendTEUpdate + " packet received by server from client " + sender);
 
-				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, id, ent.Position.X, ent.Position.Y);
+				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, ent.ID, ent.Position.X, ent.Position.Y);
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				//Still need to read the data
-				_ = reader.ReadInt32();
+				_ = new Point16(reader.ReadInt16(), reader.ReadInt16());
 				// TODO does TileEntity need to be read?
 				//_ = TileEntity.Read(reader, true);
 
@@ -428,11 +431,12 @@ namespace MagicStorage
 			}
 		}
 
-		private static ModPacket PrepareStationOperation(int ent, byte op)
+		private static ModPacket PrepareStationOperation(Point16 position, byte op)
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientStationOperation);
-			packet.Write(ent);
+			packet.Write(position.X);
+			packet.Write(position.Y);
 			packet.Write(op);
 			return packet;
 		}
@@ -445,11 +449,11 @@ namespace MagicStorage
 			return packet;
 		}
 
-		public static void SendDepositStation(int ent, Item item)
+		public static void SendDepositStation(Point16 position, Item item)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStationOperation(ent, 0);
+				ModPacket packet = PrepareStationOperation(position, 0);
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 
@@ -457,11 +461,11 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SendWithdrawStation(int ent, int slot)
+		public static void SendWithdrawStation(Point16 position, int slot)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = PrepareStationOperation(ent, 1);
+				ModPacket packet = PrepareStationOperation(position, 1);
 				packet.Write((byte)slot);
 				packet.Send();
 
@@ -471,7 +475,7 @@ namespace MagicStorage
 
 		public static void ReceiveClientStationOperation(BinaryReader reader, int sender)
 		{
-			int ent = reader.ReadInt32();
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 
 			if (Main.netMode != NetmodeID.Server)
@@ -488,7 +492,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TECraftingAccess craftingAccess)
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TECraftingAccess craftingAccess)
 				return;
 
 			craftingAccess.QClientOperation(reader, op, sender);
@@ -519,17 +523,18 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SendResetCompactStage(int ent)
+		public static void SendResetCompactStage(Point16 heart)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.ResetCompactStage);
-				packet.Write(ent);
+				packet.Write(heart.X);
+				packet.Write(heart.Y);
 				packet.Send();
 
 				Report(true, MessageType.ResetCompactStage + " packet sent from client " + Main.myPlayer);
-				Report(false, "Entity reset: " + ent);
+				Report(false, "Entity reset: (X: " + heart.X + ", Y: " + heart.Y + ")");
 			}
 		}
 
@@ -537,12 +542,12 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				int ent = reader.ReadInt32();
-				if (TileEntity.ByID.TryGetValue(ent, out var te) && te is TEStorageHeart heart)
+				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
 					heart.ResetCompactStage();
 
 				Report(true, MessageType.ResetCompactStage + " packet received by server from client " + sender);
-				Report(false, "Entity reset: " + ent);
+				Report(false, "Entity reset: (X: " + position.X + ", Y: " + position.Y + ")");
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -552,13 +557,14 @@ namespace MagicStorage
 			}
 		}
 
-		public static void SendCraftRequest(int heart, List<Item> toWithdraw, List<Item> results)
+		public static void SendCraftRequest(Point16 heart, List<Item> toWithdraw, List<Item> results)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				ModPacket packet = MagicStorage.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftRequest);
-				packet.Write(heart);
+				packet.Write(heart.X);
+				packet.Write(heart.Y);
 				packet.Write(toWithdraw.Count);
 				foreach (Item item in toWithdraw)
 					ItemIO.Send(item, packet, true, true);
@@ -573,7 +579,7 @@ namespace MagicStorage
 
 		public static void ReceiveCraftRequest(BinaryReader reader, int sender)
 		{
-			int ent = reader.ReadInt32();
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			int withdrawCount = reader.ReadInt32();
 
 			if (Main.netMode != NetmodeID.Server)
@@ -589,7 +595,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (!TileEntity.ByID.TryGetValue(ent, out TileEntity te) || te is not TEStorageHeart heart)
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
 			List<Item> toWithdraw = new();
@@ -617,7 +623,7 @@ namespace MagicStorage
 				Report(false, MessageType.CraftResult + " packet sent to all clients");
 			}
 
-			SendRefreshNetworkItems(ent);
+			SendRefreshNetworkItems(position);
 		}
 
 		public static void ReceiveCraftResult(BinaryReader reader)

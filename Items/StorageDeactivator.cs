@@ -50,7 +50,7 @@ namespace MagicStorage.Items
 					{
 						if (Main.netMode == NetmodeID.MultiplayerClient)
 						{
-							NetHelper.ClientSendDeactivate(storageUnit.ID, storageUnit.Inactive);
+							NetHelper.ClientSendDeactivate(storageUnit.Position, storageUnit.Inactive);
 						}
 						else
 						{

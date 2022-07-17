@@ -105,7 +105,7 @@ namespace MagicStorage.Components
 
 			if (Main.netMode == NetmodeID.Server && processClientOperations())
 			{
-				NetHelper.SendRefreshNetworkItems(ID);
+				NetHelper.SendRefreshNetworkItems(Position);
 			}
 
 			updateTimer++;
@@ -219,7 +219,8 @@ namespace MagicStorage.Components
 		{
 			ModPacket packet = MagicStorage.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClinetStorageOperation);
-			packet.Write(ID);
+			packet.Write(Position.X);
+			packet.Write(Position.Y);
 			packet.Write((byte)op);
 			return packet;
 		}
@@ -287,7 +288,7 @@ namespace MagicStorage.Components
 				if (abstractStorageUnit is TEStorageUnit { Inactive: false, IsEmpty: true } storageUnit && inactiveUnit.NumItems <= storageUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
-					NetHelper.SendRefreshNetworkItems(ID);
+					NetHelper.SendRefreshNetworkItems(Position);
 					return true;
 				}
 
@@ -307,7 +308,7 @@ namespace MagicStorage.Components
 				inactiveUnit.DepositItem(tryMove);
 			NetHelper.ProcessUpdateQueue();
 			if (hasChange)
-				NetHelper.SendRefreshNetworkItems(ID);
+				NetHelper.SendRefreshNetworkItems(Position);
 			else
 				compactStage++;
 			return hasChange;
@@ -327,7 +328,7 @@ namespace MagicStorage.Components
 				else if (emptyUnit is not null && !storageUnit.IsEmpty && storageUnit.NumItems <= emptyUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(emptyUnit, storageUnit);
-					NetHelper.SendRefreshNetworkItems(ID);
+					NetHelper.SendRefreshNetworkItems(Position);
 					return true;
 				}
 			}
@@ -382,7 +383,7 @@ namespace MagicStorage.Components
 					NetHelper.Report(true, $"Items flattened between units {storageUnit.ID} and {storageUnit2.ID}");
 
 					NetHelper.ProcessUpdateQueue();
-					NetHelper.SendRefreshNetworkItems(ID);
+					NetHelper.SendRefreshNetworkItems(Position);
 					return true;
 				}
 
@@ -390,7 +391,7 @@ namespace MagicStorage.Components
 			}
 
 			NetHelper.ProcessUpdateQueue();
-			NetHelper.SendRefreshNetworkItems(ID);
+			NetHelper.SendRefreshNetworkItems(Position);
 
 			compactStage++;
 			return false;

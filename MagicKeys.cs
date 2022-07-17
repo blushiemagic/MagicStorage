@@ -18,7 +18,7 @@ namespace MagicStorage {
 		}
 
 		public override void ProcessTriggers(TriggersSet triggersSet) {
-			if (!MagicStorageConfig.AllowItemDataDebug)
+			if (!MagicStorageConfig.ItemDataDebug)
 				return;
 
 			if (Main.HoverItem?.IsAir ?? true)

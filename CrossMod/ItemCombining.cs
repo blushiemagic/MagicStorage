@@ -29,8 +29,13 @@ namespace MagicStorage {
 					combine &= obj.CanCombine(item1, item2);
 			}
 
+			//Support tML hooks
+			if (combine)
+				combine &= ItemLoader.CanStack(item1, item2);
+
 			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
-			combine &= Utility.AreStrictlyEqual(item1, item2);
+			if (combine)
+				combine &= Utility.AreStrictlyEqual(item1, item2);
 
 			return combine;
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader.IO;
@@ -54,19 +55,25 @@ namespace MagicStorage {
 				return false;
 
 			if (checkStack)
-				return ItemIO.ToBase64(item1) == ItemIO.ToBase64(item2);
+				return TagIOSave(item1).SequenceEqual(TagIOSave(item2));
 
 			int oldStack1 = item1.stack;
 			item1.stack = 1;
 			int oldStack2 = item2.stack;
 			item2.stack = 1;
 
-			bool equal = ItemIO.ToBase64(item1) == ItemIO.ToBase64(item2);
+			bool equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
 
 			item1.stack = oldStack1;
 			item2.stack = oldStack2;
 
 			return equal;
+		}
+
+		private static byte[] TagIOSave(Item item) {
+			using MemoryStream memoryStream = new();
+			TagIO.ToStream(ItemIO.Save(item), memoryStream);
+			return memoryStream.ToArray();
 		}
 	}
 }

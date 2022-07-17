@@ -1862,7 +1862,7 @@ namespace MagicStorage
 				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results))
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient)
-				NetHelper.SendCraftRequest(GetHeart().ID, toWithdraw, results);
+				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
 		}
 
 		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<bool> fromModule, List<Item> withdraw, List<Item> results, EnvironmentSandbox sandbox) {

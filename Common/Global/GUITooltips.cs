@@ -20,7 +20,7 @@ namespace MagicStorage.Common.Global {
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-			if (!MagicStorageConfig.AllowItemDataDebug)
+			if (!MagicStorageConfig.ItemDataDebug)
 				return;
 
 			if (!CanAddTooltips())

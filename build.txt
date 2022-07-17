@@ -1,7 +1,7 @@
 author = The Magic Storage Team
-version = 0.5.6.5
+version = 0.5.6.6
 displayName = Magic Storage
-homepage = https://forums.terraria.org/index.php?threads/magic-storage.106520/
+homepage = https://github.com/blushiemagic/MagicStorage/wiki
 hideCode = false
 hideResources = false
 includeSource = true
