@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
@@ -9,9 +12,19 @@ namespace MagicStorage.Components
 	{
 		public List<Point16> storageUnits = new();
 
+		private void CheckUnitMapSections() {
+			//Force a map section send for each unique map section that has one of this storage center's storage units
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				foreach (Point16 unit in storageUnits.DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
+					NetHelper.ClientRequestSection(unit);
+			}
+		}
+
 		public void ResetAndSearch()
 		{
 			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch invoked.  Current unit count: " + storageUnits.Count);
+
+			CheckUnitMapSections();
 
 			List<Point16> oldStorageUnits = new(storageUnits);
 			storageUnits.Clear();
@@ -121,6 +134,8 @@ namespace MagicStorage.Components
 			int count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)
 				storageUnits.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
+
+			CheckUnitMapSections();
 		}
 	}
 }
