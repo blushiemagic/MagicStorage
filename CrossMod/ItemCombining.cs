@@ -30,8 +30,7 @@ namespace MagicStorage {
 			}
 
 			//Support tML hooks
-			if (combine)
-				combine &= ItemLoader.CanStack(item1, item2);
+			combine &= ItemLoader.CanStack(item1, item2);
 
 			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
 			if (combine)
