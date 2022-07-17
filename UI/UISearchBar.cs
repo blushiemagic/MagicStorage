@@ -96,6 +96,9 @@ namespace MagicStorage.UI
 			hasFocus = false;
 			CheckBlockInput();
 			cursorPosition = Text.Length;
+
+			if (!MagicStorageConfig.SearchBarRefreshOnKey)
+				StorageGUI.RefreshItems();
 		}
 
 		private void HandleTextInput()
@@ -117,7 +120,9 @@ namespace MagicStorage.UI
 					newString += Text[cursorPosition..];
 				Text = newString;
 				cursorPosition = newStringLength;
-				StorageGUI.RefreshItems();
+
+				if (MagicStorageConfig.SearchBarRefreshOnKey)
+					StorageGUI.RefreshItems();
 			}
 
 			if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
@@ -138,6 +143,9 @@ namespace MagicStorage.UI
 			{
 				hasFocus = false;
 				CheckBlockInput();
+
+				if (!MagicStorageConfig.SearchBarRefreshOnKey)
+					StorageGUI.RefreshItems();
 			}
 		}
 

@@ -568,6 +568,10 @@ Mods: {
 				Label: "Item debug information"
 				Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
 			}
+			searchBarRefreshOnKey: {
+				Label: "Search Bar Refreshes on Key Press"
+				Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

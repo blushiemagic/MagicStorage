@@ -58,6 +58,11 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool itemDataDebug;  //Previously "allowItemDataDebug"
 
+		[Label("$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip")]
+		[DefaultValue(true)]
+		public bool searchBarRefreshOnKey;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -86,6 +91,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ItemDataDebug => Instance.itemDataDebug;
+
+		[JsonIgnore]
+		public static bool SearchBarRefreshOnKey => Instance.searchBarRefreshOnKey;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
