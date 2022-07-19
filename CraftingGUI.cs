@@ -1898,6 +1898,9 @@ namespace MagicStorage
 							tryItem.type = ItemID.None;
 						}
 
+						foreach (var module in EnvironmentModuleLoader.modules)
+							module.OnConsumeItemForRecipe(sandbox, tryItem, stack);
+
 						if (stack <= 0)
 							break;
 					}
@@ -1926,6 +1929,9 @@ namespace MagicStorage
 							tryItem.stack = 0;
 							tryItem.type = ItemID.None;
 						}
+
+						foreach (var module in EnvironmentModuleLoader.modules)
+							module.OnConsumeItemForRecipe(sandbox, tryItem, stack);
 
 						if (stack <= 0)
 							break;
@@ -1976,9 +1982,6 @@ namespace MagicStorage
 
 				if (stack <= 0)
 					continue;
-
-				foreach (var module in EnvironmentModuleLoader.modules)
-					module.OnConsumeItemForRecipe(sandbox, reqItem.Clone(), stack);
 
 				AttemptToConsumeFromSource(reqItem.type, stack);
 			}
