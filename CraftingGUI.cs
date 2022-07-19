@@ -67,6 +67,7 @@ namespace MagicStorage
 		private static float recipeScrollBarMaxViewSize = 2f;
 
 		private static readonly List<Item> items = new();
+
 		private static readonly Dictionary<int, int> itemCounts = new();
 		private static List<Recipe> recipes = new();
 		private static List<bool> recipeAvailable = new();
@@ -2037,7 +2038,16 @@ namespace MagicStorage
 		private static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			return heart.TryWithdraw(item, false, toInventory);
+			Item withdrawn = heart.TryWithdraw(item, false, toInventory);
+
+			if (withdrawn.IsAir && numItemsWithoutSimulators > 0) {
+				//Heart did not contain the item; try to withdraw from the module items
+				List<Item> moduleItems = items.GetRange(numItemsWithoutSimulators, items.Count - numItemsWithoutSimulators);
+
+				TEStorageUnit.WithdrawFromItemCollection(moduleItems, item, out withdrawn, onItemRemoved: k => items.RemoveAt(k + numItemsWithoutSimulators));
+			}
+
+			return withdrawn;
 		}
 	}
 }

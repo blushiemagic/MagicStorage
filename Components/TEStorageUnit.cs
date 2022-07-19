@@ -43,7 +43,7 @@ namespace MagicStorage.Components
 
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new();
-		private IList<Item> items = new List<Item>();
+		private List<Item> items = new();
 		private bool receiving;
 
 		public int Capacity
@@ -151,7 +151,25 @@ namespace MagicStorage.Components
 				return new Item();
 
 			Item original = lookFor.Clone();
-			Item result = null;
+
+			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite))
+				return result;
+
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
+				}
+
+				PostChangeContents();
+			}
+
+			return result;
+		}
+
+		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, Action<int> onItemRemoved = null) {
+			result = null;
 			for (int k = items.Count - 1; k >= 0; k--)
 			{
 				Item item = items[k];
@@ -176,6 +194,7 @@ namespace MagicStorage.Components
 					item.stack -= withdraw;
 					if (item.stack <= 0) {
 						items.RemoveAt(k);
+						onItemRemoved?.Invoke(k);
 						k--;
 					}
 
@@ -188,21 +207,12 @@ namespace MagicStorage.Components
 
 			if (result is null || result.IsAir)
 			{
-				return new Item();
+				result = new Item();
+				return false;
 			}
 
 			ReturnFromMethod:
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				if (Main.netMode == NetmodeID.Server)
-				{
-					netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
-				}
-
-				PostChangeContents();
-			}
-
-			return result;
+			return true;
 		}
 
 		public bool UpdateTileFrame()
