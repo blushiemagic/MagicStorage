@@ -11,6 +11,20 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicCache : ModSystem
 {
+	public class LazyRecipe {
+		public readonly int itemType;
+
+		private readonly Lazy<Recipe[]> lazy;
+
+		public LazyRecipe(int itemType) {
+			this.itemType = itemType;
+
+			lazy = new(() => EnabledRecipes.Where(r => r.createItem.type == this.itemType || r.requiredItem.Any(i => i.type == this.itemType)).ToArray(), isThreadSafe: false);
+		}
+
+		public Recipe[] Value => lazy.Value;
+	}
+
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
 	public static Dictionary<FilterMode, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
@@ -23,7 +37,7 @@ public class MagicCache : ModSystem
 	public static Dictionary<Mod, Recipe[]> RecipesByMod { get; private set; } = null!;
 	public static Recipe[] VanillaRecipes { get; private set; } = null!;
 
-	public static Dictionary<int, Recipe[]> RecipesUsingItemType { get; private set; } = null!;
+	public static Dictionary<int, LazyRecipe> RecipesUsingItemType { get; private set; } = null!;
 
 	public override void Unload()
 	{
@@ -91,8 +105,7 @@ public class MagicCache : ModSystem
 			.ToDictionary(x => x.mod, x => x.index);
 
 		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
-			.ToDictionary(kvp => kvp.Key, kvp => EnabledRecipes.Where(r => r.createItem.type == kvp.Key || r.requiredItem.Any(i => i.type == kvp.Key))
-				.ToArray());
+			.ToDictionary(kvp => kvp.Key, kvp => new LazyRecipe(kvp.Key));
 	}
 
 	private static void SetupSortFilterRecipeCache()

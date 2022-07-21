@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
@@ -75,5 +76,13 @@ namespace MagicStorage {
 			TagIO.ToStream(ItemIO.Save(item), memoryStream);
 			return memoryStream.ToArray();
 		}
+
+		public static void Write(this BinaryWriter writer, Point16 position) {
+			writer.Write(position.X);
+			writer.Write(position.Y);
+		}
+
+		public static Point16 ReadPoint16(this BinaryReader reader)
+			=> new(reader.ReadInt16(), reader.ReadInt16());
 	}
 }

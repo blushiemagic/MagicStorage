@@ -44,7 +44,7 @@ namespace MagicStorage.Components
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new();
 		private List<Item> items = new();
-		private bool receiving;
+		internal bool receiving;
 
 		public int Capacity
 		{
@@ -98,8 +98,23 @@ namespace MagicStorage.Components
 				return;
 
 			Item original = toDeposit.Clone();
+			
+			DepositToItemCollection(items, toDeposit, Capacity, out bool hasChange);
+
+			if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
+			{
+				if (Main.netMode == NetmodeID.Server)
+				{
+					netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
+				}
+				PostChangeContents();
+			}
+		}
+
+		internal static bool DepositToItemCollection(List<Item> items, Item toDeposit, int capacity, out bool hasChange) {
 			bool finished = false;
-			bool hasChange = false;
+			hasChange = false;
+
 			foreach (Item item in items)
 			{
 				if (ItemCombining.CanCombineItems(toDeposit, item) && item.stack < item.maxStack)
@@ -126,7 +141,7 @@ namespace MagicStorage.Components
 				}
 			}
 
-			if (!finished && !IsFull)
+			if (!finished && items.Count < capacity)
 			{
 				Item item = toDeposit.Clone();
 				items.Add(item);
@@ -135,14 +150,7 @@ namespace MagicStorage.Components
 				finished = true;
 			}
 
-			if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				if (Main.netMode == NetmodeID.Server)
-				{
-					netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
-				}
-				PostChangeContents();
-			}
+			return finished;
 		}
 
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
@@ -299,31 +307,18 @@ namespace MagicStorage.Components
 		}
 
 		internal bool Flatten(TEStorageUnit other) {
-			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				NetHelper.ClientRequestItemTransfer(this, other);
+				return false;
+			}
+
+			AttemptItemTransfer(this, other, out List<Item> transferred);
+
+			if (transferred.Count == 0)
 				return false;
 
-			List<Item> both = Compact(items.Concat(other.items), out bool didPack);
-
-			if (IsFull && !didPack)
-				return false;  //Neither unit was modified
-
-			int capacity = Capacity;
-
-			items = new List<Item>(both.Take(capacity));
-			other.items = new List<Item>(both.Skip(capacity));
-
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				if (Main.netMode == NetmodeID.Server)
-				{
-					netOpQueue.Clear();
-					other.netOpQueue.Clear();
-					netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
-					other.netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
-				}
-				PostChangeContents();
-				other.PostChangeContents();
-			}
+			PostChangeContents();
+			other.PostChangeContents();
 
 			return true;
 		}
@@ -356,6 +351,56 @@ namespace MagicStorage.Components
 			}
 
 			return packed;
+		}
+
+		internal static void AttemptItemTransfer(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems) {
+			transferredItems = new();
+
+			if (source.IsEmpty)  //Nothing to do
+				return;
+
+			//Attempt to pack items first
+			for (int d = 0; d < destination.NumItems; d++) {
+				Item dest = destination.items[d];
+
+				if (dest.IsAir || dest.stack >= dest.maxStack)
+					continue;
+
+				for (int s = source.NumItems - 1; s >= 0; s--) {
+					Item src = source.items[s];
+
+					if (src.IsAir)
+						continue;
+
+					if (Utility.AreStrictlyEqual(dest, src)) {
+						Item transferred = src.Clone();
+
+						if (dest.stack + src.stack <= dest.maxStack) {
+							dest.stack += src.stack;
+							src.stack = 0;
+
+							source.items.RemoveAt(s);
+						} else {
+							transferred.stack = dest.maxStack - dest.stack;
+
+							src.stack -= dest.maxStack - dest.stack;
+							dest.stack = dest.maxStack;
+						}
+
+						transferredItems.Add(transferred);
+					}
+				}
+			}
+
+			//Then simply transfer items until the destination is full or the source is empty
+			while (!destination.IsFull && !source.IsEmpty) {
+				Item withdrawn = source.items[^1];
+				source.items.RemoveAt(source.items.Count - 1);
+
+				destination.items.Add(withdrawn);
+
+				transferredItems.Add(withdrawn);
+			}
 		}
 
 		public override void SaveData(TagCompound tag)

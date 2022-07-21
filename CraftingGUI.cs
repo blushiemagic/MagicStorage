@@ -884,7 +884,7 @@ namespace MagicStorage
 
 				IEnumerable<int> allItemTypes = new int[] { selectedRecipe.createItem.type }.Concat(selectedRecipe.requiredItem.Select(i => i.type));
 
-				IEnumerable<Recipe> affectedRecipes = allItemTypes.SelectMany(i => MagicCache.RecipesUsingItemType.TryGetValue(i, out var recipes) ? recipes : Array.Empty<Recipe>());
+				IEnumerable<Recipe> affectedRecipes = allItemTypes.SelectMany(i => MagicCache.RecipesUsingItemType.TryGetValue(i, out var recipes) ? recipes.Value : Array.Empty<Recipe>());
 
 				//If no recipes were affected, that's fine, none of the recipes will be touched due to the array being empty
 				RefreshItemsAndSpecificRecipes(affectedRecipes.ToArray());

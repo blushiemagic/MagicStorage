@@ -10,6 +10,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Linq;
 using System.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace MagicStorage
 {
@@ -25,7 +26,7 @@ namespace MagicStorage
 				if (reportTime)
 					Main.NewText("Time: " + DateTime.Now.Ticks);
 
-				Main.NewText(message);
+				Main.NewTextMultiline(message, c: Color.White);
 			} else if (Main.dedServ) {
 				if (reportTime) {
 					ConsoleColor fg = Console.ForegroundColor;
@@ -108,6 +109,12 @@ namespace MagicStorage
 					break;
 				case MessageType.ForceCraftingGUIRefresh:
 					ReceiveClientForceCraftingGUIRefresh(reader, sender);
+					break;
+				case MessageType.TransferItems:
+					ReceiveClientRequestItemTransfer(reader, sender);
+					break;
+				case MessageType.TransferItemsResult:
+					RecieveTransferItemsResult(reader);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -681,7 +688,7 @@ namespace MagicStorage
 
 				packet.Send(ignoreClient: Main.myPlayer);
 
-				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from client " + Main.myPlayer);
+				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from client " + Main.myPlayer);
 			}
 		}
 
@@ -698,14 +705,102 @@ namespace MagicStorage
 
 				packet.Send(ignoreClient: sender);
 
-				Report(false, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
+				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
 					CraftingGUI.RefreshItems();
 
-					Report(false, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
+					Report(true, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
 				}
 			}
+		}
+
+		public static void ClientRequestItemTransfer(TEStorageUnit destination, TEStorageUnit source) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = MagicStorage.Instance.GetPacket();
+				packet.Write((byte)MessageType.TransferItems);
+				packet.Write(destination.Position);
+				packet.Write(source.Position);
+				packet.Send(ignoreClient: Main.myPlayer);
+
+				Report(true, MessageType.TransferItems + " packet sent from client " + Main.myPlayer);
+			}
+		}
+
+		public static void ReceiveClientRequestItemTransfer(BinaryReader reader, int sender) {
+			Point16 destination = reader.ReadPoint16();
+			Point16 source = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			if (!TileEntity.ByPosition.TryGetValue(destination, out TileEntity tileEntity) || tileEntity is not TEStorageUnit unitDestination) {
+				Report(true, MessageType.TransferItems + " packet failed to read on the server.\n" +
+					"Reason: Destination was not a Storage Unit");
+				return;
+			}
+
+			if (!TileEntity.ByPosition.TryGetValue(source, out tileEntity) || tileEntity is not TEStorageUnit unitSource) {
+				Report(true, MessageType.TransferItems + " packet failed to read on the server.\n" +
+					"Reason: Source was not a Storage Unit");
+				return;
+			}
+
+			Report(true, MessageType.TransferItems + " packet was successfully received by server from client " + sender);
+
+			TEStorageUnit.AttemptItemTransfer(unitDestination, unitSource, out List<Item> transferredItems);
+
+			if (transferredItems.Count == 0)  //Nothing to do
+				return;
+
+			//Send the result to all clients
+			ModPacket packet = MagicStorage.Instance.GetPacket();
+			packet.Write((byte)MessageType.TransferItemsResult);
+			packet.Write(destination);
+			packet.Write(source);
+			packet.Write(transferredItems.Count);
+
+			foreach (Item item in transferredItems)
+				ItemIO.Send(item, packet, writeStack: true, writeFavorite: true);
+
+			packet.Send();
+
+			Report(true, MessageType.TransferItemsResult + " packet sent to all clients");
+
+			unitDestination.GetHeart().ResetCompactStage();
+		}
+
+		public static void RecieveTransferItemsResult(BinaryReader reader) {
+			Point16 destination = reader.ReadPoint16();
+			Point16 source = reader.ReadPoint16();
+
+			if (!TileEntity.ByPosition.TryGetValue(destination, out TileEntity tileEntity) || tileEntity is not TEStorageUnit unitDestination) {
+				Report(true, MessageType.TransferItems + " packet failed to read on client" + Main.myPlayer + ".\n" +
+					"Reason: Destination was not a Storage Unit");
+				return;
+			}
+
+			if (!TileEntity.ByPosition.TryGetValue(source, out tileEntity) || tileEntity is not TEStorageUnit unitSource) {
+				Report(true, MessageType.TransferItems + " packet failed to read on client" + Main.myPlayer + ".\n" +
+					"Reason: Source was not a Storage Unit");
+				return;
+			}
+
+			int count = reader.ReadInt32();
+			List<Item> transferredItems = new();
+			for (int i = 0; i < count; i++)
+				transferredItems.Add(ItemIO.Receive(reader, readStack: true, readFavorite: true));
+
+			//Deposit/withdraw the transferred items
+			foreach (Item item in transferredItems) {
+				List<Item> dest = unitDestination.GetItems() as List<Item>;
+				List<Item> src = unitSource.GetItems() as List<Item>;
+
+				TEStorageUnit.DepositToItemCollection(dest, item.Clone(), unitDestination.Capacity, out _);
+				TEStorageUnit.WithdrawFromItemCollection(src, item, out _);
+			}
+
+			Report(true, MessageType.TransferItemsResult + " packet received by client " + Main.myPlayer);
 		}
 	}
 
@@ -725,6 +820,8 @@ namespace MagicStorage
 		SectionRequest,
 		SyncStorageUnitToClinet,
 		SyncStorageUnit,
-		ForceCraftingGUIRefresh
+		ForceCraftingGUIRefresh,
+		TransferItems,
+		TransferItemsResult
 	}
 }
