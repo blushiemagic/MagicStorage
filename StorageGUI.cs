@@ -579,6 +579,32 @@ namespace MagicStorage
 		}
 
 		/// <summary>
+		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
+		/// </summary>
+		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
+		/// <param name="items">The items to deposit</param>
+		/// <param name="quickStack">Whether the operation is a quick stack</param>
+		/// <returns>Whether the deposit was successful</returns>
+		public static bool TryDeposit(TEStorageCenter center, List<Item> items, bool quickStack = false)
+		{
+			if (center is null)
+				return false;
+
+			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
+
+			if (wrapper.Valid) {
+				TEStorageHeart heart = wrapper.Heart;
+
+				if (quickStack)
+					items = new(items.Where(i => heart.HasItem(i, ignorePrefix: true)));
+
+				return heart.TryDeposit(items);
+			}
+
+			return false;
+		}
+
+		/// <summary>
 		/// Simulates a deposit attempt into the currently assigned Storage Heart.
 		/// </summary>
 		/// <param name="items">The items to deposit</param>

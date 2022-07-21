@@ -25,20 +25,28 @@ namespace MagicStorage.Edits {
 			Point16 centerTile = self.Center.ToTileCoordinates16();
 			Point16 unitX = new(1, 0), unitY = new(0, 1), one = new(1, 1);
 
-			//Player uses 17 tiles for the quick stack range
-			bool CheckDistance(Point16 target) => Math.Abs(target.X - centerTile.X) <= 17 && Math.Abs(target.Y - centerTile.Y) <= 17;
+			List<(StorageAccess, Point16)> storageAccesses = new();
 
-			bool CloseEnough(TEStorageCenter center) => CheckDistance(center.Position) || CheckDistance(center.Position + unitX) || CheckDistance(center.Position + unitY) || CheckDistance(center.Position + one);
+			for (int x = centerTile.X - 17; x <= centerTile.X + 17; x++) {
+				if (x < 0 || x >= Main.maxTilesX)
+					continue;
 
-			IEnumerable<TEStorageCenter> storageAccesses = TileEntity.ByPosition.Values.OfType<TEStorageCenter>().Where(CloseEnough);
+				for (int y = centerTile.Y - 17; y <= centerTile.Y + 17; y++) {
+					if (y < 0 || y >= Main.maxTilesY)
+						continue;
+
+					if (TileLoader.GetTile(Main.tile[x, y].TileType) is StorageAccess access)
+						storageAccesses.Add((access, new Point16(x, y)));
+				}
+			}
 
 			//Same check in the original method
 			List<Item> items = self.inventory.Skip(10).Take(40).Where(i => !i.IsAir && !i.favorited && !i.IsACoin).ToList();
 
 			bool couldDeposit = false;
 
-			foreach (TEStorageCenter access in storageAccesses) {
-				if (!StorageGUI.TryDeposit(access, items))
+			foreach (TEStorageHeart heart in storageAccesses.Select(t => (t.Item1.GetHeart(t.Item2.X, t.Item2.Y), t.Item2)).Where(t => t.Item1 is not null).DistinctBy(t => t.Item2).Select(t => t.Item1)) {
+				if (!StorageGUI.TryDeposit(heart, items, quickStack: true))
 					break;
 
 				couldDeposit = true;
