@@ -1868,6 +1868,7 @@ namespace MagicStorage
 
 		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<bool> fromModule, List<Item> withdraw, List<Item> results, EnvironmentSandbox sandbox) {
 			List<Item> origResults = new(results);
+			List<Item> origWithdraw = new(withdraw);
 
 			bool AttemptToConsumeItem(List<Item> list, int reqType, ref int stack, bool addToWithdraw) {
 				int listIndex = 0;
@@ -1966,6 +1967,9 @@ namespace MagicStorage
 				if (stack > 0 || !consumeSucceeded) {
 					results.Clear();
 					results.AddRange(origResults);
+
+					withdraw.Clear();
+					withdraw.AddRange(origWithdraw);
 
 					NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was not available.");
 
