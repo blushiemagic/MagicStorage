@@ -11,7 +11,7 @@ namespace MagicStorage.Items
 		{
 			if (npc.type == NPCID.MoonLordCore)
 			{
-				//10% chance to drop 1 item
+				//10% chance to drop 1 item in Normal Mode
 				npcLoot.Add(ItemDropRule.ByCondition(new Conditions.NotExpert(),
 					ModContent.ItemType<RadiantJewel>(),
 					chanceDenominator: 10,
