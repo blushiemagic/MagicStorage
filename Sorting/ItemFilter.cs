@@ -87,14 +87,17 @@ namespace MagicStorage.Sorting
 			!item.vanity &&
 			(item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || (item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType])));
 
-		public static readonly Filter Potion = item =>
-			item.consumable &&
-			(item.healLife > 0 ||
-			 item.healMana > 0 ||
-			 item.buffType > 0 ||
-			 item.potion ||
-			 item.Name.ToLowerInvariant().Contains("potion") ||
-			 item.Name.ToLowerInvariant().Contains("elixir"));
+		public static readonly Filter ArmorAndEquipment = item => Armor(item) || Equipment(item);
+
+		public static readonly Filter Potion = item => {
+			bool mightBeAPotion = item.healLife > 0 || item.healMana > 0 || item.buffType > 0 || item.potion;
+
+			if (!mightBeAPotion)
+				return false;  //Definitely not a "potion"
+
+			//It's a consumable item and it plays the sound for food (Item2) or drinks (Item3), so just assume that it is a "potion"
+			return item.consumable && (item.UseSound == SoundID.Item2 || item.UseSound == SoundID.Item3);
+		};
 
 		public static readonly Filter Placeable = item =>
 			item.createTile >= TileID.Dirt || item.createWall > 0;

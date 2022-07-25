@@ -97,7 +97,7 @@ namespace MagicStorage.Sorting
 				FilterMode.Ammo          => ItemFilter.Ammo,
 				FilterMode.WeaponsThrown => ItemFilter.WeaponThrown,
 				FilterMode.Tools         => ItemFilter.Tool,
-				FilterMode.Armor         => ItemFilter.Armor,
+				FilterMode.Armor         => MagicStorageConfig.ExtraFilterIcons ? ItemFilter.Armor : ItemFilter.ArmorAndEquipment,
 				FilterMode.Vanity        => ItemFilter.Vanity,
 				FilterMode.Equipment     => ItemFilter.Equipment,
 				FilterMode.Potions       => ItemFilter.Potion,

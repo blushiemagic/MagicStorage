@@ -28,11 +28,11 @@ namespace MagicStorage
 		private const int RecipeButtonsAvailableChoice = 0;
 		private const int RecipeButtonsBlacklistChoice = 3;
 		private const int RecipeButtonsFavoritesChoice = 2;
-		private const int Padding = 4;
-		private const int RecipeColumns = 10;
-		private const int IngredientColumns = 7;
-		private const float InventoryScale = 0.85f;
-		private const float SmallScale = 0.7f;
+		public const int Padding = 4;
+		public const int RecipeColumns = 10;
+		public const int IngredientColumns = 7;
+		public const float InventoryScale = 0.85f;
+		public const float SmallScale = 0.7f;
 		private const int StartMaxCraftTimer = 20;
 		private const int StartMaxRightClickTimer = 20;
 		private const float ScrollBar2ViewSize = 1f;

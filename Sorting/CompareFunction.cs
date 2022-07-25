@@ -22,10 +22,15 @@ namespace MagicStorage.Sorting
 		public override int Compare(Item item1, Item item2) => string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 	}
 
-	public class CompareQuantity : CompareFunction<CompareQuantity>
+	public class CompareQuantityRatio : CompareFunction<CompareQuantityRatio>
 	{
 		public override int Compare(Item item1, Item item2) =>
 			(int) Math.Ceiling(item2.stack / (float) item2.maxStack) - (int) Math.Ceiling(item1.stack / (float) item1.maxStack);
+	}
+
+	public class CompareQuantityAbsolute : CompareFunction<CompareQuantityAbsolute>
+	{
+		public override int Compare(Item item1, Item item2) => item2.stack - item1.stack;
 	}
 
 	public class CompareValue : CompareFunction<CompareValue>

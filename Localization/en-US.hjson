@@ -500,7 +500,7 @@ Mods: {
 			'''
 		}
 
-		Filters: {
+		FilteringOption: {
 			All: "Filter All"
 			Weapons: "Filter Weapons"
 			Tools: "Filter Tools"
@@ -519,13 +519,14 @@ Mods: {
 			Recent: "Filter New Recently Added Items"
 		}
 
-		Sort: {
+		SortingOption: {
 			Default: "Default Sorting"
 			ID: "Sort by ID"
 			Name: "Sort by Name"
-			Stack: "Sort by Stacks" # This text is never used?
 			Value: "Sort by Value"
 			Dps: "Sort by DPS"
+			QuantityAbsolute: "Sort by Quantity"
+			QuantityRatio: "Sort by Quantity Ratio"
 		}
 
 		Config: {

@@ -30,6 +30,9 @@ namespace MagicStorage.Components
 
 			DustType = 7;
 			ItemDrop = ModContent.ItemType<Items.StorageConnector>();
+
+			// Make the tile count as a door for housing purposes (like how platforms work)
+			AddToArray(ref TileID.Sets.RoomNeeds.CountsAsDoor);
 		}
 
 		public static int CanPlace(int i, int j, int type, int style, int direction, int alternative)
