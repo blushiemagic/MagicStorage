@@ -76,7 +76,7 @@ namespace MagicStorage.NPCs {
 
 				// You can add multiple elements if you really wanted to
 				// You can also use localization keys (see Localization/en-US.lang)
-				new FlavorTextBestiaryInfoElement("Mods.ExampleMod.Bestiary.Golem")
+				new FlavorTextBestiaryInfoElement("Mods.MagicStorage.Bestiary.Golem")
 			});
 		}
 
