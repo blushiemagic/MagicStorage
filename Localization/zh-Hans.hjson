@@ -42,6 +42,7 @@ Mods: {
 			CombinedStations2Item: 进阶组合制作站
 			CombinedStations3Item: 高级组合制作站
 			CombinedStations4Item: 最终制作站
+			EnvironmentAccess: 模组互联单元
 		}
 
 		ItemTooltip: {
@@ -160,6 +161,75 @@ Mods: {
 			'''
 			结合了一切制作站和液体需求
 			'''
+			CraftingAccess: 能够使用存储系统中的物品进行制作
+			RemoteAccess:
+			'''
+			可远程访问某个存储核心
+			对于制作单元之类的组件来说与存储核心无异
+			'''
+			StorageAccess: 可作为对存储系统中存有物品的一个访问点
+			StorageComponent: 一切魔法存储组件的合成基础材料
+			StorageConnector: 可用于连接不同的魔法存储组件，使其并入存储网络内
+			StorageDeactivator:
+			'''
+			禁用/启用相应的存储单元
+			被禁用的存储单元会试图将其原存有物品移动到其他启用的存储单元内
+			'''
+			StorageHeart:
+			'''
+			魔法存储系统的核心
+			你需要建立一个存储系统以使其运作（通过将其与存储单元相邻放置）
+			'''
+			StorageUnit:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 40 组物品
+			'''
+			StorageUnitBlueChlorophyte:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 240 组物品
+			'''
+			StorageUnitCrimtane:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 80 组物品
+			'''
+			StorageUnitDemonite:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 80 组物品
+			'''
+			StorageUnitHallowed:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 160 组物品
+			'''
+			StorageUnitHellstone:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 120 组物品
+			'''
+			StorageUnitLuminite:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 320 组物品
+			'''
+			StorageUnitTerra:
+			'''
+			用于在魔法存储系统中存储物品的组件
+			可存储至多 640 组物品
+			'''
+			StorageUnitTiny:
+			'''
+			用于在魔法存储系统中存储物品的小组件
+			可存储至多 4 组物品
+			'''
+			EnvironmentAccess:
+			'''
+			一个用于供其他模组与魔法存储系统进行跨模组访问的组件
+			显示由其他模组添加的可开关的一系列跨模组模块，如果没有模块则不显示
+			'''
 		}
 
 		ProjectileName: {
@@ -271,9 +341,10 @@ Mods: {
 				Help12:
 				'''
 				有些时候，你想要在世界的其他地区访问你的存储核心，但要用存储连接器接过去既麻烦又昂贵。这时候你可以制作一个远程存储装置，并用定位器 [i:MagicStorage/Locator] 或定位器驱动 [i:MagicStorage/LocatorDisk] 将其连上。
-				合成配方: [i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
-				定位器合成配方: [i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
-				定位器驱动合成配方: [i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+				合成配方:
+				[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+				[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+				[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 				'''
 				Help13:
 				'''
@@ -283,10 +354,13 @@ Mods: {
 				'''
 				存储单元魔杖可以禁用 [i:MagicStorage/StorageUnit]。被禁用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
 				'''
-				# Help15:
-				# '''
-				# (See en-US translation)
-				# '''
+				Help15:
+				'''
+				为了方便制作，魔法存储增加了可放置的恶魔祭坛和猩红祭坛。开采它们不会给你带来矿石，尽可用于制作。
+				制作配方:
+				[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
+				[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
+				'''
 				Help16:
 				'''
 				以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合制作站。每个组合制作站都继承其制作材料满足的制作条件。
@@ -307,10 +381,10 @@ Mods: {
 				'''
 				月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				'''
-				# Help19:
-				# '''
-				# (See en-US translation)
-				# '''
+				Help19:
+				'''
+				[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。
+				'''
 			}
 
 			ChatOptions: {
@@ -353,7 +427,7 @@ Mods: {
 		SetTo: "已设置于位于 [{0}, {1}] 的存储核心"
 		SnowBiomeBlock: "雪地环境方块"
 		DepositAll: "全部存入"
-		CraftingStations: "制作站 (翻译: -Cyril-, 抗药又坚硬汉化组）"
+		CraftingStations: "制作站"
 		CraftTooltip: "左键单击以制作"
 		CraftTooltipOld: "左键单击以制作（按住Ctrl全部制作）"
 
@@ -394,7 +468,16 @@ Mods: {
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
 
-		Filters: {
+		EnvironmentGUI: {
+			EntryDisabledDefault: 该模块已被禁用
+			NoModules:
+			'''
+			没有检测到任何跨模组模块
+			没有任何模组为魔法存储添加了跨模组模块
+			'''
+		}
+
+		FilteringOption: {
 			All: "筛选全部"
 			Weapons: "筛选武器"
 			Tools: "筛选工具"
@@ -413,13 +496,14 @@ Mods: {
 			Recent: "筛选最近存入的物品"
 		}
 
-		Sort: {
+		SortingOption: {
 			Default: "默认排序"
 			ID: "按ID排序"
 			Name: "按名称排序"
-			Stack: "按堆叠量排序"
 			Value: "按价格排序"
 			Dps: "按DPS排序"
+			QuantityAbsolute: "按数量排序"
+			QuantityRatio: "按堆叠量占其最大堆叠量的比例排序"
 		}
 
 		Config: {
@@ -454,13 +538,21 @@ Mods: {
 				Tooltip: "开启后，在武器简介里会显示预计DPS值"
 			}
 			useOldCraftMenu: {
-				# Label: "Use old Craft buttons"
-				# Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+				Label: "使用旧版合成界面"
+				Tooltip: "开启后，制作单元面板将使用旧版的界面"
+			}
+			allowItemDataDebug: {
+				Label: "显示物品调试信息"
+				Tooltip: "开启后，存放于存储面板的物品将显示其是否有GlobalItem数据，并允许通过按下“Print Item Data”(输出物品数据)快捷键以在聊天栏输出数据"
+			}
+			searchBarRefreshOnKey: {
+				Label: "搜索结果实时更新"
+				Tooltip: "开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果"
 			}
 
 			AllowAutomatonToMoveIn: {
-				# Label: "Automaton Housing"
-				# Tooltip: "Enable to allow the Automaton to be able to move into housing"
+				Label: "自动机入住"
+				Tooltip: "开启以允许城镇NPC“自动机”入住你的城镇"
 			}
 		}
 	}
