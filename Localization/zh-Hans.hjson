@@ -339,8 +339,6 @@ Mods: {
 
 		FilterAllMods: "所有物品"
 
-		CookedMarshmallowCondition: "存放于制作单元的生态球"
-
 		Capacity: "容量: {0} / {1}"
 
 		LocatorSet: "该定位器已设置于位于 [{0}, {1}] 的存储核心"
@@ -390,6 +388,14 @@ Mods: {
 		'''
 		物品 "{0}" 的制作配方已显示
 		'''
+
+		RecipeConditions: {
+			# EctoMistOverride:
+			# '''
+			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
+			# '''
+			CookedMarshmallowCondition: "存放于制作单元的生态球"
+		}
 
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"

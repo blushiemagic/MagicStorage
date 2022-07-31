@@ -300,8 +300,6 @@ Mods: {
 
 		# FilterAllMods: "All mods"
 
-		# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
-
 		# Capacity: "{0} / {1} Items"
 
 		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
@@ -350,6 +348,14 @@ Mods: {
 		# '''
 		# Recipe for item "{0}" was whitelisted.
 		# '''
+
+		RecipeConditions: {
+			# EctoMistOverride:
+			# '''
+			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
+			# '''
+			# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+		}
 
 		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"

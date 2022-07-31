@@ -32,10 +32,8 @@ namespace MagicStorage.Common.Systems {
 				{
 					Recipe copy = recipe.Clone();
 
-					copy.requiredTile.Clear(); // Should this be cleared?
-					copy.AddTile<CombinedStations4Tile>();
-
 					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
+					copy.AddCondition(MagicStorage.EctoMistOverride);
 
 					copy.Register();
 				}
