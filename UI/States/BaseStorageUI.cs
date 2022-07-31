@@ -8,8 +8,6 @@ namespace MagicStorage.UI.States {
 	/// A base class for common elements in Magic Storage's GUIs
 	/// </summary>
 	public abstract class BaseStorageUI : UIState {
-		internal static bool needRefresh;
-
 		protected UIDragablePanel panel;
 
 		protected Dictionary<string, BaseStorageUIPage> pages;
@@ -63,9 +61,6 @@ namespace MagicStorage.UI.States {
 				currentPage = newPage;
 
 				currentPage.InvokeOnPageSelected();
-
-				if (needRefresh)
-					StorageGUI.RefreshItems();
 
 				panel.viewArea.Append(currentPage);
 

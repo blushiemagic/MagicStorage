@@ -1816,6 +1816,16 @@ namespace MagicStorage
 			}
 		}
 
+		private class CraftingContext {
+			public List<Item> sourceItems, availableItems, toWithdraw, results;
+
+			public List<bool> fromModule;
+
+			public EnvironmentSandbox sandbox;
+
+			public List<Item> consumedItems;
+		}
+
 		/// <summary>
 		/// Attempts to craft a certain amount of items from the currently assigned Crafting Access.
 		/// </summary>
@@ -1830,11 +1840,20 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
+			CraftingContext context = new() {
+				sourceItems = sourceItems,
+				availableItems = availableItems,
+				toWithdraw = toWithdraw,
+				results = results,
+				sandbox = sandbox,
+				consumedItems = new()
+			};
+
 			int target = toCraft;
 			NetHelper.Report(true, "Attempting to craft " + toCraft + " items");
 
 			while (toCraft > 0) {
-				if (!AttemptSingleCraft(availableItems, sourceItems, fromModule, toWithdraw, results, sandbox))
+				if (!AttemptSingleCraft(context))
 					break;  // Could not craft any more items
 
 				Item resultItem = selectedRecipe.createItem.Clone();
@@ -1846,8 +1865,8 @@ namespace MagicStorage
 				CatchDroppedItems = true;
 				DroppedItems.Clear();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe);
-				ItemLoader.OnCreate(resultItem, new RecipeCreationContext { recipe = selectedRecipe });
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+				context.consumedItems.Clear();
 
 				CatchDroppedItems = false;
 
@@ -1855,6 +1874,11 @@ namespace MagicStorage
 			}
 
 			NetHelper.Report(true, "Crafted " + (target - toCraft) + " items");
+
+			if (target == toCraft) {
+				//Could not craft anything, bail
+				return;
+			}
 
 			toWithdraw = CompactItemList(toWithdraw);
 			results = CompactItemList(results);
@@ -1866,134 +1890,139 @@ namespace MagicStorage
 				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
 		}
 
-		private static bool AttemptSingleCraft(List<Item> available, List<Item> source, List<bool> fromModule, List<Item> withdraw, List<Item> results, EnvironmentSandbox sandbox) {
-			List<Item> origResults = new(results);
-			List<Item> origWithdraw = new(withdraw);
-
-			bool AttemptToConsumeItem(List<Item> list, int reqType, ref int stack, bool addToWithdraw) {
-				int listIndex = 0;
-				foreach (Item tryItem in list)
-				{
-					if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType))
-					{
-						//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
-						bool canWithdraw = addToWithdraw && !fromModule[listIndex];
-
-						if (tryItem.stack > stack)
-						{
-							Item temp = tryItem.Clone();
-							temp.stack = stack;
-
-							if (canWithdraw)
-								withdraw.Add(temp);
-								
-							tryItem.stack -= stack;
-							stack = 0;
-						}
-						else
-						{
-							if (canWithdraw)
-								withdraw.Add(tryItem.Clone());
-								
-							stack -= tryItem.stack;
-							tryItem.stack = 0;
-							tryItem.type = ItemID.None;
-						}
-
-						foreach (var module in EnvironmentModuleLoader.modules)
-							module.OnConsumeItemForRecipe(sandbox, tryItem, stack);
-
-						if (stack <= 0)
-							break;
-					}
-
-					listIndex++;
-				}
-
-				return stack <= 0;
-			}
-
-			void AttemptToConsumeFromSource(int reqType, int stack) {
-				int listIndex = 0;
-				foreach (Item tryItem in source) {
-					if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
-						//Don't attempt to consume the item unless it is from a module, since it doesn't exist in the storage system anyway
-						bool canConsume = fromModule[listIndex];
-
-						if (!canConsume)
-							continue;
-
-						if (tryItem.stack > stack) {
-							tryItem.stack -= stack;
-							stack = 0;
-						} else {
-							stack -= tryItem.stack;
-							tryItem.stack = 0;
-							tryItem.type = ItemID.None;
-						}
-
-						foreach (var module in EnvironmentModuleLoader.modules)
-							module.OnConsumeItemForRecipe(sandbox, tryItem, stack);
-
-						if (stack <= 0)
-							break;
-					}
-
-					listIndex++;
-				}
-			}
+		private static bool AttemptSingleCraft(CraftingContext context) {
+			List<Item> origResults = new(context.results);
+			List<Item> origWithdraw = new(context.toWithdraw);
 
 			NetHelper.Report(false, "Attempting one craft operation...");
 
-			foreach (Item reqItem in selectedRecipe.requiredItem)
-			{
-				int stack = reqItem.stack;
+			List<int> stacksConsumed = new();
 
-				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);
+			foreach (Item reqItem in selectedRecipe.requiredItem) {
+				if (!CanConsumeItem(context, reqItem, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
+					if (wasAvailable)
+						NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\".");
+					else {
+						NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was not available.");
+						return false;  // Did not have enough items
+					}
+				} else
+					NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was available.");
 
-				if (stack <= 0) {
-					NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\".");
-					continue;
-				}
-
-				int stackOrig = stack;
-				bool consumeSucceeded = AttemptToConsumeItem(available, reqItem.type, ref stack, addToWithdraw: true);
-
-				if (!consumeSucceeded) {
-					stack = stackOrig;
-					consumeSucceeded = AttemptToConsumeItem(results, reqItem.type, ref stack, addToWithdraw: false);
-				}
-
-				if (stack > 0 || !consumeSucceeded) {
-					results.Clear();
-					results.AddRange(origResults);
-
-					withdraw.Clear();
-					withdraw.AddRange(origWithdraw);
-
-					NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was not available.");
-
-					return false;  // Did not have enough items
-				}
-
-				NetHelper.Report(false, $"Required item \"{Lang.GetItemNameValue(reqItem.type)}\" was available.");
+				stacksConsumed.Add(stackConsumed);
 			}
 
 			//Consume the source items as well since the craft was successful
+			int consumeStackIndex = 0;
 			foreach (Item reqItem in selectedRecipe.requiredItem) {
-				int stack = reqItem.stack;
+				ConsumeItemFromSource(context, reqItem.type, stacksConsumed[consumeStackIndex]);
 
-				RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stack);
-
-				if (stack <= 0)
-					continue;
-
-				AttemptToConsumeFromSource(reqItem.type, stack);
+				consumeStackIndex++;
 			}
 
 			NetHelper.Report(false, "Craft operation succeeded");
 
 			return true;
+		}
+
+		private static bool CanConsumeItem(CraftingContext context, Item reqItem, List<Item> origWithdraw, List<Item> origResults, out bool wasAvailable, out int stackConsumed) {
+			wasAvailable = true;
+
+			stackConsumed = reqItem.stack;
+
+			RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stackConsumed);
+
+			if (stackConsumed <= 0)
+				return false;
+
+			int stack = stackConsumed;
+			bool consumeSucceeded = AttemptToConsumeItem(context, context.availableItems, reqItem.type, ref stack, addToWithdraw: true);
+
+			if (!consumeSucceeded) {
+				stack = stackConsumed;
+				consumeSucceeded = AttemptToConsumeItem(context, context.results, reqItem.type, ref stack, addToWithdraw: false);
+			}
+
+			if (stack > 0 || !consumeSucceeded) {
+				context.results.Clear();
+				context.results.AddRange(origResults);
+
+				context.toWithdraw.Clear();
+				context.toWithdraw.AddRange(origWithdraw);
+
+				wasAvailable = false;
+				return false;
+			}
+
+			return true;
+		}
+
+		private static bool AttemptToConsumeItem(CraftingContext context, List<Item> list, int reqType, ref int stack, bool addToWithdraw) {
+			int listIndex = 0;
+			foreach (Item tryItem in list) {
+				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
+					//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
+					bool canWithdraw = addToWithdraw && !context.fromModule[listIndex];
+
+					if (tryItem.stack > stack) {
+						Item temp = tryItem.Clone();
+						temp.stack = stack;
+
+						if (canWithdraw)
+							context.toWithdraw.Add(temp);
+								
+						tryItem.stack -= stack;
+						stack = 0;
+					} else {
+						if (canWithdraw)
+							context.toWithdraw.Add(tryItem.Clone());
+								
+						stack -= tryItem.stack;
+						tryItem.stack = 0;
+						tryItem.type = ItemID.None;
+					}
+
+					if (stack <= 0)
+						break;
+				}
+
+				listIndex++;
+			}
+
+			return stack <= 0;
+		}
+
+		private static void ConsumeItemFromSource(CraftingContext context, int reqType, int stack) {
+			foreach (Item tryItem in context.sourceItems) {
+				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
+					int origStack = stack;
+					int stackToConsume;
+
+					if (tryItem.stack > stack) {
+						stackToConsume = stack;
+						stack = 0;
+					} else {
+						stackToConsume = tryItem.stack;
+						stack -= tryItem.stack;
+					}
+
+					foreach (var module in EnvironmentModuleLoader.modules)
+						module.OnConsumeItemForRecipe(context.sandbox, tryItem, stackToConsume);
+
+					Item consumed = tryItem.Clone();
+					consumed.stack = stackToConsume;
+
+					context.consumedItems.Add(consumed);
+
+					tryItem.stack -= stackToConsume;
+
+					if (tryItem.stack <= 0)
+						tryItem.type = ItemID.None;
+
+					if (stack <= 0)
+						break;
+				}
+			}
 		}
 
 		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)

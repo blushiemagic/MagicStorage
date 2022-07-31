@@ -15,11 +15,13 @@ namespace MagicStorage.Components {
 
 		public int Count => enabled?.GetCardinality() ?? 0;
 
+		private void EnsureInitialized() => enabled ??= new(EnvironmentModuleLoader.Count, true);
+
 		public bool Enabled(int index) {
 			if (EnvironmentModuleLoader.Count == 0 || index >= EnvironmentModuleLoader.Count)
 				return false;
 
-			enabled ??= new(EnvironmentModuleLoader.Count, true);
+			EnsureInitialized();
 
 			return enabled[index];
 		}
@@ -30,7 +32,7 @@ namespace MagicStorage.Components {
 			if (EnvironmentModuleLoader.Count == 0 || index >= EnvironmentModuleLoader.Count)
 				return;
 
-			this.enabled ??= new(EnvironmentModuleLoader.Count, true);
+			EnsureInitialized();
 
 			this.enabled[index] = enabled;
 		}
@@ -80,6 +82,8 @@ namespace MagicStorage.Components {
 
 		public override void NetSend(BinaryWriter writer) {
 			base.NetSend(writer);
+
+			EnsureInitialized();
 
 			int length = (enabled.Length - 1) / 8 + 1;
 			writer.Write((short)length);

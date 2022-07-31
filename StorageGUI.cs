@@ -304,6 +304,15 @@ namespace MagicStorage
 
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
+		internal static bool needRefresh;
+
+		internal static void CheckRefresh() {
+			if (needRefresh) {
+				RefreshItems();
+				needRefresh = false;
+			}
+		}
+
 		public static void RefreshItems()
 		{
 			if (StoragePlayer.IsStorageCrafting())
