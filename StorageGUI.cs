@@ -306,6 +306,8 @@ namespace MagicStorage
 
 		internal static bool needRefresh;
 
+		internal static event Action OnRefresh;
+
 		internal static void CheckRefresh() {
 			if (needRefresh) {
 				RefreshItems();
@@ -318,6 +320,7 @@ namespace MagicStorage
 			if (StoragePlayer.IsStorageCrafting())
 			{
 				CraftingGUI.RefreshItems();
+				OnRefresh?.Invoke();
 				return;
 			}
 
@@ -388,6 +391,8 @@ namespace MagicStorage
 
 			for (int k = 0; k < items.Count; k++)
 				didMatCheck.Add(false);
+
+			OnRefresh?.Invoke();
 		}
 
 		private static void UpdateDepositButton()

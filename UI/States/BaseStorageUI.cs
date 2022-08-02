@@ -71,11 +71,17 @@ namespace MagicStorage.UI.States {
 		}
 
 		public void Open() {
+			OnOpen();
+
 			if (currentPage is null)
 				SetPage(DefaultPage);
 		}
 
+		protected virtual void OnOpen() { }
+
 		public void Close() {
+			OnClose();
+
 			if (currentPage is not null) {
 				currentPage.InvokeOnPageDeselected();
 
@@ -84,5 +90,7 @@ namespace MagicStorage.UI.States {
 
 			currentPage = null;
 		}
+
+		protected virtual void OnClose() { }
 	}
 }

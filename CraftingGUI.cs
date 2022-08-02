@@ -25,18 +25,18 @@ namespace MagicStorage
 {
 	public static class CraftingGUI
 	{
-		private const int RecipeButtonsAvailableChoice = 0;
-		private const int RecipeButtonsBlacklistChoice = 3;
-		private const int RecipeButtonsFavoritesChoice = 2;
+		public const int RecipeButtonsAvailableChoice = 0;
+		public const int RecipeButtonsBlacklistChoice = 3;
+		public const int RecipeButtonsFavoritesChoice = 2;
 		public const int Padding = 4;
 		public const int RecipeColumns = 10;
 		public const int IngredientColumns = 7;
 		public const float InventoryScale = 0.85f;
 		public const float SmallScale = 0.7f;
-		private const int StartMaxCraftTimer = 20;
-		private const int StartMaxRightClickTimer = 20;
-		private const float ScrollBar2ViewSize = 1f;
-		private const float RecipeScrollBarViewSize = 1f;
+		public const int StartMaxCraftTimer = 20;
+		public const int StartMaxRightClickTimer = 20;
+		public const float ScrollBar2ViewSize = 1f;
+		public const float RecipeScrollBarViewSize = 1f;
 
 		private static MouseState curMouse;
 		private static MouseState oldMouse;
@@ -69,12 +69,12 @@ namespace MagicStorage
 		private static readonly List<Item> items = new();
 
 		private static readonly Dictionary<int, int> itemCounts = new();
-		private static List<Recipe> recipes = new();
-		private static List<bool> recipeAvailable = new();
-		private static Recipe selectedRecipe;
+		internal static List<Recipe> recipes = new();
+		internal static List<bool> recipeAvailable = new();
+		internal static Recipe selectedRecipe;
 		private static int numRows;
 		private static int displayRows;
-		private static bool slotFocus;
+		internal static bool slotFocus;
 
 		private static readonly UIElement bottomBar = new();
 		private static UIText capacityText;
@@ -97,9 +97,9 @@ namespace MagicStorage
 		private static readonly UISlotZone storageZone = new(HoverStorage, GetStorage, SmallScale);
 		private static int numRows2;
 		private static int displayRows2;
-		private static readonly List<Item> storageItems = new();
-		private static readonly List<bool> storageItemsFromModules = new();
-		private static readonly List<ItemData> blockStorageItems = new();
+		internal static readonly List<Item> storageItems = new();
+		internal static readonly List<bool> storageItemsFromModules = new();
+		internal static readonly List<ItemData> blockStorageItems = new();
 
 		private static readonly UIScrollbar storageScrollBar = new();
 		private static float storageScrollBarMaxViewSize = 2f;
@@ -570,7 +570,7 @@ namespace MagicStorage
 						Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value);
 		}
 
-		private static Item GetStation(int slot, ref int context)
+		internal static Item GetStation(int slot, ref int context)
 		{
 			List<Item> stations = GetCraftingStations();
 			if (stations is not null && slot < stations.Count)
@@ -578,7 +578,7 @@ namespace MagicStorage
 			return new Item();
 		}
 
-		private static Item GetRecipe(int slot, ref int context)
+		internal static Item GetRecipe(int slot, ref int context)
 		{
 			int index = slot + RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
 			Item item = index < recipes.Count ? recipes[index].createItem : new Item();
@@ -600,7 +600,7 @@ namespace MagicStorage
 			return item;
 		}
 
-		private static Item GetHeader(int slot, ref int context)
+		internal static Item GetHeader(int slot, ref int context)
 		{
 			if (selectedRecipe == null)
 				return new Item();
@@ -613,7 +613,7 @@ namespace MagicStorage
 			return item;
 		}
 
-		private static Item GetIngredient(int slot, ref int context)
+		internal static Item GetIngredient(int slot, ref int context)
 		{
 			if (selectedRecipe == null || slot >= selectedRecipe.requiredItem.Count)
 				return new Item();
@@ -658,7 +658,7 @@ namespace MagicStorage
 			return item;
 		}
 
-		private static bool ProcessGroupsForText(Recipe recipe, int type, out string theText)
+		internal static bool ProcessGroupsForText(Recipe recipe, int type, out string theText)
 		{
 			foreach (int num in recipe.acceptedGroups)
 				if (RecipeGroup.recipeGroups[num].ContainsItem(type))
@@ -673,7 +673,7 @@ namespace MagicStorage
 
 		// Calculates how many times a recipe can be crafted using available items
 		// TODO is this correct?
-		private static int AmountCraftable(Recipe recipe)
+		internal static int AmountCraftable(Recipe recipe)
 		{
 			if (!IsAvailable(recipe))
 				return 0;
@@ -698,7 +698,7 @@ namespace MagicStorage
 			return maxCraftable;
 		}
 
-		private static Item GetStorage(int slot, ref int context)
+		internal static Item GetStorage(int slot, ref int context)
 		{
 			int index = slot + IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < storageItems.Count ? storageItems[index] : new Item();
@@ -708,7 +708,7 @@ namespace MagicStorage
 			return item;
 		}
 
-		private static Item GetResult(int slot, ref int context) => slot == 0 && result is not null ? result : new Item();
+		internal static Item GetResult(int slot, ref int context) => slot == 0 && result is not null ? result : new Item();
 
 		private static void UpdateRecipeText()
 		{
@@ -937,7 +937,8 @@ namespace MagicStorage
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
 			IEnumerable<Item> heartItems = heart.GetStoredItems().Select(i => i.Clone());
-			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>());
+			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
+				.DistinctBy(i => i, ReferenceEqualityComparer.Instance);  //Filter by distinct object references (prevents "duplicate" items from, say, 2 mods adding items from the player's inventory)
 
 			//Keep the simulator items separate
 			items.AddRange(ItemSorter.SortAndFilter(heartItems, SortMode.Id, FilterMode.All, ModSearchBox.ModIndexAll, ""));
@@ -1574,7 +1575,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static void SetSelectedRecipe(Recipe recipe)
+		internal static void SetSelectedRecipe(Recipe recipe)
 		{
 			ArgumentNullException.ThrowIfNull(recipe);
 
@@ -1723,7 +1724,7 @@ namespace MagicStorage
 				SlotFocusLogic();
 		}
 
-		private static void SlotFocusLogic()
+		internal static void SlotFocusLogic()
 		{
 			if (result == null || result.IsAir || !Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
@@ -1745,7 +1746,8 @@ namespace MagicStorage
 					else
 						Main.mouseItem.stack += withdrawn.stack;
 					SoundEngine.PlaySound(SoundID.MenuTick);
-					RefreshItems();
+					
+					StorageGUI.needRefresh = true;
 				}
 
 				rightClickTimer--;
@@ -2060,7 +2062,7 @@ namespace MagicStorage
 			return items;
 		}
 
-		private static bool TryDepositResult(Item item)
+		internal static bool TryDepositResult(Item item)
 		{
 			int oldStack = item.stack;
 			TEStorageHeart heart = GetHeart();
@@ -2068,7 +2070,7 @@ namespace MagicStorage
 			return oldStack != item.stack;
 		}
 
-		private static Item DoWithdrawResult(Item item, bool toInventory = false)
+		internal static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
 			Item withdrawn = heart.TryWithdraw(item, false, toInventory);

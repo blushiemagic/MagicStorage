@@ -11,6 +11,8 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
 {
+	internal static string mouseText = "";
+
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 	{
 		int inventoryIndex = layers.FindIndex(layer => layer.Name == "Vanilla: Inventory");
