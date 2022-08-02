@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.UI;
@@ -13,17 +14,51 @@ namespace MagicStorage.UI {
 
 		public int Choice { get; set; }
 
-		public NewUIButtonChoice(Action onChanged, int buttonSize, int expectedButtons, int buttonPadding = 1) {
+		private readonly List<ChoiceElement> choices = new();
+
+		private readonly int buttonSize, buttonPadding;
+
+		public NewUIButtonChoice(Action onChanged, int buttonSize, int buttonPadding = 1) {
 			ArgumentNullException.ThrowIfNull(onChanged);
 
 			_onChanged = onChanged;
+			this.buttonSize = buttonSize;
+			this.buttonPadding = buttonPadding;
 
-			int width = (buttonSize + buttonPadding) * expectedButtons - buttonPadding;
+			Height.Set(buttonSize, 0f);
+			MinHeight.Set(buttonSize, 0f);
+
+			SetPadding(0);
+		}
+
+		public void AssignButtons(Asset<Texture2D>[] textures, LocalizedText[] texts) {
+			if (textures.Length != texts.Length || textures.Length == 0)
+				throw new ArgumentException("Array Lengths must match and be non-zero");
+
+			int width = (buttonSize + buttonPadding) * textures.Length - buttonPadding;
 
 			Width.Set(width, 0f);
 			MinWidth.Set(width, 0f);
-			Height.Set(buttonSize, 0f);
-			MinHeight.Set(buttonSize, 0f);
+
+			foreach (var choice in choices)
+				choice.Remove();
+
+			choices.Clear();
+
+			int left = 0;
+
+			for (int i = 0; i < textures.Length; i++) {
+				var asset = textures[i];
+				var text = texts[i];
+
+				ChoiceElement choice = new(i, asset, text, buttonSize);
+				choice.Left.Set(left, 0f);
+
+				left += buttonSize + buttonPadding;
+
+				choices.Add(choice);
+				Append(choice);
+			}
 		}
 
 		private class ChoiceElement : UIElement {

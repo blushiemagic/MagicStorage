@@ -309,18 +309,17 @@ namespace MagicStorage
 		internal static event Action OnRefresh;
 
 		internal static void CheckRefresh() {
-			if (needRefresh) {
+			if (needRefresh)
 				RefreshItems();
-				needRefresh = false;
-			}
 		}
+
+		internal static void InvokeOnRefresh() => OnRefresh?.Invoke();
 
 		public static void RefreshItems()
 		{
 			if (StoragePlayer.IsStorageCrafting())
 			{
 				CraftingGUI.RefreshItems();
-				OnRefresh?.Invoke();
 				return;
 			}
 
@@ -393,6 +392,7 @@ namespace MagicStorage
 				didMatCheck.Add(false);
 
 			OnRefresh?.Invoke();
+			needRefresh = false;
 		}
 
 		private static void UpdateDepositButton()

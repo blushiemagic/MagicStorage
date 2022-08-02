@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
@@ -120,7 +121,7 @@ namespace MagicStorage.UI {
 
 				if (!hoverItem.IsAir) {
 					Main.HoverItem = hoverItem.Clone();
-					Main.instance.MouseText(string.Empty);
+					MagicUI.mouseText = string.Empty;
 				}
 			}
 		}

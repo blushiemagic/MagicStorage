@@ -1,7 +1,10 @@
 ﻿using MagicStorage.Common.Systems;
-using MagicStorage.CrossMod;
+using MagicStorage.Components;
+using MagicStorage.Sorting;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,28 +14,29 @@ using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.Map;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	internal class CraftingUIState : BaseStorageUI {
 		private UIPanel recipePanel;
-		private static UIText recipePanelHeader;
-		private static UIText ingredientText;
-		private static UIText reqObjText;
-		private static UIText reqObjText2;
-		private static UIText storedItemsText;
+		private UIText recipePanelHeader;
+		private UIText ingredientText;
+		private UIText reqObjText;
+		private UIText reqObjText2;
+		private UIText storedItemsText;
 
-		private static NewUISlotZone ingredientZone;    //Recipe ingredients
-		private static NewUISlotZone storageZone;       //Items in storage valid for recipe ingredient
-		private static NewUISlotZone recipeHeaderZone;  //Preview item for result
-		private static NewUISlotZone resultZone;        //Result items already in storage (in one slot)
+		private NewUISlotZone ingredientZone;    //Recipe ingredients
+		private NewUISlotZone storageZone;       //Items in storage valid for recipe ingredient
+		private NewUISlotZone recipeHeaderZone;  //Preview item for result
+		private NewUISlotZone resultZone;        //Result items already in storage (in one slot)
 
-		private static UIScrollbar storageScrollBar;
-		private static float storageScrollBarMaxViewSize = 2f;
+		private UIScrollbar storageScrollBar;
+		private float storageScrollBarMaxViewSize = 2f;
 
-		private static UITextPanel<LocalizedText> craftButton;
-		private static UITextPanel<LocalizedText> craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
-		private static UIText craftAmount;
+		private UITextPanel<LocalizedText> craftButton;
+		private UICraftAmountAdjustment craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
+		private UIText craftAmount;
 
 		private int lastKnownIngredientRows = 1;
 		private bool lastKnownUseOldCraftButtons = false;
@@ -59,25 +63,19 @@ namespace MagicStorage.UI.States {
 			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
 			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
 
-			float panelTop = Main.instance.invBottom + 60;
-			float panelLeft = 20f;
-			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
-			float panelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
-			float panelHeight = Main.screenHeight - panelTop;
-
-			panel.Left.Set(panelLeft, 0f);
-			panel.Top.Set(panelTop, 0f);
-			panel.Width.Set(panelWidth, 0f);
-			panel.Height.Set(panelHeight, 0f);
+			panel.Left.Set(PanelLeft, 0f);
+			panel.Top.Set(PanelTop, 0f);
+			panel.Width.Set(PanelWidth, 0f);
+			panel.Height.Set(PanelHeight, 0f);
 
 			panel.OnRecalculate += MoveRecipePanel;
 
 			recipePanel = new();
-			float recipeTop = panelTop;
-			float recipeLeft = panelLeft + panelWidth;
+			float recipeTop = PanelTop;
+			float recipeLeft = PanelLeft + PanelWidth;
 			float recipeWidth = CraftingGUI.IngredientColumns * (smallSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
 			recipeWidth += recipePanel.PaddingLeft + recipePanel.PaddingRight;
-			float recipeHeight = panelHeight;
+			float recipeHeight = PanelHeight;
 			recipePanel.Left.Set(recipeLeft, 0f);
 			recipePanel.Top.Set(recipeTop, 0f);
 			recipePanel.Width.Set(recipeWidth, 0f);
@@ -100,7 +98,9 @@ namespace MagicStorage.UI.States {
 			ingredientZone.Width.Set(0f, 1f);
 
 			ingredientZone.InitializeSlot += (slot, scale) => {
-				MagicStorageItemSlot itemSlot = new(slot, scale: scale);
+				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					IgnoreClicks = true  // Purely visual
+				};
 				
 				itemSlot.OnRightClick += (evt, e) => {
 					if (CraftingGUI.selectedRecipe is null)
@@ -140,7 +140,9 @@ namespace MagicStorage.UI.States {
 			storageZone = new(CraftingGUI.SmallScale);
 
 			storageZone.InitializeSlot += (slot, scale) => {
-				MagicStorageItemSlot itemSlot = new(slot, scale: scale);
+				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					IgnoreClicks = true  // Purely visual
+				};
 
 				itemSlot.OnClick += (evt, e) => {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
@@ -167,6 +169,7 @@ namespace MagicStorage.UI.States {
 			storageScrollBar.SetView(CraftingGUI.ScrollBar2ViewSize, storageScrollBarMaxViewSize);
 			storageZone.Append(storageScrollBar);
 
+			craftButton = new UICraftAmountAdjustment(Language.GetText("LegacyMisc.72"));
 			craftButton.Top.Set(-48f, 1f);
 			craftButton.Width.Set(100f, 0f);
 			craftButton.Height.Set(24f, 0f);
@@ -177,7 +180,9 @@ namespace MagicStorage.UI.States {
 			resultZone = new(CraftingGUI.InventoryScale);
 
 			resultZone.InitializeSlot += (slot, scale) => {
-				MagicStorageItemSlot itemSlot = new(slot, scale: scale);
+				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					IgnoreClicks = true  // Purely visual
+				};
 
 				itemSlot.OnClick += (evt, e) => {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
@@ -245,14 +250,23 @@ namespace MagicStorage.UI.States {
 			resultZone.Height.Set(itemSlotHeight, 0f);
 			recipePanel.Append(resultZone);
 
-			craftP1 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
-			craftP10 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
-			craftP100 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
-			craftM1 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
-			craftM10 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
-			craftM100 = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
-			craftMax = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), CraftingGUI.SmallScale);
-			craftReset = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"), CraftingGUI.SmallScale);
+			craftP1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
+			craftP1.SetAmountInformation(+1, true);
+			craftP10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
+			craftP1.SetAmountInformation(+10, true);
+			craftP100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
+			craftP1.SetAmountInformation(+100, true);
+			craftM1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
+			craftP1.SetAmountInformation(-1, true);
+			craftM10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
+			craftP1.SetAmountInformation(-10, true);
+			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
+			craftP1.SetAmountInformation(-100, true);
+			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), CraftingGUI.SmallScale);
+			craftP1.SetAmountInformation(int.MaxValue, false);
+			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), CraftingGUI.SmallScale);
+			craftP1.SetAmountInformation(1, false);
+
 			craftAmount = new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), CraftingGUI.SmallScale);
 
 			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
@@ -325,6 +339,7 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(craftReset);
 
 			RecalculateRecipePanelElements(0, 1);
+			InitCraftButtonEvents();
 			ToggleCraftButtons(hide: config);
 
 			lastKnownUseOldCraftButtons = config;
@@ -341,6 +356,8 @@ namespace MagicStorage.UI.States {
 
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
+
+			CraftingGUI.ClampCraftAmount();
 
 			bool config = MagicStorageConfig.UseOldCraftMenu;
 
@@ -363,6 +380,8 @@ namespace MagicStorage.UI.States {
 
 			if (recipeRows != lastKnownIngredientRows)
 				RecalculateRecipePanelElements(itemsNeeded, totalRows);
+
+			UpdateRecipeText();
 		}
 
 		private void RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
@@ -438,6 +457,51 @@ namespace MagicStorage.UI.States {
 			Refresh();
 		}
 
+		private void InitCraftButtonEvents() {
+			craftButton.OnClick += (evt, e) => {
+				bool stillCrafting = false;
+				CraftingGUI.ClickCraftButton(ref stillCrafting);
+
+				if (!stillCrafting) {
+					CraftingGUI.craftTimer = 0;
+					CraftingGUI.maxCraftTimer = CraftingGUI.StartMaxCraftTimer;
+				}
+			};
+
+			craftButton.OnMouseOver += (evt, e) => {
+				if (CraftingGUI.selectedRecipe is not null && CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))
+					MagicUI.mouseText = Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value;
+			};
+
+			InitAmountButtonEvents(craftP1);
+			InitAmountButtonEvents(craftP10);
+			InitAmountButtonEvents(craftP100);
+			InitAmountButtonEvents(craftM1);
+			InitAmountButtonEvents(craftM10);
+			InitAmountButtonEvents(craftM100);
+			InitAmountButtonEvents(craftMax);
+			InitAmountButtonEvents(craftReset);
+		}
+
+		private static void InitAmountButtonEvents(UICraftAmountAdjustment button) {
+			button.OnMouseOver += (evt, e) => {
+				if (CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))
+					(e as UIPanel).BackgroundColor = new Color(73, 94, 171);
+			};
+			button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
+
+			button.OnClick += (evt, e) => {
+				UICraftAmountAdjustment obj = e as UICraftAmountAdjustment;
+
+				CraftingGUI.ClickAmountButton(obj.Amount, obj.AmountIsOffset);
+			};
+
+			button.OnUpdate += e => {
+				if (!CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) || !CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))
+					(e as UIPanel).BackgroundColor = new Color(30, 40, 100) * 0.7f;
+			};
+		}
+
 		private void ToggleCraftButtons(bool hide) {
 			if (hide) {
 				craftAmount.Remove();
@@ -471,12 +535,67 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
+		private void UpdateRecipeText() {
+			if (CraftingGUI.selectedRecipe == null) {
+				reqObjText2.SetText("");
+				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
+			} else {
+				bool isEmpty = true;
+				string text = "";
+				int rows = 0;
+
+				void AddText(string s) {
+					if (!isEmpty)
+						text += ", ";
+
+					if ((text.Length + s.Length) / 35 > rows) {
+						text += "\n";
+						++rows;
+					}
+
+					text += s;
+					isEmpty = false;
+				}
+
+				foreach (int tile in CraftingGUI.selectedRecipe.requiredTile)
+					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
+
+				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearWater))
+					AddText(Language.GetTextValue("LegacyInterface.53"));
+
+				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearHoney))
+					AddText(Language.GetTextValue("LegacyInterface.58"));
+
+				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearLava))
+					AddText(Language.GetTextValue("LegacyInterface.56"));
+
+				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InSnow))
+					AddText(Language.GetTextValue("LegacyInterface.123"));
+
+				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+					AddText(Language.GetTextValue("LegacyInterface.124"));
+
+				if (isEmpty)
+					text = Language.GetTextValue("LegacyInterface.23");
+
+				reqObjText2.SetText(text);
+
+				double dps = CompareDps.GetDps(CraftingGUI.selectedRecipe.createItem);
+				string dpsText = dps >= 1d ? $"DPS = {dps:F}" : string.Empty;
+
+				recipePanelHeader.SetText(dpsText);
+			}
+		}
+
 		protected override void PostAppendPanel() {
 			Append(recipePanel);
 		}
 
 		protected override void OnOpen() {
 			StorageGUI.OnRefresh += Refresh;
+
+			if (MagicStorageConfig.UseConfigFilter)
+				(pages["Crafting"] as RecipesPage).recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 		}
 
 		protected override void OnClose() {
@@ -491,14 +610,30 @@ namespace MagicStorage.UI.States {
 			recipeHeaderZone.SetItemsAndContexts(1, CraftingGUI.GetHeader);
 
 			resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+
+			(pages["Crafting"] as RecipesPage).Refresh();
 		}
 
 		private class RecipesPage : BaseStorageUIPage {
+			public NewUIButtonChoice recipeButtons;
+			public UISearchBar searchBar;
+			public UIText stationText;
+			public UIText capacityText;
+			public UIScrollbar recipeScrollBar;
+
+			public NewUISlotZone stationZone;  //Item slots for the crafting stations
+			public NewUISlotZone recipeZone;   //Item slots for the recipes
+
+			private int lastKnownStationsCount = -1;
+			private float lastKnownScrollBarViewPosition = -1;
+
 			public RecipesPage(BaseStorageUI parent) : base(parent, "Crafting") {
 				OnPageSelected += StorageGUI.CheckRefresh;
 			}
 
 			public override void OnInitialize() {
+				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
+
 				CraftingUIState parent = parentUI as CraftingUIState;
 
 				var basePanel = parent.panel;
@@ -507,6 +642,183 @@ namespace MagicStorage.UI.States {
 				topBar.Width.Set(0f, 1f);
 				topBar.Height.Set(32f, 0f);
 				basePanel.Append(topBar);
+
+				recipeButtons = new(StorageGUI.RefreshItems, 21);
+				recipeButtons.AssignButtons(new[] {
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
+					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad)
+				}, new[] {
+					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
+					Language.GetText("Mods.MagicStorage.RecipeAll"),
+					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
+					Language.GetText("Mods.MagicStorage.RecipeBlacklist")
+				});
+				topBar.Append(recipeButtons);
+
+				float recipeButtonsRight = recipeButtons.GetDimensions().Width + CraftingGUI.Padding;
+
+				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), StorageGUI.RefreshItems);
+				searchBar.Left.Set(recipeButtonsRight + CraftingGUI.Padding, 0f);
+				searchBar.Width.Set(-recipeButtonsRight - 2 * CraftingGUI.Padding, 1f);
+				searchBar.Height.Set(0f, 1f);
+				topBar.Append(searchBar);
+
+				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+				stationText.Top.Set(76f, 0f);
+				basePanel.Append(stationText);
+
+				stationZone = new(/* HoverStation, GetStation, */ CraftingGUI.InventoryScale / 1.55f);
+
+				stationZone.InitializeSlot += (slot, scale) => {
+					MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+						IgnoreClicks = true  // Purely visual
+					};
+
+					itemSlot.OnClick += (evt, e) => {
+						MagicStorageItemSlot obj = e as MagicStorageItemSlot;
+
+						TECraftingAccess access = CraftingGUI.GetCraftingEntity();
+						if (access == null || obj.slot >= TECraftingAccess.ItemsTotal)
+							return;
+
+						Player player = Main.LocalPlayer;
+
+						bool changed = false;
+						if (obj.slot < access.stations.Count && ItemSlot.ShiftInUse) {
+							access.TryWithdrawStation(obj.slot, true);
+							changed = true;
+						} else if (player.itemAnimation == 0 && player.itemTime == 0) {
+							if (Main.mouseItem.IsAir) {
+								if (!access.TryWithdrawStation(obj.slot).IsAir)
+									changed = true;
+							} else {
+								int oldType = Main.mouseItem.type;
+								int oldStack = Main.mouseItem.stack;
+
+								Main.mouseItem = access.TryDepositStation(Main.mouseItem);
+								
+								if (oldType != Main.mouseItem.type || oldStack != Main.mouseItem.stack)
+									changed = true;
+							}
+						}
+
+						if (changed) {
+							StorageGUI.needRefresh = true;
+							SoundEngine.PlaySound(SoundID.Grab);
+						}
+					};
+
+					return itemSlot;
+				};
+
+				stationZone.Width.Set(0f, 1f);
+				stationZone.Top.Set(100f, 0f);
+				
+				basePanel.Append(stationZone);
+
+				recipeZone.Width.Set(0f, 1f);
+				recipeZone.Top.Set(100 + stationZone.ZoneHeight, 0f);
+				recipeZone.Height.Set(-(100 + stationZone.ZoneHeight), 1f);
+				basePanel.Append(recipeZone);
+
+				recipeScrollBar = new();
+				recipeScrollBar.Left.Set(-20f, 1f);
+				recipeZone.Append(recipeScrollBar);
+
+				UIElement bottomBar = new();
+				bottomBar.Width.Set(0f, 1f);
+				bottomBar.Height.Set(32f, 0f);
+				bottomBar.Top.Set(-15f, 1f);
+				basePanel.Append(bottomBar);
+
+				capacityText = new UIText("Items");
+				capacityText.Left.Set(6f, 0f);
+				capacityText.Top.Set(6f, 0f);
+
+				bottomBar.Append(capacityText);
+
+				UpdateZones();
+			}
+
+			public override void Update(GameTime gameTime) {
+				base.Update(gameTime);
+
+				if (CraftingGUI.GetCraftingStations().Count / TECraftingAccess.Columns + 1 != lastKnownStationsCount / TECraftingAccess.Columns + 1)
+					UpdateZones();
+				else if (recipeScrollBar.ViewPosition != lastKnownScrollBarViewPosition)
+					UpdateZones();
+
+				TEStorageHeart heart = CraftingGUI.GetHeart();
+				int numItems = 0;
+				int capacity = 0;
+				if (heart is not null) {
+					foreach (TEAbstractStorageUnit abstractStorageUnit in heart.GetStorageUnits()) {
+						if (abstractStorageUnit is TEStorageUnit storageUnit) {
+							numItems += storageUnit.NumItems;
+							capacity += storageUnit.Capacity;
+						}
+					}
+				}
+
+				capacityText.SetText(Language.GetTextValue("Mods.MagicStorage.Capacity", numItems, capacity));
+			}
+
+			private void UpdateZones() {
+				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
+
+				int stationCount = CraftingGUI.GetCraftingStations().Count;
+				int rows = stationCount / TECraftingAccess.Columns + 1;
+				if (rows > TECraftingAccess.Rows)
+					rows = TECraftingAccess.Rows;
+
+				stationZone.SetDimensions(TECraftingAccess.Columns, rows);
+				stationZone.Height.Set(stationZone.ZoneHeight, 1f);
+
+				stationZone.Recalculate();
+
+				int numRows = ((CraftingGUI.recipes?.Count ?? 0) + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
+				int displayRows = (int)recipeZone.GetDimensions().Height / ((int)itemSlotHeight + CraftingGUI.Padding);
+				recipeZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
+
+				int noDisplayRows = numRows - displayRows;
+				if (noDisplayRows < 0)
+					noDisplayRows = 0;
+				
+				float recipeScrollBarMaxViewSize = 1 + noDisplayRows;
+				recipeScrollBar.Height.Set(displayRows * (itemSlotHeight + CraftingGUI.Padding), 0f);
+				recipeScrollBar.SetView(CraftingGUI.RecipeScrollBarViewSize, recipeScrollBarMaxViewSize);
+
+				lastKnownStationsCount = stationCount;
+				lastKnownScrollBarViewPosition = recipeScrollBar.ViewPosition;
+			}
+
+			public void Refresh() {
+				stationZone.SetItemsAndContexts(CraftingGUI.GetCraftingStations().Count, CraftingGUI.GetStation);
+
+				recipeZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+			}
+
+			internal Item GetRecipe(int slot, ref int context) {
+				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(recipeScrollBar.ViewPosition);
+				Item item = index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
+
+				if (!item.IsAir) {
+					// TODO can this be nicer?
+					if (CraftingGUI.recipes[index] == CraftingGUI.selectedRecipe)
+						context = 6;
+
+					if (!CraftingGUI.recipeAvailable[index])
+						context = CraftingGUI.recipes[index] == CraftingGUI.selectedRecipe ? 4 : 3;
+					
+					if (StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
+						item = item.Clone();
+						item.favorited = true;
+					}
+				}
+
+				return item;
 			}
 		}
 	}

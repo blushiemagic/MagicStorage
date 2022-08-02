@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MagicStorage.Components;
+using MagicStorage.UI.States;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -12,6 +13,18 @@ namespace MagicStorage.Common.Systems;
 public class MagicUI : ModSystem
 {
 	internal static string mouseText = "";
+
+	internal static UserInterface uiInterface;
+
+	public static BaseStorageUI craftingUI, storageUI, environmentUI;
+
+	public override void Load() {
+		if (Main.dedServ)
+			return;
+
+		uiInterface = new();
+		craftingUI = new CraftingUIState();
+	}
 
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 	{

@@ -12,7 +12,7 @@ namespace MagicStorage.UI {
 
 		public float Scale { get; private set; }
 
-		public virtual Item StoredItem => storedItem;
+		public virtual Item StoredItem => getItem?.Invoke() ?? storedItem;
 
 		protected Item storedItem;
 
@@ -33,6 +33,8 @@ namespace MagicStorage.UI {
 		public bool IgnoreClicks { get; set; }
 
 		public readonly int slot;
+
+		public Func<Item> getItem;
 
 		public MagicStorageItemSlot(int slot, int context = ItemSlot.Context.InventoryItem, float scale = 1f) {
 			this.slot = slot;

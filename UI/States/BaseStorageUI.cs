@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
@@ -13,11 +15,24 @@ namespace MagicStorage.UI.States {
 		protected Dictionary<string, BaseStorageUIPage> pages;
 
 		public BaseStorageUIPage currentPage;
+		
+		public float PanelLeft { get; protected set; }
+		
+		public float PanelTop { get; protected set; }
+		
+		protected float PanelWidth { get; set; }
+		
+		protected float PanelHeight { get; set; }
 
-		public float PanelLeft { get; private set; }
-		public float PanelRight { get; private set; }
-		public float PanelTop { get; private set; }
-		public float PanelBottom { get; private set; }
+		public float PanelRight {
+			get => PanelLeft + PanelWidth;
+			set => PanelLeft = value - PanelWidth;
+		}
+		
+		public float PanelBottom {
+			get => PanelTop + PanelHeight;
+			set => PanelTop = value - PanelHeight;
+		}
 
 		protected abstract IEnumerable<string> GetMenuOptions();
 
@@ -26,6 +41,14 @@ namespace MagicStorage.UI.States {
 		public abstract string DefaultPage { get; }
 
 		public override void OnActivate() {
+			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
+
+			PanelTop = Main.instance.invBottom + 60;
+			PanelLeft = 20f;
+			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
+			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
+			PanelHeight = Main.screenHeight - PanelTop;
+
 			panel = new(true, GetMenuOptions().ToArray());
 
 			panel.OnMenuClose += Close;

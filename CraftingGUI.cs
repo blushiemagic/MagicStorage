@@ -112,11 +112,11 @@ namespace MagicStorage
 
 		private static Item result;
 		private static readonly UISlotZone resultZone = new(HoverResult, GetResult, InventoryScale);
-		private static int craftTimer;
-		private static int maxCraftTimer = StartMaxCraftTimer;
-		private static int rightClickTimer;
+		internal static int craftTimer;
+		internal static int maxCraftTimer = StartMaxCraftTimer;
+		internal static int rightClickTimer;
 
-		private static int maxRightClickTimer = StartMaxRightClickTimer;
+		internal static int maxRightClickTimer = StartMaxRightClickTimer;
 
 		public static bool CatchDroppedItems;
 		public static List<Item> DroppedItems = new();
@@ -846,7 +846,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static void HandleCraftButton(UITextPanel<LocalizedText> button, bool clickOnly, Action onClicked) {
+		internal static void HandleCraftButton(UITextPanel<LocalizedText> button, bool clickOnly, Action onClicked) {
 			Rectangle dim = InterfaceHelper.GetFullRectangle(button);
 
 			if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y && curMouse.Y < dim.Y + dim.Height) {
@@ -861,7 +861,7 @@ namespace MagicStorage
 				button.BackgroundColor = new Color(30, 40, 100) * 0.7f;
 		}
 
-		private static void ClickCraftButton(ref bool stillCrafting) {
+		internal static void ClickCraftButton(ref bool stillCrafting) {
 			if (craftTimer <= 0)
 			{
 				craftTimer = maxCraftTimer;
@@ -895,7 +895,7 @@ namespace MagicStorage
 			stillCrafting = true;
 		}
 
-		private static void ClickAmountButton(int amount, bool offset) {
+		internal static void ClickAmountButton(int amount, bool offset) {
 			if (offset && (amount == 1 || craftAmountTarget > 1))
 				craftAmountTarget += amount;
 			else
@@ -906,7 +906,7 @@ namespace MagicStorage
 			SoundEngine.PlaySound(SoundID.MenuTick);
 		}
 
-		private static void ClampCraftAmount() {
+		internal static void ClampCraftAmount() {
 			if (craftAmountTarget < 1)
 				craftAmountTarget = 1;
 			else if (!IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
@@ -915,11 +915,11 @@ namespace MagicStorage
 				craftAmountTarget = selectedRecipe.createItem.maxStack;
 		}
 
-		private static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
+		internal static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		private static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
+		internal static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
 
-		private static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
+		internal static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
 
 		public static void RefreshItems() => RefreshItemsAndSpecificRecipes(null);
 
@@ -929,8 +929,11 @@ namespace MagicStorage
 			items.Clear();
 			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
-			if (heart == null)
+			if (heart == null) {
+				StorageGUI.InvokeOnRefresh();
+				StorageGUI.needRefresh = false;
 				return;
+			}
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes invoked");
 
@@ -1008,6 +1011,9 @@ namespace MagicStorage
 				foreach (TEEnvironmentAccess environment in heart.GetEnvironmentSimulators())
 					environment.ResetPlayer(sandbox);
 			}
+
+			StorageGUI.InvokeOnRefresh();
+			StorageGUI.needRefresh = false;
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 		}
@@ -1413,7 +1419,7 @@ namespace MagicStorage
 			finally { }
 		}
 
-		private static bool PassesBlock(Recipe recipe)
+		internal static bool PassesBlock(Recipe recipe)
 		{
 			foreach (Item ingredient in recipe.requiredItem)
 			{
