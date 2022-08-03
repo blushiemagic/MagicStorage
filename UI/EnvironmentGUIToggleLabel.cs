@@ -16,8 +16,6 @@ namespace MagicStorage.UI {
 
 		public readonly EnvironmentGUIModEntry Source;
 
-		private bool hovering;
-
 		public EnvironmentGUIToggleLabel(EnvironmentGUIModEntry source, string name, string module, bool defaultState = false) : base(ModContent.Request<Texture2D>("Terraria/Images/UI/Settings_Toggle"), 13, 13, new Point(16, 0), new Point(0, 0)) {
 			Source = source;
 			Module = module;

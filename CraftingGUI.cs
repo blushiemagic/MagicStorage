@@ -972,7 +972,8 @@ namespace MagicStorage
 				toWithdraw = toWithdraw,
 				results = results,
 				sandbox = sandbox,
-				consumedItems = new()
+				consumedItems = new(),
+				fromModule = fromModule
 			};
 
 			int target = toCraft;
