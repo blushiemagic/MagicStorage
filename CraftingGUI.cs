@@ -950,6 +950,8 @@ namespace MagicStorage
 			public EnvironmentSandbox sandbox;
 
 			public List<Item> consumedItems;
+
+			public IEnumerable<EnvironmentModule> modules;
 		}
 
 		/// <summary>
@@ -973,7 +975,8 @@ namespace MagicStorage
 				results = results,
 				sandbox = sandbox,
 				consumedItems = new(),
-				fromModule = fromModule
+				fromModule = fromModule,
+				modules = heart.GetModules()
 			};
 
 			int target = toCraft;
@@ -993,6 +996,10 @@ namespace MagicStorage
 				DroppedItems.Clear();
 
 				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+
+				foreach (EnvironmentModule module in context.modules)
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
+
 				context.consumedItems.Clear();
 
 				CatchDroppedItems = false;
@@ -1133,8 +1140,7 @@ namespace MagicStorage
 						stack -= tryItem.stack;
 					}
 
-					foreach (var module in EnvironmentModuleLoader.modules)
-						module.OnConsumeItemForRecipe(context.sandbox, tryItem, stackToConsume);
+					OnConsumeItemForRecipe_Obsolete(context, tryItem, stackToConsume);
 
 					Item consumed = tryItem.Clone();
 					consumed.stack = stackToConsume;
@@ -1150,6 +1156,12 @@ namespace MagicStorage
 						break;
 				}
 			}
+		}
+
+		[Obsolete]
+		private static void OnConsumeItemForRecipe_Obsolete(CraftingContext context, Item tryItem, int stackToConsume) {
+			foreach (var module in context.modules)
+				module.OnConsumeItemForRecipe(context.sandbox, tryItem, stackToConsume);
 		}
 
 		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)

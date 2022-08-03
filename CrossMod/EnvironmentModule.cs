@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Components;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Terraria;
@@ -58,7 +59,15 @@ namespace MagicStorage {
 		/// </summary>
 		/// <param name="item">The original item instance retrieved from <see cref="GetAdditionalItems(EnvironmentSandbox)"/> or the storage system</param>
 		/// <param name="stack">How many items were consumed</param>
+		[Obsolete("Use OnconsumeItemsForRecipe instead", true)]
 		public virtual void OnConsumeItemForRecipe(EnvironmentSandbox sandbox, Item item, int stack) { }
+
+		/// <summary>
+		/// Allows you to specify what happens when items are consumed for a recipe
+		/// </summary>
+		/// <param name="recipe">The recipe used</param>
+		/// <param name="items">The items consumed for the recipe</param>
+		public virtual void OnConsumeItemsForRecipe(EnvironmentSandbox sandbox, Recipe recipe, List<Item> items) { }
 
 		/// <summary>
 		/// Allows you to reset information in the sandbox's player after processing recipes

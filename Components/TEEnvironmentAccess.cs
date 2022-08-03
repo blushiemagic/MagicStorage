@@ -49,9 +49,19 @@ namespace MagicStorage.Components {
 				module.ModifyCraftingZones(sandbox, ref information);
 		}
 
+		[Obsolete("Use OnConsumeItemsForRecipe instead", true)]
 		public void OnConsumeItemForRecipe(EnvironmentSandbox sandbox, Item item, int stack) {
 			foreach (EnvironmentModule module in Modules)
 				module.OnConsumeItemForRecipe(sandbox, item, stack);
+		}
+		
+		/// <summary>
+		/// Invokes OnConsumeItemsForRecipe for al modules in this Environment Simulator
+		/// </summary>
+		/// <inheritdoc cref="EnvironmentModule.OnConsumeItemsForRecipe(EnvironmentSandbox, Recipe, List{Item})"/>
+		public virtual void OnConsumeItemsForRecipe(EnvironmentSandbox sandbox, Recipe recipe, List<Item> items) {
+			foreach (EnvironmentModule module in Modules)
+				module.OnConsumeItemsForRecipe(sandbox, recipe, items);
 		}
 
 		public void ResetPlayer(EnvironmentSandbox sandbox) {
