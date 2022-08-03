@@ -42,7 +42,6 @@ namespace MagicStorage {
 
 		public override void Unload()
 		{
-			StorageGUI.Unload();
 			CraftingGUI.Unload();
 			EnvironmentGUI.Unload();
 
@@ -56,8 +55,6 @@ namespace MagicStorage {
 		}
 
 		public override void PostSetupContent() {
-			EnvironmentGUI.Initialize();
-
 			SortingOptionLoader.InitializeOrder();
 			FilteringOptionLoader.InitializeOrder();
 		}
