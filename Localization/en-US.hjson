@@ -523,6 +523,11 @@ Mods: {
 			Tiles: "Filter Placeables"
 			Misc: "Filter Misc"
 			Recent: "Filter New Recently Added Items"
+			WeaponsOther: "Filter Other Weapons"
+			Unstackables: "Filter Unstackables"
+			Stackables: "Filter Stackables"
+			NotFullyResearched: "Filter Items Not Fully Researched"
+			FullyResearched: "Filter Items Fully Researched"
 		}
 
 		SortingOption: {
@@ -533,6 +538,7 @@ Mods: {
 			Dps: "Sort by DPS"
 			QuantityAbsolute: "Sort by Quantity"
 			QuantityRatio: "Sort by Quantity Ratio"
+			Damage: "Sort by Damage"
 		}
 
 		Config: {

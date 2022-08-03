@@ -1,5 +1,7 @@
+using MagicStorage.CrossMod;
 using System.Linq;
 using Terraria;
+using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -53,6 +55,8 @@ namespace MagicStorage.Sorting
 			_                     => (item.CountsAsClass(DamageClass.Throwing) && item.damage > 0) || (item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating")),
 		};
 
+		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => o.FiltersDamageClass).Any(o => o.Filter(item)) && item.damage > 0 && item.DamageType != DamageClass.Default && item.DamageType != DamageClass.Generic;
+
 		public static readonly Filter Ammo = item =>
 			item.ammo > 0 && item.damage > 0 && item.ammo != AmmoID.Coin;
 
@@ -85,7 +89,15 @@ namespace MagicStorage.Sorting
 			item.createTile >= TileID.Dirt || item.createWall > 0;
 
 		public static readonly Filter Misc = item =>
-			blacklist.All(filter => !filter(item));
+			!blacklist.Any(filter => filter(item));
+
+		public static readonly Filter Unstackable = item => item.maxStack == 1;
+
+		public static readonly Filter Stackable = item => item.maxStack > 1;
+
+		public static readonly Filter FullyResearched = item => Utility.IsFullyResearched(item.type, mustBeResearchable: false);
+
+		public static readonly Filter NotFullyResearched = item => !Utility.IsFullyResearched(item.type, mustBeResearchable: false);
 
 		private static readonly Filter[] blacklist =
 		{
@@ -94,8 +106,8 @@ namespace MagicStorage.Sorting
 			WeaponMagic,
 			WeaponSummon,
 			WeaponThrown,
+			WeaponOther,
 			Ammo,
-			WeaponThrown,
 			Vanity,
 			Tool,
 			Armor,

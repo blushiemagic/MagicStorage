@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.Creative;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
@@ -84,5 +85,26 @@ namespace MagicStorage {
 
 		public static Point16 ReadPoint16(this BinaryReader reader)
 			=> new(reader.ReadInt16(), reader.ReadInt16());
+
+		public static void GetResearchStats(int itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal) {
+			canBeResearched = false;
+			sacrificesNeeded = 0;
+
+			if (!Main.LocalPlayerCreativeTracker.ItemSacrifices.SacrificesCountByItemIdCache.TryGetValue(itemType, out currentSacrificeTotal))
+				return;
+
+			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded)) {
+				currentSacrificeTotal = 0;
+				return;
+			}
+
+			canBeResearched = true;
+		}
+
+		public static bool IsFullyResearched(int itemType, bool mustBeResearchable) {
+			GetResearchStats(itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal);
+
+			return (!mustBeResearchable || canBeResearched) && currentSacrificeTotal >= sacrificesNeeded;
+		}
 	}
 }

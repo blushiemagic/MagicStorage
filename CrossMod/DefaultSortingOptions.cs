@@ -80,4 +80,15 @@ namespace MagicStorage.CrossMod {
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
+
+	[Autoload(false)]
+	public sealed class SortDamage : SortingOption {
+		public override IComparer<Item> Sorter => CompareDamage.Instance;
+
+		public override string Texture => "MagicStorage/Assets/SortNumber";
+
+		public override string Name => "Damage";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
 }

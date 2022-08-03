@@ -135,6 +135,7 @@ namespace MagicStorage.CrossMod {
 			public static SortingOption DPS { get; internal set; }
 			public static SortingOption Quantity { get; internal set; }
 			public static SortingOption QuantityRatio { get; internal set; }
+			public static SortingOption Damage { get; internal set; }
 		}
 
 		private static readonly List<SortingOption> options = new();
@@ -168,6 +169,7 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Name = new SortName());
 			mod.AddContent(Definitions.Value = new SortValue());
 			mod.AddContent(Definitions.DPS = new SortDPS());
+			mod.AddContent(Definitions.Damage = new SortDamage());
 			mod.AddContent(Definitions.Quantity = new SortQuantityAbsolute());
 			mod.AddContent(Definitions.QuantityRatio = new SortQuantityRatio());
 		}
