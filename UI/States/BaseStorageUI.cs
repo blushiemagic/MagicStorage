@@ -40,6 +40,10 @@ namespace MagicStorage.UI.States {
 
 		public abstract string DefaultPage { get; }
 
+		public BaseStorageUIPage GetPage(string page) => pages[page];
+
+		public T GetPage<T>(string page) where T : BaseStorageUIPage => pages[page] as T;
+
 		public override void OnActivate() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 

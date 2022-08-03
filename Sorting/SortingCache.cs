@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MagicStorage.CrossMod;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -36,28 +37,25 @@ public class SortingCacheDictionary
 		}
 	}
 
-	private readonly Dictionary<SortMode, Entry> cache = new();
+	private readonly Dictionary<int, Entry> cache = new();
 
-	public int FindIndex(SortMode mode, int itemType) => cache.TryGetValue(mode, out var entry) ? entry.FindIndex(itemType) : -1;
+	public int FindIndex(int mode, int itemType) => cache.TryGetValue(mode, out var entry) ? entry.FindIndex(itemType) : -1;
 
 	public void Fill()
 	{
 		cache.Clear();
 
-		cache[SortMode.Default] = Create(SortMode.Default);
-		cache[SortMode.Id]      = Create(SortMode.Id);
-		cache[SortMode.Name]    = Create(SortMode.Name);
-		//These two (value and dps) are variable on item stats, but having a baseline will make the actual sorting slightly more efficient
-		cache[SortMode.Value]   = Create(SortMode.Value);
-		cache[SortMode.Dps]     = Create(SortMode.Dps);
-		cache[SortMode.AsIs]    = new();
+		foreach (var option in SortingOptionLoader.Options)
+			Create(option.Type);
 	}
 
-	private static Entry Create(SortMode mode)
+	private void Create(int mode)
 	{
+		var sorter = SortingOptionLoader.Get(mode).Sorter;
+
 		var items = ContentSamples.ItemsByType
 			.Select((pair, i) => (item: pair.Value, type: i))
-			.OrderBy(x => x.item, ItemSorter.GetSortFunction(mode))
+			.OrderBy(x => x.item, sorter)
 			.ToArray();
 
 		int[] indices = new int[items.Length];
@@ -69,14 +67,16 @@ public class SortingCacheDictionary
 			indices[type] = item.IsAir ? -1 : i;
 		}
 
-		return new Entry(indices);
+		var entry = new Entry(indices);
+
+		cache[mode] = entry;
 	}
 
 	/// <summary>
 	///     Sorts the items based on the cached item order
 	/// </summary>
 	/// <returns>A sorted collection</returns>
-	public IOrderedEnumerable<Item> SortFuzzy(IEnumerable<Item> items, SortMode mode)
+	public IOrderedEnumerable<Item> SortFuzzy(IEnumerable<Item> items, int mode)
 	{
 		Entry entry = cache[mode];
 

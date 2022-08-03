@@ -59,6 +59,9 @@ namespace MagicStorage.UI {
 				choices.Add(choice);
 				Append(choice);
 			}
+
+			//Always reset the choice to the first option
+			Choice = 0;
 		}
 
 		private class ChoiceElement : UIElement {

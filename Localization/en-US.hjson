@@ -579,6 +579,14 @@ Mods: {
 				Label: "Search Bar Refreshes on Key Press"
 				Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
 			}
+			uiFavorites: {
+				Label: "Favorites Filter Button"
+				Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+			}
+			recipeBlacklist: {
+				Label: "Recipe Whitelist/Blacklist"
+				Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

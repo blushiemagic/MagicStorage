@@ -114,7 +114,9 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		public void DrawText() {
+		public override void Update(GameTime gameTime) {
+			base.Update(gameTime);
+
 			if (HoverSlot >= 0) {
 				var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
 				Item hoverItem = slot.StoredItem;

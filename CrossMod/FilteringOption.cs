@@ -126,7 +126,7 @@ namespace MagicStorage.CrossMod {
 		}
 	}
 
-	internal static class FilteringOptionLoader {
+	public static class FilteringOptionLoader {
 		public static class Definitions {
 			public static FilteringOption All { get; internal set; }
 			public static FilteringOption Melee { get; internal set; }

@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using System;
 using Terraria;
@@ -100,6 +101,8 @@ namespace MagicStorage
 			}
 
 			StorageGUI.RefreshItems();
+
+			MagicUI.OpenUI();
 		}
 
 		//Intended to only be used with StorageHeartAccessWrapper
@@ -120,6 +123,8 @@ namespace MagicStorage
 
 			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
+
+			MagicUI.CloseUI();
 		}
 
 		public Point16 ViewingStorage() => storageAccess;

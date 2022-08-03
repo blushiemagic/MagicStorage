@@ -59,6 +59,7 @@ namespace MagicStorage {
 			EnvironmentGUI.Initialize();
 
 			SortingOptionLoader.InitializeOrder();
+			FilteringOptionLoader.InitializeOrder();
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {
