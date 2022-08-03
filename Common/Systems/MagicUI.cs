@@ -24,7 +24,7 @@ public class MagicUI : ModSystem
 		uiInterface = new();
 		craftingUI = new CraftingUIState();
 		storageUI = new StorageUIState();
-		// environmentUI = new EnvironmentUIState();
+		environmentUI = new EnvironmentUIState();
 	}
 
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
