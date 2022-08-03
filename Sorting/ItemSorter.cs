@@ -6,7 +6,6 @@ using Terraria;
 using Terraria.GameContent.UI;
 using Terraria.ModLoader;
 using Terraria.ID;
-using Microsoft.Xna.Framework;
 using MagicStorage.CrossMod;
 
 namespace MagicStorage.Sorting
@@ -85,7 +84,7 @@ namespace MagicStorage.Sorting
 		}
 
 		internal static bool FilterBySearchText(Item item, string filter, bool modSearched = false) {
-			if (string.IsNullOrEmpty(filter))
+			if (string.IsNullOrWhiteSpace(filter))
 				return true;
 			
 			filter = filter.Trim();

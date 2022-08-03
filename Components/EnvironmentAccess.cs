@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System.Linq;
-using Terraria;
+﻿using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ObjectInteractions;
 using Terraria.ModLoader;

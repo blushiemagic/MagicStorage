@@ -95,6 +95,7 @@ namespace MagicStorage.UI {
 				base.MouseOut(evt);
 
 				hovering = false;
+				MagicUI.mouseText = "";
 			}
 
 			public override void Click(UIMouseEvent evt) {

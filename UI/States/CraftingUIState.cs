@@ -18,7 +18,7 @@ using Terraria.Map;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
-	internal class CraftingUIState : BaseStorageUI {
+	public sealed class CraftingUIState : BaseStorageUI {
 		private UIPanel recipePanel;
 		private UIText recipePanelHeader;
 		private UIText ingredientText;
@@ -353,6 +353,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		private void MoveRecipePanel() {
+			PanelTop = panel.Top.Pixels;
+			PanelLeft = panel.Left.Pixels;
+
 			recipeTop = panel.Top.Pixels;
 			recipeLeft = panel.Left.Pixels + panel.Width.Pixels;
 			recipePanel.Left.Set(recipeLeft, 0f);
@@ -366,6 +369,12 @@ namespace MagicStorage.UI.States {
 
 			try {
 				base.Update(gameTime);
+
+				if (!Main.mouseRight)
+					CraftingGUI.ResetSlotFocus();
+
+				if (CraftingGUI.slotFocus)
+					CraftingGUI.SlotFocusLogic();
 
 				CraftingGUI.ClampCraftAmount();
 
@@ -620,14 +629,17 @@ namespace MagicStorage.UI.States {
 			StorageGUI.OnRefresh += Refresh;
 
 			if (MagicStorageConfig.UseConfigFilter)
-				(pages["Crafting"] as RecipesPage).recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+				GetPage<RecipesPage>("Crafting").recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 		}
 
 		protected override void OnClose() {
 			StorageGUI.OnRefresh -= Refresh;
+
+			GetPage<RecipesPage>("Crafting").recipeScrollBar.ViewPosition = 0f;
+			storageScrollBar.ViewPosition = 0f;
 		}
 
-		private void Refresh() {
+		public void Refresh() {
 			ingredientZone.SetItemsAndContexts(CraftingGUI.selectedRecipe?.requiredItem.Count ?? 0, CraftingGUI.GetIngredient);
 
 			storageZone.SetItemsAndContexts(CraftingGUI.storageItems?.Count ?? 0, GetStorage);
@@ -672,12 +684,10 @@ namespace MagicStorage.UI.States {
 
 				CraftingUIState parent = parentUI as CraftingUIState;
 
-				var basePanel = parent.panel.viewArea;
-
 				UIElement topBar = new();
 				topBar.Width.Set(0f, 1f);
 				topBar.Height.Set(32f, 0f);
-				basePanel.Append(topBar);
+				Append(topBar);
 
 				recipeButtons = new(StorageGUI.RefreshItems, 21);
 				InitFilterButtons();
@@ -693,7 +703,7 @@ namespace MagicStorage.UI.States {
 
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 				stationText.Top.Set(76f, 0f);
-				basePanel.Append(stationText);
+				Append(stationText);
 
 				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
@@ -742,7 +752,7 @@ namespace MagicStorage.UI.States {
 				stationZone.Width.Set(0f, 1f);
 				stationZone.Top.Set(100f, 0f);
 				
-				basePanel.Append(stationZone);
+				Append(stationZone);
 
 				recipeZone = new(CraftingGUI.InventoryScale);
 
@@ -789,7 +799,7 @@ namespace MagicStorage.UI.States {
 				recipeZone.Width.Set(0f, 1f);
 				recipeZone.Top.Set(100 + stationZone.ZoneHeight, 0f);
 				recipeZone.Height.Set(-(100 + stationZone.ZoneHeight), 1f);
-				basePanel.Append(recipeZone);
+				Append(recipeZone);
 
 				recipeScrollBar = new();
 				recipeScrollBar.Left.Set(-20f, 1f);
@@ -799,7 +809,7 @@ namespace MagicStorage.UI.States {
 				bottomBar.Width.Set(0f, 1f);
 				bottomBar.Height.Set(32f, 0f);
 				bottomBar.Top.Set(-15f, 1f);
-				basePanel.Append(bottomBar);
+				Append(bottomBar);
 
 				capacityText = new UIText("Items");
 				capacityText.Left.Set(6f, 0f);

@@ -1,5 +1,4 @@
-﻿using MagicStorage.Components;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MagicStorage {
 	public static class EnvironmentModuleLoader {

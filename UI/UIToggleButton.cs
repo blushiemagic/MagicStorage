@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Localization;
-using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.UI

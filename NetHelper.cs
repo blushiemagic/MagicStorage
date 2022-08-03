@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using MagicStorage.Components;
-using MagicStorage.Edits;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using System.Linq;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 

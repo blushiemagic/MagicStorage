@@ -9,19 +9,13 @@ using MagicStorage.Sorting;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
-using Terraria.GameContent;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
-using Terraria.Map;
 using Terraria.ModLoader;
-using Terraria.UI;
 
 namespace MagicStorage
 {
@@ -884,7 +878,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static void ResetSlotFocus()
+		internal static void ResetSlotFocus()
 		{
 			slotFocus = false;
 			rightClickTimer = 0;

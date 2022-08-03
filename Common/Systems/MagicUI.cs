@@ -23,7 +23,7 @@ public class MagicUI : ModSystem
 
 		uiInterface = new();
 		craftingUI = new CraftingUIState();
-		// storageUI = new StorageUIState();
+		storageUI = new StorageUIState();
 		// environmentUI = new EnvironmentUIState();
 	}
 
@@ -38,7 +38,6 @@ public class MagicUI : ModSystem
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
 
 						Main.instance.MouseText(mouseText);
-						mouseText = "";
 					}
 
 					return true;
