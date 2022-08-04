@@ -957,7 +957,7 @@ namespace MagicStorage
 
 			if (sender == Main.myPlayer) {
 				if (sold > 0 && coppersEarned > 0) {
-					// coins = [ platinum, gold, silver, copper ]
+					// coins = [ copper, silver, gold, platinum ]
 					int[] coins = Utils.CoinsSplit(coppersEarned);
 
 					StringBuilder coinsReport = new();

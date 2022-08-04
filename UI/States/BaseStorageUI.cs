@@ -47,15 +47,15 @@ namespace MagicStorage.UI.States {
 		public override void OnActivate() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 
+			panel = new(true, GetMenuOptions().ToArray());
+
+			panel.OnMenuClose += Close;
+
 			PanelTop = Main.instance.invBottom + 60;
 			PanelLeft = 20f;
 			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
 			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
 			PanelHeight = Main.screenHeight - PanelTop;
-
-			panel = new(true, GetMenuOptions().ToArray());
-
-			panel.OnMenuClose += Close;
 
 			pages = new();
 

@@ -487,7 +487,7 @@ namespace MagicStorage.UI.States {
 						int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
 
 						if (sold > 0 && coppersEarned > 0) {
-							// coins = [ platinum, gold, silver, copper ]
+							// coins = [ copper, silver, gold, platinum ]
 							int[] coins = Utils.CoinsSplit(coppersEarned);
 
 							StringBuilder coinsReport = new();
