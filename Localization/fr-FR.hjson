@@ -426,6 +426,7 @@ Mods: {
 			# Crafting: "Crafting",
 			# Storage: "Storage",
 			# Controls: "Controls"  # StorageGUI page for the extra controls
+			# Modules: "Modules"    # EnvironmentGUI page for the modules
 		}
 
 		Config: {

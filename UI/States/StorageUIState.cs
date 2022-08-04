@@ -32,7 +32,7 @@ namespace MagicStorage.UI.States {
 
 		protected override BaseStorageUIPage InitPage(string page)
 			=> page switch {
-				"Crafting" => new StoragePage(this),
+				"Storage" => new StoragePage(this),
 				"Sorting" => new SortingPage(this),
 				"Filtering" => new FilteringPage(this),
 				"Controls" => new ControlsPage(this),
