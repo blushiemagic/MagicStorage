@@ -43,7 +43,7 @@ namespace MagicStorage.Components
 
 		//metadata
 		private HashSet<ItemData> hasSpaceInStack = new();
-		private List<Item> items = new();
+		internal List<Item> items = new();  //Exposed to make "selling" items easier
 		internal bool receiving;
 
 		public int Capacity

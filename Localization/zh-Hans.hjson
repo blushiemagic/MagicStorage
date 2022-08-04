@@ -400,7 +400,31 @@ Mods: {
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
 
-		Filters: {
+		StorageGUI: {
+			# ForceRefreshButton: "Force UI refresh"
+			# CompactCoinsButton: "Compact Coins"
+			# DestroyUnloadedButton: "Delete Unloaded Items"
+
+			# SellDuplicatesHeader: "Sell Duplicates"
+			# SellDuplicatesButton: "Sell"
+
+			# SellDuplicatesMenu: {
+				# NoPrefix: "Sell Duplicates with No Prefix"
+				# KeepMostValue: "Keep Most Expensive"
+				# KeepLeastValue: "Keep Least Expensive"
+			}
+		}
+
+		EnvironmentGUI: {
+			# EntryDisabledDefault: This module is currently disabled.
+			# NoModules:
+			# '''
+			# No Environment Simulator modules have been detected.
+			# Other mods will need to add some for them to appear here.
+			# '''
+		}
+
+		FilteringOption: {
 			All: "筛选全部"
 			Weapons: "筛选武器"
 			Tools: "筛选工具"
@@ -417,15 +441,31 @@ Mods: {
 			Tiles: "筛选放置物"
 			Misc: "筛选杂项"
 			Recent: "筛选最近存入的物品"
+			# WeaponsOther: "Filter Other Weapons"
+			# Unstackables: "Filter Unstackables"
+			# Stackables: "Filter Stackables"
+			# NotFullyResearched: "Filter Items Not Fully Researched"
+			# FullyResearched: "Filter Items Fully Researched"
 		}
 
-		Sort: {
+		SortingOption: {
 			Default: "默认排序"
 			ID: "按ID排序"
 			Name: "按名称排序"
 			Stack: "按堆叠量排序"
 			Value: "按价格排序"
 			Dps: "按DPS排序"
+			# QuantityAbsolute: "Sort by Quantity"
+			# QuantityRatio: "Sort by Quantity Ratio"
+			# Damage: "Sort by Damage"
+		}
+
+		UIPages: {
+			# Sorting: "Sorting",
+			# Filtering: "Filtering",
+			# Crafting: "Crafting",
+			# Storage: "Storage",
+			# Controls: "Controls"  # StorageGUI page for the extra controls
 		}
 
 		Config: {
@@ -462,6 +502,22 @@ Mods: {
 			useOldCraftMenu: {
 				# Label: "Use old Craft buttons"
 				# Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+			}
+			allowItemDataDebug: {
+				# Label: "Item debug information"
+				# Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
+			}
+			searchBarRefreshOnKey: {
+				# Label: "Search Bar Refreshes on Key Press"
+				# Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+			}
+			uiFavorites: {
+				# Label: "Favorites Filter Button"
+				# Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+			}
+			recipeBlacklist: {
+				# Label: "Recipe Whitelist/Blacklist"
+				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
 			}
 
 			AllowAutomatonToMoveIn: {

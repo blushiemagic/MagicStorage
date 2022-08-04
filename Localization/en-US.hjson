@@ -497,6 +497,21 @@ Mods: {
 		DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
 
+		StorageGUI: {
+			ForceRefreshButton: "Force UI refresh"
+			CompactCoinsButton: "Compact Coins"
+			DestroyUnloadedButton: "Delete Unloaded Items"
+
+			SellDuplicatesHeader: "Sell Duplicates"
+			SellDuplicatesButton: "Sell"
+
+			SellDuplicatesMenu: {
+				NoPrefix: "Sell Duplicates with No Prefix"
+				KeepMostValue: "Keep Most Expensive"
+				KeepLeastValue: "Keep Least Expensive"
+			}
+		}
+
 		EnvironmentGUI: {
 			EntryDisabledDefault: This module is currently disabled.
 			NoModules:
@@ -539,6 +554,14 @@ Mods: {
 			QuantityAbsolute: "Sort by Quantity"
 			QuantityRatio: "Sort by Quantity Ratio"
 			Damage: "Sort by Damage"
+		}
+
+		UIPages: {
+			Sorting: "Sorting",
+			Filtering: "Filtering",
+			Crafting: "Crafting",
+			Storage: "Storage",
+			Controls: "Controls"  # StorageGUI page for the extra controls
 		}
 
 		Config: {

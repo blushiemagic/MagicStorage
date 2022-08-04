@@ -506,6 +506,7 @@ namespace MagicStorage.UI.States {
 
 			craftButton.OnMouseOut += (evt, e) => hoveringCraftButton = false;
 
+			InitButtonEvents(craftButton);
 			InitAmountButtonEvents(craftP1);
 			InitAmountButtonEvents(craftP10);
 			InitAmountButtonEvents(craftP100);
@@ -517,18 +518,22 @@ namespace MagicStorage.UI.States {
 		}
 
 		private static void InitAmountButtonEvents(UICraftAmountAdjustment button) {
+			button.OnClick += (evt, e) => {
+				UICraftAmountAdjustment obj = e as UICraftAmountAdjustment;
+
+				CraftingGUI.ClickAmountButton(obj.Amount, obj.AmountIsOffset);
+			};
+
+			InitButtonEvents(button);
+		}
+
+		private static void InitButtonEvents(UITextPanel<LocalizedText> button) {
 			button.OnMouseOver += (evt, e) => {
 				if (CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))
 					(e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 			};
 
 			button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
-
-			button.OnClick += (evt, e) => {
-				UICraftAmountAdjustment obj = e as UICraftAmountAdjustment;
-
-				CraftingGUI.ClickAmountButton(obj.Amount, obj.AmountIsOffset);
-			};
 
 			button.OnUpdate += e => {
 				if (!CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) || !CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))

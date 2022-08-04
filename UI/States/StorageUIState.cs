@@ -6,12 +6,17 @@ using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
@@ -22,6 +27,7 @@ namespace MagicStorage.UI.States {
 			yield return "Storage";
 			yield return "Sorting";
 			yield return "Filtering";
+			yield return "Controls";
 		}
 
 		protected override BaseStorageUIPage InitPage(string page)
@@ -29,6 +35,7 @@ namespace MagicStorage.UI.States {
 				"Crafting" => new StoragePage(this),
 				"Sorting" => new SortingPage(this),
 				"Filtering" => new FilteringPage(this),
+				"Controls" => new ControlsPage(this),
 				_ => throw new ArgumentException("Unknown page: " + page, nameof(page))
 			};
 
@@ -317,6 +324,327 @@ namespace MagicStorage.UI.States {
 				}
 
 				return item;
+			}
+		}
+
+		public class ControlsPage : BaseStorageUIPage {
+			public const int SellNoPrefixItems = 0;
+			public const int SellAllExceptMostExpensive = 1;
+			public const int SellAllExceptLeastExpensive = 2;
+
+			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloaded;
+
+			private UIList list;
+			private UIScrollbar scroll;
+
+			internal NewUISlotZone sellDuplicatesZone;
+			public List<StorageUISellMenuToggleLabel> sellMenuLabels;
+
+			public int SellMenuChoice { get; private set; }
+
+			public ControlsPage(BaseStorageUI parent) : base(parent, "Controls") {
+				OnPageSelected += () => SellMenuChoice = 0;
+			}
+
+			public override void OnInitialize() {
+				list = new();
+				list.SetPadding(0);
+				list.Width.Set(-20, 1f);
+				list.Height.Set(0, 0.9f);
+				list.Left.Set(20, 0);
+				list.Top.Set(0, 0.05f);
+				Append(list);
+
+				scroll = new();
+				scroll.Width.Set(20, 0);
+				scroll.Height.Set(0, 0.825f);
+				scroll.Left.Set(0, 0.95f);
+				scroll.Top.Set(0, 0.1f);
+				scroll.SetView(viewSize: 1f, maxViewSize: 2f);
+
+				list.SetScrollbar(scroll);
+				list.Append(scroll);
+				list.ListPadding = 10;
+
+				float top = 0;
+
+				forceRefresh = new(Language.GetText("Mods.MagicStorage.StorageGUI.ForceRefreshButton"));
+
+				forceRefresh.OnClick += (evt, e) => StorageGUI.needRefresh = true;
+
+				InitButtonEvents(forceRefresh);
+
+				forceRefresh.Top.Set(top, 0f);
+				list.Add(forceRefresh);
+
+				top += forceRefresh.Height.Pixels + 6;
+
+				compactCoins = new(Language.GetText("Mods.MagicStorage.StorageGUI.CompactCoinsButton"));
+
+				compactCoins.OnClick += (evt, e) => {
+					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
+						return;
+
+					if (Main.netMode == NetmodeID.SinglePlayer)
+						heart.compactCoins = true;
+					else
+						NetHelper.SendCoinCompactRequest(heart.Position);
+				};
+
+				InitButtonEvents(compactCoins);
+
+				compactCoins.Top.Set(top, 0f);
+				list.Add(compactCoins);
+
+				top += compactCoins.Height.Pixels + 6;
+
+				deleteUnloaded = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedButton"));
+
+				deleteUnloaded.OnClick += (evt, e) => {
+					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
+						return;
+
+					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>());
+				};
+
+				InitButtonEvents(deleteUnloaded);
+
+				deleteUnloaded.Top.Set(top, 0f);
+				list.Add(deleteUnloaded);
+
+				top += deleteUnloaded.Height.Pixels + 6;
+
+				UIText sellDuplicatesLabel = new(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesHeader"), 1.1f);
+				sellDuplicatesLabel.Top.Set(top, 0f);
+				Append(sellDuplicatesLabel);
+
+				UIHorizontalSeparator separator = new();
+				separator.Top.Set(top + 30, 0f);
+				separator.Width.Set(0, 1f);
+				Append(separator);
+
+				top += sellDuplicatesLabel.Height.Pixels + 40;
+
+				string sellMenu = "Mods.MagicStorage.StorageGUI.SellDuplicatesMenu.";
+
+				string[] names = new[] {
+					Language.GetTextValue(sellMenu + "NoPrefix"),
+					Language.GetTextValue(sellMenu + "KeepMostValue"),
+					Language.GetTextValue(sellMenu + "KeepLeastValue")
+				};
+
+				sellMenuLabels = new();
+				int index = 0;
+				foreach (var name in names) {
+					StorageUISellMenuToggleLabel label = new(name, index);
+
+					label.OnClick += (evt, e) => {
+						StorageUISellMenuToggleLabel obj = e as StorageUISellMenuToggleLabel;
+
+						int whichIsOn = -1;
+
+						foreach (var other in sellMenuLabels) {
+							if (other.IsOn) {
+								whichIsOn = other.Index;
+								break;
+							}
+						}
+
+						if (whichIsOn == -1) {
+							//Set obj back to "on" since the choice didn't change
+							obj.SetState(true);
+						} else if (whichIsOn != obj.Index) {
+							//Set all to "off" except for obj
+							foreach (var other in sellMenuLabels) {
+								if (other.Index != obj.Index)
+									other.SetState(false);
+							}
+						}
+
+						SellMenuChoice = obj.Index;
+					};
+
+					label.Top.Set(top, 0f);
+					label.Height.Set(20, 0f);
+					label.Width.Set(0, 0.6f);
+					list.Append(label);
+
+					sellMenuLabels.Add(label);
+
+					top += label.Height.Pixels + 6;
+					index++;
+				}
+
+				UITextPanel<LocalizedText> sellMenuButton = new(Language.GetText("Mods.MagiCStorage.StorageGUI.SellDuplicatesButton"));
+
+				sellMenuButton.OnClick += (evt, e) => {
+					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
+						return;
+
+					if (Main.netMode == NetmodeID.SinglePlayer) {
+						DoSell(heart, SellMenuChoice, out long coppersEarned, out var withdrawnItems);
+
+						int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
+
+						if (sold > 0 && coppersEarned > 0) {
+							// coins = [ platinum, gold, silver, copper ]
+							int[] coins = Utils.CoinsSplit(coppersEarned);
+
+							StringBuilder coinsReport = new();
+
+							if (coins[3] > 0)
+								coinsReport.Append($"[i/s{coins[3]}:{ItemID.PlatinumCoin}]");
+							if (coins[2] > 0)
+								coinsReport.Append($" [i/s{coins[2]}:{ItemID.GoldCoin}]");
+							if (coins[1] > 0)
+								coinsReport.Append($" [i/s{coins[1]}:{ItemID.SilverCoin}]");
+							if (coins[0] > 0)
+								coinsReport.Append($" [i/s{coins[0]}:{ItemID.CopperCoin}]");
+
+							Main.NewText($"{sold} duplicates were sold for {coinsReport.ToString().Trim()}");
+
+							if (coins[3] > 0)
+								heart.DepositItem(new(ItemID.PlatinumCoin, coins[3]));
+							if (coins[2] > 0)
+								heart.DepositItem(new(ItemID.GoldCoin, coins[2]));
+							if (coins[1] > 0)
+								heart.DepositItem(new(ItemID.SilverCoin, coins[1]));
+							if (coins[0] > 0)
+								heart.DepositItem(new(ItemID.CopperCoin, coins[0]));
+
+							heart.ResetCompactStage();
+						} else if (sold > 0 && coppersEarned == 0)
+							Main.NewText($"{sold} duplicates were destroyed due to having no value");
+						else
+							Main.NewText("No duplicates were sold");
+					} else
+						NetHelper.RequestDuplicateSelling(heart.Position, SellMenuChoice);
+				};
+
+				InitButtonEvents(sellMenuButton);
+
+				sellMenuButton.Top.Set(top, 0f);
+				list.Add(sellMenuButton);
+			}
+
+			private static void InitButtonEvents(UITextPanel<LocalizedText> button) {
+				button.OnMouseOver += (evt, e) => (e as UIPanel).BackgroundColor = new Color(73, 94, 171);
+
+				button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			}
+
+			private delegate bool SelectDuplicate(ref SourcedItem item, ref SourcedItem check, out bool swapHappened);
+
+			private class SourcedItem {
+				public TEStorageUnit source;
+				public Item item;
+				public int indexInSource;
+
+				public SourcedItem(TEStorageUnit source, Item item, int indexInSource) {
+					this.source = source;
+					this.item = item;
+					this.indexInSource = indexInSource;
+				}
+			}
+
+			private class DuplicateSellingContext {
+				public SourcedItem keep;
+				public List<SourcedItem> duplicates = new();
+			}
+
+			internal static void DoSell(TEStorageHeart heart, int sellOption, out long coppersEarned, out Dictionary<TEStorageUnit, List<int>> withdrawnItems) {
+				SelectDuplicate itemEvaluation = sellOption switch {
+					SellNoPrefixItems => SellNoPrefix,
+					SellAllExceptMostExpensive => SellExceptMostExpensive,
+					SellAllExceptLeastExpensive => SellExceptLeastExpensive,
+					_ => throw new ArgumentOutOfRangeException(nameof(sellOption))
+				};
+
+				//Ignore Creative Storage Units
+				IEnumerable<SourcedItem> items = heart.GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems().Select((i, index) => new SourcedItem(s, i, index)));
+
+				//Filter duplicates to sell
+				Dictionary<int, DuplicateSellingContext> duplicatesToSell = new();
+
+				foreach (SourcedItem sourcedItem in items) {
+					Item item = sourcedItem.item;
+
+					if (item.IsAir || item.maxStack > 1)  //Only sell duplicates of unstackables
+						continue;
+
+					if (!duplicatesToSell.TryGetValue(item.type, out var context))
+						context = duplicatesToSell[item.type] = new() { keep = sourcedItem };
+					else if (Utility.AreStrictlyEqual(context.keep.item, item)) {
+						SourcedItem check = sourcedItem;
+
+						if (itemEvaluation(ref context.keep, ref check, out bool swapHappened)) {
+							if (swapHappened)
+								context.duplicates.Remove(context.keep);
+
+							context.duplicates.Add(check);
+						}
+					}
+				}
+
+				//Sell the duplicates
+				NPC dummy = new();
+
+				HashSet<Point16> unitsUpdated = new();
+				withdrawnItems = new();
+
+				int platinum = 0, gold = 0, silver = 0, copper = 0;
+
+				foreach (SourcedItem duplicate in duplicatesToSell.Values.Where(c => c.duplicates.Count > 0).SelectMany(c => c.duplicates)) {
+					if (!PlayerLoader.CanSellItem(Main.LocalPlayer, dummy, Array.Empty<Item>(), duplicate.item))
+						continue;
+
+					int value = duplicate.item.value;
+
+					// coins = [ platinum, gold, silver, copper ]
+					int[] coins = Utils.CoinsSplit(value);
+					platinum += coins[3];
+					gold += coins[2];
+					silver += coins[1];
+					copper += coins[0];
+
+					if (unitsUpdated.Add(duplicate.source.Position))
+						withdrawnItems.Add(duplicate.source, new());
+
+					withdrawnItems[duplicate.source].Add(duplicate.indexInSource);
+
+					duplicate.source.items.Remove(duplicate.item);
+
+					PlayerLoader.PostSellItem(Main.LocalPlayer, dummy, Array.Empty<Item>(), duplicate.item);
+				}
+
+				coppersEarned = platinum * 1000000L + gold * 10000 + silver * 100 + copper;
+			}
+
+			private static bool SellNoPrefix(ref SourcedItem item, ref SourcedItem check, out bool swapHappened) {
+				swapHappened = false;
+				return check.item.prefix == 0;
+			}
+
+			private static bool SellExceptMostExpensive(ref SourcedItem item, ref SourcedItem check, out bool swapHappened) {
+				swapHappened = false;
+
+				if (check.item.value > item.item.value) {
+					Utils.Swap(ref item, ref check);
+					swapHappened = true;
+				}
+
+				return true;
+			}
+
+			private static bool SellExceptLeastExpensive(ref SourcedItem item, ref SourcedItem check, out bool swapHappened) {
+				swapHappened = false;
+
+				if (check.item.value < item.item.value) {
+					Utils.Swap(ref item, ref check);
+					swapHappened = true;
+				}
+
+				return true;
 			}
 		}
 	}

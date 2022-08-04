@@ -17,7 +17,8 @@ namespace MagicStorage.Components
 			Withdraw,
 			WithdrawToInventory,
 			Deposit,
-			DepositAll
+			DepositAll,
+			WithdrawAllAndDestroy  //Withdraws without actually putting the items in the player's inventory, effectively destroying the items
 		}
 
 		private class NetOperation
@@ -52,7 +53,7 @@ namespace MagicStorage.Components
 		}
 
 		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
-		bool compactCoins = false;
+		internal bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private int compactStage;
 		public HashSet<Point16> remoteAccesses = new();
@@ -176,6 +177,15 @@ namespace MagicStorage.Components
 							packet.Send(op.client);
 						}
 					}
+					else if (op.type == Operation.WithdrawAllAndDestroy)
+					{
+						if (HasItem(op.item, true))
+						{
+							ModPacket packet = PrepareServerResult(op.type);
+							packet.Write(op.item.type);
+							packet.Send();
+						}
+					}
 				}
 			}
 			return networkRefresh;
@@ -204,6 +214,11 @@ namespace MagicStorage.Components
 					items.Add(item);
 				}
 				clientOpQ.Enqueue(new NetOperation(op, items, client));
+			}
+			else if (op == Operation.WithdrawAllAndDestroy)
+			{
+				int type = reader.ReadInt32();
+				clientOpQ.Enqueue(new NetOperation(op, new Item(type), client));
 			}
 		}
 
@@ -406,10 +421,6 @@ namespace MagicStorage.Components
 		public void DepositItem(Item toDeposit)
 		{
 			int oldStack = toDeposit.stack;
-			if (toDeposit.IsACoin)
-			{
-				compactCoins = true;
-			}
 			int remember = toDeposit.type;
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				if (!storageUnit.Inactive && storageUnit.HasSpaceInStackFor(toDeposit))
@@ -535,6 +546,38 @@ namespace MagicStorage.Components
 			var item = Withdraw(lookFor, keepOneIfFavorite);
 
 			return item;
+		}
+
+		internal void WithdrawManyAndDestroy(int type, bool net = false) {
+			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = PrepareClientRequest(Operation.WithdrawAllAndDestroy);
+				packet.Write(type);
+				packet.Send();
+
+				return;
+			}
+
+			Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
+
+			if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
+				//Clone of Withdraw, but it will keep trying to remove items, even if any were found
+				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits()) {
+					lookFor = lookForOrig;
+					if (storageUnit.HasItem(lookFor, true)) {
+						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
+
+						if (!withdrawn.IsAir) {
+							if (result.IsAir)
+								result = withdrawn;
+							else
+								result.stack += withdrawn.stack;
+						}
+					}
+				}
+
+				if (result.stack > 0)
+					ResetCompactStage();
+			}
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
