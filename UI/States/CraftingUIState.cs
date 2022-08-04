@@ -645,6 +645,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		public void Refresh() {
+			if (Main.gameMenu)
+				return;
+
 			ingredientZone.SetItemsAndContexts(CraftingGUI.selectedRecipe?.requiredItem.Count ?? 0, CraftingGUI.GetIngredient);
 
 			storageZone.SetItemsAndContexts(CraftingGUI.storageItems?.Count ?? 0, GetStorage);

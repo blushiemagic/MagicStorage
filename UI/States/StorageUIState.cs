@@ -69,6 +69,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		public void Refresh() {
+			if (Main.gameMenu)
+				return;
+
 			GetPage<StoragePage>("Storage").Refresh();
 		}
 
