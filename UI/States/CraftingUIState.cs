@@ -890,6 +890,9 @@ namespace MagicStorage.UI.States {
 			}
 
 			private void UpdateZones() {
+				if (Main.gameMenu)
+					return;
+
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
 				int stationCount = CraftingGUI.GetCraftingStations().Count;
