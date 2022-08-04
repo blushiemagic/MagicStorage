@@ -62,7 +62,7 @@ namespace MagicStorage.CrossMod {
 
 		public override string Texture => "MagicStorage/Assets/FilterMelee";
 
-		public override string Name => "WeaponsMelee";
+		public override string Name => "WeaponsSummon";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
