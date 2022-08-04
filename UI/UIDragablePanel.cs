@@ -25,7 +25,7 @@ namespace MagicStorage.UI {
 
 		public event Action OnRecalculate;
 
-		public UIDragablePanel(bool stopItemUse, params string[] menuOptions) {
+		public UIDragablePanel(bool stopItemUse, IEnumerable<(string key, string text)> menuOptions) {
 			StopItemUse = stopItemUse;
 
 			SetPadding(0);
@@ -59,9 +59,9 @@ namespace MagicStorage.UI {
 
 			float left = 0;
 
-			for (int i = 0; i < menuOptions.Length; i++) {
+			foreach ((string key, string text) in menuOptions) {
 				UITextPanel<string> menu;
-				menus.Add(menuOptions[i], menu = new(menuOptions[i]));
+				menus.Add(key, menu = new(text));
 				menu.SetPadding(7);
 				menu.Left.Set(left, 0f);
 				menu.BackgroundColor.A = 255;

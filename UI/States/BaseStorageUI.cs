@@ -48,7 +48,7 @@ namespace MagicStorage.UI.States {
 		public override void OnActivate() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 
-			panel = new(true, GetMenuOptions().Select(p => Language.GetTextValue("Mods.MagicStorage.UIPages." + p)).ToArray());
+			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetTextValue("Mods.MagicStorage.UIPages." + p))));
 
 			panel.OnMenuClose += Close;
 
@@ -60,8 +60,8 @@ namespace MagicStorage.UI.States {
 
 			pages = new();
 
-			foreach (UITextPanel<string> page in panel.menus.Values)
-				pages[page.Text] = InitPage(page.Text);
+			foreach (string key in panel.menus.Keys)
+				pages[key] = InitPage(key);
 
 			PostInitializePages();
 
