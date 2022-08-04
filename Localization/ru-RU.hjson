@@ -368,7 +368,7 @@ Mods: {
 			# SellDuplicatesHeader: "Sell Duplicates"
 			# SellDuplicatesButton: "Sell"
 
-			# SellDuplicatesMenu: {
+			SellDuplicatesMenu: {
 				# NoPrefix: "Sell Duplicates with No Prefix"
 				# KeepMostValue: "Keep Most Expensive"
 				# KeepLeastValue: "Keep Least Expensive"
