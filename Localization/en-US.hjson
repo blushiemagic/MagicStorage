@@ -501,6 +501,7 @@ Mods: {
 			ForceRefreshButton: "Force UI refresh"
 			CompactCoinsButton: "Compact Coins"
 			DestroyUnloadedButton: "Delete Unloaded Items"
+			DestroyUnloadedDataButton: "Delete Unloaded Data"
 
 			SellDuplicatesHeader: "Sell Duplicates"
 			SellDuplicatesButton: "Sell"

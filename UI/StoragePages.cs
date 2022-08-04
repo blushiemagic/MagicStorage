@@ -2,6 +2,7 @@
 using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
+using Terraria;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
@@ -33,6 +34,9 @@ namespace MagicStorage.UI {
 		}
 
 		private void InitOptionButtons() {
+			if (Main.gameMenu)
+				return;
+
 			foreach (TElement button in buttons)
 				button.Remove();
 

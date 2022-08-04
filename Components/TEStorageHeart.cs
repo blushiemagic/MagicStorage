@@ -7,6 +7,8 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
+using System.Reflection;
+using Terraria.ModLoader.Default;
 
 namespace MagicStorage.Components
 {
@@ -18,7 +20,8 @@ namespace MagicStorage.Components
 			WithdrawToInventory,
 			Deposit,
 			DepositAll,
-			WithdrawAllAndDestroy  //Withdraws without actually putting the items in the player's inventory, effectively destroying the items
+			WithdrawAllAndDestroy,  //Withdraws without actually putting the items in the player's inventory, effectively destroying the items
+			DeleteUnloadedGlobalItemData
 		}
 
 		private class NetOperation
@@ -179,12 +182,21 @@ namespace MagicStorage.Components
 					}
 					else if (op.type == Operation.WithdrawAllAndDestroy)
 					{
+						WithdrawManyAndDestroy(op.item.type);
+
 						if (HasItem(op.item, true))
 						{
 							ModPacket packet = PrepareServerResult(op.type);
 							packet.Write(op.item.type);
 							packet.Send();
 						}
+					}
+					else if (op.type == Operation.DeleteUnloadedGlobalItemData)
+					{
+						DestroyUnloadedGlobalItemData();
+
+						ModPacket packet = PrepareServerResult(op.type);
+						packet.Send();
 					}
 				}
 			}
@@ -219,6 +231,10 @@ namespace MagicStorage.Components
 			{
 				int type = reader.ReadInt32();
 				clientOpQ.Enqueue(new NetOperation(op, new Item(type), client));
+			}
+			else if (op == Operation.DeleteUnloadedGlobalItemData)
+			{
+				clientOpQ.Enqueue(new NetOperation(op, (Item)null, client));
 			}
 		}
 
@@ -553,7 +569,6 @@ namespace MagicStorage.Components
 				ModPacket packet = PrepareClientRequest(Operation.WithdrawAllAndDestroy);
 				packet.Write(type);
 				packet.Send();
-
 				return;
 			}
 
@@ -561,7 +576,7 @@ namespace MagicStorage.Components
 
 			if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
 				//Clone of Withdraw, but it will keep trying to remove items, even if any were found
-				foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits()) {
+				foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
 					lookFor = lookForOrig;
 					if (storageUnit.HasItem(lookFor, true)) {
 						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
@@ -578,6 +593,37 @@ namespace MagicStorage.Components
 				if (result.stack > 0)
 					ResetCompactStage();
 			}
+		}
+
+		private static readonly FieldInfo Item_globalItems = typeof(Item).GetField("globalItems", BindingFlags.NonPublic | BindingFlags.Instance);
+
+		internal void DestroyUnloadedGlobalItemData(bool net = false) {
+			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = PrepareClientRequest(Operation.DeleteUnloadedGlobalItemData);
+				packet.Send();
+				return;
+			}
+
+			bool didSomething = false;
+
+			foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
+				//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
+				if (item is null || item.IsAir || item.ModItem is UnloadedItem)
+					continue;
+
+				if (Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
+					continue;
+
+				Instanced<GlobalItem>[] array = globalItems.Where(i => i.Instance is not UnloadedGlobalItem).ToArray();
+
+				if (array.Length != globalItems.Length) {
+					Item_globalItems.SetValue(item, array);
+					didSomething = true;
+				}
+			}
+
+			if (didSomething)
+				ResetCompactStage();
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)

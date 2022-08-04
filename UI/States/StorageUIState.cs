@@ -335,7 +335,7 @@ namespace MagicStorage.UI.States {
 			public const int SellAllExceptMostExpensive = 1;
 			public const int SellAllExceptLeastExpensive = 2;
 
-			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloaded;
+			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
 			private UIList list;
 			private UIScrollbar scroll;
@@ -401,21 +401,37 @@ namespace MagicStorage.UI.States {
 
 				top += compactCoins.Height.Pixels + 6;
 
-				deleteUnloaded = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedButton"));
+				deleteUnloadedItems = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedButton"));
 
-				deleteUnloaded.OnClick += (evt, e) => {
+				deleteUnloadedItems.OnClick += (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
 					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>());
 				};
 
-				InitButtonEvents(deleteUnloaded);
+				InitButtonEvents(deleteUnloadedItems);
 
-				deleteUnloaded.Top.Set(top, 0f);
-				list.Add(deleteUnloaded);
+				deleteUnloadedItems.Top.Set(top, 0f);
+				list.Add(deleteUnloadedItems);
 
-				top += deleteUnloaded.Height.Pixels + 6;
+				top += deleteUnloadedItems.Height.Pixels + 6;
+
+				deleteUnloadedData = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedDataButton"));
+
+				deleteUnloadedData.OnClick += (evt, e) => {
+					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
+						return;
+
+					heart.DestroyUnloadedGlobalItemData();
+				};
+
+				InitButtonEvents(deleteUnloadedData);
+
+				deleteUnloadedData.Top.Set(top, 0f);
+				list.Add(deleteUnloadedData);
+
+				top += deleteUnloadedData.Height.Pixels + 6;
 
 				UIText sellDuplicatesLabel = new(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesHeader"), 1.1f);
 				sellDuplicatesLabel.Top.Set(top, 0f);

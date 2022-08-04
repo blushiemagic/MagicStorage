@@ -341,6 +341,12 @@ namespace MagicStorage
 
 				heart.WithdrawManyAndDestroy(type, net: true);
 			}
+			else if (op == TEStorageHeart.Operation.DeleteUnloadedGlobalItemData)
+			{
+				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+
+				heart.DestroyUnloadedGlobalItemData(net: true);
+			}
 
 			Report(true, MessageType.ServerStorageResult + " packet received by client " + Main.myPlayer);
 			Report(false, "Operation: " + op);
