@@ -34,10 +34,6 @@ namespace MagicStorage.Sorting
 			if (sortMode == SortingOptionLoader.Definitions.Value.Type) {
 				//Ignore sorting by type
 				return orderedItems.ThenBy(x => x.value);
-			} else if (sortMode == SortingOptionLoader.Definitions.DPS.Type) {
-				//Sort again by DPS due to it using variable item data
-				var func = SortingOptionLoader.Definitions.DPS.Sorter;
-				return orderedItems.ThenBy(x => x, func).ThenBy(x => x.value);
 			}
 
 			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);

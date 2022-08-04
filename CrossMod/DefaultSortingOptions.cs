@@ -49,17 +49,6 @@ namespace MagicStorage.CrossMod {
 	}
 
 	[Autoload(false)]
-	public sealed class SortDPS : SortingOption {
-		public override IComparer<Item> Sorter => CompareDps.Instance;
-
-		public override string Texture => "MagicStorage/Assets/SortNumber";
-
-		public override string Name => "Dps";
-
-		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
-	}
-
-	[Autoload(false)]
 	public sealed class SortQuantityAbsolute : SortingOption {
 		public override IComparer<Item> Sorter => CompareQuantityAbsolute.Instance;
 
