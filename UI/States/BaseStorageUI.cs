@@ -68,6 +68,10 @@ namespace MagicStorage.UI.States {
 			Append(panel);
 
 			PostAppendPanel();
+
+			//Need to manually activate the pages
+			foreach (var page in pages.Values)
+				page.Activate();
 		}
 
 		protected virtual void PostInitializePages() { }
