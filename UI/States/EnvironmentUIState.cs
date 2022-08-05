@@ -33,12 +33,12 @@ namespace MagicStorage.UI.States {
 		}
 
 		public class ModulesPage : BaseStorageUIPage {
-			private static UIList list;
+			private UIList list;
 
-			internal static Dictionary<string, EnvironmentGUIModEntry> entriesByMod = new();
+			internal Dictionary<string, EnvironmentGUIModEntry> entriesByMod = new();
 
-			private static UIText noModulesLoaded;
-			private static UIScrollbar scroll;
+			private UIText noModulesLoaded;
+			private UIScrollbar scroll;
 
 			public ModulesPage(BaseStorageUI parent) : base(parent, "Modules") { }
 

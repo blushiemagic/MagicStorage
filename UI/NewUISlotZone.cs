@@ -121,6 +121,11 @@ namespace MagicStorage.UI {
 			}
 		}
 
+		public void ClearItems() {
+			foreach (var slot in Slots)
+				slot.SetItem(new Item());
+		}
+
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 
@@ -128,12 +133,17 @@ namespace MagicStorage.UI {
 				return;
 
 			if (HoverSlot >= 0) {
-				var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
-				Item hoverItem = slot.StoredItem;
+				if (HoverSlot < NumColumns * NumRows) {
+					var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
+					Item hoverItem = slot.StoredItem;
 
-				if (!hoverItem.IsAir) {
-					Main.HoverItem = hoverItem.Clone();
-					Main.instance.MouseText(string.Empty);
+					if (!hoverItem.IsAir) {
+						Main.HoverItem = hoverItem.Clone();
+						Main.instance.MouseText(string.Empty);
+					}
+				} else {
+					//Failsafe
+					HoverSlot = -1;
 				}
 			}
 		}

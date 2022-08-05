@@ -53,13 +53,13 @@ namespace MagicStorage.UI.States {
 
 			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetText("Mods.MagicStorage.UIPages." + p))));
 
-			panel.OnMenuClose += Close;
+			panel.OnMenuClose += StoragePlayer.LocalPlayer.CloseStorage;
 
 			PanelTop = Main.instance.invBottom + 60;
 			PanelLeft = 20f;
 			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
-			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
-			PanelHeight = Main.screenHeight - PanelTop;
+			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight + 2 * UIDragablePanel.cornerPadding;
+			PanelHeight = Main.screenHeight - PanelTop + 2 * UIDragablePanel.cornerPadding;
 
 			pages = new();
 

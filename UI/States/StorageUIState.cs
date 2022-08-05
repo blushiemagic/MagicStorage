@@ -93,6 +93,10 @@ namespace MagicStorage.UI.States {
 
 				OnPageDeselected += () => {
 					lastKnownScrollBarViewPosition = -1;
+
+					slotZone.HoverSlot = -1;
+
+					slotZone.ClearItems();
 				};
 			}
 
@@ -156,8 +160,8 @@ namespace MagicStorage.UI.States {
 				float depositButtonRight = x;
 
 				searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), StorageGUI.RefreshItems);
-				searchBar.Left.Set(depositButtonRight + StorageGUI.padding, 0f);
-				searchBar.Width.Set(-depositButtonRight - 2 * StorageGUI.padding, 1f);
+				searchBar.Left.Set(depositButtonRight + StorageGUI.padding + 40, 0f);
+				searchBar.Width.Set(-depositButtonRight - 2 * StorageGUI.padding - 40, 1f);
 				searchBar.Height.Set(0f, 1f);
 				topBar.Append(searchBar);
 
@@ -207,7 +211,7 @@ namespace MagicStorage.UI.States {
 						}
 
 						if (changed) {
-							StorageGUI.needRefresh = true;
+							StorageGUI.RefreshItems();
 							SoundEngine.PlaySound(SoundID.Grab);
 						}
 					};
@@ -231,13 +235,13 @@ namespace MagicStorage.UI.States {
 					return itemSlot;
 				};
 
-				slotZone.Width.Set(0f, 1f);
+				slotZone.Width.Set(0, 1f);
 				slotZone.Top.Set(76f, 0f);
 				slotZone.Height.Set(-116f, 1f);
 				Append(slotZone);
 
 				scrollBar = new();
-				scrollBar.Left.Set(-20f, 1f);
+				scrollBar.Left.Set(-10f, 1f);
 				Append(scrollBar);
 
 				UIElement bottomBar = new();
@@ -276,7 +280,7 @@ namespace MagicStorage.UI.States {
 				}
 
 				if (lastKnownScrollBarViewPosition != scrollBar.ViewPosition)
-					UpdateZone();
+					Refresh();
 
 				TEStorageHeart heart = StorageGUI.GetHeart();
 				int numItems = 0;
@@ -314,6 +318,7 @@ namespace MagicStorage.UI.States {
 					noDisplayRows = 0;
 
 				int scrollBarMaxViewSize = 1 + noDisplayRows;
+				scrollBar.Top = slotZone.Top;
 				scrollBar.Height.Set(displayRows * (itemSlotHeight + StorageGUI.padding), 0f);
 				scrollBar.SetView(StorageGUI.scrollBarViewSize, scrollBarMaxViewSize);
 
@@ -373,13 +378,10 @@ namespace MagicStorage.UI.States {
 				scroll.Height.Set(0, 0.825f);
 				scroll.Left.Set(0, 0.95f);
 				scroll.Top.Set(0, 0.1f);
-				scroll.SetView(viewSize: 1f, maxViewSize: 2f);
 
 				list.SetScrollbar(scroll);
 				list.Append(scroll);
 				list.ListPadding = 10;
-
-				float top = 0;
 
 				forceRefresh = new(Language.GetText("Mods.MagicStorage.StorageGUI.ForceRefreshButton"));
 
@@ -387,10 +389,7 @@ namespace MagicStorage.UI.States {
 
 				InitButtonEvents(forceRefresh);
 
-				forceRefresh.Top.Set(top, 0f);
 				list.Add(forceRefresh);
-
-				top += forceRefresh.Height.Pixels + 6;
 
 				compactCoins = new(Language.GetText("Mods.MagicStorage.StorageGUI.CompactCoinsButton"));
 
@@ -406,10 +405,7 @@ namespace MagicStorage.UI.States {
 
 				InitButtonEvents(compactCoins);
 
-				compactCoins.Top.Set(top, 0f);
 				list.Add(compactCoins);
-
-				top += compactCoins.Height.Pixels + 6;
 
 				deleteUnloadedItems = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedButton"));
 
@@ -422,10 +418,7 @@ namespace MagicStorage.UI.States {
 
 				InitButtonEvents(deleteUnloadedItems);
 
-				deleteUnloadedItems.Top.Set(top, 0f);
 				list.Add(deleteUnloadedItems);
-
-				top += deleteUnloadedItems.Height.Pixels + 6;
 
 				deleteUnloadedData = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedDataButton"));
 
@@ -438,21 +431,25 @@ namespace MagicStorage.UI.States {
 
 				InitButtonEvents(deleteUnloadedData);
 
-				deleteUnloadedData.Top.Set(top, 0f);
 				list.Add(deleteUnloadedData);
 
-				top += deleteUnloadedData.Height.Pixels + 6;
-
+				float height = 0;
+				
 				UIText sellDuplicatesLabel = new(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesHeader"), 1.1f);
-				sellDuplicatesLabel.Top.Set(top, 0f);
-				Append(sellDuplicatesLabel);
+
+				UIElement sellDuplicates = new();
+				sellDuplicates.SetPadding(0);
+				sellDuplicates.Width.Set(0f, 0.9f);
+				height += sellDuplicatesLabel.Height.Pixels;
+
+				sellDuplicates.Append(sellDuplicatesLabel);
 
 				UIHorizontalSeparator separator = new();
-				separator.Top.Set(top + 30, 0f);
+				separator.Top.Set(height + 30, 0f);
 				separator.Width.Set(0, 1f);
-				Append(separator);
+				sellDuplicates.Append(separator);
 
-				top += sellDuplicatesLabel.Height.Pixels + 40;
+				height += 40;
 
 				string sellMenu = "Mods.MagicStorage.StorageGUI.SellDuplicatesMenu.";
 
@@ -470,41 +467,33 @@ namespace MagicStorage.UI.States {
 					label.OnClick += (evt, e) => {
 						StorageUISellMenuToggleLabel obj = e as StorageUISellMenuToggleLabel;
 
-						int whichIsOn = -1;
-
 						foreach (var other in sellMenuLabels) {
-							if (other.IsOn) {
-								whichIsOn = other.Index;
+							if (other.IsOn && other.Index != obj.Index) {
+								other.SetState(false);
 								break;
 							}
 						}
 
-						if (whichIsOn == -1) {
-							//Set obj back to "on" since the choice didn't change
+						if (SellMenuChoice == obj.Index) {
+							//Force enabled
 							obj.SetState(true);
-						} else if (whichIsOn != obj.Index) {
-							//Set all to "off" except for obj
-							foreach (var other in sellMenuLabels) {
-								if (other.Index != obj.Index)
-									other.SetState(false);
-							}
 						}
 
 						SellMenuChoice = obj.Index;
 					};
 
-					label.Top.Set(top, 0f);
+					label.Top.Set(height, 0f);
 					label.Height.Set(20, 0f);
 					label.Width.Set(0, 0.6f);
-					list.Append(label);
+					sellDuplicates.Append(label);
 
 					sellMenuLabels.Add(label);
 
-					top += label.Height.Pixels + 6;
+					height += label.Height.Pixels + 6;
 					index++;
 				}
 
-				UITextPanel<LocalizedText> sellMenuButton = new(Language.GetText("Mods.MagiCStorage.StorageGUI.SellDuplicatesButton"));
+				UITextPanel<LocalizedText> sellMenuButton = new(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesButton"));
 
 				sellMenuButton.OnClick += (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
@@ -552,14 +541,25 @@ namespace MagicStorage.UI.States {
 
 				InitButtonEvents(sellMenuButton);
 
-				sellMenuButton.Top.Set(top, 0f);
-				list.Add(sellMenuButton);
+				sellMenuButton.Top.Set(height, 0f);
+				sellDuplicates.Append(sellMenuButton);
+
+				height += sellMenuButton.Height.Pixels;
+
+				sellDuplicates.Height.Set(height, 0f);
+				list.Add(sellDuplicates);
 			}
 
 			private static void InitButtonEvents(UITextPanel<LocalizedText> button) {
 				button.OnMouseOver += (evt, e) => (e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 
 				button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			}
+
+			public override void Update(GameTime gameTime) {
+				base.Update(gameTime);
+
+				scroll.SetView(viewSize: 1f, maxViewSize: 2f);
 			}
 
 			private delegate bool SelectDuplicate(ref SourcedItem item, ref SourcedItem check, out bool swapHappened);

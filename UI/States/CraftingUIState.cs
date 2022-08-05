@@ -644,6 +644,11 @@ namespace MagicStorage.UI.States {
 			storageZone.HoverSlot = -1;
 			recipeHeaderZone.HoverSlot = -1;
 			resultZone.HoverSlot = -1;
+
+			ingredientZone.ClearItems();
+			storageZone.ClearItems();
+			recipeHeaderZone.ClearItems();
+			resultZone.ClearItems();
 		}
 
 		public void Refresh() {
@@ -703,6 +708,9 @@ namespace MagicStorage.UI.States {
 
 					stationZone.HoverSlot = -1;
 					recipeZone.HoverSlot = -1;
+
+					stationZone.ClearItems();
+					recipeZone.ClearItems();
 				};
 			}
 
@@ -806,13 +814,13 @@ namespace MagicStorage.UI.States {
 								if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
 									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-									StorageGUI.needRefresh = true;
+									StorageGUI.RefreshItems();
 								}
 							} else {
 								if (storagePlayer.HiddenRecipes.Add(obj.StoredItem)) {
 									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-									StorageGUI.needRefresh = true;
+									StorageGUI.RefreshItems();
 								}
 							}
 						} else {
@@ -875,8 +883,8 @@ namespace MagicStorage.UI.States {
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
-				if (CraftingGUI.GetCraftingStations().Count / TECraftingAccess.Columns + 1 != lastKnownStationsCount / TECraftingAccess.Columns + 1 || recipeScrollBar.ViewPosition != lastKnownScrollBarViewPosition)
-					UpdateZones();
+				if (CraftingGUI.GetCraftingStations().Count != lastKnownStationsCount || recipeScrollBar.ViewPosition != lastKnownScrollBarViewPosition)
+					(parentUI as CraftingUIState).Refresh();
 
 				if (lastKnownConfigFavorites != MagicStorageConfig.CraftingFavoritingEnabled || lastKnownConfigBlacklist != MagicStorageConfig.RecipeBlacklistEnabled)
 					InitFilterButtons();

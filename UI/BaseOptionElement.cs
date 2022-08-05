@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
@@ -16,6 +17,8 @@ namespace MagicStorage.UI {
 		protected abstract Asset<Texture2D> GetIcon();
 
 		protected abstract bool IsSelected();
+
+		protected abstract string GetHoverText();
 
 		public override void OnInitialize() {
 			background = new(BackTexture);
@@ -38,12 +41,14 @@ namespace MagicStorage.UI {
 			base.MouseOver(evt);
 
 			hovering = true;
+			Main.instance.MouseText(GetHoverText());
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
 			hovering = false;
+			Main.instance.MouseText("");
 		}
 	}
 }

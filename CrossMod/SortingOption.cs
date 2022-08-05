@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -112,6 +113,8 @@ namespace MagicStorage.CrossMod {
 		public SortingOptionElement(SortingOption option) {
 			this.option = option;
 		}
+
+		protected override string GetHoverText() => option.Tooltip.GetTranslation(Language.ActiveCulture);
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;
 

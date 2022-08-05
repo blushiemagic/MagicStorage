@@ -64,6 +64,8 @@ namespace MagicStorage.UI {
 
 				if (!activating)
 					element.Activate();
+
+				index++;
 			}
 		}
 

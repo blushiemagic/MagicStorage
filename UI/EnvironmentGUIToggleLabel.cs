@@ -28,7 +28,18 @@ namespace MagicStorage.UI {
 			SetState(defaultState);
 		}
 
+		public override void Update(GameTime gameTime) {
+			base.Update(gameTime);
+
+			if (!Source.IsAvailable(Module, out _)) {
+				//Force the state to false
+				SetState(false);
+				return;
+			}
+		}
+
 		public override void Click(UIMouseEvent evt) {
+			//UIToggleImage.Click() calls Toggle(), so we don't have to
 			base.Click(evt);
 
 			if (!Source.IsAvailable(Module, out var module))
@@ -37,7 +48,6 @@ namespace MagicStorage.UI {
 		//	Main.NewText($"Clicked label \"{Text.Text}\" -- Valid? {module is not null}");
 
 			if (module is not null && EnvironmentGUI.currentAccess is not null) {
-				Toggle();
 				EnvironmentGUI.currentAccess.SetEnabled(module, IsOn);
 
 				NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);

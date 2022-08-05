@@ -8,6 +8,8 @@ using Terraria.UI;
 
 namespace MagicStorage.UI {
 	public class UIDragablePanel : UIPanel {
+		public const float cornerPadding = 12;
+
 		// Stores the offset from the top left of the UIPanel while dragging.
 		private Vector2 Offset { get; set; }
 

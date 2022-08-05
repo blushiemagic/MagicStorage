@@ -36,6 +36,8 @@ namespace MagicStorage.UI {
 
 		public Func<Item> getItem;
 
+		private Item[] dummy = new Item[11];
+
 		public MagicStorageItemSlot(int slot, int context = ItemSlot.Context.InventoryItem, float scale = 1f) {
 			this.slot = slot;
 			Context = context;
@@ -85,7 +87,8 @@ namespace MagicStorage.UI {
 			}
 
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
-			ItemSlot.Draw(spriteBatch, ref storedItem, Context, rectangle.TopLeft());
+			dummy[10] = StoredItem;
+			ItemSlot.Draw(spriteBatch, dummy, Context, 10, rectangle.TopLeft());
 
 			Main.inventoryScale = oldScale;
 		}
