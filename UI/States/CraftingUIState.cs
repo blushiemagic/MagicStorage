@@ -284,14 +284,12 @@ namespace MagicStorage.UI.States {
 			craftAmount.PaddingBottom = 0;
 			craftAmount.TextOriginX = 0f;
 
-			craftP1.Top.Set(resultZone.Top.Pixels - 30, 0f);
 			craftP1.Width.Set(60, 0f);
 			craftP1.Height.Set(24f * CraftingGUI.SmallScale, 0f);
 			craftP1.PaddingTop = 8f;
 			craftP1.PaddingBottom = 8f;
 			recipePanel.Append(craftP1);
 
-			craftP10.Top = craftP1.Top;
 			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 10, 0f);
 			craftP10.Width.Set(60, 0f);
 			craftP10.Height.Set(24f * CraftingGUI.SmallScale, 0f);
@@ -299,7 +297,6 @@ namespace MagicStorage.UI.States {
 			craftP10.PaddingBottom = 8f;
 			recipePanel.Append(craftP10);
 
-			craftP100.Top = craftP1.Top;
 			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 10, 0f);
 			craftP100.Width.Set(60, 0f);
 			craftP100.Height.Set(24f * CraftingGUI.SmallScale, 0f);
@@ -307,14 +304,12 @@ namespace MagicStorage.UI.States {
 			craftP100.PaddingBottom = 8f;
 			recipePanel.Append(craftP100);
 
-			craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 15, 0f);
 			craftM1.Width.Set(60, 0f);
 			craftM1.Height.Set(24f * CraftingGUI.SmallScale, 0f);
 			craftM1.PaddingTop = 8f;
 			craftM1.PaddingBottom = 8f;
 			recipePanel.Append(craftM1);
 
-			craftM10.Top = craftM1.Top;
 			craftM10.Left.Set(craftM1.Left.Pixels + craftM1.Width.Pixels + 10, 0f);
 			craftM10.Width.Set(60, 0f);
 			craftM10.Height.Set(24f * CraftingGUI.SmallScale, 0f);
@@ -322,7 +317,6 @@ namespace MagicStorage.UI.States {
 			craftM10.PaddingBottom = 8f;
 			recipePanel.Append(craftM10);
 
-			craftM100.Top = craftM1.Top;
 			craftM100.Left.Set(craftM10.Left.Pixels + craftM10.Width.Pixels + 10, 0f);
 			craftM100.Width.Set(60, 0f);
 			craftM100.Height.Set(24f * CraftingGUI.SmallScale, 0f);
@@ -330,14 +324,12 @@ namespace MagicStorage.UI.States {
 			craftM100.PaddingBottom = 8f;
 			recipePanel.Append(craftM100);
 
-			craftMax.Top.Set(craftM1.Top.Pixels + craftM1.Height.Pixels + 15, 0f);
 			craftMax.Width.Set(160f * CraftingGUI.SmallScale, 0f);
 			craftMax.Height.Set(24f * CraftingGUI.SmallScale, 0f);
 			craftMax.PaddingTop = 8f;
 			craftMax.PaddingBottom = 8f;
 			recipePanel.Append(craftMax);
 
-			craftReset.Top = craftMax.Top;
 			craftReset.Left.Set(craftMax.Left.Pixels + craftMax.Width.Pixels + 10, 0f);
 			craftReset.Width.Set(100f * CraftingGUI.SmallScale, 0f);
 			craftReset.Height.Set(24f * CraftingGUI.SmallScale, 0f);
@@ -452,14 +444,14 @@ namespace MagicStorage.UI.States {
 
 			storageZone.Top.Set(storageZoneTop, 0f);
 
-			storageZone.Recalculate();
-
 			bool config = MagicStorageConfig.UseOldCraftMenu;
 
 			if (!config)
 				storageZone.Height.Set(-storageZoneTop - 200, 1f);
 			else
 				storageZone.Height.Set(-storageZoneTop - 36, 1f);
+
+			storageZone.Recalculate();
 
 			int numRows2 = (CraftingGUI.storageItems.Count + CraftingGUI.IngredientColumns - 1) / CraftingGUI.IngredientColumns;
 			int displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + CraftingGUI.Padding);
@@ -483,6 +475,32 @@ namespace MagicStorage.UI.States {
 			resultZone.Height.Set(itemSlotHeight, 0f);
 
 			resultZone.Recalculate();
+
+			if (!config) {
+				craftP1.Top.Set(resultZone.Top.Pixels - 30, 0f);
+				craftP1.Recalculate();
+
+				craftP10.Top = craftP1.Top;
+				craftP10.Recalculate();
+
+				craftP100.Top = craftP1.Top;
+				craftP100.Recalculate();
+
+				craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 15, 0f);
+				craftM1.Recalculate();
+
+				craftM10.Top = craftM1.Top;
+				craftM10.Recalculate();
+
+				craftM100.Top = craftM1.Top;
+				craftM100.Recalculate();
+
+				craftMax.Top.Set(craftM1.Top.Pixels + craftM1.Height.Pixels + 15, 0f);
+				craftMax.Recalculate();
+
+				craftReset.Top = craftMax.Top;
+				craftReset.Recalculate();
+			}
 
 			lastKnownIngredientRows = ingredientRows;
 			lastKnownScrollBarViewPosition = storageScrollBar.ViewPosition;
@@ -724,7 +742,7 @@ namespace MagicStorage.UI.States {
 				topBar.Height.Set(32f, 0f);
 				Append(topBar);
 
-				recipeButtons = new(StorageGUI.RefreshItems, 21);
+				recipeButtons = new(StorageGUI.RefreshItems, 32);
 				InitFilterButtons();
 				topBar.Append(recipeButtons);
 

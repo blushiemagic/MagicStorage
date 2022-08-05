@@ -55,6 +55,8 @@ namespace MagicStorage.UI.States {
 
 			panel.OnMenuClose += StoragePlayer.LocalPlayer.CloseStorage;
 
+			panel.OnRecalculate += UpdateFields;
+
 			PanelTop = Main.instance.invBottom + 60;
 			PanelLeft = 20f;
 			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
@@ -80,6 +82,13 @@ namespace MagicStorage.UI.States {
 			//Need to manually activate the pages
 			foreach (var page in pages.Values)
 				page.Activate();
+		}
+
+		private void UpdateFields() {
+			PanelLeft = panel.Left.Pixels;
+			PanelTop = panel.Top.Pixels;
+			PanelWidth = panel.Width.Pixels;
+			PanelHeight = panel.Height.Pixels;
 		}
 
 		public sealed override void OnActivate() => Open();

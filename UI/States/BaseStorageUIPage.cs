@@ -14,6 +14,9 @@ namespace MagicStorage.UI.States {
 			Name = name;
 
 			OnPageSelected += Recalculate;
+
+			Width = StyleDimension.Fill;
+			Height = StyleDimension.Fill;
 		}
 
 		public void InvokeOnPageSelected() => OnPageSelected?.Invoke();

@@ -52,22 +52,37 @@ namespace MagicStorage {
 			return count;
 		}
 
-		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false) {
-			if (!ItemData.Matches(item1, item2))
-				return false;
+		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false, bool checkPrefix = true) {
+			int stack1 = item1.stack;
+			int stack2 = item2.stack;
+			int prefix1 = item1.prefix;
+			int prefix2 = item2.prefix;
 
-			if (checkStack)
-				return TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+			bool equal;
 
-			int oldStack1 = item1.stack;
-			item1.stack = 1;
-			int oldStack2 = item2.stack;
-			item2.stack = 1;
+			if (!checkPrefix) {
+				item1.prefix = 0;
+				item2.prefix = 0;
+			}
 
-			bool equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+			if (!checkStack) {
+				item1.stack = 1;
+				item2.stack = 1;
+			}
 
-			item1.stack = oldStack1;
-			item2.stack = oldStack2;
+			if (!ItemData.Matches(item1, item2)) {
+				equal = false;
+				goto ReturnFromMethod;
+			}
+
+			equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+
+			ReturnFromMethod:
+
+			item1.stack = stack1;
+			item2.stack = stack2;
+			item1.prefix = prefix1;
+			item2.prefix = prefix2;
 
 			return equal;
 		}

@@ -42,11 +42,11 @@ namespace MagicStorage.UI {
 
 			buttons.Clear();
 
-			const int leftOrig = 20, topOrig = 20;
+			const int leftOrig = 20, topOrig = 0;
 
 			CalculatedStyle dims = GetInnerDimensions();
 
-			const int buttonSizeWithBuffer = 32 + 10;
+			const int buttonSizeWithBuffer = 32 + 4;
 
 			int columns = Math.Max(1, (int)(dims.Width - leftOrig * 2) / buttonSizeWithBuffer);
 
@@ -62,8 +62,10 @@ namespace MagicStorage.UI {
 				Append(element);
 				buttons.Add(element);
 
-				if (!activating)
+				if (!activating) {
 					element.Activate();
+					element.Recalculate();
+				}
 
 				index++;
 			}

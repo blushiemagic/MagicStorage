@@ -36,12 +36,6 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool clearSearchText;
 
-		[Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.extraFilterIcons.Tooltip")]
-		[DefaultValue(true)]
-		[ReloadRequired]
-		public bool extraFilterIcons;
-
 		[Label("$Mods.MagicStorage.Config.showDps.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.showDps.Tooltip")]
 		[DefaultValue(true)]
@@ -89,9 +83,6 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ClearSearchText => Instance.clearSearchText;
-
-		[JsonIgnore]
-		public static bool ExtraFilterIcons => Instance.extraFilterIcons;
 
 		[JsonIgnore]
 		public static bool ShowDps => Instance.showDps;

@@ -89,14 +89,27 @@ namespace MagicStorage.Sorting
 
 			if (first == '#') {
 				//First character is a "#"?  Treat the search as a tooltip search
-				return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+				if (filter.Length > 1) {
+					filter = filter[1..];
+					return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+				} else
+					return true;  //Empty tooltip = anything is valid
 			} else if (first == '@' && !modSearched) {
 				//First character is a "@"?  Treat the first "word" as a mod search and the rest as a normal search
-				string mod = filter[1..];
-				int space;
-				if ((space = mod.IndexOf(' ')) > -1)
-					mod = mod[..space];
-				return (item.ModItem?.Mod.Name ?? "Terraria").Contains(mod, StringComparison.OrdinalIgnoreCase) && FilterBySearchText(item, mod[space..], modSearched: true);
+				if (filter.Length > 1) {
+					string mod = filter[1..];
+					string remaining;
+					int space;
+					
+					if ((space = mod.IndexOf(' ')) > -1) {
+						remaining = mod[space..];
+						mod = mod[..space];
+					} else
+						remaining = "";
+
+					return (item.ModItem?.Mod.Name ?? "Terraria").Contains(mod, StringComparison.OrdinalIgnoreCase) && FilterBySearchText(item, remaining, modSearched: true);
+				} else
+					return true;  //Empty mod name = anything is valid
 			}
 
 			return item.Name.Contains(filter, StringComparison.OrdinalIgnoreCase);

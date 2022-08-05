@@ -24,7 +24,7 @@ namespace MagicStorage.UI.States {
 
 		protected override void PostInitializePages() {
 			float innerPanelWidth = 600f + EnvironmentGUI.Padding;
-			PanelWidth = PaddingLeft + innerPanelWidth + panel.PaddingRight;
+			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
 
 			panel.Left.Set(PanelLeft, 0f);
 			panel.Top.Set(PanelTop, 0f);

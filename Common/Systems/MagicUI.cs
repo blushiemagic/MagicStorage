@@ -2,6 +2,7 @@
 using MagicStorage.Components;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -49,6 +50,10 @@ public class MagicUI : ModSystem
 	}
 
 	public override void UpdateUI(GameTime gameTime) {
+		//Some UI elements couldn't easily be updated to the UIElement API, so these two fields still need to be updated
+		StorageGUI.oldMouse = StorageGUI.curMouse;
+		StorageGUI.curMouse = Mouse.GetState();
+		
 		uiInterface?.Update(gameTime);
 	}
 

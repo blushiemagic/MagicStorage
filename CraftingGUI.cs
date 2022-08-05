@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
@@ -16,6 +17,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.Utilities;
 
 namespace MagicStorage
 {
@@ -952,6 +954,10 @@ namespace MagicStorage
 			public List<Item> consumedItems;
 
 			public IEnumerable<EnvironmentModule> modules;
+
+			public int toCraft;
+
+			public bool simulation;
 		}
 
 		/// <summary>
@@ -976,35 +982,18 @@ namespace MagicStorage
 				sandbox = sandbox,
 				consumedItems = new(),
 				fromModule = fromModule,
-				modules = heart.GetModules()
+				modules = heart.GetModules(),
+				toCraft = toCraft
 			};
 
 			int target = toCraft;
 			NetHelper.Report(true, "Attempting to craft " + toCraft + " items");
 
-			while (toCraft > 0) {
-				if (!AttemptSingleCraft(context))
-					break;  // Could not craft any more items
+			//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
+			if (!AttemptLazyBatchCraft(context)) {
+				NetHelper.Report(false, "Batch craft operation failed.");
 
-				Item resultItem = selectedRecipe.createItem.Clone();
-				toCraft -= resultItem.stack;
-
-				resultItem.Prefix(-1);
-				results.Add(resultItem);
-
-				CatchDroppedItems = true;
-				DroppedItems.Clear();
-
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
-
-				foreach (EnvironmentModule module in context.modules)
-					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
-
-				context.consumedItems.Clear();
-
-				CatchDroppedItems = false;
-
-				results.AddRange(DroppedItems);
+				AttemptCraft(AttemptSingleCraft, context);
 			}
 
 			NetHelper.Report(true, "Crafted " + (target - toCraft) + " items");
@@ -1022,6 +1011,133 @@ namespace MagicStorage
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
+		}
+
+		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {
+			while (context.toCraft > 0) {
+				if (!func(context))
+					break;  // Could not craft any more items
+
+				Item resultItem = selectedRecipe.createItem.Clone();
+				context.toCraft -= resultItem.stack;
+
+				resultItem.Prefix(-1);
+				context.results.Add(resultItem);
+
+				CatchDroppedItems = true;
+				DroppedItems.Clear();
+
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+
+				foreach (EnvironmentModule module in context.modules)
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
+
+				context.consumedItems.Clear();
+
+				CatchDroppedItems = false;
+
+				context.results.AddRange(DroppedItems);
+			}
+		}
+
+		private class RandCache {
+			private readonly int inext, inextp;
+			private readonly int[] SeedArray;
+
+			private static readonly FieldInfo UnifiedRandom_inext = typeof(UnifiedRandom).GetField("inext", BindingFlags.NonPublic | BindingFlags.Instance);
+			private static readonly FieldInfo UnifiedRandom_inextp = typeof(UnifiedRandom).GetField("inextp", BindingFlags.NonPublic | BindingFlags.Instance);
+			private static readonly FieldInfo UnifiedRandom_SeedArray = typeof(UnifiedRandom).GetField("SeedArray", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			public RandCache(UnifiedRandom rand) {
+				inext = (int)UnifiedRandom_inext.GetValue(rand);
+				inextp = (int)UnifiedRandom_inextp.GetValue(rand);
+				SeedArray = UnifiedRandom_SeedArray.GetValue(rand) as int[];
+			}
+
+			public void Restore(ref UnifiedRandom rand) {
+				UnifiedRandom_inext.SetValue(rand, inext);
+				UnifiedRandom_inextp.SetValue(rand, inextp);
+				UnifiedRandom_SeedArray.SetValue(rand, SeedArray);
+			}
+		}
+
+		private static bool AttemptLazyBatchCraft(CraftingContext context) {
+			NetHelper.Report(false, "Attempting batch craft operation...");
+
+			context.simulation = true;
+
+			List<Item> origResults = new(context.results);
+			List<Item> origWithdraw = new(context.toWithdraw);
+
+			//Try to batch as many "crafts" into one craft as possible
+			int crafts = (int)Math.Ceiling(context.toCraft / (float)selectedRecipe.createItem.stack);
+
+			List<Item> batch = new(selectedRecipe.requiredItem.Count);
+
+			RandCache randCache = new(Main._rand);
+
+			//Reduce the number of batch crafts until this recipe can be completely batched for the number of crafts
+			while (crafts > 0) {
+				foreach (Item reqItem in selectedRecipe.requiredItem) {
+					Item clone = reqItem.Clone();
+					clone.stack *= crafts;
+
+					if (!CanConsumeItem(context, reqItem, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
+						if (wasAvailable) {
+							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\". (Batching {crafts} crafts)");
+							break;
+						} else {
+							// Did not have enough items
+							crafts--;
+							randCache.Restore(ref Main._rand);
+							batch.Clear();
+						}
+					} else {
+						//Consume the item
+						clone.stack = stackConsumed;
+						batch.Add(clone);
+					}
+				}
+			}
+
+			context.simulation = false;
+
+			if (crafts <= 0) {
+				//Craft batching failed
+				return false;
+			}
+
+			//Consume the batched items
+			foreach (Item item in batch) {
+				int stack = item.stack;
+				if (!AttemptToConsumeItem(context, context.availableItems, item.type, ref stack, addToWithdraw: true))
+					ConsumeItemFromSource(context, item.type, item.stack);
+			}
+
+			//Create the resulting items
+			for (int i = 0; i < crafts; i++) {
+				Item resultItem = selectedRecipe.createItem.Clone();
+				context.toCraft -= resultItem.stack;
+
+				resultItem.Prefix(-1);
+				context.results.Add(resultItem);
+
+				CatchDroppedItems = true;
+				DroppedItems.Clear();
+
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+
+				foreach (EnvironmentModule module in context.modules)
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
+
+				CatchDroppedItems = false;
+
+				context.results.AddRange(DroppedItems);
+			}
+
+			NetHelper.Report(false, $"Batch craft operation succeeded ({crafts} crafts batched)");
+
+			return true;
 		}
 
 		private static bool AttemptSingleCraft(CraftingContext context) {
@@ -1093,10 +1209,10 @@ namespace MagicStorage
 
 		private static bool AttemptToConsumeItem(CraftingContext context, List<Item> list, int reqType, ref int stack, bool addToWithdraw) {
 			int listIndex = 0;
-			foreach (Item tryItem in list) {
+			foreach (Item tryItem in !context.simulation ? list : list.Select(i => new Item(i.type, i.stack))) {
 				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
 					//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
-					bool canWithdraw = addToWithdraw && !context.fromModule[listIndex];
+					bool canWithdraw = addToWithdraw && !context.simulation && !context.fromModule[listIndex];
 
 					if (tryItem.stack > stack) {
 						Item temp = tryItem.Clone();
@@ -1127,6 +1243,7 @@ namespace MagicStorage
 		}
 
 		private static void ConsumeItemFromSource(CraftingContext context, int reqType, int stack) {
+			int index = 0;
 			foreach (Item tryItem in context.sourceItems) {
 				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
 					int origStack = stack;
@@ -1147,14 +1264,19 @@ namespace MagicStorage
 
 					context.consumedItems.Add(consumed);
 
-					tryItem.stack -= stackToConsume;
+					//Items should only be consumed if they're from a module, since withdrawing wouldn't grab the item anyway
+					if (context.fromModule[index]) {
+						tryItem.stack -= stackToConsume;
 
-					if (tryItem.stack <= 0)
-						tryItem.type = ItemID.None;
+						if (tryItem.stack <= 0)
+							tryItem.type = ItemID.None;
+					}
 
 					if (stack <= 0)
 						break;
 				}
+
+				index++;
 			}
 		}
 

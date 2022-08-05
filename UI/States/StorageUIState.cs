@@ -40,22 +40,10 @@ namespace MagicStorage.UI.States {
 			};
 
 		protected override void PostInitializePages() {
-			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
-			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
-			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
-			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
-
 			panel.Left.Set(PanelLeft, 0f);
 			panel.Top.Set(PanelTop, 0f);
 			panel.Width.Set(PanelWidth, 0f);
 			panel.Height.Set(PanelHeight, 0f);
-
-			panel.OnRecalculate += UpdateFields;
-		}
-
-		private void UpdateFields() {
-			PanelTop = panel.Top.Pixels;
-			PanelLeft = panel.Left.Pixels;
 		}
 
 		protected override void OnOpen() {
@@ -361,7 +349,10 @@ namespace MagicStorage.UI.States {
 			public int SellMenuChoice { get; private set; }
 
 			public ControlsPage(BaseStorageUI parent) : base(parent, "Controls") {
-				OnPageSelected += () => SellMenuChoice = 0;
+				OnPageSelected += () => {
+					SellMenuChoice = 0;
+					sellMenuLabels[0].Click(new(sellMenuLabels[0], UserInterface.ActiveInstance.MousePosition));
+				};
 			}
 
 			public override void OnInitialize() {
@@ -397,9 +388,10 @@ namespace MagicStorage.UI.States {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					if (Main.netMode == NetmodeID.SinglePlayer)
-						heart.compactCoins = true;
-					else
+					if (Main.netMode == NetmodeID.SinglePlayer) {
+						heart.CompactCoins();
+						StorageGUI.needRefresh = true;
+					} else
 						NetHelper.SendCoinCompactRequest(heart.Position);
 				};
 
@@ -440,7 +432,7 @@ namespace MagicStorage.UI.States {
 				UIElement sellDuplicates = new();
 				sellDuplicates.SetPadding(0);
 				sellDuplicates.Width.Set(0f, 0.9f);
-				height += sellDuplicatesLabel.Height.Pixels;
+				height += sellDuplicatesLabel.MinHeight.Pixels;
 
 				sellDuplicates.Append(sellDuplicatesLabel);
 
@@ -464,23 +456,7 @@ namespace MagicStorage.UI.States {
 				foreach (var name in names) {
 					StorageUISellMenuToggleLabel label = new(name, index);
 
-					label.OnClick += (evt, e) => {
-						StorageUISellMenuToggleLabel obj = e as StorageUISellMenuToggleLabel;
-
-						foreach (var other in sellMenuLabels) {
-							if (other.IsOn && other.Index != obj.Index) {
-								other.SetState(false);
-								break;
-							}
-						}
-
-						if (SellMenuChoice == obj.Index) {
-							//Force enabled
-							obj.SetState(true);
-						}
-
-						SellMenuChoice = obj.Index;
-					};
+					label.OnClick += ClickSellMenuToggle;
 
 					label.Top.Set(height, 0f);
 					label.Height.Set(20, 0f);
@@ -544,10 +520,28 @@ namespace MagicStorage.UI.States {
 				sellMenuButton.Top.Set(height, 0f);
 				sellDuplicates.Append(sellMenuButton);
 
-				height += sellMenuButton.Height.Pixels;
+				height += sellMenuButton.MinHeight.Pixels;
 
 				sellDuplicates.Height.Set(height, 0f);
 				list.Add(sellDuplicates);
+			}
+
+			private void ClickSellMenuToggle(UIMouseEvent evt, UIElement e) {
+				StorageUISellMenuToggleLabel obj = e as StorageUISellMenuToggleLabel;
+
+				foreach (var other in sellMenuLabels) {
+					if (other.IsOn && other.Index != obj.Index) {
+						other.SetState(false);
+						break;
+					}
+				}
+
+				if (SellMenuChoice == obj.Index) {
+					//Force enabled
+					obj.SetState(true);
+				}
+
+				SellMenuChoice = obj.Index;
 			}
 
 			private static void InitButtonEvents(UITextPanel<LocalizedText> button) {
@@ -603,7 +597,7 @@ namespace MagicStorage.UI.States {
 
 					if (!duplicatesToSell.TryGetValue(item.type, out var context))
 						context = duplicatesToSell[item.type] = new() { keep = sourcedItem };
-					else if (Utility.AreStrictlyEqual(context.keep.item, item)) {
+					else if (Utility.AreStrictlyEqual(context.keep.item, item, checkPrefix: false)) {
 						SourcedItem check = sourcedItem;
 
 						if (itemEvaluation(ref context.keep, ref check, out bool swapHappened)) {
@@ -629,7 +623,7 @@ namespace MagicStorage.UI.States {
 
 					int value = duplicate.item.value;
 
-					// coins = [ platinum, gold, silver, copper ]
+					// coins = [ copper, silver, gold, platinum ]
 					int[] coins = Utils.CoinsSplit(value);
 					platinum += coins[3];
 					gold += coins[2];
@@ -641,12 +635,18 @@ namespace MagicStorage.UI.States {
 
 					withdrawnItems[duplicate.source].Add(duplicate.indexInSource);
 
-					duplicate.source.items.Remove(duplicate.item);
-
 					PlayerLoader.PostSellItem(Main.LocalPlayer, dummy, Array.Empty<Item>(), duplicate.item);
 				}
 
+				//Actually "withdraw" the items, but in reverse order so that the "indexInSource" that was saved isn't clobbered
+				foreach ((TEStorageUnit unit, List<int> withdrawn) in withdrawnItems) {
+					foreach (int item in withdrawn.OrderByDescending(i => i))
+						unit.items.RemoveAt(item);
+				}
+
 				coppersEarned = platinum * 1000000L + gold * 10000 + silver * 100 + copper;
+
+				StorageGUI.needRefresh = true;
 			}
 
 			private static bool SellNoPrefix(ref SourcedItem item, ref SourcedItem check, out bool swapHappened) {
