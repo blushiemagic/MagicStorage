@@ -1,29 +1,61 @@
 ﻿using System.Collections.Generic;
 using MagicStorage.Components;
+using MagicStorage.UI.States;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-#nullable enable
-
 namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
 {
+	internal static UserInterface uiInterface;
+
+	public static BaseStorageUI craftingUI, storageUI, environmentUI;
+
+	public override void Load() {
+		if (Main.dedServ)
+			return;
+
+		uiInterface = new();
+		craftingUI = new CraftingUIState();
+		storageUI = new StorageUIState();
+		environmentUI = new EnvironmentUIState();
+	}
+
+	public override void Unload() {
+		uiInterface = null;
+		craftingUI = null;
+		storageUI = null;
+		environmentUI = null;
+	}
+
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 	{
 		int inventoryIndex = layers.FindIndex(layer => layer.Name == "Vanilla: Inventory");
-		if (inventoryIndex != -1)
-			layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess", () =>
-			{
-				DrawStorageGUI();
-				return true;
-			}, InterfaceScaleType.UI));
+		if (inventoryIndex != -1) {
+			layers.Insert(inventoryIndex + 1, new LegacyGameInterfaceLayer("MagicStorage: StorageAccess",
+				() => {
+					if (uiInterface?.CurrentState is not null) {
+						Main.hidePlayerCraftingMenu = true;
+						uiInterface.Draw(Main.spriteBatch, new GameTime());
+					}
+
+					return true;
+				}, InterfaceScaleType.UI));
+		}
 	}
 
-	private static void DrawStorageGUI()
-	{
+	public override void UpdateUI(GameTime gameTime) {
+		uiInterface?.Update(gameTime);
+	}
+
+	internal static void OpenUI() {
+		if (uiInterface.CurrentState is not null)
+			return;  //UI is already open
+
 		Player player = Main.LocalPlayer;
 		StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 		Point16 storageAccess = modPlayer.ViewingStorage();
@@ -38,23 +70,15 @@ public class MagicUI : ModSystem
 		if (heart is null)
 			return;
 
-		Main.hidePlayerCraftingMenu = true;
-
 		if (access is EnvironmentAccess)
-			EnvironmentGUI.Draw();
+			uiInterface.SetState(environmentUI);
 		else if (access is CraftingAccess)
-			CraftingGUI.Draw();
+			uiInterface.SetState(craftingUI);
 		else
-			StorageGUI.Draw();
+			uiInterface.SetState(storageUI);
 	}
 
-	public override void PostUpdateInput()
-	{
-		if (!Main.instance.IsActive)
-			return;
-
-		StorageGUI.Update(null);
-		CraftingGUI.Update(null);
-		EnvironmentGUI.Update(null);
+	internal static void CloseUI() {
+		uiInterface.SetState(null);
 	}
 }

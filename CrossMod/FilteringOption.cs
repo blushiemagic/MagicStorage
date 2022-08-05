@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -17,9 +18,18 @@ namespace MagicStorage.CrossMod {
 
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
+		/// <summary>
+		/// The delegate that this filter uses.  <see cref="ItemFilter.Filter"/> takes an <see cref="Item"/> as input and returns a <see langword="bool"/>
+		/// </summary>
 		public abstract ItemFilter.Filter Filter { get; }
 
 		public virtual Action OnSelected { get; }
+
+		/// <summary>
+		/// Whether this filter is for a damage class of items<br/>
+		/// If this property returns true, this filter is blacklisted by <see cref="ItemFilter.WeaponOther"/>
+		/// </summary>
+		public virtual bool FiltersDamageClass => false;
 
 		protected sealed override void Register() {
 			ModTypeLookup<FilteringOption>.Register(this);
@@ -126,7 +136,7 @@ namespace MagicStorage.CrossMod {
 		}
 	}
 
-	internal static class FilteringOptionLoader {
+	public static class FilteringOptionLoader {
 		public static class Definitions {
 			public static FilteringOption All { get; internal set; }
 			public static FilteringOption Melee { get; internal set; }
@@ -143,6 +153,11 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Tiles { get; internal set; }
 			public static FilteringOption Misc { get; internal set; }
 			public static FilteringOption Recent { get; internal set; }
+			public static FilteringOption OtherWeapons { get; internal set; }
+			public static FilteringOption Unstackables { get; internal set; }
+			public static FilteringOption Stackables { get; internal set; }
+			public static FilteringOption NotFullyResearched { get; internal set; }
+			public static FilteringOption FullyResearched { get; internal set; }
 		}
 
 		private static readonly List<FilteringOption> options = new();
@@ -176,6 +191,7 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Magic = new FilterMagic());
 			mod.AddContent(Definitions.Summon = new FilterSummon());
 			mod.AddContent(Definitions.Throwing = new FilterThrowing());
+			mod.AddContent(Definitions.OtherWeapons = new FilterOtherWeaponClasses());
 			mod.AddContent(Definitions.Ammo = new FilterAmmo());
 			mod.AddContent(Definitions.Tools = new FilterTools());
 			mod.AddContent(Definitions.Armor = new FilterArmor());
@@ -183,6 +199,10 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Vanity = new FilterVanity());
 			mod.AddContent(Definitions.Potion = new FilterPotion());
 			mod.AddContent(Definitions.Tiles = new FilterTiles());
+			mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
+			mod.AddContent(Definitions.Stackables = new FilterStackables());
+			mod.AddContent(Definitions.NotFullyResearched = new FilterNotFullyResearched());
+			mod.AddContent(Definitions.FullyResearched = new FilterFullyResearched());
 			mod.AddContent(Definitions.Misc = new FilterMisc());
 			mod.AddContent(Definitions.Recent = new FilterRecent());
 		}

@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
@@ -8,18 +12,29 @@ namespace MagicStorage.UI.States {
 	/// A base class for common elements in Magic Storage's GUIs
 	/// </summary>
 	public abstract class BaseStorageUI : UIState {
-		internal static bool needRefresh;
-
 		protected UIDragablePanel panel;
 
 		protected Dictionary<string, BaseStorageUIPage> pages;
 
 		public BaseStorageUIPage currentPage;
+		
+		public float PanelLeft { get; protected set; }
+		
+		public float PanelTop { get; protected set; }
+		
+		protected float PanelWidth { get; set; }
+		
+		protected float PanelHeight { get; set; }
 
-		public float PanelLeft { get; private set; }
-		public float PanelRight { get; private set; }
-		public float PanelTop { get; private set; }
-		public float PanelBottom { get; private set; }
+		public float PanelRight {
+			get => PanelLeft + PanelWidth;
+			set => PanelLeft = value - PanelWidth;
+		}
+		
+		public float PanelBottom {
+			get => PanelTop + PanelHeight;
+			set => PanelTop = value - PanelHeight;
+		}
 
 		protected abstract IEnumerable<string> GetMenuOptions();
 
@@ -27,22 +42,49 @@ namespace MagicStorage.UI.States {
 
 		public abstract string DefaultPage { get; }
 
-		public override void OnActivate() {
-			panel = new(true, GetMenuOptions().ToArray());
+		public BaseStorageUIPage GetPage(string page) => pages[page];
+
+		public T GetPage<T>(string page) where T : BaseStorageUIPage => pages is null
+			? null
+			: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
+
+		public override void OnInitialize() {
+			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
+
+			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetText("Mods.MagicStorage.UIPages." + p))));
 
 			panel.OnMenuClose += Close;
 
+			PanelTop = Main.instance.invBottom + 60;
+			PanelLeft = 20f;
+			float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
+			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
+			PanelHeight = Main.screenHeight - PanelTop;
+
 			pages = new();
 
-			foreach (UITextPanel<string> page in panel.menus.Values)
-				pages[page.Text] = InitPage(page.Text);
+			foreach ((string key, var tab) in panel.menus) {
+				var page = pages[key] = InitPage(key);
+				page.Width = StyleDimension.Fill;
+				page.Height = StyleDimension.Fill;
+
+				tab.OnClick += (evt, e) => SetPage((e as UIPanelTab).Name);
+			}
 
 			PostInitializePages();
 
 			Append(panel);
 
 			PostAppendPanel();
+
+			//Need to manually activate the pages
+			foreach (var page in pages.Values)
+				page.Activate();
 		}
+
+		public sealed override void OnActivate() => Open();
+
+		public sealed override void OnDeactivate() => Close();
 
 		protected virtual void PostInitializePages() { }
 
@@ -62,12 +104,9 @@ namespace MagicStorage.UI.States {
 
 				currentPage = newPage;
 
-				currentPage.InvokeOnPageSelected();
-
-				if (needRefresh)
-					StorageGUI.RefreshItems();
-
 				panel.viewArea.Append(currentPage);
+
+				currentPage.InvokeOnPageSelected();
 
 				return true;
 			}
@@ -76,12 +115,20 @@ namespace MagicStorage.UI.States {
 		}
 
 		public void Open() {
-			if (currentPage is null)
-				SetPage(DefaultPage);
+			if (currentPage is not null)
+				return;
+
+			OnOpen();
+
+			SetPage(DefaultPage);
 		}
+
+		protected virtual void OnOpen() { }
 
 		public void Close() {
 			if (currentPage is not null) {
+				OnClose();
+
 				currentPage.InvokeOnPageDeselected();
 
 				currentPage.Remove();
@@ -89,5 +136,7 @@ namespace MagicStorage.UI.States {
 
 			currentPage = null;
 		}
+
+		protected virtual void OnClose() { }
 	}
 }

@@ -413,8 +413,6 @@ Mods: {
 
 		FilterAllMods: "所有物品"
 
-		CookedMarshmallowCondition: "存放于制作单元的生态球"
-
 		Capacity: "容量: {0} / {1}"
 
 		LocatorSet: "该定位器已设置于位于 [{0}, {1}] 的存储核心"
@@ -465,16 +463,40 @@ Mods: {
 		物品 "{0}" 的制作配方已显示
 		'''
 
+		RecipeConditions: {
+			# EctoMistOverride:
+			# '''
+			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
+			# '''
+			CookedMarshmallowCondition: "存放于制作单元的生态球"
+		}
+
 		DepositTooltip: "快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键"
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
 
+		StorageGUI: {
+			# ForceRefreshButton: "Force UI refresh"
+			# CompactCoinsButton: "Compact Coins"
+			# DestroyUnloadedButton: "Delete Unloaded Items"
+			# DestroyUnloadedDataButton: "Delete Unloaded Data"
+
+			# SellDuplicatesHeader: "Sell Duplicates"
+			# SellDuplicatesButton: "Sell"
+
+			SellDuplicatesMenu: {
+				# NoPrefix: "Sell Duplicates with No Prefix"
+				# KeepMostValue: "Keep Most Expensive"
+				# KeepLeastValue: "Keep Least Expensive"
+			}
+		}
+
 		EnvironmentGUI: {
-			EntryDisabledDefault: 该模块已被禁用
-			NoModules:
-			'''
-			没有检测到任何跨模组模块
-			没有任何模组为魔法存储添加了跨模组模块
-			'''
+			# EntryDisabledDefault: This module is currently disabled.
+			# NoModules:
+			# '''
+			# No Environment Simulator modules have been detected.
+			# Other mods will need to add some for them to appear here.
+			# '''
 		}
 
 		FilteringOption: {
@@ -494,6 +516,11 @@ Mods: {
 			Tiles: "筛选放置物"
 			Misc: "筛选杂项"
 			Recent: "筛选最近存入的物品"
+			# WeaponsOther: "Filter Other Weapons"
+			# Unstackables: "Filter Unstackables"
+			# Stackables: "Filter Stackables"
+			# NotFullyResearched: "Filter Items Not Fully Researched"
+			# FullyResearched: "Filter Items Fully Researched"
 		}
 
 		SortingOption: {
@@ -502,8 +529,18 @@ Mods: {
 			Name: "按名称排序"
 			Value: "按价格排序"
 			Dps: "按DPS排序"
-			QuantityAbsolute: "按数量排序"
-			QuantityRatio: "按堆叠量占其最大堆叠量的比例排序"
+			# QuantityAbsolute: "Sort by Quantity"
+			# QuantityRatio: "Sort by Quantity Ratio"
+			# Damage: "Sort by Damage"
+		}
+
+		UIPages: {
+			# Sorting: "Sorting",
+			# Filtering: "Filtering",
+			# Crafting: "Crafting",
+			# Storage: "Storage",
+			# Controls: "Controls"  # StorageGUI page for the extra controls
+			# Modules: "Modules"    # EnvironmentGUI page for the modules
 		}
 
 		Config: {
@@ -548,6 +585,22 @@ Mods: {
 			searchBarRefreshOnKey: {
 				Label: "搜索结果实时更新"
 				Tooltip: "开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果"
+			}
+			allowItemDataDebug: {
+				# Label: "Item debug information"
+				# Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
+			}
+			searchBarRefreshOnKey: {
+				# Label: "Search Bar Refreshes on Key Press"
+				# Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+			}
+			uiFavorites: {
+				# Label: "Favorites Filter Button"
+				# Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+			}
+			recipeBlacklist: {
+				# Label: "Recipe Whitelist/Blacklist"
+				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
 			}
 
 			AllowAutomatonToMoveIn: {

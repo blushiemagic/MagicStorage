@@ -63,6 +63,16 @@ namespace MagicStorage
 		[DefaultValue(true)]
 		public bool searchBarRefreshOnKey;
 
+		[Label("$Mods.MagicStorage.Config.uiFavorites.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.uiFavorites.Tooltip")]
+		[DefaultValue(false)]
+		public bool uiFavorites;
+
+		[Label("$Mods.MagicStorage.Config.recipeBlacklist.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recipeBlacklist.Tooltip")]
+		[DefaultValue(false)]
+		public bool recipeBlacklist;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -94,6 +104,12 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool SearchBarRefreshOnKey => Instance.searchBarRefreshOnKey;
+
+		[JsonIgnore]
+		public static bool CraftingFavoritingEnabled => Instance.uiFavorites;
+
+		[JsonIgnore]
+		public static bool RecipeBlacklistEnabled => Instance.recipeBlacklist;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

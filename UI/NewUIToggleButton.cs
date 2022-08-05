@@ -1,15 +1,14 @@
-using System;
+﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using Terraria;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace MagicStorage.UI
-{
-	public class UIToggleButton : UIElement
-	{
+namespace MagicStorage.UI {
+	public class NewUIToggleButton : UIElement {
 		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
 		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 		private readonly Asset<Texture2D> button;
@@ -19,7 +18,9 @@ namespace MagicStorage.UI
 
 		public bool Value { get; set; }
 
-		public UIToggleButton(Action onChanged, Asset<Texture2D> button, LocalizedText name, int buttonSize = 21)
+		private bool hovering;
+
+		public NewUIToggleButton(Action onChanged, Asset<Texture2D> button, LocalizedText name, int buttonSize)
 		{
 			this.buttonSize = buttonSize;
 			this.onChanged = onChanged;
@@ -31,25 +32,28 @@ namespace MagicStorage.UI
 			MinHeight.Set(buttonSize, 0f);
 		}
 
-		public override void Update(GameTime gameTime)
-		{
+		public override void Click(UIMouseEvent evt) {
+			base.Click(evt);
+
 			bool oldValue = Value;
-			if (StorageGUI.MouseClicked && Parent is not null)
-				if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
-					Value = !Value;
+			Value = !Value;
 
 			if (oldValue != Value)
 				onChanged?.Invoke();
 		}
 
-		private bool MouseOverButton(int mouseX, int mouseY)
-		{
-			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
-			float left = dim.X;
-			float right = left + buttonSize * Main.UIScale;
-			float top = dim.Y;
-			float bottom = top + buttonSize * Main.UIScale;
-			return mouseX > left && mouseX < right && mouseY > top && mouseY < bottom;
+		public override void MouseOver(UIMouseEvent evt) {
+			base.MouseOver(evt);
+
+			hovering = true;
+			Main.instance.MouseText(name.Value);
+		}
+
+		public override void MouseOut(UIMouseEvent evt) {
+			base.MouseOut(evt);
+
+			hovering = false;
+			Main.instance.MouseText("");
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
@@ -57,15 +61,9 @@ namespace MagicStorage.UI
 			CalculatedStyle dim = GetDimensions();
 			Asset<Texture2D> texture = Value ? BackTextureActive : BackTexture;
 			Vector2 drawPos = new(dim.X, dim.Y);
-			Color color = MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y) ? Color.Silver : Color.White;
-			Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
-			Main.spriteBatch.Draw(button.Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
-		}
-
-		public void DrawText()
-		{
-			if (MouseOverButton(StorageGUI.curMouse.X, StorageGUI.curMouse.Y))
-				Main.instance.MouseText(name.Value);
+			Color color = hovering ? Color.Silver : Color.White;
+			spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
+			spriteBatch.Draw(button.Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
 		}
 	}
 }

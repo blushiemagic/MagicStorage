@@ -9,6 +9,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
+using MagicStorage.Stations;
 
 namespace MagicStorage {
 	public class MagicStorage : Mod {
@@ -19,6 +20,9 @@ namespace MagicStorage {
 		public static string GithubProjectName => "MagicStorage";
 
 		public static readonly Recipe.Condition HasCampfire = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire);
+
+		public static readonly Recipe.Condition EctoMistOverride = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
+			recipe => Recipe.Condition.InGraveyardBiome.RecipeAvailable(recipe) || Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
 
 		public override void Load()
 		{
@@ -38,7 +42,6 @@ namespace MagicStorage {
 
 		public override void Unload()
 		{
-			StorageGUI.Unload();
 			CraftingGUI.Unload();
 			EnvironmentGUI.Unload();
 
@@ -52,9 +55,8 @@ namespace MagicStorage {
 		}
 
 		public override void PostSetupContent() {
-			EnvironmentGUI.Initialize();
-
 			SortingOptionLoader.InitializeOrder();
+			FilteringOptionLoader.InitializeOrder();
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {

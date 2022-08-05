@@ -12,6 +12,8 @@ namespace MagicStorage.UI.States {
 		public BaseStorageUIPage(BaseStorageUI parent, string name) {
 			parentUI = parent;
 			Name = name;
+
+			OnPageSelected += Recalculate;
 		}
 
 		public void InvokeOnPageSelected() => OnPageSelected?.Invoke();

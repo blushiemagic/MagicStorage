@@ -1,4 +1,6 @@
 ﻿using MagicStorage.Sorting;
+using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
@@ -17,6 +19,8 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterMelee : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponMelee;
 
+		public override bool FiltersDamageClass => true;
+
 		public override string Texture => "MagicStorage/Assets/FilterMelee";
 
 		public override string Name => "WeaponsMelee";
@@ -27,6 +31,8 @@ namespace MagicStorage.CrossMod {
 	[Autoload(false)]
 	public sealed class FilterRanged : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponRanged;
+
+		public override bool FiltersDamageClass => true;
 
 		public override string Texture => "MagicStorage/Assets/FilterRanged";
 
@@ -39,6 +45,8 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterMagic : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponMagic;
 
+		public override bool FiltersDamageClass => true;
+
 		public override string Texture => "MagicStorage/Assets/FilterMagic";
 
 		public override string Name => "WeaponsMagic";
@@ -50,9 +58,11 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterSummon : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponSummon;
 
+		public override bool FiltersDamageClass => true;
+
 		public override string Texture => "MagicStorage/Assets/FilterMelee";
 
-		public override string Name => "WeaponsMelee";
+		public override string Name => "WeaponsSummon";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
@@ -60,6 +70,8 @@ namespace MagicStorage.CrossMod {
 	[Autoload(false)]
 	public sealed class FilterThrowing : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponThrown;
+
+		public override bool FiltersDamageClass => true;
 
 		public override string Texture => "MagicStorage/Assets/FilterThrowing";
 
@@ -167,5 +179,66 @@ namespace MagicStorage.CrossMod {
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
 		public override bool GetDefaultVisibility(bool craftingGUI) => !craftingGUI;
+	}
+
+	[Autoload(false)]
+	public sealed class FilterOtherWeaponClasses : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.WeaponOther;
+
+		public override bool FiltersDamageClass => false;  //Set to false to prevent recursion, even though it does filter damage classes
+
+		public override string Texture => "MagicStorage/Assets/FilterOtherWeapon";
+
+		public override string Name => "WeaponsOther";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterUnstackables : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.Unstackable;
+
+		public override string Texture => "MagicStorage/Assets/FilterMisc";
+
+		public override string Name => "Unstackables";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterStackables : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.Stackable;
+
+		public override string Texture => "MagicStorage/Assets/FilterMisc";
+
+		public override string Name => "Stackables";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterNotFullyResearched : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.NotFullyResearched;
+
+		public override string Texture => "MagicStorage/Assets/FilterMisc";
+
+		public override string Name => "NotFullyResearched";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override bool GetDefaultVisibility(bool craftingGUI) => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
+	}
+
+	[Autoload(false)]
+	public sealed class FilterFullyResearched : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.FullyResearched;
+
+		public override string Texture => "MagicStorage/Assets/FilterMisc";
+
+		public override string Name => "FullyResearched";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override bool GetDefaultVisibility(bool craftingGUI) => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 	}
 }
