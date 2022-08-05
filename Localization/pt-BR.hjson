@@ -103,32 +103,32 @@ Mods: {
 			UpgradeCrimtane:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 80
-			<right> uma Unidade de Armazenamento para utilizar
+			<right> em uma Unidade de Armazenamento para utilizar
 			'''
 			UpgradeDemonite:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 80
-			<right> uma Unidade de Armazenamento para utilizar
+			<right> em uma Unidade de Armazenamento para utilizar
 			'''
 			UpgradeHallowed:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 160
-			<right> uma Unidade de Armazenamento (Pedra Infernal) para utilizar
+			<right> em uma Unidade de Armazenamento (Pedra Infernal) para utilizar
 			'''
 			UpgradeHellstone:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 120
-			<right> uma Unidade de Armazenamento (Demonita/Carminita) para utilizar
+			<right> em uma Unidade de Armazenamento (Demonita/Carminita) para utilizar
 			'''
 			UpgradeLuminite:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 320
-			<right> uma Unidade de Armazenamento (Clorofita Azul) para utilizar
+			<right> em uma Unidade de Armazenamento (Clorofita Azul) para utilizar
 			'''
 			UpgradeTerra:
 			'''
 			Melhora a capacidade de uma Unidade de Armazenamento para 640
-			<right> uma Unidade de Armazenamento (Luminita) para utilizar
+			<right> em uma Unidade de Armazenamento (Luminita) para utilizar
 			'''
 			CrimsonAltar:
 			'''
