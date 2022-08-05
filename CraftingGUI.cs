@@ -1040,27 +1040,6 @@ namespace MagicStorage
 			}
 		}
 
-		private class RandCache {
-			private readonly int inext, inextp;
-			private readonly int[] SeedArray;
-
-			private static readonly FieldInfo UnifiedRandom_inext = typeof(UnifiedRandom).GetField("inext", BindingFlags.NonPublic | BindingFlags.Instance);
-			private static readonly FieldInfo UnifiedRandom_inextp = typeof(UnifiedRandom).GetField("inextp", BindingFlags.NonPublic | BindingFlags.Instance);
-			private static readonly FieldInfo UnifiedRandom_SeedArray = typeof(UnifiedRandom).GetField("SeedArray", BindingFlags.NonPublic | BindingFlags.Instance);
-
-			public RandCache(UnifiedRandom rand) {
-				inext = (int)UnifiedRandom_inext.GetValue(rand);
-				inextp = (int)UnifiedRandom_inextp.GetValue(rand);
-				SeedArray = UnifiedRandom_SeedArray.GetValue(rand) as int[];
-			}
-
-			public void Restore(ref UnifiedRandom rand) {
-				UnifiedRandom_inext.SetValue(rand, inext);
-				UnifiedRandom_inextp.SetValue(rand, inextp);
-				UnifiedRandom_SeedArray.SetValue(rand, SeedArray);
-			}
-		}
-
 		private static bool AttemptLazyBatchCraft(CraftingContext context) {
 			NetHelper.Report(false, "Attempting batch craft operation...");
 
@@ -1073,8 +1052,6 @@ namespace MagicStorage
 			int crafts = (int)Math.Ceiling(context.toCraft / (float)selectedRecipe.createItem.stack);
 
 			List<Item> batch = new(selectedRecipe.requiredItem.Count);
-
-			RandCache randCache = new(Main._rand);
 
 			//Reduce the number of batch crafts until this recipe can be completely batched for the number of crafts
 			while (crafts > 0) {
@@ -1089,7 +1066,6 @@ namespace MagicStorage
 						} else {
 							// Did not have enough items
 							crafts--;
-							randCache.Restore(ref Main._rand);
 							batch.Clear();
 						}
 					} else {
