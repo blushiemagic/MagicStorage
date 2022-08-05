@@ -464,10 +464,10 @@ Mods: {
 		'''
 
 		RecipeConditions: {
-			# EctoMistOverride:
-			# '''
-			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
-			# '''
+			EctoMistOverride:
+			'''
+			{$RecipeConditions.InGraveyardBiome} / 站在 {$Mods.MagicStorage.ItemName.CombinedStations4Item} 旁
+			'''
 			CookedMarshmallowCondition: "存放于制作单元的生态球"
 		}
 
@@ -475,28 +475,28 @@ Mods: {
 		DepositTooltipAlt: "快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键"
 
 		StorageGUI: {
-			# ForceRefreshButton: "Force UI refresh"
-			# CompactCoinsButton: "Compact Coins"
-			# DestroyUnloadedButton: "Delete Unloaded Items"
-			# DestroyUnloadedDataButton: "Delete Unloaded Data"
+			ForceRefreshButton: "强制刷新UI"
+			CompactCoinsButton: "合并钱币"
+			DestroyUnloadedButton: "删除卸载物品"
+			DestroyUnloadedDataButton: "删除被卸载的数据"
 
-			# SellDuplicatesHeader: "Sell Duplicates"
-			# SellDuplicatesButton: "Sell"
+			SellDuplicatesHeader: "出售同种物品"
+			SellDuplicatesButton: "出售"
 
 			SellDuplicatesMenu: {
-				# NoPrefix: "Sell Duplicates with No Prefix"
-				# KeepMostValue: "Keep Most Expensive"
-				# KeepLeastValue: "Keep Least Expensive"
+				NoPrefix: "出售所有同种无词缀物品"
+				KeepMostValue: "保留最值钱的物品"
+				KeepLeastValue: "保留最不值钱的物品"
 			}
 		}
 
 		EnvironmentGUI: {
-			# EntryDisabledDefault: This module is currently disabled.
-			# NoModules:
-			# '''
-			# No Environment Simulator modules have been detected.
-			# Other mods will need to add some for them to appear here.
-			# '''
+			EntryDisabledDefault: 该模块已被禁用
+			NoModules:
+			'''
+			没有检测到任何跨模组模块
+			没有任何模组为魔法存储添加了跨模组模块
+			'''
 		}
 
 		FilteringOption: {
@@ -516,11 +516,11 @@ Mods: {
 			Tiles: "筛选放置物"
 			Misc: "筛选杂项"
 			Recent: "筛选最近存入的物品"
-			# WeaponsOther: "Filter Other Weapons"
-			# Unstackables: "Filter Unstackables"
-			# Stackables: "Filter Stackables"
-			# NotFullyResearched: "Filter Items Not Fully Researched"
-			# FullyResearched: "Filter Items Fully Researched"
+			WeaponsOther: "筛选其他杂项武器"
+			Unstackables: "筛选不可堆叠物品"
+			Stackables: "筛选可堆叠物品"
+			NotFullyResearched: "筛选未完全研究的物品"
+			FullyResearched: "筛选已完全研究的物品"
 		}
 
 		SortingOption: {
@@ -529,18 +529,18 @@ Mods: {
 			Name: "按名称排序"
 			Value: "按价格排序"
 			Dps: "按DPS排序"
-			# QuantityAbsolute: "Sort by Quantity"
-			# QuantityRatio: "Sort by Quantity Ratio"
-			# Damage: "Sort by Damage"
+			QuantityAbsolute: "按数量排序"
+			QuantityRatio: "按堆叠占最大堆叠的占比排序"
+			Damage: "按伤害排序"
 		}
 
 		UIPages: {
-			# Sorting: "Sorting",
-			# Filtering: "Filtering",
-			# Crafting: "Crafting",
-			# Storage: "Storage",
-			# Controls: "Controls"  # StorageGUI page for the extra controls
-			# Modules: "Modules"    # EnvironmentGUI page for the modules
+			Sorting: "排序",
+			Filtering: "筛选",
+			Crafting: "合成",
+			Storage: "存储",
+			Controls: "控件"  # StorageGUI page for the extra controls
+			Modules: "模块"    # EnvironmentGUI page for the modules
 		}
 
 		Config: {
@@ -586,21 +586,13 @@ Mods: {
 				Label: "搜索结果实时更新"
 				Tooltip: "开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果"
 			}
-			allowItemDataDebug: {
-				# Label: "Item debug information"
-				# Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
-			}
-			searchBarRefreshOnKey: {
-				# Label: "Search Bar Refreshes on Key Press"
-				# Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
-			}
 			uiFavorites: {
-				# Label: "Favorites Filter Button"
-				# Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+				Label: "收藏筛选按钮"
+				Tooltip: "开启后，将允许在制作界面中收藏物品/制作配方"
 			}
 			recipeBlacklist: {
-				# Label: "Recipe Whitelist/Blacklist"
-				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+				Label: "制作配方白名单/黑名单"
+				Tooltip: "开启后，将允许在制作界面中将制作配方加入白名单/黑名单"
 			}
 
 			AllowAutomatonToMoveIn: {
