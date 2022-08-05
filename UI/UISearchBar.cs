@@ -10,7 +10,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.Localization;
-using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.UI
@@ -50,6 +49,9 @@ namespace MagicStorage.UI
 			cursorTimer++;
 			cursorTimer %= 60;
 
+			//Unfortunately, I can't convert this to the new API
+			//The click events only run on the element being clicked, for obvious reasons
+			// -- absoluteAquarian
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			MouseState mouse = StorageGUI.curMouse;
 			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
@@ -70,6 +72,8 @@ namespace MagicStorage.UI
 			{
 				hasFocus = true;
 				CheckBlockInput();
+
+				Click(new(this, UserInterface.ActiveInstance.MousePosition));
 			}
 			else if (hasFocus && !mouseOver)
 			{
@@ -83,11 +87,16 @@ namespace MagicStorage.UI
 			{
 				LoseFocus();
 			}
-			else if (mouseOver && Text.Length > 0)
+			else if (mouseOver)
 			{
-				Text = string.Empty;
-				cursorPosition = 0;
-				_clearedEvent?.Invoke();
+				if (Text.Length > 0)
+				{
+					Text = string.Empty;
+					cursorPosition = 0;
+					_clearedEvent?.Invoke();
+				}
+
+				base.RightClick(new(this, UserInterface.ActiveInstance.MousePosition));
 			}
 		}
 

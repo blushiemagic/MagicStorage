@@ -300,8 +300,6 @@ Mods: {
 
 		# FilterAllMods: "All mods"
 
-		# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
-
 		# Capacity: "{0} / {1} Items"
 
 		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
@@ -351,10 +349,43 @@ Mods: {
 		# Recipe for item "{0}" was whitelisted.
 		# '''
 
+		RecipeConditions: {
+			# EctoMistOverride:
+			# '''
+			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
+			# '''
+			# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+		}
+
 		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
 		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
 
-		Filters: {
+		StorageGUI: {
+			# ForceRefreshButton: "Force UI refresh"
+			# CompactCoinsButton: "Compact Coins"
+			# DestroyUnloadedButton: "Delete Unloaded Items"
+			# DestroyUnloadedDataButton: "Delete Unloaded Data"
+
+			# SellDuplicatesHeader: "Sell Duplicates"
+			# SellDuplicatesButton: "Sell"
+
+			SellDuplicatesMenu: {
+				# NoPrefix: "Sell Duplicates with No Prefix"
+				# KeepMostValue: "Keep Most Expensive"
+				# KeepLeastValue: "Keep Least Expensive"
+			}
+		}
+
+		EnvironmentGUI: {
+			# EntryDisabledDefault: This module is currently disabled.
+			# NoModules:
+			# '''
+			# No Environment Simulator modules have been detected.
+			# Other mods will need to add some for them to appear here.
+			# '''
+		}
+
+		FilteringOption: {
 			All: "Фильтр (Всё)"
 			Weapons: "Фильтр (Оружия)"
 			Tools: "Фильтр (Инструменты)"
@@ -371,15 +402,32 @@ Mods: {
 			Tiles: "Фильтр (Размещаемое)"
 			Misc: "Фильтр (Разное)"
 			# Recent: "Filter New Recently Added Items"
+			# WeaponsOther: "Filter Other Weapons"
+			# Unstackables: "Filter Unstackables"
+			# Stackables: "Filter Stackables"
+			# NotFullyResearched: "Filter Items Not Fully Researched"
+			# FullyResearched: "Filter Items Fully Researched"
 		}
 
-		Sort: {
+		SortingOption: {
 			Default: "Стандартная сортировка"
 			ID: "Сортировка по ID"
 			Name: "Сортировка по имени"
 			Stack: "Сортировать по стопкам"
 			Value: "Сортировать по значению"
 			# Dps: "Sort by DPS"
+			# QuantityAbsolute: "Sort by Quantity"
+			# QuantityRatio: "Sort by Quantity Ratio"
+			# Damage: "Sort by Damage"
+		}
+
+		UIPages: {
+			# Sorting: "Sorting",
+			# Filtering: "Filtering",
+			# Crafting: "Crafting",
+			# Storage: "Storage",
+			# Controls: "Controls"  # StorageGUI page for the extra controls
+			# Modules: "Modules"    # EnvironmentGUI page for the modules
 		}
 
 		Config: {
@@ -416,6 +464,22 @@ Mods: {
 			useOldCraftMenu: {
 				# Label: "Use old Craft buttons"
 				# Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+			}
+			allowItemDataDebug: {
+				# Label: "Item debug information"
+				# Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
+			}
+			searchBarRefreshOnKey: {
+				# Label: "Search Bar Refreshes on Key Press"
+				# Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+			}
+			uiFavorites: {
+				# Label: "Favorites Filter Button"
+				# Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+			}
+			recipeBlacklist: {
+				# Label: "Recipe Whitelist/Blacklist"
+				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
 			}
 
 			AllowAutomatonToMoveIn: {

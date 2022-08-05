@@ -15,11 +15,13 @@ namespace MagicStorage.Components {
 
 		public int Count => enabled?.GetCardinality() ?? 0;
 
+		private void EnsureInitialized() => enabled ??= new(EnvironmentModuleLoader.Count, true);
+
 		public bool Enabled(int index) {
 			if (EnvironmentModuleLoader.Count == 0 || index >= EnvironmentModuleLoader.Count)
 				return false;
 
-			enabled ??= new(EnvironmentModuleLoader.Count, true);
+			EnsureInitialized();
 
 			return enabled[index];
 		}
@@ -30,7 +32,7 @@ namespace MagicStorage.Components {
 			if (EnvironmentModuleLoader.Count == 0 || index >= EnvironmentModuleLoader.Count)
 				return;
 
-			this.enabled ??= new(EnvironmentModuleLoader.Count, true);
+			EnsureInitialized();
 
 			this.enabled[index] = enabled;
 		}
@@ -47,9 +49,19 @@ namespace MagicStorage.Components {
 				module.ModifyCraftingZones(sandbox, ref information);
 		}
 
+		[Obsolete("Use OnConsumeItemsForRecipe instead", true)]
 		public void OnConsumeItemForRecipe(EnvironmentSandbox sandbox, Item item, int stack) {
 			foreach (EnvironmentModule module in Modules)
 				module.OnConsumeItemForRecipe(sandbox, item, stack);
+		}
+		
+		/// <summary>
+		/// Invokes OnConsumeItemsForRecipe for al modules in this Environment Simulator
+		/// </summary>
+		/// <inheritdoc cref="EnvironmentModule.OnConsumeItemsForRecipe(EnvironmentSandbox, Recipe, List{Item})"/>
+		public virtual void OnConsumeItemsForRecipe(EnvironmentSandbox sandbox, Recipe recipe, List<Item> items) {
+			foreach (EnvironmentModule module in Modules)
+				module.OnConsumeItemsForRecipe(sandbox, recipe, items);
 		}
 
 		public void ResetPlayer(EnvironmentSandbox sandbox) {
@@ -80,6 +92,8 @@ namespace MagicStorage.Components {
 
 		public override void NetSend(BinaryWriter writer) {
 			base.NetSend(writer);
+
+			EnsureInitialized();
 
 			int length = (enabled.Length - 1) / 8 + 1;
 			writer.Write((short)length);

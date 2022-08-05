@@ -1,4 +1,6 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
+using MagicStorage.UI.States;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -88,18 +90,22 @@ namespace MagicStorage
 			storageAccess = point;
 			remoteAccess = remote;
 
-			if (MagicStorageConfig.UseConfigFilter && CraftingGUI.recipeButtons is not null)
+			if (MagicStorageConfig.UseConfigFilter && MagicUI.craftingUI is not null)
 			{
-				CraftingGUI.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
+					? 1   //Show all recipes
+					: 0;  //Show available recipes
 			}
 
 			if (MagicStorageConfig.ClearSearchText)
 			{
-				StorageGUI.searchBar?.Reset();
-				CraftingGUI.searchBar?.Reset();
+				MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage").searchBar?.Reset();
+				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting").searchBar?.Reset();
 			}
 
 			StorageGUI.RefreshItems();
+
+			MagicUI.OpenUI();
 		}
 
 		//Intended to only be used with StorageHeartAccessWrapper
@@ -120,6 +126,8 @@ namespace MagicStorage
 
 			storageAccess = Point16.NegativeOne;
 			Main.blockInput = false;
+
+			MagicUI.CloseUI();
 		}
 
 		public Point16 ViewingStorage() => storageAccess;

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using Terraria;
 using Terraria.ID;
@@ -27,7 +28,7 @@ public class MagicCache : ModSystem
 
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
-	public static Dictionary<FilterMode, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
+	public static Dictionary<int, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
 
 	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; } = null!;
 	public static Dictionary<int, List<Recipe>> hasTile { get; private set; } = null!;
@@ -112,16 +113,15 @@ public class MagicCache : ModSystem
 	{
 		FilteredRecipesCache = new();
 
-		foreach (var filterMode in Enum.GetValues<FilterMode>())
-		{
-			if (filterMode is FilterMode.Recent)
+		foreach (var option in FilteringOptionLoader.Options) {
+			if (option == FilteringOptionLoader.Definitions.Recent)
 				continue;
 
-			var filter = ItemSorter.GetFilter(filterMode);
+			var filter = option.Filter;
 
 			var recipes = EnabledRecipes.Where(r => filter(r.createItem));
 
-			FilteredRecipesCache[filterMode] = recipes.ToArray();
+			FilteredRecipesCache[option.Type] = recipes.ToArray();
 		}
 	}
 }

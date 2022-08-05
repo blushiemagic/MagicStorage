@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -30,6 +29,9 @@ namespace MagicStorage.Components
 
 			DustType = 7;
 			ItemDrop = ModContent.ItemType<Items.StorageConnector>();
+
+			// Make the tile count as a door for housing purposes (like how platforms work)
+			AddToArray(ref TileID.Sets.RoomNeeds.CountsAsDoor);
 		}
 
 		public static int CanPlace(int i, int j, int type, int style, int direction, int alternative)

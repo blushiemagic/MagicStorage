@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
-using Terraria.ModLoader;
 
 namespace MagicStorage
 {

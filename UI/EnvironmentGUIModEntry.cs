@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
@@ -10,7 +11,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class EnvironmentGUIModEntry : UIElement {
+	public sealed class EnvironmentGUIModEntry : UIElement {
 		public readonly Mod Mod;
 
 		public readonly bool Exists;
@@ -49,7 +50,7 @@ namespace MagicStorage.UI {
 			float top = 40;
 
 			foreach (EnvironmentModule module in modules) {
-				EnvironmentGUIToggleLabel label = new(module.DisplayName.GetTranslation(Language.ActiveCulture), module.Name, defaultState: true);
+				EnvironmentGUIToggleLabel label = new(this, module.DisplayName.GetTranslation(Language.ActiveCulture), module.Name, defaultState: true);
 				label.Top.Set(top, 0f);
 				label.Height.Set(20, 0f);
 				label.Width.Set(0, 1f);
@@ -70,49 +71,6 @@ namespace MagicStorage.UI {
 			Recalculate();
 		}
 
-		public override void Update(GameTime gameTime) {
-			foreach ((string name, EnvironmentGUIToggleLabel label) in labelsByName) {
-				bool available = name == label.Module;
-
-				EnvironmentModule module = Mod.TryFind<EnvironmentModule>(name, out var env) ? env : null;
-
-				available &= module?.IsAvailable() ?? false;
-
-				Rectangle dim = InterfaceHelper.GetFullRectangle(label);
-
-				//Man, I'd love to be able to just use the UIElement events, but that would require rewriting all of the GUI classes, so I won't bother
-				// -- absoluteAquarian
-				var curMouse = EnvironmentGUI.curMouse;
-
-				if (!available)
-					label.Text.TextColor = Color.Gray;
-				else if (curMouse.X > dim.X && curMouse.X < dim.X + dim.Width && curMouse.Y > dim.Y - 3f && curMouse.Y < dim.Y + dim.Height) {
-					label.Text.TextColor = Color.Yellow;
-
-					if (EnvironmentGUI.MouseClicked) {
-						bool valid = module is not null && module.IsAvailable();
-
-					//	Main.NewText($"Clicked label \"{label.Text.Text}\" -- Valid? {valid}");
-
-						if (valid && EnvironmentGUI.currentAccess is not null) {
-							label.Toggle();
-							EnvironmentGUI.currentAccess.SetEnabled(module, label.IsOn);
-
-							NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);
-
-						//	Main.NewText($"\"{label.Text.Text}\" label toggled to {label.IsOn}");
-
-							SoundEngine.PlaySound(SoundID.MenuTick);
-						}
-					}
-				} else
-					label.Text.TextColor = Color.White;
-
-				if (!available)
-					Main.instance.MouseText(module.DisabledTooltip.GetTranslation(Language.ActiveCulture));
-			}
-		}
-
 		public void SetLabel(EnvironmentModule module, bool value) {
 			if (labelsByName.TryGetValue(module.Name, out var label))
 				label.SetState(value);
@@ -124,5 +82,19 @@ namespace MagicStorage.UI {
 		}
 
 		public bool GetLabel(EnvironmentModule module) => labelsByName.TryGetValue(module.Name, out var label) && label.IsOn;
+
+		public bool IsAvailable(string name, [NotNullWhen(true)] out EnvironmentModule module) {
+			module = null;
+			if (!labelsByName.TryGetValue(name, out var label))
+				return false;
+
+			bool available = name == label.Module;
+
+			module = Mod.TryFind<EnvironmentModule>(name, out var env) ? env : null;
+
+			available &= module?.IsAvailable() ?? false;
+
+			return available;
+		}
 	}
 }

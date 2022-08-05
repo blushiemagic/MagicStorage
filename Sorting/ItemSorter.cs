@@ -3,34 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Common.Systems;
 using Terraria;
+using Terraria.GameContent.UI;
+using Terraria.ModLoader;
+using Terraria.ID;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(
-			IEnumerable<Item> items, SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, int sortMode, int filterMode, string nameFilter, int? takeCount = null)
 		{
-			var filter = GetFilter(filterMode);
-			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterName(item, nameFilter) && FilterMod(item, modFilterIndex));
+			var filter = FilteringOptionLoader.Get(filterMode)?.Filter;
+
+			if (filter is null)
+				throw new ArgumentOutOfRangeException(nameof(filterMode), "Filtering ID was invalid or its definition had a null filter");
+
+			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterBySearchText(item, nameFilter));
 			if (takeCount is not null)
 				filteredItems = filteredItems.Take(takeCount.Value);
 
 			filteredItems = Aggregate(filteredItems);
 
-			if (sortMode == SortMode.AsIs)
+			if (sortMode < 0)
 				return filteredItems;
 
 			//Apply "fuzzy" sorting since it's faster, but less accurate
 			IOrderedEnumerable<Item> orderedItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
 
-			if (sortMode == SortMode.Value) {
+			if (sortMode == SortingOptionLoader.Definitions.Value.Type) {
 				//Ignore sorting by type
 				return orderedItems.ThenBy(x => x.value);
-			} else if (sortMode == SortMode.Dps) {
-				//Sort again by DPS due to it using variable item data
-				var func = GetSortFunction(SortMode.Dps);
-				return orderedItems.ThenBy(x => x, func).ThenBy(x => x.value);
 			}
 
 			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
@@ -63,64 +66,149 @@ namespace MagicStorage.Sorting
 				yield return lastItem;
 		}
 
-		public static ParallelQuery<Recipe> GetRecipes(SortMode sortMode, FilterMode filterMode, int modFilterIndex, string nameFilter, out IComparer<Item> sortComparer)
+		public static ParallelQuery<Recipe> GetRecipes(int sortMode, int filterMode, string searchFilter, out IComparer<Item> sortComparer)
 		{
-			sortComparer = GetSortFunction(sortMode);
+			sortComparer = SortingOptionLoader.Get(sortMode)?.Sorter;
+
+			if (sortComparer is null)
+				throw new ArgumentOutOfRangeException(nameof(sortMode), "Sorting ID was invalid or its definition had a null sorter");
+
 			return MagicCache.FilteredRecipesCache[filterMode]
 				.AsParallel()
 				.AsOrdered()
-				.Where(recipe => FilterName(recipe.createItem, nameFilter) && FilterMod(recipe.createItem, modFilterIndex));
+				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter));
 		}
 
-		internal static IComparer<Item> GetSortFunction(SortMode sortMode)
-		{
-			return sortMode switch
-			{
-				SortMode.Default => CompareDefault.Instance,
-				SortMode.Id      => CompareID.Instance,
-				SortMode.Name    => CompareName.Instance,
-				SortMode.Value   => CompareValue.Instance,
-				SortMode.Dps     => CompareDps.Instance,
-				_                => null,
-			};
-		}
-
-		internal static ItemFilter.Filter GetFilter(FilterMode filterMode)
-		{
-			return filterMode switch
-			{
-				FilterMode.All           => ItemFilter.All,
-				FilterMode.WeaponsMelee  => MagicStorageConfig.ExtraFilterIcons ? ItemFilter.WeaponMelee : ItemFilter.Weapon,
-				FilterMode.WeaponsRanged => ItemFilter.WeaponRanged,
-				FilterMode.WeaponsMagic  => ItemFilter.WeaponMagic,
-				FilterMode.WeaponsSummon => ItemFilter.WeaponSummon,
-				FilterMode.Ammo          => ItemFilter.Ammo,
-				FilterMode.WeaponsThrown => ItemFilter.WeaponThrown,
-				FilterMode.Tools         => ItemFilter.Tool,
-				FilterMode.Armor         => ItemFilter.Armor,
-				FilterMode.Vanity        => ItemFilter.Vanity,
-				FilterMode.Equipment     => ItemFilter.Equipment,
-				FilterMode.Potions       => ItemFilter.Potion,
-				FilterMode.Placeables    => ItemFilter.Placeable,
-				FilterMode.Misc          => ItemFilter.Misc,
-				FilterMode.Recent        => throw new NotSupportedException(),
-				_                        => ItemFilter.All,
-			};
-		}
-
-		internal static bool FilterName(Item item, string filter) => item.Name.Contains(filter.Trim(), StringComparison.OrdinalIgnoreCase);
-
-		internal static bool FilterMod(Item item, int modFilterIndex)
-		{
-			if (modFilterIndex == ModSearchBox.ModIndexAll)
+		internal static bool FilterBySearchText(Item item, string filter, bool modSearched = false) {
+			if (string.IsNullOrWhiteSpace(filter))
 				return true;
+			
+			filter = filter.Trim();
 
-			int index = ModSearchBox.ModIndexBaseGame;
+			char first = filter[0];
 
-			if (item.ModItem is not null)
-				index = MagicCache.IndexByMod[item.ModItem.Mod];
+			if (first == '#') {
+				//First character is a "#"?  Treat the search as a tooltip search
+				return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+			} else if (first == '@' && !modSearched) {
+				//First character is a "@"?  Treat the first "word" as a mod search and the rest as a normal search
+				string mod = filter[1..];
+				int space;
+				if ((space = mod.IndexOf(' ')) > -1)
+					mod = mod[..space];
+				return (item.ModItem?.Mod.Name ?? "Terraria").Contains(mod, StringComparison.OrdinalIgnoreCase) && FilterBySearchText(item, mod[space..], modSearched: true);
+			}
 
-			return index == modFilterIndex;
+			return item.Name.Contains(filter, StringComparison.OrdinalIgnoreCase);
+		}
+
+		private static IEnumerable<string> GetItemTooltipLines(Item item) {
+			Item hoverItem = item;
+			int yoyoLogo = -1;
+			int researchLine = -1;
+			int rare = hoverItem.rare;
+			float knockBack = hoverItem.knockBack;
+			float num = 1f;
+			if (hoverItem.CountsAsClass(DamageClass.Melee) && Main.LocalPlayer.kbGlove)
+				num += 1f;
+
+			if (Main.LocalPlayer.kbBuff)
+				num += 0.5f;
+
+			if (num != 1f)
+				hoverItem.knockBack *= num;
+
+			if (hoverItem.CountsAsClass(DamageClass.Ranged) && Main.LocalPlayer.shroomiteStealth)
+				hoverItem.knockBack *= 1f + (1f - Main.LocalPlayer.stealth) * 0.5f;
+
+			int num2 = 30;
+			int numLines = 1;
+			string[] array = new string[num2];
+			bool[] array2 = new bool[num2];
+			bool[] array3 = new bool[num2];
+			for (int i = 0; i < num2; i++) {
+				array2[i] = false;
+				array3[i] = false;
+			}
+			string[] tooltipNames = new string[num2];
+
+			Main.MouseText_DrawItemTooltip_GetLinesInfo(item, ref yoyoLogo, ref researchLine, knockBack, ref numLines, array, array2, array3, tooltipNames);
+
+			if (Main.npcShop > 0 && hoverItem.value >= 0 && (hoverItem.type < ItemID.CopperCoin || hoverItem.type > ItemID.PlatinumCoin)) {
+				Main.LocalPlayer.GetItemExpectedPrice(hoverItem, out int calcForSelling, out int calcForBuying);
+				int num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
+				if (hoverItem.shopSpecialCurrency != -1) {
+					tooltipNames[numLines] = "SpecialPrice";
+					CustomCurrencyManager.GetPriceText(hoverItem.shopSpecialCurrency, array, ref numLines, num5);
+				} else if (num5 > 0) {
+					string text = "";
+					int num6 = 0;
+					int num7 = 0;
+					int num8 = 0;
+					int num9 = 0;
+					int num10 = num5 * hoverItem.stack;
+					if (!hoverItem.buy) {
+						num10 = num5 / 5;
+						if (num10 < 1)
+							num10 = 1;
+
+						int num11 = num10;
+						num10 *= hoverItem.stack;
+						int amount = Main.shopSellbackHelper.GetAmount(hoverItem);
+						if (amount > 0)
+							num10 += (-num11 + calcForBuying) * Math.Min(amount, hoverItem.stack);
+					}
+
+					if (num10 < 1)
+						num10 = 1;
+
+					if (num10 >= 1000000) {
+						num6 = num10 / 1000000;
+						num10 -= num6 * 1000000;
+					}
+
+					if (num10 >= 10000) {
+						num7 = num10 / 10000;
+						num10 -= num7 * 10000;
+					}
+
+					if (num10 >= 100) {
+						num8 = num10 / 100;
+						num10 -= num8 * 100;
+					}
+
+					if (num10 >= 1)
+						num9 = num10;
+
+					if (num6 > 0)
+						text = text + num6 + " " + Lang.inter[15].Value + " ";
+
+					if (num7 > 0)
+						text = text + num7 + " " + Lang.inter[16].Value + " ";
+
+					if (num8 > 0)
+						text = text + num8 + " " + Lang.inter[17].Value + " ";
+
+					if (num9 > 0)
+						text = text + num9 + " " + Lang.inter[18].Value + " ";
+
+					if (!hoverItem.buy)
+						array[numLines] = Lang.tip[49].Value + " " + text;
+					else
+						array[numLines] = Lang.tip[50].Value + " " + text;
+
+					tooltipNames[numLines] = "Price";
+					numLines++;
+				} else if (hoverItem.type != ItemID.DefenderMedal) {
+					array[numLines] = Lang.tip[51].Value;
+					tooltipNames[numLines] = "Price";
+					numLines++;
+				}
+			}
+
+			List<TooltipLine> lines = ItemLoader.ModifyTooltips(item, ref numLines, tooltipNames, ref array, ref array2, ref array3, ref yoyoLogo, out _);
+
+			return lines.Select(line => line.Text);
 		}
 	}
 }

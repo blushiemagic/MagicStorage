@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +17,9 @@ namespace MagicStorage.Common.Global {
 			if (StoragePlayer.LocalPlayer.StorageCrafting() || StoragePlayer.LocalPlayer.StorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
 				return false;
 
-			return Main.mouseX > StorageGUI.panelLeft && Main.mouseX < StorageGUI.panelLeft + StorageGUI.panelWidth && Main.mouseY > StorageGUI.panelTop && Main.mouseY < StorageGUI.panelTop + StorageGUI.panelHeight;	
+			var page = MagicUI.storageUI;
+
+			return Main.mouseX > page.PanelLeft && Main.mouseX < page.PanelRight && Main.mouseY > page.PanelTop && Main.mouseY < page.PanelBottom;	
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {

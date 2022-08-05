@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -76,7 +75,7 @@ namespace MagicStorage.NPCs {
 
 				// You can add multiple elements if you really wanted to
 				// You can also use localization keys (see Localization/en-US.lang)
-				new FlavorTextBestiaryInfoElement("Mods.ExampleMod.Bestiary.Golem")
+				new FlavorTextBestiaryInfoElement("Mods.MagicStorage.Bestiary.Golem")
 			});
 		}
 
