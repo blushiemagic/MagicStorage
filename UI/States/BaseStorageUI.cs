@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
@@ -43,12 +44,14 @@ namespace MagicStorage.UI.States {
 
 		public BaseStorageUIPage GetPage(string page) => pages[page];
 
-		public T GetPage<T>(string page) where T : BaseStorageUIPage => pages[page] as T;
+		public T GetPage<T>(string page) where T : BaseStorageUIPage => pages is null
+			? null
+			: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
 
-		public override void OnActivate() {
+		public override void OnInitialize() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 
-			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetTextValue("Mods.MagicStorage.UIPages." + p))));
+			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetText("Mods.MagicStorage.UIPages." + p))));
 
 			panel.OnMenuClose += Close;
 
@@ -60,8 +63,13 @@ namespace MagicStorage.UI.States {
 
 			pages = new();
 
-			foreach (string key in panel.menus.Keys)
-				pages[key] = InitPage(key);
+			foreach ((string key, var tab) in panel.menus) {
+				var page = pages[key] = InitPage(key);
+				page.Width = StyleDimension.Fill;
+				page.Height = StyleDimension.Fill;
+
+				tab.OnClick += (evt, e) => SetPage((e as UIPanelTab).Name);
+			}
 
 			PostInitializePages();
 
@@ -73,6 +81,10 @@ namespace MagicStorage.UI.States {
 			foreach (var page in pages.Values)
 				page.Activate();
 		}
+
+		public sealed override void OnActivate() => Open();
+
+		public sealed override void OnDeactivate() => Close();
 
 		protected virtual void PostInitializePages() { }
 
@@ -92,9 +104,9 @@ namespace MagicStorage.UI.States {
 
 				currentPage = newPage;
 
-				currentPage.InvokeOnPageSelected();
-
 				panel.viewArea.Append(currentPage);
+
+				currentPage.InvokeOnPageSelected();
 
 				return true;
 			}
@@ -103,18 +115,20 @@ namespace MagicStorage.UI.States {
 		}
 
 		public void Open() {
+			if (currentPage is not null)
+				return;
+
 			OnOpen();
 
-			if (currentPage is null)
-				SetPage(DefaultPage);
+			SetPage(DefaultPage);
 		}
 
 		protected virtual void OnOpen() { }
 
 		public void Close() {
-			OnClose();
-
 			if (currentPage is not null) {
+				OnClose();
+
 				currentPage.InvokeOnPageDeselected();
 
 				currentPage.Remove();

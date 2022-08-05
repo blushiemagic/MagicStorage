@@ -14,8 +14,8 @@ namespace MagicStorage.UI {
 		private static readonly Asset<Texture2D> InventoryBack = TextureAssets.InventoryBack;
 
 		private readonly float inventoryScale;
-		public int NumColumns { get; private set; } = 10;
-		public int NumRows { get; private set; } = 4;
+		public int NumColumns { get; private set; } = -1;
+		public int NumRows { get; private set; } = -1;
 
 		public MagicStorageItemSlot[,] Slots { get; set; } = new[,] { { new MagicStorageItemSlot(0) } };
 		
@@ -24,13 +24,16 @@ namespace MagicStorage.UI {
 		public delegate MagicStorageItemSlot GetNewItemSlot(int slot, float zoneScale);
 		public event GetNewItemSlot InitializeSlot;
 
-		public int HoverSlot { get; internal set; }
+		public int HoverSlot { get; internal set; } = -1;
 
 		public NewUISlotZone(float scale) {
 			inventoryScale = scale;
 		}
 
 		public void SetDimensions(int columns, int rows) {
+			if (NumColumns == columns && NumRows == rows)
+				return;
+
 			NumColumns = columns;
 			NumRows = rows;
 			ZoneHeight = (int)(InventoryBack.Value.Height * inventoryScale) * rows + Padding;
@@ -87,8 +90,14 @@ namespace MagicStorage.UI {
 		}
 
 		public void SetItemsAndContexts(int count, UISlotZone.GetItem getItem) {
+			if (NumColumns < 0 || NumRows < 0)
+				return;
+
 			int i;
 			for (i = 0; i < count; i++) {
+				if (i >= NumColumns * NumRows)
+					return;
+
 				int context = 0;
 				Item item = getItem(i, ref context);
 
@@ -115,13 +124,16 @@ namespace MagicStorage.UI {
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 
+			if (NumColumns < 0 || NumRows < 0)
+				return;
+
 			if (HoverSlot >= 0) {
 				var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
 				Item hoverItem = slot.StoredItem;
 
 				if (!hoverItem.IsAir) {
 					Main.HoverItem = hoverItem.Clone();
-					MagicUI.mouseText = string.Empty;
+					Main.instance.MouseText(string.Empty);
 				}
 			}
 		}

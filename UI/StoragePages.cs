@@ -16,7 +16,7 @@ namespace MagicStorage.UI {
 		private readonly List<TElement> buttons = new();
 
 		public BaseOptionUIPage(BaseStorageUI parent, string name) : base(parent, name) {
-			OnPageSelected += InitOptionButtons;
+			OnPageSelected += () => InitOptionButtons(false);
 		}
 
 		public abstract IEnumerable<TOption> GetOptions();
@@ -25,15 +25,15 @@ namespace MagicStorage.UI {
 
 		public abstract int GetOptionType(TElement element);
 
-		public override void OnInitialize() => InitOptionButtons();
+		public override void OnActivate() => InitOptionButtons(true);
 
 		public override void Recalculate() {
 			base.Recalculate();
 
-			InitOptionButtons();
+			InitOptionButtons(false);
 		}
 
-		private void InitOptionButtons() {
+		private void InitOptionButtons(bool activating) {
 			if (Main.gameMenu)
 				return;
 
@@ -61,6 +61,9 @@ namespace MagicStorage.UI {
 
 				Append(element);
 				buttons.Add(element);
+
+				if (!activating)
+					element.Activate();
 			}
 		}
 

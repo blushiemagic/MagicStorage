@@ -86,9 +86,14 @@ namespace MagicStorage.UI.States {
 			internal NewUISlotZone slotZone;  //Item slots for the items in storage
 
 			private bool lastKnownConfigFavorites;
+			private float lastKnownScrollBarViewPosition = -1;
 
 			public StoragePage(BaseStorageUI parent) : base(parent, "Storage") {
 				OnPageSelected += StorageGUI.CheckRefresh;
+
+				OnPageDeselected += () => {
+					lastKnownScrollBarViewPosition = -1;
+				};
 			}
 
 			public override void OnInitialize() {
@@ -129,13 +134,13 @@ namespace MagicStorage.UI.States {
 					(e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 
 					string alt = MagicStorageConfig.QuickStackDepositMode ? "Alt" : "";
-					MagicUI.mouseText = Language.GetText($"Mods.MagicStorage.DepositTooltip{alt}").Value;
+					Main.instance.MouseText(Language.GetText($"Mods.MagicStorage.DepositTooltip{alt}").Value);
 				};
 
 				depositButton.OnMouseOut += (evt, e) => {
 					(e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
 
-					MagicUI.mouseText = "";
+					Main.instance.MouseText("");
 				};
 
 				depositButton.Left.Set(x, 0f);
@@ -156,7 +161,7 @@ namespace MagicStorage.UI.States {
 				searchBar.Height.Set(0f, 1f);
 				topBar.Append(searchBar);
 
-				slotZone = new(/* HoverItemSlot, GetItem, */ StorageGUI.inventoryScale);
+				slotZone = new(StorageGUI.inventoryScale);
 
 				slotZone.InitializeSlot += (slot, scale) => {
 					MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
@@ -245,8 +250,6 @@ namespace MagicStorage.UI.States {
 				capacityText.Left.Set(6f, 0f);
 				capacityText.Top.Set(6f, 0f);
 				bottomBar.Append(capacityText);
-
-				UpdateZone();
 			}
 
 			private void InitFilterButtons() {
@@ -271,6 +274,9 @@ namespace MagicStorage.UI.States {
 					InitFilterButtons();
 					lastKnownConfigFavorites = MagicStorageConfig.CraftingFavoritingEnabled;
 				}
+
+				if (lastKnownScrollBarViewPosition != scrollBar.ViewPosition)
+					UpdateZone();
 
 				TEStorageHeart heart = StorageGUI.GetHeart();
 				int numItems = 0;
@@ -310,9 +316,13 @@ namespace MagicStorage.UI.States {
 				int scrollBarMaxViewSize = 1 + noDisplayRows;
 				scrollBar.Height.Set(displayRows * (itemSlotHeight + StorageGUI.padding), 0f);
 				scrollBar.SetView(StorageGUI.scrollBarViewSize, scrollBarMaxViewSize);
+
+				lastKnownScrollBarViewPosition = scrollBar.ViewPosition;
 			}
 
 			public void Refresh() {
+				UpdateZone();
+
 				slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
 			}
 

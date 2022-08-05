@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
@@ -54,7 +55,7 @@ namespace MagicStorage.UI {
 				Text.TextColor = Color.Yellow;
 			else {
 				Text.TextColor = Color.Gray;
-				MagicUI.mouseText = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture) ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
+				Main.instance.MouseText(module?.DisabledTooltip.GetTranslation(Language.ActiveCulture) ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault"));
 			}
 		}
 
@@ -65,7 +66,7 @@ namespace MagicStorage.UI {
 				Text.TextColor = Color.White;
 			else {
 				Text.TextColor = Color.Gray;
-				MagicUI.mouseText = "";
+				Main.instance.MouseText("");
 			}
 		}
 	}

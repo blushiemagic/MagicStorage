@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
+using Terraria;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -45,14 +46,14 @@ namespace MagicStorage.UI {
 			base.MouseOver(evt);
 
 			hovering = true;
-			MagicUI.mouseText = name.Value;
+			Main.instance.MouseText(name.Value);
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
 			hovering = false;
-			MagicUI.mouseText = "";
+			Main.instance.MouseText("");
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)

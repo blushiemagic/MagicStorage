@@ -11,8 +11,6 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
 {
-	internal static string mouseText = "";
-
 	internal static UserInterface uiInterface;
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI;
@@ -25,10 +23,13 @@ public class MagicUI : ModSystem
 		craftingUI = new CraftingUIState();
 		storageUI = new StorageUIState();
 		environmentUI = new EnvironmentUIState();
+	}
 
-		craftingUI.Activate();
-		storageUI.Activate();
-		environmentUI.Activate();
+	public override void Unload() {
+		uiInterface = null;
+		craftingUI = null;
+		storageUI = null;
+		environmentUI = null;
 	}
 
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -40,8 +41,6 @@ public class MagicUI : ModSystem
 					if (uiInterface?.CurrentState is not null) {
 						Main.hidePlayerCraftingMenu = true;
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
-
-						Main.instance.MouseText(mouseText);
 					}
 
 					return true;
@@ -79,5 +78,7 @@ public class MagicUI : ModSystem
 			uiInterface.SetState(storageUI);
 	}
 
-	internal static void CloseUI() => uiInterface.SetState(null);
+	internal static void CloseUI() {
+		uiInterface.SetState(null);
+	}
 }

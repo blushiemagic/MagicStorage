@@ -90,22 +90,24 @@ namespace MagicStorage
 			storageAccess = point;
 			remoteAccess = remote;
 
-			if (MagicStorageConfig.UseConfigFilter && MagicUI.craftingUI is not null)
+			Main.playerInventory = true;
+
+			MagicUI.OpenUI();
+
+			if (MagicStorageConfig.UseConfigFilter && MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting") is CraftingUIState.RecipesPage page)
 			{
-				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
+				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
 					? 1   //Show all recipes
 					: 0;  //Show available recipes
 			}
 
 			if (MagicStorageConfig.ClearSearchText)
 			{
-				MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage").searchBar?.Reset();
-				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting").searchBar?.Reset();
+				MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage")?.searchBar?.Reset();
+				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting")?.searchBar?.Reset();
 			}
 
 			StorageGUI.RefreshItems();
-
-			MagicUI.OpenUI();
 		}
 
 		//Intended to only be used with StorageHeartAccessWrapper

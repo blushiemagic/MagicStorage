@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
@@ -19,13 +20,13 @@ namespace MagicStorage.UI {
 		public event Action OnMenuClose;
 		public UIPanel header;
 
-		public readonly Dictionary<string, UITextPanel<string>> menus;
+		public readonly Dictionary<string, UIPanelTab> menus;
 
 		public UIPanel viewArea;
 
 		public event Action OnRecalculate;
 
-		public UIDragablePanel(bool stopItemUse, IEnumerable<(string key, string text)> menuOptions) {
+		public UIDragablePanel(bool stopItemUse, IEnumerable<(string key, LocalizedText text)> menuOptions) {
 			StopItemUse = stopItemUse;
 
 			SetPadding(0);
@@ -59,9 +60,9 @@ namespace MagicStorage.UI {
 
 			float left = 0;
 
-			foreach ((string key, string text) in menuOptions) {
-				UITextPanel<string> menu;
-				menus.Add(key, menu = new(text));
+			foreach ((string key, LocalizedText text) in menuOptions) {
+				UIPanelTab menu;
+				menus.Add(key, menu = new(key, text));
 				menu.SetPadding(7);
 				menu.Left.Set(left, 0f);
 				menu.BackgroundColor.A = 255;
@@ -74,8 +75,8 @@ namespace MagicStorage.UI {
 		}
 
 		public void SetActivePage(string page) {
-			foreach (var menu in menus.Values)
-				menu.TextColor = Color.White;
+			foreach (var tab in menus.Values)
+				tab.TextColor = Color.White;
 
 			if (menus.TryGetValue(page, out var menuText))
 				menuText.TextColor = Color.Yellow;
