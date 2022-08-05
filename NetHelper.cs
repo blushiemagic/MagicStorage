@@ -847,7 +847,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server) {
 				Point16 position = reader.ReadPoint16();
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
-					heart.compactCoins = true;
+					heart.CompactCoins();
 
 				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");

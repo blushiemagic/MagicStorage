@@ -56,6 +56,11 @@ namespace MagicStorage.UI.States {
 			GetPage<StoragePage>("Storage").scrollBar.ViewPosition = 0f;
 		}
 
+		public override void Update(GameTime gameTime) {
+			if (object.ReferenceEquals(currentPage, GetPage<StoragePage>("Storage")) && StorageGUI.needRefresh)
+				StorageGUI.RefreshItems();
+		}
+
 		public void Refresh() {
 			if (Main.gameMenu)
 				return;

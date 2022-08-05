@@ -590,8 +590,10 @@ namespace MagicStorage.Components
 					}
 				}
 
-				if (result.stack > 0)
+				if (result.stack > 0) {
 					ResetCompactStage();
+					StorageGUI.needRefresh = true;
+				}
 			}
 		}
 
@@ -622,8 +624,10 @@ namespace MagicStorage.Components
 				}
 			}
 
-			if (didSomething)
+			if (didSomething) {
 				ResetCompactStage();
+				StorageGUI.needRefresh = true;
+			}
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
