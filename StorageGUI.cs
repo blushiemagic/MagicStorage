@@ -41,9 +41,9 @@ namespace MagicStorage
 
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		internal static bool needRefresh;
+		public static bool needRefresh;
 
-		internal static event Action OnRefresh;
+		public static event Action OnRefresh;
 
 		internal static void CheckRefresh() {
 			if (needRefresh)
