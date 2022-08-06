@@ -366,6 +366,8 @@ Mods: {
 			# DestroyUnloadedButton: "Delete Unloaded Items"
 			# DestroyUnloadedDataButton: "Delete Unloaded Data"
 			# InitShowcaseButton: "Initialize Showcase"
+			# ResetShowcaseButton: "Reset Showcase Items"
+			# ClearItemsButton: "Clear All Items"
 
 			# SellDuplicatesHeader: "Sell Duplicates"
 			# SellDuplicatesButton: "Sell"

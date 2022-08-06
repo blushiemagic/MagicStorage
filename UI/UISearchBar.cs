@@ -107,13 +107,16 @@ namespace MagicStorage.UI
 			}
 		}
 
-		private void LoseFocus()
+		internal void LoseFocus(bool forced = false)
 		{
+			if (!hasFocus)
+				return;
+
 			hasFocus = false;
 			CheckBlockInput();
 			cursorPosition = Text.Length;
 
-			if (!MagicStorageConfig.SearchBarRefreshOnKey)
+			if (forced || !MagicStorageConfig.SearchBarRefreshOnKey)
 				StorageGUI.RefreshItems();
 		}
 

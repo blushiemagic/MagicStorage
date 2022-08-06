@@ -679,6 +679,8 @@ namespace MagicStorage.UI.States {
 
 					stationZone.ClearItems();
 					recipeZone.ClearItems();
+
+					searchBar.LoseFocus(forced: true);
 				};
 			}
 

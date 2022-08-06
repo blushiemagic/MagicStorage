@@ -86,6 +86,8 @@ namespace MagicStorage.UI.States {
 					slotZone.HoverSlot = -1;
 
 					slotZone.ClearItems();
+
+					searchBar.LoseFocus(forced: true);
 				};
 			}
 
@@ -378,17 +380,9 @@ namespace MagicStorage.UI.States {
 				list.Append(scroll);
 				list.ListPadding = 10;
 
-				forceRefresh = new(Language.GetText("Mods.MagicStorage.StorageGUI.ForceRefreshButton"));
+				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => StorageGUI.needRefresh = true);
 
-				forceRefresh.OnClick += (evt, e) => StorageGUI.needRefresh = true;
-
-				InitButtonEvents(forceRefresh);
-
-				list.Add(forceRefresh);
-
-				compactCoins = new(Language.GetText("Mods.MagicStorage.StorageGUI.CompactCoinsButton"));
-
-				compactCoins.OnClick += (evt, e) => {
+				InitButton(ref compactCoins, "StorageGUI.CompactCoinsButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
@@ -397,49 +391,26 @@ namespace MagicStorage.UI.States {
 						StorageGUI.needRefresh = true;
 					} else
 						NetHelper.SendCoinCompactRequest(heart.Position);
-				};
+				});
 
-				InitButtonEvents(compactCoins);
-
-				list.Add(compactCoins);
-
-				deleteUnloadedItems = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedButton"));
-
-				deleteUnloadedItems.OnClick += (evt, e) => {
+				InitButton(ref deleteUnloadedItems, "StorageGUI.DestroyUnloadedButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
 					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>());
-				};
+				});
 
-				InitButtonEvents(deleteUnloadedItems);
-
-				list.Add(deleteUnloadedItems);
-
-				deleteUnloadedData = new(Language.GetText("Mods.MagicStorage.StorageGUI.DestroyUnloadedDataButton"));
-
-				deleteUnloadedData.OnClick += (evt, e) => {
+				InitButton(ref deleteUnloadedData, "StorageGUI.DestroyUnloadedDataButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
 					heart.DestroyUnloadedGlobalItemData();
-				};
+				});
 
-				InitButtonEvents(deleteUnloadedData);
+				bool debugButtons = true;
 
-				list.Add(deleteUnloadedData);
-
-				bool b = true;
-
-				if (b) {
-					UITextPanel<LocalizedText> initShowcase = new(Language.GetText("Mods.MagicStorage.StorageGUI.InitShowcaseButton"));
-
-					initShowcase.OnClick += (evt, e) => StorageGUI.DepositShowcaseItemsToCurrentStorage();
-
-					InitButtonEvents(initShowcase);
-
-					list.Add(initShowcase);
-				}
+				if (debugButtons)
+					InitDebugButtons();
 
 				float height = 0;
 				
@@ -558,6 +529,38 @@ namespace MagicStorage.UI.States {
 				}
 
 				SellMenuChoice = obj.Index;
+			}
+
+			private void InitDebugButtons() {
+				UITextPanel<LocalizedText> initShowcase = null;
+				InitButton(ref initShowcase, "StorageGUI.InitShowcaseButton", (evt, e) => StorageGUI.DepositShowcaseItemsToCurrentStorage());
+
+				UITextPanel<LocalizedText> resetShowcase = null;
+				InitButton(ref resetShowcase, "StorageGUI.ResetShowcaseButton", (evt, e) => StorageGUI.showcaseItems = null);
+
+				UITextPanel<LocalizedText> clearItems = null;
+				InitButton(ref clearItems, "StorageGUI.ClearItemsButton", (evt, e) => {
+					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
+						return;
+
+					foreach (var unit in heart.GetStorageUnits().OfType<TEStorageUnit>()) {
+						unit.items.Clear();
+						unit.PostChangeContents();
+					}
+
+					StorageGUI.needRefresh = true;
+					heart.ResetCompactStage();
+				});
+			}
+
+			private void InitButton(ref UITextPanel<LocalizedText> button, string localizationKey, MouseEvent evt) {
+				button = new(Language.GetText("Mods.MagicStorage." + localizationKey));
+
+				button.OnClick += evt;
+
+				InitButtonEvents(button);
+
+				list.Add(button);
 			}
 
 			private static void InitButtonEvents(UITextPanel<LocalizedText> button) {

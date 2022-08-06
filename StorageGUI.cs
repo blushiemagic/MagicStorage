@@ -248,11 +248,27 @@ namespace MagicStorage
 				return true;
 			}
 
+			void MakeItem(int type) {
+				if (addedTypes.Add(type)) {
+					Item item = new(type);
+					item.stack = item.maxStack;
+
+					showcaseItems.Add(item);
+				}
+			}
+
 			void MakeResearchedItems(bool researched) {
+				bool CheckIsValidResearchableItemForShowcase(Item item) {
+					if (item.dye > 0 || item.maxStack == 1)
+						return false;
+
+					return researched != Utility.IsFullyResearched(item.type, true);
+				}
+
 				int tries = 1000;
 
 				for (int i = 0; i < 10; i++) {
-					if (MakeRandomItem(ref i, item => researched != Utility.IsFullyResearched(item.type, true), () => tries--))
+					if (MakeRandomItem(ref i, CheckIsValidResearchableItemForShowcase, () => tries--))
 						tries = 1000;
 					else if (tries <= 0)
 						return;
@@ -261,15 +277,23 @@ namespace MagicStorage
 
 			void MakeIngredientItems() {
 				bool CheckIsValidMaterialAndMaximizeStack(Item item) {
-					if (item.maxStack == 1 || !item.material || item.type == ItemID.DirtBlock || item.createTile >= TileID.Dirt)
+					if (item.maxStack == 1 || !item.material || item.type == ItemID.DirtBlock || item.createTile >= TileID.Dirt || item.dye > 0 || item.createWall > WallID.None)
 						return false;
 
 					item.stack = item.maxStack;
 					return true;
 				}
 
-				for (int i = 0; i < 10; i++)
+				for (int i = 0; i < 50; i++)
 					MakeRandomItem(ref i, CheckIsValidMaterialAndMaximizeStack);
+
+				MakeItem(ItemID.Wood);
+				MakeItem(ItemID.StoneBlock);
+				MakeItem(ItemID.Torch);
+				MakeItem(ItemID.ClayBlock);
+				MakeItem(ItemID.SandBlock);
+				MakeItem(ItemID.Glass);
+				MakeItem(ItemID.Cobweb);
 			}
 
 			MakeItemsForUnloadedDataShowcase(ItemID.WoodenSword, 1);
@@ -281,6 +305,8 @@ namespace MagicStorage
 			MakeResearchedItems(true);
 			MakeResearchedItems(false);
 			MakeIngredientItems();
+
+			Main.NewText("Showcase initialized.  Item count: " + showcaseItems.Count);
 
 			DepositTheItems:
 			heart.TryDeposit(showcaseItems.Select(i => i.Clone()).ToList());

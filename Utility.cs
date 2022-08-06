@@ -103,15 +103,13 @@ namespace MagicStorage {
 
 		public static void GetResearchStats(int itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal) {
 			canBeResearched = false;
-			sacrificesNeeded = 0;
+			currentSacrificeTotal = 0;
+
+			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded))
+				return;
 
 			if (!Main.LocalPlayerCreativeTracker.ItemSacrifices.SacrificesCountByItemIdCache.TryGetValue(itemType, out currentSacrificeTotal))
 				return;
-
-			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded)) {
-				currentSacrificeTotal = 0;
-				return;
-			}
 
 			canBeResearched = true;
 		}
@@ -119,7 +117,7 @@ namespace MagicStorage {
 		public static bool IsFullyResearched(int itemType, bool mustBeResearchable) {
 			GetResearchStats(itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal);
 
-			return (!mustBeResearchable || canBeResearched) && currentSacrificeTotal >= sacrificesNeeded;
+			return (!mustBeResearchable || (canBeResearched && sacrificesNeeded > 0)) && currentSacrificeTotal >= sacrificesNeeded;
 		}
 	}
 }
