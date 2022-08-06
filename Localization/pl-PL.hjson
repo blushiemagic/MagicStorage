@@ -365,6 +365,7 @@ Mods: {
 			# CompactCoinsButton: "Compact Coins"
 			# DestroyUnloadedButton: "Delete Unloaded Items"
 			# DestroyUnloadedDataButton: "Delete Unloaded Data"
+			# InitShowcaseButton: "Initialize Showcase"
 
 			# SellDuplicatesHeader: "Sell Duplicates"
 			# SellDuplicatesButton: "Sell"

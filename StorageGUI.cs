@@ -45,6 +45,10 @@ namespace MagicStorage
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 
+		internal static void Unload() {
+			showcaseItems = null;
+		}
+
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
 		public static bool needRefresh;
@@ -166,22 +170,25 @@ namespace MagicStorage
 			}
 		}
 
-		//Helper method for testing the new UIs to v0.5.7
-		//It was made public so that Modders' Toolkit's C# REPL can access the method
-		public static void DepositShowcaseItemsToCurrentStorage() {
+		internal static List<Item> showcaseItems;
+
+		internal static void DepositShowcaseItemsToCurrentStorage() {
 			if (GetHeart() is not TEStorageHeart heart)
 				return;
 
-			List<Item> items = new();
+			if (showcaseItems is not null)
+				goto DepositTheItems;
+
+			showcaseItems = new();
 			HashSet<int> addedTypes = new();
 
 			void MakeItemsForUnloadedDataShowcase(int type, int stack) {
-				items.Add(new Item(type, stack));
+				showcaseItems.Add(new Item(type, stack));
 
 				Item item = new(type, stack);
 				AddRandomUnloadedItemDataToItem(item);
 
-				items.Add(item);
+				showcaseItems.Add(item);
 
 				addedTypes.Add(type);
 			}
@@ -191,7 +198,7 @@ namespace MagicStorage
 					Item item = new(type);
 					item.Prefix(-1);
 
-					items.Add(item);
+					showcaseItems.Add(item);
 				}
 
 				addedTypes.Add(type);
@@ -200,7 +207,7 @@ namespace MagicStorage
 			void MakeCoinsForStackingShowcase() {
 				void MakeCoins(int type, int total) {
 					while (total > 0) {
-						items.Add(new Item(type, Math.Min(100, total)));
+						showcaseItems.Add(new Item(type, Math.Min(100, total)));
 						total -= 100;
 					}
 
@@ -237,7 +244,7 @@ namespace MagicStorage
 					return false;
 				}
 
-				items.Add(item);
+				showcaseItems.Add(item);
 				return true;
 			}
 
@@ -267,7 +274,8 @@ namespace MagicStorage
 			MakeResearchedItems(false);
 			MakeIngredientItems();
 
-			heart.TryDeposit(items);
+			DepositTheItems:
+			heart.TryDeposit(showcaseItems.Select(i => i.Clone()).ToList());
 			needRefresh = true;
 		}
 
@@ -277,45 +285,41 @@ namespace MagicStorage
 			if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 				return;
 
-			bool b = DebugRandomSaveData.CanCreate;
-			if (!b)
-				return;
-
 			if (TEStorageHeart.Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
 				return;
 
-			if (globalItems.Any(i => i.Instance is UnloadedGlobalItem))
-				return;
-
-			Instanced<GlobalItem>[] array = globalItems;
-			ushort index = (ushort)array.Length;
-
-			Array.Resize(ref array, array.Length + 1);
-			
-			//Create the instance and assign its data
-			UnloadedGlobalItem obj = new();
-
-			var debugObj = ModContent.GetInstance<DebugRandomSaveData>().NewInstance(item) as DebugRandomSaveData;
-			debugObj.randomData = Main.rand.Next();
-
-			TagCompound tag = new();
-			debugObj.SaveData(item, tag);
-
-			IList<TagCompound> data = new List<TagCompound>() {
-				new TagCompound() {
-					["modData"] = new List<TagCompound>() {
-						new TagCompound() {
-							["mod"] = debugObj.Mod.Name,
-							["name"] = debugObj.Name,
-							["data"] = tag
+			//Create the data
+			TagCompound modData = new() {
+				["modData"] = new List<TagCompound>() {
+					new TagCompound() {
+						["mod"] = "MagicStorage",
+						["name"] = "ShowcaseItemData",
+						["data"] = new TagCompound() {
+							["randomData"] = Main.rand.Next()
 						}
 					}
 				}
 			};
 
-			UnloadedGlobalItem_data.SetValue(obj, data);
+			UnloadedGlobalItem obj;
+			int index = -1;
+			Instanced<GlobalItem>[] array = (Instanced<GlobalItem>[])globalItems.Clone();
+			if ((index = Array.FindIndex(array, i => i.Instance is UnloadedGlobalItem)) >= 0) {
+				obj = array[index].Instance as UnloadedGlobalItem;
 
-			array[^1] = new(index, obj);
+				(UnloadedGlobalItem_data.GetValue(obj) as IList<TagCompound>).Add(modData);
+			} else {
+				index = array.Length;
+
+				Array.Resize(ref array, array.Length + 1);
+			
+				//Create the instance
+				obj = new();
+
+				UnloadedGlobalItem_data.SetValue(obj, new List<TagCompound>() { modData });
+
+				array[^1] = new((ushort)index, obj);
+			}
 
 			TEStorageHeart.Item_globalItems.SetValue(item, array);
 		}

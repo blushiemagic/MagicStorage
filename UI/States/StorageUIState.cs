@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Global;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -345,6 +346,7 @@ namespace MagicStorage.UI.States {
 			private UIList list;
 			private UIScrollbar scroll;
 
+			// TODO: make selling pull up a menu which lets the player select which duplicates they want to sell
 			internal NewUISlotZone sellDuplicatesZone;
 			public List<StorageUISellMenuToggleLabel> sellMenuLabels;
 
@@ -426,6 +428,18 @@ namespace MagicStorage.UI.States {
 				InitButtonEvents(deleteUnloadedData);
 
 				list.Add(deleteUnloadedData);
+
+				bool b = true;
+
+				if (b) {
+					UITextPanel<LocalizedText> initShowcase = new(Language.GetText("Mods.MagicStorage.StorageGUI.InitShowcaseButton"));
+
+					initShowcase.OnClick += (evt, e) => StorageGUI.DepositShowcaseItemsToCurrentStorage();
+
+					InitButtonEvents(initShowcase);
+
+					list.Add(initShowcase);
+				}
 
 				float height = 0;
 				

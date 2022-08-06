@@ -479,6 +479,7 @@ Mods: {
 			CompactCoinsButton: "合并钱币"
 			DestroyUnloadedButton: "删除卸载物品"
 			DestroyUnloadedDataButton: "删除被卸载的数据"
+			# InitShowcaseButton: "Initialize Showcase"
 
 			SellDuplicatesHeader: "出售同种物品"
 			SellDuplicatesButton: "出售"
