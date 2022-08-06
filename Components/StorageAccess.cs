@@ -102,6 +102,9 @@ namespace MagicStorage.Components
 			else
 			{
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
+				if (hadOtherOpen)
+					modPlayer.CloseStorage();
+
 				modPlayer.OpenStorage(toOpen);
 				modPlayer.timeSinceOpen = 0;
 				if (PlayerInput.GrappleAndInteractAreShared)
