@@ -173,7 +173,7 @@ namespace MagicStorage
 		internal static List<Item> showcaseItems;
 
 		internal static void DepositShowcaseItemsToCurrentStorage() {
-			if (GetHeart() is not TEStorageHeart heart)
+			if (GetHeart() is not TEStorageHeart heart || heart.GetStoredItems().Any())
 				return;
 
 			if (showcaseItems is not null)
@@ -261,7 +261,7 @@ namespace MagicStorage
 
 			void MakeIngredientItems() {
 				bool CheckIsValidMaterialAndMaximizeStack(Item item) {
-					if (item.maxStack < 100 || !item.material)
+					if (item.maxStack == 1 || !item.material || item.type == ItemID.DirtBlock || item.createTile >= TileID.Dirt)
 						return false;
 
 					item.stack = item.maxStack;

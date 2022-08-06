@@ -81,6 +81,9 @@ namespace MagicStorage.UI {
 				this.texture = texture;
 				this.text = text;
 				this.buttonSize = buttonSize;
+
+				Width.Set(buttonSize, 0);
+				Height.Set(buttonSize, 0);
 			}
 
 			public override void MouseOver(UIMouseEvent evt) {
