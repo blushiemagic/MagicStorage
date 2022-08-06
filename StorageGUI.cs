@@ -260,8 +260,16 @@ namespace MagicStorage
 			}
 
 			void MakeIngredientItems() {
+				bool CheckIsValidMaterialAndMaximizeStack(Item item) {
+					if (item.maxStack < 100 || !item.material)
+						return false;
+
+					item.stack = item.maxStack;
+					return true;
+				}
+
 				for (int i = 0; i < 10; i++)
-					MakeRandomItem(ref i, item => { item.stack = item.maxStack; return item.maxStack > 1 && item.material; });
+					MakeRandomItem(ref i, CheckIsValidMaterialAndMaximizeStack);
 			}
 
 			MakeItemsForUnloadedDataShowcase(ItemID.WoodenSword, 1);
