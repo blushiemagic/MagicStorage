@@ -597,7 +597,7 @@ namespace MagicStorage.Components
 			}
 		}
 
-		private static readonly FieldInfo Item_globalItems = typeof(Item).GetField("globalItems", BindingFlags.NonPublic | BindingFlags.Instance);
+		internal static readonly FieldInfo Item_globalItems = typeof(Item).GetField("globalItems", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		internal void DestroyUnloadedGlobalItemData(bool net = false) {
 			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {

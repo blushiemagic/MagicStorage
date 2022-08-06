@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using MagicStorage.Common.Global;
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
@@ -11,6 +14,9 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage
 {
@@ -158,6 +164,160 @@ namespace MagicStorage
 
 				rightClickTimer--;
 			}
+		}
+
+		//Helper method for testing the new UIs to v0.5.7
+		//It was made public so that Modders' Toolkit's C# REPL can access the method
+		public static void DepositShowcaseItemsToCurrentStorage() {
+			if (GetHeart() is not TEStorageHeart heart)
+				return;
+
+			List<Item> items = new();
+			HashSet<int> addedTypes = new();
+
+			void MakeItemsForUnloadedDataShowcase(int type, int stack) {
+				items.Add(new Item(type, stack));
+
+				Item item = new(type, stack);
+				AddRandomUnloadedItemDataToItem(item);
+
+				items.Add(item);
+
+				addedTypes.Add(type);
+			}
+
+			void MakeItemsForSellingShowcase(int type) {
+				for (int i = 0; i < 5; i++) {
+					Item item = new(type);
+					item.Prefix(-1);
+
+					items.Add(item);
+				}
+
+				addedTypes.Add(type);
+			}
+
+			void MakeCoinsForStackingShowcase() {
+				void MakeCoins(int type, int total) {
+					while (total > 0) {
+						items.Add(new Item(type, Math.Min(100, total)));
+						total -= 100;
+					}
+
+					addedTypes.Add(type);
+				}
+
+				MakeCoins(ItemID.CopperCoin, 135);
+				MakeCoins(ItemID.SilverCoin, 215);
+				MakeCoins(ItemID.GoldCoin, 180);
+				MakeCoins(ItemID.PlatinumCoin, 60);
+			}
+
+			bool MakeRandomItem(ref int i, Func<Item, bool> condition, Action onValidItemFail = null) {
+				int type = Main.rand.Next(0, ItemLoader.ItemCount);
+
+				Item item = new(type);
+
+				if (item.IsAir) {
+					i--;
+					return false;
+				}
+
+				item.stack = Main.rand.Next(1, item.maxStack + 1);
+
+				if (!condition(item)) {
+					onValidItemFail?.Invoke();
+
+					i--;
+					return false;
+				}
+
+				if (!addedTypes.Add(type)) {
+					i--;
+					return false;
+				}
+
+				items.Add(item);
+				return true;
+			}
+
+			void MakeResearchedItems(bool researched) {
+				int tries = 1000;
+
+				for (int i = 0; i < 10; i++) {
+					if (MakeRandomItem(ref i, item => researched != Utility.IsFullyResearched(item.type, true), () => tries--))
+						tries = 1000;
+					else if (tries <= 0)
+						return;
+				}
+			}
+
+			void MakeIngredientItems() {
+				for (int i = 0; i < 10; i++)
+					MakeRandomItem(ref i, item => { item.stack = item.maxStack; return item.maxStack > 1 && item.material; });
+			}
+
+			MakeItemsForUnloadedDataShowcase(ItemID.WoodenSword, 1);
+			MakeItemsForUnloadedDataShowcase(ItemID.CopperHelmet, 1);
+			MakeItemsForUnloadedDataShowcase(ItemID.FlamingArrow, 100);
+			MakeItemsForSellingShowcase(ItemID.Megashark);
+			MakeItemsForSellingShowcase(ItemID.LightningBoots);
+			MakeCoinsForStackingShowcase();
+			MakeResearchedItems(true);
+			MakeResearchedItems(false);
+			MakeIngredientItems();
+
+			heart.TryDeposit(items);
+			needRefresh = true;
+		}
+
+		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
+
+		private static void AddRandomUnloadedItemDataToItem(Item item) {
+			if (item is null || item.IsAir || item.ModItem is UnloadedItem)
+				return;
+
+			bool b = DebugRandomSaveData.CanCreate;
+			if (!b)
+				return;
+
+			if (TEStorageHeart.Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
+				return;
+
+			if (globalItems.Any(i => i.Instance is UnloadedGlobalItem))
+				return;
+
+			Instanced<GlobalItem>[] array = globalItems;
+			ushort index = (ushort)array.Length;
+
+			Array.Resize(ref array, array.Length + 1);
+			
+			//Create the instance and assign its data
+			UnloadedGlobalItem obj = new();
+
+			var debugObj = ModContent.GetInstance<DebugRandomSaveData>().NewInstance(item) as DebugRandomSaveData;
+			debugObj.randomData = Main.rand.Next();
+
+			TagCompound tag = new();
+			debugObj.SaveData(item, tag);
+
+			IList<TagCompound> data = new List<TagCompound>() {
+				new TagCompound() {
+					["modData"] = new List<TagCompound>() {
+						new TagCompound() {
+							["mod"] = debugObj.Mod.Name,
+							["name"] = debugObj.Name,
+							["data"] = tag
+						}
+					}
+				}
+			};
+
+			UnloadedGlobalItem_data.SetValue(obj, data);
+
+			array[^1] = new(index, obj);
+
+			TEStorageHeart.Item_globalItems.SetValue(item, array);
 		}
 
 		/// <summary>
