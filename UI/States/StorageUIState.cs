@@ -78,7 +78,11 @@ namespace MagicStorage.UI.States {
 			private float lastKnownScrollBarViewPosition = -1;
 
 			public StoragePage(BaseStorageUI parent) : base(parent, "Storage") {
-				OnPageSelected += StorageGUI.CheckRefresh;
+				OnPageSelected += () => {
+					StorageGUI.CheckRefresh();
+
+					searchBar.active = true;
+				};
 
 				OnPageDeselected += () => {
 					lastKnownScrollBarViewPosition = -1;
@@ -88,6 +92,8 @@ namespace MagicStorage.UI.States {
 					slotZone.ClearItems();
 
 					searchBar.LoseFocus(forced: true);
+
+					searchBar.active = false;
 				};
 			}
 
@@ -407,7 +413,7 @@ namespace MagicStorage.UI.States {
 					heart.DestroyUnloadedGlobalItemData();
 				});
 
-				bool debugButtons = true;
+				bool debugButtons = false;
 
 				if (debugButtons)
 					InitDebugButtons();

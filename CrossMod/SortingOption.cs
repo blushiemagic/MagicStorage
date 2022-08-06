@@ -22,6 +22,11 @@ namespace MagicStorage.CrossMod {
 
 		public virtual Action OnSelected { get; }
 
+		/// <summary>
+		/// Whether <see cref="Sorter"/> is used again after calculating sort order from fuzzy sorting
+		/// </summary>
+		public virtual bool SortAgainAfterFuzzy => false;
+
 		protected sealed override void Register() {
 			ModTypeLookup<SortingOption>.Register(this);
 

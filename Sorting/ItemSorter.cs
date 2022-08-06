@@ -31,10 +31,17 @@ namespace MagicStorage.Sorting
 			//Apply "fuzzy" sorting since it's faster, but less accurate
 			IOrderedEnumerable<Item> orderedItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
 
-			if (sortMode == SortingOptionLoader.Definitions.Value.Type) {
+			var sorter = SortingOptionLoader.Get(sortMode);
+
+			if (sorter.SortAgainAfterFuzzy) {
+				var sortFunc = sorter.Sorter;
+
 				//Ignore sorting by type
-				return orderedItems.ThenBy(x => x.value);
+				orderedItems = orderedItems.ThenBy(x => x, sortFunc);
 			}
+
+			if (sortMode == SortingOptionLoader.Definitions.Value.Type)
+				return orderedItems;  //Don't sort by type
 
 			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
 		}

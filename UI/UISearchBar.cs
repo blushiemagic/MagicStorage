@@ -31,6 +31,8 @@ namespace MagicStorage.UI
 
 		public string Text { get; private set; } = string.Empty;
 
+		internal bool active;
+
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
 			SetPadding(Padding);
@@ -50,7 +52,7 @@ namespace MagicStorage.UI
 		public override void Update(GameTime gameTime)
 		{
 			//Hack to give search bars special update logic since they have to update in ModSystem.PostUpdateInput instead of ModSystem.UpdateUI
-			if (!MagicUI.CanUpdateSearchBars)
+			if (!MagicUI.CanUpdateSearchBars || !active)
 				return;
 
 			cursorTimer++;

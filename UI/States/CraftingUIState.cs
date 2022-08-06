@@ -668,7 +668,11 @@ namespace MagicStorage.UI.States {
 			private bool lastKnownConfigBlacklist;
 
 			public RecipesPage(BaseStorageUI parent) : base(parent, "Crafting") {
-				OnPageSelected += StorageGUI.CheckRefresh;
+				OnPageSelected += () => {
+					StorageGUI.CheckRefresh();
+
+					searchBar.active = true;
+				};
 
 				OnPageDeselected += () => {
 					lastKnownStationsCount = -1;
@@ -681,6 +685,8 @@ namespace MagicStorage.UI.States {
 					recipeZone.ClearItems();
 
 					searchBar.LoseFocus(forced: true);
+
+					searchBar.active = false;
 				};
 			}
 
