@@ -10,8 +10,8 @@ namespace MagicStorage.UI
 {
 	public class UIToggleButton : UIElement
 	{
-		private static readonly Asset<Texture2D> BackTexture = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
-		private static readonly Asset<Texture2D> BackTextureActive = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+		private static readonly Asset<Texture2D> BackTexture = MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
+		private static readonly Asset<Texture2D> BackTextureActive = MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 		private readonly Asset<Texture2D> button;
 		private readonly LocalizedText name;
 		private readonly int buttonSize;

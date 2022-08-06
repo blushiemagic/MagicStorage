@@ -164,7 +164,7 @@ namespace MagicStorage.CrossMod {
 		public static SortingOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
 
 		internal static void Load() {
-			MagicStorage mod = MagicStorage.Instance;
+			MagicStorageMod mod = MagicStorageMod.Instance;
 
 			mod.AddContent(Definitions.Default = new SortDefault());
 			mod.AddContent(Definitions.ID = new SortID());

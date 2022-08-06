@@ -14,7 +14,7 @@ namespace MagicStorage.Common.Systems {
 		{
 			Recipe.Create(ItemID.CookedMarshmallow)
 				.AddIngredient(ItemID.Marshmallow)
-				.AddCondition(MagicStorage.HasCampfire)
+				.AddCondition(MagicStorageMod.HasCampfire)
 				.Register();
 		}
 
@@ -33,7 +33,7 @@ namespace MagicStorage.Common.Systems {
 					Recipe copy = recipe.Clone();
 
 					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
-					copy.AddCondition(MagicStorage.EctoMistOverride);
+					copy.AddCondition(MagicStorageMod.EctoMistOverride);
 
 					copy.Register();
 				}

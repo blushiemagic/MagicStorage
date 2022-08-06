@@ -14,7 +14,7 @@ namespace MagicStorage
 
 			double dps = CompareDps.GetDps(item);
 			if (dps > 1f)
-				tooltips.Add(new TooltipLine(MagicStorage.Instance, "DPS", dps.ToString("F") + " DPS"));
+				tooltips.Add(new TooltipLine(MagicStorageMod.Instance, "DPS", dps.ToString("F") + " DPS"));
 		}
 	}
 }

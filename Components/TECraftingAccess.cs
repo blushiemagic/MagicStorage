@@ -119,7 +119,7 @@ namespace MagicStorage.Components
 
 		private static ModPacket PrepareServerResult(Operation op)
 		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerStationOperationResult);
 			packet.Write((byte)op);
 			return packet;
@@ -127,7 +127,7 @@ namespace MagicStorage.Components
 
 		private ModPacket PrepareClientRequest(Operation op)
 		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientStationOperation);
 			packet.Write(ID);
 			packet.Write((byte)op);

@@ -12,8 +12,8 @@ using MagicStorage.CrossMod;
 using MagicStorage.Stations;
 
 namespace MagicStorage {
-	public class MagicStorage : Mod {
-		public static MagicStorage Instance => ModContent.GetInstance<MagicStorage>();
+	public class MagicStorageMod : Mod {
+		public static MagicStorageMod Instance => ModContent.GetInstance<MagicStorageMod>();
 
 		// Integration with ModHelpers
 		public static string GithubUserName => "blushiemagic";

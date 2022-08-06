@@ -186,7 +186,7 @@ namespace MagicStorage.CrossMod {
 		public static FilteringOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
 
 		internal static void Load() {
-			MagicStorage mod = MagicStorage.Instance;
+			MagicStorageMod mod = MagicStorageMod.Instance;
 
 			mod.AddContent(Definitions.All = new FilterAll());
 			mod.AddContent(Definitions.Melee = new FilterMelee());

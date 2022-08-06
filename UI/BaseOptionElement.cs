@@ -8,8 +8,8 @@ using Terraria.UI;
 
 namespace MagicStorage.UI {
 	internal abstract class BaseOptionElement : UIElement {
-		private static Asset<Texture2D> BackTexture => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
-		private static Asset<Texture2D> BackTextureActive => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+		private static Asset<Texture2D> BackTexture => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
+		private static Asset<Texture2D> BackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 
 		private bool hovering;
 

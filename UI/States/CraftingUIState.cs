@@ -832,8 +832,8 @@ namespace MagicStorage.UI.States {
 
 			private void InitFilterButtons() {
 				List<Asset<Texture2D>> assets = new() {
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable", AssetRequestMode.ImmediateLoad),
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad)
+					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable", AssetRequestMode.ImmediateLoad),
+					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad)
 				};
 
 				List<LocalizedText> texts = new() {
@@ -842,12 +842,12 @@ namespace MagicStorage.UI.States {
 				};
 
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					assets.Add(MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad));
+					assets.Add(MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad));
 					texts.Add(Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
 				}
 
 				if (MagicStorageConfig.RecipeBlacklistEnabled) {
-					assets.Add(MagicStorage.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad));
+					assets.Add(MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad));
 					texts.Add(Language.GetText("Mods.MagicStorage.RecipeBlacklist"));
 				}
 

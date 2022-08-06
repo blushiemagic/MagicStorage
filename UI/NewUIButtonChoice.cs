@@ -65,8 +65,8 @@ namespace MagicStorage.UI {
 		}
 
 		private class ChoiceElement : UIElement {
-			private static Asset<Texture2D> BackTexture => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
-			private static Asset<Texture2D> BackTextureActive => MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+			private static Asset<Texture2D> BackTexture => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
+			private static Asset<Texture2D> BackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 
 			public readonly Asset<Texture2D> texture;
 			public readonly LocalizedText text;

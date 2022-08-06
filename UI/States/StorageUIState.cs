@@ -97,7 +97,7 @@ namespace MagicStorage.UI.States {
 				Append(topBar);
 				
 				filterFavorites = new(StorageGUI.RefreshItems,
-					MagicStorage.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
+					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
 					21);
 

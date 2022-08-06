@@ -47,7 +47,7 @@ namespace MagicStorage
 			if (reportTime)
 				message = "Time: " + DateTime.Now.Ticks + "\n" + message;
 
-			MagicStorage.Instance.Logger.Debug(message);
+			MagicStorageMod.Instance.Logger.Debug(message);
 		}
 
 		public static void HandlePacket(BinaryReader reader, int sender)
@@ -134,7 +134,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SyncStorageUnit);
 				packet.Write(position.X);
 				packet.Write(position.Y);
@@ -171,7 +171,7 @@ namespace MagicStorage
 					TileEntity.Write(BWriter, tileEntity, true);
 					BWriter.Flush();
 
-					ModPacket packet = MagicStorage.Instance.GetPacket();
+					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.SyncStorageUnitToClinet);
 					packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
 					packet.Send(remoteClient);
@@ -232,7 +232,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SearchAndRefreshNetwork);
 				packet.Write((short)i);
 				packet.Write((short)j);
@@ -356,7 +356,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.RefreshNetworkItems);
 				packet.Write(position.X);
 				packet.Write(position.Y);
@@ -382,7 +382,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendDeactivate);
 				packet.Write(position.X);
 				packet.Write(position.Y);
@@ -428,7 +428,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendTEUpdate);
 				packet.Write(position.X);
 				packet.Write(position.Y);
@@ -471,7 +471,7 @@ namespace MagicStorage
 
 		private static ModPacket PrepareStationOperation(Point16 position, byte op)
 		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientStationOperation);
 			packet.Write(position.X);
 			packet.Write(position.Y);
@@ -481,7 +481,7 @@ namespace MagicStorage
 
 		private static ModPacket PrepareStationResult(byte op)
 		{
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerStationOperationResult);
 			packet.Write(op);
 			return packet;
@@ -565,7 +565,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ResetCompactStage);
 				packet.Write(heart.X);
 				packet.Write(heart.Y);
@@ -599,7 +599,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftRequest);
 				packet.Write(heart.X);
 				packet.Write(heart.Y);
@@ -651,7 +651,7 @@ namespace MagicStorage
 
 			if (items.Count > 0)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.CraftResult);
 				packet.Write(items.Count);
 				foreach (Item item in items)
@@ -683,7 +683,7 @@ namespace MagicStorage
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SectionRequest);
 
 				packet.Write(coords.X);
@@ -711,7 +711,7 @@ namespace MagicStorage
 
 		public static void ClientRequestForceCraftingGUIRefresh() {
 			if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ForceCraftingGUIRefresh);
 
 				packet.Write(heart.Position.X);
@@ -728,7 +728,7 @@ namespace MagicStorage
 
 			if (Main.netMode == NetmodeID.Server) {
 				//Forward the packet
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ForceCraftingGUIRefresh);
 
 				packet.Write(storage.X);
@@ -748,7 +748,7 @@ namespace MagicStorage
 
 		public static void ClientRequestItemTransfer(TEStorageUnit destination, TEStorageUnit source) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorage.Instance.GetPacket();
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.TransferItems);
 				packet.Write(destination.Position);
 				packet.Write(source.Position);
@@ -785,7 +785,7 @@ namespace MagicStorage
 				return;
 
 			//Send the result to all clients
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.TransferItemsResult);
 			packet.Write(destination);
 			packet.Write(source);
@@ -835,7 +835,7 @@ namespace MagicStorage
 		}
 
 		public static void SendCoinCompactRequest(Point16 heart) {
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.RequestCoinCompact);
 			packet.Write(heart);
 			packet.Send();
@@ -862,7 +862,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			ModPacket packet = MagicStorage.Instance.GetPacket();
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.MassDuplicateSellRequest);
 			packet.Write(heart);
 			packet.Write((byte)sellOption);
@@ -879,7 +879,7 @@ namespace MagicStorage
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
 					StorageUIState.ControlsPage.DoSell(heart, sellOption, out long coppersEarned, out var withdrawnItems);
 
-					ModPacket packet = MagicStorage.Instance.GetPacket();
+					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.MassDuplicateSellResult);
 					packet.Write((short)sender);
 					packet.Write(position);
