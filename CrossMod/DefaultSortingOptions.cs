@@ -65,7 +65,7 @@ namespace MagicStorage.CrossMod {
 
 		public override string Texture => "MagicStorage/Assets/SortNumber";
 
-		public override string Name => "Quantity";
+		public override string Name => "QuantityRatio";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
