@@ -728,6 +728,8 @@ namespace MagicStorage
 		{
 			ArgumentNullException.ThrowIfNull(action);
 
+			PlayerZoneCache.Cache();
+
 			Player player = Main.LocalPlayer;
 
 			try
@@ -742,7 +744,10 @@ namespace MagicStorage
 
 				action();
 			}
-			finally { }
+			finally
+			{
+				PlayerZoneCache.FreeCache(false);
+			}
 		}
 
 		internal static bool PassesBlock(Recipe recipe)
@@ -996,9 +1001,9 @@ namespace MagicStorage
 				AttemptCraft(AttemptSingleCraft, context);
 			}
 
-			NetHelper.Report(true, "Crafted " + (target - toCraft) + " items");
+			NetHelper.Report(true, "Crafted " + (target - context.toCraft) + " items");
 
-			if (target == toCraft) {
+			if (target == context.toCraft) {
 				//Could not craft anything, bail
 				return;
 			}
@@ -1059,7 +1064,7 @@ namespace MagicStorage
 					Item clone = reqItem.Clone();
 					clone.stack *= crafts;
 
-					if (!CanConsumeItem(context, reqItem, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
+					if (!CanConsumeItem(context, clone, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
 						if (wasAvailable) {
 							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\". (Batching {crafts} crafts)");
 							break;
@@ -1073,6 +1078,11 @@ namespace MagicStorage
 						clone.stack = stackConsumed;
 						batch.Add(clone);
 					}
+				}
+
+				if (batch.Count > 0) {
+					//Successfully batched items for the craft
+					break;
 				}
 			}
 

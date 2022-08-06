@@ -1,8 +1,9 @@
-﻿using Terraria.GameContent.UI.Elements;
+﻿using Microsoft.Xna.Framework;
 using Terraria.Localization;
+using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class UICraftAmountAdjustment : UITextPanel<LocalizedText> {
+	internal class UICraftAmountAdjustment : UICraftingStateButtonBase {
 		public int Amount { get; private set; }
 
 		public bool AmountIsOffset { get; private set; }
@@ -12,6 +13,13 @@ namespace MagicStorage.UI {
 		public void SetAmountInformation(int amount, bool amountIsOffset) {
 			Amount = amount;
 			AmountIsOffset = amountIsOffset;
+		}
+
+		protected override void OnHoveringAndValidRecipe(GameTime gameTime) {
+			if (StorageGUI.MouseClicked) {
+				Click(new(this, UserInterface.ActiveInstance.MousePosition));
+				CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
+			}
 		}
 	}
 }

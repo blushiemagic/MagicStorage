@@ -51,7 +51,9 @@ namespace MagicStorage.UI {
 
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < columns; c++) {
-					var slot = Slots[r, c] = InitializeSlot?.Invoke(r * rows + c, inventoryScale) ?? new MagicStorageItemSlot(r * rows + c, scale: inventoryScale);
+					int slotIndex = r * columns + c;
+
+					var slot = Slots[r, c] = InitializeSlot?.Invoke(slotIndex, inventoryScale) ?? new MagicStorageItemSlot(slotIndex, scale: inventoryScale);
 
 					float x = (slotWidth + Padding) * c;
 					float y = (slotHeight + Padding) * r;
