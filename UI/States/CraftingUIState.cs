@@ -394,7 +394,7 @@ namespace MagicStorage.UI.States {
 				UpdateRecipeText();
 
 				if (hoveringCraftButton && CraftingGUI.selectedRecipe is not null && CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe))
-					Main.instance.MouseText(Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value);
+					MagicUI.mouseText = Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value;
 			} catch (Exception e) {
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}

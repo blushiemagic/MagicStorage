@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
@@ -13,6 +14,11 @@ namespace MagicStorage.UI {
 		private bool hovering;
 
 		private UIImage background, icon;
+
+		public BaseOptionElement() {
+			Width.Set(32, 0);
+			Height.Set(32, 0);
+		}
 
 		protected abstract Asset<Texture2D> GetIcon();
 
@@ -41,14 +47,14 @@ namespace MagicStorage.UI {
 			base.MouseOver(evt);
 
 			hovering = true;
-			Main.instance.MouseText(GetHoverText());
+			MagicUI.mouseText = GetHoverText();
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
 			hovering = false;
-			Main.instance.MouseText("");
+			MagicUI.mouseText = "";
 		}
 	}
 }

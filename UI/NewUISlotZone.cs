@@ -139,7 +139,7 @@ namespace MagicStorage.UI {
 
 					if (!hoverItem.IsAir) {
 						Main.HoverItem = hoverItem.Clone();
-						Main.instance.MouseText(string.Empty);
+						MagicUI.mouseText = string.Empty;
 					}
 				} else {
 					//Failsafe

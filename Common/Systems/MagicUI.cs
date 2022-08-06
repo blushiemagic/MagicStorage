@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MagicStorage.Components;
+using MagicStorage.UI;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -16,6 +17,9 @@ public class MagicUI : ModSystem
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI;
 
+	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
+	internal static string mouseText;
+
 	public override void Load() {
 		if (Main.dedServ)
 			return;
@@ -31,6 +35,8 @@ public class MagicUI : ModSystem
 		craftingUI = null;
 		storageUI = null;
 		environmentUI = null;
+
+		UISearchBar.ClearList();
 	}
 
 	public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -49,12 +55,31 @@ public class MagicUI : ModSystem
 		}
 	}
 
+	private static GameTime lastGameTime;
+
+	public static bool CanUpdateSearchBars { get; private set; }
+
 	public override void UpdateUI(GameTime gameTime) {
+		CanUpdateSearchBars = false;
+		lastGameTime = gameTime;
+
 		//Some UI elements couldn't easily be updated to the UIElement API, so these two fields still need to be updated
 		StorageGUI.oldMouse = StorageGUI.curMouse;
 		StorageGUI.curMouse = Mouse.GetState();
 		
 		uiInterface?.Update(gameTime);
+
+		Main.instance.MouseText(mouseText);
+	}
+
+	public override void PostUpdateInput() {
+		CanUpdateSearchBars = true;
+
+		if (Main.dedServ)
+			return;
+
+		foreach (var searchBar in UISearchBar.SearchBars)
+			searchBar.Update(lastGameTime);
 	}
 
 	internal static void OpenUI() {

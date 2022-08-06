@@ -126,13 +126,13 @@ namespace MagicStorage.UI.States {
 					(e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 
 					string alt = MagicStorageConfig.QuickStackDepositMode ? "Alt" : "";
-					Main.instance.MouseText(Language.GetText($"Mods.MagicStorage.DepositTooltip{alt}").Value);
+					MagicUI.mouseText = Language.GetText($"Mods.MagicStorage.DepositTooltip{alt}").Value;
 				};
 
 				depositButton.OnMouseOut += (evt, e) => {
 					(e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
 
-					Main.instance.MouseText("");
+					MagicUI.mouseText = "";
 				};
 
 				depositButton.Left.Set(x, 0f);

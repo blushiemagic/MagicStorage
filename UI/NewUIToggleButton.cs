@@ -46,14 +46,14 @@ namespace MagicStorage.UI {
 			base.MouseOver(evt);
 
 			hovering = true;
-			Main.instance.MouseText(name.Value);
+			MagicUI.mouseText = name.Value;
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
 			hovering = false;
-			Main.instance.MouseText("");
+			MagicUI.mouseText = "";
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)

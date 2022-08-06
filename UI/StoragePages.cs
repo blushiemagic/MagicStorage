@@ -1,5 +1,6 @@
 ﻿using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -26,12 +27,6 @@ namespace MagicStorage.UI {
 		public abstract int GetOptionType(TElement element);
 
 		public override void OnActivate() => InitOptionButtons(true);
-
-		public override void Recalculate() {
-			base.Recalculate();
-
-			InitOptionButtons(false);
-		}
 
 		private void InitOptionButtons(bool activating) {
 			if (Main.gameMenu)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,7 +18,7 @@ namespace MagicStorage.UI
 	public class UISearchBar : UIElement
 	{
 		private const int Padding = 4;
-		private static readonly List<UISearchBar> SearchBars = new();
+		private static readonly List<UISearchBar> _searchBars = new();
 		private static readonly Asset<Texture2D> TextureAsset = MagicStorage.Instance.Assets.Request<Texture2D>("Assets/SearchBar", AssetRequestMode.ImmediateLoad);
 		private static readonly Asset<DynamicSpriteFont> MouseTextFont = FontAssets.MouseText;
 		private readonly Action _clearedEvent;
@@ -26,12 +27,14 @@ namespace MagicStorage.UI
 		private int cursorTimer;
 		private bool hasFocus;
 
+		internal static IReadOnlyList<UISearchBar> SearchBars => _searchBars;
+
 		public string Text { get; private set; } = string.Empty;
 
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
 			SetPadding(Padding);
-			SearchBars.Add(this);
+			_searchBars.Add(this);
 			this.defaultText = defaultText;
 			_clearedEvent = clearedEvent;
 		}
@@ -46,6 +49,10 @@ namespace MagicStorage.UI
 
 		public override void Update(GameTime gameTime)
 		{
+			//Hack to give search bars special update logic since they have to update in ModSystem.PostUpdateInput instead of ModSystem.UpdateUI
+			if (!MagicUI.CanUpdateSearchBars)
+				return;
+
 			cursorTimer++;
 			cursorTimer %= 60;
 
@@ -211,7 +218,11 @@ namespace MagicStorage.UI
 
 		private static void CheckBlockInput()
 		{
-			Main.blockInput = SearchBars.Any(searchBar => searchBar.hasFocus);
+			Main.blockInput = _searchBars.Any(searchBar => searchBar.hasFocus);
+		}
+
+		internal static void ClearList() {
+			_searchBars.Clear();
 		}
 	}
 }

@@ -65,7 +65,7 @@ namespace MagicStorage.UI {
 				Text.TextColor = Color.Yellow;
 			else {
 				Text.TextColor = Color.Gray;
-				Main.instance.MouseText(module?.DisabledTooltip.GetTranslation(Language.ActiveCulture) ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault"));
+				MagicUI.mouseText = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture) ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 			}
 		}
 
@@ -76,7 +76,7 @@ namespace MagicStorage.UI {
 				Text.TextColor = Color.White;
 			else {
 				Text.TextColor = Color.Gray;
-				Main.instance.MouseText("");
+				MagicUI.mouseText = "";
 			}
 		}
 	}
