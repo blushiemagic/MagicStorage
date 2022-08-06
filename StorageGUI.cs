@@ -290,26 +290,18 @@ namespace MagicStorage
 
 			//Create the data
 			TagCompound modData = new() {
-				["modData"] = new List<TagCompound>() {
-					new TagCompound() {
-						["mod"] = "MagicStorage",
-						["name"] = "ShowcaseItemData",
-						["data"] = new TagCompound() {
-							["randomData"] = Main.rand.Next()
-						}
-					}
+				["mod"] = "MagicStorage",
+				["name"] = "ShowcaseItemData",
+				["data"] = new TagCompound() {
+					["randomData"] = Main.rand.Next()
 				}
 			};
 
-			UnloadedGlobalItem obj;
-			int index = -1;
-			Instanced<GlobalItem>[] array = (Instanced<GlobalItem>[])globalItems.Clone();
-			if ((index = Array.FindIndex(array, i => i.Instance is UnloadedGlobalItem)) >= 0) {
-				obj = array[index].Instance as UnloadedGlobalItem;
-
+			if (item.TryGetGlobalItem(out UnloadedGlobalItem obj))
 				(UnloadedGlobalItem_data.GetValue(obj) as IList<TagCompound>).Add(modData);
-			} else {
-				index = array.Length;
+			else {
+				Instanced<GlobalItem>[] array = (Instanced<GlobalItem>[])globalItems.Clone();
+				int index = array.Length;
 
 				Array.Resize(ref array, array.Length + 1);
 			
@@ -319,9 +311,9 @@ namespace MagicStorage
 				UnloadedGlobalItem_data.SetValue(obj, new List<TagCompound>() { modData });
 
 				array[^1] = new((ushort)index, obj);
-			}
 
-			TEStorageHeart.Item_globalItems.SetValue(item, array);
+				TEStorageHeart.Item_globalItems.SetValue(item, array);
+			}
 		}
 
 		/// <summary>
