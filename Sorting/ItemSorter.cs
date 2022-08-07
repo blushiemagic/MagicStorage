@@ -34,7 +34,7 @@ namespace MagicStorage.Sorting
 			var sorter = SortingOptionLoader.Get(sortMode);
 
 			if (sorter.SortAgainAfterFuzzy) {
-				var sortFunc = sorter.Sorter;
+				var sortFunc = sorter.Sorter.AsSafe();
 
 				orderedItems = orderedItems.OrderBy(x => x, sortFunc);
 			}

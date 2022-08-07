@@ -51,7 +51,7 @@ public class SortingCacheDictionary
 
 	private void Create(int mode)
 	{
-		var sorter = SortingOptionLoader.Get(mode).Sorter;
+		var sorter = SortingOptionLoader.Get(mode).Sorter.AsSafe();
 
 		var items = ContentSamples.ItemsByType
 			.Select((pair, i) => (item: pair.Value, type: i))

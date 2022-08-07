@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Terraria;
@@ -119,5 +120,7 @@ namespace MagicStorage {
 
 			return (!mustBeResearchable || (canBeResearched && sacrificesNeeded > 0)) && currentSacrificeTotal >= sacrificesNeeded;
 		}
+
+		public static SafeOrdering<T> AsSafe<T>(this IComparer<T> comparer) => new(comparer);
 	}
 }
