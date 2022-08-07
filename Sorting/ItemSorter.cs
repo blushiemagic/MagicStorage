@@ -36,7 +36,7 @@ namespace MagicStorage.Sorting
 			if (sorter.SortAgainAfterFuzzy) {
 				var sortFunc = sorter.Sorter;
 
-				orderedItems = orderedItems.ThenBy(x => x, sortFunc);
+				orderedItems = orderedItems.OrderBy(x => x, sortFunc);
 			}
 
 			if (sortMode == SortingOptionLoader.Definitions.Value.Type)
