@@ -129,7 +129,7 @@ namespace MagicStorage.Components
 		{
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientStationOperation);
-			packet.Write(ID);
+			packet.Write(Position);
 			packet.Write((byte)op);
 			return packet;
 		}
