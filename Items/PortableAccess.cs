@@ -94,6 +94,9 @@ namespace MagicStorage.Items
 			else
 			{
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
+				if (hadOtherOpen)
+					modPlayer.CloseStorage();
+
 				modPlayer.OpenStorage(toOpen, true);
 				modPlayer.remoteCrafting = crafting;
 				modPlayer.timeSinceOpen = 0;

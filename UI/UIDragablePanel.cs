@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -47,7 +49,10 @@ namespace MagicStorage.UI {
 			closeButton.Width.Set(40, 0);
 			closeButton.Left.Set(-40, 1);
 			closeButton.BackgroundColor.A = 255;
-			closeButton.OnClick += (evt, element) => OnMenuClose?.Invoke();
+			closeButton.OnClick += (evt, element) => {
+				SoundEngine.PlaySound(SoundID.MenuTick);
+				OnMenuClose?.Invoke();
+			};
 			header.Append(closeButton);
 
 			viewArea = new();
