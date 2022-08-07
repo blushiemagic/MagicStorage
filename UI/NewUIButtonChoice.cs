@@ -5,6 +5,8 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -108,8 +110,10 @@ namespace MagicStorage.UI {
 					int old = buttons.Choice;
 					buttons.Choice = option;
 
-					if (old != buttons.Choice)
+					if (old != buttons.Choice) {
+						SoundEngine.PlaySound(SoundID.MenuTick);
 						buttons._onChanged();
+					}
 				}
 			}
 

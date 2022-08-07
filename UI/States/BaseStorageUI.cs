@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -70,7 +72,10 @@ namespace MagicStorage.UI.States {
 				page.Width = StyleDimension.Fill;
 				page.Height = StyleDimension.Fill;
 
-				tab.OnClick += (evt, e) => SetPage((e as UIPanelTab).Name);
+				tab.OnClick += (evt, e) => {
+					SoundEngine.PlaySound(SoundID.MenuTick);
+					SetPage((e as UIPanelTab).Name);
+				};
 			}
 
 			PostInitializePages();

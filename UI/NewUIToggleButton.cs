@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -38,8 +40,10 @@ namespace MagicStorage.UI {
 			bool oldValue = Value;
 			Value = !Value;
 
-			if (oldValue != Value)
+			if (oldValue != Value) {
 				onChanged?.Invoke();
+				SoundEngine.PlaySound(SoundID.MenuTick);
+			}
 		}
 
 		public override void MouseOver(UIMouseEvent evt) {

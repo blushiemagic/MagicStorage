@@ -1,6 +1,8 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -19,6 +21,9 @@ namespace MagicStorage.UI {
 				MagicUI.mouseText = Language.GetText("Mods.MagicStorage.CraftTooltip" + (MagicStorageConfig.UseOldCraftMenu ? "Old" : "")).Value;
 
 			if (StorageGUI.curMouse.LeftButton == ButtonState.Pressed) {
+				if (StorageGUI.oldMouse.LeftButton == ButtonState.Released)
+					SoundEngine.PlaySound(SoundID.MenuTick);
+
 				MouseDown(new(this, UserInterface.ActiveInstance.MousePosition));
 
 				bool stillCrafting = false;

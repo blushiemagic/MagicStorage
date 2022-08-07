@@ -194,11 +194,23 @@ namespace MagicStorage
 			}
 
 			void MakeItemsForSellingShowcase(int type) {
+				HashSet<int> rolledPrefixes = new();
+				int tries = 200;
+
 				for (int i = 0; i < 5; i++) {
 					Item item = new(type);
 					item.Prefix(-1);
 
+					if (!rolledPrefixes.Add(item.prefix)) {
+						i--;
+						tries--;
+
+						if (tries <= 0)
+							break;
+					}
+
 					showcaseItems.Add(item);
+					tries = 200;
 				}
 
 				addedTypes.Add(type);

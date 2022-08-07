@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -128,9 +130,13 @@ namespace MagicStorage.CrossMod {
 		public override void Click(UIMouseEvent evt) {
 			base.Click(evt);
 
+			int old = SortingOptionLoader.Selected;
 			SortingOptionLoader.Selected = option.Type;
 
-			option.OnSelected?.Invoke();
+			if (old != option.Type) {
+				SoundEngine.PlaySound(SoundID.MenuTick);
+				option.OnSelected?.Invoke();
+			}
 		}
 	}
 

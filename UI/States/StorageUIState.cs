@@ -562,6 +562,8 @@ namespace MagicStorage.UI.States {
 			private void InitButton(ref UITextPanel<LocalizedText> button, string localizationKey, MouseEvent evt) {
 				button = new(Language.GetText("Mods.MagicStorage." + localizationKey));
 
+				button.OnClick += (evt, e) => SoundEngine.PlaySound(SoundID.MenuTick);
+
 				button.OnClick += evt;
 
 				InitButtonEvents(button);

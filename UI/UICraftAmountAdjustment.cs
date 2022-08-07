@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -17,6 +19,8 @@ namespace MagicStorage.UI {
 
 		protected override void OnHoveringAndValidRecipe(GameTime gameTime) {
 			if (StorageGUI.MouseClicked) {
+				SoundEngine.PlaySound(SoundID.MenuTick);
+
 				Click(new(this, UserInterface.ActiveInstance.MousePosition));
 				CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
 			}
