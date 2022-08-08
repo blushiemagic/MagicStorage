@@ -36,12 +36,6 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool clearSearchText;
 
-		[Label("$Mods.MagicStorage.Config.showDps.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.showDps.Tooltip")]
-		[DefaultValue(true)]
-		[ReloadRequired]
-		public bool showDps;
-
 		[Label("$Mods.MagicStorage.Config.useOldCraftMenu.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip")]
 		[DefaultValue(false)]
@@ -83,9 +77,6 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ClearSearchText => Instance.clearSearchText;
-
-		[JsonIgnore]
-		public static bool ShowDps => Instance.showDps;
 
 		[JsonIgnore]
 		public static bool UseOldCraftMenu => Instance.useOldCraftMenu;

@@ -42,6 +42,7 @@ namespace MagicStorage.Sorting
 	{
 		public override int Compare(Item item1, Item item2) => (int) ((GetDps(item2) - GetDps(item1)) * 100);
 
+		// TODO: make a more adequate implementation?  might be outside of the mod's scope
 		public static double GetDps(Item item)
 		{
 			if (item.damage <= 0)
