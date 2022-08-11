@@ -59,7 +59,6 @@ namespace MagicStorage.UI {
 			header.Height.Set(30, 0f);
 			header.BackgroundColor.A = 255;
 			header.OnClick += (evt, e) => HeaderClicked();
-			Append(header);
 
 			caption = new(captionText);
 			caption.VAlign = 0.5f;
@@ -102,6 +101,9 @@ namespace MagicStorage.UI {
 			list.SetScrollbar(scroll);
 			list.Append(scroll);
 			list.ListPadding = listPadding;
+			
+			//Append the header last so that it and its children take priority over the view area
+			Append(header);
 		}
 
 		private void HeaderClicked() {

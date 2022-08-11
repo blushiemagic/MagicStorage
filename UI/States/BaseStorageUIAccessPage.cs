@@ -343,12 +343,12 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
+		public override void Draw(SpriteBatch spriteBatch) {
 			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
 			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering))
 				MagicUI.BlockItemSlotActionsDetour = false;
 
-			base.DrawSelf(spriteBatch);
+			base.Draw(spriteBatch);
 
 			MagicUI.BlockItemSlotActionsDetour = oldBlock;
 		}
