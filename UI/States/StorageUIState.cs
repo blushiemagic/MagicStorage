@@ -277,7 +277,9 @@ namespace MagicStorage.UI.States {
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							if (Main.netMode == NetmodeID.SinglePlayer) {
 								StorageGUI.items[objSlot].favorited = !StorageGUI.items[objSlot].favorited;
-								changed = true;
+								StorageGUI.RefreshItems();
+
+								obj.IgnoreNextHandleAction = true;
 							} else {
 								Main.NewTextMultiline(
 									"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again",
@@ -304,6 +306,8 @@ namespace MagicStorage.UI.States {
 					if (changed) {
 						StorageGUI.RefreshItems();
 						SoundEngine.PlaySound(SoundID.Grab);
+
+						obj.IgnoreNextHandleAction = true;
 					}
 				};
 

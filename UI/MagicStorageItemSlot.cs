@@ -33,6 +33,8 @@ namespace MagicStorage.UI {
 
 		public bool IgnoreClicks { get; set; }
 
+		public bool IgnoreNextHandleAction { get; set; }
+
 		public readonly int slot;
 
 		public Func<Item> getItem;
@@ -58,7 +60,7 @@ namespace MagicStorage.UI {
 
 			//Lazy hardcoding lol
 			bool parentWasClicked = Parent is UIDragablePanel panel && panel.UIDelay > 0;
-			if (ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface) {
+			if (!IgnoreNextHandleAction && ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface) {
 				Main.LocalPlayer.mouseInterface = true;
 
 				if (Parent is UIDragablePanel panel2)
@@ -86,6 +88,8 @@ namespace MagicStorage.UI {
 					Main.mouseRightRelease = oldRightRelease;
 				}
 			}
+
+			IgnoreNextHandleAction = false;
 
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
 			dummy[10] = StoredItem;

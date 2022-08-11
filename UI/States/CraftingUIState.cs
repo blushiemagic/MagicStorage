@@ -228,6 +228,8 @@ namespace MagicStorage.UI.States {
 					if (changed) {
 						StorageGUI.needRefresh = true;
 						SoundEngine.PlaySound(SoundID.Grab);
+
+						obj.IgnoreNextHandleAction = true;
 					}
 				};
 
@@ -239,8 +241,10 @@ namespace MagicStorage.UI.States {
 					if (result is not null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 						CraftingGUI.slotFocus = true;
 
-					if (CraftingGUI.slotFocus)
+					if (CraftingGUI.slotFocus) {
 						CraftingGUI.SlotFocusLogic();
+						obj.IgnoreNextHandleAction = true;
+					}
 				};
 
 				return itemSlot;
@@ -769,6 +773,8 @@ namespace MagicStorage.UI.States {
 						if (changed) {
 							StorageGUI.needRefresh = true;
 							SoundEngine.PlaySound(SoundID.Grab);
+
+							obj.IgnoreNextHandleAction = true;
 						}
 					};
 
@@ -937,22 +943,19 @@ namespace MagicStorage.UI.States {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
 								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-								StorageGUI.InvokeOnRefresh();
-								StorageGUI.needRefresh = false;
+								StorageGUI.RefreshItems();
 							}
 						} else {
 							if (storagePlayer.HiddenRecipes.Add(obj.StoredItem)) {
 								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-								StorageGUI.InvokeOnRefresh();
-								StorageGUI.needRefresh = false;
+								StorageGUI.RefreshItems();
 							}
 						}
 					} else {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 							
-						StorageGUI.InvokeOnRefresh();
-						StorageGUI.needRefresh = false;
+						StorageGUI.RefreshItems();
 					}
 				};
 			}
