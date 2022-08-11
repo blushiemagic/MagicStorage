@@ -72,6 +72,7 @@ namespace MagicStorage
 		[Label("$Mods.MagicStorage.Config.buttonLayout.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.buttonLayout.Tooltip")]
 		[DefaultValue(ButtonConfigurationMode.Legacy)]
+		[DrawTicks]
 		public ButtonConfigurationMode buttonLayout;
 
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
