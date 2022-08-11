@@ -45,11 +45,15 @@ namespace MagicStorage.UI {
 			Recalculate();
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
+		protected override void DrawChildren(SpriteBatch spriteBatch) {
 			background.SetImage(IsSelected() ? BackTextureActive : BackTexture);
 			background.Color = IsMouseHovering ? Color.Silver : Color.White;
+			background.Recalculate();
 
-			base.DrawSelf(spriteBatch);
+			icon.SetImage(GetIcon());
+			icon.Recalculate();
+
+			base.DrawChildren(spriteBatch);
 		}
 
 		public override void MouseOver(UIMouseEvent evt) {

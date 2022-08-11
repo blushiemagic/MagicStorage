@@ -22,10 +22,11 @@ namespace MagicStorage {
 			int sign = Math.Sign(order), signR = Math.Sign(reverse);
 
 			//Throw a proper error here if the reverse comparison isn't the negative of "order"
+			// TOOD: once the cause has been found, fix it, then just return 0 here since the order is irrelevant
 			if ((sign != 0 && signR == 0) || (sign == 0 && signR != 0) || (sign != -signR))
 				throw new ArgumentException($"Comparer returned inconsistent results (x.Compare(y): {sign}, y.Compare(x): {signR})\n" +
-					$"Object #1: {reportObjectFunc(x)}\n" +
-					$"Object #2: {reportObjectFunc(y)}");
+					$"x: {reportObjectFunc(x)}\n" +
+					$"y: {reportObjectFunc(y)}");
 
 			return order;
 		}

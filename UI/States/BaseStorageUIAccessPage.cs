@@ -115,12 +115,15 @@ namespace MagicStorage.UI.States {
 				return itemSlot;
 			};
 
-			slotZone.OnScrollWheel += (evt, e) => scrollBar?.ScrollWheel(new(scrollBar, evt.MousePosition, evt.ScrollWheelValue));
+			slotZone.OnScrollWheel += (evt, e) => {
+				if (scrollBar is not null)
+					scrollBar.ViewPosition -= evt.ScrollWheelValue / scrollBar.ScrollDividend;
+			};
 
 			slotZone.Width.Set(0f, 1f);
 			Append(slotZone);
 
-			scrollBar = new();
+			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
 			slotZone.Append(scrollBar);
 
@@ -207,7 +210,7 @@ namespace MagicStorage.UI.States {
 					topBar2.Append(sortingButtons);
 
 					if (MagicStorageConfig.ExtraFilterIcons) {
-						filteringButtons.AssignOptions(FilteringOptionLoader.GetOptions(craftingGUI));
+						filteringButtons.AssignOptions(FilteringOptionLoader.GetVisibleOptions(craftingGUI));
 
 						filteringButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 22);
 					} else {
@@ -280,11 +283,17 @@ namespace MagicStorage.UI.States {
 				case ButtonConfigurationMode.ModernDropdown:
 					//Initialize the menu
 					sortingDropdown.Clear();
-					sortingDropdown.AddRange(SortingOptionLoader.GetOptions(craftingGUI).Select(o => new SortingOptionElement(o)));
+					sortingDropdown.AddRange(SortingOptionLoader.GetVisibleOptions(craftingGUI).Select(CreateDropdownOption));
+
+					foreach (var child in sortingDropdown.Children)
+						child.Activate();
 
 					//Initialize the menu
 					filteringDropdown.Clear();
-					filteringDropdown.AddRange(FilteringOptionLoader.GetOptions(craftingGUI).Select(o => new FilteringOptionElement(o)));
+					filteringDropdown.AddRange(FilteringOptionLoader.GetVisibleOptions(craftingGUI).Select(CreateDropdownOption));
+
+					foreach (var child in filteringDropdown.Children)
+						child.Activate();
 
 					//Can't just append them to "topBar2" since that would mess up the mouse events
 					Append(sortingDropdown);
@@ -295,6 +304,22 @@ namespace MagicStorage.UI.States {
 			}
 
 			Recalculate();
+		}
+
+		private SortingOptionElement CreateDropdownOption(SortingOption option) {
+			SortingOptionElement element = new(option);
+
+			element.OnClick += parentUI.GetPage<SortingPage>("Sorting").ClickOption;
+
+			return element;
+		}
+
+		private FilteringOptionElement CreateDropdownOption(FilteringOption option) {
+			FilteringOptionElement element = new(option);
+
+			element.OnClick += parentUI.GetPage<FilteringPage>("Filtering").ClickOption;
+
+			return element;
 		}
 
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);

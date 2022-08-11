@@ -105,7 +105,7 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		private void ClickOption(UIMouseEvent evt, UIElement e) {
+		internal void ClickOption(UIMouseEvent evt, UIElement e) {
 			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable) {
 				OnConfigurationClicked(e as TElement);
 				StorageGUI.needRefresh = true;
@@ -132,7 +132,7 @@ namespace MagicStorage.UI {
 		public override SortingOption GetOption(SortingOptionElement element) => element.option;
 
 		public override IEnumerable<SortingOption> GetOptions() {
-			IEnumerable<SortingOption> orig = SortingOptionLoader.GetOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
+			IEnumerable<SortingOption> orig = SortingOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
 
 			if (!filterBaseOptions)
 				return orig;
@@ -155,7 +155,7 @@ namespace MagicStorage.UI {
 		public override FilteringOption GetOption(FilteringOptionElement element) => element.option;
 
 		public override IEnumerable<FilteringOption> GetOptions() {
-			IEnumerable<FilteringOption> orig = FilteringOptionLoader.GetOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
+			IEnumerable<FilteringOption> orig = FilteringOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
 
 			if (!filterBaseOptions)
 				return orig;

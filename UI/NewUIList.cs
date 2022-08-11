@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.UI;
@@ -90,9 +91,11 @@ namespace MagicStorage.UI {
 		}
 
 		public virtual void AddRange(IEnumerable<UIElement> items) {
-			_items.AddRange(items);
-			foreach (var item in items)
+			foreach (var item in items) {
+				//TML bug fix:  duplicate enumerations resulting in separate object instances in "_items" and "_innerList.Children"
+				_items.Add(item);
 				_innerList.Append(item);
+			}
 
 			UpdateOrder();
 			_innerList.Recalculate();
@@ -116,7 +119,7 @@ namespace MagicStorage.UI {
 		public override void ScrollWheel(UIScrollWheelEvent evt) {
 			base.ScrollWheel(evt);
 			if (_scrollbar != null)
-				_scrollbar.ScrollWheel(new(_scrollbar, evt.MousePosition, evt.ScrollWheelValue));
+				_scrollbar.ViewPosition -= evt.ScrollWheelValue / _scrollbar.ScrollDividend;
 		}
 
 		public override void RecalculateChildren() {

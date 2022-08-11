@@ -152,9 +152,9 @@ namespace MagicStorage.CrossMod.Control {
 			TagIO.ToFile(root, DestinationPath);
 		}
 
-		public IEnumerable<SortingOption> GetSortingOptions(bool craftingGUI) => SortingOptionLoader.GetOptions(craftingGUI).Where(o => sortingOptions[o.Type] is not null);
+		public IEnumerable<SortingOption> GetSortingOptions(bool craftingGUI) => SortingOptionLoader.GetVisibleOptions(craftingGUI).Where(o => sortingOptions[o.Type] is not null);
 
-		public IEnumerable<FilteringOption> GetFilteringOptions(bool craftingGUI) => FilteringOptionLoader.GetOptions(craftingGUI).Where(o => filteringOptions[o.Type] is not null);
+		public IEnumerable<FilteringOption> GetFilteringOptions(bool craftingGUI) => FilteringOptionLoader.GetVisibleOptions(craftingGUI).Where(o => filteringOptions[o.Type] is not null);
 
 		private static OptionDefinition?[] BuildArray(IEnumerable<SortingOption> options) {
 			OptionDefinition?[] result = new OptionDefinition?[SortingOptionLoader.Count];

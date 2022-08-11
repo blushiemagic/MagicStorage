@@ -134,6 +134,13 @@ namespace MagicStorage.CrossMod {
 		protected override bool IsSelected() => MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable
 			? MagicStorageMod.Instance.optionsConfig.filteringOptions[option.Type] is not null
 			: option.Type == FilteringOptionLoader.Selected;
+
+		public override int CompareTo(object obj) {
+			if (obj is not FilteringOptionElement other)
+				return base.CompareTo(obj);
+
+			return option.Type.CompareTo(other.option.Type);
+		}
 	}
 
 	public static class FilteringOptionLoader {
@@ -282,5 +289,7 @@ namespace MagicStorage.CrossMod {
 
 			return order;
 		}
+
+		public static IEnumerable<FilteringOption> GetVisibleOptions(bool craftingGUI) => GetOptions(craftingGUI).Where(o => o.Visible);
 	}
 }

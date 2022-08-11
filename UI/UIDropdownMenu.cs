@@ -10,10 +10,14 @@ using Terraria.UI;
 namespace MagicStorage.UI {
 	internal class UIDropdownMenu : UIPanel {
 		private class UIViewArea : UIPanel {
+			public UIViewArea() {
+				OverflowHidden = true;
+			}
+
 			public override bool ContainsPoint(Vector2 point) => true;
 
 			protected override void DrawChildren(SpriteBatch spriteBatch) {
-				var parentDims = Parent.GetDimensions();
+				var parentDims = Parent.GetInnerDimensions();
 
 				Vector2 position = parentDims.Position();
 				Vector2 dimensions = new(parentDims.Width, parentDims.Height);
@@ -29,7 +33,7 @@ namespace MagicStorage.UI {
 				}
 			}
 
-			public override Rectangle GetViewCullingArea() => Parent.GetDimensions().ToRectangle();
+			public override Rectangle GetViewCullingArea() => Parent.GetInnerDimensions().ToRectangle();
 		}
 
 		public readonly NewUIList list;
@@ -80,23 +84,31 @@ namespace MagicStorage.UI {
 			viewArea = new();
 			viewArea.Top.Set(header.Height.Pixels, 0);
 			viewArea.Width.Set(0, 1f);
-			viewArea.Height.Set(fullDropdownSize, 0f);
+			viewArea.Height.Set(-header.Height.Pixels, 1f);
 			viewArea.BackgroundColor = Color.Transparent;
 			viewArea.BorderColor = Color.Transparent;
-			viewArea.PaddingLeft = viewArea.PaddingRight = 0;
+			viewArea.SetPadding(0);
 			Append(viewArea);
 
+			// Normally i'd just use relative Height and Top values, but that breaks the cool "slide open" effect, so constant values it is
 			list = new();
 			list.SetPadding(0);
-			list.Width.Set(-20, 1f);
-			list.Height.Set(0f, 1f);
+			list.Left.Set(24, 0f);
+			list.Top.Set(10, 0f);
+			list.Width.Set(-44, 1f);
+			//list.Height.Set(0f, 1f);
+			list.Height.Set(fullDropdownSize - 20, 0f);
 			viewArea.Append(list);
 
-			scroll = new();
+			scroll = new(scrollDividend: 1f) {
+				IgnoreParentBoundsWhenDrawing = true
+			};
 			scroll.Width.Set(20, 0);
-			scroll.Height.Set(0, 0.825f);
+			//scroll.Height.Set(0, 0.825f);
+			scroll.Height.Set(list.Height.Pixels * 0.95f, 0f);
 			scroll.Left.Set(-20, 1f);
-			scroll.Top.Set(0, 0.1f);
+			//scroll.Top.Set(0, 0.1f);
+			scroll.Top.Set(list.Height.Pixels * 0.025f, 0f);
 
 			list.SetScrollbar(scroll);
 			list.Append(scroll);
@@ -122,11 +134,12 @@ namespace MagicStorage.UI {
 			arrow.SetText('>');
 			listHeightFactor = 0f;
 			scroll.ViewPosition = 0f;
+
+			Height.Set(header.Height.Pixels, 0f);
+			Recalculate();
 		}
 
 		public override void Update(GameTime gameTime) {
-			scroll.SetView(0f, list.Count);
-			
 			base.Update(gameTime);
 
 			float old = listHeightFactor;

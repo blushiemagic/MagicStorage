@@ -164,7 +164,10 @@ namespace MagicStorage.UI.States {
 				return itemSlot;
 			};
 
-			storageZone.OnScrollWheel += (evt, e) => storageScrollBar?.ScrollWheel(new(storageScrollBar, evt.MousePosition, evt.ScrollWheelValue));
+			storageZone.OnScrollWheel += (evt, e) => {
+				if (storageScrollBar is not null)
+					storageScrollBar.ViewPosition -= evt.ScrollWheelValue / storageScrollBar.ScrollDividend;
+			};
 
 			storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
 			recipePanel.Append(storedItemsText);
@@ -173,7 +176,7 @@ namespace MagicStorage.UI.States {
 			
 			recipePanel.Append(storageZone);
 
-			storageScrollBar = new();
+			storageScrollBar = new(scrollDividend: 250f);
 			storageScrollBar.Left.Set(-20f, 1f);
 			storageScrollBar.SetView(CraftingGUI.ScrollBar2ViewSize, storageScrollBarMaxViewSize);
 			storageZone.Append(storageScrollBar);

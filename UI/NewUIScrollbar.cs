@@ -24,6 +24,10 @@ namespace MagicStorage.UI {
 
 		public event Action<NewUIScrollbar> OnDraggingStart, OnDraggingEnd;
 
+		public bool IgnoreParentBoundsWhenDrawing { get; set; }
+
+		public float ScrollDividend { get; set; } = 1f;
+
 		public float ViewPosition {
 			get {
 				return _viewPosition;
@@ -39,13 +43,14 @@ namespace MagicStorage.UI {
 			ViewPosition = MaxViewSize - ViewSize;
 		}
 
-		public NewUIScrollbar() {
+		public NewUIScrollbar(float scrollDividend = 1f) {
 			Width.Set(20f, 0f);
 			MaxWidth.Set(20f, 0f);
 			_texture = Main.Assets.Request<Texture2D>("Images/UI/Scrollbar");
 			_innerTexture = Main.Assets.Request<Texture2D>("Images/UI/ScrollbarInner");
 			PaddingTop = 5f;
 			PaddingBottom = 5f;
+			ScrollDividend = scrollDividend;
 		}
 
 		public void SetView(float viewSize, float maxViewSize) {
@@ -55,14 +60,15 @@ namespace MagicStorage.UI {
 			MaxViewSize = maxViewSize;
 		}
 
-		public Rectangle GetHandleRectangle() {
-			CalculatedStyle innerDimensions = GetInnerDimensions();
+		public Rectangle GetHandleRectangle() => GetHandleRectangle(GetInnerDimensions());
+
+		private Rectangle GetHandleRectangle(CalculatedStyle style) {
 			if (MaxViewSize == 0f && ViewSize == 0f) {
 				ViewSize = 1f;
 				MaxViewSize = 1f;
 			}
 
-			return new Rectangle((int)innerDimensions.X, (int)(innerDimensions.Y + innerDimensions.Height * (_viewPosition / MaxViewSize)) - 3, 20, (int)(innerDimensions.Height * (ViewSize / MaxViewSize)) + 7);
+			return new Rectangle((int)style.X, (int)(style.Y + style.Height * (_viewPosition / MaxViewSize)) - 3, 20, (int)(style.Height * (ViewSize / MaxViewSize)) + 7);
 		}
 
 		public override void Update(GameTime gameTime) {
@@ -89,11 +95,53 @@ namespace MagicStorage.UI {
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			CalculatedStyle dimensions = GetDimensions();
-			Rectangle handleRectangle = GetHandleRectangle();
+			CalculatedStyle dimensions;
+			Rectangle handleRectangle;
+
+			if (!IgnoreParentBoundsWhenDrawing) {
+				dimensions = GetDimensions();
+				handleRectangle = GetHandleRectangle();
+			} else {
+				GetUnrestrictedDimensions(out _, out dimensions, out CalculatedStyle innerDimensions);
+				handleRectangle = GetHandleRectangle(innerDimensions);
+			}
 
 			DrawBar(spriteBatch, _texture.Value, dimensions.ToRectangle(), Color.White);
 			DrawBar(spriteBatch, _innerTexture.Value, handleRectangle, Color.White * ((IsDragging || _isHoveringOverHandle) ? 1f : 0.85f));
+		}
+
+		//Copy of UIElement.Recalculate() and UIElement.GetDimensionsBasedOnParentDimensions(), but without any clamping for Width and Height
+		private void GetUnrestrictedDimensions(out CalculatedStyle outer, out CalculatedStyle style, out CalculatedStyle inner) {
+			CalculatedStyle parentDimensions = Parent is null ? UserInterface.ActiveInstance.GetDimensions() : Parent.GetInnerDimensions();
+
+			CalculatedStyle result = default;
+			result.X = Left.GetValue(parentDimensions.Width) + parentDimensions.X;
+			result.Y = Top.GetValue(parentDimensions.Height) + parentDimensions.Y;
+			//float value = MinWidth.GetValue(parentDimensions.Width);
+			//float value2 = MaxWidth.GetValue(parentDimensions.Width);
+			//float value3 = MinHeight.GetValue(parentDimensions.Height);
+			//float value4 = MaxHeight.GetValue(parentDimensions.Height);
+			//result.Width = MathHelper.Clamp(Width.GetValue(parentDimensions.Width), value, value2);
+			//result.Height = MathHelper.Clamp(Height.GetValue(parentDimensions.Height), value3, value4);
+			result.Width = Width.GetValue(parentDimensions.Width);
+			result.Height = Height.GetValue(parentDimensions.Height);
+			result.Width += MarginLeft + MarginRight;
+			result.Height += MarginTop + MarginBottom;
+			result.X += parentDimensions.Width * HAlign - result.Width * HAlign;
+			result.Y += parentDimensions.Height * VAlign - result.Height * VAlign;
+			outer = result;
+
+			result.X += MarginLeft;
+			result.Y += MarginTop;
+			result.Width -= MarginLeft + MarginRight;
+			result.Height -= MarginTop + MarginBottom;
+			style = result;
+
+			result.X += PaddingLeft;
+			result.Y += PaddingTop;
+			result.Width -= PaddingLeft + PaddingRight;
+			result.Height -= PaddingTop + PaddingBottom;
+			inner = result;
 		}
 
 		public override void MouseDown(UIMouseEvent evt) {
@@ -130,7 +178,7 @@ namespace MagicStorage.UI {
 
 			base.ScrollWheel(evt);
 
-			_viewPosition -= evt.ScrollWheelValue / 250f;
+			_viewPosition -= evt.ScrollWheelValue / ScrollDividend;
 		}
 	}
 }
