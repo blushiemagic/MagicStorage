@@ -162,6 +162,9 @@ namespace MagicStorage.UI {
 				Height.Set(header.Height.Pixels + fullDropdownSize * listHeightFactor, 0f);
 				Recalculate();
 			}
+
+			if (listHeightFactor <= 0)
+				scroll.ViewPosition = 0;
 		}
 
 		protected override void DrawChildren(SpriteBatch spriteBatch) {

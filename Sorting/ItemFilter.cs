@@ -88,6 +88,19 @@ namespace MagicStorage.Sorting
 		public static readonly Filter Placeable = item =>
 			item.createTile >= TileID.Dirt || item.createWall > 0;
 
+		//A typical "material" item like Gel or Fallen Stars
+		//Filter out equipment, items that place tiles/walls, weapons, tools, dyes and paint
+		public static readonly Filter Material = item =>
+			item.material
+			&& !ArmorAndEquipment(item)
+			&& !Vanity(item)
+			&& !Placeable(item)
+			&& !Weapon(item)
+			&& item.useStyle == ItemUseStyleID.None
+			&& !Tool(item)
+			&& item.dye <= 0
+			&& item.paint <= 0;
+
 		public static readonly Filter Misc = item =>
 			!blacklist.Any(filter => filter(item));
 

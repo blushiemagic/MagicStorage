@@ -525,6 +525,7 @@ Mods: {
 			Stackables: "筛选可堆叠物品"
 			NotFullyResearched: "筛选未完全研究的物品"
 			FullyResearched: "筛选已完全研究的物品"
+			# Materials: "Filter by Materials"
 		}
 
 		SortingOption: {

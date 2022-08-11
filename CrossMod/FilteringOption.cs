@@ -167,6 +167,7 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Stackables { get; internal set; }
 			public static FilteringOption NotFullyResearched { get; internal set; }
 			public static FilteringOption FullyResearched { get; internal set; }
+			public static FilteringOption Material { get; internal set; }
 		}
 
 		private static readonly List<FilteringOption> options = new();
@@ -233,6 +234,7 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Vanity = new FilterVanity());
 			mod.AddContent(Definitions.Potion = new FilterPotion());
 			mod.AddContent(Definitions.Tiles = new FilterTiles());
+			mod.AddContent(Definitions.Material = new FilterMaterials());
 			mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
 			mod.AddContent(Definitions.Stackables = new FilterStackables());
 			mod.AddContent(Definitions.NotFullyResearched = new FilterNotFullyResearched());

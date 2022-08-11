@@ -411,6 +411,7 @@ Mods: {
 			# Stackables: "Filter Stackables"
 			# NotFullyResearched: "Filter Items Not Fully Researched"
 			# FullyResearched: "Filter Items Fully Researched"
+			# Materials: "Filter by Materials"
 		}
 
 		SortingOption: {

@@ -265,4 +265,15 @@ namespace MagicStorage.CrossMod {
 
 		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 	}
+
+	[Autoload(false)]
+	public sealed class FilterMaterials : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.Material;
+
+		public override string Texture => "MagicStorage/Assets/FilterMisc";
+
+		public override string Name => "Materials";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
 }

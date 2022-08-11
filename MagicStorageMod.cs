@@ -17,7 +17,7 @@ namespace MagicStorage {
 		public static MagicStorageMod Instance => ModContent.GetInstance<MagicStorageMod>();
 
 		internal static readonly bool ShowcaseEnabled = false;
-		internal static readonly bool UsingPrivateBeta = false;  //Make sure to add the "NETPLAY" define when setting this to true for beta builds! -- absoluteAquarian
+		internal static readonly bool UsingPrivateBeta = true;  //Make sure to add the "NETPLAY" define when setting this to true for beta builds! -- absoluteAquarian
 
 		// Integration with ModHelpers
 		public static string GithubUserName => "blushiemagic";

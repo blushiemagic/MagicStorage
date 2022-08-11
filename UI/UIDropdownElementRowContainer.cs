@@ -1,4 +1,5 @@
-﻿using Terraria.UI;
+﻿using System;
+using Terraria.UI;
 
 namespace MagicStorage.UI {
 	public class UIDropdownElementRowContainer : UIElement {
@@ -6,20 +7,34 @@ namespace MagicStorage.UI {
 
 		public UIDropdownElementRowContainer(float padding) {
 			this.padding = padding;
+
+			SetPadding(0);
+			MarginTop = MarginBottom = MarginLeft = MarginRight = 0;
 		}
 
 		public void SetElements(params UIElement[] elements) {
 			RemoveAllChildren();
 
-			float left = 0;
+			float left = 0, height = 0;
 
 			foreach (var element in elements) {
 				element.Left.Set(left, 0f);
 
-				Append(element);
+				element.Activate();
+				element.Recalculate();
 
-				left += element.GetDimensions().Width + padding;
+				var dims = element.GetDimensions();
+
+				left += dims.Width + padding;
+				height = Math.Max(height, dims.Height);
+
+				Append(element);
 			}
+
+			Width.Set(left - padding, 0f);
+			Height.Set(height, 0f);
+
+			Recalculate();
 		}
 	}
 }
