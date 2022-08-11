@@ -24,7 +24,8 @@ namespace MagicStorage
 	public static class CraftingGUI
 	{
 		public const int RecipeButtonsAvailableChoice = 0;
-		public const int RecipeButtonsBlacklistChoice = 3;
+		//Button location could either be the third (2) or fourth (3) option depending on if the favoriting config is enabled
+		public static int RecipeButtonsBlacklistChoice => MagicStorageConfig.CraftingFavoritingEnabled ? 3 : 2;
 		public const int RecipeButtonsFavoritesChoice = 2;
 		public const int Padding = 4;
 		public const int RecipeColumns = 10;
@@ -359,11 +360,13 @@ namespace MagicStorage
 					filteredRecipes = filteredRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
 
 				// favorites first
-				if (MagicStorageConfig.CraftingFavoritingEnabled)
+				if (MagicStorageConfig.CraftingFavoritingEnabled) {
 					filteredRecipes = filteredRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
 					
-				filteredRecipes = filteredRecipes.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
-					.ThenBy(r => r.createItem, sortComparer);
+					filteredRecipes = filteredRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
+						.ThenBy(r => r.createItem, sortComparer);
+				} else
+					filteredRecipes = filteredRecipes.OrderByDescending(r => r.createItem, sortComparer);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -482,7 +485,7 @@ namespace MagicStorage
 					.AsParallel()
 					.AsOrdered()
 					// favorites first
-					.OrderBy(r => favorited.Contains(r.createItem) ? 0 : 1)
+					.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
 					.ThenBy(r => r.createItem, sortComparer);
 
 				recipes.Clear();

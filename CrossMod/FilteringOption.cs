@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Sorting;
 using MagicStorage.UI;
+using MagicStorage.UI.States;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -130,24 +131,15 @@ namespace MagicStorage.CrossMod {
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;
 
-		protected override bool IsSelected() => option.Type == FilteringOptionLoader.Selected;
-
-		public override void Click(UIMouseEvent evt) {
-			base.Click(evt);
-
-			int old = FilteringOptionLoader.Selected;
-			FilteringOptionLoader.Selected = option.Type;
-
-			if (old != option.Type) {
-				SoundEngine.PlaySound(SoundID.MenuTick);
-				option.OnSelected?.Invoke();
-			}
-		}
+		protected override bool IsSelected() => MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable
+			? MagicStorageMod.Instance.optionsConfig.filteringOptions[option.Type] is not null
+			: option.Type == FilteringOptionLoader.Selected;
 	}
 
 	public static class FilteringOptionLoader {
 		public static class Definitions {
 			public static FilteringOption All { get; internal set; }
+			public static FilteringOption Weapon { get; internal set; }
 			public static FilteringOption Melee { get; internal set; }
 			public static FilteringOption Ranged { get; internal set; }
 			public static FilteringOption Magic { get; internal set; }
@@ -155,6 +147,7 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Throwing { get; internal set; }
 			public static FilteringOption Ammo { get; internal set; }
 			public static FilteringOption Tools { get; internal set; }
+			public static FilteringOption ArmorAndEquips { get; internal set; }
 			public static FilteringOption Armor { get; internal set; }
 			public static FilteringOption Equips { get; internal set; }
 			public static FilteringOption Vanity { get; internal set; }
@@ -170,6 +163,7 @@ namespace MagicStorage.CrossMod {
 		}
 
 		private static readonly List<FilteringOption> options = new();
+		internal static readonly Dictionary<string, HashSet<string>> optionNames = new();
 
 		public static IReadOnlyList<FilteringOption> Options => options.AsReadOnly();
 
@@ -182,19 +176,42 @@ namespace MagicStorage.CrossMod {
 		public static int Count => options.Count;
 
 		internal static int Add(FilteringOption option) {
+			//Ensure that the name doesn't conflict with a SortingOption
+			if (SortingOptionLoader.optionNames.TryGetValue(option.Mod.Name, out var hash) && hash.Contains(option.Name))
+				throw new Exception($"Cannot add a FilteringOption with the name \"{option.Mod.Name}:{option.Name}\".  A SortingOption with that name already exists.");
+
 			int count = Count;
 
 			options.Add(option);
+
+			if (!optionNames.TryGetValue(option.Mod.Name, out hash))
+				optionNames[option.Mod.Name] = hash = new();
+
+			hash.Add(option.Name);
+			order = null;
 
 			return count;
 		}
 
 		public static FilteringOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
 
+		public static IEnumerable<FilteringOption> BaseOptions
+			=> new FilteringOption[] {
+				Definitions.All,
+				Definitions.Weapon,
+				Definitions.Tools,
+				Definitions.ArmorAndEquips,
+				Definitions.Potion,
+				Definitions.Tiles,
+				Definitions.Misc,
+				Definitions.Recent
+			};
+
 		internal static void Load() {
 			MagicStorageMod mod = MagicStorageMod.Instance;
 
 			mod.AddContent(Definitions.All = new FilterAll());
+			mod.AddContent(Definitions.Weapon = new FilterWeapons());
 			mod.AddContent(Definitions.Melee = new FilterMelee());
 			mod.AddContent(Definitions.Ranged = new FilterRanged());
 			mod.AddContent(Definitions.Magic = new FilterMagic());
@@ -203,6 +220,7 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.OtherWeapons = new FilterOtherWeaponClasses());
 			mod.AddContent(Definitions.Ammo = new FilterAmmo());
 			mod.AddContent(Definitions.Tools = new FilterTools());
+			mod.AddContent(Definitions.ArmorAndEquips = new FilterArmorAndEquips());
 			mod.AddContent(Definitions.Armor = new FilterArmor());
 			mod.AddContent(Definitions.Equips = new FilterEquips());
 			mod.AddContent(Definitions.Vanity = new FilterVanity());
@@ -219,6 +237,8 @@ namespace MagicStorage.CrossMod {
 		internal static void Unload() {
 			options.Clear();
 			Selected = 0;
+
+			optionNames.Clear();
 
 			foreach (var field in typeof(Definitions).GetFields().Where(f => f.FieldType == typeof(FilteringOption)))
 				field.SetValue(null, null);

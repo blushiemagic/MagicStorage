@@ -33,16 +33,16 @@ namespace MagicStorage.Sorting
 
 			var sorter = SortingOptionLoader.Get(sortMode);
 
-			if (sorter.SortAgainAfterFuzzy) {
-				var sortFunc = sorter.Sorter.AsSafe();
+			if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
+				var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
-				orderedItems = orderedItems.OrderBy(x => x, sortFunc);
+				orderedItems = orderedItems.OrderByDescending(x => x, sortFunc);
 			}
 
 			if (sortMode == SortingOptionLoader.Definitions.Value.Type)
 				return orderedItems;  //Don't sort by type
 
-			return orderedItems.ThenBy(x => x.type).ThenBy(x => x.value);
+			return orderedItems.ThenByDescending(x => x.type).ThenByDescending(x => x.value);
 		}
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
@@ -74,7 +74,7 @@ namespace MagicStorage.Sorting
 
 		public static ParallelQuery<Recipe> GetRecipes(int sortMode, int filterMode, string searchFilter, out IComparer<Item> sortComparer)
 		{
-			sortComparer = SortingOptionLoader.Get(sortMode)?.Sorter;
+			sortComparer = SortingOptionLoader.Get(sortMode)?.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
 			if (sortComparer is null)
 				throw new ArgumentOutOfRangeException(nameof(sortMode), "Sorting ID was invalid or its definition had a null sorter");

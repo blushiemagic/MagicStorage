@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
+using MagicStorage.UI.States;
 using Newtonsoft.Json;
+using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
@@ -36,6 +38,12 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool clearSearchText;
 
+		[Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.extraFilterIcons.Tooltip")]
+		[DefaultValue(true)]
+		[ReloadRequired]
+		public bool extraFilterIcons;
+
 		[Label("$Mods.MagicStorage.Config.useOldCraftMenu.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip")]
 		[DefaultValue(false)]
@@ -61,6 +69,11 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool recipeBlacklist;
 
+		[Label("$Mods.MagicStorage.Config.buttonLayout.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.buttonLayout.Tooltip")]
+		[DefaultValue(ButtonConfigurationMode.Legacy)]
+		public ButtonConfigurationMode buttonLayout;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -79,6 +92,9 @@ namespace MagicStorage
 		public static bool ClearSearchText => Instance.clearSearchText;
 
 		[JsonIgnore]
+		public static bool ExtraFilterIcons => Instance.extraFilterIcons;
+
+		[JsonIgnore]
 		public static bool UseOldCraftMenu => Instance.useOldCraftMenu;
 
 		[JsonIgnore]
@@ -92,6 +108,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool RecipeBlacklistEnabled => Instance.recipeBlacklist;
+
+		[JsonIgnore]
+		public static ButtonConfigurationMode ButtonUIMode => Instance.buttonLayout;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
@@ -109,5 +128,13 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
+
+		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref string message) {
+			if (Netplay.HasClients && Netplay.Clients[whoAmI].Socket.GetRemoteAddress().IsLocalHost())
+				return true;
+
+			message = "Only the server host can modify this config";
+			return false;
+		}
 	}
 }

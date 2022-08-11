@@ -17,9 +17,7 @@ namespace MagicStorage.Common.Global {
 			if (StoragePlayer.LocalPlayer.StorageCrafting() || StoragePlayer.LocalPlayer.StorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
 				return false;
 
-			var page = MagicUI.storageUI;
-
-			return Main.mouseX > page.PanelLeft && Main.mouseX < page.PanelRight && Main.mouseY > page.PanelTop && Main.mouseY < page.PanelBottom;	
+			return MagicUI.BlockItemSlotActionsDetour;
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {

@@ -20,8 +20,6 @@ namespace MagicStorage.UI {
 
 		public bool Value { get; set; }
 
-		private bool hovering;
-
 		public NewUIToggleButton(Action onChanged, Asset<Texture2D> button, LocalizedText name, int buttonSize)
 		{
 			this.buttonSize = buttonSize;
@@ -49,14 +47,12 @@ namespace MagicStorage.UI {
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
 
-			hovering = true;
 			MagicUI.mouseText = name.Value;
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
-			hovering = false;
 			MagicUI.mouseText = "";
 		}
 
@@ -65,7 +61,7 @@ namespace MagicStorage.UI {
 			CalculatedStyle dim = GetDimensions();
 			Asset<Texture2D> texture = Value ? BackTextureActive : BackTexture;
 			Vector2 drawPos = new(dim.X, dim.Y);
-			Color color = hovering ? Color.Silver : Color.White;
+			Color color = IsMouseHovering ? Color.Silver : Color.White;
 			spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
 			spriteBatch.Draw(button.Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
 		}

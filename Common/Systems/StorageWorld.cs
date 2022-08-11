@@ -87,6 +87,8 @@ namespace MagicStorage.Common.Systems
 			tag["queenSlimeDiamond"] = queenSlimeDiamond;
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").ToList();
+
+			MagicStorageMod.Instance.optionsConfig.Save();
 		}
 
 		public override void LoadWorldData(TagCompound tag)

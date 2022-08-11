@@ -537,6 +537,7 @@ Mods: {
 			WeaponsThrown: "Filter Throwing Weapons"
 			Ammo: "Filter Ammo"
 			Armor: "Filter Armor"
+			Accessories: "Filter Accessories"
 			Vanity: "Filter Vanity Items"
 			Potions: "Filter Potions"
 			Tiles: "Filter Placeables"
@@ -559,6 +560,8 @@ Mods: {
 			QuantityRatio: "Sort by Quantity Ratio"
 			Damage: "Sort by Damage"
 		}
+
+		ButtonConfigGear: "Open Configuration Panel"
 
 		UIPages: {
 			Sorting: "Sorting",
@@ -595,7 +598,7 @@ Mods: {
 			}
 			extraFilterIcons: {
 				Label: "Display extra sorting icons"
-				Tooltip: "Enable to have the extra sorting options available"
+				Tooltip: "Enable to have the extra sorting options available in the Legacy "
 			}
 			showDps: {
 				Label: "Estimate the dps of weapons"
@@ -620,6 +623,29 @@ Mods: {
 			recipeBlacklist: {
 				Label: "Recipe Whitelist/Blacklist"
 				Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+			}
+			buttonLayout: {
+				Label: "Sorting/Filtering Button Layout"
+				Tooltip:
+				'''
+				Legacy:
+				  Layout from v0.5.6.5 and previous versions.
+				  The Sorting and Filtering pages are disabled.
+				ModernPaged:
+				  Sorting and filtering options moved to the Sorting and Filtering pages.
+				ModernConfigurable:
+				  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+				LegacyWithGear:
+				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+				  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
+				  The Sorting and Filtering pages are disabled.
+				LegacyBasicWithPaged:
+				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+				  Additional icons are in the Sorting and Filtering pages.
+				ModernDropdown:
+				  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
+				  The Sorting and Filtering pages are disabled.
+				'''
 			}
 
 			AllowAutomatonToMoveIn: {

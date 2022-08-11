@@ -16,6 +16,19 @@ namespace MagicStorage.CrossMod {
 	}
 
 	[Autoload(false)]
+	public sealed class FilterWeapons : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.Weapon;
+
+		public override bool FiltersDamageClass => true;
+
+		public override string Texture => "MagicStorage/Assets/FilterMelee";
+
+		public override string Name => "Weapons";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
 	public sealed class FilterMelee : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.WeaponMelee;
 
@@ -60,7 +73,7 @@ namespace MagicStorage.CrossMod {
 
 		public override bool FiltersDamageClass => true;
 
-		public override string Texture => "MagicStorage/Assets/FilterMelee";
+		public override string Texture => "MagicStorage/Assets/FilterSummon";
 
 		public override string Name => "WeaponsSummon";
 
@@ -93,11 +106,22 @@ namespace MagicStorage.CrossMod {
 
 	[Autoload(false)]
 	public sealed class FilterTools : FilteringOption {
-		public override ItemFilter.Filter Filter => ItemFilter.All;
+		public override ItemFilter.Filter Filter => ItemFilter.Tool;
 
 		public override string Texture => "MagicStorage/Assets/FilterPickaxe";
 
 		public override string Name => "Tools";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterArmorAndEquips : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.ArmorAndEquipment;
+
+		public override string Texture => "MagicStorage/Assets/FilterAmorAndEquips";
+
+		public override string Name => "ArmorAndEquips";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
@@ -226,7 +250,7 @@ namespace MagicStorage.CrossMod {
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
-		public override bool GetDefaultVisibility(bool craftingGUI) => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
+		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 	}
 
 	[Autoload(false)]
@@ -239,6 +263,6 @@ namespace MagicStorage.CrossMod {
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
-		public override bool GetDefaultVisibility(bool craftingGUI) => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
+		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 	}
 }

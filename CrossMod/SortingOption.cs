@@ -1,4 +1,5 @@
 ﻿using MagicStorage.UI;
+using MagicStorage.UI.States;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -28,6 +29,12 @@ namespace MagicStorage.CrossMod {
 		/// Whether <see cref="Sorter"/> is used again after calculating sort order from fuzzy sorting
 		/// </summary>
 		public virtual bool SortAgainAfterFuzzy => false;
+
+		/// <summary>
+		/// Whether <see cref="Sorter"/> is used during mod loading to initialze a collection for fuzzy sorting.<br/>
+		/// <b>NOTE:</b> Not performing fuzzy sorting will usually slow down sorting.  Please use this property only when necessary.
+		/// </summary>
+		public virtual bool CacheFuzzySorting => true;
 
 		protected sealed override void Register() {
 			ModTypeLookup<SortingOption>.Register(this);
@@ -125,19 +132,9 @@ namespace MagicStorage.CrossMod {
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;
 
-		protected override bool IsSelected() => option.Type == SortingOptionLoader.Selected;
-
-		public override void Click(UIMouseEvent evt) {
-			base.Click(evt);
-
-			int old = SortingOptionLoader.Selected;
-			SortingOptionLoader.Selected = option.Type;
-
-			if (old != option.Type) {
-				SoundEngine.PlaySound(SoundID.MenuTick);
-				option.OnSelected?.Invoke();
-			}
-		}
+		protected override bool IsSelected() => MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable
+			? MagicStorageMod.Instance.optionsConfig.sortingOptions[option.Type] is not null
+			: option.Type == SortingOptionLoader.Selected;
 	}
 
 	public static class SortingOptionLoader {
@@ -152,6 +149,7 @@ namespace MagicStorage.CrossMod {
 		}
 
 		private static readonly List<SortingOption> options = new();
+		internal static readonly Dictionary<string, HashSet<string>> optionNames = new();
 
 		public static IReadOnlyList<SortingOption> Options => options.AsReadOnly();
 
@@ -164,15 +162,36 @@ namespace MagicStorage.CrossMod {
 		public static int Count => options.Count;
 
 		internal static int Add(SortingOption option) {
+			//Ensure that the name doesn't conflict with a FilteringOption
+			if (FilteringOptionLoader.optionNames.TryGetValue(option.Mod.Name, out var hash) && hash.Contains(option.Name))
+				throw new Exception($"Cannot add a SortingOption with the name \"{option.Mod.Name}:{option.Name}\".  A FilteringOption with that name already exists.");
+
 			int count = Count;
 
 			options.Add(option);
+
+			if (!optionNames.TryGetValue(option.Mod.Name, out hash))
+				optionNames[option.Mod.Name] = hash = new();
+
+			hash.Add(option.Name);
+
 			order = null;
 
 			return count;
 		}
 
 		public static SortingOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
+
+		public static IEnumerable<SortingOption> BaseOptions
+			=> new SortingOption[] {
+				Definitions.Default,
+				Definitions.ID,
+				Definitions.Name,
+				Definitions.Value,
+				Definitions.Damage,
+				Definitions.Quantity,
+				Definitions.QuantityRatio
+			};
 
 		internal static void Load() {
 			MagicStorageMod mod = MagicStorageMod.Instance;
@@ -189,6 +208,8 @@ namespace MagicStorage.CrossMod {
 		internal static void Unload() {
 			options.Clear();
 			Selected = 0;
+
+			optionNames.Clear();
 
 			foreach (var field in typeof(Definitions).GetFields().Where(f => f.FieldType == typeof(SortingOption)))
 				field.SetValue(null, null);

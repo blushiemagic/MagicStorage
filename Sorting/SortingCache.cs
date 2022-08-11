@@ -45,17 +45,29 @@ public class SortingCacheDictionary
 	{
 		cache.Clear();
 
-		foreach (var option in SortingOptionLoader.Options)
-			Create(option.Type);
+		foreach (var option in SortingOptionLoader.Options) {
+			try {
+				Create(option);
+			} catch (Exception ex) {
+				throw new InvalidOperationException($"SortingOption.Sorter for type \"{option.GetType().GetSimplifiedGenericTypeName()}\" was invalid" +
+					(option == SortingOptionLoader.Definitions.Default ? $"\nDefinitions.Default most recent class: {SortClassList.exceptionTracking_class ?? "none"}" : ""),
+					ex);
+			}
+		}
 	}
 
-	private void Create(int mode)
+	private void Create(SortingOption option)
 	{
-		var sorter = SortingOptionLoader.Get(mode).Sorter.AsSafe();
+		if (!option.CacheFuzzySorting) {
+			cache[option.Type] = new Entry();
+			return;
+		}
+
+		var sorter = option.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
 		var items = ContentSamples.ItemsByType
 			.Select((pair, i) => (item: pair.Value, type: i))
-			.OrderBy(x => x.item, sorter)
+			.OrderByDescending(x => x.item, sorter)
 			.ToArray();
 
 		int[] indices = new int[items.Length];
@@ -69,7 +81,7 @@ public class SortingCacheDictionary
 
 		var entry = new Entry(indices);
 
-		cache[mode] = entry;
+		cache[option.Type] = entry;
 	}
 
 	/// <summary>
@@ -81,11 +93,11 @@ public class SortingCacheDictionary
 		Entry entry = cache[mode];
 
 		if (items is null)
-			return Array.Empty<Item>().OrderBy(_ => 1); //Failsafe - a pointless collection
+			return Array.Empty<Item>().OrderByDescending(_ => 0); //Failsafe - a pointless collection
 
 		if (entry?.IndexByType is null)
-			return items.OrderBy(_ => 1); //Preserve item order
+			return items.OrderByDescending(_ => 0); //Preserve item order, likely because the sorter uses runtime values
 
-		return items.Where(i => i is not null).OrderBy(i => entry.FindIndex(i.type));
+		return items.Where(i => i is not null).OrderByDescending(i => entry.FindIndex(i.type));
 	}
 }

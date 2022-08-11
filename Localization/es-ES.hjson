@@ -401,6 +401,7 @@ Mods: {
 			# WeaponsThrown: "Filter Throwing Weapons"
 			# Ammo: "Filter Ammo"
 			# Armor: "Filter Armor"
+			# Accessories: "Filter Accessories"
 			# Vanity: "Filter Vanity Items"
 			Potions: "Filtrar por poción"
 			Tiles: "Filtrar por metido"
@@ -424,6 +425,8 @@ Mods: {
 			# QuantityRatio: "Sort by Quantity Ratio"
 			# Damage: "Sort by Damage"
 		}
+
+		# ButtonConfigGear: "Open Configuration Panel"
 
 		UIPages: {
 			# Sorting: "Sorting",
@@ -484,6 +487,13 @@ Mods: {
 			recipeBlacklist: {
 				# Label: "Recipe Whitelist/Blacklist"
 				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+			}
+			buttonLayout: {
+				# Label: "Sorting/Filtering Button Layout"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
 			}
 
 			AllowAutomatonToMoveIn: {

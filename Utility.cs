@@ -121,6 +121,6 @@ namespace MagicStorage {
 			return (!mustBeResearchable || (canBeResearched && sacrificesNeeded > 0)) && currentSacrificeTotal >= sacrificesNeeded;
 		}
 
-		public static SafeOrdering<T> AsSafe<T>(this IComparer<T> comparer) => new(comparer);
+		public static SafeOrdering<T> AsSafe<T>(this IComparer<T> comparer, Func<T, string> reportObjectFunc) => new(comparer, reportObjectFunc);
 	}
 }

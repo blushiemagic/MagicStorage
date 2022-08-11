@@ -1,6 +1,7 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.UI.States;
+using Microsoft.Xna.Framework;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -37,6 +38,14 @@ namespace MagicStorage
 		{
 			HiddenRecipes.Load(tag);
 			FavoritedRecipes.Load(tag);
+		}
+
+		public override void OnEnterWorld(Player player) {
+			if (MagicStorageMod.UsingPrivateBeta) {
+				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
+					"Do note that using this private beta build will cause a ton of text to be printed to the chat and to your log files.",
+					c: Color.LightBlue);
+			}
 		}
 
 		public override void UpdateDead()

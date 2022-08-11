@@ -20,6 +20,8 @@ public class MagicUI : ModSystem
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;
 
+	internal static bool BlockItemSlotActionsDetour { get; set; }
+
 	public override void Load() {
 		if (Main.dedServ)
 			return;
@@ -47,7 +49,12 @@ public class MagicUI : ModSystem
 				() => {
 					if (uiInterface?.CurrentState is not null) {
 						Main.hidePlayerCraftingMenu = true;
+
+						BlockItemSlotActionsDetour = true;
+
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
+
+						BlockItemSlotActionsDetour = false;
 					}
 
 					return true;
@@ -67,7 +74,11 @@ public class MagicUI : ModSystem
 		StorageGUI.oldMouse = StorageGUI.curMouse;
 		StorageGUI.curMouse = Mouse.GetState();
 		
+		BlockItemSlotActionsDetour = true;
+
 		uiInterface?.Update(gameTime);
+
+		BlockItemSlotActionsDetour = false;
 
 		Main.instance.MouseText(mouseText);
 	}

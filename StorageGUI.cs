@@ -101,7 +101,10 @@ namespace MagicStorage
 				}
 				else
 				{
-					itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchText).OrderBy(x => x.favorited ? 0 : 1);
+					itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchText);
+
+					if (MagicStorageConfig.CraftingFavoritingEnabled)
+						itemsLocal = itemsLocal.OrderByDescending(x => x.favorited ? 1 : 0);
 				}
 
 				items.AddRange(itemsLocal.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x.favorited));
@@ -142,7 +145,7 @@ namespace MagicStorage
 		internal static void SlotFocusLogic()
 		{
 			if (slotFocus >= items.Count ||
-				!Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+				!Main.mouseItem.IsAir && (!Utility.AreStrictlyEqual(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}

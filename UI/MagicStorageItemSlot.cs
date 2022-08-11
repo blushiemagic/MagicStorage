@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -7,7 +8,7 @@ using Terraria.GameInput;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class MagicStorageItemSlot : UIElement {
+	public class MagicStorageItemSlot : UIElement {
 		public int Context { get; set; }
 
 		public float Scale { get; private set; }

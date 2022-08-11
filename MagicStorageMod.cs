@@ -10,10 +10,14 @@ using Terraria.ModLoader;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
 using MagicStorage.Stations;
+using MagicStorage.CrossMod.Control;
 
 namespace MagicStorage {
 	public class MagicStorageMod : Mod {
 		public static MagicStorageMod Instance => ModContent.GetInstance<MagicStorageMod>();
+
+		internal static readonly bool ShowcaseEnabled = false;
+		internal static readonly bool UsingPrivateBeta = false;
 
 		// Integration with ModHelpers
 		public static string GithubUserName => "blushiemagic";
@@ -23,6 +27,8 @@ namespace MagicStorage {
 
 		public static readonly Recipe.Condition EctoMistOverride = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
 			recipe => Recipe.Condition.InGraveyardBiome.RecipeAvailable(recipe) || Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
+
+		public UIOptionConfigurationManager optionsConfig;
 
 		public override void Load()
 		{
@@ -52,9 +58,14 @@ namespace MagicStorage {
 
 			SortingOptionLoader.Unload();
 			FilteringOptionLoader.Unload();
+
+			optionsConfig = null;
 		}
 
 		public override void PostSetupContent() {
+			optionsConfig = new();
+			optionsConfig.Initialize();
+
 			SortingOptionLoader.InitializeOrder();
 			FilteringOptionLoader.InitializeOrder();
 		}

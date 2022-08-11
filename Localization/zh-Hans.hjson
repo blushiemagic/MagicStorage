@@ -514,6 +514,7 @@ Mods: {
 			WeaponsThrown: "筛选投掷武器"
 			Ammo: "筛选弹药"
 			Armor: "筛选盔甲"
+			# Accessories: "Filter Accessories"
 			Vanity: "筛选时装"
 			Potions: "筛选药水"
 			Tiles: "筛选放置物"
@@ -536,6 +537,8 @@ Mods: {
 			QuantityRatio: "按堆叠占最大堆叠的占比排序"
 			Damage: "按伤害排序"
 		}
+
+		# ButtonConfigGear: "Open Configuration Panel"
 
 		UIPages: {
 			Sorting: "排序",
@@ -596,6 +599,13 @@ Mods: {
 			recipeBlacklist: {
 				Label: "制作配方白名单/黑名单"
 				Tooltip: "开启后，将允许在制作界面中将制作配方加入白名单/黑名单"
+			}
+			buttonLayout: {
+				# Label: "Sorting/Filtering Button Layout"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
 			}
 
 			AllowAutomatonToMoveIn: {

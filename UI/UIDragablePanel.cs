@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -89,14 +90,38 @@ namespace MagicStorage.UI {
 				menuText.TextColor = Color.Yellow;
 		}
 
-		public override void OnInitialize(){
-			base.OnInitialize();
-			header.Width = Width;
+		public void HideTab(string page) {
+			if (menus.TryGetValue(page, out var tab)) {
+				tab.Remove();
+				RecalculateTabPositions();
+			}
+		}
+
+		public void ShowTab(string page) {
+			if (menus.TryGetValue(page, out var tab) && tab.Parent is null) {
+				tab.Remove();
+				header.Append(tab);
+
+				RecalculateTabPositions();
+			}
+		}
+
+		private void RecalculateTabPositions() {
+			float left = 0;
+
+			foreach (var tab in menus.Values) {
+				if (tab.Parent is null)
+					continue;
+
+				tab.Left.Set(left, 0f);
+				tab.Recalculate();
+
+				left += tab.GetDimensions().Width + 10;
+			}
 		}
 
 		public override void Recalculate(){
 			base.Recalculate();
-			header.Width = Width;
 
 			OnRecalculate?.Invoke();
 		}

@@ -11,8 +11,6 @@ namespace MagicStorage.UI {
 		private static Asset<Texture2D> BackTexture => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
 		private static Asset<Texture2D> BackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 
-		private bool hovering;
-
 		private UIImage background, icon;
 
 		public BaseOptionElement() {
@@ -27,18 +25,29 @@ namespace MagicStorage.UI {
 		protected abstract string GetHoverText();
 
 		public override void OnInitialize() {
-			background = new(BackTexture);
+			background = new(BackTexture) {
+				ScaleToFit = true
+			};
 			Append(background);
 
-			icon = new(GetIcon());
-			icon.Left.Set(1, 0f);
-			icon.Top.Set(1, 0f);
+			icon = new(GetIcon()) {
+				ScaleToFit = true
+			};
+			icon.Left.Set(0, 1f / 32f);
+			icon.Top.Set(0, 1f / 32f);
 			Append(icon);
+		}
+
+		public void SetSize(float size) {
+			Width.Set(size, 0f);
+			Height.Set(size, 0f);
+
+			Recalculate();
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			background.SetImage(IsSelected() ? BackTextureActive : BackTexture);
-			background.Color = hovering ? Color.Silver : Color.White;
+			background.Color = IsMouseHovering ? Color.Silver : Color.White;
 
 			base.DrawSelf(spriteBatch);
 		}
@@ -46,14 +55,12 @@ namespace MagicStorage.UI {
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
 
-			hovering = true;
 			MagicUI.mouseText = GetHoverText();
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
 
-			hovering = false;
 			MagicUI.mouseText = "";
 		}
 	}

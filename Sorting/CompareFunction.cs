@@ -25,22 +25,22 @@ namespace MagicStorage.Sorting
 	public class CompareQuantityRatio : CompareFunction<CompareQuantityRatio>
 	{
 		public override int Compare(Item item1, Item item2) =>
-			(int) Math.Ceiling(item2.stack / (float) item2.maxStack) - (int) Math.Ceiling(item1.stack / (float) item1.maxStack);
+			(int)(Math.Ceiling(item1.stack / (double)item1.maxStack) * 1000 - Math.Ceiling(item2.stack / (double)item2.maxStack) * 1000);
 	}
 
 	public class CompareQuantityAbsolute : CompareFunction<CompareQuantityAbsolute>
 	{
-		public override int Compare(Item item1, Item item2) => item2.stack - item1.stack;
+		public override int Compare(Item item1, Item item2) => item1.stack - item2.stack;
 	}
 
 	public class CompareValue : CompareFunction<CompareValue>
 	{
-		public override int Compare(Item item1, Item item2) => item2.value - item1.value;
+		public override int Compare(Item item1, Item item2) => item1.value - item2.value;
 	}
 
 	public class CompareDps : CompareFunction<CompareDps>
 	{
-		public override int Compare(Item item1, Item item2) => (int) ((GetDps(item2) - GetDps(item1)) * 100);
+		public override int Compare(Item item1, Item item2) => (int) ((GetDps(item1) - GetDps(item2)) * 100);
 
 		// TODO: make a more adequate implementation?  might be outside of the mod's scope
 		public static double GetDps(Item item)
@@ -75,6 +75,6 @@ namespace MagicStorage.Sorting
 	}
 
 	public class CompareDamage : CompareFunction<CompareDamage> {
-		public override int Compare(Item item1, Item item2) => item2.damage - item1.damage;
+		public override int Compare(Item item1, Item item2) => item1.damage - item2.damage;
 	}
 }

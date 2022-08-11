@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -23,6 +24,8 @@ namespace MagicStorage.Sorting
 
 		private static readonly CompareDps _dps = new();
 
+		internal static string exceptionTracking_class;
+
 		public static int Compare(Item item1, Item item2)
 		{
 			int class1 = classes.Count;
@@ -41,8 +44,12 @@ namespace MagicStorage.Sorting
 					break;
 				}
 
-			if (class1 != class2)
+			if (class1 != class2) {
+				exceptionTracking_class = null;
 				return class1 - class2;
+			}
+
+			exceptionTracking_class = classes[class1].passName;
 			return classes[class1].Compare(item1, item2);
 		}
 
@@ -50,12 +57,12 @@ namespace MagicStorage.Sorting
 		{
 			if (initialized)
 				return;
-			classes.Add(new DefaultSortClass(MeleeWeapon, CompareDps));
-			classes.Add(new DefaultSortClass(RangedWeapon, CompareDps));
-			classes.Add(new DefaultSortClass(MagicWeapon, CompareDps));
+			classes.Add(new DefaultSortClass(MeleeWeapon, CompareDamage));
+			classes.Add(new DefaultSortClass(RangedWeapon, CompareDamage));
+			classes.Add(new DefaultSortClass(MagicWeapon, CompareDamage));
 			classes.Add(new DefaultSortClass(SummonWeapon, CompareValue));
-			classes.Add(new DefaultSortClass(ThrownWeapon, CompareDps));
-			classes.Add(new DefaultSortClass(Weapon, CompareDps));
+			classes.Add(new DefaultSortClass(ThrownWeapon, CompareDamage));
+			classes.Add(new DefaultSortClass(Weapon, CompareDamage));
 			classes.Add(new DefaultSortClass(Ammo, CompareValue));
 			classes.Add(new DefaultSortClass(Picksaw, ComparePicksaw));
 			classes.Add(new DefaultSortClass(Hamaxe, CompareHamaxe));
@@ -177,6 +184,11 @@ namespace MagicStorage.Sorting
 			return r != 0 ? r : CompareValue(item1, item2);
 		}
 
+		private static int CompareDamage(Item item1, Item item2) {
+			int r = item1.damage - item2.damage;
+			return r != 0 ? r : CompareValue(item1, item2);
+		}
+
 		private static int ComparePicksaw(Item item1, Item item2)
 		{
 			int result = item1.pick - item2.pick;
@@ -214,7 +226,7 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
-				result = item2.dye - item1.dye;
+				result = item1.dye - item2.dye;
 			return result;
 		}
 
@@ -226,9 +238,9 @@ namespace MagicStorage.Sorting
 			return result;
 		}
 
-		private static int CompareHealing(Item item1, Item item2) => item2.healLife - item1.healLife;
+		private static int CompareHealing(Item item1, Item item2) => item1.healLife - item2.healLife;
 
-		private static int CompareMana(Item item1, Item item2) => item2.mana - item1.mana;
+		private static int CompareMana(Item item1, Item item2) => item1.mana - item2.mana;
 
 		private static int CompareElixir(Item item1, Item item2)
 		{
@@ -243,7 +255,7 @@ namespace MagicStorage.Sorting
 
 		private static int ComparePainting(Item item1, Item item2)
 		{
-			int result = ItemID.Sets.SortingPriorityPainting[item2.type] - ItemID.Sets.SortingPriorityPainting[item1.type];
+			int result = ItemID.Sets.SortingPriorityPainting[item1.type] - ItemID.Sets.SortingPriorityPainting[item2.type];
 			if (result == 0)
 				result = item1.paint - item2.paint;
 			return result;
@@ -251,24 +263,24 @@ namespace MagicStorage.Sorting
 
 		private static int CompareWiring(Item item1, Item item2)
 		{
-			int result = ItemID.Sets.SortingPriorityWiring[item2.type] - ItemID.Sets.SortingPriorityWiring[item1.type];
+			int result = ItemID.Sets.SortingPriorityWiring[item1.type] - ItemID.Sets.SortingPriorityWiring[item2.type];
 			if (result == 0)
 				result = CompareRarity(item1, item2);
 			return result;
 		}
 
-		private static int CompareMaterial(Item item1, Item item2) => ItemID.Sets.SortingPriorityMaterials[item2.type] - ItemID.Sets.SortingPriorityMaterials[item1.type];
+		private static int CompareMaterial(Item item1, Item item2) => ItemID.Sets.SortingPriorityMaterials[item1.type] - ItemID.Sets.SortingPriorityMaterials[item2.type];
 
-		private static int CompareRope(Item item1, Item item2) => ItemID.Sets.SortingPriorityRopes[item2.type] - ItemID.Sets.SortingPriorityRopes[item1.type];
+		private static int CompareRope(Item item1, Item item2) => ItemID.Sets.SortingPriorityRopes[item1.type] - ItemID.Sets.SortingPriorityRopes[item2.type];
 
 		private static int CompareExtractible(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityExtractibles[item2.type] - ItemID.Sets.SortingPriorityExtractibles[item1.type];
+			ItemID.Sets.SortingPriorityExtractibles[item1.type] - ItemID.Sets.SortingPriorityExtractibles[item2.type];
 
 		private static int CompareMisc(Item item1, Item item2)
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
-				result = item2.value - item1.value;
+				result = item1.value - item2.value;
 			return result;
 		}
 
@@ -284,10 +296,14 @@ namespace MagicStorage.Sorting
 		public PassFilter Pass { get; }
 		public CompareFilter Compare { get; }
 
-		public DefaultSortClass(PassFilter pass, CompareFilter compare)
+		internal readonly string passName;
+
+		public DefaultSortClass(PassFilter pass, CompareFilter compare, [CallerArgumentExpression("pass")] string passName = null)
 		{
 			ArgumentNullException.ThrowIfNull(pass);
 			ArgumentNullException.ThrowIfNull(compare);
+
+			this.passName = passName;
 
 			Pass = pass;
 			Compare = compare;
