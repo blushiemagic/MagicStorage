@@ -283,14 +283,14 @@ namespace MagicStorage.UI.States {
 				case ButtonConfigurationMode.ModernDropdown:
 					//Initialize the menu
 					sortingDropdown.Clear();
-					sortingDropdown.AddRange(SortingOptionLoader.GetVisibleOptions(craftingGUI).Select(CreateDropdownOption));
+					sortingDropdown.AddRange(CreatePairedDropdownOptionElements(SortingOptionLoader.GetVisibleOptions(craftingGUI), sortingDropdown.list.ListPadding, CreateDropdownOption));
 
 					foreach (var child in sortingDropdown.Children)
 						child.Activate();
 
 					//Initialize the menu
 					filteringDropdown.Clear();
-					filteringDropdown.AddRange(FilteringOptionLoader.GetVisibleOptions(craftingGUI).Select(CreateDropdownOption));
+					filteringDropdown.AddRange(CreatePairedDropdownOptionElements(FilteringOptionLoader.GetVisibleOptions(craftingGUI), filteringDropdown.list.ListPadding, CreateDropdownOption));
 
 					foreach (var child in filteringDropdown.Children)
 						child.Activate();
@@ -304,6 +304,37 @@ namespace MagicStorage.UI.States {
 			}
 
 			Recalculate();
+		}
+
+		private static IEnumerable<UIElement> CreatePairedDropdownOptionElements<T>(IEnumerable<T> source, float padding, Func<T, UIElement> createElement) {
+			UIElement first = null, second;
+
+			foreach (var option in source) {
+				if (first is null)
+					first = createElement(option);
+				else {
+					second = createElement(option);
+
+					//Pair the elements, then yield an element containing them
+					UIDropdownElementRowContainer container = new(padding);
+
+					container.SetElements(first, second);
+
+					yield return container;
+
+					first = null;
+					second = null;
+				}
+			}
+
+			//Last element is sad and alone
+			if (first is not null) {
+				UIDropdownElementRowContainer container = new(padding);
+
+				container.SetElements(first);
+
+				yield return container;
+			}
 		}
 
 		private SortingOptionElement CreateDropdownOption(SortingOption option) {
