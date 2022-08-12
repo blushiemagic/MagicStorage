@@ -50,7 +50,7 @@ public class SortingCacheDictionary
 				Create(option);
 			} catch (Exception ex) {
 				throw new InvalidOperationException($"SortingOption.Sorter for type \"{option.GetType().GetSimplifiedGenericTypeName()}\" was invalid" +
-					(option == SortingOptionLoader.Definitions.Default ? $"\nDefinitions.Default most recent class: {SortClassList.exceptionTracking_class ?? "none"}" : ""),
+					(option == SortingOptionLoader.Definitions.Default ? $"\nDefinitions.Default most recent class: {SortClassList.actualException_class ?? "none"}" : ""),
 					ex);
 			}
 		}

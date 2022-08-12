@@ -249,7 +249,7 @@ namespace MagicStorage
 
 		internal static TECraftingAccess GetCraftingEntity() => StoragePlayer.LocalPlayer.GetCraftingAccess();
 
-		internal static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations;
+		internal static List<Item> GetCraftingStations() => GetCraftingEntity()?.stations ?? new();
 
 		public static void RefreshItems() => RefreshItemsAndSpecificRecipes(null);
 
@@ -397,7 +397,7 @@ namespace MagicStorage
 			DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 
 			// now if nothing found we disable filters one by one
-			if (MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").searchBar.Text.Length > 0)
+			if (searchText.Length > 0)
 			{
 				if (recipes.Count == 0 && hiddenRecipes.Count > 0)
 				{

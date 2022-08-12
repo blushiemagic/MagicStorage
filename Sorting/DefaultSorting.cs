@@ -24,7 +24,10 @@ namespace MagicStorage.Sorting
 
 		private static readonly CompareDps _dps = new();
 
+		[ThreadStatic]
 		internal static string exceptionTracking_class;
+
+		internal static string actualException_class;
 
 		public static int Compare(Item item1, Item item2)
 		{
@@ -46,7 +49,7 @@ namespace MagicStorage.Sorting
 
 			if (class1 != class2) {
 				exceptionTracking_class = null;
-				return class1 - class2;
+				return class2 - class1;
 			}
 
 			exceptionTracking_class = classes[class1].passName;
@@ -284,7 +287,11 @@ namespace MagicStorage.Sorting
 			return result;
 		}
 
-		private static int CompareName(Item item1, Item item2) => string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
+		// "item2" and "item1" are reversed here.
+		// This is intentional!  The 'a' character is considered "less than" the 'z' character
+		// Magic Storage puts A before Z in the sorting list, so the reversing here is needed.
+		//  -- absoluteAquarian
+		private static int CompareName(Item item1, Item item2) => string.Compare(item2.Name, item1.Name, StringComparison.OrdinalIgnoreCase);
 	}
 
 	public class DefaultSortClass

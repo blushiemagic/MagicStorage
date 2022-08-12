@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MagicStorage.Sorting;
+using System;
 using System.Collections.Generic;
 
 namespace MagicStorage {
@@ -23,10 +24,13 @@ namespace MagicStorage {
 
 			//Throw a proper error here if the reverse comparison isn't the negative of "order"
 			// TOOD: once the cause has been found, fix it, then just return 0 here since the order is irrelevant
-			if ((sign != 0 && signR == 0) || (sign == 0 && signR != 0) || (sign != -signR))
+			if ((sign != 0 && signR == 0) || (sign == 0 && signR != 0) || (sign != -signR)) {
+				SortClassList.actualException_class = SortClassList.exceptionTracking_class;
+
 				throw new ArgumentException($"Comparer returned inconsistent results (x.Compare(y): {sign}, y.Compare(x): {signR})\n" +
 					$"x: {reportObjectFunc(x)}\n" +
 					$"y: {reportObjectFunc(y)}");
+			}
 
 			return order;
 		}
