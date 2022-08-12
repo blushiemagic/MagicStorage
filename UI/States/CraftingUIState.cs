@@ -360,6 +360,9 @@ namespace MagicStorage.UI.States {
 			recipePanel.Left.Set(recipeLeft, 0f);
 			recipePanel.Top.Set(recipeTop, 0f);
 
+			recipeHeight = panel.Height.Pixels;
+			recipePanel.Height.Set(recipeHeight, 0f);
+
 			recipePanel.Recalculate();
 		}
 
@@ -405,12 +408,6 @@ namespace MagicStorage.UI.States {
 			}
 
 			CraftingGUI.PlayerZoneCache.FreeCache(true);
-
-			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
-
-			recipeWidth = CraftingGUI.IngredientColumns * (smallSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
-			recipeWidth += recipePanel.PaddingLeft + recipePanel.PaddingRight;
-			recipeHeight = PanelHeight;
 		}
 
 		private void RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
