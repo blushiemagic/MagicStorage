@@ -857,7 +857,7 @@ namespace MagicStorage.UI.States {
 				stationText.Top.Set(top + stationTextTop, 0f);
 
 				stationZone.SetDimensions(TECraftingAccess.Columns, rows);
-				stationZone.Height.Set(stationZone.ZoneHeight, 1f);
+				stationZone.Height.Set(stationZone.ZoneHeight, 0f);
 				stationZone.Top.Set(top + stationTop, 0f);
 
 				stationZone.Recalculate();
@@ -875,6 +875,8 @@ namespace MagicStorage.UI.States {
 				float recipeScrollBarMaxViewSize = 1 + noDisplayRows;
 				scrollBar.Height.Set(displayRows * (itemSlotHeight + CraftingGUI.Padding), 0f);
 				scrollBar.SetView(CraftingGUI.RecipeScrollBarViewSize, recipeScrollBarMaxViewSize);
+
+				scrollBar.Recalculate();
 
 				lastKnownStationsCount = stationCount;
 				lastKnownScrollBarViewPosition = scrollBar.ViewPosition;

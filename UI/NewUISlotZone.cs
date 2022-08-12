@@ -36,7 +36,12 @@ namespace MagicStorage.UI {
 
 			NumColumns = columns;
 			NumRows = rows;
-			ZoneHeight = (int)(InventoryBack.Value.Height * inventoryScale) * rows + Padding;
+			
+			Texture2D texture = InventoryBack.Value;
+			float slotWidth = texture.Width * inventoryScale;
+			float slotHeight = texture.Height * inventoryScale;
+
+			ZoneHeight = (int)((slotHeight + Padding) * rows);
 
 			if (Slots is not null) {
 				foreach (var slot in Slots)
@@ -44,10 +49,6 @@ namespace MagicStorage.UI {
 			}
 
 			Slots = new MagicStorageItemSlot[rows, columns];
-
-			Texture2D texture = InventoryBack.Value;
-			float slotWidth = texture.Width * inventoryScale;
-			float slotHeight = texture.Height * inventoryScale;
 
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < columns; c++) {
