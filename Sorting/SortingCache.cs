@@ -67,7 +67,7 @@ public class SortingCacheDictionary
 
 		var items = ContentSamples.ItemsByType
 			.Select((pair, i) => (item: pair.Value, type: i))
-			.OrderByDescending(x => x.item, sorter)
+			.OrderBy(x => x.item, sorter)
 			.ToArray();
 
 		int[] indices = new int[items.Length];
@@ -85,19 +85,20 @@ public class SortingCacheDictionary
 	}
 
 	/// <summary>
-	///     Sorts the items based on the cached item order
+	///		Sorts a collection based on a <see cref="Item"/> selector
 	/// </summary>
 	/// <returns>A sorted collection</returns>
-	public IOrderedEnumerable<Item> SortFuzzy(IEnumerable<Item> items, int mode)
-	{
+	public IOrderedEnumerable<T> SortFuzzy<T>(IEnumerable<T> source, Func<T, Item> objToItem, int mode) {
+		ArgumentNullException.ThrowIfNull(objToItem);
+
 		Entry entry = cache[mode];
 
-		if (items is null)
-			return Array.Empty<Item>().OrderByDescending(_ => 0); //Failsafe - a pointless collection
+		if (source is null)
+			return Array.Empty<T>().OrderBy(_ => 0); //Failsafe - a pointless collection
 
 		if (entry?.IndexByType is null)
-			return items.OrderByDescending(_ => 0); //Preserve item order, likely because the sorter uses runtime values
+			return source.OrderBy(_ => 0); //Preserve item order, likely because the sorter uses runtime values
 
-		return items.Where(i => i is not null).OrderByDescending(i => entry.FindIndex(i.type));
+		return source.Where(t => t is not null).OrderBy(t => entry.FindIndex(objToItem(t).type));
 	}
 }

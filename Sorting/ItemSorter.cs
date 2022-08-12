@@ -25,24 +25,27 @@ namespace MagicStorage.Sorting
 
 			filteredItems = Aggregate(filteredItems);
 
+			return DoSorting(filteredItems, i => i, sortMode);
+		}
+
+		public static IEnumerable<T> DoSorting<T>(IEnumerable<T> source, Func<T, Item> objToItem, int sortMode) {
+			ArgumentNullException.ThrowIfNull(objToItem);
+
 			if (sortMode < 0)
-				return filteredItems;
+				return source;
 
 			//Apply "fuzzy" sorting since it's faster, but less accurate
-			IOrderedEnumerable<Item> orderedItems = SortingCache.dictionary.SortFuzzy(filteredItems, sortMode);
+			IOrderedEnumerable<T> orderedItems = SortingCache.dictionary.SortFuzzy(source, objToItem, sortMode);
 
 			var sorter = SortingOptionLoader.Get(sortMode);
 
 			if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
 				var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
-				orderedItems = orderedItems.OrderByDescending(x => x, sortFunc);
+				orderedItems = orderedItems.OrderByDescending(x => objToItem(x), sortFunc);
 			}
 
-			if (sortMode == SortingOptionLoader.Definitions.Value.Type)
-				return orderedItems;  //Don't sort by type
-
-			return orderedItems.ThenByDescending(x => x.type).ThenByDescending(x => x.value);
+			return orderedItems.ThenByDescending(x => objToItem(x).type).ThenByDescending(x => objToItem(x).value);
 		}
 
 		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)

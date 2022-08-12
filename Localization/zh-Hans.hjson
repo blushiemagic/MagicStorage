@@ -514,18 +514,18 @@ Mods: {
 			WeaponsThrown: "筛选投掷武器"
 			Ammo: "筛选弹药"
 			Armor: "筛选盔甲"
-			# Accessories: "Filter Accessories"
 			Vanity: "筛选时装"
 			Potions: "筛选药水"
 			Tiles: "筛选放置物"
 			Misc: "筛选杂项"
 			Recent: "筛选最近存入的物品"
+			# ArmorAndEquips: "Filter Armor and Equipment"
 			WeaponsOther: "筛选其他杂项武器"
 			Unstackables: "筛选不可堆叠物品"
 			Stackables: "筛选可堆叠物品"
 			NotFullyResearched: "筛选未完全研究的物品"
 			FullyResearched: "筛选已完全研究的物品"
-			# Materials: "Filter by Materials"
+			# Materials: "Filter Materials"
 		}
 
 		SortingOption: {

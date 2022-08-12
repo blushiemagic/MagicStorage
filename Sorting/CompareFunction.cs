@@ -14,20 +14,12 @@ namespace MagicStorage.Sorting
 
 	public class CompareID : CompareFunction<CompareID>
 	{
-		// "item2" and "item1" are reversed here.
-		// This is intentional!
-		// Magic Storage puts vanilla items above modded items in the sorting list, so the reversing here is needed.
-		//  -- absoluteAquarian
-		public override int Compare(Item item1, Item item2) => item2.type - item1.type;
+		public override int Compare(Item item1, Item item2) => item1.type - item2.type;
 	}
 
 	public class CompareName : CompareFunction<CompareName>
 	{
-		// "item2" and "item1" are reversed here.
-		// This is intentional!  The 'a' character is considered "less than" the 'z' character
-		// Magic Storage puts A above Z in the sorting list, so the reversing here is needed.
-		//  -- absoluteAquarian
-		public override int Compare(Item item1, Item item2) => string.Compare(item2.Name, item1.Name, StringComparison.OrdinalIgnoreCase);
+		public override int Compare(Item item1, Item item2) => string.Compare(item1.Name, item2.Name, StringComparison.OrdinalIgnoreCase);
 	}
 
 	public class CompareQuantityRatio : CompareFunction<CompareQuantityRatio>

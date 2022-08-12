@@ -49,7 +49,7 @@ namespace MagicStorage.Sorting
 
 			if (class1 != class2) {
 				exceptionTracking_class = null;
-				return class2 - class1;
+				return class1 - class2;
 			}
 
 			exceptionTracking_class = classes[class1].passName;
@@ -179,17 +179,17 @@ namespace MagicStorage.Sorting
 
 		private static int CompareRarity(Item item1, Item item2) => item1.rare - item2.rare;
 
-		private static int CompareValue(Item item1, Item item2) => item1.value - item2.value;
+		private static int CompareValue(Item item1, Item item2) => Sorting.CompareValue.Instance.Compare(item1, item2);
 
 		private static int CompareDps(Item item1, Item item2)
 		{
 			int r = _dps.Compare(item1, item2);
-			return r != 0 ? r : CompareValue(item1, item2);
+			return r != 0 ? -r : CompareValue(item1, item2);
 		}
 
 		private static int CompareDamage(Item item1, Item item2) {
-			int r = item1.damage - item2.damage;
-			return r != 0 ? r : CompareValue(item1, item2);
+			int r = Sorting.CompareDamage.Instance.Compare(item1, item2);
+			return r != 0 ? -r : CompareValue(item1, item2);
 		}
 
 		private static int ComparePicksaw(Item item1, Item item2)
@@ -287,11 +287,7 @@ namespace MagicStorage.Sorting
 			return result;
 		}
 
-		// "item2" and "item1" are reversed here.
-		// This is intentional!  The 'a' character is considered "less than" the 'z' character
-		// Magic Storage puts A before Z in the sorting list, so the reversing here is needed.
-		//  -- absoluteAquarian
-		private static int CompareName(Item item1, Item item2) => string.Compare(item2.Name, item1.Name, StringComparison.OrdinalIgnoreCase);
+		private static int CompareName(Item item1, Item item2) => Sorting.CompareName.Instance.Compare(item1, item2);
 	}
 
 	public class DefaultSortClass

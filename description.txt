@@ -11,6 +11,8 @@ Please report bugs/issues to this mod's Discord server: https://discord.gg/FemPG
 
 The 1.4 version of Magic Storage merges the Magic Storage and Magic Storage - Extra mods from 1.3 tModLoader
 
+Want to support the mod's development?  Donate to absoluteAquarian's Patreon:  https://www.patreon.com/absoluteAquarian
+
 === MAGIC STORAGE TEAM ===
 [c/ffff00:blushiemagic]
 - Mod Author

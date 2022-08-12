@@ -360,25 +360,26 @@ namespace MagicStorage
 					filteredRecipes = filteredRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
 
 				// favorites first
+				// TODO: for some reason, OrderByDescending and ThenByDescending for the "sortComparer" usage is making the sorts reversed.  Why?
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {
 					filteredRecipes = filteredRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
 					
-					filteredRecipes = filteredRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
-						.ThenByDescending(r => r.createItem, sortComparer);
-				} else
-					filteredRecipes = filteredRecipes.OrderByDescending(r => r.createItem, sortComparer);
+					filteredRecipes = filteredRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0);
+				}
+
+				IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(filteredRecipes, r => r.createItem, sortMode);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
 
 				if (choice == RecipeButtonsAvailableChoice)
 				{
-					recipes.AddRange(filteredRecipes.Where(r => IsAvailable(r)));
+					recipes.AddRange(sortedRecipes.Where(r => IsAvailable(r)));
 					recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
 				}
 				else
 				{
-					recipes.AddRange(filteredRecipes);
+					recipes.AddRange(sortedRecipes);
 					recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
 				}
 			}

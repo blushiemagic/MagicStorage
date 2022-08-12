@@ -277,7 +277,7 @@ namespace MagicStorage.UI.States {
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							if (Main.netMode == NetmodeID.SinglePlayer) {
 								StorageGUI.items[objSlot].favorited = !StorageGUI.items[objSlot].favorited;
-								StorageGUI.RefreshItems();
+								slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
 
 								obj.IgnoreNextHandleAction = true;
 							} else {

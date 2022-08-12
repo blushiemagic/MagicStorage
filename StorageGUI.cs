@@ -87,7 +87,7 @@ namespace MagicStorage
 			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
 
 			string searchText = storagePage.searchBar.Text;
-			bool onlyFavorites =storagePage.filterFavorites.Value;
+			bool onlyFavorites = storagePage.filterFavorites.Value;
 
 			void DoFiltering()
 			{
@@ -102,12 +102,16 @@ namespace MagicStorage
 				else
 				{
 					itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchText);
-
-					if (MagicStorageConfig.CraftingFavoritingEnabled)
-						itemsLocal = itemsLocal.OrderByDescending(x => x.favorited ? 1 : 0);
 				}
 
-				items.AddRange(itemsLocal.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x.favorited));
+				if (MagicStorageConfig.CraftingFavoritingEnabled)
+				{
+					items.AddRange(itemsLocal.Where(x => !onlyFavorites || x.favorited));
+				}
+				else
+				{
+					items.AddRange(itemsLocal);
+				}
 
 				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
 			}

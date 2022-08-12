@@ -55,7 +55,7 @@ namespace MagicStorage.Sorting
 			_                     => (item.CountsAsClass(DamageClass.Throwing) && item.damage > 0) || (item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating")),
 		};
 
-		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => o.FiltersDamageClass).Any(o => o.Filter(item)) && item.damage > 0 && item.DamageType != DamageClass.Default && item.DamageType != DamageClass.Generic;
+		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => o.FiltersDamageClass).Any(o => o.Filter(item)) && item.damage > 0 && item.DamageType != DamageClass.Default && item.DamageType != DamageClass.Generic && !Tool(item);
 
 		public static readonly Filter Ammo = item =>
 			item.ammo > 0 && item.damage > 0 && item.ammo != AmmoID.Coin;

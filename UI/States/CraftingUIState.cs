@@ -131,6 +131,7 @@ namespace MagicStorage.UI.States {
 						}
 
 						CraftingGUI.SetSelectedRecipe(selected);
+						StorageGUI.RefreshItems();
 					}
 				};
 
@@ -159,6 +160,8 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.blockStorageItems.Remove(data);
 					else
 						CraftingGUI.blockStorageItems.Add(data);
+
+					storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
 				};
 
 				return itemSlot;
@@ -201,8 +204,14 @@ namespace MagicStorage.UI.States {
 
 					Item result = obj.StoredItem;
 
-					if (Main.mouseItem.IsAir && result is not null && !result.IsAir)
+					if (Main.mouseItem.IsAir && result is not null && !result.IsAir) {
+						bool shiny = result.newAndShiny;
+
 						result.newAndShiny = false;
+
+						if (shiny)
+							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+					}
 
 					Player player = Main.LocalPlayer;
 
@@ -211,9 +220,10 @@ namespace MagicStorage.UI.States {
 						if (CraftingGUI.TryDepositResult(Main.mouseItem))
 							changed = true;
 					} else if (Main.mouseItem.IsAir && result is not null && !result.IsAir) {
-						if (Main.keyState.IsKeyDown(Keys.LeftAlt))
+						if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							result.favorited = !result.favorited;
-						else {
+							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+						} else {
 							Item toWithdraw = result.Clone();
 							
 							if (toWithdraw.stack > toWithdraw.maxStack)
@@ -229,7 +239,7 @@ namespace MagicStorage.UI.States {
 					}
 
 					if (changed) {
-						StorageGUI.needRefresh = true;
+						StorageGUI.RefreshItems();
 						SoundEngine.PlaySound(SoundID.Grab);
 
 						obj.IgnoreNextHandleAction = true;
@@ -940,18 +950,20 @@ namespace MagicStorage.UI.States {
 					if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 						if (!storagePlayer.FavoritedRecipes.Add(obj.StoredItem))
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
+
+						StorageGUI.RefreshItems();
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
 								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-								StorageGUI.RefreshItems();
+								slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 							}
 						} else {
 							if (storagePlayer.HiddenRecipes.Add(obj.StoredItem)) {
 								Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(obj.StoredItem.type)));
 
-								StorageGUI.RefreshItems();
+								slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 							}
 						}
 					} else {

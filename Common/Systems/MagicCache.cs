@@ -57,13 +57,11 @@ public class MagicCache : ModSystem
 		RecipesUsingItemType = null!;
 	}
 
-	public override void PostSetupContent()
-	{
-		SortingCache.dictionary.Fill();
-	}
-
 	public override void PostSetupRecipes()
 	{
+		// PostSetupContent() is too early for name sorting, which causes the fuzzy sorting to fail
+		SortingCache.dictionary.Fill();
+
 		EnabledRecipes = Main.recipe.Take(Recipe.numRecipes).Where(r => !r.Disabled).ToArray();
 		ResultToRecipe = EnabledRecipes.GroupBy(r => r.createItem.type).ToDictionary(x => x.Key, x => x.ToArray());
 

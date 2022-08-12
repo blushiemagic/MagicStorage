@@ -400,18 +400,18 @@ Mods: {
 			# WeaponsThrown: "Filter Throwing Weapons"
 			# Ammo: "Filter Ammo"
 			# Armor: "Filter Armor"
-			# Accessories: "Filter Accessories"
 			# Vanity: "Filter Vanity Items"
 			Potions: "Фильтр (Зелья)"
 			Tiles: "Фильтр (Размещаемое)"
 			Misc: "Фильтр (Разное)"
 			# Recent: "Filter New Recently Added Items"
+			# ArmorAndEquips: "Filter Armor and Equipment"
 			# WeaponsOther: "Filter Other Weapons"
 			# Unstackables: "Filter Unstackables"
 			# Stackables: "Filter Stackables"
 			# NotFullyResearched: "Filter Items Not Fully Researched"
 			# FullyResearched: "Filter Items Fully Researched"
-			# Materials: "Filter by Materials"
+			# Materials: "Filter Materials"
 		}
 
 		SortingOption: {
