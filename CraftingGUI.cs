@@ -364,7 +364,7 @@ namespace MagicStorage
 					filteredRecipes = filteredRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
 					
 					filteredRecipes = filteredRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
-						.ThenBy(r => r.createItem, sortComparer);
+						.ThenByDescending(r => r.createItem, sortComparer);
 				} else
 					filteredRecipes = filteredRecipes.OrderByDescending(r => r.createItem, sortComparer);
 
@@ -486,7 +486,7 @@ namespace MagicStorage
 					.AsOrdered()
 					// favorites first
 					.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
-					.ThenBy(r => r.createItem, sortComparer);
+					.ThenByDescending(r => r.createItem, sortComparer);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
