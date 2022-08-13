@@ -66,6 +66,10 @@ namespace MagicStorage.Common.Systems
 			moddedDiamonds = new();
 		}
 
+		public override void PreSaveAndQuit() {
+			StoragePlayer.LocalPlayer.CloseStorage();
+		}
+
 		public override void PreWorldGen() => OnWorldLoad();
 
 		public override void SaveWorldData(TagCompound tag)
@@ -88,7 +92,8 @@ namespace MagicStorage.Common.Systems
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").ToList();
 
-			MagicStorageMod.Instance.optionsConfig.Save();
+			if (!Main.dedServ)
+				MagicStorageMod.Instance.optionsConfig.Save();
 		}
 
 		public override void LoadWorldData(TagCompound tag)

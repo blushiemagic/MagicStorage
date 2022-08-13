@@ -63,8 +63,10 @@ namespace MagicStorage {
 		}
 
 		public override void PostSetupContent() {
-			optionsConfig = new();
-			optionsConfig.Initialize();
+			if (!Main.dedServ) {
+				optionsConfig = new();
+				optionsConfig.Initialize();
+			}
 
 			SortingOptionLoader.InitializeOrder();
 			FilteringOptionLoader.InitializeOrder();

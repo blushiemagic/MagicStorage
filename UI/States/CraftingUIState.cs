@@ -21,7 +21,7 @@ using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	public sealed class CraftingUIState : BaseStorageUI {
-		public const float SmallerScale = 0.58f;
+		public const float SmallerScale = 0.64f;
 
 		private UIPanel recipePanel;
 		private UIText recipePanelHeader;
@@ -297,60 +297,7 @@ namespace MagicStorage.UI.States {
 
 			craftAmount = new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), CraftingGUI.SmallScale);
 
-			craftAmount.Top.Set(craftButton.Top.Pixels - 20, 1f);
-			craftAmount.Left.Set(12, 0f);
-			craftAmount.Width.Set(250f, 0f);
-			craftAmount.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftAmount.PaddingTop = 0;
-			craftAmount.PaddingBottom = 0;
-			craftAmount.TextOriginX = 0f;
-
-			craftP1.Left.Set(craftButton.Width.Pixels + 12, 0f);
-			craftP1.Width.Set(35, 0f);
-			craftP1.Height.Set(16, 0f);
-			craftP1.PaddingTop = craftP1.PaddingBottom = 3;
-			recipePanel.Append(craftP1);
-
-			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 10, 0f);
-			craftP10.Width.Set(35, 0f);
-			craftP10.Height = craftP1.Height;
-			craftP1.PaddingTop = craftP1.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftP10);
-
-			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 10, 0f);
-			craftP100.Width.Set(35, 0f);
-			craftP100.Height = craftP1.Height;
-			craftP1.PaddingTop = craftP1.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftP100);
-
-			craftM1.Width.Set(35, 0f);
-			craftM1.Height = craftP1.Height;
-			craftM1.PaddingTop = craftM1.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftM1);
-
-			craftM10.Left.Set(craftM1.Left.Pixels + craftM1.Width.Pixels + 10, 0f);
-			craftM10.Width.Set(35, 0f);
-			craftM10.Height = craftP1.Height;
-			craftM10.PaddingTop = craftM10.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftM10);
-
-			craftM100.Left.Set(craftM10.Left.Pixels + craftM10.Width.Pixels + 10, 0f);
-			craftM100.Width.Set(35, 0f);
-			craftM100.Height = craftP1.Height;
-			craftM100.PaddingTop = craftM100.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftM100);
-
-			craftMax.Width.Set(93 * CraftingGUI.SmallScale, 0f);
-			craftMax.Height = craftP1.Height;
-			craftMax.PaddingTop = 8f;
-			craftMax.PaddingBottom = 8f;
-			recipePanel.Append(craftMax);
-
-			craftReset.Left.Set(craftMax.Left.Pixels + craftMax.Width.Pixels + 10, 0f);
-			craftReset.Width.Set(58 * CraftingGUI.SmallScale, 0f);
-			craftReset.Height = craftP1.Height;
-			craftReset.PaddingTop = craftReset.PaddingBottom = craftP1.PaddingTop;
-			recipePanel.Append(craftReset);
+			InitCraftButtonDimensions();
 
 			ToggleCraftButtons(hide: config);
 
@@ -370,6 +317,64 @@ namespace MagicStorage.UI.States {
 			recipePanel.Height.Set(recipeHeight, 0f);
 
 			recipePanel.Recalculate();
+		}
+
+		private void InitCraftButtonDimensions() {
+			craftAmount.Top.Set(craftButton.Top.Pixels - 16, 1f);
+			craftAmount.Left.Set(12, 0f);
+			craftAmount.Width.Set(75f, 0f);
+			craftAmount.Height.Set(24f * CraftingGUI.SmallScale, 0f);
+			craftAmount.PaddingTop = 0;
+			craftAmount.PaddingBottom = 0;
+			craftAmount.TextOriginX = 0f;
+
+			craftP1.Left.Set(craftButton.Width.Pixels + 4, 0f);
+			craftP1.Width.Set(24, 0f);
+			craftP1.Height.Set(18, 0f);
+			craftP1.PaddingTop = 4;
+			craftP1.PaddingBottom = 3;
+
+			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 16, 0f);
+			craftP10.Width.Set(32, 0f);
+			craftP10.Height = craftP1.Height;
+			craftP10.PaddingTop = craftP1.PaddingTop;
+			craftP10.PaddingBottom = craftP1.PaddingBottom;
+
+			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 13, 0f);
+			craftP100.Width.Set(48, 0f);
+			craftP100.Height = craftP1.Height;
+			craftP100.PaddingTop = craftP1.PaddingTop;
+			craftP100.PaddingBottom = craftP1.PaddingBottom;
+
+			craftM1.Left = craftP1.Left;
+			craftM1.Width = craftP1.Width;
+			craftM1.Height = craftP1.Height;
+			craftM1.PaddingTop = craftP1.PaddingTop;
+			craftM1.PaddingBottom = craftP1.PaddingBottom;
+
+			craftM10.Left = craftP10.Left;
+			craftM10.Width = craftP10.Width;
+			craftM10.Height = craftP1.Height;
+			craftM10.PaddingTop = craftP1.PaddingTop;
+			craftM10.PaddingBottom = craftP1.PaddingBottom;
+
+			craftM100.Left = craftP100.Left;
+			craftM100.Width = craftP100.Width;
+			craftM100.Height = craftP1.Height;
+			craftM100.PaddingTop = craftP1.PaddingTop;
+			craftM100.PaddingBottom = craftP1.PaddingBottom;
+
+			craftMax.Left.Set(craftP1.Left.Pixels, 0f);
+			craftMax.Width.Set(93 * CraftingGUI.SmallScale, 0f);
+			craftMax.Height = craftP1.Height;
+			craftMax.PaddingTop = craftP1.PaddingTop;
+			craftMax.PaddingBottom = craftP1.PaddingBottom;
+
+			craftReset.Left.Set(craftMax.Left.Pixels + craftMax.Width.Pixels + 18, 0f);
+			craftReset.Width.Set(58 * CraftingGUI.SmallScale, 0f);
+			craftReset.Height = craftP1.Height;
+			craftReset.PaddingTop = craftP1.PaddingTop;
+			craftReset.PaddingBottom = craftP1.PaddingBottom;
 		}
 
 		public override void Update(GameTime gameTime) {
@@ -453,12 +458,7 @@ namespace MagicStorage.UI.States {
 
 			storageZone.Top.Set(storageZoneTop, 0f);
 
-			bool config = MagicStorageConfig.UseOldCraftMenu;
-
-			if (!config)
-				storageZone.Height.Set(-storageZoneTop - 60, 1f);
-			else
-				storageZone.Height.Set(-storageZoneTop - 36, 1f);
+			storageZone.Height.Set(-storageZoneTop - 60, 1f);
 
 			storageZone.Recalculate();
 
@@ -475,20 +475,20 @@ namespace MagicStorage.UI.States {
 
 			storageScrollBar.Recalculate();
 
-			if (!config)
-				resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 10, 0f);
-			else
-				resultZone.Top.Set(-itemSlotHeight, 1f);
+			resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 10, 0f);
 
 			resultZone.Width.Set(itemSlotWidth, 0f);
 			resultZone.Height.Set(itemSlotHeight, 0f);
 
 			resultZone.Recalculate();
 
-			if (!config) {
-				var mainButtonDims = craftButton.GetDimensions();
+			if (!MagicStorageConfig.UseOldCraftMenu) {
+				InitCraftButtonDimensions();
 
-				craftP1.Top.Set(mainButtonDims.Y - 5, 0f);
+				float craftButtonTop = craftButton.Top.Pixels;
+
+				craftP1.Top.Set(craftButtonTop - 18, 1f);
+				
 				craftP1.Recalculate();
 
 				craftP10.Top = craftP1.Top;
@@ -497,7 +497,7 @@ namespace MagicStorage.UI.States {
 				craftP100.Top = craftP1.Top;
 				craftP100.Recalculate();
 
-				craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 8, 0f);
+				craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 2, 1f);
 				craftM1.Recalculate();
 
 				craftM10.Top = craftM1.Top;
@@ -506,7 +506,7 @@ namespace MagicStorage.UI.States {
 				craftM100.Top = craftM1.Top;
 				craftM100.Recalculate();
 
-				craftMax.Top.Set(craftM1.Top.Pixels + craftM1.Height.Pixels + 15, 0f);
+				craftMax.Top.Set(craftM1.Top.Pixels + craftM1.Height.Pixels + 4, 1f);
 				craftMax.Recalculate();
 
 				craftReset.Top = craftMax.Top;
