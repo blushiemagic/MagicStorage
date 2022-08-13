@@ -60,9 +60,13 @@ namespace MagicStorage.CrossMod.Control {
 
 		internal List<OptionDefinition> unloadedOptions;
 
-		public const string RelativeDestinationPath = "ModConfigs/MagicStorage_Options.nbt";
+		//Normally i'd just use consts here, but that causes VS debugging to crash for whatever reason
+		// -- absoluteAquarian
+		public static readonly string RelativeDestinationFolder = "ModConfigs";
+		public static readonly string RelativeDestinationFile = "MagicStorage_Options.nbt";
 
-		public static string DestinationPath => Path.Combine(Main.SavePath, RelativeDestinationPath);
+		public static string DestinationFolder => Path.Combine(Main.SavePath, RelativeDestinationFolder);
+		public static string DestinationPath => Path.Combine(Main.SavePath, RelativeDestinationFolder, RelativeDestinationFile);
 
 		public void ToggleEnabled(SortingOption option) => SetEnabled(option, sortingOptions[option.Type] is null);
 
@@ -105,6 +109,8 @@ namespace MagicStorage.CrossMod.Control {
 		}
 
 		internal void Initialize() {
+			Directory.CreateDirectory(DestinationFolder);
+
 			if (!File.Exists(DestinationPath)) {
 				//No file?  Default to a base configuration
 				goto UseDefault;
@@ -113,7 +119,7 @@ namespace MagicStorage.CrossMod.Control {
 					TagCompound tag = TagIO.FromFile(DestinationPath);
 
 					if (tag.GetList<TagCompound>("options") is not List<TagCompound> tags) {
-						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationPath + "\" was malformed");
+						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
 						goto UseDefault;
 					}
 
@@ -124,7 +130,7 @@ namespace MagicStorage.CrossMod.Control {
 					unloadedOptions = options.Where(o => !o.Exists).ToList();
 					return;
 				} catch {
-					MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationPath + "\" was malformed");
+					MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
 					goto UseDefault;
 				}
 			}

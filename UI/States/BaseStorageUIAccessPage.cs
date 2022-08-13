@@ -45,6 +45,8 @@ namespace MagicStorage.UI.States {
 				StorageGUI.CheckRefresh();
 
 				searchBar.active = true;
+
+				searchBar.SetDefaultText(GetRandomSearchText());
 			};
 
 			OnPageDeselected += () => {
@@ -148,6 +150,15 @@ namespace MagicStorage.UI.States {
 			filteringDropdown.Left.Set(sortingDropdown.Left.Pixels + sortingDropdown.Width.Pixels + 40, 0f);
 			filteringDropdown.Top = topBar2.Top;
 		}
+
+		private static readonly LocalizedText[] searchTextDefaults = new[] {
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchName"),
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchMod"),
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchTooltip"),
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchModAndTooltip"),
+		};
+
+		public static LocalizedText GetRandomSearchText() => Main.rand.Next(searchTextDefaults);
 
 		private void ModernConfigSortingButtonAction() => parentUI.ModernPanelButtonClicked("Sorting", sortingButtons);
 

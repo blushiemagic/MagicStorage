@@ -98,7 +98,6 @@ namespace MagicStorage.UI.States {
 				page.Activate();
 
 			lastKnownMode = MagicStorageConfig.ButtonUIMode;
-			lastKnownUIScale = Main.UIScale;
 
 			config = new(true, new (string, LocalizedText)[] {
 				("Sorting", Language.GetText("Mods.MagicStorage.UIPages.Sorting")),

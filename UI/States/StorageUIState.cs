@@ -319,9 +319,17 @@ namespace MagicStorage.UI.States {
 						StorageGUI.items[objSlot].newAndShiny = false;
 				};
 
-				itemSlot.OnRightClick += (evt, e) => {
+				itemSlot.OnUpdate += e => {
+					if (!e.IsMouseHovering || !Main.mouseRight)
+						return;  //Not right clicking
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
+
+					if (StorageGUI.slotFocus >= 0 && StorageGUI.slotFocus != objSlot) {
+						//Held down right click and moved to another slot
+						StorageGUI.ResetSlotFocus();
+					}
 
 					if (objSlot < StorageGUI.items.Count && (Main.mouseItem.IsAir || Utility.AreStrictlyEqual(Main.mouseItem, StorageGUI.items[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 						StorageGUI.slotFocus = objSlot;

@@ -974,6 +974,9 @@ namespace MagicStorage
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
+			//Safeguard against absurdly high craft targets
+			toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
+
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
@@ -998,12 +1001,14 @@ namespace MagicStorage
 			int target = toCraft;
 			NetHelper.Report(true, "Attempting to craft " + toCraft + " items");
 
-			//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
-			if (!AttemptLazyBatchCraft(context)) {
-				NetHelper.Report(false, "Batch craft operation failed.");
+			ExecuteInCraftingGuiEnvironment(() => {
+				//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
+				if (!AttemptLazyBatchCraft(context)) {
+					NetHelper.Report(false, "Batch craft operation failed.");
 
-				AttemptCraft(AttemptSingleCraft, context);
-			}
+					AttemptCraft(AttemptSingleCraft, context);
+				}
+			});
 
 			NetHelper.Report(true, "Crafted " + (target - context.toCraft) + " items");
 

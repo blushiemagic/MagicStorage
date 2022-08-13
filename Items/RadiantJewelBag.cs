@@ -1,11 +1,14 @@
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
 	public class RadiantJewelBag : GlobalItem
 	{
+		public override bool AppliesToEntity(Item entity, bool lateInstantiation) => lateInstantiation && entity.type == ItemID.MoonLordBossBag;
+
 		public override void ModifyItemLoot(Item item, ItemLoot itemLoot) {
 			//18% chance to drop 1 item in Expert Mode
 			//25% chance to drop 1 item in Master Mode

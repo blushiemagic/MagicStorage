@@ -445,6 +445,13 @@ Mods: {
 		SearchName: "搜索名称"
 		SearchMod: "搜索模组"
 
+		SearchTips: {
+			# SearchName: "Search Name"
+			# SearchMod: "@ModName Search Name"
+			# SearchTooltip: "#Search Tooltip"
+			# SearchModAndTooltip: "@ModName #Search Tooltip"
+		}
+
 		Recipes: "合成配方"
 		RecipeAvailable: "显示可合成配方"
 		RecipeAll: "显示全部配方"

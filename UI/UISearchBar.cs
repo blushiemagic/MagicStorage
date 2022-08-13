@@ -22,7 +22,7 @@ namespace MagicStorage.UI
 		private static readonly Asset<Texture2D> TextureAsset = MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SearchBar", AssetRequestMode.ImmediateLoad);
 		private static readonly Asset<DynamicSpriteFont> MouseTextFont = FontAssets.MouseText;
 		private readonly Action _clearedEvent;
-		private readonly LocalizedText defaultText;
+		private LocalizedText defaultText;
 		private int cursorPosition;
 		private int cursorTimer;
 		private bool hasFocus;
@@ -39,6 +39,10 @@ namespace MagicStorage.UI
 			_searchBars.Add(this);
 			this.defaultText = defaultText;
 			_clearedEvent = clearedEvent;
+		}
+
+		public void SetDefaultText(LocalizedText defaultText) {
+			this.defaultText = defaultText;
 		}
 
 		public void Reset()

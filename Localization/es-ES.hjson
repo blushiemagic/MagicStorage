@@ -332,6 +332,13 @@ Mods: {
 		SearchName: "búsqueda por nombre"
 		SearchMod: "búsqueda por mod"
 
+		SearchTips: {
+			# SearchName: "Search Name"
+			# SearchMod: "@ModName Search Name"
+			# SearchTooltip: "#Search Tooltip"
+			# SearchModAndTooltip: "@ModName #Search Tooltip"
+		}
+
 		Recipes: "Recetas"
 		RecipeAvailable: "Mostrar recetas disponibles"
 		RecipeAll: "Mostrar todas las recetas"

@@ -21,6 +21,8 @@ using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	public sealed class CraftingUIState : BaseStorageUI {
+		public const float SmallerScale = 0.58f;
+
 		private UIPanel recipePanel;
 		private UIText recipePanelHeader;
 		private UIText ingredientText;
@@ -109,9 +111,9 @@ namespace MagicStorage.UI.States {
 					IgnoreClicks = true  // Purely visual
 				};
 				
-				itemSlot.OnRightClick += (evt, e) => {
-					if (CraftingGUI.selectedRecipe is null)
-						return;
+				itemSlot.OnUpdate += e => {
+					if (!e.IsMouseHovering || !Main.mouseRight)
+						return;  //Not right clicking
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
@@ -246,7 +248,7 @@ namespace MagicStorage.UI.States {
 					}
 				};
 
-				itemSlot.OnRightClick += (evt, e) => {
+				itemSlot.OnRightMouseDown += (evt, e) => {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -276,21 +278,21 @@ namespace MagicStorage.UI.States {
 			resultZone.Height.Set(itemSlotHeight, 0f);
 			recipePanel.Append(resultZone);
 
-			craftP1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus1"));
+			craftP1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus1"), SmallerScale);
 			craftP1.SetAmountInformation(+1, true);
-			craftP10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus10"));
+			craftP10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus10"), SmallerScale);
 			craftP10.SetAmountInformation(+10, true);
-			craftP100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus100"));
+			craftP100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus100"), SmallerScale);
 			craftP100.SetAmountInformation(+100, true);
-			craftM1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus1"));
+			craftM1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus1"), SmallerScale);
 			craftM1.SetAmountInformation(-1, true);
-			craftM10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus10"));
+			craftM10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus10"), SmallerScale);
 			craftM10.SetAmountInformation(-10, true);
-			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"));
+			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"), SmallerScale);
 			craftM100.SetAmountInformation(-100, true);
-			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), CraftingGUI.SmallScale);
+			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallerScale);
 			craftMax.SetAmountInformation(int.MaxValue, false);
-			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), CraftingGUI.SmallScale);
+			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallerScale);
 			craftReset.SetAmountInformation(1, false);
 
 			craftAmount = new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), CraftingGUI.SmallScale);
@@ -303,57 +305,51 @@ namespace MagicStorage.UI.States {
 			craftAmount.PaddingBottom = 0;
 			craftAmount.TextOriginX = 0f;
 
-			craftP1.Width.Set(60, 0f);
-			craftP1.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftP1.PaddingTop = 8f;
-			craftP1.PaddingBottom = 8f;
+			craftP1.Left.Set(craftButton.Width.Pixels + 12, 0f);
+			craftP1.Width.Set(35, 0f);
+			craftP1.Height.Set(16, 0f);
+			craftP1.PaddingTop = craftP1.PaddingBottom = 3;
 			recipePanel.Append(craftP1);
 
 			craftP10.Left.Set(craftP1.Left.Pixels + craftP1.Width.Pixels + 10, 0f);
-			craftP10.Width.Set(60, 0f);
-			craftP10.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftP10.PaddingTop = 8f;
-			craftP10.PaddingBottom = 8f;
+			craftP10.Width.Set(35, 0f);
+			craftP10.Height = craftP1.Height;
+			craftP1.PaddingTop = craftP1.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftP10);
 
 			craftP100.Left.Set(craftP10.Left.Pixels + craftP10.Width.Pixels + 10, 0f);
-			craftP100.Width.Set(60, 0f);
-			craftP100.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftP100.PaddingTop = 8f;
-			craftP100.PaddingBottom = 8f;
+			craftP100.Width.Set(35, 0f);
+			craftP100.Height = craftP1.Height;
+			craftP1.PaddingTop = craftP1.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftP100);
 
-			craftM1.Width.Set(60, 0f);
-			craftM1.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftM1.PaddingTop = 8f;
-			craftM1.PaddingBottom = 8f;
+			craftM1.Width.Set(35, 0f);
+			craftM1.Height = craftP1.Height;
+			craftM1.PaddingTop = craftM1.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftM1);
 
 			craftM10.Left.Set(craftM1.Left.Pixels + craftM1.Width.Pixels + 10, 0f);
-			craftM10.Width.Set(60, 0f);
-			craftM10.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftM10.PaddingTop = 8f;
-			craftM10.PaddingBottom = 8f;
+			craftM10.Width.Set(35, 0f);
+			craftM10.Height = craftP1.Height;
+			craftM10.PaddingTop = craftM10.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftM10);
 
 			craftM100.Left.Set(craftM10.Left.Pixels + craftM10.Width.Pixels + 10, 0f);
-			craftM100.Width.Set(60, 0f);
-			craftM100.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftM100.PaddingTop = 8f;
-			craftM100.PaddingBottom = 8f;
+			craftM100.Width.Set(35, 0f);
+			craftM100.Height = craftP1.Height;
+			craftM100.PaddingTop = craftM100.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftM100);
 
-			craftMax.Width.Set(160f * CraftingGUI.SmallScale, 0f);
-			craftMax.Height.Set(24f * CraftingGUI.SmallScale, 0f);
+			craftMax.Width.Set(93 * CraftingGUI.SmallScale, 0f);
+			craftMax.Height = craftP1.Height;
 			craftMax.PaddingTop = 8f;
 			craftMax.PaddingBottom = 8f;
 			recipePanel.Append(craftMax);
 
 			craftReset.Left.Set(craftMax.Left.Pixels + craftMax.Width.Pixels + 10, 0f);
-			craftReset.Width.Set(100f * CraftingGUI.SmallScale, 0f);
-			craftReset.Height.Set(24f * CraftingGUI.SmallScale, 0f);
-			craftReset.PaddingTop = 8f;
-			craftReset.PaddingBottom = 8f;
+			craftReset.Width.Set(58 * CraftingGUI.SmallScale, 0f);
+			craftReset.Height = craftP1.Height;
+			craftReset.PaddingTop = craftReset.PaddingBottom = craftP1.PaddingTop;
 			recipePanel.Append(craftReset);
 
 			ToggleCraftButtons(hide: config);
@@ -460,7 +456,7 @@ namespace MagicStorage.UI.States {
 			bool config = MagicStorageConfig.UseOldCraftMenu;
 
 			if (!config)
-				storageZone.Height.Set(-storageZoneTop - 200, 1f);
+				storageZone.Height.Set(-storageZoneTop - 60, 1f);
 			else
 				storageZone.Height.Set(-storageZoneTop - 36, 1f);
 
@@ -480,7 +476,7 @@ namespace MagicStorage.UI.States {
 			storageScrollBar.Recalculate();
 
 			if (!config)
-				resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 40, 0f);
+				resultZone.Top.Set(storageZoneTop + storageZone.GetDimensions().Height + 10, 0f);
 			else
 				resultZone.Top.Set(-itemSlotHeight, 1f);
 
@@ -490,7 +486,9 @@ namespace MagicStorage.UI.States {
 			resultZone.Recalculate();
 
 			if (!config) {
-				craftP1.Top.Set(resultZone.Top.Pixels - 30, 0f);
+				var mainButtonDims = craftButton.GetDimensions();
+
+				craftP1.Top.Set(mainButtonDims.Y - 5, 0f);
 				craftP1.Recalculate();
 
 				craftP10.Top = craftP1.Top;
@@ -499,7 +497,7 @@ namespace MagicStorage.UI.States {
 				craftP100.Top = craftP1.Top;
 				craftP100.Recalculate();
 
-				craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 15, 0f);
+				craftM1.Top.Set(craftP1.Top.Pixels + craftP1.Height.Pixels + 8, 0f);
 				craftM1.Recalculate();
 
 				craftM10.Top = craftM1.Top;
@@ -642,6 +640,8 @@ namespace MagicStorage.UI.States {
 		public void Refresh() {
 			if (Main.gameMenu)
 				return;
+
+			MoveRecipePanel();
 
 			int itemsNeeded = CraftingGUI.selectedRecipe?.requiredItem.Count ?? CraftingGUI.IngredientColumns;
 			int recipeRows = itemsNeeded / CraftingGUI.IngredientColumns;

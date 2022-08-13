@@ -44,7 +44,7 @@ namespace MagicStorage.Edits {
 			return !PreventActions() && orig(inv, context, slot);
 		}
 
-		private static bool PreventActions() {
+		public static bool PreventActions() {
 			if (MagicUI.uiInterface?.CurrentState is null || !Main.hasFocus || MagicUI.BlockItemSlotActionsDetour)
 				return false;
 
