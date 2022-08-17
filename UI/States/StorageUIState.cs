@@ -220,7 +220,7 @@ namespace MagicStorage.UI.States {
 				int numRows = (StorageGUI.items.Count + StorageGUI.numColumns - 1) / StorageGUI.numColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + StorageGUI.padding);
 
-				if (displayRows <= 0) {
+				if (numRows > 0 && displayRows <= 0) {
 					lastKnownScrollBarViewPosition = -1;
 
 					MagicUI.CloseUIDueToHeightLimit();
@@ -472,41 +472,12 @@ namespace MagicStorage.UI.States {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					DoSell(heart, SellMenuChoice, out long coppersEarned, out var withdrawnItems);
+					if (Main.netMode == NetmodeID.SinglePlayer) {
+						DoSell(heart, SellMenuChoice, out long coppersEarned, out var withdrawnItems);
 
-					int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
-
-					if (sold > 0 && coppersEarned > 0) {
-						// coins = [ copper, silver, gold, platinum ]
-						int[] coins = Utils.CoinsSplit(coppersEarned);
-
-						StringBuilder coinsReport = new();
-
-						if (coins[3] > 0)
-							coinsReport.Append($"[i/s{coins[3]}:{ItemID.PlatinumCoin}]");
-						if (coins[2] > 0)
-							coinsReport.Append($" [i/s{coins[2]}:{ItemID.GoldCoin}]");
-						if (coins[1] > 0)
-							coinsReport.Append($" [i/s{coins[1]}:{ItemID.SilverCoin}]");
-						if (coins[0] > 0)
-							coinsReport.Append($" [i/s{coins[0]}:{ItemID.CopperCoin}]");
-
-						Main.NewText($"{sold} duplicates were sold for {coinsReport.ToString().Trim()}");
-
-						if (coins[3] > 0)
-							heart.DepositItem(new(ItemID.PlatinumCoin, coins[3]));
-						if (coins[2] > 0)
-							heart.DepositItem(new(ItemID.GoldCoin, coins[2]));
-						if (coins[1] > 0)
-							heart.DepositItem(new(ItemID.SilverCoin, coins[1]));
-						if (coins[0] > 0)
-							heart.DepositItem(new(ItemID.CopperCoin, coins[0]));
-
-						heart.ResetCompactStage();
-					} else if (sold > 0 && coppersEarned == 0)
-						Main.NewText($"{sold} duplicates were destroyed due to having no value");
-					else
-						Main.NewText("No duplicates were sold");
+						DuplicateSellingResult(heart, withdrawnItems.Values.Select(l => l.Count).Sum(), coppersEarned);
+					} else
+						NetHelper.RequestDuplicateSelling(heart.Position, SellMenuChoice);
 				};
 
 				InitButtonEvents(sellMenuButton);
@@ -673,7 +644,7 @@ namespace MagicStorage.UI.States {
 					foreach (int item in withdrawn.OrderByDescending(i => i))
 						unit.items.RemoveAt(item);
 
-					if (Main.netMode == NetmodeID.MultiplayerClient)
+					if (Main.netMode == NetmodeID.Server)
 						unit.FullySync();
 
 					unit.PostChangeContents();
@@ -684,6 +655,45 @@ namespace MagicStorage.UI.States {
 				coppersEarned = platinum * 1000000L + gold * 10000 + silver * 100 + copper;
 
 				StorageGUI.needRefresh = true;
+			}
+
+			internal static void DuplicateSellingResult(TEStorageHeart heart, int sold, long coppersEarned, bool reportText = true, bool depositCoins = true) {
+				if (sold > 0 && coppersEarned > 0) {
+					// coins = [ copper, silver, gold, platinum ]
+					int[] coins = Utils.CoinsSplit(coppersEarned);
+
+					if (reportText) {
+						StringBuilder coinsReport = new();
+
+						if (coins[3] > 0)
+							coinsReport.Append($"[i/s{coins[3]}:{ItemID.PlatinumCoin}]");
+						if (coins[2] > 0)
+							coinsReport.Append($" [i/s{coins[2]}:{ItemID.GoldCoin}]");
+						if (coins[1] > 0)
+							coinsReport.Append($" [i/s{coins[1]}:{ItemID.SilverCoin}]");
+						if (coins[0] > 0)
+							coinsReport.Append($" [i/s{coins[0]}:{ItemID.CopperCoin}]");
+
+						Main.NewText($"{sold} duplicates were sold for {coinsReport.ToString().Trim()}");
+					}
+
+					if (depositCoins) {
+						if (coins[3] > 0)
+							heart.DepositItem(new(ItemID.PlatinumCoin, coins[3]));
+						if (coins[2] > 0)
+							heart.DepositItem(new(ItemID.GoldCoin, coins[2]));
+						if (coins[1] > 0)
+							heart.DepositItem(new(ItemID.SilverCoin, coins[1]));
+						if (coins[0] > 0)
+							heart.DepositItem(new(ItemID.CopperCoin, coins[0]));
+
+						heart.ResetCompactStage();
+					}
+				} else if (sold > 0 && coppersEarned == 0) {
+					if (reportText)
+						Main.NewText($"{sold} duplicates were destroyed due to having no value");
+				} else if (reportText)
+					Main.NewText("No duplicates were sold");
 			}
 
 			private static bool SellNoPrefix(ref SourcedItem item, ref SourcedItem check, out bool swapHappened) {

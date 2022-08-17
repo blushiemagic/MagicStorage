@@ -11,6 +11,7 @@ using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using MagicStorage.UI.States;
 using System.Text;
+using System.Linq;
 
 namespace MagicStorage
 {
@@ -858,6 +859,74 @@ namespace MagicStorage
 				Report(true, MessageType.RequestCoinCompact + " packet recevied by client " + Main.myPlayer);
 			}
 		}
+
+		public static void RequestDuplicateSelling(Point16 heart, int sellOption) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.MassDuplicateSellRequest);
+			packet.Write(heart);
+			packet.Write((byte)sellOption);
+			packet.Send();
+
+			Report(true, MessageType.MassDuplicateSellRequest + " packet sent to the server");
+		}
+
+		public static void ReceiveDuplicateSellingRequest(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				Point16 position = reader.ReadPoint16();
+				int sellOption = reader.ReadByte();
+
+				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
+					StorageUIState.ControlsPage.DoSell(heart, sellOption, out long coppersEarned, out var withdrawnItems);
+
+					ModPacket packet = MagicStorageMod.Instance.GetPacket();
+					packet.Write((byte)MessageType.MassDuplicateSellResult);
+					packet.Write((short)sender);
+					packet.Write(position);
+					packet.Write7BitEncodedInt64(coppersEarned);
+					packet.Write7BitEncodedInt(withdrawnItems.Values.Select(l => l.Count).Sum());
+
+					packet.Send();
+				}
+
+				Report(true, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
+				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				reader.ReadPoint16();
+				reader.ReadInt32();
+
+				Report(true, MessageType.MassDuplicateSellRequest + " packet recevied by client " + Main.myPlayer);
+			}
+		}
+
+		public static void ClientReceiveDuplicateSellingResult(BinaryReader reader) {
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				//Read the data, but do nothing with it
+				_ = reader.ReadInt16();
+				_ = reader.ReadPoint16();
+				_ = reader.Read7BitEncodedInt64();
+
+				return;
+			}
+
+			short sender = reader.ReadInt16();
+			Point16 heart = reader.ReadPoint16();
+			long coppersEarned = reader.Read7BitEncodedInt64();
+
+			int sold = reader.Read7BitEncodedInt();
+
+			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
+				Report(true, MessageType.MassDuplicateSellResult + " packet was malformed: Storage Heart location did not have a Storage Heart");
+				return;
+			}
+
+			Report(true, MessageType.MassDuplicateSellResult + " packet recevied by client " + Main.myPlayer);
+
+			if (sender == Main.myPlayer)
+				StorageUIState.ControlsPage.DuplicateSellingResult(storageHeart, sold, coppersEarned, reportText: true, depositCoins: false);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -879,6 +948,8 @@ namespace MagicStorage
 		ForceCraftingGUIRefresh,
 		TransferItems,
 		TransferItemsResult,
-		RequestCoinCompact
+		RequestCoinCompact,
+		MassDuplicateSellRequest,
+		MassDuplicateSellResult
 	}
 }
