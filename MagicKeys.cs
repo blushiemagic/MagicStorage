@@ -32,10 +32,13 @@ namespace MagicStorage {
 
 				var sources = GUITooltips.Sources(item);
 
-				if (!sources.Any())
-					return;
+				string sourceText = sources.Any()
+					? string.Join('\n', sources.Select(t => t.Item1 + "\n  " + t.Item2))
+					: "None";
 
-				Main.NewTextMultiline($"Data for item \"{Lang.GetItemNameValue(item.type)}\":\n" + string.Join('\n', sources.Select(t => t.Item1 + "\n  " + t.Item2)), c: Color.Orange);
+				Main.NewTextMultiline($"Data for item \"{Lang.GetItemNameValue(item.type)}\":\n"
+					+ sourceText,
+					c: Color.Orange);
 			}
 		}
 	}

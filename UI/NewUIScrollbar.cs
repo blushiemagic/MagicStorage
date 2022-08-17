@@ -80,12 +80,14 @@ namespace MagicStorage.UI {
 				_viewPosition = MathHelper.Clamp(num / innerDimensions.Height * MaxViewSize, 0f, MaxViewSize - ViewSize);
 			}
 
-			Rectangle handleRectangle = GetHandleRectangle();
-			Vector2 mousePosition = UserInterface.ActiveInstance.MousePosition;
-			bool isHoveringOverHandle = _isHoveringOverHandle;
-			_isHoveringOverHandle = handleRectangle.Contains(new Point((int)mousePosition.X, (int)mousePosition.Y));
-			if (!isHoveringOverHandle && _isHoveringOverHandle && Main.hasFocus && !IsDragging)
-				SoundEngine.PlaySound(SoundID.MenuTick);
+			if (innerDimensions.Height > 0) {
+				Rectangle handleRectangle = GetHandleRectangle();
+				Vector2 mousePosition = UserInterface.ActiveInstance.MousePosition;
+				bool isHoveringOverHandle = _isHoveringOverHandle;
+				_isHoveringOverHandle = handleRectangle.Contains(new Point((int)mousePosition.X, (int)mousePosition.Y));
+				if (!isHoveringOverHandle && _isHoveringOverHandle && Main.hasFocus && !IsDragging)
+					SoundEngine.PlaySound(SoundID.MenuTick);
+			}
 		}
 
 		internal static void DrawBar(SpriteBatch spriteBatch, Texture2D texture, Rectangle dimensions, Color color) {

@@ -438,6 +438,7 @@ namespace MagicStorage.UI.States {
 
 				if (lastKnownUseOldCraftButtons != config) {
 					ToggleCraftButtons(hide: config);
+					lastKnownUseOldCraftButtons = config;
 					lastKnownIngredientRows = -1;  //Force a recipe panel heights refresh
 				}
 
@@ -674,6 +675,9 @@ namespace MagicStorage.UI.States {
 
 			if (MagicStorageConfig.ClearRecipeHistory)
 				history.Clear();
+
+			if (history.Current >= 0)
+				history.Goto(history.Current);
 		}
 
 		protected override void OnClose() {

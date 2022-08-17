@@ -17,7 +17,7 @@ namespace MagicStorage.Common.Global {
 			if (StoragePlayer.LocalPlayer.StorageCrafting() || StoragePlayer.LocalPlayer.StorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
 				return false;
 
-			return MagicUI.BlockItemSlotActionsDetour;
+			return !MagicUI.BlockItemSlotActionsDetour;
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
@@ -30,16 +30,19 @@ namespace MagicStorage.Common.Global {
 			//The cursor is actually within the GUI.  Add the tooltip to the item
 			string[] sources = Sources(item).Select(t => t.Item1).ToArray();
 
-			if (sources.Length == 0)
-				return;
-
 			var binds = MagicKeys.PrintBase64Data.GetAssignedKeys();
 			string keybindingKey = "\"" + (binds.Count == 0 ? "<NOT BOUND>" : binds[0]) + "\"";
 
-			string whole = "This item contains GlobalItem data.\n" +
-				"Sources:\n" +
-				"  " + string.Join("\n  ", sources.Distinct()) + "\n" +
-				"Press " + keybindingKey + " to print its encoded data to the chat.";
+			string whole;
+			string keyInfo = "Press " + keybindingKey + " to print this item's encoded data to the chat.";
+
+			if (sources.Length > 0) {
+				whole = "This item contains GlobalItem data.\n" +
+					"Sources:\n" +
+					"  " + string.Join("\n  ", sources.Distinct()) + "\n" +
+					keyInfo;
+			} else
+				whole = keyInfo;
 
 			int index = 0;
 			foreach (string line in whole.Split('\n')) {
