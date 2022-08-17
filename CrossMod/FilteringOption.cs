@@ -163,8 +163,8 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Misc { get; internal set; }
 			public static FilteringOption Recent { get; internal set; }
 			public static FilteringOption OtherWeapons { get; internal set; }
-			public static FilteringOption Unstackables { get; internal set; }
-			public static FilteringOption Stackables { get; internal set; }
+			//public static FilteringOption Unstackables { get; internal set; }
+			//public static FilteringOption Stackables { get; internal set; }
 			public static FilteringOption NotFullyResearched { get; internal set; }
 			public static FilteringOption FullyResearched { get; internal set; }
 			public static FilteringOption Material { get; internal set; }
@@ -235,8 +235,8 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Potion = new FilterPotion());
 			mod.AddContent(Definitions.Tiles = new FilterTiles());
 			mod.AddContent(Definitions.Material = new FilterMaterials());
-			mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
-			mod.AddContent(Definitions.Stackables = new FilterStackables());
+			//mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
+			//mod.AddContent(Definitions.Stackables = new FilterStackables());
 			mod.AddContent(Definitions.NotFullyResearched = new FilterNotFullyResearched());
 			mod.AddContent(Definitions.FullyResearched = new FilterFullyResearched());
 			mod.AddContent(Definitions.Misc = new FilterMisc());

@@ -1,4 +1,6 @@
 ﻿using MagicStorage.Sorting;
+using MagicStorage.UI.States;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -124,6 +126,22 @@ namespace MagicStorage.CrossMod {
 		public override string Name => "ArmorAndEquips";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override bool GetDefaultVisibility(bool craftingGUI) {
+			switch (MagicStorageConfig.ButtonUIMode) {
+				case ButtonConfigurationMode.Legacy:
+					return !MagicStorageConfig.ExtraFilterIcons;
+				case ButtonConfigurationMode.ModernPaged:
+				case ButtonConfigurationMode.ModernConfigurable:
+				case ButtonConfigurationMode.ModernDropdown:
+					return false;
+				case ButtonConfigurationMode.LegacyWithGear:
+				case ButtonConfigurationMode.LegacyBasicWithPaged:
+					return true;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
 	}
 
 	[Autoload(false)]
