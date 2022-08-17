@@ -288,7 +288,7 @@ namespace MagicStorage.UI.States {
 					if (sortingOptions.Any()) {
 						sortingButtons.AssignOptions(sortingOptions);
 
-						sortingButtons.AutomaticallyUpdateButtonLayout();
+						sortingButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 15);
 
 						topBar2.Height = sortingButtons.Height;
 						topBar2.Append(sortingButtons);
@@ -300,7 +300,7 @@ namespace MagicStorage.UI.States {
 					if (filteringOptions.Any()) {
 						filteringButtons.AssignOptions(filteringOptions);
 
-						filteringButtons.AutomaticallyUpdateButtonLayout();
+						filteringButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 22);
 
 						topBar3.Height = filteringButtons.Height;
 						topBar3.Append(filteringButtons);
