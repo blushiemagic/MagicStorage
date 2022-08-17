@@ -284,11 +284,14 @@ namespace MagicStorage.UI.States {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
+					if (objSlot >= StorageGUI.items.Count)
+						return;
+
 					bool changed = false;
 					if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
 						if (StorageGUI.TryDeposit(Main.mouseItem))
 							changed = true;
-					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
+					} else if (Main.mouseItem.IsAir && !StorageGUI.items[objSlot].IsAir) {
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							if (Main.netMode == NetmodeID.SinglePlayer)
 								StorageGUI.FavoriteItem(objSlot);

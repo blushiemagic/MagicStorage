@@ -120,6 +120,12 @@ namespace MagicStorage
 				case MessageType.RequestCoinCompact:
 					ReceiveCoinCompactRequest(reader, sender);
 					break;
+				case MessageType.MassDuplicateSellRequest:
+					ReceiveDuplicateSellingRequest(reader, sender);
+					break;
+				case MessageType.MassDuplicateSellResult:
+					ClientReceiveDuplicateSellingResult(reader);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
