@@ -357,6 +357,12 @@ Mods: {
 		# PrevHistory: "Previous Recipe in History"
 		# NextHistory: "Next Recipe in History"
 
+		# PanelTooSmol:
+		# '''
+		# Unable to open a Magic Storage UI.  Reason: Panel height was too short to properly display the UI elements.
+		# Please decrease your UI Scale in Settings or increase your game's Resolution in Video Settings.
+		# '''
+
 		# RecipeHidden:
 		# '''
 		# Recipe for item "{0}" was blacklisted.

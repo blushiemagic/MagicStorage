@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameInput;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -171,16 +172,16 @@ public class MagicUI : ModSystem
 	internal static bool pendingUIChangeForAnyReason;
 	private static float lastKnownUIScale = -1;
 
+	private static bool pendingClose;
+
 	public override void UpdateUI(GameTime gameTime) {
 		if (lastKnownUIScale != Main.UIScale) {
 			lastKnownUIScale = Main.UIScale;
 			pendingUIChangeForAnyReason = true;
 		}
 
-		if (!Main.playerInventory) {
+		if (!Main.playerInventory)
 			StoragePlayer.LocalPlayer.CloseStorage();  //Failsafe
-			CloseUI();
-		}
 
 		CanUpdateSearchBars = false;
 		lastGameTime = gameTime;
@@ -205,6 +206,12 @@ public class MagicUI : ModSystem
 		}
 
 		uiInterface?.Update(gameTime);
+
+		if (pendingClose) {
+			Main.NewTextMultiline(Language.GetTextValue("Mods.MagicStorage.PanelTooSmol"), c: Color.Red);
+			StoragePlayer.LocalPlayer.CloseStorage();
+			pendingClose = false;
+		}
 
 		BlockItemSlotActionsDetour = false;
 
@@ -249,5 +256,9 @@ public class MagicUI : ModSystem
 
 	internal static void CloseUI() {
 		uiInterface.SetState(null);
+
+		mouseText = "";
 	}
+
+	internal static void CloseUIDueToHeightLimit() => pendingClose = true;
 }

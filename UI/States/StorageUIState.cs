@@ -209,9 +209,9 @@ namespace MagicStorage.UI.States {
 					(parentUI as StorageUIState).Refresh();
 			}
 
-			private void UpdateZone() {
+			private bool UpdateZone() {
 				if (Main.gameMenu)
-					return;
+					return false;
 
 				AdjustCommonElements();
 
@@ -219,6 +219,14 @@ namespace MagicStorage.UI.States {
 
 				int numRows = (StorageGUI.items.Count + StorageGUI.numColumns - 1) / StorageGUI.numColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + StorageGUI.padding);
+
+				if (displayRows <= 0) {
+					lastKnownScrollBarViewPosition = -1;
+
+					MagicUI.CloseUIDueToHeightLimit();
+					return false;
+				}
+
 				slotZone.SetDimensions(StorageGUI.numColumns, displayRows);
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
@@ -229,10 +237,12 @@ namespace MagicStorage.UI.States {
 				scrollBar.SetView(StorageGUI.scrollBarViewSize, scrollBarMaxViewSize);
 
 				lastKnownScrollBarViewPosition = scrollBar.ViewPosition;
+				return true;
 			}
 
 			public void Refresh() {
-				UpdateZone();
+				if (!UpdateZone())
+					return;
 
 				slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
 			}

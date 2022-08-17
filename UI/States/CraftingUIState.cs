@@ -469,7 +469,7 @@ namespace MagicStorage.UI.States {
 			MagicUI.BlockItemSlotActionsDetour = oldBlock;
 		}
 
-		private void RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
+		private bool RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
@@ -512,6 +512,15 @@ namespace MagicStorage.UI.States {
 
 			int numRows2 = (CraftingGUI.storageItems.Count + CraftingGUI.IngredientColumns - 1) / CraftingGUI.IngredientColumns;
 			int displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + CraftingGUI.Padding);
+
+			if (numRows2 > 0 && displayRows2 <= 0) {
+				lastKnownIngredientRows = -1;
+				lastKnownScrollBarViewPosition = -1;
+
+				MagicUI.CloseUIDueToHeightLimit();
+				return false;
+			}
+
 			storageZone.SetDimensions(CraftingGUI.IngredientColumns, displayRows2);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
@@ -563,6 +572,7 @@ namespace MagicStorage.UI.States {
 
 			lastKnownIngredientRows = ingredientRows;
 			lastKnownScrollBarViewPosition = storageScrollBar.ViewPosition;
+			return true;
 		}
 
 		private void ToggleCraftButtons(bool hide) {
@@ -703,7 +713,8 @@ namespace MagicStorage.UI.States {
 			if (totalRows < 1)
 				totalRows = 1;
 
-			RecalculateRecipePanelElements(itemsNeeded, totalRows);
+			if (!RecalculateRecipePanelElements(itemsNeeded, totalRows))
+				return;
 
 			ingredientZone.SetItemsAndContexts(int.MaxValue, CraftingGUI.GetIngredient);
 
@@ -918,9 +929,9 @@ namespace MagicStorage.UI.States {
 					InitFilterButtons();
 			}
 
-			private void UpdateZones() {
+			private bool UpdateZones() {
 				if (Main.gameMenu)
-					return;
+					return false;
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
@@ -951,6 +962,15 @@ namespace MagicStorage.UI.States {
 
 				int numRows = ((CraftingGUI.recipes?.Count ?? 0) + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + CraftingGUI.Padding);
+
+				if (numRows > 0 && displayRows <= 0) {
+					lastKnownStationsCount = -1;
+					lastKnownScrollBarViewPosition = -1;
+
+					MagicUI.CloseUIDueToHeightLimit();
+					return false;
+				}
+
 				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
 
 				int noDisplayRows = numRows - displayRows;
@@ -965,10 +985,12 @@ namespace MagicStorage.UI.States {
 
 				lastKnownStationsCount = stationCount;
 				lastKnownScrollBarViewPosition = scrollBar.ViewPosition;
+				return true;
 			}
 
 			public void Refresh() {
-				UpdateZones();
+				if (!UpdateZones())
+					return;
 
 				stationZone.SetItemsAndContexts(int.MaxValue, CraftingGUI.GetStation);
 
