@@ -12,20 +12,45 @@ namespace MagicStorage.Sorting
 {
 	public static class ItemSorter
 	{
-		public static IEnumerable<Item> SortAndFilter(IEnumerable<Item> items, int sortMode, int filterMode, string nameFilter, int? takeCount = null)
+		public class AggregateContext {
+			public IEnumerable<Item> items;
+			public IEnumerable<List<Item>> sourceItems;
+			internal List<List<Item>> enumeratedSource;
+
+			public AggregateContext(IEnumerable<Item> items) {
+				this.items = items;
+				sourceItems = enumeratedSource = new();
+			}
+		}
+
+		public static IEnumerable<Item> SortAndFilter(AggregateContext context, int sortMode, int filterMode, string nameFilter, int modSearchIndex, int? takeCount = null)
 		{
+			context.items = DoFiltering(context.items, i => i, filterMode, nameFilter, modSearchIndex);
+
+			if (takeCount is int take)
+				context.items = context.items.Take(take);
+
+			context.items = Aggregate(context);
+
+			context.sourceItems = DoFiltering(context.sourceItems, i => i[0], filterMode, nameFilter, modSearchIndex);
+
+			if (takeCount is int take2)
+				context.sourceItems = context.sourceItems.Take(take2);
+
+			context.sourceItems = DoSorting(context.sourceItems, i => i[0], sortMode);
+
+			return DoSorting(context.items, i => i, sortMode);
+		}
+
+		public static IEnumerable<T> DoFiltering<T>(IEnumerable<T> source, Func<T, Item> objToItem, int filterMode, string nameFilter, int modSearchIndex) {
+			ArgumentNullException.ThrowIfNull(objToItem);
+
 			var filter = FilteringOptionLoader.Get(filterMode)?.Filter;
 
 			if (filter is null)
 				throw new ArgumentOutOfRangeException(nameof(filterMode), "Filtering ID was invalid or its definition had a null filter");
 
-			IEnumerable<Item> filteredItems = items.Where(item => filter(item) && FilterBySearchText(item, nameFilter));
-			if (takeCount is not null)
-				filteredItems = filteredItems.Take(takeCount.Value);
-
-			filteredItems = Aggregate(filteredItems);
-
-			return DoSorting(filteredItems, i => i, sortMode);
+			return source.Where(x => filter(objToItem(x)) && FilterBySearchText(objToItem(x), nameFilter, modSearchIndex));
 		}
 
 		public static IEnumerable<T> DoSorting<T>(IEnumerable<T> source, Func<T, Item> objToItem, int sortMode) {
@@ -48,47 +73,62 @@ namespace MagicStorage.Sorting
 			return orderedItems.ThenByDescending(x => objToItem(x).type).ThenByDescending(x => objToItem(x).value);
 		}
 
-		public static IEnumerable<Item> Aggregate(IEnumerable<Item> items)
+		//Formerly returned IEnumerable<Item> for lazy evaluation
+		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
+		public static List<Item> Aggregate(AggregateContext context)
 		{
 			Item lastItem = null;
 
-			foreach (Item item in items.OrderBy(i => i.type))
+			int sourceIndex = 0;
+
+			List<Item> aggregate = new();
+
+			foreach (Item item in context.items.OrderBy(i => i.type))
 			{
 				if (lastItem is null)
 				{
 					lastItem = item.Clone();
+					context.enumeratedSource.Add(new() { item });
 					continue;
 				}
 
 				if (ItemCombining.CanCombineItems(item, lastItem) && lastItem.stack + item.stack > 0)
 				{
+					if (item.favorited) {
+						lastItem.favorited = true;
+
+						foreach (var source in context.enumeratedSource[sourceIndex])
+							source.favorited = true;
+					}
+
 					lastItem.stack += item.stack;
+					context.enumeratedSource[sourceIndex].Add(item);
 				}
 				else
 				{
-					yield return lastItem;
+					aggregate.Add(lastItem);
 					lastItem = item.Clone();
+					context.enumeratedSource.Add(new() { item });
+					sourceIndex++;
 				}
 			}
 
 			if (lastItem is not null)
-				yield return lastItem;
+				aggregate.Add(lastItem);
+
+			return aggregate;
 		}
 
-		public static ParallelQuery<Recipe> GetRecipes(int sortMode, int filterMode, string searchFilter, out IComparer<Item> sortComparer)
-		{
-			sortComparer = SortingOptionLoader.Get(sortMode)?.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
-
-			if (sortComparer is null)
-				throw new ArgumentOutOfRangeException(nameof(sortMode), "Sorting ID was invalid or its definition had a null sorter");
-
-			return MagicCache.FilteredRecipesCache[filterMode]
+		public static ParallelQuery<Recipe> GetRecipes(int filterMode, string searchFilter, int modSearchIndex)
+			=> MagicCache.FilteredRecipesCache[filterMode]
 				.AsParallel()
 				.AsOrdered()
-				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter));
-		}
+				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
 
-		internal static bool FilterBySearchText(Item item, string filter, bool modSearched = false) {
+		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
+			if (!modSearched && modSearchIndex != ModSearchBox.ModIndexAll)
+				filter += "@" + ModSearchBox.GetNameFromIndex(modSearchIndex);
+
 			if (string.IsNullOrWhiteSpace(filter))
 				return true;
 			
@@ -116,7 +156,7 @@ namespace MagicStorage.Sorting
 					} else
 						remaining = "";
 
-					return (item.ModItem?.Mod.Name ?? "Terraria").Contains(mod, StringComparison.OrdinalIgnoreCase) && FilterBySearchText(item, remaining, modSearched: true);
+					return (item.ModItem?.Mod.Name ?? "Terraria").Contains(mod, StringComparison.OrdinalIgnoreCase) && FilterBySearchText(item, remaining, modSearchIndex, modSearched: true);
 				} else
 					return true;  //Empty mod name = anything is valid
 			}

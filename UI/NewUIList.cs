@@ -50,6 +50,8 @@ namespace MagicStorage.UI {
 			set => _scrollbar.ViewPosition = value;
 		}
 
+		public bool DisplayChildrenInReverseOrder;
+
 		public NewUIList() {
 			_innerList.OverflowHidden = false;
 			_innerList.Width.Set(0f, 1f);
@@ -125,12 +127,22 @@ namespace MagicStorage.UI {
 		public override void RecalculateChildren() {
 			base.RecalculateChildren();
 			float num = 0f;
-			for (int i = 0; i < _items.Count; i++) {
-				float num2 = (_items.Count == 1) ? 0f : ListPadding;
-				_items[i].Top.Set(num, 0f);
-				_items[i].Recalculate();
-				CalculatedStyle outerDimensions = _items[i].GetOuterDimensions();
-				num += outerDimensions.Height + num2;
+			if (!DisplayChildrenInReverseOrder) {
+				for (int i = 0; i < _items.Count; i++) {
+					float num2 = (_items.Count == 1) ? 0f : ListPadding;
+					_items[i].Top.Set(num, 0f);
+					_items[i].Recalculate();
+					CalculatedStyle outerDimensions = _items[i].GetOuterDimensions();
+					num += outerDimensions.Height + num2;
+				}
+			} else {
+				for (int i = _items.Count - 1; i >= 0; i--) {
+					float num2 = (_items.Count == 1) ? 0f : ListPadding;
+					_items[i].Top.Set(num, 0f);
+					_items[i].Recalculate();
+					CalculatedStyle outerDimensions = _items[i].GetOuterDimensions();
+					num += outerDimensions.Height + num2;
+				}
 			}
 
 			_innerListHeight = num;

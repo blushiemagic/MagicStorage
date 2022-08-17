@@ -200,7 +200,7 @@ namespace MagicStorage
 			if (item.type != oldType || item.stack != oldStack)
 			{
 				SoundEngine.PlaySound(SoundID.Grab);
-				StorageGUI.RefreshItems();
+				StorageGUI.needRefresh = true;
 			}
 
 			return true;

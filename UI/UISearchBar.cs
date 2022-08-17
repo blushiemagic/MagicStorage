@@ -19,8 +19,8 @@ namespace MagicStorage.UI
 	{
 		private const int Padding = 4;
 		private static readonly List<UISearchBar> _searchBars = new();
-		private static readonly Asset<Texture2D> TextureAsset = MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SearchBar", AssetRequestMode.ImmediateLoad);
-		private static readonly Asset<DynamicSpriteFont> MouseTextFont = FontAssets.MouseText;
+		private static Asset<Texture2D> TextureAsset;
+		private static Asset<DynamicSpriteFont> MouseTextFont;
 		private readonly Action _clearedEvent;
 		private LocalizedText defaultText;
 		private int cursorPosition;
@@ -31,10 +31,15 @@ namespace MagicStorage.UI
 
 		public string Text { get; private set; } = string.Empty;
 
-		internal bool active;
+		internal bool active, oldActive;
+
+		public Func<string> GetHoverText { get; set; }
 
 		public UISearchBar(LocalizedText defaultText, Action clearedEvent)
 		{
+			TextureAsset ??=  MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SearchBar", AssetRequestMode.ImmediateLoad);
+			MouseTextFont ??= FontAssets.MouseText;
+
 			SetPadding(Padding);
 			_searchBars.Add(this);
 			this.defaultText = defaultText;
@@ -51,23 +56,42 @@ namespace MagicStorage.UI
 			cursorPosition = 0;
 			hasFocus = false;
 			CheckBlockInput();
+			oldMouseOver = false;
 		}
+
+		private bool oldMouseOver;
 
 		public override void Update(GameTime gameTime)
 		{
-			//Hack to give search bars special update logic since they have to update in ModSystem.PostUpdateInput instead of ModSystem.UpdateUI
-			if (!MagicUI.CanUpdateSearchBars || !active)
-				return;
-
-			cursorTimer++;
-			cursorTimer %= 60;
-
 			//Unfortunately, I can't convert this to the new API
 			//The click events only run on the element being clicked, for obvious reasons
 			// -- absoluteAquarian
 			Rectangle dim = InterfaceHelper.GetFullRectangle(this);
 			MouseState mouse = StorageGUI.curMouse;
 			bool mouseOver = mouse.X > dim.X && mouse.X < dim.X + dim.Width && mouse.Y > dim.Y && mouse.Y < dim.Y + dim.Height;
+
+			bool oldMouseOver = this.oldMouseOver;
+			this.oldMouseOver = mouseOver;
+
+			bool oldActive = this.oldActive;
+			this.oldActive = active;
+
+			//Hack to give search bars special update logic since they have to update in ModSystem.PostUpdateInput instead of ModSystem.UpdateUI
+			if (!MagicUI.CanUpdateSearchBars || !active) {
+				if (active) {
+					if (mouseOver && GetHoverText?.Invoke() is string s && !string.IsNullOrWhiteSpace(s))
+						MagicUI.mouseText = s;
+					else if (oldMouseOver && !mouseOver)
+						MagicUI.mouseText = "";
+				} else if (oldActive)
+					MagicUI.mouseText = "";
+
+				return;
+			}
+
+			cursorTimer++;
+			cursorTimer %= 60;
+
 			if (StorageGUI.MouseClicked && Parent is not null)
 				LeftClick(mouseOver);
 			else if (StorageGUI.RightMouseClicked)
@@ -123,7 +147,7 @@ namespace MagicStorage.UI
 			cursorPosition = Text.Length;
 
 			if (forced || !MagicStorageConfig.SearchBarRefreshOnKey)
-				StorageGUI.RefreshItems();
+				StorageGUI.needRefresh = true;
 		}
 
 		private void HandleTextInput()
@@ -147,13 +171,15 @@ namespace MagicStorage.UI
 				cursorPosition = newStringLength;
 
 				if (MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.RefreshItems();
+					StorageGUI.needRefresh = true;
 			}
 
 			if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
 			{
 				Text = Text.Remove(cursorPosition, 1);
-				StorageGUI.RefreshItems();
+
+				if (MagicStorageConfig.SearchBarRefreshOnKey)
+					StorageGUI.needRefresh = true;
 			}
 
 			if (KeyTyped(Keys.Left) && cursorPosition > 0)
@@ -170,7 +196,7 @@ namespace MagicStorage.UI
 				CheckBlockInput();
 
 				if (!MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.RefreshItems();
+					StorageGUI.needRefresh = true;
 			}
 		}
 

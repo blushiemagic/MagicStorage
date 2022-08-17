@@ -1,14 +1,4 @@
 ﻿[h1]v0.5.7.1[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Fixed being unable to right click items in a storage
-- Fixed a bug which caused the UI panels to initialize with the wrong height
-- Added a safeguard for creating the ModConfigs folder if it doesn't exist
-- Changed the search bars to show a random help text string (search name, search mod and name, search tooltip, search mod and tooltip)
-- Fixed a bug which caused all loot bags to have a chance to drop a Radiant Jewel
-- Compressed and rearranged the Craft Amount buttons to give the Stored Ingredients zone more room
-- Fixed a bug where the Crafting Access would ignore recipe events (e.g. the Alchemy Table's 33% to not consume ingredients)
-- Added a safeguard to the mass crafting logic to prevent attempts to craft more items than can be crafted
-- Added logic to block all mouse events from UI elements located underneath Magic Storage's UI panels
-- Prevented the ModernConfigurable button layout config file (MagicStorage_Options.nbt) from saving on servers since they can't use the file anyway
-- Fixed a bug which allowed the UI panels to stay "active" after leaving a world
+TODO

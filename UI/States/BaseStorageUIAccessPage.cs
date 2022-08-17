@@ -7,6 +7,7 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
@@ -18,6 +19,7 @@ namespace MagicStorage.UI.States {
 		internal UISearchBar searchBar;
 		internal UIText capacityText;
 		internal NewUIScrollbar scrollBar;
+		internal ModSearchBox modSearchBox;
 
 		internal NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
 
@@ -46,7 +48,8 @@ namespace MagicStorage.UI.States {
 
 				searchBar.active = true;
 
-				searchBar.SetDefaultText(GetRandomSearchText());
+				//Search bar text is affected by this call
+				modSearchBox.Reset(false);
 			};
 
 			OnPageDeselected += () => {
@@ -62,6 +65,8 @@ namespace MagicStorage.UI.States {
 
 				sortingDropdown.Reset();
 				filteringDropdown.Reset();
+
+				modSearchBox.Reset(true);
 			};
 		}
 
@@ -92,17 +97,39 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), StorageGUI.RefreshItems);
+			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), StorageGUI.RefreshItems) {
+				GetHoverText = () => {
+					StringBuilder sb = new();
+
+					if (modSearchBox.ModIndex == ModSearchBox.ModIndexAll)
+						sb.Append("[c/ffff00:@ModName] to search by mod, ");
+
+					sb.Append("[c/ffff00:#Search Tooltip] to search by tooltip");
+
+					if (modSearchBox.ModIndex == ModSearchBox.ModIndexAll)
+						sb.Append(" (can be combined in that order)");
+
+					return sb.ToString();
+				}
+			};
 			topBar.Append(searchBar);
 
 			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
-			topBar2.Height.Set(32f, 0f);
+			topBar2.Height.Set(21, 0f);
 			topBar2.Top.Set(36f, 0f);
+
+			modSearchBox = new(ModSearchChanged, 0.72f);
+			modSearchBox.Left.Set(-190, 1f);
+			modSearchBox.Width.Set(190, 0f);
+			modSearchBox.Height.Set(21, 0f);
+			modSearchBox.OverflowHidden = true;
+			modSearchBox.PaddingTop = 3;
+			modSearchBox.PaddingBottom = 2;
 
 			topBar3 = new UIElement();
 			topBar3.Width.Set(0f, 1f);
-			topBar3.Height.Set(32f, 0f);
+			topBar3.Height.Set(21, 0f);
 			topBar3.Top.Set(72f, 0f);
 
 			slotZone = new(CraftingGUI.InventoryScale);
@@ -139,26 +166,39 @@ namespace MagicStorage.UI.States {
 
 			bottomBar.Append(capacityText);
 
-			sortingButtons = new(ModernConfigSortingButtonAction, 32, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
-			filteringButtons = new(ModernConfigFilteringButtonAction, 32, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
+			sortingButtons = new(ModernConfigSortingButtonAction, 21, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
+			filteringButtons = new(ModernConfigFilteringButtonAction, 21, 22, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
 
-			sortingDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Sorting"), 150, 2, 250);
+			sortingDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
 			sortingDropdown.Left.Set(10, 0f);
 			sortingDropdown.Top = topBar2.Top;
 
-			filteringDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Filtering"), 150, 2, 250);
-			filteringDropdown.Left.Set(sortingDropdown.Left.Pixels + sortingDropdown.Width.Pixels + 40, 0f);
+			filteringDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Filtering"), 135, 2, 250);
+			filteringDropdown.Left.Set(sortingDropdown.Left.Pixels + sortingDropdown.Width.Pixels + 30, 0f);
 			filteringDropdown.Top = topBar2.Top;
 		}
 
+		private void ModSearchChanged(int old, int index) {
+			bool oldNeedsMod = old == ModSearchBox.ModIndexAll;
+			bool needsMod = index == ModSearchBox.ModIndexAll;
+
+			if (oldNeedsMod != needsMod)
+				searchBar.SetDefaultText(GetRandomSearchText(needsMod));
+
+			StorageGUI.needRefresh = true;
+		}
+
 		private static readonly LocalizedText[] searchTextDefaults = new[] {
-			Language.GetText("Mods.MagicStorage.SearchTips.SearchName"),
 			Language.GetText("Mods.MagicStorage.SearchTips.SearchMod"),
-			Language.GetText("Mods.MagicStorage.SearchTips.SearchTooltip"),
 			Language.GetText("Mods.MagicStorage.SearchTips.SearchModAndTooltip"),
 		};
 
-		public static LocalizedText GetRandomSearchText() => Main.rand.Next(searchTextDefaults);
+		private static readonly LocalizedText[] searchTextDefaultsWithoutMod = new[] {
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchName"),
+			Language.GetText("Mods.MagicStorage.SearchTips.SearchTooltip"),
+		};
+
+		public static LocalizedText GetRandomSearchText(bool includeMod) => Main.rand.Next(includeMod ? searchTextDefaults : searchTextDefaultsWithoutMod);
 
 		private void ModernConfigSortingButtonAction() => parentUI.ModernPanelButtonClicked("Sorting", sortingButtons);
 
@@ -201,6 +241,8 @@ namespace MagicStorage.UI.States {
 			topBar2.Remove();
 			topBar2.RemoveAllChildren();
 
+			topBar2.Append(modSearchBox);
+
 			topBar3.Remove();
 			topBar3.RemoveAllChildren();
 
@@ -215,7 +257,7 @@ namespace MagicStorage.UI.States {
 				case ButtonConfigurationMode.Legacy:
 					sortingButtons.AssignOptions(SortingOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
 
-					sortingButtons.UpdateButtonLayout(newButtonSize: 32, newMaxButtonsPerRow: 15);
+					sortingButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 15);
 
 					topBar2.Height = sortingButtons.Height;
 					topBar2.Append(sortingButtons);
@@ -227,14 +269,13 @@ namespace MagicStorage.UI.States {
 					} else {
 						filteringButtons.AssignOptions(FilteringOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
 
-						filteringButtons.UpdateButtonLayout(newButtonSize: 32, newMaxButtonsPerRow: 15);
+						filteringButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 22);
 					}
 					
 					TopBar3Top = TopBar2Bottom + 4;
 					topBar3.Height = filteringButtons.Height;
 					topBar3.Append(filteringButtons);
 
-					Append(topBar2);
 					Append(topBar3);
 					break;
 				case ButtonConfigurationMode.ModernPaged:
@@ -268,27 +309,25 @@ namespace MagicStorage.UI.States {
 					
 					TopBar3Top = TopBar2Bottom + 4;
 
-					Append(topBar2);
 					Append(topBar3);
 					break;
 				case ButtonConfigurationMode.LegacyWithGear:
 				case ButtonConfigurationMode.LegacyBasicWithPaged:
 					sortingButtons.AssignOptions(SortingOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
 
-					sortingButtons.UpdateButtonLayout(newButtonSize: 32, newMaxButtonsPerRow: 15);
+					sortingButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 15);
 
 					topBar2.Height = sortingButtons.Height;
 					topBar2.Append(sortingButtons);
 
 					filteringButtons.AssignOptions(FilteringOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
 
-					filteringButtons.UpdateButtonLayout(newButtonSize: 32, newMaxButtonsPerRow: 15);
+					filteringButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 22);
 
 					TopBar3Top = TopBar2Bottom + 4;
 					topBar3.Height = filteringButtons.Height;
 					topBar3.Append(filteringButtons);
 
-					Append(topBar2);
 					Append(topBar3);
 					break;
 				case ButtonConfigurationMode.ModernDropdown:
@@ -314,8 +353,14 @@ namespace MagicStorage.UI.States {
 					throw new ArgumentOutOfRangeException();
 			}
 
+			Append(topBar2);
+
+			PostReformatPage(current);
+
 			Recalculate();
 		}
+
+		public abstract void PostReformatPage(ButtonConfigurationMode current);
 
 		private static IEnumerable<UIElement> CreatePairedDropdownOptionElements<T>(IEnumerable<T> source, float padding, Func<T, UIElement> createElement) {
 			UIElement first = null, second;

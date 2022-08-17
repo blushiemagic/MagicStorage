@@ -176,7 +176,7 @@ namespace MagicStorage.Components
 			return result;
 		}
 
-		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, Action<int> onItemRemoved = null) {
+		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, Action<int> onItemRemoved = null, Action<int, int> onItemStackReduced = null) {
 			result = null;
 			for (int k = items.Count - 1; k >= 0; k--)
 			{
@@ -190,7 +190,7 @@ namespace MagicStorage.Components
 
 					if (result is not null) {
 						//Item data must be the same
-						if (!Utility.AreStrictlyEqual(result, item))
+						if (!ItemCombining.CanCombineItems(result, item))
 							continue;
 
 						result.stack += withdraw;
@@ -199,11 +199,13 @@ namespace MagicStorage.Components
 						result.stack = withdraw;
 					}
 
+					onItemStackReduced?.Invoke(k, withdraw);
 					item.stack -= withdraw;
 					if (item.stack <= 0) {
-						items.RemoveAt(k);
 						onItemRemoved?.Invoke(k);
-						k--;
+						items.RemoveAt(k);
+						item.TurnToAir();
+						k++;
 					}
 
 					lookFor.stack -= withdraw;
@@ -332,7 +334,7 @@ namespace MagicStorage.Components
 					if (pack.IsAir || pack.stack >= pack.maxStack)
 						continue;
 
-					if (Utility.AreStrictlyEqual(item, pack)) {
+					if (ItemCombining.CanCombineItems(item, pack)) {
 						if (item.stack + pack.stack <= pack.maxStack) {
 							pack.stack += item.stack;
 							item.stack = 0;
@@ -372,7 +374,7 @@ namespace MagicStorage.Components
 					if (src.IsAir)
 						continue;
 
-					if (Utility.AreStrictlyEqual(dest, src)) {
+					if (ItemCombining.CanCombineItems(dest, src)) {
 						Item transferred = src.Clone();
 
 						if (dest.stack + src.stack <= dest.maxStack) {

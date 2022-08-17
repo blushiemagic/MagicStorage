@@ -1,7 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Terraria;
@@ -60,6 +62,11 @@ namespace MagicStorage {
 			int stack2 = item2.stack;
 			int prefix1 = item1.prefix;
 			int prefix2 = item2.prefix;
+			bool favorite1 = item1.favorited;
+			bool favorite2 = item2.favorited;
+
+			item1.favorited = false;
+			item2.favorited = false;
 
 			bool equal;
 
@@ -86,6 +93,8 @@ namespace MagicStorage {
 			item2.stack = stack2;
 			item1.prefix = prefix1;
 			item2.prefix = prefix2;
+			item1.favorited = favorite1;
+			item2.favorited = favorite2;
 
 			return equal;
 		}
@@ -140,5 +149,27 @@ namespace MagicStorage {
 		public static Vector2 Bottom(CalculatedStyle dims) => new(dims.X + dims.Width / 2f, dims.Y + dims.Height);
 
 		public static Vector2 BottomRight(CalculatedStyle dims) => new(dims.X + dims.Width, dims.Y + dims.Height);
+
+		private class ItemTypeComparer : IEqualityComparer<Item> {
+			public static ItemTypeComparer Instance { get; } = new();
+
+			public bool Equals(Item x, Item y) => x.type == y.type;
+
+			public int GetHashCode([DisallowNull] Item obj) => obj.type;
+		}
+
+		internal static bool RecipesMatchForHistory(Recipe recipe1, Recipe recipe2) {
+			if (RecursiveCraftIntegration.Enabled) {
+				if (RecursiveCraftIntegration.IsCompoundRecipe(recipe1))
+					recipe1 = RecursiveCraftIntegration.GetOverriddenRecipe(recipe1);
+
+				if (RecursiveCraftIntegration.IsCompoundRecipe(recipe2))
+					recipe2 = RecursiveCraftIntegration.GetOverriddenRecipe(recipe2);
+			}
+
+			return recipe1.createItem.type == recipe2.createItem.type
+				&& recipe1.requiredItem.SequenceEqual(recipe2.requiredItem, ItemTypeComparer.Instance)
+				&& recipe1.requiredTile.SequenceEqual(recipe2.requiredTile, EqualityComparer<int>.Default);
+		}
 	}
 }

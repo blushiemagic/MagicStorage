@@ -46,57 +46,47 @@ namespace MagicStorage.UI {
 		}
 
 		public void UpdateButtonLayout(int newButtonSize = -1, int newButtonPadding = -1, int newMaxButtonsPerRow = -1) {
-			bool hadChange = false;
-
-			if (newButtonSize > 0 && newButtonSize != buttonSize) {
+			if (newButtonSize > 0)
 				buttonSize = newButtonSize;
-				hadChange = true;
-			}
 
-			if (newButtonPadding > 0 && newButtonPadding != buttonPadding) {
+			if (newButtonPadding > 0)
 				buttonPadding = newButtonPadding;
-				hadChange = true;
-			}
 
-			if (newMaxButtonsPerRow > 0 && newMaxButtonsPerRow != maxButtonsPerRow) {
+			if (newMaxButtonsPerRow > 0)
 				maxButtonsPerRow = newMaxButtonsPerRow;
-				hadChange = true;
-			}
 
-			if (hadChange) {
-				int rows = (choices.Count - 1) / maxButtonsPerRow + 1;
+			int rows = (choices.Count - 1) / maxButtonsPerRow + 1;
 
-				int width = (buttonSize + buttonPadding) * Math.Min(maxButtonsPerRow, choices.Count) - buttonPadding;
-				int height = (buttonSize + buttonPadding) * rows - buttonPadding;
+			int width = (buttonSize + buttonPadding) * Math.Min(maxButtonsPerRow, choices.Count) - buttonPadding;
+			int height = (buttonSize + buttonPadding) * rows - buttonPadding;
 
-				Width.Set(width, 0f);
-				MinWidth.Set(width, 0f);
+			Width.Set(width, 0f);
+			MinWidth.Set(width, 0f);
 
-				Height.Set(height, 0f);
-				MinHeight.Set(height, 0f);
+			Height.Set(height, 0f);
+			MinHeight.Set(height, 0f);
 
-				//Adjust the positions of the buttons
-				int left = 0;
-				int top = 0;
+			//Adjust the positions of the buttons
+			int left = 0;
+			int top = 0;
 
-				for (int i = 0; i < choices.Count; i++) {
-					var choice = choices[i];
-					choice.buttonSize = buttonSize;
+			for (int i = 0; i < choices.Count; i++) {
+				var choice = choices[i];
+				choice.buttonSize = buttonSize;
 
-					choice.Left.Set(left, 0f);
-					choice.Top.Set(top, 0f);
+				choice.Left.Set(left, 0f);
+				choice.Top.Set(top, 0f);
 
-					CheckAdjustment(i, ref left, ref top);
+				CheckAdjustment(i, ref left, ref top);
 
-					choice.Recalculate();
-				}
+				choice.Recalculate();
 			}
 		}
 
 		void CheckAdjustment(int index, ref int left, ref int top) {
 			left += buttonSize + buttonPadding;
 
-			if (index > 0 && index % maxButtonsPerRow == 0) {
+			if (index > 0 && (index + 1) % maxButtonsPerRow == 0) {
 				left = 0;
 				top += buttonSize + buttonPadding;
 			}

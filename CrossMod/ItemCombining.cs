@@ -15,11 +15,15 @@ namespace MagicStorage {
 
 		public abstract bool CanCombine(Item item1, Item item2);
 
-		public static bool CanCombineItems(Item item1, Item item2) {
+		public static bool CanCombineItems(Item item1, Item item2, bool checkPrefix = true) {
 			if (!ItemData.Matches(item1, item2))
 				return false;
 
 			bool combine = true;
+
+			//Ignore favorite
+			bool oldFavorite1 = item1.favorited;
+			bool oldFavorite2 = item2.favorited;
 
 			combiningObjectsByType ??= new();
 
@@ -33,7 +37,10 @@ namespace MagicStorage {
 
 			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
 			if (combine)
-				combine &= Utility.AreStrictlyEqual(item1, item2);
+				combine &= Utility.AreStrictlyEqual(item1, item2, checkPrefix: checkPrefix);
+
+			item1.favorited = oldFavorite1;
+			item2.favorited = oldFavorite2;
 
 			return combine;
 		}

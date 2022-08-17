@@ -184,6 +184,11 @@ namespace MagicStorage.UI.States {
 				}
 			}
 
+			public override void PostReformatPage(ButtonConfigurationMode current) {
+				//Adjust the position of elements here
+				Refresh();
+			}
+
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
@@ -275,12 +280,9 @@ namespace MagicStorage.UI.States {
 							changed = true;
 					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
-							if (Main.netMode == NetmodeID.SinglePlayer) {
-								StorageGUI.items[objSlot].favorited = !StorageGUI.items[objSlot].favorited;
-								slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
-
-								obj.IgnoreNextHandleAction = true;
-							} else {
+							if (Main.netMode == NetmodeID.SinglePlayer)
+								StorageGUI.FavoriteItem(objSlot);
+							else {
 								Main.NewTextMultiline(
 									"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again",
 									c: Color.White);
@@ -303,12 +305,11 @@ namespace MagicStorage.UI.States {
 						}
 					}
 
-					if (changed) {
-						StorageGUI.RefreshItems();
-						SoundEngine.PlaySound(SoundID.Grab);
+					StorageGUI.needRefresh = true;
+					obj.IgnoreNextHandleAction = true;
 
-						obj.IgnoreNextHandleAction = true;
-					}
+					if (changed)
+						SoundEngine.PlaySound(SoundID.Grab);
 				};
 
 				itemSlot.OnMouseOver += (evt, e) => {
@@ -331,7 +332,7 @@ namespace MagicStorage.UI.States {
 						StorageGUI.ResetSlotFocus();
 					}
 
-					if (objSlot < StorageGUI.items.Count && (Main.mouseItem.IsAir || Utility.AreStrictlyEqual(Main.mouseItem, StorageGUI.items[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+					if (objSlot < StorageGUI.items.Count && (Main.mouseItem.IsAir || ItemCombining.CanCombineItems(Main.mouseItem, StorageGUI.items[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 						StorageGUI.slotFocus = objSlot;
 				};
 			}
@@ -461,44 +462,41 @@ namespace MagicStorage.UI.States {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					if (Main.netMode == NetmodeID.SinglePlayer) {
-						DoSell(heart, SellMenuChoice, out long coppersEarned, out var withdrawnItems);
+					DoSell(heart, SellMenuChoice, out long coppersEarned, out var withdrawnItems);
 
-						int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
+					int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
 
-						if (sold > 0 && coppersEarned > 0) {
-							// coins = [ copper, silver, gold, platinum ]
-							int[] coins = Utils.CoinsSplit(coppersEarned);
+					if (sold > 0 && coppersEarned > 0) {
+						// coins = [ copper, silver, gold, platinum ]
+						int[] coins = Utils.CoinsSplit(coppersEarned);
 
-							StringBuilder coinsReport = new();
+						StringBuilder coinsReport = new();
 
-							if (coins[3] > 0)
-								coinsReport.Append($"[i/s{coins[3]}:{ItemID.PlatinumCoin}]");
-							if (coins[2] > 0)
-								coinsReport.Append($" [i/s{coins[2]}:{ItemID.GoldCoin}]");
-							if (coins[1] > 0)
-								coinsReport.Append($" [i/s{coins[1]}:{ItemID.SilverCoin}]");
-							if (coins[0] > 0)
-								coinsReport.Append($" [i/s{coins[0]}:{ItemID.CopperCoin}]");
+						if (coins[3] > 0)
+							coinsReport.Append($"[i/s{coins[3]}:{ItemID.PlatinumCoin}]");
+						if (coins[2] > 0)
+							coinsReport.Append($" [i/s{coins[2]}:{ItemID.GoldCoin}]");
+						if (coins[1] > 0)
+							coinsReport.Append($" [i/s{coins[1]}:{ItemID.SilverCoin}]");
+						if (coins[0] > 0)
+							coinsReport.Append($" [i/s{coins[0]}:{ItemID.CopperCoin}]");
 
-							Main.NewText($"{sold} duplicates were sold for {coinsReport.ToString().Trim()}");
+						Main.NewText($"{sold} duplicates were sold for {coinsReport.ToString().Trim()}");
 
-							if (coins[3] > 0)
-								heart.DepositItem(new(ItemID.PlatinumCoin, coins[3]));
-							if (coins[2] > 0)
-								heart.DepositItem(new(ItemID.GoldCoin, coins[2]));
-							if (coins[1] > 0)
-								heart.DepositItem(new(ItemID.SilverCoin, coins[1]));
-							if (coins[0] > 0)
-								heart.DepositItem(new(ItemID.CopperCoin, coins[0]));
+						if (coins[3] > 0)
+							heart.DepositItem(new(ItemID.PlatinumCoin, coins[3]));
+						if (coins[2] > 0)
+							heart.DepositItem(new(ItemID.GoldCoin, coins[2]));
+						if (coins[1] > 0)
+							heart.DepositItem(new(ItemID.SilverCoin, coins[1]));
+						if (coins[0] > 0)
+							heart.DepositItem(new(ItemID.CopperCoin, coins[0]));
 
-							heart.ResetCompactStage();
-						} else if (sold > 0 && coppersEarned == 0)
-							Main.NewText($"{sold} duplicates were destroyed due to having no value");
-						else
-							Main.NewText("No duplicates were sold");
-					} else
-						NetHelper.RequestDuplicateSelling(heart.Position, SellMenuChoice);
+						heart.ResetCompactStage();
+					} else if (sold > 0 && coppersEarned == 0)
+						Main.NewText($"{sold} duplicates were destroyed due to having no value");
+					else
+						Main.NewText("No duplicates were sold");
 				};
 
 				InitButtonEvents(sellMenuButton);
@@ -617,7 +615,7 @@ namespace MagicStorage.UI.States {
 
 					if (!duplicatesToSell.TryGetValue(item.type, out var context))
 						context = duplicatesToSell[item.type] = new() { keep = sourcedItem };
-					else if (Utility.AreStrictlyEqual(context.keep.item, item, checkPrefix: false)) {
+					else if (ItemCombining.CanCombineItems(context.keep.item, item, checkPrefix: false)) {
 						SourcedItem check = sourcedItem;
 
 						if (itemEvaluation(ref context.keep, ref check, out bool swapHappened)) {
@@ -658,11 +656,20 @@ namespace MagicStorage.UI.States {
 					PlayerLoader.PostSellItem(Main.LocalPlayer, dummy, Array.Empty<Item>(), duplicate.item);
 				}
 
-				//Actually "withdraw" the items, but in reverse order so that the "indexInSource" that was saved isn't clobbered
+				NetHelper.StartUpdateQueue();
+
 				foreach ((TEStorageUnit unit, List<int> withdrawn) in withdrawnItems) {
+					//Actually "withdraw" the items, but in reverse order so that the "indexInSource" that was saved isn't clobbered
 					foreach (int item in withdrawn.OrderByDescending(i => i))
 						unit.items.RemoveAt(item);
+
+					if (Main.netMode == NetmodeID.MultiplayerClient)
+						unit.FullySync();
+
+					unit.PostChangeContents();
 				}
+
+				NetHelper.ProcessUpdateQueue();
 
 				coppersEarned = platinum * 1000000L + gold * 10000 + silver * 100 + copper;
 

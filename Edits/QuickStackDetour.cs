@@ -44,16 +44,41 @@ namespace MagicStorage.Edits {
 
 			bool couldDeposit = false;
 
-			foreach (TEStorageHeart heart in storageAccesses.Select(t => (t.Item1.GetHeart(t.Item2.X, t.Item2.Y), t.Item2)).Where(t => t.Item1 is not null).DistinctBy(t => t.Item2).Select(t => t.Item1)) {
-				if (!StorageGUI.TryDeposit(heart, items, quickStack: true))
-					break;
+			IEnumerable<TEStorageHeart> hearts = storageAccesses.Select(t => (t.Item1.GetHeart(t.Item2.X, t.Item2.Y), t.Item2))
+				.Where(t => t.Item1 is not null)
+				.DistinctBy(t => t.Item2)
+				.Select(t => t.Item1);
 
-				couldDeposit = true;
+			if (Main.netMode == NetmodeID.SinglePlayer) {
+				foreach (TEStorageHeart heart in hearts) {
+					if (!StorageGUI.TryDeposit(heart, items, quickStack: true))
+						continue;
 
-				items = new(items.Where(i => !i.IsAir));
+					couldDeposit = true;
 
-				if (items.Count == 0)
-					break;
+					items = new(items.Where(i => !i.IsAir));
+
+					if (items.Count == 0)
+						break;
+				}
+			} else {
+				//Must manually check for units that can have items quick stacked into them, then manually send deposit requests for them
+				foreach (TEStorageHeart heart in hearts) {
+					foreach (Item item in items) {
+						foreach (TEStorageUnit unit in heart.GetStorageUnits().OfType<TEStorageUnit>()) {
+							if (unit.HasSpaceFor(item)) {
+								heart.TryDeposit(item);
+								couldDeposit = true;
+								break;
+							}
+						}
+					}
+
+					items = new(items.Where(i => !i.IsAir));
+
+					if (items.Count == 0)
+						break;
+				}
 			}
 
 			if (couldDeposit)

@@ -163,6 +163,11 @@ Mods: {
 			# Golem: "Automaton"
 		}
 
+		ModuleName: {
+			# UseInventoryModule: "Use Player Inventory Items"
+			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+		}
+
 		TownNPCMood: {
 			Golem: {
 				# Content: Systems are operational.
@@ -346,6 +351,10 @@ Mods: {
 		Ingredients: "Ingrédients"
 		StoredItems: "Ingrédients Stockés"
 		# ShowOnlyFavorited: "Only Favorited"
+		# ViewHistory: "Click to View Recipe History"
+		# ClearHistory: "Clear"
+		# PrevHistory: "Previous Recipe in History"
+		# NextHistory: "Next Recipe in History"
 
 		# RecipeHidden:
 		# '''
@@ -442,6 +451,7 @@ Mods: {
 			# Storage: "Storage",
 			# Controls: "Controls"  # StorageGUI page for the extra controls
 			# Modules: "Modules"    # EnvironmentGUI page for the modules
+			# History: "History"    # CraftingGUI recipe history panel
 		}
 
 		Config: {
@@ -501,6 +511,10 @@ Mods: {
 				# '''
 				# (See en-US translation)
 				# '''
+			}
+			clearHistory: {
+				# Label: "Clear recipe history"
+				# Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
 
 			AllowAutomatonToMoveIn: {

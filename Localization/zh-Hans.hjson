@@ -240,6 +240,11 @@ Mods: {
 			Golem: "自动机"
 		}
 
+		ModuleName: {
+			# UseInventoryModule: "Use Player Inventory Items"
+			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+		}
+
 		TownNPCMood: {
 			Golem: {
 				Content: 运行中。
@@ -460,6 +465,10 @@ Mods: {
 		Ingredients: "材料"
 		StoredItems: "存储中的材料"
 		ShowOnlyFavorited: "显示被收藏"
+		# ViewHistory: "Click to View Recipe History"
+		# ClearHistory: "Clear"
+		# PrevHistory: "Previous Recipe in History"
+		# NextHistory: "Next Recipe in History"
 
 		RecipeHidden:
 		'''
@@ -553,8 +562,9 @@ Mods: {
 			Filtering: "筛选",
 			Crafting: "合成",
 			Storage: "存储",
-			Controls: "控件"  # StorageGUI page for the extra controls
+			Controls: "控件"   # StorageGUI page for the extra controls
 			Modules: "模块"    # EnvironmentGUI page for the modules
+			# History: "History"    # CraftingGUI recipe history panel
 		}
 
 		Config: {
@@ -614,6 +624,10 @@ Mods: {
 				# '''
 				# (See en-US translation)
 				# '''
+			}
+			clearHistory: {
+				# Label: "Clear recipe history"
+				# Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
 
 			AllowAutomatonToMoveIn: {

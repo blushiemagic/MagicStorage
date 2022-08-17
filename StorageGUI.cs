@@ -39,6 +39,7 @@ namespace MagicStorage
 		internal static float scrollBarMaxViewSize = 2f;
 
 		internal static readonly List<Item> items = new();
+		internal static readonly List<List<Item>> sourceItems = new();
 		internal static readonly List<bool> didMatCheck = new();
 
 		//Legacy properties required for UISearchBar to function properly
@@ -75,6 +76,7 @@ namespace MagicStorage
 
 			items.Clear();
 			didMatCheck.Clear();
+			sourceItems.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null)
 				return;
@@ -88,30 +90,36 @@ namespace MagicStorage
 
 			string searchText = storagePage.searchBar.Text;
 			bool onlyFavorites = storagePage.filterFavorites.Value;
+			int modSearch = storagePage.modSearchBox.ModIndex;
 
 			void DoFiltering()
 			{
-				IEnumerable<Item> itemsLocal;
+				ItemSorter.AggregateContext context;
+
 				if (filterMode == FilteringOptionLoader.Definitions.Recent.Type)
 				{
 					Dictionary<int, Item> stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
 
 					IEnumerable<Item> toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
-					itemsLocal = ItemSorter.SortAndFilter(toFilter, sortMode == SortingOptionLoader.Definitions.Default.Type ? -1 : sortMode, FilteringOptionLoader.Definitions.All.Type, searchText, 100);
+
+					context = new(toFilter);
+
+					context.items = ItemSorter.SortAndFilter(context, sortMode == SortingOptionLoader.Definitions.Default.Type ? -1 : sortMode, FilteringOptionLoader.Definitions.All.Type, searchText, modSearch, 100);
 				}
 				else
 				{
-					itemsLocal = ItemSorter.SortAndFilter(heart.GetStoredItems(), sortMode, filterMode, searchText);
+					context = new(heart.GetStoredItems());
+					context.items = ItemSorter.SortAndFilter(context, sortMode, filterMode, searchText, modSearch);
+
+					if (MagicStorageConfig.CraftingFavoritingEnabled) {
+						context.items = context.items.OrderByDescending(x => x.favorited ? 1 : 0);
+						context.sourceItems = context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
+					}
 				}
 
-				if (MagicStorageConfig.CraftingFavoritingEnabled)
-				{
-					items.AddRange(itemsLocal.Where(x => !onlyFavorites || x.favorited));
-				}
-				else
-				{
-					items.AddRange(itemsLocal);
-				}
+				items.AddRange(context.items.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x.favorited));
+
+				sourceItems.AddRange(context.sourceItems.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x[0].favorited));
 
 				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
 			}
@@ -149,7 +157,7 @@ namespace MagicStorage
 		internal static void SlotFocusLogic()
 		{
 			if (slotFocus >= items.Count ||
-				!Main.mouseItem.IsAir && (!Utility.AreStrictlyEqual(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+				!Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}
@@ -367,6 +375,19 @@ namespace MagicStorage
 
 				TEStorageHeart.Item_globalItems.SetValue(item, array);
 			}
+		}
+
+		internal static void FavoriteItem(int slot) {
+			if (slot < 0 || slot >= items.Count)
+				return;
+
+			//Favorite all of the source items
+			bool doFavorite = !sourceItems[slot][0].favorited;
+
+			foreach (var item in sourceItems[slot])
+				item.favorited = doFavorite;
+
+			needRefresh = true;
 		}
 
 		/// <summary>

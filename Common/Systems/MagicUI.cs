@@ -16,7 +16,7 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicUI : ModSystem
 {
-	internal static UserInterface uiInterface;
+	public static UserInterface uiInterface;
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI;
 
@@ -33,15 +33,27 @@ public class MagicUI : ModSystem
 		craftingUI = new CraftingUIState();
 		storageUI = new StorageUIState();
 		environmentUI = new EnvironmentUIState();
+
+		Main.OnResolutionChanged += PendingResolutionChange;
 	}
 
 	public override void Unload() {
+		if (!Main.dedServ) {
+			(craftingUI as CraftingUIState)?.history?.Clear();
+
+			Main.OnResolutionChanged -= PendingResolutionChange;
+		}
+
 		uiInterface = null;
 		craftingUI = null;
 		storageUI = null;
 		environmentUI = null;
 
 		UISearchBar.ClearList();
+	}
+
+	private static void PendingResolutionChange(Vector2 resolution) {
+		pendingUIChangeForAnyReason = true;
 	}
 
 	internal class MouseCache {
@@ -156,7 +168,20 @@ public class MagicUI : ModSystem
 
 	public static bool CanUpdateSearchBars { get; private set; }
 
+	internal static bool pendingUIChangeForAnyReason;
+	private static float lastKnownUIScale = -1;
+
 	public override void UpdateUI(GameTime gameTime) {
+		if (lastKnownUIScale != Main.UIScale) {
+			lastKnownUIScale = Main.UIScale;
+			pendingUIChangeForAnyReason = true;
+		}
+
+		if (!Main.playerInventory) {
+			StoragePlayer.LocalPlayer.CloseStorage();  //Failsafe
+			CloseUI();
+		}
+
 		CanUpdateSearchBars = false;
 		lastGameTime = gameTime;
 
@@ -165,6 +190,19 @@ public class MagicUI : ModSystem
 		StorageGUI.curMouse = Mouse.GetState();
 		
 		BlockItemSlotActionsDetour = true;
+
+		if (pendingUIChangeForAnyReason) {
+			if (craftingUI is CraftingUIState cUI)
+				cUI.pendingUIChange = true;
+
+			if (storageUI is StorageUIState sUI)
+				sUI.pendingUIChange = true;
+
+			if (environmentUI is EnvironmentUIState eUI)
+				eUI.pendingUIChange = true;
+			
+			pendingUIChangeForAnyReason = false;
+		}
 
 		uiInterface?.Update(gameTime);
 

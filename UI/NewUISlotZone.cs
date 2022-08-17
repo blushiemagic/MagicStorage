@@ -19,6 +19,7 @@ namespace MagicStorage.UI {
 
 		public MagicStorageItemSlot[,] Slots { get; set; } = new[,] { { new MagicStorageItemSlot(0) } };
 		
+		public int ZoneWidth { get; private set; }
 		public int ZoneHeight { get; private set; }
 
 		public delegate MagicStorageItemSlot GetNewItemSlot(int slot, float zoneScale);
@@ -41,6 +42,7 @@ namespace MagicStorage.UI {
 			float slotWidth = texture.Width * inventoryScale;
 			float slotHeight = texture.Height * inventoryScale;
 
+			ZoneWidth = (int)((slotWidth + Padding) * columns);
 			ZoneHeight = (int)((slotHeight + Padding) * rows);
 
 			if (Slots is not null) {

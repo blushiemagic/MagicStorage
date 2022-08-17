@@ -1,4 +1,5 @@
-﻿using MagicStorage.CrossMod;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -45,8 +46,6 @@ namespace MagicStorage.UI.States {
 		}
 
 		private ButtonConfigurationMode lastKnownMode;
-
-		private float lastKnownUIScale = -1;
 
 		protected abstract IEnumerable<string> GetMenuOptions();
 
@@ -235,6 +234,8 @@ namespace MagicStorage.UI.States {
 
 		protected virtual void OnClose() { }
 
+		public bool pendingUIChange;
+
 		public override void Update(GameTime gameTime) {
 			ButtonConfigurationMode currentMode = MagicStorageConfig.ButtonUIMode;
 			if (lastKnownMode != currentMode) {
@@ -242,16 +243,17 @@ namespace MagicStorage.UI.States {
 				lastKnownMode = currentMode;
 			}
 
-			if (lastKnownUIScale != Main.UIScale) {
+			if (pendingUIChange) {
 				float top = Main.instance.invBottom + 60;
 				panel.Top.Set(top, 0f);
 				panel.Left.Set(20f, 0f);
 				panel.Height.Set(Main.screenHeight - (top + 2 * UIDragablePanel.cornerPadding), 0f);
 				panel.Recalculate();
-				lastKnownUIScale = Main.UIScale;
 
 				//RefreshItems will conveniently update the zone heights
 				StorageGUI.RefreshItems();
+
+				pendingUIChange = false;
 			}
 
 			base.Update(gameTime);
@@ -267,7 +269,7 @@ namespace MagicStorage.UI.States {
 			optionPage.option = buttons.SelectionType;
 			optionPage.SetLoaderSelection(optionPage.option);
 			
-			StorageGUI.RefreshItems();
+			StorageGUI.needRefresh = true;
 		}
 
 		internal void OpenModernConfigPanel(string page) {

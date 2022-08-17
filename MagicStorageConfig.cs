@@ -75,6 +75,11 @@ namespace MagicStorage
 		[DrawTicks]
 		public ButtonConfigurationMode buttonLayout;
 
+		[Label("$Mods.MagicStorage.Config.clearHistory.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.clearHistory.Tooltip")]
+		[DefaultValue(false)]
+		public bool clearHistory;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -112,6 +117,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static ButtonConfigurationMode ButtonUIMode => Instance.buttonLayout;
+
+		[JsonIgnore]
+		public static bool ClearRecipeHistory => Instance.clearHistory;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

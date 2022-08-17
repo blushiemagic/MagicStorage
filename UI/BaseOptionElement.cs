@@ -31,10 +31,10 @@ namespace MagicStorage.UI {
 			Append(background);
 
 			icon = new(GetIcon()) {
-				ScaleToFit = true
+				ScaleToFit = true,
+				HAlign = 0.5f,
+				VAlign = 0.5f
 			};
-			icon.Left.Set(0, 1f / 32f);
-			icon.Top.Set(0, 1f / 32f);
 			Append(icon);
 		}
 

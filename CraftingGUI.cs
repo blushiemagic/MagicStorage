@@ -49,6 +49,7 @@ namespace MagicStorage
 		internal static readonly List<Item> storageItems = new();
 		internal static readonly List<bool> storageItemsFromModules = new();
 		internal static readonly List<ItemData> blockStorageItems = new();
+		internal static readonly List<List<Item>> sourceItems = new();
 
 		public static int craftAmountTarget;
 
@@ -257,6 +258,7 @@ namespace MagicStorage
 
 		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
 			items.Clear();
+			sourceItems.Clear();
 			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
@@ -269,16 +271,23 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
-			IEnumerable<Item> heartItems = heart.GetStoredItems().Select(i => i.Clone());
+			IEnumerable<Item> heartItems = heart.GetStoredItems();
 			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
+				.Where(i => i.type > ItemID.None && i.stack > 0)
 				.DistinctBy(i => i, ReferenceEqualityComparer.Instance);  //Filter by distinct object references (prevents "duplicate" items from, say, 2 mods adding items from the player's inventory)
 
 			//Keep the simulator items separate
-			items.AddRange(ItemSorter.SortAndFilter(heartItems, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, ""));
+			ItemSorter.AggregateContext context = new(heartItems);
+
+			items.AddRange(ItemSorter.SortAndFilter(context, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, "", ModSearchBox.ModIndexAll));
 
 			numItemsWithoutSimulators = items.Count;
 
-			items.AddRange(ItemSorter.SortAndFilter(simulatorItems, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, ""));
+			ItemSorter.AggregateContext context2 = new(simulatorItems);
+
+			items.AddRange(ItemSorter.SortAndFilter(context2, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, "", ModSearchBox.ModIndexAll));
+
+			sourceItems.AddRange(context.sourceItems.Concat(context2.sourceItems));
 
 			NetHelper.Report(false, "Total items: " + items.Count);
 			NetHelper.Report(false, "Items from modules: " + (items.Count - numItemsWithoutSimulators));
@@ -350,24 +359,24 @@ namespace MagicStorage
 
 			string searchText = page.searchBar.Text;
 			int choice = page.recipeButtons.Choice;
+			int modFilterIndex = page.modSearchBox.ModIndex;
 
 			void DoFiltering(int sortMode, int filterMode, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited)
 			{
-				var filteredRecipes = ItemSorter.GetRecipes(sortMode, filterMode, searchText, out var sortComparer);
+				var filteredRecipes = ItemSorter.GetRecipes(filterMode, searchText, modFilterIndex);
+
+				IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(filteredRecipes, r => r.createItem, sortMode);
 
 				// show only blacklisted recipes only if choice = 2, otherwise show all other
 				if (MagicStorageConfig.RecipeBlacklistEnabled)
-					filteredRecipes = filteredRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
+					sortedRecipes = sortedRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
 
 				// favorites first
-				// TODO: for some reason, OrderByDescending and ThenByDescending for the "sortComparer" usage is making the sorts reversed.  Why?
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					filteredRecipes = filteredRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
+					sortedRecipes = sortedRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
 					
-					filteredRecipes = filteredRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0);
+					sortedRecipes = sortedRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0);
 				}
-
-				IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(filteredRecipes, r => r.createItem, sortMode);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -415,6 +424,12 @@ namespace MagicStorage
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
 				*/
+				if (recipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
+				{
+					// search all mods
+					modFilterIndex = ModSearchBox.ModIndexAll;
+					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
+				}
 			}
 		}
 
@@ -425,15 +440,18 @@ namespace MagicStorage
 			bool needsResort = false;
 
 			int filterMode = MagicUI.craftingUI.GetPage<FilteringPage>("Filtering").option;
-			string searchText = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").searchBar.Text;
+
+			var recipesPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
+			string searchText = recipesPage.searchBar.Text;
 
 			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
 			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
 
-			int recipeChoice = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").recipeButtons.Choice;
+			int recipeChoice = recipesPage.recipeButtons.Choice;
+			int modSearchIndex = recipesPage.modSearchBox.ModIndex;
 
 			bool CanBeAdded(Recipe r) => Array.IndexOf(MagicCache.FilteredRecipesCache[filterMode], r) >= 0
-				&& ItemSorter.FilterBySearchText(r.createItem, searchText)
+				&& ItemSorter.FilterBySearchText(r.createItem, searchText, modSearchIndex)
 				// show only blacklisted recipes only if choice = 2, otherwise show all other
 				&& (!MagicStorageConfig.RecipeBlacklistEnabled || recipeChoice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(r.createItem))
 				// show only favorited items if selected
@@ -484,10 +502,15 @@ namespace MagicStorage
 
 				var sorted = new List<Recipe>(recipes)
 					.AsParallel()
-					.AsOrdered()
+					.AsOrdered();
+
+				if (MagicStorageConfig.CraftingFavoritingEnabled) {
 					// favorites first
-					.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
-					.ThenByDescending(r => r.createItem, sortComparer);
+					sorted = sorted
+						.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
+						.ThenByDescending(r => r.createItem, sortComparer);
+				} else
+					sorted = sorted.OrderByDescending(r => r.createItem, sortComparer);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -796,19 +819,37 @@ namespace MagicStorage
 				return;
 
 			int index = 0;
+			bool hasItemFromStorage = false;
 			foreach (Item item in items)
 			{
 				foreach (Item reqItem in selectedRecipe.requiredItem) {
 					if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type)) {
-						storageItems.Add(item);
+						//Cloning can still happen here since the actual items aren't needed -- only the types
+						storageItems.Add(item.Clone());
 						storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
 					}
 				}
 
-				if (item.type == selectedRecipe.createItem.type)
-					result = item;
+				if (item.type == selectedRecipe.createItem.type) {
+					Item source = sourceItems[index][0];
+
+					if (index < numItemsWithoutSimulators) {
+						result = source;
+						hasItemFromStorage = true;
+					} else if (!hasItemFromStorage)
+						result = source;
+				}
 
 				index++;
+			}
+
+			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList);
+			if (resultItemList.Count != storageItems.Count) {
+				//Update the lists since items were compacted
+				storageItems.Clear();
+				storageItems.AddRange(resultItemList);
+				storageItemsFromModules.Clear();
+				storageItemsFromModules.AddRange(moduleItemsList);
 			}
 
 			result ??= new Item(selectedRecipe.createItem.type, 0);
@@ -861,7 +902,7 @@ namespace MagicStorage
 
 		internal static void SlotFocusLogic()
 		{
-			if (result == null || result.IsAir || !Main.mouseItem.IsAir && (!ItemData.Matches(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			if (result == null || result.IsAir || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}
@@ -935,6 +976,50 @@ namespace MagicStorage
 			return compacted;
 		}
 
+		private static List<Item> CompactItemListWithModuleData(List<Item> items, List<bool> moduleItems, out List<bool> moduleItemsResult) {
+			List<Item> compacted = new();
+			List<int> compactedSource = new();
+
+			for (int i = 0; i < items.Count; i++) {
+				Item item = items[i];
+
+				if (item.IsAir)
+					continue;
+
+				bool fullyCompacted = false;
+				for (int j = 0; j < compacted.Count; j++) {
+					Item existing = compacted[j];
+
+					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]]) {
+						if (existing.stack + item.stack <= existing.maxStack) {
+							existing.stack += item.stack;
+							item.stack = 0;
+
+							fullyCompacted = true;
+						} else {
+							int diff = existing.maxStack - existing.stack;
+							existing.stack = existing.maxStack;
+							item.stack -= diff;
+						}
+
+						break;
+					}
+				}
+
+				if (item.IsAir)
+					continue;
+
+				if (!fullyCompacted) {
+					compacted.Add(item);
+					compactedSource.Add(i);
+				}
+			}
+
+			moduleItemsResult = compactedSource.Select(m => moduleItems[m]).ToList();
+
+			return compacted;
+		}
+
 		/// <summary>
 		/// Attempts to craft a certain amount of items from a Crafting Access
 		/// </summary>
@@ -976,6 +1061,9 @@ namespace MagicStorage
 		public static void Craft(int toCraft) {
 			//Safeguard against absurdly high craft targets
 			toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
+
+			if (toCraft <= 0)
+				return;  //Bail
 
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
@@ -1065,6 +1153,10 @@ namespace MagicStorage
 			//Try to batch as many "crafts" into one craft as possible
 			int crafts = (int)Math.Ceiling(context.toCraft / (float)selectedRecipe.createItem.stack);
 
+			//Skip item consumption code for recipes that have no ingredients
+			if (selectedRecipe.requiredItem.Count == 0)
+				goto SkipItemConsumption;
+
 			List<Item> batch = new(selectedRecipe.requiredItem.Count);
 
 			//Reduce the number of batch crafts until this recipe can be completely batched for the number of crafts
@@ -1108,6 +1200,8 @@ namespace MagicStorage
 				if (!AttemptToConsumeItem(context, context.availableItems, item.type, ref stack, addToWithdraw: true))
 					ConsumeItemFromSource(context, item.type, item.stack);
 			}
+
+			SkipItemConsumption:
 
 			//Create the resulting items
 			for (int i = 0; i < crafts; i++) {
@@ -1329,12 +1423,46 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			Item withdrawn = heart.TryWithdraw(item, false, toInventory);
 
-			if (withdrawn.IsAir && numItemsWithoutSimulators > 0) {
+			if (withdrawn.IsAir && items.Count != numItemsWithoutSimulators) {
 				//Heart did not contain the item; try to withdraw from the module items
 				List<Item> moduleItems = items.GetRange(numItemsWithoutSimulators, items.Count - numItemsWithoutSimulators);
 
-				TEStorageUnit.WithdrawFromItemCollection(moduleItems, item, out withdrawn, onItemRemoved: k => items.RemoveAt(k + numItemsWithoutSimulators));
+				TEStorageUnit.WithdrawFromItemCollection(moduleItems, item, out withdrawn,
+					onItemRemoved: k => {
+						int index = k + numItemsWithoutSimulators;
+
+						foreach (var item in sourceItems[index])
+							item.TurnToAir();
+
+						items.RemoveAt(index);
+						sourceItems.RemoveAt(index);
+					},
+					onItemStackReduced: (k, stack) => {
+						int index = k + numItemsWithoutSimulators;
+
+						int itemsRemoved = 0;
+						foreach (var item in Enumerable.Reverse(sourceItems[index])) {
+							if (item.stack > stack) {
+								item.stack -= stack;
+								break;
+							} else {
+								stack -= item.stack;
+								item.TurnToAir();
+
+								itemsRemoved++;
+
+								if (stack <= 0)
+									break;
+							}
+						}
+
+						if (itemsRemoved > 0)
+							sourceItems[index].RemoveRange(sourceItems[index].Count - itemsRemoved, itemsRemoved);
+					});
 			}
+
+			if (!withdrawn.IsAir)
+				StorageGUI.needRefresh = true;
 
 			return withdrawn;
 		}

@@ -30,6 +30,10 @@ namespace MagicStorage.UI.States {
 		private UIText reqObjText2;
 		private UIText storedItemsText;
 
+		public readonly RecipeHistory history = new();
+		private RecipePanelHistoryArrangement recipeHistory;
+		private RecipeHistoryPanel recipeHistoryPanel;
+
 		private NewUISlotZone ingredientZone;    //Recipe ingredients
 		private NewUISlotZone storageZone;       //Items in storage valid for recipe ingredient
 		private NewUISlotZone recipeHeaderZone;  //Preview item for result
@@ -111,9 +115,9 @@ namespace MagicStorage.UI.States {
 					IgnoreClicks = true  // Purely visual
 				};
 				
-				itemSlot.OnUpdate += e => {
-					if (!e.IsMouseHovering || !Main.mouseRight)
-						return;  //Not right clicking
+				itemSlot.OnRightClick += (evt, e) => {
+					if (CraftingGUI.selectedRecipe is null)
+						return;
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
@@ -133,7 +137,9 @@ namespace MagicStorage.UI.States {
 						}
 
 						CraftingGUI.SetSelectedRecipe(selected);
-						StorageGUI.RefreshItems();
+						StorageGUI.needRefresh = true;
+
+						history.AddHistory(CraftingGUI.selectedRecipe);
 					}
 				};
 
@@ -147,6 +153,21 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(reqObjText);
 			recipePanel.Append(reqObjText2);
 
+			recipeHistory = new(history, 1f);
+
+			recipeHistory.OnButtonClicked += () => {
+				OpenRecipeHistoryPanel();
+				SoundEngine.PlaySound(SoundID.MenuTick);
+			};
+
+			recipePanel.Append(recipeHistory);
+
+			recipeHistoryPanel = new(true, history, new[] { ("History", Language.GetText("Mods.MagicStorage.UIPages.History")) });
+
+			recipeHistoryPanel.OnMenuClose += CloseRecipeHistoryPanel;
+
+			recipeHistoryPanel.SetActivePage("History");
+
 			storageZone = new(CraftingGUI.SmallScale);
 
 			storageZone.InitializeSlot += (slot, scale) => {
@@ -156,6 +177,11 @@ namespace MagicStorage.UI.States {
 
 				itemSlot.OnClick += (evt, e) => {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
+
+					int index = obj.slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
+
+					if (index >= CraftingGUI.storageItems.Count)
+						return;
 
 					ItemData data = new(obj.StoredItem);
 					if (CraftingGUI.blockStorageItems.Contains(data))
@@ -241,7 +267,7 @@ namespace MagicStorage.UI.States {
 					}
 
 					if (changed) {
-						StorageGUI.RefreshItems();
+						StorageGUI.needRefresh = true;
 						SoundEngine.PlaySound(SoundID.Grab);
 
 						obj.IgnoreNextHandleAction = true;
@@ -253,7 +279,7 @@ namespace MagicStorage.UI.States {
 
 					Item result = obj.StoredItem;
 
-					if (result is not null && !result.IsAir && (Main.mouseItem.IsAir || ItemData.Matches(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+					if (result is not null && !result.IsAir && (Main.mouseItem.IsAir || ItemCombining.CanCombineItems(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 						CraftingGUI.slotFocus = true;
 
 					if (CraftingGUI.slotFocus) {
@@ -315,6 +341,12 @@ namespace MagicStorage.UI.States {
 
 			recipeHeight = panel.Height.Pixels;
 			recipePanel.Height.Set(recipeHeight, 0f);
+			
+			recipeHistory.Left.Set(-recipeHistory.Width.Pixels, 1f);
+
+			recipeHistoryPanel.Width.Set(280, 0);
+			recipeHistoryPanel.Left.Set(10, 0f);
+			recipeHistoryPanel.Height.Set(Math.Min(recipeHeight * 3f / 7f, 300), 0f);
 
 			recipePanel.Recalculate();
 		}
@@ -381,7 +413,13 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.PlayerZoneCache.Cache();
 
 			try {
+				bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
+				if (recipeHistoryPanel.IsMouseHovering)
+					MagicUI.BlockItemSlotActionsDetour = false;
+
 				base.Update(gameTime);
+
+				MagicUI.BlockItemSlotActionsDetour = oldBlock;
 
 				if (!Main.mouseRight)
 					CraftingGUI.ResetSlotFocus();
@@ -421,6 +459,16 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.PlayerZoneCache.FreeCache(true);
 		}
 
+		public override void Draw(SpriteBatch spriteBatch) {
+			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
+			if (recipeHistoryPanel.IsMouseHovering)
+				MagicUI.BlockItemSlotActionsDetour = false;
+
+			base.Draw(spriteBatch);
+
+			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+		}
+
 		private void RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
@@ -458,7 +506,7 @@ namespace MagicStorage.UI.States {
 
 			storageZone.Top.Set(storageZoneTop, 0f);
 
-			storageZone.Height.Set(-storageZoneTop - 60, 1f);
+			storageZone.Height.Set(-storageZoneTop - 68, 1f);
 
 			storageZone.Recalculate();
 
@@ -613,6 +661,9 @@ namespace MagicStorage.UI.States {
 
 			if (MagicStorageConfig.UseConfigFilter)
 				GetPage<RecipesPage>("Crafting").recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+
+			if (MagicStorageConfig.ClearRecipeHistory)
+				history.Clear();
 		}
 
 		protected override void OnClose() {
@@ -632,6 +683,8 @@ namespace MagicStorage.UI.States {
 			resultZone.ClearItems();
 
 			CraftingGUI.selectedRecipe = null;
+
+			CloseRecipeHistoryPanel();
 
 			CraftingGUI.Reset();
 			CraftingGUI.ResetSlotFocus();
@@ -659,6 +712,8 @@ namespace MagicStorage.UI.States {
 			recipeHeaderZone.SetItemsAndContexts(1, CraftingGUI.GetHeader);
 
 			resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+
+			history.RefreshEntries();
 
 			GetPage<RecipesPage>("Crafting").Refresh();
 		}
@@ -708,6 +763,24 @@ namespace MagicStorage.UI.States {
 			base.GetConfigPanelLocation(out left, out top);
 
 			left += recipeWidth;
+		}
+
+		private void OpenRecipeHistoryPanel() {
+			if (recipeHistoryPanel.Parent is not null)
+				return;
+
+			recipeHistory.Remove();
+			recipePanel.Append(recipeHistoryPanel);
+			recipePanel.Recalculate();
+		}
+
+		private void CloseRecipeHistoryPanel() {
+			if (recipeHistoryPanel.Parent is null)
+				return;
+
+			recipePanel.Append(recipeHistory);
+			recipeHistoryPanel.Remove();
+			recipePanel.Recalculate();
 		}
 
 		public class RecipesPage : BaseStorageUIAccessPage {
@@ -826,6 +899,11 @@ namespace MagicStorage.UI.States {
 
 				lastKnownConfigFavorites = MagicStorageConfig.CraftingFavoritingEnabled;
 				lastKnownConfigBlacklist = MagicStorageConfig.RecipeBlacklistEnabled;
+			}
+
+			public override void PostReformatPage(ButtonConfigurationMode current) {
+				//Adjust the position of elements here
+				Refresh();
 			}
 
 			public override void Update(GameTime gameTime) {
@@ -951,7 +1029,7 @@ namespace MagicStorage.UI.States {
 						if (!storagePlayer.FavoritedRecipes.Add(obj.StoredItem))
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
-						StorageGUI.RefreshItems();
+						StorageGUI.needRefresh = true;
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
@@ -968,8 +1046,9 @@ namespace MagicStorage.UI.States {
 						}
 					} else {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
+						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 							
-						StorageGUI.RefreshItems();
+						StorageGUI.needRefresh = true;
 					}
 				};
 			}

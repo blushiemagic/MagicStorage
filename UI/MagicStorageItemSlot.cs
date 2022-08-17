@@ -93,7 +93,13 @@ namespace MagicStorage.UI {
 
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
 			dummy[10] = StoredItem;
+			bool oldFavorite = dummy[10].favorited;
+			if (!MagicStorageConfig.CraftingFavoritingEnabled)
+				dummy[10].favorited = false;
+
 			ItemSlot.Draw(spriteBatch, dummy, Context, 10, rectangle.TopLeft());
+
+			dummy[10].favorited = oldFavorite;
 
 			Main.inventoryScale = oldScale;
 		}
