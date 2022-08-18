@@ -780,16 +780,23 @@ namespace MagicStorage
 
 			Report(true, MessageType.TransferItems + " packet was successfully received by server from client " + sender);
 
-			TEStorageUnit.AttemptItemTransfer(unitDestination, unitSource, out List<Item> transferredItems);
+			AttemptItemTransferAndSendResult(unitDestination, unitSource);
+		}
+
+		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, bool netQueue = true) {
+			if (Main.netMode != NetmodeID.Server)
+				return false;
+
+			TEStorageUnit.AttemptItemTransfer(destination, source, out List<Item> transferredItems);
 
 			if (transferredItems.Count == 0)  //Nothing to do
-				return;
+				return false;
 
 			//Send the result to all clients
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.TransferItemsResult);
-			packet.Write(destination);
-			packet.Write(source);
+			packet.Write(destination.Position);
+			packet.Write(source.Position);
 			packet.Write(transferredItems.Count);
 
 			foreach (Item item in transferredItems)
@@ -799,14 +806,22 @@ namespace MagicStorage
 
 			Report(true, MessageType.TransferItemsResult + " packet sent to all clients");
 
-			unitDestination.GetHeart().ResetCompactStage();
+			destination.PostChangeContents();
+			source.PostChangeContents();
 
-			StartUpdateQueue();
+			if (netQueue) {
+				NetHelper.StartUpdateQueue();
 
-			unitDestination.PostChangeContents();
-			unitSource.PostChangeContents();
+				destination.GetHeart()?.ResetCompactStage();
+			}
 
-			ProcessUpdateQueue();
+			destination.PostChangeContents();
+			source.PostChangeContents();
+
+			if (netQueue)
+				NetHelper.ProcessUpdateQueue();
+
+			return true;
 		}
 
 		public static void RecieveTransferItemsResult(BinaryReader reader) {
@@ -838,6 +853,9 @@ namespace MagicStorage
 				TEStorageUnit.DepositToItemCollection(dest, item.Clone(), unitDestination.Capacity, out _);
 				TEStorageUnit.WithdrawFromItemCollection(src, item, out _);
 			}
+
+			unitDestination.PostChangeContents();
+			unitSource.PostChangeContents();
 
 			Report(true, MessageType.TransferItemsResult + " packet received by client " + Main.myPlayer);
 		}

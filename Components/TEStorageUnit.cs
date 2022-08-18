@@ -312,7 +312,8 @@ namespace MagicStorage.Components
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.ClientRequestItemTransfer(this, other);
 				return false;
-			}
+			} else if (Main.netMode == NetmodeID.Server)
+				return NetHelper.AttemptItemTransferAndSendResult(this, other, false);
 
 			AttemptItemTransfer(this, other, out List<Item> transferred);
 
