@@ -359,8 +359,13 @@ namespace MagicStorage.Components
 		internal static void AttemptItemTransfer(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems) {
 			transferredItems = new();
 
-			if (source.IsEmpty)  //Nothing to do
+			NetHelper.Report(false, "Performing TEStorageUnit.AttemptItemTransfer...");
+
+			if (source.IsEmpty) {
+				//Nothing to do
+				NetHelper.Report(false, $"Source unit (X: {source.Position.X}, Y: {source.Position.Y}) was empty.  Aborting transfer");
 				return;
+			}
 
 			//Attempt to pack items first
 			for (int d = 0; d < destination.NumItems; d++) {
@@ -395,7 +400,10 @@ namespace MagicStorage.Components
 				}
 			}
 
+			NetHelper.Report(false, $"Packed {transferredItems.Count} from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
+
 			//Then simply transfer items until the destination is full or the source is empty
+			int nonPackedTransfer = 0;
 			while (!destination.IsFull && !source.IsEmpty) {
 				Item withdrawn = source.items[^1];
 				source.items.RemoveAt(source.items.Count - 1);
@@ -403,7 +411,11 @@ namespace MagicStorage.Components
 				destination.items.Add(withdrawn);
 
 				transferredItems.Add(withdrawn);
+
+				nonPackedTransfer++;
 			}
+
+			NetHelper.Report(false, $"Transferred {nonPackedTransfer} items from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
 		}
 
 		public override void SaveData(TagCompound tag)

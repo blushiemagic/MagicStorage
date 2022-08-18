@@ -787,10 +787,17 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return false;
 
+			Report(true, $"Performing AttemptItemTransferAndSendResult on source unit (X: {source.Position.X}, Y: {source.Position.Y}) and destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})...");
+
 			TEStorageUnit.AttemptItemTransfer(destination, source, out List<Item> transferredItems);
 
-			if (transferredItems.Count == 0)  //Nothing to do
+			if (transferredItems.Count == 0) {
+				//Nothing to do
+				Report(false, "No items were transferred");
 				return false;
+			}
+
+			Report(false, transferredItems.Count + " items were transferred");
 
 			//Send the result to all clients
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
@@ -810,7 +817,7 @@ namespace MagicStorage
 			source.PostChangeContents();
 
 			if (netQueue) {
-				NetHelper.StartUpdateQueue();
+				StartUpdateQueue();
 
 				destination.GetHeart()?.ResetCompactStage();
 			}
@@ -819,7 +826,7 @@ namespace MagicStorage
 			source.PostChangeContents();
 
 			if (netQueue)
-				NetHelper.ProcessUpdateQueue();
+				ProcessUpdateQueue();
 
 			return true;
 		}
@@ -844,6 +851,8 @@ namespace MagicStorage
 			List<Item> transferredItems = new();
 			for (int i = 0; i < count; i++)
 				transferredItems.Add(ItemIO.Receive(reader, readStack: true, readFavorite: true));
+
+			Report(true, transferredItems.Count + " items were transferred");
 
 			//Deposit/withdraw the transferred items
 			List<Item> dest = unitDestination.GetItems() as List<Item>;
