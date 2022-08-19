@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Terraria;
@@ -422,7 +423,7 @@ namespace MagicStorage.UI.States {
 					heart.DestroyUnloadedGlobalItemData();
 				});
 
-				if (MagicStorageMod.ShowcaseEnabled)
+				if (Debugger.IsAttached)
 					InitDebugButtons();
 
 				float height = 0;
@@ -585,6 +586,8 @@ namespace MagicStorage.UI.States {
 					_ => throw new ArgumentOutOfRangeException(nameof(sellOption))
 				};
 
+				NetHelper.Report(true, $"Detecting duplicates to sell from storage heart (X: {heart.Position.X}, Y: {heart.Position.X})...");
+
 				//Ignore Creative Storage Units
 				IEnumerable<SourcedItem> items = heart.GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems().Select((i, index) => new SourcedItem(s, i, index)));
 
@@ -610,6 +613,8 @@ namespace MagicStorage.UI.States {
 						}
 					}
 				}
+
+				NetHelper.Report(false, "Attempting to sell duplicates...");
 
 				//Sell the duplicates
 				NPC dummy = new();
@@ -644,13 +649,20 @@ namespace MagicStorage.UI.States {
 
 				foreach ((TEStorageUnit unit, List<int> withdrawn) in withdrawnItems) {
 					//Actually "withdraw" the items, but in reverse order so that the "indexInSource" that was saved isn't clobbered
-					foreach (int item in withdrawn.OrderByDescending(i => i))
+					NetHelper.Report(false, $"Destroying items in unit (X: {unit.Position.X}, Y: {unit.Position.Y})");
+
+					foreach (int item in withdrawn.OrderByDescending(i => i)) {
+						NetHelper.Report(false, "Destroying item at index " + item);
+
 						unit.items.RemoveAt(item);
+					}
 
 					if (Main.netMode == NetmodeID.Server)
 						unit.FullySync();
 
 					unit.PostChangeContents();
+
+					NetHelper.Report(false, $"{withdrawn.Count} total items were sold/destroyed");
 				}
 
 				NetHelper.ProcessUpdateQueue();

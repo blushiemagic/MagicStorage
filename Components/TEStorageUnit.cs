@@ -359,8 +359,6 @@ namespace MagicStorage.Components
 		internal static void AttemptItemTransfer(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems) {
 			transferredItems = new();
 
-			NetHelper.Report(false, "Performing TEStorageUnit.AttemptItemTransfer...");
-
 			if (source.IsEmpty) {
 				//Nothing to do
 				NetHelper.Report(false, $"Source unit (X: {source.Position.X}, Y: {source.Position.Y}) was empty.  Aborting transfer");
@@ -400,7 +398,8 @@ namespace MagicStorage.Components
 				}
 			}
 
-			NetHelper.Report(false, $"Packed {transferredItems.Count} from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
+			if (transferredItems.Count > 0)
+				NetHelper.Report(false, $"Packed {transferredItems.Count} from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
 
 			//Then simply transfer items until the destination is full or the source is empty
 			int nonPackedTransfer = 0;
@@ -415,7 +414,8 @@ namespace MagicStorage.Components
 				nonPackedTransfer++;
 			}
 
-			NetHelper.Report(false, $"Transferred {nonPackedTransfer} items from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
+			if (nonPackedTransfer > 0)
+				NetHelper.Report(false, $"Transferred {nonPackedTransfer} items from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
 		}
 
 		public override void SaveData(TagCompound tag)
@@ -459,10 +459,19 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
 
-			// There's a full sync present, so only do that
+			// There's a full sync present, so only do that first
 			if (netOpQueue.Any(q => q.netOperation == NetOperations.FullySync)) {
+				NetOperations op;
+
+				do {
+					op = netOpQueue.Dequeue().netOperation;
+				} while (op != NetOperations.FullySync);
+
+				Queue<NetOperation> queue = new(netOpQueue);
 				netOpQueue.Clear();
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+				foreach (var q in queue)
+					netOpQueue.Enqueue(q);
 			}
 
 			writer.Write((ushort)items.Count);

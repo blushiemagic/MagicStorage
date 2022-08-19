@@ -16,7 +16,7 @@ namespace MagicStorage {
 		public abstract bool CanCombine(Item item1, Item item2);
 
 		public static bool CanCombineItems(Item item1, Item item2, bool checkPrefix = true) {
-			if (!ItemData.Matches(item1, item2))
+			if ((checkPrefix && !ItemData.Matches(item1, item2)) || item1.type != item2.type)
 				return false;
 
 			bool combine = true;

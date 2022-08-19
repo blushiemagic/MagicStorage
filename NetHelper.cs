@@ -23,11 +23,15 @@ namespace MagicStorage
 
 		[Conditional("NETPLAY")]
 		public static void Report(bool reportTime, string message) {
-			if (Main.netMode != NetmodeID.Server) {
-				if (reportTime)
-					Main.NewText("Time: " + DateTime.Now.Ticks);
+			StringBuilder sb = new();
 
-				Main.NewTextMultiline(message, c: Color.White);
+			if (reportTime)
+				sb.Append("Time: " + DateTime.Now.Ticks + " ");
+
+			sb.Append(message);
+
+			if (Main.netMode != NetmodeID.Server) {
+				Main.NewTextMultiline(sb.ToString(), c: Color.White);
 			} else if (Main.dedServ) {
 				if (reportTime) {
 					ConsoleColor fg = Console.ForegroundColor;
@@ -45,10 +49,7 @@ namespace MagicStorage
 				Console.WriteLine(message);
 			}
 
-			if (reportTime)
-				message = "Time: " + DateTime.Now.Ticks + "\n" + message;
-
-			MagicStorageMod.Instance.Logger.Debug(message);
+			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
 		}
 
 		public static void HandlePacket(BinaryReader reader, int sender)
@@ -813,9 +814,6 @@ namespace MagicStorage
 
 			Report(true, MessageType.TransferItemsResult + " packet sent to all clients");
 
-			destination.PostChangeContents();
-			source.PostChangeContents();
-
 			if (netQueue) {
 				StartUpdateQueue();
 
@@ -914,17 +912,23 @@ namespace MagicStorage
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
 					StorageUIState.ControlsPage.DoSell(heart, sellOption, out long coppersEarned, out var withdrawnItems);
 
+					int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
+
+					Report(false, $"{sold} items were sold for {coppersEarned} copper coins");
+
+					StorageUIState.ControlsPage.DuplicateSellingResult(heart, sold, coppersEarned, reportText: false, depositCoins: true);
+
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.MassDuplicateSellResult);
 					packet.Write((short)sender);
 					packet.Write(position);
 					packet.Write7BitEncodedInt64(coppersEarned);
-					packet.Write7BitEncodedInt(withdrawnItems.Values.Select(l => l.Count).Sum());
+					packet.Write7BitEncodedInt(sold);
 
 					packet.Send();
 				}
 
-				Report(true, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
+				Report(false, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				reader.ReadPoint16();
@@ -955,7 +959,9 @@ namespace MagicStorage
 				return;
 			}
 
-			Report(true, MessageType.MassDuplicateSellResult + " packet recevied by client " + Main.myPlayer);
+			Report(true, $"{sold} items were sold/destroyed at heart (X: {heart.X}, Y: {heart.Y}) for {coppersEarned} copper coins");
+
+			Report(false, MessageType.MassDuplicateSellResult + " packet recevied by client " + Main.myPlayer);
 
 			if (sender == Main.myPlayer)
 				StorageUIState.ControlsPage.DuplicateSellingResult(storageHeart, sold, coppersEarned, reportText: true, depositCoins: false);
