@@ -1,4 +1,39 @@
-﻿[h1]v0.5.7.1[/h1]
+﻿[h1]v0.5.7.2[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-TODO
+- Fixed a bug which caused the search bars to try to load textures on servers, leading to a crash
+- Fixed an oversight which caused item/recipe favorites to no longer be forced to the top of the display order
+- Fixed a bug which caused the UI panels to still try and block mouse inputs "underneath" them when they weren't visible
+- Made the sorting/filtering icons in the main UI pages (Storage and Crafting) be smaller
+- [b]Reimplemented the "Search by Mod" button that had been removed in update v0.5.7[/b]
+- Modified the search bar's help text to only use the [i]@ModName[/i] help text when not using the "All Mods" mod search
+- Fixed some bugs caused by the UI elements trying to refresh items/recipes when they shouldn't be
+- Added hover text to the search bars explaining how the [i]@ModName[/i] and [i]#Search Tooltip[/i] searches work
+- Properly implemented the [b]ItemCombining[/b] API in places where it wasn't used, but should have been
+- Fixed an oversight which caused the mass crafting logic to end up in an infinite loop when trying to craft items with no ingredients
+- Renamed the "Use Inventory Module" module to "Use Player Inventory Items" and extended its usage to include the ammo and coin slots
+- Added a "Use Non-Favorited Player Inventory Items" module
+- Fixed a bug which would sometimes cause the UI to require two inventory key presses to close
+- Fixed a bug which caused items added by Environment Simulator modules to be duplicated
+- Fixed a bug which allowed empty slots in the Crafting UI's Stored Ingredients zone to be blacklisted as ingredients
+- Fixed a bug which caused the Crafting UI's Stored Ingredients zone to sometimes overlap the mass crafting buttons
+- Fixed a bug which allowed infinite duplication of items from the Crafting UI's result slot
+- Added logic to make the UIs recalculate their bounds when the game's resolution changes and improved the logic that handles detecting the change for UI Scale as well
+- Fixed various oversights in the item withdrawal/deposit code
+- Modified the sorting/filtering icon alignments to be more accurate at lower scales
+- Fixed the Quick Stack logic (from the inventory button) being broken in multiplayer
+- Added a highly-requested feature:  [b]Recipe History[/b]
+- Removed the [i]Filter Unstackables[/i] and [i]Filter Stackables[/i] filtering options
+- [i]Filter Armor and Equipment[/i] is now hidden when [i]Filter Armor[/i] and [i]Filter Equipment[/i] are easily accessible
+- Added an error message that's printed to the chat when the Storage/Crafting UIs are too small to properly create and align all UI elements
+- Fixed an oversight which caused clicking empty slots in the Storage UI to refresh the UI
+- Fixed a bug where the ModernDropdown layout's dropdown menu's scroll bars would still make noise when not visible
+- Fixed a few bugs which prevented the [i]Item debug information[/i] config and [i]Print Item Data[/i] keybinding from being handled properly
+- Fixed various bugs caused by not properly checking if certain configs have changed
+- Modified the message displayed by the [i]Print Item Data[/i] keybinding to be less misleading
+- Fixed various bugs which caused the Sell Duplicates logic to not work as intended
+- Added a safeguard for a tModLoader bug which would sometimes cause the scroll bars in Magic Storage to stop working
+- Fixed an oversight which allowed Inactive Storage Units to be considered as valid "destinations" for item transfers
+- Fixed a bug which would sometimes cause the mass crafting logic to incorrectly cap the amount of resulting items requested
+- Added a warning that's printed to the chat whenever a combination of filtering options causes no entries to exist, when they would exist otherwise.  This is just an indicator for already-existing filtering logic so that it's less confusing.
+[b]NOTE: The "item transfers cause items to temporarily disappear" bug in Multiplayer has not been fixed yet.[/b]

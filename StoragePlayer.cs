@@ -59,7 +59,7 @@ namespace MagicStorage
 			if (Player.whoAmI != Main.myPlayer)
 				return;
 
-			if (timeSinceOpen < 1)
+			if (timeSinceOpen < 1 && !Main.autoPause && storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
 				Player.SetTalkNPC(-1);
 				Main.playerInventory = true;
