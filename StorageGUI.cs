@@ -10,10 +10,12 @@ using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.IO;
@@ -134,7 +136,7 @@ namespace MagicStorage
 					// search all categories
 					filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					Main.NewText("No items displayed even though items exist in storage.  Defaulting to \"All\" filter mode", Microsoft.Xna.Framework.Color.Red);
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllItems"), Color.Red);
 
 					DoFiltering();
 				}
@@ -144,7 +146,7 @@ namespace MagicStorage
 					// search all mods
 					modSearch = ModSearchBox.ModIndexAll;
 
-					Main.NewText($"No items displayed even though items exist in storage.  Defaulting to \"{Terraria.Localization.Language.GetTextValue("Mods.MagicStorage.FilterAllMods")}\" mod filter", Microsoft.Xna.Framework.Color.Red);
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllMods"), Color.Red);
 
 					DoFiltering();
 				}

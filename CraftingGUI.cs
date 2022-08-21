@@ -414,7 +414,7 @@ namespace MagicStorage
 					// search hidden recipes too
 					hiddenRecipes = ItemTypeOrderedSet.Empty;
 
-					Main.NewText("No recipes displayed even though blacklisted recipes exist.  Ignoring recipe blacklisting");
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist"), Color.Red);
 
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
@@ -433,7 +433,7 @@ namespace MagicStorage
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
 
-					Main.NewText($"No recipes displayed even though recipes exist from other mods.  Defaulting to \"{Terraria.Localization.Language.GetTextValue("Mods.MagicStorage.FilterAllMods")}\" mod filter", Microsoft.Xna.Framework.Color.Red);
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingDefaultToAllMods"), Color.Red);
 
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}

@@ -363,6 +363,25 @@ Mods: {
 		# Please decrease your UI Scale in Settings or increase your game's Resolution in Video Settings.
 		# '''
 
+		Warnings: {
+			# StorageDefaultToAllItems:
+			# '''
+			# No items displayed even though items exist in storage.  Defaulting to "All" filter mode.
+			# '''
+			# StorageDefaultToAllMods:
+			# '''
+			# No items displayed even though items exist in storage.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
+			# '''
+			# CraftingNoBlacklist:
+			# '''
+			# No recipes displayed even though blacklisted recipes exist.  Ignoring recipe blacklisting.
+			# '''
+			# CraftingDefaultToAllMods:
+			# '''
+			# No recipes displayed even though recipes exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
+			# '''
+		}
+
 		# RecipeHidden:
 		# '''
 		# Recipe for item "{0}" was blacklisted.
