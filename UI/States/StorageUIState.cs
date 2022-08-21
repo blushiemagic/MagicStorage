@@ -285,18 +285,18 @@ namespace MagicStorage.UI.States {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
-					if (objSlot >= StorageGUI.items.Count)
-						return;
-
-					bool changed = false;
+					bool changed = false, canRefresh = false;
 					if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
-						if (StorageGUI.TryDeposit(Main.mouseItem))
+						if (StorageGUI.TryDeposit(Main.mouseItem)) {
 							changed = true;
-					} else if (Main.mouseItem.IsAir && !StorageGUI.items[objSlot].IsAir) {
+							canRefresh = true;
+						}
+					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
-							if (Main.netMode == NetmodeID.SinglePlayer)
+							if (Main.netMode == NetmodeID.SinglePlayer) {
 								StorageGUI.FavoriteItem(objSlot);
-							else {
+								canRefresh = true;
+							} else {
 								Main.NewTextMultiline(
 									"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again",
 									c: Color.White);
@@ -316,11 +316,14 @@ namespace MagicStorage.UI.States {
 								Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
 								
 							changed = true;
+							canRefresh = true;
 						}
 					}
 
-					StorageGUI.needRefresh = true;
-					obj.IgnoreNextHandleAction = true;
+					if (canRefresh) {
+						StorageGUI.needRefresh = true;
+						obj.IgnoreNextHandleAction = true;
+					}
 
 					if (changed)
 						SoundEngine.PlaySound(SoundID.Grab);

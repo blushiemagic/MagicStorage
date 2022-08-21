@@ -22,6 +22,8 @@ namespace MagicStorage
 
 		public int timeSinceOpen = 1;
 
+		internal bool pendingRemoteOpen;
+
 		protected override bool CloneNewInstances => false;
 
 		public ItemTypeOrderedSet HiddenRecipes { get; } = new("HiddenItems");
@@ -75,6 +77,8 @@ namespace MagicStorage
 			{
 				int playerX = (int)(Player.Center.X / 16f);
 				int playerY = (int)(Player.Center.Y / 16f);
+				var modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
+
 				if (!remoteAccess &&
 					(playerX < storageAccess.X - Player.lastTileRangeX ||
 					 playerX > storageAccess.X + Player.lastTileRangeX + 1 ||
@@ -85,7 +89,7 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType) is not StorageAccess)
+				else if (modTile is not StorageAccess || (remoteAccess && remoteCrafting && modTile is not CraftingAccess))
 				{
 					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();

@@ -21,26 +21,19 @@ namespace MagicStorage.Items {
 			Item.value = Item.sellPrice(gold: 10);
 		}
 
-		public override bool? UseItem(Player player)
-		{
-			if (player.whoAmI == Main.myPlayer)
+		protected override void DoOpenStorage(Player player) {
+			if (location.X >= 0 && location.Y >= 0)
 			{
-				if (location.X >= 0 && location.Y >= 0)
-				{
-					Tile tile = Main.tile[location.X, location.Y];
-					if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.CraftingAccess>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
-						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingMissing"));
-					else {
-						OpenStorage(player, true);
-					}
-				}
+				Tile tile = Main.tile[location.X, location.Y];
+				if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.CraftingAccess>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingMissing"));
 				else
-				{
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingUnlocated"));
-				}
+					OpenStorage(player, true);
 			}
-
-			return true;
+			else
+			{
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableCraftingUnlocated"));
+			}
 		}
 
 		public override void AddRecipes()

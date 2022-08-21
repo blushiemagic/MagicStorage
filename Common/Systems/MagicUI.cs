@@ -216,8 +216,12 @@ public class MagicUI : ModSystem
 
 		BlockItemSlotActionsDetour = false;
 
-		Main.instance.MouseText(mouseText);
+		if (CanUpdateMouseText())
+			Main.instance.MouseText(mouseText);
 	}
+
+	private static bool CanUpdateMouseText()
+		=> uiInterface.CurrentState is not null && !object.ReferenceEquals(uiInterface.CurrentState.GetElementAt(new Vector2(Main.mouseX, Main.mouseY)), uiInterface.CurrentState);
 
 	public override void PostUpdateInput() {
 		CanUpdateSearchBars = true;

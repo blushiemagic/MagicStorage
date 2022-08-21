@@ -465,21 +465,6 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
 
-			// There's a full sync present, so only do that first
-			if (netOpQueue.Any(q => q.netOperation == NetOperations.FullySync)) {
-				NetOperations op;
-
-				do {
-					op = netOpQueue.Dequeue().netOperation;
-				} while (op != NetOperations.FullySync);
-
-				Queue<NetOperation> queue = new(netOpQueue);
-				netOpQueue.Clear();
-				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
-				foreach (var q in queue)
-					netOpQueue.Enqueue(q);
-			}
-
 			writer.Write((ushort)items.Count);
 			writer.Write((ushort)netOpQueue.Count);
 			while (netOpQueue.Count > 0)

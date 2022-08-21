@@ -30,23 +30,41 @@ namespace MagicStorage.Items
 
 		public override bool? UseItem(Player player)
 		{
-			if (player.whoAmI == Main.myPlayer)
-			{
-				if (location.X >= 0 && location.Y >= 0)
-				{
-					Tile tile = Main.tile[location.X, location.Y];
-					if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.StorageHeart>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
-						Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessMissing"));
-					else
-						OpenStorage(player);
-				}
+			if (player.whoAmI == Main.myPlayer) {
+				if (Main.autoPause)
+					player.GetModPlayer<StoragePlayer>().pendingRemoteOpen = true;
 				else
-				{
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessUnlocated"));
-				}
+					DoOpenStorage(player);
 			}
 
 			return true;
+		}
+
+		public override void HoldItem(Player player) {
+			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
+
+			if (!Main.autoPause)
+				modPlayer.pendingRemoteOpen = false;
+
+			if (player.whoAmI == Main.myPlayer && player.ItemTimeIsZero && modPlayer.pendingRemoteOpen) {
+				DoOpenStorage(player);
+				modPlayer.pendingRemoteOpen = false;
+			}
+		}
+
+		protected virtual void DoOpenStorage(Player player) {
+			if (location.X >= 0 && location.Y >= 0)
+			{
+				Tile tile = Main.tile[location.X, location.Y];
+				if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.StorageHeart>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessMissing"));
+				else
+					OpenStorage(player);
+			}
+			else
+			{
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessUnlocated"));
+			}
 		}
 
 		protected void OpenStorage(Player player, bool crafting = false)

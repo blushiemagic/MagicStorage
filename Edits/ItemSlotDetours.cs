@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.UI;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
@@ -48,7 +49,7 @@ namespace MagicStorage.Edits {
 			if (!Main.playerInventory || Main.ingameOptionsWindow || MagicUI.uiInterface?.CurrentState is null || !Main.hasFocus || MagicUI.BlockItemSlotActionsDetour)
 				return false;
 
-			UIElement element = MagicUI.uiInterface.CurrentState.GetElementAt(new Microsoft.Xna.Framework.Vector2(Main.mouseX, Main.mouseY));
+			UIElement element = MagicUI.uiInterface.CurrentState.GetElementAt(new Vector2(Main.mouseX, Main.mouseY));
 
 			if (element is null || object.ReferenceEquals(element, MagicUI.uiInterface.CurrentState))
 				return false;  //Not hovering over an element in the state

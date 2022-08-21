@@ -832,6 +832,7 @@ namespace MagicStorage
 		public static void RecieveTransferItemsResult(BinaryReader reader) {
 			Point16 destination = reader.ReadPoint16();
 			Point16 source = reader.ReadPoint16();
+			int count = reader.ReadInt32();
 
 			if (!TileEntity.ByPosition.TryGetValue(destination, out TileEntity tileEntity) || tileEntity is not TEStorageUnit unitDestination) {
 				Report(true, MessageType.TransferItems + " packet failed to read on client" + Main.myPlayer + ".\n" +
@@ -844,8 +845,6 @@ namespace MagicStorage
 					"Reason: Source was not a Storage Unit");
 				return;
 			}
-
-			int count = reader.ReadInt32();
 
 			Report(true, count + " items were transferred");
 

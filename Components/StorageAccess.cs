@@ -57,7 +57,12 @@ namespace MagicStorage.Components
 				return true;
 			}
 
-			Player player = Main.LocalPlayer;
+			OpenStorage(Main.LocalPlayer, i, j);
+
+			return true;
+		}
+
+		internal static void OpenStorage(Player player, int i, int j, bool remoteCrafting = false) {
 			StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 			Main.mouseRightRelease = false;
 			if (player.sign > -1)
@@ -106,6 +111,7 @@ namespace MagicStorage.Components
 					modPlayer.CloseStorage();
 
 				modPlayer.OpenStorage(toOpen);
+				modPlayer.remoteCrafting = remoteCrafting;
 				modPlayer.timeSinceOpen = 0;
 				if (PlayerInput.GrappleAndInteractAreShared)
 					PlayerInput.Triggers.JustPressed.Grapple = false;
@@ -113,8 +119,6 @@ namespace MagicStorage.Components
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
 				Recipe.FindRecipes();
 			}
-
-			return true;
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
