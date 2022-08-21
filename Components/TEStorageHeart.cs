@@ -389,6 +389,10 @@ namespace MagicStorage.Components
 				if (abstractStorageUnit is not TEStorageUnit storageUnit)
 					continue;
 
+				//Ignore inactive units as the destination
+				if (storageUnit.Inactive)
+					continue;
+
 				foreach (TEAbstractStorageUnit abstractStorageUnit2 in GetStorageUnits())
 				{
 					index2++;
@@ -408,7 +412,7 @@ namespace MagicStorage.Components
 					if (storageUnit2.IsEmpty)
 						continue;
 
-					if (!storageUnit.Flatten(storageUnit2))
+					if (!storageUnit.FlattenFrom(storageUnit2))
 						continue;
 
 					NetHelper.Report(true, $"Items flattened between units {storageUnit.ID} and {storageUnit2.ID}");

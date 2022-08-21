@@ -108,16 +108,12 @@ namespace MagicStorage
 				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
 					? 1   //Show all recipes
 					: 0;  //Show available recipes
-
-				StorageGUI.needRefresh = true;
 			}
 
 			if (MagicStorageConfig.ClearSearchText)
 			{
 				MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage")?.searchBar?.Reset();
 				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting")?.searchBar?.Reset();
-
-				StorageGUI.needRefresh = true;
 			}
 
 			StorageGUI.RefreshItems();

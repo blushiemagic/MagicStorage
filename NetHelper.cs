@@ -807,9 +807,6 @@ namespace MagicStorage
 			packet.Write(source.Position);
 			packet.Write(transferredItems.Count);
 
-			foreach (Item item in transferredItems)
-				ItemIO.Send(item, packet, writeStack: true, writeFavorite: true);
-
 			packet.Send();
 
 			Report(true, MessageType.TransferItemsResult + " packet sent to all clients");
@@ -825,6 +822,9 @@ namespace MagicStorage
 
 			if (netQueue)
 				ProcessUpdateQueue();
+
+			if (destination.GetHeart() is TEStorageHeart heart)
+				SendRefreshNetworkItems(heart.Position);
 
 			return true;
 		}
@@ -846,23 +846,22 @@ namespace MagicStorage
 			}
 
 			int count = reader.ReadInt32();
-			List<Item> transferredItems = new();
-			for (int i = 0; i < count; i++)
-				transferredItems.Add(ItemIO.Receive(reader, readStack: true, readFavorite: true));
 
-			Report(true, transferredItems.Count + " items were transferred");
+			Report(true, count + " items were transferred");
 
-			//Deposit/withdraw the transferred items
-			List<Item> dest = unitDestination.GetItems() as List<Item>;
-			List<Item> src = unitSource.GetItems() as List<Item>;
+			if (count > 0) {
+				TEStorageUnit.AttemptItemTransfer(unitDestination, unitSource, out var items);
 
-			foreach (Item item in transferredItems) {
-				TEStorageUnit.DepositToItemCollection(dest, item.Clone(), unitDestination.Capacity, out _);
-				TEStorageUnit.WithdrawFromItemCollection(src, item, out _);
+				if (count != items.Count) {
+					Report(false, MessageType.TransferItemsResult + " had a mismatch of item counts (Server: " + count + ", Client: " + items.Count + "), requesting a full sync");
+
+					SyncStorageUnit(unitDestination.Position);
+					SyncStorageUnit(unitSource.Position);
+				}
+
+				unitDestination.PostChangeContents();
+				unitSource.PostChangeContents();
 			}
-
-			unitDestination.PostChangeContents();
-			unitSource.PostChangeContents();
 
 			Report(true, MessageType.TransferItemsResult + " packet received by client " + Main.myPlayer);
 		}

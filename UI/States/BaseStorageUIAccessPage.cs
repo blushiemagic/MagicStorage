@@ -44,12 +44,12 @@ namespace MagicStorage.UI.States {
 
 		public BaseStorageUIAccessPage(BaseStorageUI parent, string name) : base(parent, name) {
 			OnPageSelected += () => {
-				StorageGUI.CheckRefresh();
-
 				searchBar.active = true;
 
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
+
+				StorageGUI.CheckRefresh();
 			};
 
 			OnPageDeselected += () => {

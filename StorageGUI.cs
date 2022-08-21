@@ -110,11 +110,11 @@ namespace MagicStorage
 				{
 					context = new(heart.GetStoredItems());
 					context.items = ItemSorter.SortAndFilter(context, sortMode, filterMode, searchText, modSearch);
+				}
 
-					if (MagicStorageConfig.CraftingFavoritingEnabled) {
-						context.items = context.items.OrderByDescending(x => x.favorited ? 1 : 0);
-						context.sourceItems = context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
-					}
+				if (MagicStorageConfig.CraftingFavoritingEnabled) {
+					context.items = context.items.OrderByDescending(x => x.favorited ? 1 : 0);
+					context.sourceItems = context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
 				}
 
 				items.AddRange(context.items.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x.favorited));
@@ -134,7 +134,17 @@ namespace MagicStorage
 					// search all categories
 					filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					NetHelper.Report(false, "No items displayed even though items exist in storage.  Defaulting to \"All\" filter mode");
+					Main.NewText("No items displayed even though items exist in storage.  Defaulting to \"All\" filter mode", Microsoft.Xna.Framework.Color.Red);
+
+					DoFiltering();
+				}
+
+				if (items.Count == 0 && modSearch != ModSearchBox.ModIndexAll)
+				{
+					// search all mods
+					modSearch = ModSearchBox.ModIndexAll;
+
+					Main.NewText($"No items displayed even though items exist in storage.  Defaulting to \"{Terraria.Localization.Language.GetTextValue("Mods.MagicStorage.FilterAllMods")}\" mod filter", Microsoft.Xna.Framework.Color.Red);
 
 					DoFiltering();
 				}

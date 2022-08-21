@@ -174,7 +174,7 @@ namespace MagicStorage
 			if (RecursiveCraftIntegration.Enabled)
 				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 
-			int GetAmountCraftable(Item requiredItem)
+			int GetMaxCraftsAmount(Item requiredItem)
 			{
 				int total = 0;
 				foreach (Item inventoryItem in items)
@@ -185,9 +185,9 @@ namespace MagicStorage
 				return craftable;
 			}
 
-			maxCraftable = recipe.requiredItem.Select(GetAmountCraftable).Prepend(maxCraftable).Min();
+			maxCraftable = recipe.requiredItem.Select(GetMaxCraftsAmount).Prepend(maxCraftable).Min();
 
-			return maxCraftable;
+			return maxCraftable * recipe.createItem.stack;
 		}
 
 		internal static Item GetResult(int slot, ref int context) => slot == 0 && result is not null ? result : new Item();
@@ -413,6 +413,9 @@ namespace MagicStorage
 				{
 					// search hidden recipes too
 					hiddenRecipes = ItemTypeOrderedSet.Empty;
+
+					Main.NewText("No recipes displayed even though blacklisted recipes exist.  Ignoring recipe blacklisting");
+
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
 
@@ -424,10 +427,14 @@ namespace MagicStorage
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
 				*/
+
 				if (recipes.Count == 0 && modFilterIndex != ModSearchBox.ModIndexAll)
 				{
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
+
+					Main.NewText($"No recipes displayed even though recipes exist from other mods.  Defaulting to \"{Terraria.Localization.Language.GetTextValue("Mods.MagicStorage.FilterAllMods")}\" mod filter", Microsoft.Xna.Framework.Color.Red);
+
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
 			}

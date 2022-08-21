@@ -205,6 +205,7 @@ public class MagicUI : ModSystem
 			pendingUIChangeForAnyReason = false;
 		}
 
+		uiInterface?.Use();
 		uiInterface?.Update(gameTime);
 
 		if (pendingClose) {
@@ -252,6 +253,8 @@ public class MagicUI : ModSystem
 			uiInterface.SetState(craftingUI);
 		else
 			uiInterface.SetState(storageUI);
+
+		StorageGUI.needRefresh = true;
 	}
 
 	internal static void CloseUI() {

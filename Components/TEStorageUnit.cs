@@ -308,20 +308,20 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal bool Flatten(TEStorageUnit other) {
+		internal bool FlattenFrom(TEStorageUnit source) {
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				NetHelper.ClientRequestItemTransfer(this, other);
+				NetHelper.ClientRequestItemTransfer(this, source);
 				return false;
 			} else if (Main.netMode == NetmodeID.Server)
-				return NetHelper.AttemptItemTransferAndSendResult(this, other, false);
+				return NetHelper.AttemptItemTransferAndSendResult(this, source, false);
 
-			AttemptItemTransfer(this, other, out List<Item> transferred);
+			AttemptItemTransfer(this, source, out List<Item> transferred);
 
 			if (transferred.Count == 0)
 				return false;
 
 			PostChangeContents();
-			other.PostChangeContents();
+			source.PostChangeContents();
 
 			return true;
 		}
@@ -365,6 +365,12 @@ namespace MagicStorage.Components
 				return;
 			}
 
+			if (destination.Inactive) {
+				//Nothing to do
+				NetHelper.Report(false, $"Destination unit (X: {destination.Position.X}, Y: {destination.Position.Y}) was inactive.  Aborting transfer");
+				return;
+			}
+
 			//Attempt to pack items first
 			for (int d = 0; d < destination.NumItems; d++) {
 				Item dest = destination.items[d];
@@ -399,7 +405,7 @@ namespace MagicStorage.Components
 			}
 
 			if (transferredItems.Count > 0)
-				NetHelper.Report(false, $"Packed {transferredItems.Count} from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
+				NetHelper.Report(false, $"Packed {transferredItems.Count} items from the source unit (X: {source.Position.X}, Y: {source.Position.Y}) to the destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})");
 
 			//Then simply transfer items until the destination is full or the source is empty
 			int nonPackedTransfer = 0;
@@ -608,6 +614,9 @@ namespace MagicStorage.Components
 
 				if (repairMetaData)
 					RepairMetadata();
+
+				UpdateTileFrameWithNetSend();
+
 				receiving = false;
 
 				NetHelper.Report(true, "Received tile entity data for TEStorageUnit");
