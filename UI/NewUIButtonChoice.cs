@@ -153,9 +153,10 @@ namespace MagicStorage.UI {
 
 			//Always reset the choice to the first option
 			Choice = 0;
+			OnChanged();
 		}
 
-		protected virtual void OnChanged() {
+		public virtual void OnChanged() {
 			_onChanged();
 		}
 

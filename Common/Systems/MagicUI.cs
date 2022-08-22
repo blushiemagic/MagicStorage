@@ -92,6 +92,9 @@ public class MagicUI : ModSystem
 		}
 
 		public static void Block() {
+			if (cache is null)
+				return;
+
 			Main.mouseX = -1;
 			Main.mouseY = -1;
 			Main.mouseLeft = Main.mouseLeftRelease = Main.mouseRight = Main.mouseRightRelease = false;
@@ -205,8 +208,12 @@ public class MagicUI : ModSystem
 			pendingUIChangeForAnyReason = false;
 		}
 
+		UserInterface old = UserInterface.ActiveInstance;
+
 		uiInterface?.Use();
 		uiInterface?.Update(gameTime);
+
+		UserInterface.ActiveInstance = old;
 
 		if (pendingClose) {
 			Main.NewTextMultiline(Language.GetTextValue("Mods.MagicStorage.PanelTooSmol"), c: Color.Red);
@@ -257,8 +264,6 @@ public class MagicUI : ModSystem
 			uiInterface.SetState(craftingUI);
 		else
 			uiInterface.SetState(storageUI);
-
-		StorageGUI.needRefresh = true;
 	}
 
 	internal static void CloseUI() {

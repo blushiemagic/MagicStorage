@@ -533,7 +533,7 @@ namespace MagicStorage.Components
 
 			base.NetReceive(reader);
 
-			int serverItemsCount = reader.ReadInt16();
+			int serverItemsCount = reader.ReadUInt16();
 			int opCount = reader.ReadUInt16();
 			if (opCount > 0)
 			{

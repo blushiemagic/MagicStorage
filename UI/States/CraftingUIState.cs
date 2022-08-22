@@ -670,8 +670,12 @@ namespace MagicStorage.UI.States {
 		protected override void OnOpen() {
 			StorageGUI.OnRefresh += Refresh;
 
-			if (MagicStorageConfig.UseConfigFilter)
-				GetPage<RecipesPage>("Crafting").recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+			if (MagicStorageConfig.UseConfigFilter) {
+				var page = GetPage<RecipesPage>("Crafting");
+
+				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
+				page.recipeButtons.OnChanged();
+			}
 
 			if (MagicStorageConfig.ClearRecipeHistory)
 				history.Clear();
@@ -826,7 +830,7 @@ namespace MagicStorage.UI.States {
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
-				recipeButtons = new(StorageGUI.RefreshItems, 32, 5, forceGearIconToNotBeCreated: true);
+				recipeButtons = new(() => StorageGUI.needRefresh = true, 32, 5, forceGearIconToNotBeCreated: true);
 				InitFilterButtons();
 				topBar.Append(recipeButtons);
 

@@ -112,6 +112,8 @@ namespace MagicStorage
 				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
 					? 1   //Show all recipes
 					: 0;  //Show available recipes
+
+				page.recipeButtons.OnChanged();
 			}
 
 			if (MagicStorageConfig.ClearSearchText)

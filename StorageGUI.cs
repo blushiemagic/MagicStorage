@@ -189,7 +189,7 @@ namespace MagicStorage
 					else
 						Main.mouseItem.stack += result.stack;
 
-					RefreshItems();
+					needRefresh = true;
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 

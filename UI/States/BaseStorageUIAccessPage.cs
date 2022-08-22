@@ -97,7 +97,7 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), StorageGUI.RefreshItems) {
+			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), () => StorageGUI.needRefresh = true) {
 				GetHoverText = () => {
 					StringBuilder sb = new();
 

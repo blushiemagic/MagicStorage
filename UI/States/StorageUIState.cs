@@ -121,7 +121,7 @@ namespace MagicStorage.UI.States {
 			public override void OnInitialize() {
 				base.OnInitialize();
 				
-				filterFavorites = new(StorageGUI.RefreshItems,
+				filterFavorites = new(() => StorageGUI.needRefresh = true,
 					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
 					32);
