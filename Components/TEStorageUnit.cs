@@ -600,15 +600,13 @@ namespace MagicStorage.Components
 				if (repairMetaData)
 					RepairMetadata();
 
-				UpdateTileFrameWithNetSend();
-
 				receiving = false;
 
 				NetHelper.Report(true, "Received tile entity data for TEStorageUnit");
 			}
 			else if (serverItemsCount != items.Count) // if there is mismatch between the server and the client then send a sync request
 			{
-				NetHelper.Report(true, "Item count mismatch detected for TEStorageUnit, requesting full sync");
+				NetHelper.Report(true, $"Item count mismatch detected for TEStorageUnit (Server: {serverItemsCount}, Client: {items.Count}), requesting full sync");
 
 				NetHelper.SyncStorageUnit(Position);
 			}
