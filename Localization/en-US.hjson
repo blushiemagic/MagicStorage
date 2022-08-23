@@ -618,6 +618,7 @@ Mods: {
 		Config: {
 			Label: "Magic Storage Config"
 			ServersideLabel: "Magic Storage Server Config"
+			BetaLabel: "Magic Storage BETA Config"
 
 			glowNewItems: {
 				Label: "Display new items/recipes"
@@ -698,6 +699,15 @@ Mods: {
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"
 				Tooltip: "Enable to allow the Automaton to be able to move into housing"
+			}
+
+			PrintTextToChat: {
+				Label: "Print logging information to ingame chat"
+				Tooltip:
+				'''
+				Enable to print logging information to the ingame chat.
+				Logging information will be printed to your client.log and server.log files regardless.
+				'''
 			}
 		}
 	}

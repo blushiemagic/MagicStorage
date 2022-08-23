@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using MagicStorage.UI.States;
 using Newtonsoft.Json;
 using Terraria;
@@ -146,4 +147,21 @@ namespace MagicStorage
 			return false;
 		}
 	}
+
+	#if NETPLAY
+	[Label("$Mods.MagicStorage.Config.BetaLabel")]
+	public class MagicStorageBetaConfig : ModConfig {
+		public override ConfigScope Mode => ConfigScope.ClientSide;
+
+		public static MagicStorageBetaConfig Instance => ModContent.GetInstance<MagicStorageBetaConfig>();
+
+		[Label("$Mods.MagicStorage.Config.PrintTextToChat.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.PrintTextToChat.Tooltip")]
+		[DefaultValue(false)]
+		public bool printTextToChat;
+
+		[JsonIgnore]
+		public static bool PrintTextToChat => Instance.printTextToChat;
+	}
+	#endif
 }

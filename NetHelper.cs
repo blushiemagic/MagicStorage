@@ -31,7 +31,10 @@ namespace MagicStorage
 			sb.Append(message);
 
 			if (Main.netMode != NetmodeID.Server) {
-				Main.NewTextMultiline(sb.ToString(), c: Color.White);
+				#if NETPLAY
+				if (MagicStorageBetaConfig.PrintTextToChat)
+				#endif
+					Main.NewTextMultiline(sb.ToString(), c: Color.White);
 			} else if (Main.dedServ) {
 				if (reportTime) {
 					ConsoleColor fg = Console.ForegroundColor;

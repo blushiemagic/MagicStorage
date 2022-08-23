@@ -594,6 +594,8 @@ Mods: {
 
 		Config: {
 			Label: "魔法存储配置"
+			# ServersideLabel: "Magic Storage Server Config"
+			# BetaLabel: "Magic Storage BETA Config"
 
 			glowNewItems: {
 				Label: "显示新物品/配方"
@@ -658,6 +660,14 @@ Mods: {
 			AllowAutomatonToMoveIn: {
 				Label: "自动机入住"
 				Tooltip: "开启以允许城镇NPC“自动机”入住你的城镇"
+			}
+
+			PrintTextToChat: {
+				# Label: "Print logging information to ingame chat"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
 			}
 		}
 	}
