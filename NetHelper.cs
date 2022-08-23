@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using MagicStorage.UI.States;
 using System.Text;
 using System.Linq;
+using Terraria.Audio;
 
 namespace MagicStorage
 {
@@ -118,9 +119,6 @@ namespace MagicStorage
 				case MessageType.TransferItems:
 					ReceiveClientRequestItemTransfer(reader, sender);
 					break;
-				case MessageType.TransferItemsResult:
-					RecieveTransferItemsResult(reader);
-					break;
 				case MessageType.RequestCoinCompact:
 					ReceiveCoinCompactRequest(reader, sender);
 					break;
@@ -132,6 +130,9 @@ namespace MagicStorage
 					break;
 				case MessageType.RequestStorageUnitStyle:
 					ReceiveStorageUnitStyle(reader, sender);
+					break;
+				case MessageType.InformQuickStackToStorage:
+					ClientReceiveQuickStackToStorage();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -806,22 +807,14 @@ namespace MagicStorage
 
 			Report(false, transferredItems.Count + " items were transferred");
 
-			//Send the result to all clients
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.TransferItemsResult);
-			packet.Write(destination.Position);
-			packet.Write(source.Position);
-			packet.Write(transferredItems.Count);
-
-			packet.Send();
-
-			Report(true, MessageType.TransferItemsResult + " packet sent to all clients");
-
 			if (netQueue) {
 				StartUpdateQueue();
 
 				destination.GetHeart()?.ResetCompactStage();
 			}
+
+			destination.FullySync();
+			source.FullySync();
 
 			destination.PostChangeContents();
 			source.PostChangeContents();
@@ -833,42 +826,6 @@ namespace MagicStorage
 				SendRefreshNetworkItems(heart.Position);
 
 			return true;
-		}
-
-		public static void RecieveTransferItemsResult(BinaryReader reader) {
-			Point16 destination = reader.ReadPoint16();
-			Point16 source = reader.ReadPoint16();
-			int count = reader.ReadInt32();
-
-			if (!TileEntity.ByPosition.TryGetValue(destination, out TileEntity tileEntity) || tileEntity is not TEStorageUnit unitDestination) {
-				Report(true, MessageType.TransferItems + " packet failed to read on client" + Main.myPlayer + ".\n" +
-					"Reason: Destination was not a Storage Unit");
-				return;
-			}
-
-			if (!TileEntity.ByPosition.TryGetValue(source, out tileEntity) || tileEntity is not TEStorageUnit unitSource) {
-				Report(true, MessageType.TransferItems + " packet failed to read on client" + Main.myPlayer + ".\n" +
-					"Reason: Source was not a Storage Unit");
-				return;
-			}
-
-			Report(true, count + " items were transferred");
-
-			if (count > 0) {
-				TEStorageUnit.AttemptItemTransfer(unitDestination, unitSource, out var items);
-
-				if (count != items.Count) {
-					Report(false, MessageType.TransferItemsResult + " had a mismatch of item counts (Server: " + count + ", Client: " + items.Count + "), requesting a full sync");
-
-					SyncStorageUnit(unitDestination.Position);
-					SyncStorageUnit(unitSource.Position);
-				}
-
-				unitDestination.PostChangeContents();
-				unitSource.PostChangeContents();
-			}
-
-			Report(true, MessageType.TransferItemsResult + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void SendCoinCompactRequest(Point16 heart) {
@@ -1003,6 +960,23 @@ namespace MagicStorage
 
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
+
+		public static void SendQuickStackToStorage(int player) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.InformQuickStackToStorage);
+			packet.Send(toClient: player);
+		}
+
+		public static void ClientReceiveQuickStackToStorage() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			SoundEngine.PlaySound(SoundID.Grab);
+			StorageGUI.needRefresh = true;
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1023,10 +997,10 @@ namespace MagicStorage
 		SyncStorageUnit,
 		ForceCraftingGUIRefresh,
 		TransferItems,
-		TransferItemsResult,
 		RequestCoinCompact,
 		MassDuplicateSellRequest,
 		MassDuplicateSellResult,
-		RequestStorageUnitStyle
+		RequestStorageUnitStyle,
+		InformQuickStackToStorage
 	}
 }

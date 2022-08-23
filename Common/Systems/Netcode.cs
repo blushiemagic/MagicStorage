@@ -22,9 +22,12 @@ namespace MagicStorage.Common.Systems {
 					item = Chest.PutItemInNearbyChest(item, player.Center);
 
 					bool playSound = false;
-					TryPlaceItemInNearbyStorageSystems(player, item, ref playSound);
+					bool success = TryPlaceItemInNearbyStorageSystems(player, item, ref playSound);
 
 					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, playerNumber, b7, item.prefix);
+
+					if (success)
+						NetHelper.SendQuickStackToStorage(playerNumber);
 				}
 
 				return true;
@@ -33,12 +36,12 @@ namespace MagicStorage.Common.Systems {
 			return base.HijackGetData(ref messageType, ref reader, playerNumber);
 		}
 
-		internal static void TryPlaceItemInNearbyStorageSystems(Player self, Item item, ref bool playSound)
+		internal static bool TryPlaceItemInNearbyStorageSystems(Player self, Item item, ref bool playSound)
 			=> TryPlaceItemInNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
 
-		internal static void TryPlaceItemInNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
+		internal static bool TryPlaceItemInNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
 			if (item.IsAir)
-				return;
+				return false;
 
 			//Quick stack to nearby chests failed or was only partially completed.  Try to do the same for nearby storage systems
 			foreach (TEStorageHeart heart in hearts) {
@@ -51,8 +54,10 @@ namespace MagicStorage.Common.Systems {
 					playSound = true;
 
 				if (item.IsAir)
-					break;
+					return true;
 			}
+
+			return false;
 		}
 	}
 }

@@ -50,11 +50,9 @@ namespace MagicStorage.Edits {
 					Item item = self.inventory[i];
 
 					if (item.type > ItemID.None && item.stack > 0 && !item.favorited && !item.IsACoin) {
-						int oldStack = item.stack, oldType = item.type;
+						bool success = Netcode.TryPlaceItemInNearbyStorageSystems(hearts, item, ref flag);
 
-						Netcode.TryPlaceItemInNearbyStorageSystems(hearts, item, ref flag);
-
-						if ((oldStack != item.stack || oldType != item.type) && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
+						if (success && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
 							StorageGUI.needRefresh = true;
 					}
 				}
