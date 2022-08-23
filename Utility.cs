@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections;
@@ -9,6 +10,7 @@ using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
@@ -171,5 +173,41 @@ namespace MagicStorage {
 				&& recipe1.requiredItem.SequenceEqual(recipe2.requiredItem, ItemTypeComparer.Instance)
 				&& recipe1.requiredTile.SequenceEqual(recipe2.requiredTile, EqualityComparer<int>.Default);
 		}
+
+		private static List<(StorageAccess access, Point16 position)> GetNearbyAccesses(Player self) {
+			Point16 centerTile = self.Center.ToTileCoordinates16();
+
+			List<(StorageAccess access, Point16 position)> storageAccesses = new();
+
+			for (int x = centerTile.X - 17; x <= centerTile.X + 17; x++) {
+				if (x < 0 || x >= Main.maxTilesX)
+					continue;
+
+				for (int y = centerTile.Y - 17; y <= centerTile.Y + 17; y++) {
+					if (y < 0 || y >= Main.maxTilesY)
+						continue;
+
+					if (TileLoader.GetTile(Main.tile[x, y].TileType) is StorageAccess access)
+						storageAccesses.Add((access, new Point16(x, y)));
+				}
+			}
+
+			static Point16 AccessTopLeft(Point16 position) {
+				//Assumes that all accesses are only 2x2, which they should be anyway
+				Tile tile = Main.tile[position.X, position.Y];
+
+				return position - new Point16(tile.TileFrameX / 18, tile.TileFrameY / 18);
+			}
+
+			//Avoid lazy evaluation making the List local possibly invalid
+			return storageAccesses.DistinctBy(t => AccessTopLeft(t.position)).ToList();
+		}
+
+		public static IEnumerable<TEStorageHeart> GetNearbyNetworkHearts(this Player self)
+			=> GetNearbyAccesses(self)
+				.Select(t => (heart: t.access.GetHeart(t.position.X, t.position.Y), heartPosition: t.position))
+				.Where(t => t.heart is not null)
+				.DistinctBy(t => t.heartPosition)
+				.Select(t => t.heart);
 	}
 }

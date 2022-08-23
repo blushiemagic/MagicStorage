@@ -127,6 +127,9 @@ namespace MagicStorage
 				case MessageType.MassDuplicateSellResult:
 					ClientReceiveDuplicateSellingResult(reader);
 					break;
+				case MessageType.RequestStorageUnitStyle:
+					ReceiveStorageUnitStyle(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
@@ -964,6 +967,39 @@ namespace MagicStorage
 			if (sender == Main.myPlayer)
 				StorageUIState.ControlsPage.DuplicateSellingResult(storageHeart, sold, coppersEarned, reportText: true, depositCoins: false);
 		}
+
+		public static void RequestStorageUnitStyle(Point16 unit) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.RequestStorageUnitStyle);
+				packet.Write(unit);
+				packet.Send();
+
+				Report(true, MessageType.RequestStorageUnitStyle + " packet sent to the server");
+			}
+		}
+
+		public static void ReceiveStorageUnitStyle(BinaryReader reader, int sender) {
+			if (Main.netMode != NetmodeID.Server) {
+				_ = reader.ReadPoint16();
+
+				return;
+			}
+
+			Point16 unit = reader.ReadPoint16();
+
+			//Safeguard:  Ensure that the map section exists before sending data
+			RemoteClient.CheckSection(sender, unit.ToWorldCoordinates());
+
+			if (!TileEntity.ByPosition.TryGetValue(unit, out TileEntity entity) || entity is not TEStorageUnit storageUnit) {
+				Report(true, MessageType.RequestStorageUnitStyle + " packet was malformed: Storage Unit location did not have a Storage Unit");
+				return;
+			}
+
+			storageUnit.UpdateTileFrameWithNetSend();
+
+			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -987,6 +1023,7 @@ namespace MagicStorage
 		TransferItemsResult,
 		RequestCoinCompact,
 		MassDuplicateSellRequest,
-		MassDuplicateSellResult
+		MassDuplicateSellResult,
+		RequestStorageUnitStyle
 	}
 }

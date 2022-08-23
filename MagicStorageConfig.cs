@@ -30,7 +30,7 @@ namespace MagicStorage
 
 		[Label("$Mods.MagicStorage.Config.quickStackDepositMode.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip")]
-		[DefaultValue(false)]
+		[DefaultValue(true)]
 		public bool quickStackDepositMode;
 
 		[Label("$Mods.MagicStorage.Config.clearSearchText.Label")]

@@ -248,8 +248,11 @@ namespace MagicStorage.Components
 
 		public void UpdateTileFrameWithNetSend()
 		{
-			if (UpdateTileFrame())
-				NetMessage.SendTileSquare(-1, Position.X, Position.Y, 2, 2);
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				if (UpdateTileFrame())
+					NetMessage.SendTileSquare(-1, Position.X, Position.Y, 2, 2);
+			} else
+				NetHelper.RequestStorageUnitStyle(Position);
 		}
 
 		internal static void SwapItems(TEStorageUnit unit1, TEStorageUnit unit2)
@@ -542,7 +545,10 @@ namespace MagicStorage.Components
 					items = otherUnit.items;
 					hasSpaceInStack = otherUnit.hasSpaceInStack;
 					hasItem = otherUnit.hasItem;
+					hasItemNoPrefix = otherUnit.hasItemNoPrefix;
 				}
+
+				int oldCount = items.Count;
 
 				receiving = true;
 				bool repairMetaData = true;
@@ -599,6 +605,9 @@ namespace MagicStorage.Components
 
 				if (repairMetaData)
 					RepairMetadata();
+
+				if (items.Count != oldCount)
+					UpdateTileFrameWithNetSend();
 
 				receiving = false;
 
