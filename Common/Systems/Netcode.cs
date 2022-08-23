@@ -14,19 +14,17 @@ namespace MagicStorage.Common.Systems {
 				byte b7 = reader.ReadByte();
 
 				if (Main.netMode == NetmodeID.Server && playerNumber < Main.maxPlayers && b7 < 58) {
-					Item item = Main.player[playerNumber].inventory[b7];
-					
-					int oldType = item.type, oldStack = item.stack;
+					Player player = Main.player[playerNumber];
 
-					Chest.ServerPlaceItem(playerNumber, b7);
+					ref Item item = ref player.inventory[b7];
 
-					bool skipSound = false;
-
-					if (oldType != item.type || oldStack != item.stack)
-						skipSound = true;
+					//Basically manually doing Chest.ServerPlaceItem, but inserting TryPlaceItemInNearbyStorageSystems before the SendData call
+					item = Chest.PutItemInNearbyChest(item, player.Center);
 
 					bool playSound = false;
-					TryPlaceItemInNearbyStorageSystems(Main.player[playerNumber], item, skipSound, ref playSound);
+					TryPlaceItemInNearbyStorageSystems(player, item, ref playSound);
+
+					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, playerNumber, b7, item.prefix);
 				}
 
 				return true;
@@ -35,10 +33,10 @@ namespace MagicStorage.Common.Systems {
 			return base.HijackGetData(ref messageType, ref reader, playerNumber);
 		}
 
-		internal static void TryPlaceItemInNearbyStorageSystems(Player self, Item item, bool skipSound, ref bool playSound)
-			=> TryPlaceItemInNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, skipSound, ref playSound);
+		internal static void TryPlaceItemInNearbyStorageSystems(Player self, Item item, ref bool playSound)
+			=> TryPlaceItemInNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
 
-		internal static void TryPlaceItemInNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, bool skipSound, ref bool playSound) {
+		internal static void TryPlaceItemInNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
 			if (item.IsAir)
 				return;
 
@@ -55,9 +53,6 @@ namespace MagicStorage.Common.Systems {
 				if (item.IsAir)
 					break;
 			}
-
-			if (!skipSound && playSound)
-				SoundEngine.PlaySound(SoundID.Grab);
 		}
 	}
 }
