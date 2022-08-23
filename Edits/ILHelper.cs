@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
 	internal static class ILHelper {
-		public static bool LogILEdits { get; set; }
+		public static bool LogILEdits { get; set; } = true;
 
 		private static void PrepareInstruction(Instruction instr, out string offset, out string opcode, out string operand) {
 			offset = $"IL_{instr.Offset:X5}:";
