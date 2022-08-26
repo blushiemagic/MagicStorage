@@ -3,7 +3,9 @@ using MagicStorage.Stations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -11,11 +13,19 @@ using Terraria.GameContent.Personalities;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 
 namespace MagicStorage.NPCs {
 	[AutoloadHead]
 	internal class Golem : ModNPC {
+		public bool newHelpTextAvailable;
+		private bool pendingNewHelpTextCheck;
+
+		private int newHelpTextAvailableCounter;
+
+		private bool lastKnownAllMechsDowned, lastKnownMoonLordDowned;
+
 		public override void SetStaticDefaults() {
 			Main.npcFrameCount[Type] = 25;
 
@@ -81,6 +91,23 @@ namespace MagicStorage.NPCs {
 
 		public override void PostAI() {
 			Lighting.AddLight(NPC.Center, (Color.Orange * 0.3f).ToVector3());
+
+			if (newHelpTextAvailable)
+				newHelpTextAvailableCounter++;
+
+			if (lastKnownAllMechsDowned != Utility.DownedAllMechs || lastKnownMoonLordDowned != NPC.downedMoonlord)
+				pendingNewHelpTextCheck = true;
+
+			if (pendingNewHelpTextCheck) {
+				if (Utility.DownedAllMechs || NPC.downedMoonlord)
+					newHelpTextAvailable = true;
+
+				pendingNewHelpTextCheck = false;
+				newHelpTextAvailableCounter = 0;
+			}
+
+			lastKnownAllMechsDowned = Utility.DownedAllMechs;
+			lastKnownMoonLordDowned = NPC.downedMoonlord;
 		}
 
 		public override void HitEffect(int hitDirection, double damage) {
@@ -109,6 +136,13 @@ namespace MagicStorage.NPCs {
 			};
 
 		public override string GetChat() {
+			helpOption = 0;
+
+			if (newHelpTextAvailable) {
+				newHelpTextAvailable = false;
+				return Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.NewTextAvailable", Main.LocalPlayer.name);
+			}
+
 			WeightedRandom<string> chat = new();
 
 			chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Greeting", Main.LocalPlayer.name), 8);
@@ -118,8 +152,6 @@ namespace MagicStorage.NPCs {
 			int wizard = NPC.FindFirstNPC(NPCID.Wizard);
 			if (wizard >= 0)
 				chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Wizard", Main.npc[wizard].GivenName), 3);
-
-			helpOption = 0;
 
 			return chat;
 		}
@@ -137,7 +169,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 19;
+		public const int maxHelp = 20;
+
+		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			if (firstButton)
@@ -150,9 +184,18 @@ namespace MagicStorage.NPCs {
 			else if (helpOption < 1)
 				helpOption = 1;
 
-			Main.npcChatText = Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + helpOption);
+			int option = helpOptionsByIndex[helpOption - 1];
 
-			Main.npcChatCornerItem = helpOption switch {
+			//string alt = option != 20 ? "" : NPC.downedMoonlord ? "_Moon" : NPC.downedMechBossAny ? "_Mechs" : "";
+
+			string alt = option switch {
+				20 => NPC.downedMoonlord ? "_Moon" : Utility.DownedAllMechs ? "_Mechs" : "",
+				_ => ""
+			};
+
+			Main.npcChatText = Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + option + alt);
+
+			Main.npcChatCornerItem = option switch {
 				1 => ModContent.ItemType<StorageComponent>(),
 				2 => ModContent.ItemType<StorageHeart>(),
 				3 or
@@ -167,7 +210,8 @@ namespace MagicStorage.NPCs {
 				10 => ModContent.ItemType<StorageAccess>(),
 				11 => ModContent.ItemType<BiomeGlobe>(),
 				12 or
-				13 => ModContent.ItemType<RemoteAccess>(),
+				13 or
+				20 => ModContent.ItemType<RemoteAccess>(),
 				14 => ModContent.ItemType<StorageDeactivator>(),
 				15 => ModContent.ItemType<DemonAltar>(),
 				18 => ModContent.ItemType<RadiantJewel>(),
@@ -221,6 +265,48 @@ namespace MagicStorage.NPCs {
 				NPC.scale,
 				spriteEffects,
 				0f);
+
+			if (newHelpTextAvailable) {
+				Texture2D exclamation = TextureAssets.Extra[48].Value;
+
+				Rectangle source = exclamation.Frame(8, 39, newHelpTextAvailableCounter % 60 < 30 ? 6 : 7, 1);
+
+				Vector2 center = NPC.Top - new Vector2(0, source.Height * 0.75f);
+
+				double sin = (Math.Sin(newHelpTextAvailableCounter / 60d * MathHelper.TwoPi * 0.65) + 1) / 2;
+
+				center.Y += (float)(-5 * Math.Sin(newHelpTextAvailableCounter / 60d * MathHelper.TwoPi * 0.4));
+
+				float transparency = (float)(0.75 + 0.25 * sin);
+
+				spriteBatch.Draw(exclamation, center, source, Color.White * transparency, 0, source.Size() / 2f, 1f, SpriteEffects.None, 0);
+			}
+		}
+
+		public override void SendExtraAI(BinaryWriter writer) {
+			BitsByte bb = new(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
+
+			writer.Write(bb);
+		}
+
+		public override void ReceiveExtraAI(BinaryReader reader) {
+			BitsByte bb = reader.ReadByte();
+
+			bb.Retrieve(ref newHelpTextAvailable, ref pendingNewHelpTextCheck, ref lastKnownAllMechsDowned, ref lastKnownMoonLordDowned);
+		}
+
+		public override void SaveData(TagCompound tag) {
+			tag["flags"] = new BitsByte(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
+		}
+
+		public override void LoadData(TagCompound tag) {
+			if (!tag.ContainsKey("flags"))
+				pendingNewHelpTextCheck = true;
+			else {
+				BitsByte bb = tag.GetByte("flags");
+
+				bb.Retrieve(ref newHelpTextAvailable, ref pendingNewHelpTextCheck, ref lastKnownAllMechsDowned, ref lastKnownMoonLordDowned);
+			}
 		}
 	}
 

@@ -9,13 +9,16 @@ using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.GameContent.Creative;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace MagicStorage {
-	public static class Utility {
+	public static partial class Utility {
+		public static bool DownedAllMechs => NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3;
+
 		public static string GetSimplifiedGenericTypeName(this Type type) {
 			//Handle all invalid cases here:
 			if (type.FullName is null)
@@ -209,5 +212,122 @@ namespace MagicStorage {
 				.Where(t => t.heart is not null)
 				.DistinctBy(t => t.heartPosition)
 				.Select(t => t.heart);
+
+		public static TEStorageHeart GetHeartFromAccess(Point16 access) {
+			if (access.X < 0 || access.Y < 0)
+				return null;
+
+			Tile tile = Main.tile[access.X, access.Y];
+
+			if (TileLoader.GetTile(tile.TileType) is not StorageAccess storage)
+				return null;
+
+			return storage.GetHeart(access.X, access.Y);
+		}
+
+		public static IEnumerable<TeleportPylonInfo> NearbyPylons(Player player, float range) {
+			if (!Main.PylonSystem.HasAnyPylon() || range == 0)
+				yield break;
+
+			Vector2 center = player.Center;
+			float distSQ = range * range;
+
+			foreach (TeleportPylonInfo pylon in Main.PylonSystem.Pylons) {
+				if (!IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false))
+					continue;
+
+				//Range < 0 is treated as infinite range
+				if (range < 0 || center.DistanceSQ(pylon.PositionInTiles.ToWorldCoordinates()) < distSQ)
+					yield return pylon;
+			}
+		}
+
+		public static bool StorageSystemHasNearbyPylon(TEStorageHeart heart, int tileRange) {
+			if (!Main.PylonSystem.HasAnyPylon() || heart is null || tileRange == 0)
+				return false;
+
+			List<TeleportPylonInfo> validPylons = Main.PylonSystem.Pylons.Where(pylon => IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false)).ToList();
+
+			if (validPylons.Count == 0)
+				return false;
+
+			//Tile range < 0 is treated as infinite range
+			if (tileRange < 0)
+				return true;
+
+			foreach (var center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>()) {
+				if (GetHeartFromAccess(center.Position)?.Position != heart.Position)
+					continue;
+
+				int x = center.Position.X, y = center.Position.Y;
+				int xMin = x - tileRange, xMax = x + tileRange + 1, yMin = y - tileRange, yMax = y + tileRange + 1;
+
+				foreach (TeleportPylonInfo pylon in validPylons) {
+					int pX = pylon.PositionInTiles.X, pY = pylon.PositionInTiles.Y;
+
+					if (xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax)
+						return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static bool PlayerIsNearStorageSystem(Player player, TEStorageHeart heart, float range) {
+			if (heart is null || range == 0)
+				return false;
+
+			//Range < 0 is treated as infinite range
+			if (range < 0)
+				return true;
+
+			Vector2 playerCenter = player.Center;
+			float pX = playerCenter.X, pY = playerCenter.Y;
+
+			foreach (var center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>()) {
+				if (GetHeartFromAccess(center.Position)?.Position != heart.Position)
+					continue;
+
+				int x = center.Position.X, y = center.Position.Y;
+				float xMin = x - range, xMax = x + range + 1, yMin = y - range, yMax = y + range + 1;
+
+				if (xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax)
+					return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsPylonValidForRemoteAccessLinking(TeleportPylonInfo info, bool checkNPCDanger) {
+			string key = null;
+
+			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info);
+			bool flag = DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
+			if (!flag)
+				key = "Net.CannotTeleportToPylonBecauseNotEnoughNPCs";
+
+			if (flag && checkNPCDanger) {
+				CheckNPCDanger(info, ref flag);
+				if (!flag)
+					key = "Net.CannotTeleportToPylonBecauseThereIsDanger";
+			}
+
+			if (flag) {
+				CheckLihzahrdPylon(info, ref flag);
+				if (!flag)
+					key = "Net.CannotTeleportToPylonBecauseAccessingLihzahrdTempleEarly";
+			}
+
+			if (flag) {
+				CheckValidDestination(info, ref flag);
+				if (!flag)
+					key = "Net.CannotTeleportToPylonBecauseNotMeetingBiomeRequirements";
+			}
+
+			if (info.ModPylon is ModPylon destinationPylon)
+				destinationPylon.ValidTeleportCheck_DestinationPostCheck(info, ref flag, ref key);
+
+			return flag;
+		}
 	}
 }

@@ -43,6 +43,8 @@ Mods: {
 			CombinedStations3Item: 高级组合制作站
 			CombinedStations4Item: 最终制作站
 			EnvironmentAccess: 模组互联单元
+			# PortableAccessPreHM: Basic Portable Remote Storage Access
+			# PortableAccessHM: Advanced Portable Remote Storage Access
 		}
 
 		ItemTooltip: {
@@ -66,18 +68,14 @@ Mods: {
 			<right>远程存储装置以设置其定位点
 			使用后不再损坏
 			'''
-			PortableAccess:
-			'''
-			<right>存储核心可储存其定位点
-			目前未设置为任何位置
-			使用可直接访问你的存储
-			'''
-			PortableCraftingAccess:
-			'''
-			<right>制作单元可储存其定位点
-			目前未设置为任何位置
-			使用可直接访问你的制作单元
-			'''
+			# PortableAccess:
+			# '''
+			# (See en-US translation)
+			# '''
+			# PortableCraftingAccess:
+			# '''
+			# (See en-US translation)
+			# '''
 			RadiantJewel:
 			'''
 			“辐射出耀眼的光芒”
@@ -230,6 +228,14 @@ Mods: {
 			一个用于供其他模组与魔法存储系统进行跨模组访问的组件
 			显示由其他模组添加的可开关的一系列跨模组模块，如果没有模块则不显示
 			'''
+			# PortableAccessPreHM:
+			# '''
+			# (See en-US translation)
+			# '''
+			# PortableAccessHM:
+			# '''
+			# (See en-US translation)
+			# '''
 		}
 
 		ProjectileName: {
@@ -405,6 +411,8 @@ Mods: {
 
 		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
 		PortableAccessMissing: "定位器目标点没有存储核心！"
+		# PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
+		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
 
 		PortableCraftingUnlocated: "定位器尚未设置到任何制作单元"
 		PortableCraftingMissing: "定位器目标点没有制作单元！"
@@ -664,6 +672,13 @@ Mods: {
 
 			PrintTextToChat: {
 				# Label: "Print logging information to ingame chat"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
+			}
+			ShowDebugPylonRangeAreas: {
+				# Label: "Portable Access Range Debug"
 				# Tooltip:
 				# '''
 				# (See en-US translation)

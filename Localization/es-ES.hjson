@@ -41,6 +41,9 @@ Mods: {
 			# CombinedStations2Item: Combined Stations (Tier 2)
 			# CombinedStations3Item: Combined Stations (Tier 3)
 			# CombinedStations4Item: Combined Stations (Final Tier)
+			# EnvironmentAccess: Environment Simulator
+			# PortableAccessPreHM: Basic Portable Remote Storage Access
+			# PortableAccessHM: Advanced Portable Remote Storage Access
 		}
 
 		ItemTooltip: {
@@ -65,12 +68,14 @@ Mods: {
 			<right> el Acceso de Almacenamiento Remoto para establecerlo
 			No se destruye cuando se usa
 			'''
-			PortableAccess:
-			'''
-			<right> Storage Heart to store location
-			Currently not set to any location
-			Use item to access your storage
-			'''
+			# PortableAccess:
+			# '''
+			# (See en-US translation)
+			# '''
+			# PortableCraftingAccess:
+			# '''
+			# (See en-US translation)
+			# '''
 			RadiantJewel:
 			'''
 			'Brilla con una luz deslumbrante'
@@ -153,6 +158,14 @@ Mods: {
 			# CombinedStations4Item:
 			# '''
 			# Combines the functionality of several crafting stations
+			# '''
+			# PortableAccessPreHM:
+			# '''
+			# (See en-US translation)
+			# '''
+			# PortableAccessHM:
+			# '''
+			# (See en-US translation)
 			# '''
 		}
 
@@ -293,6 +306,8 @@ Mods: {
 
 		# PortableAccessUnlocated: "Locator is not set to any Storage Heart"
 		# PortableAccessMissing: "Storage Heart is missing!"
+		# PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
+		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
 
 		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
 		# PortableCraftingMissing: "Crafting Access is missing!"
@@ -552,6 +567,13 @@ Mods: {
 
 			PrintTextToChat: {
 				# Label: "Print logging information to ingame chat"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
+			}
+			ShowDebugPylonRangeAreas: {
+				# Label: "Portable Access Range Debug"
 				# Tooltip:
 				# '''
 				# (See en-US translation)

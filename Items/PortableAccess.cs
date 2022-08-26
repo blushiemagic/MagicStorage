@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -52,19 +53,63 @@ namespace MagicStorage.Items
 			}
 		}
 
-		protected virtual void DoOpenStorage(Player player) {
+		/// <summary>
+		/// This method determines if this portable access has a limited range and, if it does, what the range is
+		/// </summary>
+		/// <returns><see langword="true"/> to indicate that this portable access has a limited range, <see langword="false"/> otherwise.</returns>
+		public virtual bool GetEffectiveRange(out float playerToPylonRange, out int pylonToStorageTileRange) {
+			playerToPylonRange = -1;
+			pylonToStorageTileRange = -1;
+			return false;
+		}
+
+		protected virtual void OpenContext(out int validTileType, out string missingAccessKey, out string unlocatedAccessKey, out bool openCrafting) {
+			validTileType = ModContent.TileType<Components.StorageHeart>();
+			missingAccessKey = "Mods.MagicStorage.PortableAccessMissing";
+			unlocatedAccessKey = "Mods.MagicStorage.PortableAccessUnlocated";
+			openCrafting = false;
+		}
+
+		private void DoOpenStorage(Player player) {
+			StoragePlayer mp = player.GetModPlayer<StoragePlayer>();
+
+			OpenContext(out int validTileType, out string missingAccessKey, out string unlocatedAccessKey, out bool openCrafting);
+
 			if (location.X >= 0 && location.Y >= 0)
 			{
 				Tile tile = Main.tile[location.X, location.Y];
-				if (!tile.HasTile || tile.TileType != ModContent.TileType<Components.StorageHeart>() || tile.TileFrameX != 0 || tile.TileFrameY != 0)
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessMissing"));
-				else
-					OpenStorage(player);
+				if (!tile.HasTile || tile.TileType != validTileType || tile.TileFrameX != 0 || tile.TileFrameY != 0)
+					Main.NewText(Language.GetTextValue(missingAccessKey));
+				else {
+					if (!GetEffectiveRange(out float playerRange, out int pylonRange) || playerRange < 0)
+						mp.portableAccessRangePlayerToPylons = -1;
+					else
+						mp.portableAccessRangePlayerToPylons = playerRange;
+					
+					mp.portableAccessRangePylonsToStorage = pylonRange;
+
+					OpenStorage(player, openCrafting);
+				}
 			}
 			else
 			{
-				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessUnlocated"));
+				Main.NewText(Language.GetTextValue(unlocatedAccessKey));
 			}
+		}
+
+		public static bool PlayerCanBeRemotelyConnectedToStorage(Player player, Point16 accessLocation) {
+			StoragePlayer mp = player.GetModPlayer<StoragePlayer>();
+
+			if (accessLocation.X < 0 || accessLocation.Y < 0)
+				return false;
+
+			if (Utility.GetHeartFromAccess(accessLocation) is not Components.TEStorageHeart heart)
+				return false;
+
+			if (Utility.PlayerIsNearStorageSystem(player, heart, mp.portableAccessRangePlayerToPylons))
+				return true;
+
+			return Utility.NearbyPylons(player, mp.portableAccessRangePlayerToPylons).Any() && Utility.StorageSystemHasNearbyPylon(heart, mp.portableAccessRangePylonsToStorage);
 		}
 
 		protected void OpenStorage(Player player, bool crafting = false)
@@ -103,7 +148,24 @@ namespace MagicStorage.Items
 			Main.stackSplit = 600;
 			Point16 toOpen = location;
 			Point16 prevOpen = modPlayer.ViewingStorage();
-			if (prevOpen == toOpen)
+
+			bool canOpen = true;
+			if (modPlayer.portableAccessRangePylonsToStorage >= 0 && !Utility.StorageSystemHasNearbyPylon(Utility.GetHeartFromAccess(location), modPlayer.portableAccessRangePylonsToStorage)) {
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessNoPylons"));
+				canOpen = false;
+			} else if (modPlayer.portableAccessRangePlayerToPylons >= 0 && !Utility.NearbyPylons(player, modPlayer.portableAccessRangePlayerToPylons).Any()) {
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessOutOfRange"));
+				canOpen = false;
+			}
+
+			if (!canOpen)
+			{
+				modPlayer.CloseStorage();
+				Recipe.FindRecipes();
+				modPlayer.portableAccessRangePlayerToPylons = 0;
+				modPlayer.portableAccessRangePylonsToStorage = 0;
+			}
+			else if (prevOpen == toOpen)
 			{
 				modPlayer.CloseStorage();
 				SoundEngine.PlaySound(SoundID.MenuClose);

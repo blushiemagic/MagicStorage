@@ -144,6 +144,14 @@ namespace MagicStorage.Common.Systems {
 			items = new int[] { ItemID.SilverBar, ItemID.TungstenBar };
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.SilverBar)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnySilverBar", group);
+
+			items = new int[] { ItemID.MythrilBar, ItemID.OrichalcumBar };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.MythrilBar)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyMythrilBar", group);
+
+			items = new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar };
+			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.DemoniteBar)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyDemoniteBar", group);
 		}
 	}
 }

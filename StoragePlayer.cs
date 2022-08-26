@@ -19,6 +19,8 @@ namespace MagicStorage
 
 		public bool remoteAccess, remoteCrafting;
 		private Point16 storageAccess = Point16.NegativeOne;
+		public float portableAccessRangePlayerToPylons;
+		public int portableAccessRangePylonsToStorage;
 
 		public int timeSinceOpen = 1;
 
@@ -89,7 +91,7 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (modTile is not StorageAccess || (remoteAccess && remoteCrafting && modTile is not CraftingAccess))
+				else if (modTile is not StorageAccess || (remoteAccess && remoteCrafting && modTile is not CraftingAccess) || !Items.PortableAccess.PlayerCanBeRemotelyConnectedToStorage(Player, storageAccess))
 				{
 					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();
@@ -142,6 +144,10 @@ namespace MagicStorage
 			}
 
 			storageAccess = Point16.NegativeOne;
+			remoteAccess = false;
+			remoteCrafting = false;
+			portableAccessRangePlayerToPylons = 0;
+			portableAccessRangePylonsToStorage = 0;
 			Main.blockInput = false;
 
 			MagicUI.CloseUI();

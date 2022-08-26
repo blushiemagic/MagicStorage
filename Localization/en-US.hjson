@@ -45,6 +45,8 @@ Mods: {
 			CombinedStations3Item: Combined Stations (Tier 3)
 			CombinedStations4Item: Combined Stations (Final Tier)
 			EnvironmentAccess: Environment Simulator
+			PortableAccessPreHM: Basic Portable Remote Storage Access
+			PortableAccessHM: Advanced Portable Remote Storage Access
 		}
 
 		ItemTooltip: {
@@ -73,12 +75,14 @@ Mods: {
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
+			Has an unlimited access range
 			'''
 			PortableCraftingAccess:
 			'''
 			<right> Crafting Access to store location
 			Currently not set to any location
 			Use item to access your crafting
+			Has an unlimited access range
 			'''
 			RadiantJewel:
 			'''
@@ -232,6 +236,20 @@ Mods: {
 			A component for cross-mod accessibility with a Magic Storage storage system
 			Displays a list of toggleable environment modules added by other mods, or nothing if no modules are present
 			'''
+			PortableAccessPreHM:
+			'''
+			<right> Storage Heart to store location
+			Currently not set to any location
+			Use item to access your storage
+			Has a small access range
+			'''
+			PortableAccessHM:
+			'''
+			<right> Storage Heart to store location
+			Currently not set to any location
+			Use item to access your storage
+			Has a large access range
+			'''
 		}
 
 		ProjectileName: {
@@ -300,6 +318,7 @@ Mods: {
 				Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
 				NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
 				Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				NewTextAvailable: "Hello {0}. This unit has prepared some new help text about Portable Remote Accesses for you."
 				Help1:
 				'''
 				To get started, you will need to craft some Storage Components. This item is the base for all storage system components. Give one to a Guide to see what it can be used for!
@@ -407,11 +426,28 @@ Mods: {
 				'''
 				Help18:
 				'''
-				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. Its power unlocks the latent potential of the Bluemagic residing in all Storage Hearts: wireless access.
+				The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. You can use it to craft Portable Remote Accesses with unlimited access range!
 				'''
 				Help19:
 				'''
 				The [i:MagicStorage/EnvironmentAccess] is quite the bizarre component. Rumor states that it allows outside tampering of Magic Storage storage systems, but only a mod developer would be able to use its inner workings.
+				'''
+				Help20:
+				'''
+				While the [i:MagicStorage/RemoteAccess] is very handy, sometimes you need to be able to access your storage while you're away from home.
+				To do so, craft a Portable Remote Storage Access.
+				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+				'''
+				Help20_Mechs:
+				'''
+				{$Mods.MagicStorage.Dialogue.Golem.Help20}
+				[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortbleAccessHM]
+				'''
+				Help20_Moon:
+				'''
+				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
+				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 				'''
 			}
 
@@ -428,6 +464,8 @@ Mods: {
 
 		PortableAccessUnlocated: "Locator is not set to any Storage Heart"
 		PortableAccessMissing: "Storage Heart is missing!"
+		PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
+		PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
 
 		PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
 		PortableCraftingMissing: "Crafting Access is missing!"
@@ -707,6 +745,14 @@ Mods: {
 				'''
 				Enable to print logging information to the ingame chat.
 				Logging information will be printed to your client.log and server.log files regardless.
+				'''
+			}
+			ShowDebugPylonRangeAreas: {
+				Label: "Portable Access Range Debug"
+				Tooltip:
+				'''
+				Enable to show the valid ranges for a Portable Remote Access while the player is holding it.
+				For accesses with infinite range, nothing is displayed.
 				'''
 			}
 		}

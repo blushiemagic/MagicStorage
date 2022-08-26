@@ -149,6 +149,9 @@ namespace MagicStorage
 	}
 
 	#if NETPLAY
+	/// <summary>
+	/// The config for beta builds.  Make sure to wrap uses of this class with <c>#if NETPLAY</c>
+	/// </summary>
 	[Label("$Mods.MagicStorage.Config.BetaLabel")]
 	public class MagicStorageBetaConfig : ModConfig {
 		public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -160,8 +163,16 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool printTextToChat;
 
+		[Label("$Mods.MagicStorage.Config.ShowDebugPylonRangeAreas.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.ShowDebugPylonRangeAreas.Tooltip")]
+		[DefaultValue(false)]
+		public bool showPylonAreas;
+
 		[JsonIgnore]
 		public static bool PrintTextToChat => Instance.printTextToChat;
+
+		[JsonIgnore]
+		public static bool ShowDebugPylonRangeAreas => Instance.showPylonAreas;
 	}
 	#endif
 }
