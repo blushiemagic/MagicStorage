@@ -22,7 +22,7 @@ namespace MagicStorage.Common.Systems {
 					item = Chest.PutItemInNearbyChest(item, player.Center);
 
 					bool playSound = false;
-					bool success = TryPlaceItemInNearbyStorageSystems(player, item, ref playSound);
+					bool success = TryQuickStackItemIntoNearbyStorageSystems(player, item, ref playSound);
 
 					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, playerNumber, b7, item.prefix);
 
@@ -36,10 +36,10 @@ namespace MagicStorage.Common.Systems {
 			return base.HijackGetData(ref messageType, ref reader, playerNumber);
 		}
 
-		internal static bool TryPlaceItemInNearbyStorageSystems(Player self, Item item, ref bool playSound)
-			=> TryPlaceItemInNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound)
+			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
 
-		internal static bool TryPlaceItemInNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
 			if (item.IsAir)
 				return false;
 
