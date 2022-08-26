@@ -45,6 +45,9 @@ namespace MagicStorage.Common.Systems {
 
 			//Quick stack to nearby chests failed or was only partially completed.  Try to do the same for nearby storage systems
 			foreach (TEStorageHeart heart in hearts) {
+				if (!heart.HasItem(item, ignorePrefix: true))
+					continue;
+
 				int oldType = item.type;
 				int oldStack = item.stack;
 
