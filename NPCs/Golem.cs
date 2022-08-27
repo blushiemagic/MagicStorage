@@ -296,7 +296,7 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override void SaveData(TagCompound tag) {
-			tag["flags"] = new BitsByte(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
+			tag["flags"] = (byte)new BitsByte(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
 		}
 
 		public override void LoadData(TagCompound tag) {
