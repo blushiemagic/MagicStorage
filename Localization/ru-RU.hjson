@@ -7,7 +7,8 @@ Mods: {
 			CreativeStorageUnit: Креативная Ячейка Хранилища
 			Locator: Локатор
 			LocatorDisk: Локатор с CD Приводом
-			PortableAccess: Портативный Модуль Удаленного Доступа к Хранилищу
+			# PortableAccess: Ultimate Portable Remote Storage Access
+			# PortableCraftingAcces: Portable Remote Crafting Access
 			RadiantJewel: Сияющая Драгоценность
 			RemoteAccess: Модуль Удаленного Доступа к Хранилищу
 			ShadowDiamond: Теневой Алмаз

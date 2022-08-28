@@ -51,14 +51,14 @@ namespace MagicStorage.Components
 		{
 			Player player = Main.LocalPlayer;
 			Item item = player.HeldItem;
-			if (item.type == ModContent.ItemType<PortableCraftingAccess>())
+			if (!item.IsAir && item.ModItem is PortableCraftingAccess locator)
 			{
 				if (Main.tile[i, j].TileFrameX % 36 == 18)
 					i--;
 				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
-				Locator locator = (Locator) item.ModItem;
 				locator.location = new Point16(i, j);
+				locator.pendingDictionarySave = true;
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
 				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", i, j));

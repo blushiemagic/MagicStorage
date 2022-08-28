@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Items;
 using MagicStorage.Stations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -138,6 +139,21 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire", group);
 
 			items = new[] { ModContent.ItemType<DemonAltar>(), ModContent.ItemType<CrimsonAltar>() };
+
+			//Support the Demon/Crimson Altar items from Fargo's Mutants Mod
+			if (ModLoader.TryGetMod("Fargowiltas", out Mod Fargowiltas)) {
+				Array.Resize(ref items, items.Length + 2);
+				items[^2] = Fargowiltas.Find<ModItem>("DemonAltar").Type;
+				items[^1] = Fargowiltas.Find<ModItem>("CrimsonAltar").Type;
+			}
+
+			//Support the Corrupt/Crimson Altar items from LuiAFK Reborn
+			if (ModLoader.TryGetMod("miningcracks_take_on_luiafk", out Mod LuiAFK)) {
+				Array.Resize(ref items, items.Length + 2);
+				items[^2] = LuiAFK.Find<ModItem>("CorruptionAltar").Type;
+				items[^1] = LuiAFK.Find<ModItem>("CrimsonAltar").Type;
+			}
+
 			group = new RecipeGroup(() => $"{any} {Language.GetTextValue("MapObject.DemonAltar")}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemonAltar", group);
 

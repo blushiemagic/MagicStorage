@@ -32,6 +32,7 @@ namespace MagicStorage.Components
 				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
 				locator.location = new Point16(i, j);
+				locator.pendingDictionarySave = true;
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
 				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", i, j));

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
@@ -12,7 +13,13 @@ namespace MagicStorage.Items
 {
 	public class Locator : ModItem
 	{
+		public const int SAVE_VERSION = 1;
+
 		public Point16 location = Point16.NegativeOne;
+		internal Dictionary<string, Point16> locationsByWorld;
+
+		private bool pendingLocationLoad;
+		internal bool pendingDictionarySave;
 
 		public override void SetStaticDefaults()
 		{
@@ -52,15 +59,51 @@ namespace MagicStorage.Items
 			recipe.Register();
 		}
 
+		public override void UpdateInventory(Player player) {
+			if (player.whoAmI == Main.myPlayer) {
+				if (pendingLocationLoad) {
+					location = locationsByWorld.TryGetValue(Main.worldName, out Point16 pos) ? pos : Point16.NegativeOne;
+					pendingLocationLoad = false;
+				}
+
+				if (pendingDictionarySave) {
+					locationsByWorld[Main.worldName] = location;
+					pendingDictionarySave = false;
+				}
+			} else {
+				pendingLocationLoad = false;
+				pendingDictionarySave = false;
+			}
+		}
+
 		public override void SaveData(TagCompound tag)
 		{
-			tag.Set("X", location.X);
-			tag.Set("Y", location.Y);
+			//Legacy data
+			tag["X"] = location.X;
+			tag["Y"] = location.Y;
+
+			tag["version"] = SAVE_VERSION;
+
+			tag["locations"] = locationsByWorld
+				.Select(kvp => new TagCompound() {
+					["world"] = kvp.Key,
+					["X"] = kvp.Value.X,
+					["Y"] = kvp.Value.Y
+				})
+				.ToList();
 		}
 
 		public override void LoadData(TagCompound tag)
 		{
-			location = new Point16(tag.GetShort("X"), tag.GetShort("Y"));
+			if (tag.GetInt("version") < SAVE_VERSION || tag.GetList<TagCompound>("locations") is not List<TagCompound> locations) {
+				//Default to the last known location
+				location = new Point16(tag.GetShort("X"), tag.GetShort("Y"));
+				locationsByWorld = new();
+				pendingDictionarySave = true;
+			} else {
+				locationsByWorld = locations.ToDictionary(t => t.GetString("world"), t => new Point16(t.GetInt("X"), t.GetInt("Y")));
+				pendingLocationLoad = true;
+			}
 		}
 
 		public override void NetSend(BinaryWriter writer)

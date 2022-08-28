@@ -7,7 +7,7 @@ Mods: {
 			CreativeStorageUnit: 创造单元
 			Locator: 定位器
 			LocatorDisk: 定位器驱动
-			PortableAccess: 便携式远程存储装置
+			# PortableAccess: Ultimate Portable Remote Storage Access
 			PortableCraftingAcces: 便携式远程制作装置
 			RadiantJewel: 璀璨棱晶
 			RemoteAccess: 远程存储装置
