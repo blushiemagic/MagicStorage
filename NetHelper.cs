@@ -13,6 +13,8 @@ using MagicStorage.UI.States;
 using System.Text;
 using System.Linq;
 using Terraria.Audio;
+using MagicStorage.NPCs;
+using MagicStorage.Common.Global;
 
 namespace MagicStorage
 {
@@ -133,6 +135,9 @@ namespace MagicStorage
 					break;
 				case MessageType.InformQuickStackToStorage:
 					ClientReceiveQuickStackToStorage();
+					break;
+				case MessageType.GolemHelpTextUpdate:
+					ClientReceiveGolemTextUpdate();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -977,6 +982,22 @@ namespace MagicStorage
 			SoundEngine.PlaySound(SoundID.Grab);
 			StorageGUI.needRefresh = true;
 		}
+
+		public static void SendGolemTextUpdate() {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.GolemHelpTextUpdate);
+			packet.Send();
+		}
+
+		public static void ClientReceiveGolemTextUpdate() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			GolemTextTracking.SetPendingText();
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1001,6 +1022,7 @@ namespace MagicStorage
 		MassDuplicateSellRequest,
 		MassDuplicateSellResult,
 		RequestStorageUnitStyle,
-		InformQuickStackToStorage
+		InformQuickStackToStorage,
+		GolemHelpTextUpdate
 	}
 }

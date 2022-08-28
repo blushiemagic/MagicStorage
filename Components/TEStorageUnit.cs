@@ -205,7 +205,6 @@ namespace MagicStorage.Components
 						onItemRemoved?.Invoke(k);
 						items.RemoveAt(k);
 						item.TurnToAir();
-						k++;
 					}
 
 					lookFor.stack -= withdraw;

@@ -170,10 +170,28 @@ namespace MagicStorage.Edits {
 			return $"{offset} {opcode}   {operand}";
 		}
 
-		public static void EnsureAreNotNull(params (MemberInfo? member, string identifier)[] memberInfos) {
+		public static void EnsureAreNotNull(params (MemberInfo member, string identifier)[] memberInfos) {
 			foreach (var (member, identifier) in memberInfos)
 				if (member is null)
 					throw new NullReferenceException($"Member reference \"{identifier}\" is null");
+		}
+
+		public delegate bool PatchingContextDelegate(ILCursor c, ref string badReturnReason);
+
+		public static void CommonPatchingWrapper(ILContext il, PatchingContextDelegate doEdits) {
+			ArgumentNullException.ThrowIfNull(doEdits);
+
+			ILCursor c = new(il);
+
+			CompleteLog(MagicStorageMod.Instance, c, beforeEdit: true);
+
+			string badReturnReason = "Unable to fully patch " + il.Method.Name + "()";
+			if (!doEdits(c, ref badReturnReason))
+				throw new Exception(badReturnReason);
+
+			UpdateInstructionOffsets(c);
+
+			CompleteLog(MagicStorageMod.Instance, c, beforeEdit: false);
 		}
 	}
 }

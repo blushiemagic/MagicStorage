@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -13,18 +12,15 @@ using Terraria.GameContent.Personalities;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 
 namespace MagicStorage.NPCs {
 	[AutoloadHead]
 	internal class Golem : ModNPC {
 		public bool newHelpTextAvailable;
-		private bool pendingNewHelpTextCheck;
+		public bool pendingNewHelpTextCheck;
 
 		private int newHelpTextAvailableCounter;
-
-		private bool lastKnownAllMechsDowned, lastKnownMoonLordDowned;
 
 		public override void SetStaticDefaults() {
 			Main.npcFrameCount[Type] = 25;
@@ -94,9 +90,8 @@ namespace MagicStorage.NPCs {
 
 			if (newHelpTextAvailable)
 				newHelpTextAvailableCounter++;
-
-			if (lastKnownAllMechsDowned != Utility.DownedAllMechs || lastKnownMoonLordDowned != NPC.downedMoonlord)
-				pendingNewHelpTextCheck = true;
+			else
+				newHelpTextAvailableCounter = 0;
 
 			if (pendingNewHelpTextCheck) {
 				if (Utility.DownedAllMechs || NPC.downedMoonlord)
@@ -105,9 +100,6 @@ namespace MagicStorage.NPCs {
 				pendingNewHelpTextCheck = false;
 				newHelpTextAvailableCounter = 0;
 			}
-
-			lastKnownAllMechsDowned = Utility.DownedAllMechs;
-			lastKnownMoonLordDowned = NPC.downedMoonlord;
 		}
 
 		public override void HitEffect(int hitDirection, double damage) {
@@ -271,7 +263,7 @@ namespace MagicStorage.NPCs {
 
 				Rectangle source = exclamation.Frame(8, 39, newHelpTextAvailableCounter % 60 < 30 ? 6 : 7, 1);
 
-				Vector2 center = NPC.Top - new Vector2(0, source.Height * 0.75f);
+				Vector2 center = NPC.Top - new Vector2(0, source.Height * 0.75f) - Main.screenPosition;
 
 				double sin = (Math.Sin(newHelpTextAvailableCounter / 60d * MathHelper.TwoPi * 0.65) + 1) / 2;
 
@@ -279,33 +271,7 @@ namespace MagicStorage.NPCs {
 
 				float transparency = (float)(0.75 + 0.25 * sin);
 
-				spriteBatch.Draw(exclamation, center, source, Color.White * transparency, 0, source.Size() / 2f, 1f, SpriteEffects.None, 0);
-			}
-		}
-
-		public override void SendExtraAI(BinaryWriter writer) {
-			BitsByte bb = new(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
-
-			writer.Write(bb);
-		}
-
-		public override void ReceiveExtraAI(BinaryReader reader) {
-			BitsByte bb = reader.ReadByte();
-
-			bb.Retrieve(ref newHelpTextAvailable, ref pendingNewHelpTextCheck, ref lastKnownAllMechsDowned, ref lastKnownMoonLordDowned);
-		}
-
-		public override void SaveData(TagCompound tag) {
-			tag["flags"] = (byte)new BitsByte(newHelpTextAvailable, pendingNewHelpTextCheck, lastKnownAllMechsDowned, lastKnownMoonLordDowned);
-		}
-
-		public override void LoadData(TagCompound tag) {
-			if (!tag.ContainsKey("flags"))
-				pendingNewHelpTextCheck = true;
-			else {
-				BitsByte bb = tag.GetByte("flags");
-
-				bb.Retrieve(ref newHelpTextAvailable, ref pendingNewHelpTextCheck, ref lastKnownAllMechsDowned, ref lastKnownMoonLordDowned);
+				spriteBatch.Draw(exclamation, center, source, Color.White * transparency, 0, source.Size() / 2f, 1.5f, SpriteEffects.None, 0);
 			}
 		}
 	}
