@@ -99,6 +99,13 @@ namespace MagicStorage.Components
 
 		public static bool IsStorageCenter(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter;
 
+		public static bool HeartsMatch(Point16 center, Point16 heart) {
+			if (!TileEntity.ByPosition.TryGetValue(center, out TileEntity entity) || entity is not TEStorageCenter centerEntity)
+				return false;
+
+			return centerEntity.GetHeart()?.Position == heart;
+		}
+
 		public override void SaveData(TagCompound tag)
 		{
 			List<TagCompound> tagUnits = new();

@@ -89,7 +89,7 @@ namespace MagicStorage.Components
 		public IEnumerable<TEEnvironmentAccess> GetEnvironmentSimulators()
 			=> TileEntity.ByPosition.Values
 				.OfType<TEEnvironmentAccess>()
-				.Where(e => e.center == Position);
+				.Where(e => TEStorageCenter.HeartsMatch(e.center, Position));
 
 		public IEnumerable<EnvironmentModule> GetModules()
 			=> GetEnvironmentSimulators()

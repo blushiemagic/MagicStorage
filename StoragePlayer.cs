@@ -91,7 +91,7 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
-				else if (modTile is not StorageAccess || (remoteAccess && remoteCrafting && modTile is not CraftingAccess) || !Items.PortableAccess.PlayerCanBeRemotelyConnectedToStorage(Player, storageAccess))
+				else if (modTile is not StorageAccess || (remoteAccess && remoteCrafting && modTile is not CraftingAccess) || (remoteAccess && !Items.PortableAccess.PlayerCanBeRemotelyConnectedToStorage(Player, storageAccess)))
 				{
 					SoundEngine.PlaySound(SoundID.MenuClose);
 					CloseStorage();

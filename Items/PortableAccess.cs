@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MagicStorage.Components;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
@@ -106,7 +107,7 @@ namespace MagicStorage.Items
 			if (Utility.GetHeartFromAccess(accessLocation) is not Components.TEStorageHeart heart)
 				return false;
 
-			if (Utility.PlayerIsNearStorageSystem(player, heart, mp.portableAccessRangePlayerToPylons))
+			if (Utility.PlayerIsNearAccess(player, accessLocation, mp.portableAccessRangePlayerToPylons))
 				return true;
 
 			return Utility.NearbyPylons(player, mp.portableAccessRangePlayerToPylons).Any() && Utility.StorageSystemHasNearbyPylon(heart, mp.portableAccessRangePylonsToStorage);
@@ -150,12 +151,18 @@ namespace MagicStorage.Items
 			Point16 prevOpen = modPlayer.ViewingStorage();
 
 			bool canOpen = true;
-			if (modPlayer.portableAccessRangePylonsToStorage >= 0 && !Utility.StorageSystemHasNearbyPylon(Utility.GetHeartFromAccess(location), modPlayer.portableAccessRangePylonsToStorage)) {
-				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessNoPylons"));
-				canOpen = false;
-			} else if (modPlayer.portableAccessRangePlayerToPylons >= 0 && !Utility.NearbyPylons(player, modPlayer.portableAccessRangePlayerToPylons).Any()) {
-				Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessOutOfRange"));
-				canOpen = false;
+			bool canAccessStorageFromAnywhere = modPlayer.portableAccessRangePlayerToPylons < 0;
+			
+			TEStorageHeart heart = Utility.GetHeartFromAccess(location);
+
+			if (!canAccessStorageFromAnywhere && !Utility.PlayerIsNearAccess(player, location, modPlayer.portableAccessRangePlayerToPylons)) {
+				if (!Utility.NearbyPylons(player, modPlayer.portableAccessRangePlayerToPylons).Any()) {
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessOutOfRange"));
+					canOpen = false;
+				} else if (modPlayer.portableAccessRangePylonsToStorage >= 0 && !Utility.StorageSystemHasNearbyPylon(heart, modPlayer.portableAccessRangePylonsToStorage)) {
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessNoPylons"));
+					canOpen = false;
+				}
 			}
 
 			if (!canOpen)

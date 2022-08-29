@@ -15,7 +15,7 @@ namespace MagicStorage.Items
 	{
 		public const int SAVE_VERSION = 1;
 
-		public Point16 location = Point16.NegativeOne;
+		public Point16 location;
 		internal Dictionary<string, Point16> locationsByWorld;
 
 		private bool pendingLocationLoad;
@@ -33,6 +33,8 @@ namespace MagicStorage.Items
 			Item.maxStack = 1;
 			Item.rare = ItemRarityID.Blue;
 			Item.value = Item.sellPrice(gold: 1);
+			locationsByWorld = new();
+			location = Point16.NegativeOne;
 		}
 
 		public override void ModifyTooltips(List<TooltipLine> lines)
@@ -101,7 +103,7 @@ namespace MagicStorage.Items
 				locationsByWorld = new();
 				pendingDictionarySave = true;
 			} else {
-				locationsByWorld = locations.ToDictionary(t => t.GetString("world"), t => new Point16(t.GetInt("X"), t.GetInt("Y")));
+				locationsByWorld = locations.ToDictionary(t => t.GetString("world"), t => new Point16(t.GetShort("X"), t.GetShort("Y")));
 				pendingLocationLoad = true;
 			}
 		}

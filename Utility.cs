@@ -229,15 +229,24 @@ namespace MagicStorage {
 			if (!Main.PylonSystem.HasAnyPylon() || range == 0)
 				yield break;
 
-			Vector2 center = player.Center;
-			float distSQ = range * range;
+			Point16 playerCenter = player.Center.ToTileCoordinates16();
+			short pX = playerCenter.X, pY = playerCenter.Y;
+			float r = range / 16;
 
 			foreach (TeleportPylonInfo pylon in Main.PylonSystem.Pylons) {
 				if (!IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false))
 					continue;
 
+				if (range < 0) {
+					yield return pylon;
+					continue;
+				}
+
+				int x = pylon.PositionInTiles.X, y = pylon.PositionInTiles.Y;
+				float xMin = x - r, xMax = x + r + 1, yMin = y - r, yMax = y + r + 1;
+
 				//Range < 0 is treated as infinite range
-				if (range < 0 || center.DistanceSQ(pylon.PositionInTiles.ToWorldCoordinates()) < distSQ)
+				if (xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax)
 					yield return pylon;
 			}
 		}
@@ -281,21 +290,73 @@ namespace MagicStorage {
 			if (range < 0)
 				return true;
 
-			Vector2 playerCenter = player.Center;
-			float pX = playerCenter.X, pY = playerCenter.Y;
+			Point16 playerCenter = player.Center.ToTileCoordinates16();
+			short pX = playerCenter.X, pY = playerCenter.Y;
+			float r = range / 16;
 
 			foreach (var center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>()) {
 				if (GetHeartFromAccess(center.Position)?.Position != heart.Position)
 					continue;
 
 				int x = center.Position.X, y = center.Position.Y;
-				float xMin = x - range, xMax = x + range + 1, yMin = y - range, yMax = y + range + 1;
+				float xMin = x - r, xMax = x + r + 1, yMin = y - r, yMax = y + r + 1;
 
 				if (xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax)
 					return true;
 			}
 
 			return false;
+		}
+
+		public static bool PlayerIsNearAccess(Player player, Point16 access, float range) {
+			float r = range / 16;
+
+			float pX = player.Center.X / 16, pY = player.Center.Y / 16;
+
+			int x = access.X, y = access.Y;
+			float xMin = x - r, xMax = x + r + 1, yMin = y - r, yMax = y + r + 1;
+
+			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
+		}
+
+		public static bool PlayerIsNearPylon(Player player, TeleportPylonInfo pylon, float range) {
+			if (range == 0)
+				return false;
+			
+			//Range < 0 is treated as infinite range
+			if (range < 1)
+				return true;
+
+			Point16 playerCenter = player.Center.ToTileCoordinates16();
+			short pX = playerCenter.X, pY = playerCenter.Y;
+			float r = range / 16;
+
+			if (!IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false))
+				return false;
+
+			int x = pylon.PositionInTiles.X, y = pylon.PositionInTiles.Y;
+			float xMin = x - r, xMax = x + r + 1, yMin = y - r, yMax = y + r + 1;
+
+			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
+		}
+
+		//Copy for Common/Systems/PortableAccessAreas.cs
+		internal static bool PlayerIsNearPylonIgnoreValidity(Player player, TeleportPylonInfo pylon, float range) {
+			if (range == 0)
+				return false;
+			
+			//Range < 0 is treated as infinite range
+			if (range < 1)
+				return true;
+
+			Point16 playerCenter = player.Center.ToTileCoordinates16();
+			short pX = playerCenter.X, pY = playerCenter.Y;
+			float r = range / 16;
+
+			int x = pylon.PositionInTiles.X, y = pylon.PositionInTiles.Y;
+			float xMin = x - r, xMax = x + r + 1, yMin = y - r, yMax = y + r + 1;
+
+			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
 		}
 
 		public static bool IsPylonValidForRemoteAccessLinking(TeleportPylonInfo info, bool checkNPCDanger) {
