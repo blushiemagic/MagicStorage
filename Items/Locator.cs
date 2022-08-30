@@ -62,6 +62,8 @@ namespace MagicStorage.Items
 		}
 
 		public override void UpdateInventory(Player player) {
+			locationsByWorld ??= new();
+
 			if (player.whoAmI == Main.myPlayer) {
 				if (pendingLocationLoad) {
 					location = locationsByWorld.TryGetValue(Main.worldName, out Point16 pos) ? pos : Point16.NegativeOne;
@@ -80,6 +82,8 @@ namespace MagicStorage.Items
 
 		public override void SaveData(TagCompound tag)
 		{
+			locationsByWorld ??= new();
+
 			//Legacy data
 			tag["X"] = location.X;
 			tag["Y"] = location.Y;
