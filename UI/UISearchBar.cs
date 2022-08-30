@@ -79,9 +79,15 @@ namespace MagicStorage.UI
 			//Hack to give search bars special update logic since they have to update in ModSystem.PostUpdateInput instead of ModSystem.UpdateUI
 			if (!MagicUI.CanUpdateSearchBars || !active) {
 				if (active) {
-					if (mouseOver && GetHoverText?.Invoke() is string s && !string.IsNullOrWhiteSpace(s))
-						MagicUI.mouseText = s;
-					else if (oldMouseOver && !mouseOver)
+					if (mouseOver && GetHoverText?.Invoke() is string s) {
+						if (MagicUI.lastKnownSearchBarErrorReason is not null)
+							s += $"\n[c/ff0000:{MagicUI.lastKnownSearchBarErrorReason}]";
+
+						if (!string.IsNullOrWhiteSpace(s))
+							MagicUI.mouseText = s;
+						else
+							MagicUI.mouseText = "";
+					} else if (oldMouseOver && !mouseOver)
 						MagicUI.mouseText = "";
 				} else if (oldActive)
 					MagicUI.mouseText = "";
@@ -241,6 +247,8 @@ namespace MagicStorage.UI
 			Color color = Color.Black;
 			if (isEmpty)
 				color *= 0.75f;
+			if (MagicUI.lastKnownSearchBarErrorReason is not null)
+				color = Color.Red;
 			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + Padding, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			if (!isEmpty && hasFocus && cursorTimer < 30)
 			{

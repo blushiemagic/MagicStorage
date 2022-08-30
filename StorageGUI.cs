@@ -127,6 +127,8 @@ namespace MagicStorage
 			}
 
 			DoFiltering();
+			
+			bool didDefault = false;
 
 			// now if nothing found we disable filters one by one
 			if (searchText.Trim().Length > 0)
@@ -136,7 +138,8 @@ namespace MagicStorage
 					// search all categories
 					filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllItems"), Color.Red);
+					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllItems");
+					didDefault = true;
 
 					DoFiltering();
 				}
@@ -146,11 +149,15 @@ namespace MagicStorage
 					// search all mods
 					modSearch = ModSearchBox.ModIndexAll;
 
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllMods"), Color.Red);
+					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllMods");
+					didDefault = true;
 
 					DoFiltering();
 				}
 			}
+
+			if (!didDefault)
+				MagicUI.lastKnownSearchBarErrorReason = null;
 
 			for (int k = 0; k < items.Count; k++)
 				didMatCheck.Add(false);

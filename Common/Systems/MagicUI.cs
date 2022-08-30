@@ -24,6 +24,8 @@ public class MagicUI : ModSystem
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;
 
+	internal static string lastKnownSearchBarErrorReason;
+
 	internal static bool BlockItemSlotActionsDetour { get; set; }
 
 	public override void Load() {

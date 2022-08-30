@@ -37,7 +37,7 @@ namespace MagicStorage
 		public const float ScrollBar2ViewSize = 1f;
 		public const float RecipeScrollBarViewSize = 1f;
 
-		private static readonly List<Item> items = new();
+		internal static readonly List<Item> items = new();
 
 		private static readonly Dictionary<int, int> itemCounts = new();
 		internal static List<Recipe> recipes = new();
@@ -395,8 +395,11 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Refreshing all recipes");
 
-			if (RecursiveCraftIntegration.Enabled)
+			if (RecursiveCraftIntegration.Enabled) {
 				RecursiveCraftIntegration.RefreshRecursiveRecipes();
+				if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
+					SetSelectedRecipe(selectedRecipe);
+			}
 
 			int sortMode = MagicUI.craftingUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.craftingUI.GetPage<FilteringPage>("Filtering").option;
@@ -406,6 +409,8 @@ namespace MagicStorage
 
 			DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 
+			bool didDefault = false;
+
 			// now if nothing found we disable filters one by one
 			if (searchText.Length > 0)
 			{
@@ -414,7 +419,8 @@ namespace MagicStorage
 					// search hidden recipes too
 					hiddenRecipes = ItemTypeOrderedSet.Empty;
 
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist"), Color.Red);
+					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist");
+					didDefault = true;
 
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
@@ -433,11 +439,15 @@ namespace MagicStorage
 					// search all mods
 					modFilterIndex = ModSearchBox.ModIndexAll;
 
-					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingDefaultToAllMods"), Color.Red);
+					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingDefaultToAllMods");
+					didDefault = true;
 
 					DoFiltering(sortMode, filterMode, hiddenRecipes, favorited);
 				}
 			}
+
+			if (!didDefault)
+				MagicUI.lastKnownSearchBarErrorReason = null;
 		}
 
 		private static void RefreshSpecificRecipes(Recipe[] toRefresh) {

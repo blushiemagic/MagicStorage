@@ -144,7 +144,7 @@ namespace MagicStorage.Common.Systems
 			if (heart is null)
 				return null;
 
-			return FlatDict(heart.GetStoredItems());
+			return FlatDict(CraftingGUI.items);
 		}
 
 		public static bool IsCompoundRecipe(Recipe recipe) => RecipeToCompoundRecipe.ContainsKey(recipe);
