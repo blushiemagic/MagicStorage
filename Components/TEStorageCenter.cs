@@ -12,7 +12,7 @@ namespace MagicStorage.Components
 	{
 		public List<Point16> storageUnits = new();
 
-		private void CheckUnitMapSections() {
+		protected virtual void CheckMapSections() {
 			//Force a map section send for each unique map section that has one of this storage center's storage units
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				foreach (Point16 unit in storageUnits.DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
@@ -24,7 +24,7 @@ namespace MagicStorage.Components
 		{
 			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch invoked.  Current unit count: " + storageUnits.Count);
 
-			CheckUnitMapSections();
+			CheckMapSections();
 
 			List<Point16> oldStorageUnits = new(storageUnits);
 			storageUnits.Clear();
@@ -142,7 +142,7 @@ namespace MagicStorage.Components
 			for (int k = 0; k < count; k++)
 				storageUnits.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
 
-			CheckUnitMapSections();
+			CheckMapSections();
 		}
 	}
 }

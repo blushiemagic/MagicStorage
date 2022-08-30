@@ -101,6 +101,16 @@ namespace MagicStorage.Components
 			return GetStorageUnits().SelectMany(storageUnit => storageUnit.GetItems());
 		}
 
+		protected override void CheckMapSections() {
+			base.CheckMapSections();
+
+			//Check for remote accesses as well
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				foreach (Point16 remote in remoteAccesses.DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
+					NetHelper.ClientRequestSection(remote);
+			}
+		}
+
 		public override void Update()
 		{
 			foreach (Point16 remoteAccess in remoteAccesses)
