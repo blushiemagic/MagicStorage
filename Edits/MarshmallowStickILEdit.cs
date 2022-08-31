@@ -11,22 +11,16 @@ using ILPlayer = IL.Terraria.Player;
 
 namespace MagicStorage.Edits;
 
-public class MarshmallowStickILEdit : ILoadable
+public class MarshmallowStickILEdit : Edit
 {
-	public Mod Mod { get; private set; } = null!;
-
-	public void Load(Mod mod)
+	public override void LoadEdits()
 	{
-		Mod = mod;
-
 		ILPlayer.ItemCheck_ApplyHoldStyle_Inner += ILPlayerOnItemCheck_ApplyHoldStyle_Inner;
 	}
 
-	public void Unload()
+	public override void UnloadEdits()
 	{
 		ILPlayer.ItemCheck_ApplyHoldStyle_Inner -= ILPlayerOnItemCheck_ApplyHoldStyle_Inner;
-
-		Mod = null!;
 	}
 
 	private void ILPlayerOnItemCheck_ApplyHoldStyle_Inner(ILContext il)

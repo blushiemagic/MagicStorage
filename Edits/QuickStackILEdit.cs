@@ -14,12 +14,8 @@ using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
-	internal class QuickStackILEdit : ILoadable {
-		public Mod Mod { get; private set; } = null!;
-
-		public void Load(Mod mod) {
-			Mod = mod;
-
+	internal class QuickStackILEdit : Edit {
+		public override void LoadEdits() {
 			IL.Terraria.Player.QuickStackAllChests += Player_QuickStackAllChests;
 		}
 
@@ -68,10 +64,8 @@ namespace MagicStorage.Edits {
 				"Reason: Could not find instruction sequence for patch #" + patchNum);
 		}
 
-		public void Unload() {
+		public override void UnloadEdits() {
 			IL.Terraria.Player.QuickStackAllChests -= Player_QuickStackAllChests;
-
-			Mod = null!;
 		}
 	}
 }

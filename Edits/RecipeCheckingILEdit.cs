@@ -8,20 +8,14 @@ using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
-	internal class RecipeCheckingILEdit : ILoadable {
-		public Mod Mod { get; private set; }
-
-		public void Load(Mod mod) {
-			Mod = mod;
-
+	internal class RecipeCheckingILEdit : Edit {
+		public override void LoadEdits() {
 			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("AddRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
 			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("PostAddRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
 			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("PostSetupRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
 		}
 
-		public void Unload() {
-			Mod = null;
-		}
+		public override void UnloadEdits() { }
 
 		private static void RecipeLoader_Hook(ILContext il) {
 			ILHelper.CommonPatchingWrapper(il, DoCommonPatching);

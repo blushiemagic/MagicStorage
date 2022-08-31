@@ -15,6 +15,9 @@ using System.Linq;
 using Terraria.Audio;
 using MagicStorage.NPCs;
 using MagicStorage.Common.Global;
+using MagicStorage.Common.Systems;
+using static MagicStorage.Common.Systems.StringScrambling;
+using MagicStorage.Common.Players;
 
 namespace MagicStorage
 {
@@ -138,6 +141,21 @@ namespace MagicStorage
 					break;
 				case MessageType.GolemHelpTextUpdate:
 					ClientReceiveGolemTextUpdate();
+					break;
+				case MessageType.ClientRequestServerOp:
+					ServerReceiveOperatorRequest(sender);
+					break;
+				case MessageType.ServerOpResponse:
+					ClientReceiveOperatorReponse();
+					break;
+				case MessageType.ClientRequestServerOpConfirmation:
+					ServerReceiveOperatorKeyFromClient(reader, sender);
+					break;
+				case MessageType.ServerOpConfirmationResult:
+					ClientReceiveOperatorConformationResult(reader);
+					break;
+				case MessageType.PlayerHasServerOp:
+					ReceivePlayerHasOperator(reader);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -998,6 +1016,153 @@ namespace MagicStorage
 
 			GolemTextTracking.SetPendingText();
 		}
+
+		public static void ClientRequestServerOperator() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientRequestServerOp);
+			packet.Send();
+
+			Report(true, MessageType.ClientRequestServerOp + " packet sent to the server");
+		}
+
+		public static void ServerReceiveOperatorRequest(int sender) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			bool print = !Netcode.KeyIsGenerated;
+
+			string key = Netcode.ServerOperatorKey;
+
+			Report(false, MessageType.ClientRequestServerOp + " packet received by server from client " + sender);
+
+			if (print) {
+				ConsoleColor fg = Console.ForegroundColor;
+				ConsoleColor bg = Console.BackgroundColor;
+
+				Console.ForegroundColor = ConsoleColor.Yellow;
+				Console.BackgroundColor = ConsoleColor.Black;
+
+				Console.WriteLine("=====\n" +
+					"THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!\n" +
+					"Server Operator Key: " + key + "\n" +
+					"=====");
+
+				Console.ForegroundColor = fg;
+				Console.BackgroundColor = bg;
+			}
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ServerOpResponse);
+			packet.Send(toClient: sender);
+
+			Report(false, MessageType.ServerOpResponse + " packet sent to client " + sender);
+		}
+
+		public static void ClientReceiveOperatorReponse() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			Report(false, MessageType.ServerOpResponse + " packet received by client " + Main.myPlayer);
+
+			Main.NewText("=== ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE ===", Color.Yellow);
+
+			Netcode.RequestingOperatorKey = true;
+		}
+
+		public static void ClientSendOperatorKey(string key) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			Netcode.RequestingOperatorKey = false;
+
+			if (!Netcode.IsKeyValidForConfirmationMessage(key)) {
+				//Bail immediately since the key couldn't be valid in the first place
+				Netcode.ClientPrintKeyReponse(valid: false);
+				return;
+			}
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientRequestServerOpConfirmation);
+			byte[] bytes = ToBytes(Scramble(key));
+			packet.Write((byte)bytes.Length);
+			packet.Write(bytes);
+			packet.Send();
+
+			Report(true, MessageType.ClientRequestServerOpConfirmation + " packet sent to the server");
+		}
+
+		public static void ServerReceiveOperatorKeyFromClient(BinaryReader reader, int sender) {
+			byte count = reader.ReadByte();
+			byte[] bytes = reader.ReadBytes(count);
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			string key = Unscramble(FromBytes(bytes));
+
+			bool valid = key == Netcode.ServerOperatorKey;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ServerOpConfirmationResult);
+			packet.Write(valid);
+			packet.Send(toClient: sender);
+
+			Report(false, MessageType.ServerOpConfirmationResult + " packet sent to client " + sender);
+		}
+
+		public static void ClientReceiveOperatorConformationResult(BinaryReader reader) {
+			bool valid = reader.ReadBoolean();
+
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			Report(false, MessageType.ServerOpConfirmationResult + " packet received by client " + Main.myPlayer);
+
+			Netcode.ClientPrintKeyReponse(valid);
+
+			if (valid) {
+				Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp = true;
+
+				ClientSendPlayerHasOp(Main.myPlayer);
+			}
+		}
+
+		public static void ClientSendPlayerHasOp(int plr) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.PlayerHasServerOp);
+			packet.Write((byte)plr);
+			packet.Write(Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp);
+			packet.Send(ignoreClient: Main.myPlayer);
+
+			Report(true, MessageType.PlayerHasServerOp + " packet sent to the server");
+		}
+
+		public static void ReceivePlayerHasOperator(BinaryReader reader) {
+			byte plr = reader.ReadByte();
+			bool hasOp = reader.ReadBoolean();
+
+			Main.player[plr].GetModPlayer<OperatorPlayer>().hasOp = hasOp;
+
+			if (Main.netMode != NetmodeID.Server) {
+				Report(true, MessageType.PlayerHasServerOp + " packet received by client " + Main.myPlayer);
+				return;
+			}
+
+			//Forward the result
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.PlayerHasServerOp);
+			packet.Write(plr);
+			packet.Write(hasOp);
+			packet.Send(ignoreClient: plr);
+
+			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1023,6 +1188,11 @@ namespace MagicStorage
 		MassDuplicateSellResult,
 		RequestStorageUnitStyle,
 		InformQuickStackToStorage,
-		GolemHelpTextUpdate
+		GolemHelpTextUpdate,
+		ClientRequestServerOp,
+		ServerOpResponse,
+		ClientRequestServerOpConfirmation,
+		ServerOpConfirmationResult,
+		PlayerHasServerOp
 	}
 }

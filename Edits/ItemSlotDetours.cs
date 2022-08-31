@@ -7,13 +7,9 @@ using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.Edits {
-	internal class ItemSlotDetours : ILoadable {
-		public Mod Mod { get; private set; } = null!;
-
-		public void Load(Mod mod)
+	internal class ItemSlotDetours : Edit {
+		public override void LoadEdits()
 		{
-			Mod = mod;
-
 			On.Terraria.UI.ItemSlot.MouseHover_ItemArray_int_int += ItemSlot_MouseHover_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += ItemSlot_LeftClick_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.RightClick_ItemArray_int_int += ItemSlot_RightClick_ItemArray_int_int;
@@ -66,15 +62,13 @@ namespace MagicStorage.Edits {
 			return panelDetected && object.ReferenceEquals(element, MagicUI.uiInterface.CurrentState);
 		}
 
-		public void Unload()
+		public override void UnloadEdits()
 		{
 			On.Terraria.UI.ItemSlot.MouseHover_ItemArray_int_int -= ItemSlot_MouseHover_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int -= ItemSlot_LeftClick_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.RightClick_ItemArray_int_int -= ItemSlot_RightClick_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.OverrideHover_ItemArray_int_int -= ItemSlot_OverrideHover_ItemArray_int_int;
 			On.Terraria.UI.ItemSlot.OverrideLeftClick -= ItemSlot_OverrideLeftClick;
-
-			Mod = null!;
 		}
 	}
 }

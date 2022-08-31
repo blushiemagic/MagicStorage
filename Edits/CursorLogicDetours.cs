@@ -2,13 +2,9 @@
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
-	internal class CursorLogicDetours : ILoadable {
-		public Mod Mod { get; private set; } = null!;
-
-		public void Load(Mod mod)
+	internal class CursorLogicDetours : Edit {
+		public override void LoadEdits()
 		{
-			Mod = mod;
-
 			On.Terraria.Main.DrawInterface_36_Cursor += Main_DrawInterface_36_Cursor;
 		}
 
@@ -21,11 +17,9 @@ namespace MagicStorage.Edits {
 			orig();
 		}
 
-		public void Unload()
+		public override void UnloadEdits()
 		{
 			On.Terraria.Main.DrawInterface_36_Cursor -= Main_DrawInterface_36_Cursor;
-
-			Mod = null!;
 		}
 	}
 }

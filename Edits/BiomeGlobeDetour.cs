@@ -7,22 +7,16 @@ using OnRecipe = On.Terraria.Recipe;
 
 namespace MagicStorage.Edits;
 
-public class BiomeGlobeDetour : ILoadable
+public class BiomeGlobeDetour : Edit
 {
-	public Mod Mod { get; private set; } = null!;
-
-	public void Load(Mod mod)
+	public override void LoadEdits()
 	{
-		Mod = mod;
-
 		OnRecipe.FindRecipes += Recipe_FindRecipes;
 	}
 
-	public void Unload()
+	public override void UnloadEdits()
 	{
 		OnRecipe.FindRecipes -= Recipe_FindRecipes;
-
-		Mod = null!;
 	}
 
 	private static void Recipe_FindRecipes(OnRecipe.orig_FindRecipes orig, bool canDelayCheck)

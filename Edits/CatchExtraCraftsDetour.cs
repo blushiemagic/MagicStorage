@@ -6,22 +6,16 @@ using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage.Edits;
 
-public class CatchExtraCraftsDetour : ILoadable
+public class CatchExtraCraftsDetour : Edit
 {
-	public Mod Mod { get; private set; } = null!;
-
-	public void Load(Mod mod)
+	public override void LoadEdits()
 	{
-		Mod = mod;
-
 		OnPlayer.QuickSpawnItem_IEntitySource_int_int += OnPlayerQuickSpawnItem_IEntitySource_int_int;
 	}
 
-	public void Unload()
+	public override void UnloadEdits()
 	{
 		OnPlayer.QuickSpawnItem_IEntitySource_int_int -= OnPlayerQuickSpawnItem_IEntitySource_int_int;
-
-		Mod = null!;
 	}
 
 	private int OnPlayerQuickSpawnItem_IEntitySource_int_int(OnPlayer.orig_QuickSpawnItem_IEntitySource_int_int orig,

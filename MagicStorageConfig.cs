@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using MagicStorage.Common.Players;
 using MagicStorage.UI.States;
 using Newtonsoft.Json;
 using Terraria;
@@ -140,10 +141,10 @@ namespace MagicStorage
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
 
 		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref string message) {
-			if (Netplay.HasClients && Netplay.Clients[whoAmI].Socket.GetRemoteAddress().IsLocalHost())
+			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)
 				return true;
 
-			message = "Only the server host can modify this config";
+			message = "Only users with the Server Operator status can modify this config";
 			return false;
 		}
 	}
