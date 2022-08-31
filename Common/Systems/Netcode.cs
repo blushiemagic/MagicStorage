@@ -108,5 +108,9 @@ namespace MagicStorage.Common.Systems {
 
 			return false;
 		}
+
+		public override void PreSaveAndQuit() {
+			RequestingOperatorKey = false;
+		}
 	}
 }
