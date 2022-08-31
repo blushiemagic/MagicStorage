@@ -51,7 +51,7 @@ namespace MagicStorage.Common.Systems {
 			if (!valid)
 				Main.NewText("Inputted key did not match the key stored on the server.", Color.Red);
 			else
-				Main.NewText("Server Operator status was successfully granted.", Color.Green);
+				Main.NewText("Server Operator status was successfully modified.", Color.Green);
 		}
 
 		public override bool HijackGetData(ref byte messageType, ref BinaryReader reader, int playerNumber) {

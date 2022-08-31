@@ -37,14 +37,14 @@ namespace MagicStorage.Common.Commands {
 		}
 	}
 
-	internal class GiveOperator : ModCommand {
-		public override string Command => "giveop";
+	internal abstract class ChangeOperatorStatusCommand : ModCommand {
+		public abstract bool GivesOperatorStatus { get; }
 
 		public override CommandType Type => CommandType.Chat;
 
-		public override string Usage => "[c/ff6a00:Usage: /giveop <number>]";
+		public override string Usage => $"[c/ff6a00:Usage: /{Command} <number>]";
 
-		public override string Description => "Gives operator status to client <number>";
+		public override string Description => GivesOperatorStatus ? "Gives the Server Operator status to client <number>" : "Removes the Server Operator status from client <number>";
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 1) {
@@ -76,17 +76,29 @@ namespace MagicStorage.Common.Commands {
 
 			var mp = plr.GetModPlayer<OperatorPlayer>();
 
-			if (mp.hasOp) {
-				caller.Reply("Client " + client + " already has the Server Operator status", Color.Red);
+			if (mp.hasOp == GivesOperatorStatus) {
+				caller.Reply("Client " + client + " already " + (GivesOperatorStatus ? "has" : "lacks") + " the Server Operator status", Color.Red);
 				return;
 			}
 
-			mp.hasOp = true;
+			mp.hasOp = GivesOperatorStatus;
 
 			NetHelper.ClientSendPlayerHasOp(client);
 
 			Netcode.ClientPrintKeyReponse(valid: true);
 		}
+	}
+
+	internal class GiveOperator : ChangeOperatorStatusCommand {
+		public override string Command => "op";
+
+		public override bool GivesOperatorStatus => true;
+	}
+
+	internal class RemoveOperator : ChangeOperatorStatusCommand {
+		public override string Command => "deop";
+
+		public override bool GivesOperatorStatus => false;
 	}
 
 	internal class WhoAreClients : ModCommand {
