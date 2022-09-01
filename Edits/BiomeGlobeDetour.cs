@@ -21,8 +21,9 @@ public class BiomeGlobeDetour : Edit
 
 	private static void Recipe_FindRecipes(OnRecipe.orig_FindRecipes orig, bool canDelayCheck)
 	{
+		if (Main.dedServ)
+			return;
 		Player player = Main.LocalPlayer;
-
 		bool oldGraveyard = player.ZoneGraveyard;
 		bool oldSnow = player.ZoneSnow;
 		bool oldNearCampfire = player.adjTile[TileID.Campfire];
