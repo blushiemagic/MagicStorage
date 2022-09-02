@@ -733,6 +733,10 @@ Mods: {
 				Label: "Clear recipe history"
 				Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
+			canMovePanels: {
+				Label: "UI Panel Movement"
+				Tooltip: "Disable to prevent moving and resizing the UI panels"
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

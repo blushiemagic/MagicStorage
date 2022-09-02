@@ -82,6 +82,11 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool clearHistory;
 
+		[Label("$Mods.MagicStorage.Config.canMovePanels.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.canMovePanels.Tooltip")]
+		[DefaultValue(true)]
+		public bool canMovePanels;
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -122,6 +127,9 @@ namespace MagicStorage
 
 		[JsonIgnore]
 		public static bool ClearRecipeHistory => Instance.clearHistory;
+
+		[JsonIgnore]
+		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}

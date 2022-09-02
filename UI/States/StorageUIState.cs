@@ -42,13 +42,6 @@ namespace MagicStorage.UI.States {
 				_ => throw new ArgumentException("Unknown page: " + page, nameof(page))
 			};
 
-		protected override void PostInitializePages() {
-			panel.Left.Set(PanelLeft, 0f);
-			panel.Top.Set(PanelTop, 0f);
-			panel.Width.Set(PanelWidth, 0f);
-			panel.Height.Set(PanelHeight, 0f);
-		}
-
 		protected override void OnOpen() {
 			StorageGUI.OnRefresh += Refresh;
 		}
@@ -59,7 +52,7 @@ namespace MagicStorage.UI.States {
 			GetPage<StoragePage>("Storage").scrollBar.ViewPosition = 0f;
 		}
 
-		public void Refresh() {
+		public override void Refresh() {
 			if (Main.gameMenu)
 				return;
 
@@ -101,7 +94,28 @@ namespace MagicStorage.UI.States {
 
 		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
 
-		public override string GetSearchText() => GetPage<StoragePage>("Crafting").searchBar.Text;
+		public override string GetSearchText() => GetPage<StoragePage>("Storage").searchBar.Text;
+
+		public override float GetMinimumResizeHeight() {
+			var page = GetPage<StoragePage>("Storage");
+
+			page.GetZoneDimensions(out float zoneTop, out float bottomMargin);
+
+			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * StorageGUI.inventoryScale;
+
+			float mainPageMinimumHeight = zoneTop + itemSlotHeight + StorageGUI.padding + bottomMargin;
+
+			float dropdownHeight;
+
+			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown) {
+				dropdownHeight = page.sortingDropdown.MaxExpandedHeight;
+
+				dropdownHeight += page.topBar2.Top.Pixels;
+			} else
+				dropdownHeight = 0;
+
+			return Math.Max(dropdownHeight, mainPageMinimumHeight);
+		}
 
 		public class StoragePage : BaseStorageUIAccessPage {
 			public NewUIToggleButton filterFavorites;
@@ -225,6 +239,7 @@ namespace MagicStorage.UI.States {
 					lastKnownScrollBarViewPosition = -1;
 
 					MagicUI.CloseUIDueToHeightLimit();
+					parentUI.pendingUIChange = true;  //Failsafe
 					return false;
 				}
 
@@ -260,8 +275,8 @@ namespace MagicStorage.UI.States {
 				return item;
 			}
 
-			protected override void GetZoneDimensions(out float top, out float bottomMargin) {
-				bottomMargin = 20f;
+			public override void GetZoneDimensions(out float top, out float bottomMargin) {
+				bottomMargin = 36f;
 
 				top = MagicStorageConfig.ButtonUIMode switch {
 					ButtonConfigurationMode.Legacy

@@ -16,25 +16,25 @@ using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	public abstract class BaseStorageUIAccessPage : BaseStorageUIPage {
-		internal UISearchBar searchBar;
-		internal UIText capacityText;
-		internal NewUIScrollbar scrollBar;
-		internal ModSearchBox modSearchBox;
+		public UISearchBar searchBar;
+		public UIText capacityText;
+		public NewUIScrollbar scrollBar;
+		public ModSearchBox modSearchBox;
 
-		internal NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
+		public NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
 
 		//Used to order the buttons
-		internal UIElement topBar;   //Search Bar, recipe buttons, Deposit All
-		internal UIElement topBar2;  //Sorting options, dropdown menus
-		internal UIElement topBar3;  //Filtering options
+		public UIElement topBar;   //Search Bar, recipe buttons, Deposit All
+		public UIElement topBar2;  //Sorting options, dropdown menus
+		public UIElement topBar3;  //Filtering options
 
-		private UIElement bottomBar;
+		public UIElement bottomBar;
 
-		internal SortingOptionButtonChoice sortingButtons;
-		internal FilteringOptionButtonChoice filteringButtons;
+		public SortingOptionButtonChoice sortingButtons;
+		public FilteringOptionButtonChoice filteringButtons;
 
-		internal UIDropdownMenu sortingDropdown;
-		internal UIDropdownMenu filteringDropdown;
+		public UIDropdownMenu sortingDropdown;
+		public UIDropdownMenu filteringDropdown;
 
 		public bool PendingZoneRefresh { get; private set; }
 		
@@ -92,6 +92,8 @@ namespace MagicStorage.UI.States {
 		protected float TopBar3Bottom => topBar3.Top.Pixels + topBar3.Height.Pixels;
 
 		public override void OnInitialize() {
+			base.OnInitialize();
+
 			topBar = new();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
@@ -204,7 +206,7 @@ namespace MagicStorage.UI.States {
 
 		private void ModernConfigFilteringButtonAction() => parentUI.ModernPanelButtonClicked("Filtering", filteringButtons);
 
-		protected abstract void GetZoneDimensions(out float top, out float bottomMargin);
+		public abstract void GetZoneDimensions(out float top, out float bottomMargin);
 
 		protected abstract float GetSearchBarRight();
 
@@ -356,6 +358,8 @@ namespace MagicStorage.UI.States {
 			Append(topBar2);
 
 			PostReformatPage(current);
+
+			parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 
 			Recalculate();
 		}

@@ -74,11 +74,6 @@ namespace MagicStorage.UI.States {
 			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
 			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
 
-			panel.Left.Set(PanelLeft, 0f);
-			panel.Top.Set(PanelTop, 0f);
-			panel.Width.Set(PanelWidth, 0f);
-			panel.Height.Set(PanelHeight, 0f);
-
 			panel.OnRecalculate += MoveRecipePanel;
 
 			recipePanel = new();
@@ -138,6 +133,8 @@ namespace MagicStorage.UI.States {
 
 						CraftingGUI.SetSelectedRecipe(selected);
 						StorageGUI.needRefresh = true;
+
+						UpdatePanelHeight(PanelHeight);
 
 						history.AddHistory(CraftingGUI.selectedRecipe);
 					}
@@ -331,11 +328,8 @@ namespace MagicStorage.UI.States {
 		}
 
 		private void MoveRecipePanel() {
-			PanelTop = panel.Top.Pixels;
-			PanelLeft = panel.Left.Pixels;
-
-			recipeTop = panel.Top.Pixels;
-			recipeLeft = panel.Left.Pixels + panel.Width.Pixels;
+			recipeTop = PanelTop;
+			recipeLeft = PanelRight;
 			recipePanel.Left.Set(recipeLeft, 0f);
 			recipePanel.Top.Set(recipeTop, 0f);
 
@@ -469,6 +463,8 @@ namespace MagicStorage.UI.States {
 
 			MagicUI.BlockItemSlotActionsDetour = oldBlock;
 		}
+		
+		const float ingredientZoneTop = 54f;
 
 		private bool RecalculateRecipePanelElements(int itemsNeeded, int ingredientRows) {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
@@ -480,7 +476,6 @@ namespace MagicStorage.UI.States {
 			int totalRows = ingredientRows + extraRow;
 			if (totalRows < 1)
 				totalRows = 1;
-			const float ingredientZoneTop = 54f;
 			float ingredientZoneHeight = 30f * totalRows;
 
 			ingredientZone.SetDimensions(CraftingGUI.IngredientColumns, totalRows);
@@ -511,6 +506,8 @@ namespace MagicStorage.UI.States {
 
 			storageZone.Recalculate();
 
+			UpdatePanelHeight(PanelHeight);
+
 			int numRows2 = (CraftingGUI.storageItems.Count + CraftingGUI.IngredientColumns - 1) / CraftingGUI.IngredientColumns;
 			int displayRows2 = (int)storageZone.GetDimensions().Height / ((int)smallSlotHeight + CraftingGUI.Padding);
 
@@ -519,6 +516,7 @@ namespace MagicStorage.UI.States {
 				lastKnownScrollBarViewPosition = -1;
 
 				MagicUI.CloseUIDueToHeightLimit();
+				pendingUIChange = true;  //Failsafe
 				return false;
 			}
 
@@ -708,7 +706,7 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.ResetSlotFocus();
 		}
 
-		public void Refresh() {
+		public override void Refresh() {
 			if (Main.gameMenu)
 				return;
 
@@ -800,6 +798,48 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(recipeHistory);
 			recipeHistoryPanel.Remove();
 			recipePanel.Recalculate();
+		}
+
+		public override float GetMinimumResizeHeight() {
+			var page = GetPage<RecipesPage>("Crafting");
+
+			//Main page height
+			page.GetZoneDimensions(out float zoneTop, out float bottomMargin);
+
+			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * StorageGUI.inventoryScale;
+
+			float mainPageMinimumHeight = zoneTop + itemSlotHeight + StorageGUI.padding + bottomMargin;
+
+			float dropdownHeight;
+
+			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown) {
+				dropdownHeight = page.sortingDropdown.MaxExpandedHeight;
+
+				dropdownHeight += page.topBar2.Top.Pixels;
+			} else
+				dropdownHeight = 0;
+
+			//Recipe panel height
+			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
+
+			int itemsNeeded = CraftingGUI.selectedRecipe?.requiredItem.Count ?? CraftingGUI.IngredientColumns;
+			int recipeRows = itemsNeeded / CraftingGUI.IngredientColumns;
+			int extraRow = itemsNeeded % CraftingGUI.IngredientColumns != 0 ? 1 : 0;
+			int totalRows = recipeRows + extraRow;
+			if (totalRows < 1)
+				totalRows = 1;
+			float ingredientZoneHeight = 30f * totalRows;
+
+			float reqObjTextTop = ingredientZoneTop + ingredientZoneHeight + 11 * totalRows;
+			float reqObjText2Top = reqObjTextTop + 24;
+
+			int reqObjText2Rows = reqObjText2.Text.Count(c => c == '\n') + 1;
+			float storedItemsTextTop = reqObjText2Top + 30 * reqObjText2Rows;
+			float storageZoneTop = storedItemsTextTop + 24;
+
+			float recipePanelMinimumHeight = storageZoneTop + smallSlotHeight + CraftingGUI.Padding + 68;
+
+			return Math.Max(dropdownHeight, Math.Max(mainPageMinimumHeight, recipePanelMinimumHeight));
 		}
 
 		public class RecipesPage : BaseStorageUIAccessPage {
@@ -966,6 +1006,8 @@ namespace MagicStorage.UI.States {
 
 				stationZone.Recalculate();
 
+				parentUI.UpdatePanelHeight(parentUI.PanelHeight);
+
 				AdjustCommonElements();
 
 				int numRows = ((CraftingGUI.recipes?.Count ?? 0) + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
@@ -976,6 +1018,7 @@ namespace MagicStorage.UI.States {
 					lastKnownScrollBarViewPosition = -1;
 
 					MagicUI.CloseUIDueToHeightLimit();
+					parentUI.pendingUIChange = true;  //Failsafe
 					return false;
 				}
 
@@ -1026,8 +1069,8 @@ namespace MagicStorage.UI.States {
 				return item;
 			}
 
-			protected override void GetZoneDimensions(out float top, out float bottomMargin) {
-				bottomMargin = 20f;
+			public override void GetZoneDimensions(out float top, out float bottomMargin) {
+				bottomMargin = 36f;
 
 				top = MagicStorageConfig.ButtonUIMode switch {
 					ButtonConfigurationMode.Legacy
@@ -1077,8 +1120,10 @@ namespace MagicStorage.UI.States {
 					} else {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
-							
+						
 						StorageGUI.needRefresh = true;
+
+						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}
 				};
 			}

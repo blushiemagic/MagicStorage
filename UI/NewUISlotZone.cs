@@ -8,7 +8,7 @@ using Terraria.GameContent;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class NewUISlotZone : UIElement {
+	public class NewUISlotZone : UIElement {
 		private const int Padding = 4;
 
 		private static readonly Asset<Texture2D> InventoryBack = TextureAssets.InventoryBack;

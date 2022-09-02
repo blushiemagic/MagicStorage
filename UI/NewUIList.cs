@@ -10,7 +10,7 @@ using Terraria.UI;
 
 namespace MagicStorage.UI {
 	//Basically a copy of UIList that uses a NewUIScrollbar instead of a UIScrollbar
-	internal class NewUIList : UIElement, IEnumerable<UIElement>, IEnumerable {
+	public class NewUIList : UIElement, IEnumerable<UIElement>, IEnumerable {
 		public delegate bool ElementSearchMethod(UIElement element);
 
 		private class UIInnerList : UIElement {

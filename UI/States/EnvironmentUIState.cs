@@ -1,4 +1,5 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -31,11 +32,17 @@ namespace MagicStorage.UI.States {
 		protected override void PostInitializePages() {
 			float innerPanelWidth = 600f + EnvironmentGUI.Padding;
 			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight;
+		}
 
-			panel.Left.Set(PanelLeft, 0f);
-			panel.Top.Set(PanelTop, 0f);
-			panel.Width.Set(PanelWidth, 0f);
-			panel.Height.Set(PanelHeight, 0f);
+		public override float GetMinimumResizeHeight() => 150;
+
+		public override void Recalculate() {
+			base.Recalculate();
+
+			if (!Main.gameMenu && PanelHeight < GetMinimumResizeHeight()) {
+				MagicUI.CloseUIDueToHeightLimit();
+				pendingUIChange = true;
+			}
 		}
 
 		public class ModulesPage : BaseStorageUIPage {
@@ -49,6 +56,8 @@ namespace MagicStorage.UI.States {
 			public ModulesPage(BaseStorageUI parent) : base(parent, "Modules") { }
 
 			public override void OnInitialize() {
+				base.OnInitialize();
+
 				list = new();
 				list.SetPadding(0);
 				list.Width.Set(-20, 1f);

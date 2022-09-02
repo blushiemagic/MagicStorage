@@ -8,7 +8,7 @@ using Terraria.ID;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class UIDropdownMenu : UIPanel {
+	public class UIDropdownMenu : UIPanel {
 		private class UIViewArea : UIPanel {
 			public UIViewArea() {
 				OverflowHidden = true;
@@ -48,6 +48,8 @@ namespace MagicStorage.UI {
 		private readonly float fullDropdownSize;
 
 		private bool expanding;
+
+		public float MaxExpandedHeight => header.Height.Pixels + fullDropdownSize;
 
 		public UIDropdownMenu(string captionText, float width, int listPadding, float fullDropdownSize) {
 			Width.Set(width, 0f);

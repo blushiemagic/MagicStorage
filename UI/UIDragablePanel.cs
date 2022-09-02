@@ -22,7 +22,7 @@ namespace MagicStorage.UI {
 
 		public int UIDelay = -1;
 
-		public event Action OnMenuClose;
+		public event Action OnMenuClose, OnMenuReset;
 		public UIPanel header;
 
 		public readonly Dictionary<string, UIPanelTab> menus;
@@ -55,6 +55,17 @@ namespace MagicStorage.UI {
 				OnMenuClose?.Invoke();
 			};
 			header.Append(closeButton);
+
+			var resetButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Crafting.Reset"));
+			resetButton.SetPadding(7);
+			resetButton.Width.Set(100, 0);
+			resetButton.Left.Set(-45 - 100, 1);
+			resetButton.BackgroundColor.A = 255;
+			resetButton.OnClick += (evt, element) => {
+				SoundEngine.PlaySound(SoundID.MenuOpen);
+				OnMenuReset?.Invoke();
+			};
+			header.Append(resetButton);
 
 			viewArea = new();
 			viewArea.Top.Set(38, 0);
@@ -160,6 +171,9 @@ namespace MagicStorage.UI {
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime); // don't remove.
 
+			if (!MagicStorageConfig.CanMoveUIPanels)
+				Dragging = false;
+
 			if (UIDelay > 0)
 				UIDelay--;
 
@@ -178,6 +192,7 @@ namespace MagicStorage.UI {
 			var parentSpace = Parent.GetDimensions().ToRectangle();
 
 			if (!GetDimensions().ToRectangle().Intersects(parentSpace)) {
+				// TODO: account for negative Pixels and > 0 Percent
 				Left.Pixels = Utils.Clamp(Left.Pixels, 0, parentSpace.Right - Width.Pixels);
 				Top.Pixels = Utils.Clamp(Top.Pixels, 0, parentSpace.Bottom - Height.Pixels);
 

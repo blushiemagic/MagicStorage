@@ -27,23 +27,87 @@ namespace MagicStorage.UI.States {
 		private Dictionary<string, BaseOptionUIPage> configPages;
 		private BaseOptionUIPage currentConfigPage;
 		
-		public float PanelLeft { get; protected set; }
+		private bool needsRecalculate;
+
+		internal UIResizeButton resize;
+
+		public float PanelLeft {
+			get => panel.Left.Pixels;
+			set {
+				if (panel.Left.Pixels != value)
+					needsRecalculate = true;
+
+				panel.Left.Set(value, 0f);
+			}
+		}
 		
-		public float PanelTop { get; protected set; }
+		public float PanelTop {
+			get => panel.Top.Pixels;
+			set {
+				if (panel.Top.Pixels != value)
+					needsRecalculate = true;
+
+				panel.Top.Set(value, 0f);
+			}
+		}
 		
-		protected float PanelWidth { get; set; }
+		public float PanelWidth {
+			get => panel.Width.Pixels;
+			set {
+				if (panel.Width.Pixels != value)
+					needsRecalculate = true;
+
+				panel.Width.Set(value, 0f);
+			}
+		}
+
+		//Needed to prevent clamping in the initialization code
+		// TODO: width clamping?
+		private bool preventHeightClamping = true;
 		
-		protected float PanelHeight { get; set; }
+		public float PanelHeight {
+			get => panel.Height.Pixels;
+			set {
+				if (panel.Height.Pixels != value)
+					needsRecalculate = true;
+
+				panel.Height.Set(value, 0f);
+			}
+		}
+
+		public void UpdatePanelHeight(float height) {
+			if (!preventHeightClamping) {
+				float min = GetMinimumResizeHeight();
+
+				//Panel view area top/bottom
+				min += panel.viewArea.Top.Pixels + (-panel.viewArea.Height.Pixels);
+
+				if (height < min) {
+					height = min;
+					needsRecalculate = true;
+				}
+
+				if (PanelHeight != height)
+					needsRecalculate = true;
+			}
+
+			PanelHeight = height;
+
+			if (needsRecalculate)
+				Recalculate();
+		}
 
 		public float PanelRight {
 			get => PanelLeft + PanelWidth;
-			set => PanelLeft = value - PanelWidth;
+			protected set => PanelLeft = value - PanelWidth;
 		}
 		
 		public float PanelBottom {
 			get => PanelTop + PanelHeight;
-			set => PanelTop = value - PanelHeight;
+			protected set => PanelTop = value - PanelHeight;
 		}
+
+		public abstract float GetMinimumResizeHeight();
 
 		private ButtonConfigurationMode lastKnownMode;
 
@@ -70,6 +134,7 @@ namespace MagicStorage.UI.States {
 			};
 
 			panel.OnRecalculate += UpdateFields;
+			panel.OnMenuReset += () => pendingUIChange = true;
 
 			PanelTop = Main.instance.invBottom + 60;
 			PanelLeft = 20f;
@@ -116,11 +181,34 @@ namespace MagicStorage.UI.States {
 			InitConfigPage("Sorting", new SortingPage(this) { filterBaseOptions = true });
 			InitConfigPage("Filtering", new FilteringPage(this) { filterBaseOptions = true });
 
+			resize = new() {
+				ResizeWidth = false
+			};
+
+			// NOTE: this isn't called in UIResizeButton.Recalculate and for good reason
+			resize.OnDragging += r => {
+				float old = PanelHeight;
+				UpdatePanelHeight(old + r.OffsetDelta.Y);
+				
+				r.OffsetDelta.Y = PanelHeight - old;
+
+				Refresh();
+				Recalculate();
+			};
+
+			resize.Left.Set(-4 - resize.Width.Pixels, 1f);
+			resize.Top.Set(-4 - resize.Height.Pixels, 1f);
+
+			panel.Append(resize);
+
 			Append(panel);
 
 			PostAppendPanel();
 
 			OnButtonConfigChanged(lastKnownMode);
+
+			needsRecalculate = false;
+			preventHeightClamping = false;
 		}
 
 		private void InitConfigPage(string page, BaseOptionUIPage instance) {
@@ -151,11 +239,6 @@ namespace MagicStorage.UI.States {
 		}
 
 		private void UpdateFields() {
-			PanelLeft = panel.Left.Pixels;
-			PanelTop = panel.Top.Pixels;
-			PanelWidth = panel.Width.Pixels;
-			PanelHeight = panel.Height.Pixels;
-
 			GetConfigPanelLocation(out float left, out float top);
 
 			config.Left.Set(left, 0f);
@@ -230,6 +313,8 @@ namespace MagicStorage.UI.States {
 			}
 
 			currentPage = null;
+
+			resize.Dragging = false;
 		}
 
 		protected virtual void OnClose() { }
@@ -237,6 +322,11 @@ namespace MagicStorage.UI.States {
 		public bool pendingUIChange;
 
 		public override void Update(GameTime gameTime) {
+			if (needsRecalculate) {
+				Refresh();
+				Recalculate();
+			}
+			
 			ButtonConfigurationMode currentMode = MagicStorageConfig.ButtonUIMode;
 			if (lastKnownMode != currentMode) {
 				OnButtonConfigChanged(currentMode);
@@ -244,10 +334,13 @@ namespace MagicStorage.UI.States {
 			}
 
 			if (pendingUIChange) {
+				float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 				float top = Main.instance.invBottom + 60;
-				panel.Top.Set(top, 0f);
-				panel.Left.Set(20f, 0f);
-				panel.Height.Set(Main.screenHeight - (top + 2 * UIDragablePanel.cornerPadding), 0f);
+				PanelTop = top;
+				PanelLeft = 20f;
+				float innerPanelWidth = CraftingGUI.RecipeColumns * (itemSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
+				PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight + 2 * UIDragablePanel.cornerPadding;
+				PanelHeight = Main.screenHeight - (top + 2 * UIDragablePanel.cornerPadding);
 				panel.Recalculate();
 
 				//RefreshItems will conveniently update the zone heights
@@ -257,7 +350,20 @@ namespace MagicStorage.UI.States {
 			}
 
 			base.Update(gameTime);
+
+			if (needsRecalculate) {
+				Refresh();
+				Recalculate();
+			}
 		}
+
+		public override void Recalculate() {
+			base.Recalculate();
+
+			needsRecalculate = false;
+		}
+
+		public virtual void Refresh() { }
 
 		protected virtual void OnButtonConfigChanged(ButtonConfigurationMode current) { }
 
