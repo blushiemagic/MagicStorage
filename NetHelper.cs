@@ -1124,7 +1124,9 @@ namespace MagicStorage
 			Netcode.ClientPrintKeyReponse(valid);
 
 			if (valid) {
-				Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp = true;
+				var mp = Main.LocalPlayer.GetModPlayer<OperatorPlayer>();
+
+				mp.manualOp = mp.hasOp = true;
 
 				ClientSendPlayerHasOp(Main.myPlayer);
 			}
@@ -1137,7 +1139,11 @@ namespace MagicStorage
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.PlayerHasServerOp);
 			packet.Write((byte)plr);
-			packet.Write(Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp);
+
+			var mp = Main.LocalPlayer.GetModPlayer<OperatorPlayer>();
+			BitsByte bb = new(mp.hasOp, mp.manualOp);
+
+			packet.Write(bb);
 			packet.Send(ignoreClient: Main.myPlayer);
 
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to the server");
@@ -1145,9 +1151,11 @@ namespace MagicStorage
 
 		public static void ReceivePlayerHasOperator(BinaryReader reader) {
 			byte plr = reader.ReadByte();
-			bool hasOp = reader.ReadBoolean();
+			BitsByte opFlags = reader.ReadByte();
 
-			Main.player[plr].GetModPlayer<OperatorPlayer>().hasOp = hasOp;
+			var mp = Main.LocalPlayer.GetModPlayer<OperatorPlayer>();
+
+			opFlags.Retrieve(ref mp.hasOp, ref mp.manualOp);
 
 			if (Main.netMode != NetmodeID.Server) {
 				Report(true, MessageType.PlayerHasServerOp + " packet received by client " + Main.myPlayer);
@@ -1158,7 +1166,10 @@ namespace MagicStorage
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.PlayerHasServerOp);
 			packet.Write(plr);
-			packet.Write(hasOp);
+
+			BitsByte bb = new(mp.hasOp, mp.manualOp);
+
+			packet.Write(bb);
 			packet.Send(ignoreClient: plr);
 
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");

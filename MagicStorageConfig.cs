@@ -144,7 +144,7 @@ namespace MagicStorage
 			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)
 				return true;
 
-			message = "Only users with the Server Operator status can modify this config";
+			message = "Only users with the Server Operator status or higher can modify this config";
 			return false;
 		}
 	}

@@ -75,6 +75,9 @@ namespace MagicStorage.Components
 			heart?.ResetCompactStage();
 			NetHelper.SendTEUpdate(ID, Position);
 
+			if (heart is not null)
+				NetHelper.SendTEUpdate(heart.ID, heart.Position);
+
 			NetHelper.ProcessUpdateQueue();
 		}
 

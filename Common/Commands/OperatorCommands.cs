@@ -15,7 +15,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => "[c/ff6a00:Usage: /reqop]";
 
-		public override string Description => "Requests operator status from the server";
+		public override string Description => "Requests the Server Admin status from the server";
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 0) {
@@ -28,8 +28,8 @@ namespace MagicStorage.Common.Commands {
 				return;
 			}
 
-			if (caller.Player.GetModPlayer<OperatorPlayer>().hasOp) {
-				caller.Reply("This player already has the Server Operator status", Color.Red);
+			if (caller.Player.GetModPlayer<OperatorPlayer>().manualOp) {
+				caller.Reply("This player already has the Server Admin status", Color.Red);
 				return;
 			}
 
@@ -62,8 +62,8 @@ namespace MagicStorage.Common.Commands {
 				return;
 			}
 
-			if (!caller.Player.GetModPlayer<OperatorPlayer>().hasOp) {
-				caller.Reply("This command can only be used by multiplayer clients with the Server Operator status", Color.Red);
+			if (!caller.Player.GetModPlayer<OperatorPlayer>().manualOp) {
+				caller.Reply("This command can only be used by multiplayer clients with the Server Admin status", Color.Red);
 				return;
 			}
 
@@ -82,6 +82,7 @@ namespace MagicStorage.Common.Commands {
 			}
 
 			mp.hasOp = GivesOperatorStatus;
+			mp.manualOp = false;
 
 			NetHelper.ClientSendPlayerHasOp(client);
 
