@@ -1093,7 +1093,7 @@ namespace MagicStorage.UI.States {
 
 					int objSlot = obj.slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
 
-					if (obj.slot >= CraftingGUI.recipes.Count)
+					if (objSlot >= CraftingGUI.recipes.Count)
 						return;
 
 					StoragePlayer storagePlayer = StoragePlayer.LocalPlayer;
