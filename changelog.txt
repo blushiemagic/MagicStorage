@@ -1,27 +1,4 @@
-﻿[h1]v0.5.7.4[/h1]
+﻿[h1]v0.5.7.5[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Fixed an oversight which caused empty item slots in the Storage UI to ignore clicks
-- Portable Accesses now only open the UI at the end of the item use animation when Autopause is enabled
-- Fixed an oversight which caused Magic Storage to overwrite "mouse text" usage by other mods
-- Improved the stability of the netcode for Storage Units
-- Fixed a bug which caused the Bestiary to malfunction
-- Fixed a bug where the sorting/filtering options wouldn't refresh the UI when being reset to their default values
-- Improved the logic responsible for detecting when the UI should refresh
-- Made the [b]Quick stack deposit mode[/b] config option be enabled by default
-- Improved the expanded Quick Stack logic to properly mesh with the existing logic
-- Renamed the Portable Remote Storage Access to [b]Ultimate Portable Remote Storage Access[/b]
-- Added two new items: the [b]Basic Portable Remote Storage Access[/b] and the [b]Advanced Portable Remote Storage Access[/b].  These two items act like the existing Ultimate Portable Remote Storage Access item, but they have a limited range.  The linked Storage Heart can only be accessed if 1) the player is close enough to the Storage Heart or 2) the player is close enough to any Pylon and at least one Pylon is close enough to the Storage Heart.  The Basic access can be crafted in Pre-Hardmode and the Advanced access can be crafted in early Hardmode.
-- Updated the tooltips for the Ultimate Portable Remote Storage Access and the Portable Remote Crafting Access to indicate that they have an unlimited range
-- Updated and reorganized some of the help tips from the Automaton
-- Fixed a bug which caused item withdrawal from Storage Units to sometimes fail or delete items
-- Added logic during mod loading to detect when another mod adds a recipe with an invalid state or modifies an existing recipe to be in an invalid state
-- The [b]Locator[/b], [b]Locator Drive[/b], [b]Basic Portable Remote Storage Access[/b], [b]Advanced Portable Remote Storage Access[/b], [b]Ultimate Portable Remote Storage Access[/b] and [b]Portable Remote Crafting Access[/b] can now save a unique location per world name.
-- The "Any Demon Altar" ingredient group now supports the [b]Demon Altar[/b] and [b]Crimson Altar[/b] items from [i]Fargo's Mutant Mod[/b], as well as the [b]Corrupt Altar[/b] and [b]Crimson Altar[/b] items from [i]LuiAFK Reborn[/i]
-- Fixed a bug which caused Environment Simulators attached to a Remote Access to be not detectable by the Storage Heart
-- Removed the messages that would appear in chat when any fallback logic for filtering would trigger.  Instead, the text in the search bar will turn red and the warning message will appear in its hover text.
-- Added various safeguards in the netcode to help improve multiplayer stability
-- Rewrote the [b]Magic Storage Server Config[/b] config to work on "Server Operator" system.  Users can request the "Server Admin" status via the [b]/reqop[/b] command.  Any players with the Server Admin status can then grant other players the "Server Operator" status via the [b]/op[/b] command and remove it with the [b]/deop[/b] command.
-- Added new buttons in the UIs for resizing the UI panel's height and for resetting the position and size of the UI panel
-- Added a config option which, when disabled, prevents moving and resizing the UI panels
-- Fixed some bugs which caused the scroll bars in the Environment Simulator UI and the Controls page of the Storage UI to not properly render or update
+-TODO

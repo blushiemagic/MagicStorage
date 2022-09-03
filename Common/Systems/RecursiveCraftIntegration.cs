@@ -147,10 +147,13 @@ namespace MagicStorage.Common.Systems
 			return FlatDict(CraftingGUI.items);
 		}
 
-		public static bool IsCompoundRecipe(Recipe recipe) => RecipeToCompoundRecipe.ContainsKey(recipe);
+		public static bool IsCompoundRecipe(Recipe recipe) => recipe is not null && RecipeToCompoundRecipe.ContainsKey(recipe);
 
 		public static bool HasCompoundVariant(Recipe recipe)
 		{
+			if (recipe is null)
+				return false;
+
 			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
@@ -162,6 +165,9 @@ namespace MagicStorage.Common.Systems
 
 		public static Recipe GetOverriddenRecipe(Recipe recipe)
 		{
+			if (recipe is null)
+				return null;
+
 			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);
@@ -173,6 +179,9 @@ namespace MagicStorage.Common.Systems
 
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
+			if (recipe is null)
+				return null;
+
 			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
 				ArgumentNullException.ThrowIfNull(compoundRecipe.OverridenRecipe);

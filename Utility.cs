@@ -309,6 +309,13 @@ namespace MagicStorage {
 		}
 
 		public static bool PlayerIsNearAccess(Player player, Point16 access, float range) {
+			if (range == 0)
+				return false;
+
+			//Infinite range
+			if (range < 0)
+				return true;
+
 			float r = range / 16;
 
 			float pX = player.Center.X / 16, pY = player.Center.Y / 16;

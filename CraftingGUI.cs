@@ -365,18 +365,7 @@ namespace MagicStorage
 			{
 				var filteredRecipes = ItemSorter.GetRecipes(filterMode, searchText, modFilterIndex);
 
-				IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(filteredRecipes, r => r.createItem, sortMode);
-
-				// show only blacklisted recipes only if choice = 2, otherwise show all other
-				if (MagicStorageConfig.RecipeBlacklistEnabled)
-					sortedRecipes = sortedRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
-
-				// favorites first
-				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					sortedRecipes = sortedRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
-					
-					sortedRecipes = sortedRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0);
-				}
+				IEnumerable<Recipe> sortedRecipes = SortRecipes(filteredRecipes, sortMode, choice, hiddenRecipes, favorited);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -515,26 +504,37 @@ namespace MagicStorage
 
 			if (needsResort) {
 				int sortMode = MagicUI.craftingUI.GetPage<SortingPage>("Sorting").option;
-				var sortComparer = SortingOptionLoader.Get(sortMode).Sorter;
+				int choice = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").recipeButtons.Choice;
 
 				var sorted = new List<Recipe>(recipes)
 					.AsParallel()
 					.AsOrdered();
 
-				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					// favorites first
-					sorted = sorted
-						.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0)
-						.ThenByDescending(r => r.createItem, sortComparer);
-				} else
-					sorted = sorted.OrderByDescending(r => r.createItem, sortComparer);
+				IEnumerable<Recipe> sortedRecipes = SortRecipes(sorted, sortMode, choice, hiddenRecipes, favorited);
 
 				recipes.Clear();
 				recipeAvailable.Clear();
 
-				recipes.AddRange(sorted);
+				recipes.AddRange(sortedRecipes);
 				recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
 			}
+		}
+
+		private static IEnumerable<Recipe> SortRecipes(IEnumerable<Recipe> source, int sortMode, int choice, ItemTypeOrderedSet hiddenRecipes, ItemTypeOrderedSet favorited) {
+			IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(source, r => r.createItem, sortMode);
+
+			// show only blacklisted recipes only if choice = 2, otherwise show all other
+			if (MagicStorageConfig.RecipeBlacklistEnabled)
+				sortedRecipes = sortedRecipes.Where(x => choice == RecipeButtonsBlacklistChoice == hiddenRecipes.Contains(x.createItem));
+
+			// favorites first
+			if (MagicStorageConfig.CraftingFavoritingEnabled) {
+				sortedRecipes = sortedRecipes.Where(x => choice != RecipeButtonsFavoritesChoice || favorited.Contains(x.createItem));
+					
+				sortedRecipes = sortedRecipes.OrderByDescending(r => favorited.Contains(r.createItem) ? 1 : 0);
+			}
+
+			return sortedRecipes;
 		}
 
 		private static void AnalyzeIngredients()
