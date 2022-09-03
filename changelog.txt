@@ -1,4 +1,8 @@
 ﻿[h1]v0.5.7.5[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
--TODO
+- Fixed an oversight which caused the Ultimate Portable Remote Storage Access and Portable Remote Crafting Access to instantly close their UIs when used
+- Added safeguards in the Recursive Craft integration's logic
+- Fixed a bug which caused recipes to sometimes be sorted in reverse order
+- Fixed a bug which caused recipe slots in the Crafting UI to be duplicated when Recursive Craft is enabled
+- Fixed a bug which caused the screen to tear when clicking empty recipe slots in the Crafting UI
