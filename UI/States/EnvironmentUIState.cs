@@ -46,12 +46,12 @@ namespace MagicStorage.UI.States {
 		}
 
 		public class ModulesPage : BaseStorageUIPage {
-			private UIList list;
+			private NewUIList list;
 
 			internal Dictionary<string, EnvironmentGUIModEntry> entriesByMod = new();
 
 			private UIText noModulesLoaded;
-			private UIScrollbar scroll;
+			private NewUIScrollbar scroll;
 
 			public ModulesPage(BaseStorageUI parent) : base(parent, "Modules") { }
 
@@ -64,18 +64,17 @@ namespace MagicStorage.UI.States {
 				list.Height.Set(0, 0.9f);
 				list.Left.Set(20, 0);
 				list.Top.Set(0, 0.05f);
-				Append(list);
 
 				scroll = new();
 				scroll.Width.Set(20, 0);
 				scroll.Height.Set(0, 0.825f);
 				scroll.Left.Set(0, 0.95f);
 				scroll.Top.Set(0, 0.1f);
-				scroll.SetView(viewSize: 1f, maxViewSize: 2f);
 
 				list.SetScrollbar(scroll);
 				list.Append(scroll);
 				list.ListPadding = 10;
+				Append(list);
 
 				foreach (Mod mod in ModLoader.Mods) {
 					EnvironmentGUIModEntry entry = new(mod);

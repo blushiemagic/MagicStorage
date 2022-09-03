@@ -379,8 +379,8 @@ namespace MagicStorage.UI.States {
 
 			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
-			private UIList list;
-			private UIScrollbar scroll;
+			private NewUIList list;
+			private NewUIScrollbar scroll;
 
 			// TODO: make selling pull up a menu which lets the player select which duplicates they want to sell
 			internal NewUISlotZone sellDuplicatesZone;
@@ -402,7 +402,6 @@ namespace MagicStorage.UI.States {
 				list.Height.Set(0, 0.9f);
 				list.Left.Set(20, 0);
 				list.Top.Set(0, 0.05f);
-				Append(list);
 
 				scroll = new();
 				scroll.Width.Set(20, 0);
@@ -413,6 +412,7 @@ namespace MagicStorage.UI.States {
 				list.SetScrollbar(scroll);
 				list.Append(scroll);
 				list.ListPadding = 10;
+				Append(list);
 
 				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => StorageGUI.needRefresh = true);
 
@@ -569,12 +569,6 @@ namespace MagicStorage.UI.States {
 				button.OnMouseOver += (evt, e) => (e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 
 				button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			}
-
-			public override void Update(GameTime gameTime) {
-				base.Update(gameTime);
-
-				scroll.SetView(viewSize: 1f, maxViewSize: 2f);
 			}
 
 			private delegate bool SelectDuplicate(ref SourcedItem item, ref SourcedItem check, out bool swapHappened);
