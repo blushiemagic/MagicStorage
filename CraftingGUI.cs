@@ -467,13 +467,17 @@ namespace MagicStorage
 				Recipe orig = recipe;
 				Recipe check = recipe;
 
-				if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(check))
-					check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);  //Get the compound recipe
+				if (RecursiveCraftIntegration.Enabled) {
+					if (RecursiveCraftIntegration.HasCompoundVariant(recipe)) {
+						orig = RecursiveCraftIntegration.GetOverriddenRecipe(orig);
+						check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);  //Get the compound recipe
+					}
+				}
 
 				if (check is null)
 					continue;
 
-				int index = recipes.IndexOf(orig);  //Compound recipe is not assigned to the original recipe list
+				int index = recipes.IndexOf(check);  //Compound recipe is in the original recipe list
 
 				if (!IsAvailable(check)) {
 					if (index >= 0) {
