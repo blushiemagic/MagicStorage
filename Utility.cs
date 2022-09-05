@@ -234,7 +234,7 @@ namespace MagicStorage {
 			float r = range / 16;
 
 			foreach (TeleportPylonInfo pylon in Main.PylonSystem.Pylons) {
-				if (!IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false))
+				if (!IsPylonValidForRemoteAccessLinking(player, pylon, checkNPCDanger: false))
 					continue;
 
 				if (range < 0) {
@@ -251,11 +251,11 @@ namespace MagicStorage {
 			}
 		}
 
-		public static bool StorageSystemHasNearbyPylon(TEStorageHeart heart, int tileRange) {
+		public static bool StorageSystemHasNearbyPylon(Player player, TEStorageHeart heart, int tileRange) {
 			if (!Main.PylonSystem.HasAnyPylon() || heart is null || tileRange == 0)
 				return false;
 
-			List<TeleportPylonInfo> validPylons = Main.PylonSystem.Pylons.Where(pylon => IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false)).ToList();
+			List<TeleportPylonInfo> validPylons = Main.PylonSystem.Pylons.Where(pylon => IsPylonValidForRemoteAccessLinking(player, pylon, checkNPCDanger: false)).ToList();
 
 			if (validPylons.Count == 0)
 				return false;
@@ -338,7 +338,7 @@ namespace MagicStorage {
 			short pX = playerCenter.X, pY = playerCenter.Y;
 			float r = range / 16;
 
-			if (!IsPylonValidForRemoteAccessLinking(pylon, checkNPCDanger: false))
+			if (!IsPylonValidForRemoteAccessLinking(player, pylon, checkNPCDanger: false))
 				return false;
 
 			int x = pylon.PositionInTiles.X, y = pylon.PositionInTiles.Y;
@@ -366,7 +366,7 @@ namespace MagicStorage {
 			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
 		}
 
-		public static bool IsPylonValidForRemoteAccessLinking(TeleportPylonInfo info, bool checkNPCDanger) {
+		public static bool IsPylonValidForRemoteAccessLinking(Player player, TeleportPylonInfo info, bool checkNPCDanger) {
 			string key = null;
 
 			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info);
@@ -394,6 +394,8 @@ namespace MagicStorage {
 
 			if (info.ModPylon is ModPylon destinationPylon)
 				destinationPylon.ValidTeleportCheck_DestinationPostCheck(info, ref flag, ref key);
+
+			player.ForceUpdateBiomes();
 
 			return flag;
 		}

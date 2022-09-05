@@ -110,7 +110,7 @@ namespace MagicStorage.Items
 			if (Utility.PlayerIsNearAccess(player, accessLocation, mp.portableAccessRangePlayerToPylons))
 				return true;
 
-			return Utility.NearbyPylons(player, mp.portableAccessRangePlayerToPylons).Any() && Utility.StorageSystemHasNearbyPylon(heart, mp.portableAccessRangePylonsToStorage);
+			return Utility.NearbyPylons(player, mp.portableAccessRangePlayerToPylons).Any() && Utility.StorageSystemHasNearbyPylon(player, heart, mp.portableAccessRangePylonsToStorage);
 		}
 
 		protected void OpenStorage(Player player, bool crafting = false)
@@ -159,7 +159,7 @@ namespace MagicStorage.Items
 				if (!Utility.NearbyPylons(player, modPlayer.portableAccessRangePlayerToPylons).Any()) {
 					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessOutOfRange"));
 					canOpen = false;
-				} else if (modPlayer.portableAccessRangePylonsToStorage >= 0 && !Utility.StorageSystemHasNearbyPylon(heart, modPlayer.portableAccessRangePylonsToStorage)) {
+				} else if (modPlayer.portableAccessRangePylonsToStorage >= 0 && !Utility.StorageSystemHasNearbyPylon(player, heart, modPlayer.portableAccessRangePylonsToStorage)) {
 					Main.NewText(Language.GetTextValue("Mods.MagicStorage.PortableAccessNoPylons"));
 					canOpen = false;
 				}

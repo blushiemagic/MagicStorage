@@ -134,7 +134,7 @@ namespace MagicStorage.Common.Systems {
 
 		internal static void GetDrawingInformation(Player player, Point16 access, float playerToPylonRange, bool drawNear, out List<DrawingContext> contexts) {
 			List<TeleportPylonInfo> pylons = Main.PylonSystem.Pylons
-				.Where(p => Utility.IsPylonValidForRemoteAccessLinking(p, false))
+				.Where(p => Utility.IsPylonValidForRemoteAccessLinking(player, p, false))
 				.Where(p => drawNear == Utility.PlayerIsNearPylonIgnoreValidity(player, p, playerToPylonRange))
 				.ToList();
 
