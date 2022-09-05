@@ -378,7 +378,9 @@ namespace MagicStorage
 				else
 				{
 					recipes.AddRange(sortedRecipes);
-					recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
+					recipeAvailable.AddRange(recipes
+						//.AsParallel().AsOrdered()
+						.Select(r => IsAvailable(r)));
 				}
 			}
 
@@ -478,6 +480,10 @@ namespace MagicStorage
 					continue;
 
 				int index = recipes.IndexOf(check);  //Compound recipe is in the original recipe list
+
+				//Failsafe?  Sometimes non-compound recipes can be in the list when the compound variant can be used
+				if (RecursiveCraftIntegration.Enabled && index < 0 && RecursiveCraftIntegration.IsCompoundRecipe(check))
+					index = recipes.IndexOf(orig);
 
 				if (!IsAvailable(check)) {
 					if (index >= 0) {
@@ -792,10 +798,7 @@ namespace MagicStorage
 
 				action();
 			}
-			finally
-			{
-				PlayerZoneCache.FreeCache(false);
-			}
+			finally { }
 		}
 
 		internal static bool PassesBlock(Recipe recipe)
@@ -841,24 +844,26 @@ namespace MagicStorage
 
 			int index = 0;
 			bool hasItemFromStorage = false;
-			foreach (Item item in items)
+			foreach (List<Item> itemsFromSource in sourceItems)
 			{
-				foreach (Item reqItem in selectedRecipe.requiredItem) {
-					if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type)) {
-						//Cloning can still happen here since the actual items aren't needed -- only the types
-						storageItems.Add(item.Clone());
-						storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
+				foreach (Item item in itemsFromSource) {
+					foreach (Item reqItem in selectedRecipe.requiredItem) {
+						if (item.type == reqItem.type || RecipeGroupMatch(selectedRecipe, item.type, reqItem.type)) {
+							//Module items must refer to the original item instances
+							storageItems.Add(index >= numItemsWithoutSimulators ? item : item.Clone());
+							storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
+						}
 					}
-				}
 
-				if (item.type == selectedRecipe.createItem.type) {
-					Item source = sourceItems[index][0];
+					if (item.type == selectedRecipe.createItem.type) {
+						Item source = itemsFromSource[0];
 
-					if (index < numItemsWithoutSimulators) {
-						result = source;
-						hasItemFromStorage = true;
-					} else if (!hasItemFromStorage)
-						result = source;
+						if (index < numItemsWithoutSimulators) {
+							result = source;
+							hasItemFromStorage = true;
+						} else if (!hasItemFromStorage)
+							result = source;
+					}
 				}
 
 				index++;
@@ -1066,13 +1071,15 @@ namespace MagicStorage
 
 			public EnvironmentSandbox sandbox;
 
-			public List<Item> consumedItems;
+			public List<Item> consumedItemsFromModules;
 
 			public IEnumerable<EnvironmentModule> modules;
 
 			public int toCraft;
 
 			public bool simulation;
+
+			public IEnumerable<Item> ConsumedItems => toWithdraw.Concat(consumedItemsFromModules);
 		}
 
 		/// <summary>
@@ -1101,7 +1108,7 @@ namespace MagicStorage
 				toWithdraw = toWithdraw,
 				results = results,
 				sandbox = sandbox,
-				consumedItems = new(),
+				consumedItemsFromModules = new(),
 				fromModule = fromModule,
 				modules = heart.GetModules(),
 				toCraft = toCraft
@@ -1150,12 +1157,14 @@ namespace MagicStorage
 				CatchDroppedItems = true;
 				DroppedItems.Clear();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+				var consumed = context.ConsumedItems.ToList();
+
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed);
 
 				foreach (EnvironmentModule module in context.modules)
-					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
 
-				context.consumedItems.Clear();
+				context.consumedItemsFromModules.Clear();
 
 				CatchDroppedItems = false;
 
@@ -1166,8 +1175,6 @@ namespace MagicStorage
 		private static bool AttemptLazyBatchCraft(CraftingContext context) {
 			NetHelper.Report(false, "Attempting batch craft operation...");
 
-			context.simulation = true;
-
 			List<Item> origResults = new(context.results);
 			List<Item> origWithdraw = new(context.toWithdraw);
 
@@ -1177,6 +1184,8 @@ namespace MagicStorage
 			//Skip item consumption code for recipes that have no ingredients
 			if (selectedRecipe.requiredItem.Count == 0)
 				goto SkipItemConsumption;
+
+			context.simulation = true;
 
 			List<Item> batch = new(selectedRecipe.requiredItem.Count);
 
@@ -1235,10 +1244,12 @@ namespace MagicStorage
 				CatchDroppedItems = true;
 				DroppedItems.Clear();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, context.consumedItems);
+				var consumed = context.ConsumedItems.ToList();
+
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed);
 
 				foreach (EnvironmentModule module in context.modules)
-					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, context.consumedItems);
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
 
 				CatchDroppedItems = false;
 
@@ -1322,24 +1333,32 @@ namespace MagicStorage
 			foreach (Item tryItem in !context.simulation ? list : list.Select(i => new Item(i.type, i.stack))) {
 				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
 					//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
-					bool canWithdraw = addToWithdraw && !context.simulation && !context.fromModule[listIndex];
+					bool canWithdraw = context.simulation || (addToWithdraw && !context.fromModule[listIndex]);
 
-					if (tryItem.stack > stack) {
-						Item temp = tryItem.Clone();
-						temp.stack = stack;
+					if (canWithdraw) {
+						int stackToConsume;
 
-						if (canWithdraw)
+						if (tryItem.stack > stack) {
+							stackToConsume = stack;
+							stack = 0;
+						} else {
+							stackToConsume = tryItem.stack;
+							stack -= tryItem.stack;
+						}
+
+						OnConsumeItemForRecipe_Obsolete(context, tryItem, stackToConsume);
+
+						if (!context.simulation) {
+							Item temp = tryItem.Clone();
+							temp.stack = stackToConsume;
+
 							context.toWithdraw.Add(temp);
-								
-						tryItem.stack -= stack;
-						stack = 0;
-					} else {
-						if (canWithdraw)
-							context.toWithdraw.Add(tryItem.Clone());
-								
-						stack -= tryItem.stack;
-						tryItem.stack = 0;
-						tryItem.type = ItemID.None;
+						}
+
+						tryItem.stack -= stackToConsume;
+
+						if (tryItem.stack <= 0)
+							tryItem.type = ItemID.None;
 					}
 
 					if (stack <= 0)
@@ -1356,7 +1375,6 @@ namespace MagicStorage
 			int index = 0;
 			foreach (Item tryItem in context.sourceItems) {
 				if (reqType == tryItem.type || RecipeGroupMatch(selectedRecipe, tryItem.type, reqType)) {
-					int origStack = stack;
 					int stackToConsume;
 
 					if (tryItem.stack > stack) {
@@ -1372,7 +1390,7 @@ namespace MagicStorage
 					Item consumed = tryItem.Clone();
 					consumed.stack = stackToConsume;
 
-					context.consumedItems.Add(consumed);
+					context.consumedItemsFromModules.Add(consumed);
 
 					//Items should only be consumed if they're from a module, since withdrawing wouldn't grab the item anyway
 					if (context.fromModule[index]) {

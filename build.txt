@@ -1,5 +1,5 @@
 author = The Magic Storage Team
-version = 0.5.7.6
+version = 0.5.7.7
 displayName = Magic Storage
 homepage = https://github.com/blushiemagic/MagicStorage/wiki
 hideCode = false
