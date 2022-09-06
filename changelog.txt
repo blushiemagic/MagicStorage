@@ -1,6 +1,4 @@
-﻿[h1]v0.5.7.7[/h1]
+﻿[h1]v0.5.7.8[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Fixed a bug which caused the Crafting Access to not properly recognize crafting stations in its station slots
-- Fixed a bug which caused items from Environment Simulator modules to not be consumed when crafting in the Crafting Access
-- Various other bug fixes which improved the logic for crafting in the Crafting Access 
+- TODO

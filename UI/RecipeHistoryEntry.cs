@@ -142,14 +142,19 @@ namespace MagicStorage.UI {
 		}
 
 		internal void SetRecipe(Recipe recipe) {
+			if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(recipe))
+				recipe = RecursiveCraftIntegration.GetOverriddenRecipe(recipe);
+
 			OriginalRecipe = recipe;
 
 			if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.HasCompoundVariant(recipe))
 				CompoundRecipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
 
-			resultSlot.SetItem(recipe.createItem, clone: true);
+			Recipe used = UsedRecipe;
 
-			ingredientZone.SetDimensions(7, Math.Max((recipe.requiredItem.Count - 1) / 7 + 1, 1));
+			resultSlot.SetItem(used.createItem, clone: true);
+
+			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1));
 
 			ingredientZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
 			ingredientZone.Width.Set(ingredientZone.ZoneWidth, 0f);
@@ -158,7 +163,7 @@ namespace MagicStorage.UI {
 			Width.Set(resultSlot.Width.Pixels + 4 + ingredientZone.ZoneWidth + 4, 0f);
 			Height.Set(Math.Max(resultSlot.Height.Pixels, ingredientZone.ZoneHeight) + 4, 0f);
 
-			ingredientZone.SetItemsAndContexts(recipe.requiredItem.Count, GetIngredient);
+			ingredientZone.SetItemsAndContexts(used.requiredItem.Count, GetIngredient);
 
 			Recalculate();
 		}
