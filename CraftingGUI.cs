@@ -378,9 +378,7 @@ namespace MagicStorage
 				else
 				{
 					recipes.AddRange(sortedRecipes);
-					recipeAvailable.AddRange(recipes
-						//.AsParallel().AsOrdered()
-						.Select(r => IsAvailable(r)));
+					recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
 				}
 			}
 
