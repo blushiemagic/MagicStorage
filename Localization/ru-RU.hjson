@@ -2,13 +2,13 @@
 Mods: {
 	MagicStorage: {
 		ItemName: {
-			# BiomeGlobe: Biome Globe
+			BiomeGlobe: Биомная Шар
 			CraftingAccess: Модуль Создания Предметов
 			CreativeStorageUnit: Креативная Ячейка Хранилища
 			Locator: Локатор
 			LocatorDisk: Локатор с CD Приводом
-			# PortableAccess: Ultimate Portable Remote Storage Access
-			# PortableCraftingAcces: Portable Remote Crafting Access
+			PortableAccess: Супер Портативный Дистанционный Доступ Хранилища
+			PortableCraftingAcces: Портативный Дистанционный Доступ Создания Предметов
 			RadiantJewel: Сияющая Драгоценность
 			RemoteAccess: Модуль Удаленного Доступа к Хранилищу
 			ShadowDiamond: Теневой Алмаз
@@ -34,28 +34,28 @@ Mods: {
 			UpgradeHellstone: Адское Улучшение Ячейки Хранилища
 			UpgradeLuminite: Люминитовое Улучшение Ячейки Хранилища
 			UpgradeTerra:Терра Улучшение Ячейки Хранилища
-			# CrimsonAltar: Crimson Altar
-			# DemonAltar: Demon Altar
-			# CombinedFurnitureStations1Item: Combined Furniture Stations (Tier 1)
-			# CombinedFurnitureStations2Item: Combined Furniture Stations (Tier 2)
-			# CombinedStations1Item: Combined Stations (Tier 1)
-			# CombinedStations2Item: Combined Stations (Tier 2)
-			# CombinedStations3Item: Combined Stations (Tier 3)
-			# CombinedStations4Item: Combined Stations (Final Tier)
-			# EnvironmentAccess: Environment Simulator
-			# PortableAccessPreHM: Basic Portable Remote Storage Access
-			# PortableAccessHM: Advanced Portable Remote Storage Access
+			CrimsonAltar: Багряный Алтарь
+			DemonAltar: Демонический Алтарь
+			CombinedFurnitureStations1Item: Совмещенная Мебельная Станция (Tир 1)
+			CombinedFurnitureStations2Item: Совмещенная Мебельная Станция (Tир 2)
+			CombinedStations1Item: Совмещенная Станция (Тир 1)
+			CombinedStations2Item: Совмещенная Станция (Тир 2)
+			CombinedStations3Item: Совмещенная Станция (Tир 3)
+			CombinedStations4Item: Совмещенная Станция (Финальный Тир)
+			EnvironmentAccess: Симулятор Окружающей Среды
+			PortableAccessPreHM: Базовый Портативный Дистанционный Доступ Хранилища
+			PortableAccessHM: Продвинутый Портативный Дистанционный Доступ Хранилища
 		}
 
 		ItemTooltip: {
 			BiomeGlobe:
 			'''
-			'The world's power is at your fingertips'
-			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
-			Can be in the inventory or a Crafting Interface's station slot
-			While in the inventory, Marshmallows can be cooked without needing to stand near a Campfire
-			Allows crafting of Cooked Marshmallows in the Crafting Interface
-			Acts like a Beach Ball when thrown
+			'Сила мира в ваших руках'  
+			Позволяет создание рецептов которые требуют Снежный биом, Экто-туман, Демонический/Багряный Алтарь и Воду/Лаву/Мёд
+			Может быть в инвентаре или в слоте для станций Интерфейса Создания Предметов
+			Пока в инвентаре, позволяет жарить зефир без нужды быть рядом с Костром
+			Позволяет создание Жареного зефира в Интерфейсе Создания Предметов
+			Ведет себя как Пляжный мяч когда брошен
 			'''
 			Locator:
 			'''
@@ -64,18 +64,22 @@ Mods: {
 			'''
 			LocatorDisk:
 			'''
-			<right> по Cердцу Хранилища чтобы запомнить его местоположение"
-			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища"
+			<right> по Cердцу Хранилища чтобы запомнить его местоположение
+			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища
 			Не пропадает при использовании
 			'''
-			# PortableAccess:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableCraftingAccess:
-			# '''
-			# (See en-US translation)
-			# '''
+			PortableAccess:
+			'''
+			<right> Сердце Хранилища чтобы запомнить его местоположение
+			Используйте предмет чтобы открыть ваше хранилище
+			Имеет неограниченую дальность доступа
+			'''
+			PortableCraftingAccess:
+			'''
+			<right> Интерфейс Создания Предметов чтобы запомнить его местоположение
+			Используйте предмет чтобы открыть ваш Интерфейс Создания Предметов
+			Имеет неограниченую дальность доступа
+			'''
 			RadiantJewel:
 			'''
 			'Блестит ослепительным светом'
@@ -127,54 +131,58 @@ Mods: {
 			Увеличивает количество слотов в Ячейке Хранилища до 640
 			<right> на Люминитовой Ячейке Хранилища для улучшения
 			'''
-			# CrimsonAltar:
-			# '''
-			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
-			# '''
-			# DemonAltar:
-			# '''
-			# A placeable Demon Altar. Cannot be mined to get hardmode ores
-			# '''
-			# CombinedFurnitureStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedFurnitureStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations3Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations4Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# PortableAccessPreHM:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableAccessHM:
-			# '''
-			# (See en-US translation)
-			# '''
+			CrimsonAltar:
+			'''
+			Устанавливаемый Багряный Алтарь. Нельзя сломать для получения хардмод руд
+			'''
+			DemonAltar:
+			'''
+			Устанавливаемый Демонический Алтарь. Нельзя сломать для получения хардмод руд
+			'''
+			CombinedFurnitureStations1Item:
+			'''
+			Совмещает функционал нескольких станций создания мебели
+			'''
+			CombinedFurnitureStations2Item:
+			'''
+			Совмещает функционал нескольких станций создания мебели
+			'''
+			CombinedStations1Item:
+			'''
+			Совмещает функционал нескольких станций создания
+			'''
+			CombinedStations2Item:
+			'''
+			Совмещает функционал нескольких станций создания
+			'''
+			CombinedStations3Item:
+			'''
+			Совмещает функционал нескольких станций создания
+			'''
+			CombinedStations4Item:
+			'''
+			Совмещает функционал нескольких станций создания
+			'''
+			PortableAccessPreHM:
+			'''
+			<right> Сердце Хранилища чтобы запомнить его местоположение
+			Используйте предмет чтобы открыть ваше хранилище
+			Имеет малую дальность доступа
+			'''
+			PortableAccessHM:
+			'''
+			<right> Сердце Хранилища чтобы запомнить его местоположение
+			Используйте предмет чтобы открыть ваше хранилище
+			Имеет большую дальность доступа
+			'''
 		}
 
 		ProjectileName: {
-			# BiomeGlobeThrown: Biome Globe
+			BiomeGlobeThrown: Биомный Шар
 		}
 
 		NPCName: {
-			# Golem: "Automaton"
+			Golem: "Автоматон"
 		}
 
 		ModuleName: {
@@ -202,19 +210,19 @@ Mods: {
 		}
 
 		Bestiary: {
-			# Golem:
-			# '''
-			# A living automaton powered by the elusive Bluemagic.
-			# It can teach you all there is to know about Magic Storage.
-			# '''
+			Golem:
+			'''
+			Живой Автоматон запитаный неуловимой Bluemagic. 
+			Он может обучить вас всему что можно знать о Магическом Хранилище.
+			'''
 		}
 
 		Dialogue: {
 			Golem: {
-				# Greeting: "Hello {0}. Would you like for this unit to teach you something?"
-				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
-				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
-				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				Greeting: "Здравствуй {0}. Желаете чтобы этот агрегат обучил вас чему-то?"
+				Wizard: "Для кого-то просвященного в магии, {0} не может опознать как Bluemagic работает. Но если честно, это не совсем магия."
+				NotLihzahrd: Этот агрегат не создан из Ящщерного кирпича. Пожалуйста хватит спрашивать.
+				Bluemagic: Bluemagic невероятный источник енергии. Будет ращумно не недооценивать его возможностей.
 				# Help1:
 				# '''
 				# (See en-US translation)
@@ -295,46 +303,46 @@ Mods: {
 
 			ChatOptions: {
 				Golem: {
-					# NextHelp: Next
-					# PrevHelp: Previous
+					# NextHelp: Следующее
+					# PrevHelp: Предыдущий
 				}
 			}
 		}
 
-		# Active: "Active"
-		# Inactive: "Inactive"
+		Active: "Включен"
+		Inactive: "Выключен"
 
-		# PortableAccessUnlocated: "Locator is not set to any Storage Heart"
-		# PortableAccessMissing: "Storage Heart is missing!"
-		# PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
-		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
+		PortableAccessUnlocated: "Локатор не привязан к Сердцу Хранилища"
+		PortableAccessMissing: "Сердце Хранилища отсутвует!"
+		PortableAccessOutOfRange: "Локатор не мог достичь его привязаной системы хранилища"
+		PortableAccessNoPylons: "Нет столбов достаточно близко к привязаной системе хранилища"
 
-		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
-		# PortableCraftingMissing: "Crafting Access is missing!"
+		PortableCraftingUnlocated: "Локатор не привязан к Интерфесу Создания Предметов"
+		PortableCraftingMissing: "Интерфейс Создания Предметов отсутствует!"
 
-		# RemoteAccessSuccess: "Success!"
-		# RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
+		RemoteAccessSuccess: "Успешно!"
+		RemoteAccessHasLocator: "Этот доступ уже имеет локатор, пожалуйста вскопайте и поставьте обратно что-бы сбросить его"
 		# RemoteAccessUnlocated: "The locator has not been set to a destination"
 
-		# StorageUnitActivated: "Storage Unit has been Activated"
-		# StorageUnitDeactivated: "Storage Unit has been Deactivated"
+		StorageUnitActivated: "Ячейка хранилища включена"
+		StorageUnitDeactivated: "Ячейка Хранилища отключена"
 
-		# FilterAllMods: "All mods"
+		FilterAllMods: "Все моды"
 
-		# Capacity: "{0} / {1} Items"
+		Capacity: "{0} / {1} Предметов"
 
-		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
+		LocatorSet: "Локатор успешно привязан к: X={0}, Y={1}"
 
 		# StorageAccessFail: "Could not load Storage Heart tile entity!"
 		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
 		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
 
 		# TestItemSuffix: " !UNTIL RESPAWN!"
-		# SetTo: "Set to: X={0}, Y={1}"
+		SetTo: "Привязан к: X={0}, Y={1}"
 		# SnowBiomeBlock: "Snow Biome Block"
 		DepositAll: "Переместить всё"
 		CraftingStations: "Станции создания"
-		# CraftTooltip: "Left click to Craft"
+		CraftTooltip: "Левый Клик что-бы создать"
 
 		Crafting: {
 			Plus1: "+1"
@@ -343,9 +351,9 @@ Mods: {
 			Minus1: "-1"
 			Minus10: "-10"
 			Minus100: "-100"
-			# MaxStack: "Max. Stack"
-			# Reset: "Reset"
-			# Amount: "Crafting: {0}"
+			MaxStack: "Макс. Стак"
+			Reset: "Сброс"
+			Amount: "Создать: {0}"
 		}
 
 		Search: "Поиск"
@@ -450,25 +458,25 @@ Mods: {
 			Weapons: "Фильтр (Оружия)"
 			Tools: "Фильтр (Инструменты)"
 			Equips: "Фильтр (Снаряжения)"
-			# WeaponsMelee: "Filter Melee Weapons"
-			# WeaponsRanged: "Filter Ranged Weapons"
-			# WeaponsMagic: "Filter Magic Weapons"
-			# WeaponsSummon: "Filter Summons"
-			# WeaponsThrown: "Filter Throwing Weapons"
-			# Ammo: "Filter Ammo"
-			# Armor: "Filter Armor"
-			# Vanity: "Filter Vanity Items"
+			WeaponsMelee: "Фильтр (Оружия ближнего боя)"
+			WeaponsRanged: "Фильтр (Дистанционные Оружия)"
+			WeaponsMagic: "Фильтр (Магические Оружия)"
+			WeaponsSummon: "Фильтр (Призывающие Оружия)"
+			WeaponsThrown: "Фильтр (Метательные Оружия)"
+			Ammo: "Фильтр (Амуниция)"
+			Armor: "Фильтр (Броня)"
+			Vanity: "Фильтр (Предметы украшения)"
 			Potions: "Фильтр (Зелья)"
 			Tiles: "Фильтр (Размещаемое)"
 			Misc: "Фильтр (Разное)"
-			# Recent: "Filter New Recently Added Items"
-			# ArmorAndEquips: "Filter Armor and Equipment"
-			# WeaponsOther: "Filter Other Weapons"
+			Recent: "Фильтр (Новые недавно добавленные предметы)"
+			ArmorAndEquips: "Фильтр (Броня и аксессуары)"
+			WeaponsOther: "Фильтр (Другие Оружия)"
 			# Unstackables: "Filter Unstackables"
 			# Stackables: "Filter Stackables"
-			# NotFullyResearched: "Filter Items Not Fully Researched"
-			# FullyResearched: "Filter Items Fully Researched"
-			# Materials: "Filter Materials"
+			NotFullyResearched: "Фильтр (Не полностью иследовано)"
+			FullyResearched: "Фильтр (Полностью иследовано)"
+			Materials: "Фильтр (Материал)"
 		}
 
 		SortingOption: {
@@ -477,10 +485,10 @@ Mods: {
 			Name: "Сортировка по имени"
 			Stack: "Сортировать по стопкам"
 			Value: "Сортировать по значению"
-			# Dps: "Sort by DPS"
-			# QuantityAbsolute: "Sort by Quantity"
+			Dps: "Сортировка по Урону в секунду"
+			QuantityAbsolute: "Сортировка по количеству"
 			# QuantityRatio: "Sort by Quantity Ratio"
-			# Damage: "Sort by Damage"
+			Damage: "Сортировка по урону"
 		}
 
 		# ButtonConfigGear: "Open Configuration Panel"
