@@ -71,9 +71,9 @@ Mods: {
 			PortableAccess:
 			'''
 			<right> 存储核心可储存其定位点
-            目前未设置到任何定位点
-            使用物品以访问制作单元
-            具有无限的访问范围
+			目前未设置到任何定位点
+			使用物品以访问制作单元
+			具有无限的访问范围
 			'''
 			PortableCraftingAccess:
 			'''
@@ -409,16 +409,16 @@ Mods: {
 				[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。
 				'''
 				Help20:
-                '''
-                虽然远程存储装置 [i:MagicStorage/RemoteAccess] 很方便, 但有时你需要不在家中就可以访问存储装置.
-                你可以这样做, 制作一个便携式远程访问装置.
-                [i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
-                '''
-                Help20_Mechs:
-                '''
-                {$Mods.MagicStorage.Dialogue.Golem.Help20}
-                [i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
-                '''
+				'''
+				虽然远程存储装置 [i:MagicStorage/RemoteAccess] 很方便, 但有时你需要不在家中就可以访问存储装置.
+				你可以这样做, 制作一个便携式远程访问装置.
+				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+				'''
+				Help20_Mechs:
+				'''
+				{$Mods.MagicStorage.Dialogue.Golem.Help20}
+				[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+				'''
 				Help20_Moon:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
