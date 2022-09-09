@@ -7,7 +7,7 @@ Mods: {
 			CreativeStorageUnit: 创造单元
 			Locator: 定位器
 			LocatorDisk: 定位器驱动
-			# PortableAccess: Ultimate Portable Remote Storage Access
+			PortableAccess: 超级远程访问装置
 			PortableCraftingAcces: 便携式远程制作装置
 			RadiantJewel: 璀璨棱晶
 			RemoteAccess: 远程存储装置
@@ -43,8 +43,8 @@ Mods: {
 			CombinedStations3Item: 高级组合制作站
 			CombinedStations4Item: 最终制作站
 			EnvironmentAccess: 模组互联单元
-			# PortableAccessPreHM: Basic Portable Remote Storage Access
-			# PortableAccessHM: Advanced Portable Remote Storage Access
+			PortableAccessPreHM: 基础便携式远程访问装置
+			PortableAccessHM: 高级便携式远程访问装置
 		}
 
 		ItemTooltip: {
@@ -68,14 +68,20 @@ Mods: {
 			<right>远程存储装置以设置其定位点
 			使用后不再损坏
 			'''
-			# PortableAccess:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableCraftingAccess:
-			# '''
-			# (See en-US translation)
-			# '''
+			PortableAccess:
+			'''
+			<right> 存储核心可储存其定位点
+            目前未设置到任何定位点
+            使用物品以访问制作单元
+            具有无限的访问范围
+			'''
+			PortableCraftingAccess:
+			'''
+			<right> 制作单元可储存其定位点
+			目前未设置到任何定位点
+			使用物品以访问制作单元
+			具有无限的访问范围
+			'''
 			RadiantJewel:
 			'''
 			“辐射出耀眼的光芒”
@@ -228,14 +234,20 @@ Mods: {
 			一个用于供其他模组与魔法存储系统进行跨模组访问的组件
 			显示由其他模组添加的可开关的一系列跨模组模块，如果没有模块则不显示
 			'''
-			# PortableAccessPreHM:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableAccessHM:
-			# '''
-			# (See en-US translation)
-			# '''
+			PortableAccessPreHM:
+			'''
+            <right> 存储核心可储存其定位点
+            目前未设置到任何定位点
+            使用该物品以访问存储核心
+            访问范围小
+            '''
+			PortableAccessHM:
+			'''
+			<right> 存储核心可储存其定位点
+			目前未设置到任何定位点
+			使用该物品以访问存储核心
+			访问范围大
+			'''
 		}
 
 		ProjectileName: {
@@ -247,8 +259,8 @@ Mods: {
 		}
 
 		ModuleName: {
-			# UseInventoryModule: "Use Player Inventory Items"
-			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+			UseInventoryModule: "使用玩家物品"
+			UseInventoryNoFavoritesModule: "使用玩家未收藏的物品"
 		}
 
 		TownNPCMood: {
@@ -396,6 +408,23 @@ Mods: {
 				'''
 				[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。
 				'''
+				Help20:
+                '''
+                虽然远程存储装置 [i:MagicStorage/RemoteAccess] 很方便, 但有时你需要不在家中就可以访问存储装置.
+                你可以这样做, 制作一个便携式远程访问装置.
+                [i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+                '''
+                Help20_Mechs:
+                '''
+                {$Mods.MagicStorage.Dialogue.Golem.Help20}
+                [i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+                '''
+				Help20_Moon:
+				'''
+				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
+				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
+				'''
 			}
 
 			ChatOptions: {
@@ -411,7 +440,7 @@ Mods: {
 
 		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
 		PortableAccessMissing: "定位器目标点没有存储核心！"
-		# PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
+		PortableAccessOutOfRange: "定位器无法方法存储核心，超出访问范围"
 		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
 
 		PortableCraftingUnlocated: "定位器尚未设置到任何制作单元"
@@ -459,10 +488,10 @@ Mods: {
 		SearchMod: "搜索模组"
 
 		SearchTips: {
-			# SearchName: "Search Name"
-			# SearchMod: "@ModName Search Name"
-			# SearchTooltip: "#Search Tooltip"
-			# SearchModAndTooltip: "@ModName #Search Tooltip"
+			SearchName: "搜索物品名称"
+			SearchMod: "@模组名称 搜索模组名称"
+			SearchTooltip: "#搜索提示"
+			SearchModAndTooltip: "@模组名称 #搜索提示"
 		}
 
 		Recipes: "合成配方"
@@ -473,34 +502,34 @@ Mods: {
 		Ingredients: "材料"
 		StoredItems: "存储中的材料"
 		ShowOnlyFavorited: "显示被收藏"
-		# ViewHistory: "Click to View Recipe History"
-		# ClearHistory: "Clear"
-		# PrevHistory: "Previous Recipe in History"
-		# NextHistory: "Next Recipe in History"
+		ViewHistory: "点击查看配方历史"
+		ClearHistory: "清除历史"
+		PrevHistory: "上一个配方"
+		NextHistory: "下一个配方"
 
-		# PanelTooSmol:
-		# '''
-		# Unable to open a Magic Storage UI.  Reason: Panel height was too short to properly display the UI elements.
-		# Please decrease your UI Scale in Settings or increase your game's Resolution in Video Settings.
-		# '''
+		PanelTooSmol:
+		'''
+		无法打开魔法存储 UI。原因：面板高度太短，无法正确显示 UI 元素.
+		请在模组设置中降低您的 UI 比例或在视频设置中提高游戏的分辨率.
+		'''
 
 		Warnings: {
-			# StorageDefaultToAllItems:
-			# '''
-			# No items displayed even though items exist in storage.  Defaulting to "All" filter mode.
-			# '''
-			# StorageDefaultToAllMods:
-			# '''
-			# No items displayed even though items exist in storage.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
-			# '''
-			# CraftingNoBlacklist:
-			# '''
-			# No recipes displayed even though blacklisted recipes exist.  Ignoring recipe blacklisting.
-			# '''
-			# CraftingDefaultToAllMods:
-			# '''
-			# No recipes displayed even though recipes exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
-			# '''
+			StorageDefaultToAllItems:
+			'''
+			即使存储核心中存在物品，也不会显示任何物品。默认为“全部”过滤模式.
+			'''
+			StorageDefaultToAllMods:
+			'''
+			即使存储核心中存在物品，也不会显示任何物品。默认为 "{$Mods.MagicStorage.FilterAllMods}" 过滤模式.
+			'''
+			CraftingNoBlacklist:
+			'''
+			即使存在列入黑名单的配方，也不会显示任何配方。忽略配方黑名单.
+			'''
+			CraftingDefaultToAllMods:
+			'''
+			即使其他模组中存在配方，也不会显示任何配方。默认为 "{$Mods.MagicStorage.FilterAllMods}" 过滤模式.
+			'''
 		}
 
 		RecipeHidden:
@@ -528,9 +557,9 @@ Mods: {
 			CompactCoinsButton: "合并钱币"
 			DestroyUnloadedButton: "删除卸载物品"
 			DestroyUnloadedDataButton: "删除被卸载的数据"
-			# InitShowcaseButton: "Initialize Showcase"
-			# ResetShowcaseButton: "Reset Showcase Items"
-			# ClearItemsButton: "Clear All Items"
+			InitShowcaseButton: "初始化视窗"
+			ResetShowcaseButton: "重置展示物品"
+		    ClearItemsButton: "清除所有物品"
 
 			SellDuplicatesHeader: "出售同种物品"
 			SellDuplicatesButton: "出售"
@@ -568,13 +597,13 @@ Mods: {
 			Tiles: "筛选放置物"
 			Misc: "筛选杂项"
 			Recent: "筛选最近存入的物品"
-			# ArmorAndEquips: "Filter Armor and Equipment"
+			ArmorAndEquips: "筛选装甲和设备"
 			WeaponsOther: "筛选其他杂项武器"
 			Unstackables: "筛选不可堆叠物品"
 			Stackables: "筛选可堆叠物品"
 			NotFullyResearched: "筛选未完全研究的物品"
 			FullyResearched: "筛选已完全研究的物品"
-			# Materials: "Filter Materials"
+			Materials: "筛选材料"
 		}
 
 		SortingOption: {
@@ -588,7 +617,7 @@ Mods: {
 			Damage: "按伤害排序"
 		}
 
-		# ButtonConfigGear: "Open Configuration Panel"
+		ButtonConfigGear: "打开配置面板"
 
 		UIPages: {
 			Sorting: "排序",
@@ -597,12 +626,12 @@ Mods: {
 			Storage: "存储",
 			Controls: "控件"   # StorageGUI page for the extra controls
 			Modules: "模块"    # EnvironmentGUI page for the modules
-			# History: "History"    # CraftingGUI recipe history panel
+			History: "历史"    # CraftingGUI recipe history panel
 		}
 
 		Config: {
 			Label: "魔法存储配置"
-			# ServersideLabel: "Magic Storage Server Config"
+			ServersideLabel: "魔法存储服务器配置"
 			# BetaLabel: "Magic Storage BETA Config"
 
 			glowNewItems: {
@@ -654,11 +683,27 @@ Mods: {
 				Tooltip: "开启后，将允许在制作界面中将制作配方加入白名单/黑名单"
 			}
 			buttonLayout: {
-				# Label: "Sorting/Filtering Button Layout"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				Label: "排序/过滤 按钮布局"
+				Tooltip:
+				'''
+				Legacy:
+				  v0.5.6.5 及以前版本的布局.
+				  排序和过滤页面被禁用.
+				ModernPaged:
+				  排序和过滤选项移至排序和过滤页面.
+				ModernConfigurable:
+				  从排序和过滤页面中选择哪些排序和过滤选项显示在主 UI 页面中.
+				LegacyWithGear:
+				  如果禁用了“显示额外的排序图标”，则从 v0.5.6.5 和以前版本开始的布局.
+				  添加了一个额外的齿轮图标，单击该图标会打开一个包含所有其他选项的面板.
+				  排序和过滤页面被禁用.
+				LegacyBasicWithPaged:
+				  如果禁用了“显示额外的排序图标”，则从 v0.5.6.5 和以前版本开始的布局.
+				  其他图标位于排序和过滤页面中.
+				ModernDropdown:
+				  添加两个下拉菜单到主 UI 页面，用于选择所需的排序和过滤选项.
+				  排序和过滤页面被禁用.
+				'''
 			}
 			clearHistory: {
 				# Label: "Clear recipe history"
@@ -675,18 +720,20 @@ Mods: {
 			}
 
 			PrintTextToChat: {
-				# Label: "Print logging information to ingame chat"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				Label: "将日志信息打印到游戏内聊天"
+				Tooltip:
+				'''
+				启用以将日志信息打印到游戏内聊天.
+				日志信息将打印到您的 client.log 和 server.log 文件.
+				'''
 			}
 			ShowDebugPylonRangeAreas: {
-				# Label: "Portable Access Range Debug"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				Label: "便携式访问范围调试"
+				Tooltip:
+				'''
+				启用以在玩家手持便携式远程访问时显示其有效范围.
+				对于无限范围的访问，不显示任何内容.
+				'''
 			}
 		}
 	}
