@@ -160,6 +160,74 @@ Mods: {
 			# '''
 			# Combines the functionality of several crafting stations
 			# '''
+			# CraftingAccess: Enables crafting with the items in a storage system
+			# RemoteAccess:
+			# '''
+			# Allows remote access of a Storage Heart
+			# Acts as a "storage center" for components like the Crafting Access
+			# '''
+			# StorageAccess: Acts as another access point for viewing the stored items in a storage system
+			# StorageComponent: The base item for creating any Magic Storage component
+			# StorageConnector: Acts as a bridge for connecting components of Magic Storage components
+			# StorageDeactivator:
+			# '''
+			# Enables/disables a Storage Unit
+			# Disabled Storage Units will attempt to transfer their items to enabled Storage Units in a storage system
+			# '''
+			# StorageHeart:
+			# '''
+			# The core component for any Magic Storage storage system
+			# Required for a storage system to function
+			# '''
+			# StorageUnit:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 40 items
+			# '''
+			# StorageUnitBlueChlorophyte:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 240 items
+			# '''
+			# StorageUnitCrimtane:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 80 items
+			# '''
+			# StorageUnitDemonite:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 80 items
+			# '''
+			# StorageUnitHallowed:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 160 items
+			# '''
+			# StorageUnitHellstone:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 120 items
+			# '''
+			# StorageUnitLuminite:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 320 items
+			# '''
+			# StorageUnitTerra:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 640 items
+			# '''
+			# StorageUnitTiny:
+			# '''
+			# A component for storing items in a Magic Storage storage system
+			# Can store up to 4 items
+			# '''
+			# EnvironmentAccess:
+			# '''
+			# (See en-US translation)
+			# '''
 			# PortableAccessPreHM:
 			# '''
 			# (See en-US translation)

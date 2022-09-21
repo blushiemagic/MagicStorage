@@ -44,7 +44,7 @@ Mods: {
 			CombinedStations2Item: Combined Stations (Tier 2)
 			CombinedStations3Item: Combined Stations (Tier 3)
 			CombinedStations4Item: Combined Stations (Final Tier)
-			EnvironmentAccess: Environment Simulator
+			EnvironmentAccess: Storage Configuration Interface
 			PortableAccessPreHM: Basic Portable Remote Storage Access
 			PortableAccessHM: Advanced Portable Remote Storage Access
 		}
@@ -235,6 +235,8 @@ Mods: {
 			'''
 			A component for cross-mod accessibility with a Magic Storage storage system
 			Displays a list of toggleable environment modules added by other mods, or nothing if no modules are present
+			Available Modules:
+			<MODULES>
 			'''
 			PortableAccessPreHM:
 			'''

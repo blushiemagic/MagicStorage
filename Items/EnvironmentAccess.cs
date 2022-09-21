@@ -1,6 +1,10 @@
-﻿using Terraria;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
@@ -35,6 +39,46 @@ namespace MagicStorage.Items {
 			recipe.AddIngredient(ItemID.SandBlock, 50);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.Register();
+		}
+
+		private const int MaxCounter = 20;
+		private static int tooltipCounter = MaxCounter;
+		private static string lastKnownTooltip;
+
+		public override void ModifyTooltips(List<TooltipLine> tooltips) {
+			IEnumerable<EnvironmentModule> available = EnvironmentModuleLoader.modules.Where(e => e.IsAvailable());
+
+			if (!available.Any()) {
+				Utility.FindAndModify(tooltips, "<MODULES>", "  None");
+				return;
+			}
+
+			if (++tooltipCounter < MaxCounter) {
+				Utility.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip);
+				return;
+			}
+
+			tooltipCounter = 0;
+
+			List<string> lines = available.Select(e => e.DisplayName.GetTranslation(Language.ActiveCulture)).ToList();
+
+			const int maxLines = 7;
+			
+			static IEnumerable<int> GenerateIndices(int count, int max) {
+				HashSet<int> indices = new();
+
+				if (count <= max)
+					return Enumerable.Range(0, count);
+
+				for (int i = 0; i < max; i++)
+					while(!indices.Add(Main.rand.Next(count)));
+
+				return indices;
+			}
+
+			IEnumerable<string> random = GenerateIndices(lines.Count, maxLines).OrderBy(i => i).Select(i => lines[i]);
+
+			Utility.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip = "  " + string.Join("\n  ", random));
 		}
 	}
 }
