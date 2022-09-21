@@ -78,6 +78,26 @@ namespace MagicStorage {
 		/// Allows you to determine when this module is available for use
 		/// </summary>
 		public virtual bool IsAvailable() => true;
+
+		/// <summary>
+		/// Allows you to run logic before recipes are refreshed
+		/// </summary>
+		public virtual void PreRefreshRecipes(EnvironmentSandbox sandbox) { }
+
+		/// <summary>
+		/// Allows you to run logic after recipes are refreshed
+		/// </summary>
+		public virtual void PostRefreshRecipes(EnvironmentSandbox sandbox) { }
+
+		/// <summary>
+		/// Allows you to run logic before the UIs in Magic Storage are updated
+		/// </summary>
+		public virtual void PreUpdateUI() { }
+
+		/// <summary>
+		/// Allows you to run logic after the UIs in Magic Storage are updated
+		/// </summary>
+		public virtual void PostUpdateUI() { }
 	}
 
 	public readonly struct EnvironmentSandbox {

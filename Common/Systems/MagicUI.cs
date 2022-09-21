@@ -210,12 +210,25 @@ public class MagicUI : ModSystem
 			pendingUIChangeForAnyReason = false;
 		}
 
+		TEStorageHeart heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+		bool viewingStorage = heart is not null;
+
+		if (viewingStorage) {
+			foreach (var module in heart.GetModules())
+				module.PreUpdateUI();
+		}
+
 		UserInterface old = UserInterface.ActiveInstance;
 
 		uiInterface?.Use();
 		uiInterface?.Update(gameTime);
 
 		UserInterface.ActiveInstance = old;
+
+		if (viewingStorage) {
+			foreach (var module in heart.GetModules())
+				module.PostUpdateUI();
+		}
 
 		if (pendingClose) {
 			Main.NewTextMultiline(Language.GetTextValue("Mods.MagicStorage.PanelTooSmol"), c: Color.Red);
