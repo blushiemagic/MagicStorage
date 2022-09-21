@@ -583,6 +583,11 @@ Mods: {
 			CompactCoinsButton: "Compact Coins"
 			DestroyUnloadedButton: "Delete Unloaded Items"
 			DestroyUnloadedDataButton: "Delete Unloaded Data"
+			DepositPiggyBank: "Deposit Piggy Bank Items"
+			DepositSafe: "Deposit Safe Items"
+			DepositForge: "Deposit Defender's Forge Items"
+			DepositVault: "Deposit Void Vault Items"
+
 			InitShowcaseButton: "Initialize Showcase"
 			ResetShowcaseButton: "Reset Showcase Items"
 			ClearItemsButton: "Clear All Items"

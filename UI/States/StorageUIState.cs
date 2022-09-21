@@ -379,6 +379,8 @@ namespace MagicStorage.UI.States {
 
 			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
+			public UIStorageControlDepositPlayerInventoryButton depositFromPiggyBank, depositFromSafe, depositFromForge, depositFromVault;
+
 			private NewUIList list;
 			private NewUIScrollbar scroll;
 
@@ -440,6 +442,11 @@ namespace MagicStorage.UI.States {
 
 					heart.DestroyUnloadedGlobalItemData();
 				});
+
+				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", p => p.bank.item);
+				InitSubInventoryDepositButton(ref depositFromSafe, "StorageGUI.DepositSafe", p => p.bank2.item);
+				InitSubInventoryDepositButton(ref depositFromForge, "StorageGUI.DepositForge", p => p.bank3.item);
+				InitSubInventoryDepositButton(ref depositFromVault, "StorageGUI.DepositVault", p => p.bank4.item);
 
 				if (Debugger.IsAttached)
 					InitDebugButtons();
@@ -551,6 +558,18 @@ namespace MagicStorage.UI.States {
 					StorageGUI.needRefresh = true;
 					heart.ResetCompactStage();
 				});
+			}
+
+			private void InitSubInventoryDepositButton(ref UIStorageControlDepositPlayerInventoryButton button, string localizationKey, Func<Player, Item[]> getInventory) {
+				button = new(Language.GetText("Mods.MagicStorage." + localizationKey)) {
+					GetInventory = getInventory
+				};
+
+				button.OnClick += (evt, e) => SoundEngine.PlaySound(SoundID.MenuTick);
+
+				InitButtonEvents(button);
+
+				list.Add(button);
 			}
 
 			private void InitButton(ref UITextPanel<LocalizedText> button, string localizationKey, MouseEvent evt) {
