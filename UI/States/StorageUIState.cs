@@ -443,10 +443,26 @@ namespace MagicStorage.UI.States {
 					heart.DestroyUnloadedGlobalItemData();
 				});
 
-				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", p => p.bank.item);
-				InitSubInventoryDepositButton(ref depositFromSafe, "StorageGUI.DepositSafe", p => p.bank2.item);
-				InitSubInventoryDepositButton(ref depositFromForge, "StorageGUI.DepositForge", p => p.bank3.item);
-				InitSubInventoryDepositButton(ref depositFromVault, "StorageGUI.DepositVault", p => p.bank4.item);
+				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", p => p.bank.item,
+					(p, inv) => {
+						for (int i = 0; i < inv.Length && i < p.bank.item.Length; i++)
+							p.bank.item[i] = inv[i];
+					});
+				InitSubInventoryDepositButton(ref depositFromSafe, "StorageGUI.DepositSafe", p => p.bank2.item,
+					(p, inv) => {
+						for (int i = 0; i < inv.Length && i < p.bank2.item.Length; i++)
+							p.bank2.item[i] = inv[i];
+					});
+				InitSubInventoryDepositButton(ref depositFromForge, "StorageGUI.DepositForge", p => p.bank3.item,
+					(p, inv) => {
+						for (int i = 0; i < inv.Length && i < p.bank3.item.Length; i++)
+							p.bank3.item[i] = inv[i];
+					});
+				InitSubInventoryDepositButton(ref depositFromVault, "StorageGUI.DepositVault", p => p.bank4.item,
+					(p, inv) => {
+						for (int i = 0; i < inv.Length && i < p.bank4.item.Length; i++)
+							p.bank4.item[i] = inv[i];
+					});
 
 				if (Debugger.IsAttached)
 					InitDebugButtons();
@@ -560,9 +576,10 @@ namespace MagicStorage.UI.States {
 				});
 			}
 
-			private void InitSubInventoryDepositButton(ref UIStorageControlDepositPlayerInventoryButton button, string localizationKey, Func<Player, Item[]> getInventory) {
+			private void InitSubInventoryDepositButton(ref UIStorageControlDepositPlayerInventoryButton button, string localizationKey, Func<Player, Item[]> getInventory, Action<Player, Item[]> netFunc) {
 				button = new(Language.GetText("Mods.MagicStorage." + localizationKey)) {
-					GetInventory = getInventory
+					GetInventory = getInventory,
+					NetReceiveInventoryResult = netFunc
 				};
 
 				button.OnClick += (evt, e) => SoundEngine.PlaySound(SoundID.MenuTick);

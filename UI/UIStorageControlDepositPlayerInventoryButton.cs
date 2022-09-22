@@ -10,9 +10,9 @@ using Terraria.UI;
 namespace MagicStorage.UI {
 	public class UIStorageControlDepositPlayerInventoryButton : UITextPanel<LocalizedText> {
 		public Func<Player, Item[]> GetInventory;
-		public Action<Item[]> NetReceiveInventoryResult;
+		public Action<Player, Item[]> NetReceiveInventoryResult;
 
-		internal static Action<Item[]> PendingResultAction;
+		internal static Action<Player, Item[]> PendingResultAction;
 
 		public UIStorageControlDepositPlayerInventoryButton(LocalizedText text, float textScale = 1, bool large = false) : base(text, textScale, large) { }
 

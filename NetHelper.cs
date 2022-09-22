@@ -1183,7 +1183,7 @@ namespace MagicStorage
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
 		}
 
-		public static void ClientRequestDepositFromBank(Item[] inventory, Point16 heart, Action<Item[]> netResult) {
+		public static void ClientRequestDepositFromBank(Item[] inventory, Point16 heart, Action<Player, Item[]> netResult) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
@@ -1205,19 +1205,19 @@ namespace MagicStorage
 		}
 
 		public static void ServerReceiveDepositFromBankRequest(BinaryReader reader, int sender) {
-			int count = reader.ReadUInt16();
-
 			Point16 heart = reader.ReadPoint16();
 
-			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
-				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet was malformed: Storage Heart location did not have a Storage Heart");
-				return;
-			}
+			int count = reader.ReadUInt16();
 
 			Item[] inventory = new Item[count];
 
 			for (int i = 0; i < count; i++)
 				inventory[i] = ItemIO.Receive(reader, true, true);
+
+			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
+				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet was malformed: Storage Heart location did not have a Storage Heart");
+				return;
+			}
 
 			if (Main.netMode != NetmodeID.Server) {
 				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet received by client " + Main.myPlayer);
@@ -1241,15 +1241,20 @@ namespace MagicStorage
 		}
 
 		public static void ClientReceiveDepositFromBankResult(BinaryReader reader) {
-			int count = reader.ReadUInt16();
 			bool changed = reader.ReadBoolean();
+			int count = reader.ReadUInt16();
 
 			Item[] inventory = new Item[count];
 
 			for (int i = 0; i < count; i++)
 				inventory[i] = ItemIO.Receive(reader, true, true);
 
-			Interlocked.Exchange(ref UIStorageControlDepositPlayerInventoryButton.PendingResultAction, null)?.Invoke(inventory);
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				Report(true, MessageType.PlayerBankDepositResult + " packet received by the server");
+				return;
+			}
+
+			Interlocked.Exchange(ref UIStorageControlDepositPlayerInventoryButton.PendingResultAction, null)?.Invoke(Main.LocalPlayer, inventory);
 
 			if (changed)
 				SoundEngine.PlaySound(SoundID.Grab);
