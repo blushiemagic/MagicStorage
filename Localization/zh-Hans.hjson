@@ -236,11 +236,11 @@ Mods: {
 			'''
 			PortableAccessPreHM:
 			'''
-            <right> 存储核心可储存其定位点
-            目前未设置到任何定位点
-            使用该物品以访问存储核心
-            访问范围小
-            '''
+			<right> 存储核心可储存其定位点
+			目前未设置到任何定位点
+			使用该物品以访问存储核心
+			访问范围小
+			'''
 			PortableAccessHM:
 			'''
 			<right> 存储核心可储存其定位点
@@ -441,7 +441,7 @@ Mods: {
 		PortableAccessUnlocated: "定位器尚未设置到任何存储核心"
 		PortableAccessMissing: "定位器目标点没有存储核心！"
 		PortableAccessOutOfRange: "定位器无法方法存储核心，超出访问范围"
-		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
+		PortableAccessNoPylons: "没有任何晶塔足够靠近链接的存储系统"
 
 		PortableCraftingUnlocated: "定位器尚未设置到任何制作单元"
 		PortableCraftingMissing: "定位器目标点没有制作单元！"
@@ -559,7 +559,7 @@ Mods: {
 			DestroyUnloadedDataButton: "删除被卸载的数据"
 			InitShowcaseButton: "初始化视窗"
 			ResetShowcaseButton: "重置展示物品"
-		    ClearItemsButton: "清除所有物品"
+			ClearItemsButton: "清除所有物品"
 
 			SellDuplicatesHeader: "出售同种物品"
 			SellDuplicatesButton: "出售"
