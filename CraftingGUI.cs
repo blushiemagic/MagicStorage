@@ -271,6 +271,9 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
+			foreach (var module in heart.GetModules())
+				module.PreRefreshRecipes(sandbox);
+
 			IEnumerable<Item> heartItems = heart.GetStoredItems();
 			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
 				.Where(i => i.type > ItemID.None && i.stack > 0)
@@ -349,6 +352,9 @@ namespace MagicStorage
 
 			StorageGUI.InvokeOnRefresh();
 			StorageGUI.needRefresh = false;
+
+			foreach (var module in heart.GetModules())
+				module.PostRefreshRecipes(sandbox);
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 		}

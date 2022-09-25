@@ -114,7 +114,7 @@ namespace MagicStorage.UI.States {
 
 				Player player = Main.LocalPlayer;
 
-				if (Main.mouseX > parent.PanelLeft && Main.mouseX < parent.PanelWidth && Main.mouseY > parent.PanelTop && Main.mouseY < parent.PanelBottom) {
+				if (Main.mouseX > parent.PanelLeft && Main.mouseX < parent.PanelRight && Main.mouseY > parent.PanelTop && Main.mouseY < parent.PanelBottom) {
 					player.mouseInterface = true;
 					player.cursorItemIconEnabled = false;
 					InterfaceHelper.HideItemIconCache();

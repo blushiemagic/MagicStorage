@@ -18,6 +18,8 @@ using MagicStorage.Common.Global;
 using MagicStorage.Common.Systems;
 using static MagicStorage.Common.Systems.StringScrambling;
 using MagicStorage.Common.Players;
+using MagicStorage.UI;
+using System.Threading;
 
 namespace MagicStorage
 {
@@ -156,6 +158,12 @@ namespace MagicStorage
 					break;
 				case MessageType.PlayerHasServerOp:
 					ReceivePlayerHasOperator(reader);
+					break;
+				case MessageType.ClientRequestPlayerBankDeposit:
+					ServerReceiveDepositFromBankRequest(reader, sender);
+					break;
+				case MessageType.PlayerBankDepositResult:
+					ClientReceiveDepositFromBankResult(reader);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -1174,6 +1182,85 @@ namespace MagicStorage
 
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
 		}
+
+		public static void ClientRequestDepositFromBank(Item[] inventory, Point16 heart, Action<Player, Item[]> netResult) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			UIStorageControlDepositPlayerInventoryButton.PendingResultAction = netResult;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientRequestPlayerBankDeposit);
+
+			packet.Write(heart);
+
+			packet.Write((ushort)inventory.Length);
+
+			for (int i = 0; i < inventory.Length; i++)
+				ItemIO.Send(inventory[i], packet, true, true);
+
+			packet.Send();
+
+			Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet sent to the server");
+		}
+
+		public static void ServerReceiveDepositFromBankRequest(BinaryReader reader, int sender) {
+			Point16 heart = reader.ReadPoint16();
+
+			int count = reader.ReadUInt16();
+
+			Item[] inventory = new Item[count];
+
+			for (int i = 0; i < count; i++)
+				inventory[i] = ItemIO.Receive(reader, true, true);
+
+			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
+				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet was malformed: Storage Heart location did not have a Storage Heart");
+				return;
+			}
+
+			if (Main.netMode != NetmodeID.Server) {
+				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet received by client " + Main.myPlayer);
+				return;
+			}
+
+			UIStorageControlDepositPlayerInventoryButton.TryDepositItems(inventory, storageHeart, false, out bool changed);
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.PlayerBankDepositResult);
+			packet.Write(changed);
+
+			packet.Write((ushort)inventory.Length);
+
+			for (int i = 0; i < inventory.Length; i++)
+				ItemIO.Send(inventory[i], packet, true, true);
+
+			packet.Send(toClient: sender);
+
+			Report(false, MessageType.PlayerBankDepositResult + " packet sent to client " + sender);
+		}
+
+		public static void ClientReceiveDepositFromBankResult(BinaryReader reader) {
+			bool changed = reader.ReadBoolean();
+			int count = reader.ReadUInt16();
+
+			Item[] inventory = new Item[count];
+
+			for (int i = 0; i < count; i++)
+				inventory[i] = ItemIO.Receive(reader, true, true);
+
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				Report(true, MessageType.PlayerBankDepositResult + " packet received by the server");
+				return;
+			}
+
+			Interlocked.Exchange(ref UIStorageControlDepositPlayerInventoryButton.PendingResultAction, null)?.Invoke(Main.LocalPlayer, inventory);
+
+			if (changed)
+				SoundEngine.PlaySound(SoundID.Grab);
+
+			Report(true, MessageType.PlayerBankDepositResult + " packet received by client " + Main.myPlayer);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1204,6 +1291,8 @@ namespace MagicStorage
 		ServerOpResponse,
 		ClientRequestServerOpConfirmation,
 		ServerOpConfirmationResult,
-		PlayerHasServerOp
+		PlayerHasServerOp,
+		ClientRequestPlayerBankDeposit,
+		PlayerBankDepositResult
 	}
 }

@@ -399,5 +399,30 @@ namespace MagicStorage {
 
 			return flag;
 		}
+
+		public static void FindAndModify(List<TooltipLine> tooltips, string searchPhrase, string replacePhrase) {
+			int searchIndex = tooltips.FindIndex(t => t.Text.Contains(searchPhrase));
+			if (searchIndex >= 0)
+				tooltips[searchIndex].Text = tooltips[searchIndex].Text.Replace(searchPhrase, replacePhrase);
+		}
+
+		public static void FindAndRemoveLine(List<TooltipLine> tooltips, string fullLine) {
+			int searchIndex = tooltips.FindIndex(t => t.Text == fullLine);
+			if (searchIndex >= 0)
+				tooltips.RemoveAt(searchIndex);
+		}
+
+		public static void FindAndInsertLines(Mod mod, List<TooltipLine> tooltips, string searchLine, Func<int, string> lineNames, string replaceLines) {
+			int searchIndex = tooltips.FindIndex(t => t.Text == searchLine);
+			if (searchIndex >= 0) {
+				tooltips.RemoveAt(searchIndex);
+
+				int inserted = 0;
+				foreach (var line in replaceLines.Split('\n')) {
+					tooltips.Insert(searchIndex++, new TooltipLine(mod, lineNames(inserted), line));
+					inserted++;
+				}
+			}
+		}
 	}
 }

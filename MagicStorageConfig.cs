@@ -37,7 +37,7 @@ namespace MagicStorage
 
 		[Label("$Mods.MagicStorage.Config.clearSearchText.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.clearSearchText.Tooltip")]
-		[DefaultValue(false)]
+		[DefaultValue(true)]
 		public bool clearSearchText;
 
 		[Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]

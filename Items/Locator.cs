@@ -16,6 +16,7 @@ namespace MagicStorage.Items
 		public const int SAVE_VERSION = 1;
 
 		public Point16 location;
+		[CloneByReference]
 		internal Dictionary<string, Point16> locationsByWorld;
 
 		private bool pendingLocationLoad;
