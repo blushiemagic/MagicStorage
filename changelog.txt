@@ -1,13 +1,4 @@
-﻿[h1]v0.5.7.8[/h1]
+﻿[h1]v0.5.7.9[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- fixed a bug which caused the Recipe History to end up in an invalid state when Recursive Craft is enabled
-- fixed a typo which caused the filtering logic in the Crafting UI to be significantly slower than it should be
-- changed the name of the Environment Simulator to the [b]Storage Configuration Interface[/b]
-- made the tooltip for the Storage Configuration Interface indicate which modules are available
-- fixed a bug which caused the cursor's item icon to not be hidden properly when hovering over the Configuration UI
-- fixed an oversight which caused client logs to print a message about "Locator does not use CloneByReference"
-- made the [b]Clear search text[/b] config option default to being enabled
-- updated the EnvironmentModule API
-- added 4 new buttons to the Storage UI's Controls page:  [b]Deposit Piggy Bank Items[/b], [b]Deposit Safe Items[/b], [b]Deposit Defender's Forge Items[/b] and [b]Deposit Void Vault Items[/b]
-- updated localization files
+- TODO
