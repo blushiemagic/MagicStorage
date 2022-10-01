@@ -26,6 +26,8 @@ namespace MagicStorage
 
 		internal bool pendingRemoteOpen;
 
+		internal int wirelessLatency = -1;
+
 		protected override bool CloneNewInstances => false;
 
 		public ItemTypeOrderedSet HiddenRecipes { get; } = new("HiddenItems");
@@ -60,6 +62,9 @@ namespace MagicStorage
 
 		public override void ResetEffects()
 		{
+			if (wirelessLatency >= 0)
+				wirelessLatency--;
+
 			if (Player.whoAmI != Main.myPlayer)
 				return;
 
@@ -149,6 +154,8 @@ namespace MagicStorage
 			portableAccessRangePlayerToPylons = 0;
 			portableAccessRangePylonsToStorage = 0;
 			Main.blockInput = false;
+
+			wirelessLatency = -1;
 
 			MagicUI.CloseUI();
 		}

@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
+using MagicStorage.Edits;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections;
@@ -369,6 +370,8 @@ namespace MagicStorage {
 		public static bool IsPylonValidForRemoteAccessLinking(Player player, TeleportPylonInfo info, bool checkNPCDanger) {
 			string key = null;
 
+			NearbyEffectsBlockingDuringPylonScanningEdit.DoBlockHooks = true;
+
 			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info);
 			bool flag = DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
 			if (!flag)
@@ -396,6 +399,8 @@ namespace MagicStorage {
 				destinationPylon.ValidTeleportCheck_DestinationPostCheck(info, ref flag, ref key);
 
 			player.ForceUpdateBiomes();
+
+			NearbyEffectsBlockingDuringPylonScanningEdit.DoBlockHooks = false;
 
 			return flag;
 		}

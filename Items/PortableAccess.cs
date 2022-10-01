@@ -101,10 +101,15 @@ namespace MagicStorage.Items
 		public static bool PlayerCanBeRemotelyConnectedToStorage(Player player, Point16 accessLocation) {
 			StoragePlayer mp = player.GetModPlayer<StoragePlayer>();
 
+			if (mp.wirelessLatency >= 0)
+				return true;  // Pretend that the player is close enough
+
+			mp.wirelessLatency = 10;
+
 			if (accessLocation.X < 0 || accessLocation.Y < 0)
 				return false;
 
-			if (Utility.GetHeartFromAccess(accessLocation) is not Components.TEStorageHeart heart)
+			if (Utility.GetHeartFromAccess(accessLocation) is not TEStorageHeart heart)
 				return false;
 
 			if (Utility.PlayerIsNearAccess(player, accessLocation, mp.portableAccessRangePlayerToPylons))
@@ -187,6 +192,7 @@ namespace MagicStorage.Items
 				modPlayer.OpenStorage(toOpen, true);
 				modPlayer.remoteCrafting = crafting;
 				modPlayer.timeSinceOpen = 0;
+				modPlayer.wirelessLatency = 10;
 				Main.playerInventory = true;
 				Main.recBigList = false;
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
