@@ -1155,7 +1155,11 @@ namespace MagicStorage
 
 				var consumed = context.ConsumedItems.ToList();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed, new Item());
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed
+#if !TML_2022_09
+					, new Item()
+#endif
+					);
 
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
@@ -1242,7 +1246,11 @@ namespace MagicStorage
 
 				var consumed = context.ConsumedItems.ToList();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed, new Item());
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed
+#if !TML_2022_09
+					, new Item()
+#endif
+					);
 
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);

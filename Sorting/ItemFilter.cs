@@ -1,6 +1,7 @@
 using MagicStorage.CrossMod;
 using System.Linq;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -82,7 +83,7 @@ namespace MagicStorage.Sorting
 				return false;  //Definitely not a "potion"
 
 			//It's a consumable item and it plays the sound for food (Item2) or drinks (Item3), so just assume that it is a "potion"
-			return item.consumable && (item.UseSound == SoundID.Item2 || item.UseSound == SoundID.Item3);
+			return item.consumable && item.UseSound is SoundStyle style && (style.IsTheSameAs(SoundID.Item2) || style.IsTheSameAs(SoundID.Item3));
 		};
 
 		public static readonly Filter Placeable = item =>
