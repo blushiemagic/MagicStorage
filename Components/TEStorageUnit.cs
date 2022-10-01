@@ -119,22 +119,11 @@ namespace MagicStorage.Components
 			{
 				if (ItemCombining.CanCombineItems(toDeposit, item) && item.stack < item.maxStack)
 				{
-					int total = item.stack + toDeposit.stack;
-					int newStack = total;
-					if (newStack > item.maxStack)
-						newStack = item.maxStack;
-					item.stack = newStack;
-
-					if (toDeposit.favorited)
-						item.favorited = true;
-					if (toDeposit.newAndShiny)
-						item.newAndShiny = MagicStorageConfig.GlowNewItems;
+					Utility.CustomStackItems(item, toDeposit);
 
 					hasChange = true;
-					toDeposit.stack = total - newStack;
 					if (toDeposit.stack <= 0)
 					{
-						toDeposit.SetDefaults(0, true);
 						finished = true;
 						break;
 					}
@@ -193,18 +182,16 @@ namespace MagicStorage.Components
 						if (!ItemCombining.CanCombineItems(result, item))
 							continue;
 
-						result.stack += withdraw;
+						Utility.CustomStackItems(result, item, withdraw);
 					} else {
 						result = item.Clone();
 						result.stack = withdraw;
 					}
 
 					onItemStackReduced?.Invoke(k, withdraw);
-					item.stack -= withdraw;
 					if (item.stack <= 0) {
 						onItemRemoved?.Invoke(k);
 						items.RemoveAt(k);
-						item.TurnToAir();
 					}
 
 					lookFor.stack -= withdraw;
@@ -338,13 +325,7 @@ namespace MagicStorage.Components
 						continue;
 
 					if (ItemCombining.CanCombineItems(item, pack)) {
-						if (item.stack + pack.stack <= pack.maxStack) {
-							pack.stack += item.stack;
-							item.stack = 0;
-						} else {
-							item.stack -= pack.maxStack - pack.stack;
-							pack.stack = pack.maxStack;
-						}
+						Utility.CustomStackItems(pack, item);
 
 						didPack = true;
 						break;
@@ -389,17 +370,10 @@ namespace MagicStorage.Components
 					if (ItemCombining.CanCombineItems(dest, src)) {
 						Item transferred = src.Clone();
 
-						if (dest.stack + src.stack <= dest.maxStack) {
-							dest.stack += src.stack;
-							src.stack = 0;
+						Utility.CustomStackItems(dest, src);
 
+						if (src.stack <= 0)
 							source.items.RemoveAt(s);
-						} else {
-							transferred.stack = dest.maxStack - dest.stack;
-
-							src.stack -= dest.maxStack - dest.stack;
-							dest.stack = dest.maxStack;
-						}
 
 						transferredItems.Add(transferred);
 					}

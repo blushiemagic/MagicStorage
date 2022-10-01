@@ -424,5 +424,22 @@ namespace MagicStorage {
 				}
 			}
 		}
+
+		public static void CustomStackItems(Item destination, Item source, int? amountToTransfer = null) {
+			bool destFavorite = destination.favorited;
+
+			ItemLoader.StackItems(destination, source, out _, false, amountToTransfer);
+
+			if (destFavorite)
+				source.favorited = destFavorite;
+
+			destination.favorited = destFavorite;
+
+			if (source.newAndShiny)
+				destination.newAndShiny = MagicStorageConfig.GlowNewItems;
+
+			if (source.stack <= 0)
+				source.SetDefaults(0, true);
+		}
 	}
 }

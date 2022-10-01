@@ -949,8 +949,12 @@ namespace MagicStorage
 					Item withdrawn = DoWithdrawResult(toWithdraw);
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = withdrawn;
-					else
-						Main.mouseItem.stack += withdrawn.stack;
+					else {
+						int stack = withdrawn.stack;
+						Utility.CustomStackItems(Main.mouseItem, withdrawn);
+						withdrawn.stack = stack;
+					}
+
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
 					StorageGUI.needRefresh = true;
@@ -981,16 +985,10 @@ namespace MagicStorage
 					Item existing = compacted[j];
 
 					if (ItemCombining.CanCombineItems(item, existing)) {
-						if (existing.stack + item.stack <= existing.maxStack) {
-							existing.stack += item.stack;
-							item.stack = 0;
+						Utility.CustomStackItems(existing, item);
 
+						if (item.stack <= 0)
 							fullyCompacted = true;
-						} else {
-							int diff = existing.maxStack - existing.stack;
-							existing.stack = existing.maxStack;
-							item.stack -= diff;
-						}
 
 						break;
 					}
@@ -1021,16 +1019,10 @@ namespace MagicStorage
 					Item existing = compacted[j];
 
 					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]]) {
-						if (existing.stack + item.stack <= existing.maxStack) {
-							existing.stack += item.stack;
-							item.stack = 0;
+						Utility.CustomStackItems(existing, item);
 
+						if (item.stack <= 0)
 							fullyCompacted = true;
-						} else {
-							int diff = existing.maxStack - existing.stack;
-							existing.stack = existing.maxStack;
-							item.stack -= diff;
-						}
 
 						break;
 					}
