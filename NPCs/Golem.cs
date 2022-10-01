@@ -161,9 +161,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		int helpOption = 1;
-		public const int maxHelp = 20;
+		public const int maxHelp = 21;
 
-		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
+		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 21, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
 
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			if (firstButton)
@@ -191,7 +191,8 @@ namespace MagicStorage.NPCs {
 				1 => ModContent.ItemType<StorageComponent>(),
 				2 => ModContent.ItemType<StorageHeart>(),
 				3 or
-				9 => ModContent.ItemType<StorageUnit>(),
+				9 or
+				21 => ModContent.ItemType<StorageUnit>(),
 				4 or
 				5 or
 				6 or

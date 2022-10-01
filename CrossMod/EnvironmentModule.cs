@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	/// <summary>
-	/// A module of information for use in an Environmental Simulator. Only one instance is assumed to be active at once.
+	/// A module of information for use in a Storage Configuration Interface. Only one instance is assumed to be active at once.
 	/// </summary>
 	public abstract class EnvironmentModule : ModType {
 		public int Type { get; private set; }

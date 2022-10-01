@@ -248,6 +248,11 @@ Mods: {
 		ModuleName: {
 			# UseInventoryModule: "Use Player Inventory Items"
 			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+			# JourneyInfiniteItems: "Use Journey Mode Infinite Items"
+		}
+
+		ModuleDisabled: {
+			# JourneyInfiniteItems: "This module can only be used by Journey mode characters."
 		}
 
 		TownNPCMood: {
@@ -356,6 +361,22 @@ Mods: {
 				# (See en-US translation)
 				# '''
 				# Help19:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help20:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help20_Mechs:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help20_Moon:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help21:
 				# '''
 				# (See en-US translation)
 				# '''

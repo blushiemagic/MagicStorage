@@ -249,6 +249,11 @@ Mods: {
 		ModuleName: {
 			# UseInventoryModule: "Use Player Inventory Items"
 			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+			# JourneyInfiniteItems: "Use Journey Mode Infinite Items"
+		}
+
+		ModuleDisabled: {
+			# JourneyInfiniteItems: "This module can only be used by Journey mode characters."
 		}
 
 		TownNPCMood: {
@@ -396,6 +401,22 @@ Mods: {
 				'''
 				[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。
 				'''
+				# Help20:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help20_Mechs:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help20_Moon:
+				# '''
+				# (See en-US translation)
+				# '''
+				# Help21:
+				# '''
+				# (See en-US translation)
+				# '''
 			}
 
 			ChatOptions: {

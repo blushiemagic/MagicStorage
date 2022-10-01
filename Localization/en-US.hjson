@@ -265,6 +265,11 @@ Mods: {
 		ModuleName: {
 			UseInventoryModule: "Use Player Inventory Items"
 			UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
+			JourneyInfiniteItems: "Use Journey Mode Infinite Items"
+		}
+
+		ModuleDisabled: {
+			JourneyInfiniteItems: "This module can only be used by Journey mode characters."
 		}
 
 		TownNPCMood: {
@@ -450,6 +455,14 @@ Mods: {
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
 				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
+				'''
+				Help21:
+				'''
+				You can also upgrade a Storage Unit to the next tier by right clicking it with the Upgrade item for the next tier.
+				[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
+				[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
+				[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+				[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
 				'''
 			}
 
