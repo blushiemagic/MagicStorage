@@ -567,8 +567,8 @@ Mods: {
 			# Stack: "Sort by Stacks" # This text is never used?
 			# Value: "Sort by Value"
 			# Dps: "Sort by DPS"
-			# QuantityAbsolute: "Sort by Quantity"
-			# QuantityRatio: "Sort by Quantity Ratio"
+			# QuantityAbsolute: "Sort by Total Quantity"
+			# QuantityRatio: "Sort by Stack Count"
 			# Damage: "Sort by Damage"
 		}
 

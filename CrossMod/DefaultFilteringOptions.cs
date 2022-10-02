@@ -240,7 +240,7 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterUnstackables : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.Unstackable;
 
-		public override string Texture => "MagicStorage/Assets/FilterMisc";
+		public override string Texture => "MagicStorage/Assets/FilterUnstackables";
 
 		public override string Name => "Unstackables";
 
@@ -251,7 +251,7 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterStackables : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.Stackable;
 
-		public override string Texture => "MagicStorage/Assets/FilterMisc";
+		public override string Texture => "MagicStorage/Assets/FilterStackables";
 
 		public override string Name => "Stackables";
 
@@ -262,7 +262,7 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterNotFullyResearched : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.NotFullyResearched;
 
-		public override string Texture => "MagicStorage/Assets/FilterMisc";
+		public override string Texture => "MagicStorage/Assets/FilterNotFullyResearched";
 
 		public override string Name => "NotFullyResearched";
 
@@ -275,7 +275,7 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterFullyResearched : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.FullyResearched;
 
-		public override string Texture => "MagicStorage/Assets/FilterMisc";
+		public override string Texture => "MagicStorage/Assets/FilterFullyResearched";
 
 		public override string Name => "FullyResearched";
 
@@ -288,7 +288,7 @@ namespace MagicStorage.CrossMod {
 	public sealed class FilterMaterials : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.Material;
 
-		public override string Texture => "MagicStorage/Assets/FilterMisc";
+		public override string Texture => "MagicStorage/Assets/FilterMaterials";
 
 		public override string Name => "Materials";
 

@@ -604,8 +604,8 @@ Mods: {
 			Name: "按名称排序"
 			Value: "按价格排序"
 			Dps: "按DPS排序"
-			QuantityAbsolute: "按数量排序"
-			QuantityRatio: "按堆叠占最大堆叠的占比排序"
+			# QuantityAbsolute: "Sort by Total Quantity"
+			# QuantityRatio: "Sort by Stack Count"
 			Damage: "按伤害排序"
 		}
 
