@@ -47,6 +47,10 @@ Mods: {
 			EnvironmentAccess: Storage Configuration Interface
 			PortableAccessPreHM: Basic Portable Remote Storage Access
 			PortableAccessHM: Advanced Portable Remote Storage Access
+			Config_GlowItemGlowing: "Config//GlowItemGlowing"
+			Config_GlowItemNotGlowing: "Config//GlowItemNotGlowing"
+			Config_RecipeFilterAvailable: "Config//RecipeFilterAvailable"
+			Config_RecipeFilterAll: "Config//RecipeFilterAll"
 		}
 
 		ItemTooltip: {
@@ -678,20 +682,27 @@ Mods: {
 			ServersideLabel: "Magic Storage Server Config"
 			BetaLabel: "Magic Storage BETA Config"
 
+			Headers: {
+				Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
+				Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
+				General: "General Configs"
+			}
+
 			glowNewItems: {
-				Label: "Display new items/recipes"
+				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
 				Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
 			}
 			useConfigFilter: {
-				Label: "Use default filter"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
 				Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
 			}
 			showAllRecipes: {
-				Label: "Default recipe filter"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
 				Tooltip: "Enable to default to all recipes, disable to default to available recipes"
 			}
 			quickStackDepositMode: {
-				Label: "Quick stack deposit mode"
+				Label: "[i:Chest]  Quick stack deposit mode"
 				Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
 			}
 			clearSearchText: {
@@ -699,19 +710,19 @@ Mods: {
 				Tooltip: "Enable to clear the search text when opening the UI"
 			}
 			extraFilterIcons: {
-				Label: "Display extra sorting icons"
-				Tooltip: "Enable to have the extra sorting options available in the Legacy "
+				Label: "[i:Cog]  Display extra sorting icons"
+				Tooltip: "Enable to have the extra sorting options available in the Legacy button layout"
 			}
 			showDps: {
 				Label: "Estimate the dps of weapons"
 				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
 			}
 			useOldCraftMenu: {
-				Label: "Use old Craft buttons"
+				Label: "[i:WorkBench]  Use old Craft buttons"
 				Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
 			}
 			allowItemDataDebug: {
-				Label: "Item debug information"
+				Label: "[i:IronPickaxe]  Item debug information"
 				Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
 			}
 			searchBarRefreshOnKey: {
@@ -719,7 +730,7 @@ Mods: {
 				Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
 			}
 			uiFavorites: {
-				Label: "Favorites Filter Button"
+				Label: "[i:FallenStar]  Favorites Filter Button"
 				Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
 			}
 			recipeBlacklist: {
@@ -750,7 +761,7 @@ Mods: {
 				'''
 			}
 			clearHistory: {
-				Label: "Clear recipe history"
+				Label: "[i:Book]  Clear recipe history"
 				Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
 			canMovePanels: {

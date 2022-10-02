@@ -626,20 +626,27 @@ Mods: {
 			# ServersideLabel: "Magic Storage Server Config"
 			# BetaLabel: "Magic Storage BETA Config"
 
+			Headers: {
+				# Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
+				# Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
+				# StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
+				# General: "General Configs"
+			}
+
 			glowNewItems: {
-				Label: "显示新物品/配方"
+				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  显示新物品/配方"
 				Tooltip: "存储核心/制作存储单元中的新物品/配方是否会突出显示"
 			}
 			useConfigFilter: {
-				Label: "使用默认筛选项"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  使用默认筛选项"
 				Tooltip: "开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）"
 			}
 			showAllRecipes: {
-				Label: "显示所有制作配方"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  显示所有制作配方"
 				Tooltip: "开启以显示所有制作配方，关闭则只会显示可用的制作配方"
 			}
 			quickStackDepositMode: {
-				Label: "快速堆叠与捕获快捷键"
+				Label: "[i:Chest]  快速堆叠与捕获快捷键"
 				Tooltip: "若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可\n将指针移动到存储核心的“快速存入”按钮上以了解具体信息"
 			}
 			clearSearchText: {
@@ -647,7 +654,7 @@ Mods: {
 				Tooltip: "开启后，每次打开存储核心的UI界面都会自动清除上一次键入的搜索文本"
 			}
 			extraFilterIcons: {
-				Label: "显示更多排序选项"
+				Label: "[i:Cog]  显示更多排序选项"
 				Tooltip: "开启后，在存储核心的UI界面会显示更多排序选项"
 			}
 			showDps: {
@@ -655,11 +662,11 @@ Mods: {
 				Tooltip: "开启后，在武器简介里会显示预计DPS值"
 			}
 			useOldCraftMenu: {
-				Label: "使用旧版合成界面"
+				Label: "[i:WorkBench]  使用旧版合成界面"
 				Tooltip: "开启后，制作单元面板将使用旧版的界面"
 			}
 			allowItemDataDebug: {
-				Label: "显示物品调试信息"
+				Label: "[i:IronPickaxe]  显示物品调试信息"
 				Tooltip: "开启后，存放于存储面板的物品将显示其是否有GlobalItem数据，并允许通过按下“Print Item Data”(输出物品数据)快捷键以在聊天栏输出数据"
 			}
 			searchBarRefreshOnKey: {
@@ -667,7 +674,7 @@ Mods: {
 				Tooltip: "开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果"
 			}
 			uiFavorites: {
-				Label: "收藏筛选按钮"
+				Label: "[i:FallenStar]  收藏筛选按钮"
 				Tooltip: "开启后，将允许在制作界面中收藏物品/制作配方"
 			}
 			recipeBlacklist: {
@@ -682,7 +689,7 @@ Mods: {
 				# '''
 			}
 			clearHistory: {
-				# Label: "Clear recipe history"
+				# Label: "[i:Book]  Clear recipe history"
 				# Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
 			canMovePanels: {

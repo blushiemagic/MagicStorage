@@ -15,11 +15,13 @@ namespace MagicStorage
 	[Label("$Mods.MagicStorage.Config.Label")]
 	public class MagicStorageConfig : ModConfig
 	{
-		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.glowNewItems.Tooltip")]
-		[DefaultValue(false)]
-		public bool glowNewItems;
+		[Header($"$Mods.MagicStorage.Config.Headers.Storage")]
+		[Label("$Mods.MagicStorage.Config.quickStackDepositMode.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip")]
+		[DefaultValue(true)]
+		public bool quickStackDepositMode;
 
+		[Header($"$Mods.MagicStorage.Config.Headers.Crafting")]
 		[Label("$Mods.MagicStorage.Config.useConfigFilter.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.useConfigFilter.Tooltip")]
 		[DefaultValue(true)]
@@ -30,31 +32,31 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool showAllRecipes;
 
-		[Label("$Mods.MagicStorage.Config.quickStackDepositMode.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip")]
-		[DefaultValue(true)]
-		public bool quickStackDepositMode;
-
-		[Label("$Mods.MagicStorage.Config.clearSearchText.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.clearSearchText.Tooltip")]
-		[DefaultValue(true)]
-		public bool clearSearchText;
-
-		[Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.extraFilterIcons.Tooltip")]
-		[DefaultValue(true)]
-		[ReloadRequired]
-		public bool extraFilterIcons;
-
 		[Label("$Mods.MagicStorage.Config.useOldCraftMenu.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip")]
 		[DefaultValue(false)]
 		public bool useOldCraftMenu;
 
-		[Label("$Mods.MagicStorage.Config.allowItemDataDebug.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip")]
+		[Label("$Mods.MagicStorage.Config.recipeBlacklist.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recipeBlacklist.Tooltip")]
 		[DefaultValue(false)]
-		public bool itemDataDebug;  //Previously "allowItemDataDebug"
+		public bool recipeBlacklist;
+
+		[Label("$Mods.MagicStorage.Config.clearHistory.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.clearHistory.Tooltip")]
+		[DefaultValue(false)]
+		public bool clearHistory;
+
+		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
+		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.glowNewItems.Tooltip")]
+		[DefaultValue(false)]
+		public bool glowNewItems;
+
+		[Label("$Mods.MagicStorage.Config.clearSearchText.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.clearSearchText.Tooltip")]
+		[DefaultValue(true)]
+		public bool clearSearchText;
 
 		[Label("$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip")]
@@ -66,10 +68,11 @@ namespace MagicStorage
 		[DefaultValue(false)]
 		public bool uiFavorites;
 
-		[Label("$Mods.MagicStorage.Config.recipeBlacklist.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.recipeBlacklist.Tooltip")]
-		[DefaultValue(false)]
-		public bool recipeBlacklist;
+		[Label("$Mods.MagicStorage.Config.extraFilterIcons.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.extraFilterIcons.Tooltip")]
+		[DefaultValue(true)]
+		[ReloadRequired]
+		public bool extraFilterIcons;
 
 		[Label("$Mods.MagicStorage.Config.buttonLayout.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.buttonLayout.Tooltip")]
@@ -77,10 +80,11 @@ namespace MagicStorage
 		[DrawTicks]
 		public ButtonConfigurationMode buttonLayout;
 
-		[Label("$Mods.MagicStorage.Config.clearHistory.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.clearHistory.Tooltip")]
+		[Header($"$Mods.MagicStorage.Config.Headers.General")]
+		[Label("$Mods.MagicStorage.Config.allowItemDataDebug.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip")]
 		[DefaultValue(false)]
-		public bool clearHistory;
+		public bool itemDataDebug;  //Previously "allowItemDataDebug"
 
 		[Label("$Mods.MagicStorage.Config.canMovePanels.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.canMovePanels.Tooltip")]
