@@ -79,10 +79,12 @@ public class MarshmallowStickILEdit : Edit
 
 		return;
 		bad_il:
-		throw new Exception("Unable to fully patch " +
-							il.Method.Name +
-							"()\n" +
-							"Reason: Could not find instruction sequence for patch #" +
-							patchNum);
+		string msg = $"Unable to fully patch {il.Method.Name}()\n" +
+			$"Reason: Could not find instruction sequence for patch #{patchNum}";
+
+		if (!BuildInfo.IsDev)
+			throw new Exception(msg);
+		else
+			Mod.Logger.Error(msg);
 	}
 }

@@ -370,7 +370,7 @@ namespace MagicStorage {
 		public static bool IsPylonValidForRemoteAccessLinking(Player player, TeleportPylonInfo info, bool checkNPCDanger) {
 			string key = null;
 
-			NearbyEffectsBlockingDuringPylonScanningEdit.DoBlockHooks = true;
+			NearbyEffectsBlockingDuringPylonScanningDetour.DoBlockHooks = true;
 
 			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info);
 			bool flag = DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
@@ -400,7 +400,7 @@ namespace MagicStorage {
 
 			player.ForceUpdateBiomes();
 
-			NearbyEffectsBlockingDuringPylonScanningEdit.DoBlockHooks = false;
+			NearbyEffectsBlockingDuringPylonScanningDetour.DoBlockHooks = false;
 
 			return flag;
 		}

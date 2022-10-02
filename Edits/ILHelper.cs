@@ -186,8 +186,14 @@ namespace MagicStorage.Edits {
 			CompleteLog(MagicStorageMod.Instance, c, beforeEdit: true);
 
 			string badReturnReason = "Unable to fully patch " + il.Method.Name + "()";
-			if (!doEdits(c, ref badReturnReason))
-				throw new Exception(badReturnReason);
+			if (!doEdits(c, ref badReturnReason)) {
+				if (!BuildInfo.IsDev)
+					throw new Exception(badReturnReason);
+				else {
+					MagicStorageMod.Instance.Logger.Error(badReturnReason);
+					return;
+				}
+			}
 
 			UpdateInstructionOffsets(c);
 

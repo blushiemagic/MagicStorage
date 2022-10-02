@@ -27,6 +27,7 @@ namespace MagicStorage
 		internal bool pendingRemoteOpen;
 
 		internal int wirelessLatency = -1;
+		internal const int MaxLatency = 10;
 
 		protected override bool CloneNewInstances => false;
 
@@ -142,6 +143,16 @@ namespace MagicStorage
 
 		public void CloseStorage()
 		{
+			CloseStorageUnsafely();
+
+			remoteAccess = false;
+			remoteCrafting = false;
+			portableAccessRangePlayerToPylons = 0;
+			portableAccessRangePylonsToStorage = 0;
+		}
+
+		//Intended to only be used with PortableAccess
+		internal void CloseStorageUnsafely() {
 			if (StorageEnvironment()) {
 				NetHelper.ClientRequestForceCraftingGUIRefresh();
 
@@ -149,10 +160,6 @@ namespace MagicStorage
 			}
 
 			storageAccess = Point16.NegativeOne;
-			remoteAccess = false;
-			remoteCrafting = false;
-			portableAccessRangePlayerToPylons = 0;
-			portableAccessRangePylonsToStorage = 0;
 			Main.blockInput = false;
 
 			wirelessLatency = -1;

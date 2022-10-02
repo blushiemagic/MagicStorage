@@ -3,7 +3,7 @@ using System.Reflection;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
-	internal class NearbyEffectsBlockingDuringPylonScanningEdit : Edit {
+	internal class NearbyEffectsBlockingDuringPylonScanningDetour : Edit {
 		public static bool DoBlockHooks;
 
 		private static readonly MethodInfo TileLoader_NearbyEffects = typeof(TileLoader).GetMethod(nameof(TileLoader.NearbyEffects), BindingFlags.Public | BindingFlags.Static);

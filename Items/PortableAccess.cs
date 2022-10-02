@@ -104,7 +104,7 @@ namespace MagicStorage.Items
 			if (mp.wirelessLatency >= 0)
 				return true;  // Pretend that the player is close enough
 
-			mp.wirelessLatency = 10;
+			mp.wirelessLatency = StoragePlayer.MaxLatency;
 
 			if (accessLocation.X < 0 || accessLocation.Y < 0)
 				return false;
@@ -187,12 +187,12 @@ namespace MagicStorage.Items
 			{
 				bool hadOtherOpen = prevOpen.X >= 0 && prevOpen.Y >= 0;
 				if (hadOtherOpen)
-					modPlayer.CloseStorage();
+					modPlayer.CloseStorageUnsafely();
 
 				modPlayer.OpenStorage(toOpen, true);
 				modPlayer.remoteCrafting = crafting;
 				modPlayer.timeSinceOpen = 0;
-				modPlayer.wirelessLatency = 10;
+				modPlayer.wirelessLatency = StoragePlayer.MaxLatency;
 				Main.playerInventory = true;
 				Main.recBigList = false;
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);

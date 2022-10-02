@@ -592,7 +592,7 @@ namespace MagicStorage.Components
 				//Clone of Withdraw, but it will keep trying to remove items, even if any were found
 				foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
 					lookFor = lookForOrig;
-					if (storageUnit.HasItem(lookFor, true)) {
+					while (storageUnit.HasItem(lookFor, true)) {
 						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
 
 						if (!withdrawn.IsAir) {
