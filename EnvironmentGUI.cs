@@ -1,7 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.UI.States;
-using Microsoft.Xna.Framework.Input;
 
 namespace MagicStorage {
 	public static class EnvironmentGUI {

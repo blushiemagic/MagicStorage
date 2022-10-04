@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader;
 using OnPlayer = On.Terraria.Player;
 
 namespace MagicStorage.Edits;

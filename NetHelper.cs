@@ -13,7 +13,6 @@ using MagicStorage.UI.States;
 using System.Text;
 using System.Linq;
 using Terraria.Audio;
-using MagicStorage.NPCs;
 using MagicStorage.Common.Global;
 using MagicStorage.Common.Systems;
 using static MagicStorage.Common.Systems.StringScrambling;

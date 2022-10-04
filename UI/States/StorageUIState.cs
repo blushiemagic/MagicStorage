@@ -1,7 +1,5 @@
-﻿using MagicStorage.Common.Global;
-using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
-using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

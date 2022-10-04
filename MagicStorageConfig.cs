@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using MagicStorage.Common.Players;
 using MagicStorage.UI.States;
 using Newtonsoft.Json;
@@ -10,8 +9,7 @@ using Terraria.ModLoader.Config;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnassignedField.Global
 
-namespace MagicStorage
-{
+namespace MagicStorage {
 	[Label("$Mods.MagicStorage.Config.Label")]
 	public class MagicStorageConfig : ModConfig
 	{

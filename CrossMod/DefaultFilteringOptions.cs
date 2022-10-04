@@ -266,6 +266,8 @@ namespace MagicStorage.CrossMod {
 
 		public override string Name => "NotFullyResearched";
 
+		public override bool UsesFilterCache => false;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
 		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
@@ -278,6 +280,8 @@ namespace MagicStorage.CrossMod {
 		public override string Texture => "MagicStorage/Assets/FilterFullyResearched";
 
 		public override string Name => "FullyResearched";
+
+		public override bool UsesFilterCache => false;
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 

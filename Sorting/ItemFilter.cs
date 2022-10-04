@@ -2,7 +2,6 @@ using MagicStorage.CrossMod;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.ModLoader;
 

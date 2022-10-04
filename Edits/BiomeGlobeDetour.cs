@@ -2,7 +2,6 @@
 using MagicStorage.Items;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using OnRecipe = On.Terraria.Recipe;
 
 namespace MagicStorage.Edits;

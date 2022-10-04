@@ -55,15 +55,19 @@ namespace MagicStorage.Edits {
 			requestedNativeAccess = false;
 		}
 
+#if TML_2022_09
 		private static void TryRequestAccess() {
 			if (!requestedNativeAccess) {
 				MonoModHooks.RequestNativeAccess();
 				requestedNativeAccess = true;
 			}
 		}
+#endif
 
 		public static void ILHook(MethodInfo orig, MethodInfo modify) {
+#if TML_2022_09
 			TryRequestAccess();
+#endif
 
 			try {
 				ArgumentNullException.ThrowIfNull(orig);
@@ -82,7 +86,9 @@ namespace MagicStorage.Edits {
 		}
 
 		public static void DetourHook(MethodInfo orig, MethodInfo modify) {
+#if TML_2022_09
 			TryRequestAccess();
+#endif
 
 			try {
 				ArgumentNullException.ThrowIfNull(orig);

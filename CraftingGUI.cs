@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
@@ -17,7 +16,6 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 
 namespace MagicStorage
 {

@@ -2,7 +2,6 @@
 using MonoMod.Cil;
 using System;
 using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

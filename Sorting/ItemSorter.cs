@@ -122,11 +122,30 @@ namespace MagicStorage.Sorting
 			return aggregate;
 		}
 
-		public static ParallelQuery<Recipe> GetRecipes(int filterMode, string searchFilter, int modSearchIndex)
-			=> MagicCache.FilteredRecipesCache[filterMode]
+		public static ParallelQuery<Recipe> GetRecipes(int filterMode, string searchFilter, int modSearchIndex) {
+			IEnumerable<Recipe> recipes;
+
+			FilteringOption filterOption = FilteringOptionLoader.Get(filterMode);
+
+			if (filterOption is null)
+				recipes = Array.Empty<Recipe>();  // Failsafe
+			else if (filterOption.UsesFilterCache)
+				recipes = MagicCache.FilteredRecipesCache[filterMode];
+			else {
+				var filter = filterOption.Filter;
+
+				recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem)).Evaluate();
+			}
+
+			return recipes
 				.AsParallel()
 				.AsOrdered()
 				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
+		}
+			//=> MagicCache.FilteredRecipesCache[filterMode]
+			//	.AsParallel()
+			//	.AsOrdered()
+			//	.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
 			if (!modSearched && modSearchIndex != ModSearchBox.ModIndexAll)

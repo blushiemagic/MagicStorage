@@ -7,11 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.UI;
 
 namespace MagicStorage.CrossMod {
 	public abstract partial class SortingOption : ModTexturedType {

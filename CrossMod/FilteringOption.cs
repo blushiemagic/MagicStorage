@@ -1,4 +1,5 @@
-﻿using MagicStorage.Sorting;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Sorting;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,11 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.UI;
 
 namespace MagicStorage.CrossMod {
 	public abstract partial class FilteringOption : ModTexturedType {
@@ -34,6 +32,11 @@ namespace MagicStorage.CrossMod {
 		/// If this property returns true, this filter is blacklisted by <see cref="ItemFilter.WeaponOther"/>
 		/// </summary>
 		public virtual bool FiltersDamageClass => false;
+
+		/// <summary>
+		/// Whether this filter uses its cached list of valid recipes from <see cref="MagicCache.FilteredRecipesCache"/>
+		/// </summary>
+		public virtual bool UsesFilterCache => true;
 
 		protected sealed override void Register() {
 			ModTypeLookup<FilteringOption>.Register(this);

@@ -1,7 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
-using MagicStorage.CrossMod;
-using MagicStorage.Sorting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,7 +11,6 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
-using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Map;

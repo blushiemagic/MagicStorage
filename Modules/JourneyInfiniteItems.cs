@@ -31,9 +31,10 @@ namespace MagicStorage.Modules {
 		}
 
 		public IEnumerable<Item> GetItems() {
-			if (inventoryWasUpdated)
+			if (inventoryWasUpdated) {
+				inventoryWasUpdated = false;
 				items = Inventory.OrderBy(i => i).Select(MakeItem).ToList();
-			else {
+			} else {
 				for (int i = 0; i < items.Count; i++)
 					items[i].stack = items[i].maxStack;
 			}
@@ -63,7 +64,7 @@ namespace MagicStorage.Modules {
 	}
 
 	internal class JourneyInfiniteItems : EnvironmentModule {
-		public static InfiniteItemsInventory inventory;
+		public static InfiniteItemsInventory inventory = new();
 
 		public override bool IsAvailable() => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 

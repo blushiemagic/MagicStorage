@@ -1,9 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
-using MagicStorage.UI;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.Edits {

@@ -1,5 +1,4 @@
 ﻿using MagicStorage.Common.Systems;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
 	internal class CursorLogicDetours : Edit {

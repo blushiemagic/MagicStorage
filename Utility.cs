@@ -457,5 +457,11 @@ namespace MagicStorage {
 			if (source.stack <= 0)
 				source.SetDefaults(0, true);
 		}
+
+		/// <summary>
+		/// Forces an enumeration to be evaluated, then returns the result
+		/// </summary>
+		public static IEnumerable<T> Evaluate<T>(this IEnumerable<T> enumerable)
+			=> enumerable.ToArray();
 	}
 }

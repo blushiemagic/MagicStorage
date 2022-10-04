@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
-using Terraria.UI;
 
 namespace MagicStorage.UI {
 	internal class UICraftingStateButtonBase : UITextPanel<LocalizedText> {
