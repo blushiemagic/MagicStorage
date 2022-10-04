@@ -142,10 +142,6 @@ namespace MagicStorage.Sorting
 				.AsOrdered()
 				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
 		}
-			//=> MagicCache.FilteredRecipesCache[filterMode]
-			//	.AsParallel()
-			//	.AsOrdered()
-			//	.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
 			if (!modSearched && modSearchIndex != ModSearchBox.ModIndexAll)
