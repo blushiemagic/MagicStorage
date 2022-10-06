@@ -134,7 +134,7 @@ namespace MagicStorage.Sorting
 			else {
 				var filter = filterOption.Filter;
 
-				recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem)).Evaluate();
+				recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem));
 			}
 
 			return recipes
