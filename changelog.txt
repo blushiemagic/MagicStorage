@@ -1,4 +1,17 @@
 ﻿[h1]v0.5.7.9[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- TODO
+- Updated the codebase to account for new tModLoader changes in 1.4 preview
+- Improved the detection logic for the Filter Potions filter
+- Added a new module to the Storage Configuration Interface:  [b]Use Journey Mode Infinite Items[/b]
+- Added a new help tip from the Automaton regarding Storage Units
+- Made the logic responsible for checking if a player can be connected to a storage system from a Portable Access happen less often in order to reduce lag
+- Fixed a bug which caused tiles to run their "nearby effects" logic more often than they should've been
+- Reorganized the client config and made it look better
+- Renamed the Sort by Quantity sorting option to [b]Sort by Total Quantity[/b]
+- Renamed the Sort by Quantity Ratio sorting option to [b]Sort by Stack Count[/b]
+- Added icons for the "newer" filtering icons, which previously just used the same icon as the miscellaneous filter
+- Fixed a bug which caused the Delete Unloaded Items button in the Storage UI's Controls panel to do nothing
+- Fixed a bug where opening a portable Storage access and then trying to open a portable Crafting access (or vice versa) would just cause the UI to close
+- Tweaked the logic for loading some edits to make them not cause the mod to fail to load on 1.4dev (tModLoader v9999.0) builds
+- Fixed some oversights which caused the Filter Items Fully Researched and Filter Items Not Fully Researched filters to do nothing when used
