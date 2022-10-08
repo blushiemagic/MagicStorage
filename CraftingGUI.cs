@@ -947,11 +947,8 @@ namespace MagicStorage
 					Item withdrawn = DoWithdrawResult(toWithdraw);
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = withdrawn;
-					else {
-						int stack = withdrawn.stack;
+					else
 						Utility.CustomStackItems(Main.mouseItem, withdrawn);
-						withdrawn.stack = stack;
-					}
 
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					

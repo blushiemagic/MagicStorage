@@ -203,9 +203,7 @@ namespace MagicStorage
 
 			if (ItemCombining.CanCombineItems(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
 			{
-				int stack = item.stack;
 				Utility.CustomStackItems(Main.mouseItem, item);
-				item.stack = stack;
 				return;
 			}
 
