@@ -6,14 +6,14 @@ The magic storage scales as you progress in your playthrough. It is accessible v
 
 Are you unable to keep track of the dozens of crafting stations in your base? This mod will help you to keep track of all of them with its Combined Crafting Stations! The Combined Crafting Stations combine the functionality of several crafting stations into each tier, with the next tier having all of the previous tiers' crafting stations.
 
-=== IMPORTANT ===
-Please report bugs/issues to this mod's Discord server: https://discord.gg/FemPG7eev4
+[h1]IMPORTANT[/h1]
+Please report bugs/issues to this mod's Discord server [url=discord.gg/FemPG7eev4][img]https://discordapp.com/api/guilds/860671977449979914/widget.png?style=shield[/img][/url]
 
 The 1.4 version of Magic Storage merges the Magic Storage and Magic Storage - Extra mods from 1.3 tModLoader
 
-Want to support the mod's development?  Donate to absoluteAquarian's Patreon:  https://www.patreon.com/absoluteAquarian
+Want to support the mod's development?  Donate to absoluteAquarian's Patreon [url=www.patreon.com/absoluteAquarian][img]https://i.imgur.com/xII2DwJ.png[/img][/url]
 
-=== MAGIC STORAGE TEAM ===
+[h1]MAGIC STORAGE TEAM[/h1]
 [b]blushiemagic[/b]
 - Mod Author
 [b]absoluteAquarian[/b]
@@ -26,7 +26,3 @@ Want to support the mod's development?  Donate to absoluteAquarian's Patreon:  h
 - Created most of the sprites used in the mod
 [b]Yowave[/b]
 - Created bug fixes and optimizations for the mod during absoluteAquarian's hiatus from 20Oct2021-15Dec2021
-
-TODO:
-Blacklist/Whitelist for specific accesses
-Wait for bug reports

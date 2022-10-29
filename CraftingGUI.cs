@@ -947,8 +947,11 @@ namespace MagicStorage
 					Item withdrawn = DoWithdrawResult(toWithdraw);
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = withdrawn;
-					else
-						Utility.CustomStackItems(Main.mouseItem, withdrawn);
+					else {
+						Utility.CallOnStackHooks(Main.mouseItem, withdrawn, withdrawn.stack);
+
+						Main.mouseItem.stack += withdrawn.stack;
+					}
 
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
@@ -980,10 +983,20 @@ namespace MagicStorage
 					Item existing = compacted[j];
 
 					if (ItemCombining.CanCombineItems(item, existing)) {
-						Utility.CustomStackItems(existing, item);
+						if (existing.stack + item.stack <= existing.maxStack) {
+							Utility.CallOnStackHooks(existing, item, item.stack);
 
-						if (item.stack <= 0)
+							existing.stack += item.stack;
+							item.stack = 0;
 							fullyCompacted = true;
+						} else {
+							int diff = existing.maxStack - existing.stack;
+
+							Utility.CallOnStackHooks(existing, item, diff);
+
+							existing.stack = existing.maxStack;
+							item.stack -= diff;
+						}
 
 						break;
 					}
@@ -1014,10 +1027,18 @@ namespace MagicStorage
 					Item existing = compacted[j];
 
 					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]]) {
-						Utility.CustomStackItems(existing, item);
-
-						if (item.stack <= 0)
+						if (existing.stack + item.stack <= existing.maxStack) {
+							existing.stack += item.stack;
+							item.stack = 0;
 							fullyCompacted = true;
+						} else {
+							int diff = existing.maxStack - existing.stack;
+
+							Utility.CallOnStackHooks(existing, item, diff);
+
+							existing.stack = existing.maxStack;
+							item.stack -= diff;
+						}
 
 						break;
 					}

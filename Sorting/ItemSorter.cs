@@ -101,9 +101,9 @@ namespace MagicStorage.Sorting
 							source.favorited = true;
 					}
 
-					int stack = item.stack;
-					Utility.CustomStackItems(lastItem, item);
-					item.stack = stack;
+					Utility.CallOnStackHooks(lastItem, item, item.stack);
+
+					lastItem.stack += item.stack;
 
 					context.enumeratedSource[sourceIndex].Add(item);
 				}

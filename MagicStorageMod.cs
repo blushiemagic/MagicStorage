@@ -61,6 +61,8 @@ namespace MagicStorage {
 			FilteringOptionLoader.Unload();
 
 			optionsConfig = null;
+
+			Utility.UnloadHookDelegate();
 		}
 
 		public override void PostSetupContent() {

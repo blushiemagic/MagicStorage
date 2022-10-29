@@ -190,8 +190,11 @@ namespace MagicStorage
 					Item result = DoWithdraw(toWithdraw);
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = result;
-					else
-						Utility.CustomStackItems(Main.mouseItem, result);
+					else {
+						Utility.CallOnStackHooks(Main.mouseItem, result, result.stack);
+
+						Main.mouseItem.stack += result.stack;
+					}
 
 					needRefresh = true;
 					SoundEngine.PlaySound(SoundID.MenuTick);

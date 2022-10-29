@@ -430,32 +430,10 @@ namespace MagicStorage {
 			}
 		}
 
-		public static void CustomStackItems(Item destination, Item source, int? amountToTransfer = null) {
-			bool srcFavorite = source.favorited;
+		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
+			BuildOnStackHooksDelegate();
 
-#if !TML_2022_09
-			ItemLoader.StackItems(destination, source, out _, false, amountToTransfer);
-#else
-			// Mimic the preview logic without the hooks
-			int transfer = amountToTransfer ?? Math.Min(source.stack, destination.maxStack - destination.stack);
-
-			if (source.favorited) {
-				destination.favorited = true;
-				source.favorited = false;
-			}
-
-			destination.stack += transfer;
-			source.stack -= transfer;
-#endif
-
-			if (srcFavorite)
-				source.favorited = srcFavorite;
-
-			if (source.newAndShiny)
-				destination.newAndShiny = MagicStorageConfig.GlowNewItems;
-
-			if (source.stack <= 0)
-				source.SetDefaults(0, true);
+			onStackHooksDelegate?.Invoke(destination, source, numTransfered);
 		}
 
 		/// <summary>
