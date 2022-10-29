@@ -49,7 +49,7 @@ namespace MagicStorage {
 				enumerator.Current.OnStack(arg_0, arg_1, arg_2);
 			}
 			if (arg_0.ModItem is not null) {
-				arg_0.ModItem.OnStack(arg_0, arg_1, arg_2);
+				arg_0.ModItem.OnStack(arg_1, arg_2);
 			}
 			*/
 
