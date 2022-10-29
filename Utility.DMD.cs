@@ -44,7 +44,7 @@ namespace MagicStorage {
 			/*
 			Desired resulting method:
 			
-			HookList<GlobalItem>.InstanceEnumerator enumerator = ItemLoader.HookOnStack.Enumerator(arg_0.globalItems);
+			HookList<GlobalItem>.InstanceEnumerator enumerator = ItemLoader.HookOnStack.Enumerate(arg_0.globalItems);
 			while (enumerator.MoveNext()) {
 				enumerator.Current.OnStack(arg_0, arg_1, arg_2);
 			}
@@ -53,7 +53,7 @@ namespace MagicStorage {
 			}
 			*/
 
-			// HookList<GlobalItem>.InstanceEnumerator enumerator = ItemLoader.HookOnStack.Enumerator(arg_0.globalItems);
+			// HookList<GlobalItem>.InstanceEnumerator enumerator = ItemLoader.HookOnStack.Enumerate(arg_0.globalItems);
 			il.Emit(OpCodes.Ldsfld, ItemLoader_HookOnStack);
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Ldfld, Item_globalItems);
