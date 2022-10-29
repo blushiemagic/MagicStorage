@@ -23,7 +23,7 @@ namespace MagicStorage {
 #if TML_2022_09
 			onStackHooksDelegate = null;
 #else
-			// Build a DynamicMethodDefinition which invokes the hooks
+			// Build a DynamicMethod which invokes the hooks
 			FieldInfo Item_globalItems = typeof(Item).GetField("globalItems", BindingFlags.NonPublic | BindingFlags.Instance);
 			MethodInfo Item_get_ModItem = typeof(Item).GetProperty("ModItem", BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
 			
