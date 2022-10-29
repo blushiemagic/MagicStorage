@@ -11,7 +11,10 @@ namespace MagicStorage {
 		private delegate void OnStack(Item increase, Item decrease, int numTransfered);
 		private static OnStack onStackHooksDelegate;
 
-		internal static void UnloadHookDelegate() => onStackHooksDelegate = null;
+		internal static void UnloadHookDelegate() {
+			onStackHooksDelegate = null;
+			onStackHooksDelegateBuilt = false;
+		}
 
 		private static void BuildOnStackHooksDelegate() {
 			if (onStackHooksDelegateBuilt)

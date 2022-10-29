@@ -646,6 +646,9 @@ namespace MagicStorage.UI.States {
 					if (item.IsAir || item.maxStack > 1)  //Only sell duplicates of unstackables
 						continue;
 
+					if (item.favorited)  // Ignore favorited items
+						continue;
+
 					if (!duplicatesToSell.TryGetValue(item.type, out var context))
 						context = duplicatesToSell[item.type] = new() { keep = sourcedItem };
 					else if (ItemCombining.CanCombineItems(context.keep.item, item, checkPrefix: false)) {
