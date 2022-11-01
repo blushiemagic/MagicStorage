@@ -572,6 +572,11 @@ Mods: {
 			CompactCoinsButton: "合并钱币"
 			DestroyUnloadedButton: "删除卸载物品"
 			DestroyUnloadedDataButton: "删除被卸载的数据"
+			DepositPiggyBank: "转移猪猪存钱罐物品"
+			DepositSafe: "转移保险箱物品"
+			DepositForge: "转移护卫熔炉物品"
+			DepositVault: "转移虚空保险库物品"
+
 			# InitShowcaseButton: "Initialize Showcase"
 			# ResetShowcaseButton: "Reset Showcase Items"
 			# ClearItemsButton: "Clear All Items"
