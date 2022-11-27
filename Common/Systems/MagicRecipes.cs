@@ -51,6 +51,8 @@ namespace MagicStorage.Common.Systems {
 
 		public override void AddRecipeGroups()
 		{
+			MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicRecipes::AddRecipeGroups");
+
 			IEnumerable<int> vanillaItems = Enumerable.Range(0, ItemID.Count);
 
 			int[] GetItems(int iconicItem, Regex regex, params int[] ignore) {
@@ -168,6 +170,8 @@ namespace MagicStorage.Common.Systems {
 			items = new int[] { ItemID.DemoniteBar, ItemID.CrimtaneBar };
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.DemoniteBar)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemoniteBar", group);
+
+			MagicStorageMod.SetLoadingSubProgressText("");
 		}
 	}
 }

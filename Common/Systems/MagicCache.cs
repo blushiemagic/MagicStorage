@@ -71,6 +71,8 @@ public class MagicCache : ModSystem
 
 	public override void PostSetupRecipes()
 	{
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::PostSetupRecipes");
+
 		// PostSetupContent() is too early for name sorting, which causes the fuzzy sorting to fail
 		SortingCache.dictionary.Fill();
 
@@ -100,23 +102,39 @@ public class MagicCache : ModSystem
 			}
 		}
 
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::SetupSortFilterRecipeCache");
+
 		SetupSortFilterRecipeCache();
 
 		var groupedByMod = EnabledRecipes.GroupBy(r => r.Mod).ToArray();
+
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesByMod");
+
 		RecipesByMod = groupedByMod.Where(x => x.Key is not null).ToDictionary(x => x.Key, x => x.ToArray());
+
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::VanillaRecipes");
+
 		VanillaRecipes = groupedByMod.Where(x => x.Key is null).SelectMany(x => x.ToArray()).ToArray();
+
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::AllMods");
 
 		// TODO: Split into mods with recipe and mods with items. Also have to account for it in ModSearchBox
 		AllMods = ModLoader.Mods
 			.Where(mod => RecipesByMod.ContainsKey(mod) || mod.GetContent<ModItem>().Any())
 			.ToArray();
 
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::IndexByMod");
+
 		IndexByMod = AllMods
 			.Select((mod, index) => (mod, index))
 			.ToDictionary(x => x.mod, x => x.index);
 
+		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
+
 		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
 			.ToDictionary(kvp => kvp.Key, kvp => new LazyRecipe(kvp.Key));
+
+		MagicStorageMod.SetLoadingSubProgressText("");
 	}
 
 	private static void SetupSortFilterRecipeCache()

@@ -166,7 +166,7 @@ namespace MagicStorage.Common.Systems
 		public static Recipe GetOverriddenRecipe(Recipe recipe)
 		{
 			if (recipe is null)
-				return null;
+				return null!;
 
 			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{
@@ -180,7 +180,7 @@ namespace MagicStorage.Common.Systems
 		public static Recipe ApplyCompoundRecipe(Recipe recipe)
 		{
 			if (recipe is null)
-				return null;
+				return null!;
 
 			if (RecipeToCompoundRecipe.TryGetValue(recipe, out var compoundRecipe))
 			{

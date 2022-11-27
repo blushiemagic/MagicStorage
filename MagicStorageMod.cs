@@ -1,17 +1,18 @@
-﻿using MagicStorage.Items;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.CrossMod;
+using MagicStorage.CrossMod.Control;
+using MagicStorage.Items;
 using MagicStorage.NPCs;
+using MagicStorage.Stations;
 using System;
 using System.IO;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using MagicStorage.Common.Systems;
-using MagicStorage.CrossMod;
-using MagicStorage.Stations;
-using MagicStorage.CrossMod.Control;
-using MagicStorage.Common.Systems.RecurrentRecipes;
 
 namespace MagicStorage {
 	public class MagicStorageMod : Mod {
@@ -30,9 +31,26 @@ namespace MagicStorage {
 
 		public UIOptionConfigurationManager optionsConfig;
 
+		private static FieldInfo Interface_loadMods;
+		private static MethodInfo UIProgress_set_SubProgressText;
+
+		public static string ProgressText_FinishResourceLoading => Language.GetTextValue("tModLoader.MSFinishingResourceLoading");
+
+		public static void SetLoadingSubProgressText(string text)
+			=> UIProgress_set_SubProgressText.Invoke(Interface_loadMods.GetValue(null), new object[] { text });
+
 		public override void Load()
 		{
 			UsingPrivateBeta = DisplayName.Contains("BETA");
+
+			Interface_loadMods = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface")!.GetField("loadMods", BindingFlags.NonPublic | BindingFlags.Static);
+			UIProgress_set_SubProgressText = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UIProgress")!.GetProperty("SubProgressText", BindingFlags.Public | BindingFlags.Instance)!.GetSetMethod();
+
+			Utility.LocalizationLoader_AutoloadTranslations = typeof(LocalizationLoader).GetMethod("AutoloadTranslations", BindingFlags.NonPublic | BindingFlags.Static)!;
+			Utility.LocalizationLoader_SetLocalizedText = typeof(LocalizationLoader).GetMethod("SetLocalizedText", BindingFlags.NonPublic | BindingFlags.Static)!;
+			Utility.LanguageManager__localizedTexts = typeof(LanguageManager).GetField("_localizedTexts", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+			Utility.ForceLoadModHJsonLocalization(this);
 
 			InterfaceHelper.Initialize();
 
