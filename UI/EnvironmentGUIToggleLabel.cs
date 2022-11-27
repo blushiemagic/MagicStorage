@@ -44,14 +44,14 @@ namespace MagicStorage.UI {
 			if (!Source.IsAvailable(Module, out var module))
 				return;
 
-		//	Main.NewText($"Clicked label \"{Text.Text}\" -- Valid? {module is not null}");
+			NetHelper.Report(true, $"Clicked label \"{Text.Text}\" -- Valid? {module is not null}");
 
 			if (module is not null && EnvironmentGUI.currentAccess is not null) {
 				EnvironmentGUI.currentAccess.SetEnabled(module, IsOn);
 
 				NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);
 
-			//	Main.NewText($"\"{Text.Text}\" label toggled to {IsOn}");
+				NetHelper.Report(false, $"\"{Text.Text}\" label toggled to {IsOn}");
 
 				SoundEngine.PlaySound(SoundID.MenuTick);
 			}

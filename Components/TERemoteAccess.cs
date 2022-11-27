@@ -28,11 +28,11 @@ namespace MagicStorage.Components
 			if (ByPosition.TryGetValue(locator, out TileEntity te))
 				return te as TEStorageHeart;
 
-			Load();
+			LoadLocation();
 			return null;
 		}
 
-		private void Load()
+		private void LoadLocation()
 		{
 			if (!Loaded)
 			{
