@@ -24,8 +24,18 @@ namespace MagicStorage.Sorting
 
 	public class CompareQuantityRatio : CompareFunction<CompareQuantityRatio>
 	{
-		public override int Compare(Item item1, Item item2) =>
-			(int)(Math.Ceiling(item1.stack / (double)item1.maxStack) * 1000 - Math.Ceiling(item2.stack / (double)item2.maxStack) * 1000);
+		public override int Compare(Item item1, Item item2) {
+			if (item1.IsAir && item2.IsAir)
+				return 0;
+
+			if (item1.IsAir)
+				return 1;
+
+			if (item2.IsAir)
+				return -1;
+
+			return (int)(Math.Ceiling(item1.stack / (double)item1.maxStack) * 1000 - Math.Ceiling(item2.stack / (double)item2.maxStack) * 1000);
+		}
 	}
 
 	public class CompareQuantityAbsolute : CompareFunction<CompareQuantityAbsolute>

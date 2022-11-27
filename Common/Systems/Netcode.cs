@@ -54,34 +54,6 @@ namespace MagicStorage.Common.Systems {
 				Main.NewText("Server Operator status was successfully modified.", Color.Green);
 		}
 
-		public override bool HijackGetData(ref byte messageType, ref BinaryReader reader, int playerNumber) {
-			if (messageType == MessageID.QuickStackChests) {
-				//Do the logic for chests, then do the logic for storage systems when applicable
-				byte b7 = reader.ReadByte();
-
-				if (Main.netMode == NetmodeID.Server && playerNumber < Main.maxPlayers && b7 < 58) {
-					Player player = Main.player[playerNumber];
-
-					ref Item item = ref player.inventory[b7];
-
-					//Basically manually doing Chest.ServerPlaceItem, but inserting TryPlaceItemInNearbyStorageSystems before the SendData call
-					item = Chest.PutItemInNearbyChest(item, player.Center);
-
-					bool playSound = false;
-					bool success = TryQuickStackItemIntoNearbyStorageSystems(player, item, ref playSound);
-
-					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, playerNumber, b7, item.prefix);
-
-					if (success)
-						NetHelper.SendQuickStackToStorage(playerNumber);
-				}
-
-				return true;
-			}
-
-			return base.HijackGetData(ref messageType, ref reader, playerNumber);
-		}
-
 		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound)
 			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
 

@@ -11,6 +11,7 @@ using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
 using MagicStorage.Stations;
 using MagicStorage.CrossMod.Control;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 
 namespace MagicStorage {
 	public class MagicStorageMod : Mod {
@@ -63,6 +64,7 @@ namespace MagicStorage {
 			optionsConfig = null;
 
 			Utility.UnloadHookDelegate();
+			RecursiveRecipe.UnloadDelegates();
 		}
 
 		public override void PostSetupContent() {

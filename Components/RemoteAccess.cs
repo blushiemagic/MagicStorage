@@ -34,10 +34,10 @@ namespace MagicStorage.Components
 					return false;
 
 				Locator locator = (Locator)item.ModItem;
-				if (remoteAccess.TryLocate(locator.location, out string message))
+				if (remoteAccess.TryLocate(locator.Location, out string message))
 				{
 					if (item.type == ModContent.ItemType<LocatorDisk>())
-						locator.location = Point16.NegativeOne;
+						locator.Location = Point16.NegativeOne;
 					else
 						item.SetDefaults();
 				}

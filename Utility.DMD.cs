@@ -37,7 +37,7 @@ namespace MagicStorage {
 			MethodInfo HookList_T_InstanceEnumerator_MoveNext = HookList_T_InstanceEnumerator.GetMethod(nameof(HookList<GlobalItem>.InstanceEnumerator.MoveNext), BindingFlags.Public | BindingFlags.Instance);
 			MethodInfo HookList_T_InstanceEnumerator_get_Current = HookList_T_InstanceEnumerator.GetProperty(nameof(HookList<GlobalItem>.InstanceEnumerator.Current), BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
 
-			DynamicMethod dmd = new("MagicStorage.Utility.BuildOnStackHooksDelegate.<>DMD", null, new Type[] { typeof(Item), typeof(Item), typeof(int) }, typeof(MagicStorageMod).Module, skipVisibility: true);
+			DynamicMethod dmd = new(typeof(Utility).FullName + ".BuildOnStackHooksDelegate.<>DMD", null, new Type[] { typeof(Item), typeof(Item), typeof(int) }, typeof(MagicStorageMod).Module, skipVisibility: true);
 			ILGenerator il = dmd.GetILGenerator();
 			LocalBuilder enumerator = il.DeclareLocal(HookList_T_InstanceEnumerator);
 

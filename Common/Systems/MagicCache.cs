@@ -40,6 +40,18 @@ public class MagicCache : ModSystem
 
 	public static Dictionary<int, LazyRecipe> RecipesUsingItemType { get; private set; } = null!;
 
+	/// <summary>
+	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
+	/// Also forces the active storage/crafting UI to refresh if applicable.
+	/// </summary>
+	public static void RecalculateRecipeCaches() {
+		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
+
+		StorageGUI.needRefresh = true;
+
+		// TODO: refresh recursive recipes
+	}
+
 	public override void Unload()
 	{
 		EnabledRecipes = null!;

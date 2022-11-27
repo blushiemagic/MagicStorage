@@ -76,6 +76,7 @@ namespace MagicStorage.Items
 
 			OpenContext(out int validTileType, out string missingAccessKey, out string unlocatedAccessKey, out bool openCrafting);
 
+			Point16 location = Location;
 			if (location.X >= 0 && location.Y >= 0)
 			{
 				Tile tile = Main.tile[location.X, location.Y];
@@ -152,6 +153,7 @@ namespace MagicStorage.Items
 			bool hadChestOpen = player.chest != -1;
 			player.chest = -1;
 			Main.stackSplit = 600;
+			Point16 location = Location;
 			Point16 toOpen = location;
 			Point16 prevOpen = modPlayer.ViewingStorage();
 
@@ -202,6 +204,7 @@ namespace MagicStorage.Items
 
 		public override void ModifyTooltips(List<TooltipLine> lines)
 		{
+			Point16 location = Location;
 			bool isSet = location.X >= 0 && location.Y >= 0;
 			for (int k = 0; k < lines.Count; k++)
 				if (isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip1")

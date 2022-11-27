@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.UI.States;
 using Newtonsoft.Json;
 using Terraria;
@@ -44,6 +45,19 @@ namespace MagicStorage {
 		[Tooltip("$Mods.MagicStorage.Config.clearHistory.Tooltip")]
 		[DefaultValue(false)]
 		public bool clearHistory;
+
+		[Label("$Mods.MagicStorage.Config.recursionDepth.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recursionDepth.Tooltip")]
+		[DefaultValue(0)]
+		[DrawTicks]
+		[Range(-1, 10)]
+		public int recursionDepth;
+
+		[Label("$Mods.MagicStorage.Config.recursionMode.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recursionMode.Tooltip")]
+		[DefaultValue(RecursionMode.Legacy)]
+		[DrawTicks]
+		public RecursionMode recursionMode;
 
 		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
 		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
@@ -133,7 +147,29 @@ namespace MagicStorage {
 		[JsonIgnore]
 		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
+		[JsonIgnore]
+		public static int RecipeRecursionDepth => Instance.recursionDepth;
+		
+		[JsonIgnore]
+		public static bool IsRecursionDisabled => RecipeRecursionDepth == 0;
+
+		[JsonIgnore]
+		public static bool IsRecursionInfinite => RecipeRecursionDepth == -1;
+
+		[JsonIgnore]
+		public static RecursionMode RecipeRecursionMode => Instance.recursionMode;
+
 		public override ConfigScope Mode => ConfigScope.ClientSide;
+
+		[JsonIgnore]
+		internal int LastKnownDepth = -2;
+
+		public override void OnChanged() {
+			if (recursionDepth != LastKnownDepth)
+				RecursiveRecipe.RecalculateAllRecursiveRecipes();
+
+			LastKnownDepth = recursionDepth;
+		}
 	}
 
 	[Label("$Mods.MagicStorage.Config.ServersideLabel")]

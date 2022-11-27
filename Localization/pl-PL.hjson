@@ -659,6 +659,13 @@ Mods: {
 				# Label: "UI Panel Movement"
 				# Tooltip: "Disable to prevent moving and resizing the UI panels"
 			}
+			recursionDepth: {
+				# Label: "Recipe Recursion Depth"
+				# Tooltip:
+				# '''
+				# (See en-US translation)
+				# '''
+			}
 
 			AllowAutomatonToMoveIn: {
 				# Label: "Automaton Housing"

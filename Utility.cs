@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using Microsoft.Xna.Framework;
@@ -441,5 +442,7 @@ namespace MagicStorage {
 		/// </summary>
 		public static IEnumerable<T> Evaluate<T>(this IEnumerable<T> enumerable)
 			=> enumerable.ToArray();
+
+		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 	}
 }

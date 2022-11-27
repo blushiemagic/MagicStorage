@@ -69,6 +69,11 @@ namespace MagicStorage.Components {
 				module.ResetPlayer(sandbox);
 		}
 
+		public override void Update() {
+			TEStorageHeart heart = GetHeart();
+			heart?.environmentAccesses.Add(Position);
+		}
+
 		public override void SaveData(TagCompound tag) {
 			base.SaveData(tag);
 

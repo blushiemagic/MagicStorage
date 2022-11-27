@@ -112,11 +112,11 @@ namespace MagicStorage.Common.Systems {
 		}
 
 		internal static bool CanDrawAreas(Player player, out Point16 accessLocation, out float playerToPylonRange) {
-			if (player.HeldItem.ModItem is not PortableAccess portableAccess || portableAccess.location.X < 0 || !portableAccess.GetEffectiveRange(out playerToPylonRange, out _) || playerToPylonRange < 0) {
+			if (player.HeldItem.ModItem is not PortableAccess portableAccess || portableAccess.Location.X < 0 || !portableAccess.GetEffectiveRange(out playerToPylonRange, out _) || playerToPylonRange < 0) {
 				accessLocation = Point16.NegativeOne;
 				playerToPylonRange = 0;
 			} else
-				accessLocation = portableAccess.location;
+				accessLocation = portableAccess.Location;
 
 			return accessLocation.X >= 0;
 		}

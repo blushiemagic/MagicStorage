@@ -60,6 +60,7 @@ namespace MagicStorage.Components
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private int compactStage;
 		public HashSet<Point16> remoteAccesses = new();
+		public HashSet<Point16> environmentAccesses = new();
 		private int updateTimer = 60;
 
 		public bool IsAlive { get; private set; } = true;
@@ -87,9 +88,8 @@ namespace MagicStorage.Components
 		}
 
 		public IEnumerable<TEEnvironmentAccess> GetEnvironmentSimulators()
-			=> TileEntity.ByPosition.Values
-				.OfType<TEEnvironmentAccess>()
-				.Where(e => TEStorageCenter.HeartsMatch(e.center, Position));
+			=> environmentAccesses.Select(p => TileEntity.ByPosition.TryGetValue(p, out TileEntity te) ? te : null)
+				.OfType<TEEnvironmentAccess>();
 
 		public IEnumerable<EnvironmentModule> GetModules()
 			=> GetEnvironmentSimulators()
@@ -104,18 +104,24 @@ namespace MagicStorage.Components
 		protected override void CheckMapSections() {
 			base.CheckMapSections();
 
-			//Check for remote accesses as well
+			// Check for remote and environment accesses as well
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				foreach (Point16 remote in remoteAccesses.DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
+				foreach (Point16 remote in remoteAccesses.Concat(environmentAccesses).DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
 					NetHelper.ClientRequestSection(remote);
 			}
 		}
 
 		public override void Update()
 		{
-			foreach (Point16 remoteAccess in remoteAccesses)
+			foreach (Point16 remoteAccess in remoteAccesses) {
 				if (!ByPosition.TryGetValue(remoteAccess, out TileEntity te) || te is not TERemoteAccess)
 					remoteAccesses.Remove(remoteAccess);
+			}
+
+			foreach (Point16 environmentAccess in environmentAccesses) {
+				if (!TileEntity.ByPosition.TryGetValue(environmentAccess, out TileEntity te) || te is not TEEnvironmentAccess)
+					environmentAccesses.Remove(environmentAccess);
+			}
 
 			if (Main.netMode == NetmodeID.Server && processClientOperations())
 			{
@@ -665,6 +671,17 @@ namespace MagicStorage.Components
 			}
 
 			tag.Set("RemoteAccesses", tagRemotes);
+
+			List<TagCompound> tagEnvironments = new();
+			foreach (Point16 environmentAccess in environmentAccesses) {
+				tagEnvironments.Add(new TagCompound() {
+					["X"] = environmentAccess.X,
+					["Y"] = environmentAccess.Y
+				});
+			}
+
+			tag["EnvironmentAccesses"] = tagEnvironments;
+
 			_uniqueItemsPutHistory.Save(tag);
 		}
 
@@ -673,6 +690,10 @@ namespace MagicStorage.Components
 			base.LoadData(tag);
 			foreach (TagCompound tagRemote in tag.GetList<TagCompound>("RemoteAccesses"))
 				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
+
+			foreach (TagCompound tagEnvironment in tag.GetList<TagCompound>("EnvironmentAccesses"))
+				environmentAccesses.Add(new Point16(tagEnvironment.GetShort("X"), tagEnvironment.GetShort("Y")));
+
 			_uniqueItemsPutHistory.Load(tag);
 
 			compactCoins = true;
@@ -688,6 +709,13 @@ namespace MagicStorage.Components
 				writer.Write(remoteAccess.Y);
 			}
 
+			writer.Write((short)environmentAccesses.Count);
+			foreach (Point16 environmentAccess in environmentAccesses)
+			{
+				writer.Write(environmentAccess.X);
+				writer.Write(environmentAccess.Y);
+			}
+
 			NetHelper.Report(true, "Sent tile entity data for TEStorageHeart");
 		}
 
@@ -697,6 +725,10 @@ namespace MagicStorage.Components
 			int count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)
 				remoteAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
+
+			count = reader.ReadInt16();
+			for (int k = 0; k < count; k++)
+				environmentAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
 
 			NetHelper.Report(true, "Received tile entity data for TEStorageHeart");
 		}

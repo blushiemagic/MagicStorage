@@ -768,6 +768,31 @@ Mods: {
 				Label: "UI Panel Movement"
 				Tooltip: "Disable to prevent moving and resizing the UI panels"
 			}
+			recursionDepth: {
+				Label: "[DISABLED] Recipe Recursion Depth"
+				Tooltip:
+				'''
+				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+				How deep the recursion goes for crafting recipes in the Crafting UI.
+				Set to 0 to disable this feature.
+				Set to -1 for infinite depth
+				'''
+			}
+			recursionMode: {
+				Label: "[DISABLED] Recipe Recursion Mode"
+				Tooltip:
+				'''
+				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+				Legacy:
+				  Logic is kept in line with how it worked in the Recursive Craft integration.
+				  That is, recursive recipes are "combined" into one singular recipe.
+				  Simplicity at the cost of more processing required and less control.
+				Modern:
+				  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
+				  Sub-recipes can be swapped out in a special UI in the Crafting UI.
+				  Less processing required and more control at the cost of more complexity.
+				'''
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

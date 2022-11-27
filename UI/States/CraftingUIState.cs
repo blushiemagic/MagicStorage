@@ -1047,7 +1047,7 @@ namespace MagicStorage.UI.States {
 
 			internal Item GetRecipe(int slot, ref int context) {
 				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
-				Item item = index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
+				Item item = index >= 0 && index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
 
 				if (!item.IsAir) {
 					// TODO can this be nicer?
