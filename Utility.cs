@@ -95,7 +95,12 @@ namespace MagicStorage {
 				goto ReturnFromMethod;
 			}
 
-			equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+			try {
+				equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+			} catch {
+				// Swallow the except and disallow stacking
+				equal = false;
+			}
 
 			ReturnFromMethod:
 
