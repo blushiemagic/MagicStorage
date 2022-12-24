@@ -1214,7 +1214,10 @@ namespace MagicStorage
 					if (!CanConsumeItem(context, clone, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
 						if (wasAvailable) {
 							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\". (Batching {crafts} crafts)");
-							break;
+
+							// Add an "empty item" to the batch in order to allow later logic to exit the loop...
+							clone.stack = 0;
+							batch.Add(clone);
 						} else {
 							// Did not have enough items
 							crafts--;
@@ -1232,6 +1235,9 @@ namespace MagicStorage
 					break;
 				}
 			}
+
+			// Remove any empty items since they wouldn't do anything anyway
+			batch.RemoveAll(i => i.stack <= 0);
 
 			context.simulation = false;
 
