@@ -42,15 +42,21 @@ namespace MagicStorage {
 		}
 
 		private static void CheckValidDestination(TeleportPylonInfo info, ref bool flag) {
-			SceneMetrics sceneMetrics = _sceneMetrics;
-			SceneMetricsScanSettings settings = new SceneMetricsScanSettings {
-				VisualScanArea = null,
-				BiomeScanCenterPositionInWorld = info.PositionInTiles.ToWorldCoordinates(),
-				ScanOreFinderData = false
-			};
+			// For whatever reason, this code has a chance to throw an error, which causes a hard game crash
+			try {
+				SceneMetrics sceneMetrics = _sceneMetrics;
+				SceneMetricsScanSettings settings = new SceneMetricsScanSettings {
+					VisualScanArea = null,
+					BiomeScanCenterPositionInWorld = info.PositionInTiles.ToWorldCoordinates(),
+					ScanOreFinderData = false
+				};
 
-			sceneMetrics.ScanAndExportToMain(settings);
-			flag = DoesPylonAcceptTeleportation(info);
+				sceneMetrics.ScanAndExportToMain(settings);
+				flag = DoesPylonAcceptTeleportation(info);
+			} catch {
+				// Swallow any exceptions and assume that the pylon was invalid
+				flag = false;
+			}
 		}
 
 		private static bool DoesPylonAcceptTeleportation(TeleportPylonInfo info) {
