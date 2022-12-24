@@ -76,7 +76,9 @@ namespace MagicStorage.UI {
 
 					// Handle handles all the click and hover actions based on the context.
 					storedItemBeforeHandle = StoredItem.Clone();
-					ItemSlot.Handle(ref storedItem, Context);
+					dummy[10] = storedItem;
+					ItemSlot.Handle(dummy, Context, 10);
+					storedItem = dummy[10];
 
 					if (ItemChanged || ItemTypeChanged)
 						OnItemChanged?.Invoke(storedItem);
