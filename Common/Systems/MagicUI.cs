@@ -74,7 +74,7 @@ public class MagicUI : ModSystem
 			oldMouseLeft = Main.mouseLeft;
 			oldMouseLeftRelease = Main.mouseLeftRelease;
 			oldMouseRight = Main.mouseRight;
-			oldMouseRightRelease = Main.mouseRight;
+			oldMouseRightRelease = Main.mouseRightRelease;
 			oldPIMouseX = PlayerInput.MouseX;
 			oldPIMouseY = PlayerInput.MouseY;
 			oldPIOrigMouseX = (int)PlayerInput__originalMouseX.GetValue(null);

@@ -201,7 +201,6 @@ namespace MagicStorage.Components
 					} else {
 						result = item.Clone();
 						result.stack = withdraw;
-						item.stack -= withdraw;
 					}
 
 					onItemStackReduced?.Invoke(k, withdraw);
