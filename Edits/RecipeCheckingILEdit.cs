@@ -60,7 +60,7 @@ namespace MagicStorage.Edits {
 
 					throw new Exception($"Mod \"{mod.Name}\" added or modified a recipe to be in an invalid state.\n" +
 						"Reason: An ingredient had a stack size of zero or less.\n" +
-						$"Problem Recipe:  {result} @ {tile}}");
+						$"Problem Recipe:  {result} @ {tile}");
 				}
 			}
 		}
