@@ -54,9 +54,14 @@ namespace MagicStorage.Edits {
 				if (recipe.Disabled)
 					continue;  //Ignore since Magic Storage can't use it anyway
 
-				if (recipe.requiredItem.Any(i => i.type <= ItemID.None || i.stack <= 0))
+				if (recipe.requiredItem.Any(i => i.type <= ItemID.None || i.stack <= 0)) {
+					string result = recipe.createItem.IsAir ? "<result not set>" : $"{Lang.GetItemNameValue(recipe.createItem.type)} ({recipe.createItem.stack})";
+					string tile = recipe.requiredTile.Count == 0 ? "hand" : string.Join(", ", recipe.requiredTile.Select(t => TileID.Search.TryGetName(t, out string s) ? s : "<unknown>"));
+
 					throw new Exception($"Mod \"{mod.Name}\" added or modified a recipe to be in an invalid state.\n" +
-						"Reason: An ingredient had a stack size of zero or less.");
+						"Reason: An ingredient had a stack size of zero or less.\n" +
+						$"Problem Recipe:  {result} @ {tile}}");
+				}
 			}
 		}
 	}
