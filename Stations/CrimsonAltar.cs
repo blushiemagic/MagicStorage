@@ -8,6 +8,7 @@ namespace MagicStorage.Stations
 	{
 		public override void SetStaticDefaults()
 		{
+			SacrificeTotal = 5;
 		}
 
 		public override void SetDefaults()

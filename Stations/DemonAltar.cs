@@ -6,6 +6,11 @@ namespace MagicStorage.Stations
 {
 	public class DemonAltar : ModItem
 	{
+		public override void SetStaticDefaults()
+		{
+			SacrificeTotal = 5;
+		}
+
 		public override void SetDefaults()
 		{
 			Item.width = 48;
