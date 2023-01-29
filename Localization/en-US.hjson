@@ -535,6 +535,9 @@ Mods: {
 			SearchMod: "@ModName Search Name"
 			SearchTooltip: "#Search Tooltip"
 			SearchModAndTooltip: "@ModName #Search Tooltip"
+
+			TipModAndTooltip: "[c/ffff00:@ModName] to search by mod, [c/ffff00:#Search Tooltip] to search by tooltip (can be combined in that order)"
+			TipTooltipOnly: "[c/ffff00:#Search Tooltip] to search by tooltip"
 		}
 
 		Recipes: "Recipes"
@@ -672,10 +675,10 @@ Mods: {
 		ButtonConfigGear: "Open Configuration Panel"
 
 		UIPages: {
-			Sorting: "Sorting",
-			Filtering: "Filtering",
-			Crafting: "Crafting",
-			Storage: "Storage",
+			Sorting: "Sorting"
+			Filtering: "Filtering"
+			Crafting: "Crafting"
+			Storage: "Storage"
 			Controls: "Controls"  # StorageGUI page for the extra controls
 			Modules: "Modules"    # EnvironmentGUI page for the modules
 			History: "History"    # CraftingGUI recipe history panel

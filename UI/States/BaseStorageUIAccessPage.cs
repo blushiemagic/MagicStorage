@@ -99,17 +99,9 @@ namespace MagicStorage.UI.States {
 
 			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), () => StorageGUI.needRefresh = true) {
 				GetHoverText = () => {
-					StringBuilder sb = new();
-
-					if (modSearchBox.ModIndex == ModSearchBox.ModIndexAll)
-						sb.Append("[c/ffff00:@ModName] to search by mod, ");
-
-					sb.Append("[c/ffff00:#Search Tooltip] to search by tooltip");
-
-					if (modSearchBox.ModIndex == ModSearchBox.ModIndexAll)
-						sb.Append(" (can be combined in that order)");
-
-					return sb.ToString();
+					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
+						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
+						: Language.GetTextValue("Mods.MagicStorage.SearchTips.TipTooltipOnly");
 				}
 			};
 			topBar.Append(searchBar);

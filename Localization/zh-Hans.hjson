@@ -592,7 +592,7 @@ Mods: {
 		}
 
 		HoverText: {
-			# Reset: "Reset panel position and size"
+			// Reset: ""
 		}
 
 		EnvironmentGUI: {
@@ -679,7 +679,11 @@ Mods: {
 			}
 			quickStackDepositMode: {
 				Label: "[i:Chest]  快速堆叠与存入快捷键"
-				Tooltip: "若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可\n将指针移动到存储核心的“快速存入”按钮上以了解具体信息"
+				Tooltip:
+				'''
+				若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可
+				将指针移动到存储核心的“快速存入”按钮上以了解具体信息
+				'''
 			}
 			clearSearchText: {
 				Label: "自动清除搜索文本"

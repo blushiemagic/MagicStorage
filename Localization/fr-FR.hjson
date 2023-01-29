@@ -2,13 +2,13 @@
 Mods: {
 	MagicStorage: {
 		ItemName: {
-			# BiomeGlobe: Biome Globe
+			// BiomeGlobe: ""
 			CraftingAccess: Interface de Stockage Artisanat
 			CreativeStorageUnit: Unité de Stockage Créatif
 			Locator: Localisateur
 			LocatorDisk: Disque Localisateur
-			# PortableAccess: Ultimate Portable Remote Storage Access
-			# PortableCraftingAccess: Portable Remote Crafting Access
+			// PortableAccess: ""
+			// PortableCraftingAccess: ""
 			RadiantJewel: Bijou Rayonnant
 			RemoteAccess: Fenêtre d'accès éloigné
 			ShadowDiamond: Diamant sombre
@@ -34,29 +34,21 @@ Mods: {
 			UpgradeHellstone: Amélioration d'Unité de stockage (Infernale)
 			UpgradeLuminite: Amélioration d'Unité de stockage (Luminite)
 			UpgradeTerra: Amélioration d'Unité de stockage (Terra)
-			# CrimsonAltar: Crimson Altar
-			# DemonAltar: Demon Altar
-			# CombinedFurnitureStations1Item: Combined Furniture Stations (Tier 1)
-			# CombinedFurnitureStations2Item: Combined Furniture Stations (Tier 2)
-			# CombinedStations1Item: Combined Stations (Tier 1)
-			# CombinedStations2Item: Combined Stations (Tier 2)
-			# CombinedStations3Item: Combined Stations (Tier 3)
-			# CombinedStations4Item: Combined Stations (Final Tier)
-			# EnvironmentAccess: Environment Simulator
-			# PortableAccessPreHM: Basic Portable Remote Storage Access
-			# PortableAccessHM: Advanced Portable Remote Storage Access
+			// CrimsonAltar: ""
+			// DemonAltar: ""
+			// CombinedFurnitureStations1Item: ""
+			// CombinedFurnitureStations2Item: ""
+			// CombinedStations1Item: ""
+			// CombinedStations2Item: ""
+			// CombinedStations3Item: ""
+			// CombinedStations4Item: ""
+			// EnvironmentAccess: ""
+			// PortableAccessPreHM: ""
+			// PortableAccessHM: ""
 		}
 
 		ItemTooltip: {
-			BiomeGlobe:
-			'''
-			'The world's power is at your fingertips'
-			Allows the crafting of recipes that require the Snow biome, Ecto Mist, Demon/Crimson Altar and Water/Lava/Honey
-			Can be in the inventory or a Crafting Interface's station slot
-			While in the inventory, Marshmallows can be cooked without needing to stand near a Campfire
-			Allows crafting of Cooked Marshmallows in the Crafting Interface
-			Acts like a Beach Ball when thrown
-			'''
+			// BiomeGlobe: ""
 			Locator:
 			'''
 			<right> le Cœur de Stockage pour enregistrer son emplacement
@@ -68,14 +60,8 @@ Mods: {
 			<right> Stockage Éloigné pour le mettre en place"
 			N'est pas détruit lors de son utilisation
 			'''
-			# PortableAccess:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableCraftingAccess:
-			# '''
-			# (See en-US translation)
-			# '''
+			// PortableAccess: ""
+			// PortableCraftingAccess: ""
 			RadiantJewel:
 			'''
 			'Il brille avec une lumière aveuglante'
@@ -115,315 +101,161 @@ Mods: {
 			UpgradeHellstone:
 			'''
 			Améliore la capacité de unité de stockage à 120
-			\n<right> l'unité de stockage (Démonite/Carmitane) pour utiliser
+			<right> l'unité de stockage (Démonite/Carmitane) pour utiliser
 			'''
 			UpgradeLuminite:
 			'''
 			Améliore la capacité de unité de stockage à 320
-			\n<right> l'unité de stockage (Chlorophylle Bleu) pour utiliser
+			<right> l'unité de stockage (Chlorophylle Bleu) pour utiliser
 			'''
 			UpgradeTerra:
 			'''
 			Améliore la capacité de unité de stockage à 640
-			\n<right> l'unité de stockage (Luminite) pour utiliser
+			<right> l'unité de stockage (Luminite) pour utiliser
 			'''
-			# CrimsonAltar:
-			# '''
-			# A placeable Crimson Altar. Cannot be mined to get hardmode ores
-			# '''
-			# DemonAltar:
-			# '''
-			# A placeable Demon Altar. Cannot be mined to get hardmode ores
-			# '''
-			# CombinedFurnitureStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedFurnitureStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations for furniture
-			# '''
-			# CombinedStations1Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations2Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations3Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CombinedStations4Item:
-			# '''
-			# Combines the functionality of several crafting stations
-			# '''
-			# CraftingAccess: Enables crafting with the items in a storage system
-			# RemoteAccess:
-			# '''
-			# Allows remote access of a Storage Heart
-			# Acts as a "storage center" for components like the Crafting Access
-			# '''
-			# StorageAccess: Acts as another access point for viewing the stored items in a storage system
-			# StorageComponent: The base item for creating any Magic Storage component
-			# StorageConnector: Acts as a bridge for connecting components of Magic Storage components
-			# StorageDeactivator:
-			# '''
-			# Enables/disables a Storage Unit
-			# Disabled Storage Units will attempt to transfer their items to enabled Storage Units in a storage system
-			# '''
-			# StorageHeart:
-			# '''
-			# The core component for any Magic Storage storage system
-			# Required for a storage system to function
-			# '''
-			# StorageUnit:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 40 items
-			# '''
-			# StorageUnitBlueChlorophyte:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 240 items
-			# '''
-			# StorageUnitCrimtane:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 80 items
-			# '''
-			# StorageUnitDemonite:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 80 items
-			# '''
-			# StorageUnitHallowed:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 160 items
-			# '''
-			# StorageUnitHellstone:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 120 items
-			# '''
-			# StorageUnitLuminite:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 320 items
-			# '''
-			# StorageUnitTerra:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 640 items
-			# '''
-			# StorageUnitTiny:
-			# '''
-			# A component for storing items in a Magic Storage storage system
-			# Can store up to 4 items
-			# '''
-			# EnvironmentAccess:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableAccessPreHM:
-			# '''
-			# (See en-US translation)
-			# '''
-			# PortableAccessHM:
-			# '''
-			# (See en-US translation)
-			# '''
+			// CrimsonAltar: ""
+			// DemonAltar: ""
+			// CombinedFurnitureStations1Item: ""
+			// CombinedFurnitureStations2Item: ""
+			// CombinedStations1Item: ""
+			// CombinedStations2Item: ""
+			// CombinedStations3Item: ""
+			// CombinedStations4Item: ""
+			// CraftingAccess: ""
+			// RemoteAccess: ""
+			// StorageAccess: ""
+			// StorageComponent: ""
+			// StorageConnector: ""
+			// StorageDeactivator: ""
+			// StorageHeart: ""
+			// StorageUnit: ""
+			// StorageUnitBlueChlorophyte: ""
+			// StorageUnitCrimtane: ""
+			// StorageUnitDemonite: ""
+			// StorageUnitHallowed: ""
+			// StorageUnitHellstone: ""
+			// StorageUnitLuminite: ""
+			// StorageUnitTerra: ""
+			// StorageUnitTiny: ""
+			// EnvironmentAccess: ""
+			// PortableAccessPreHM: ""
+			// PortableAccessHM: ""
 		}
 
 		ProjectileName: {
-			# BiomeGlobeThrown: Biome Globe
+			// BiomeGlobeThrown: ""
 		}
 
 		NPCName: {
-			# Golem: "Automaton"
+			// Golem: ""
 		}
 
 		ModuleName: {
-			# UseInventoryModule: "Use Player Inventory Items"
-			# UseInventoryNoFavoritesModule: "Use Non-Favorited Player Inventory Items"
-			# JourneyInfiniteItems: "Use Journey Mode Infinite Items"
+			// UseInventoryModule: ""
+			// UseInventoryNoFavoritesModule: ""
+			// JourneyInfiniteItems: ""
 		}
 
 		ModuleDisabled: {
-			# JourneyInfiniteItems: "This module can only be used by Journey mode characters."
+			// JourneyInfiniteItems: ""
 		}
 
 		TownNPCMood: {
 			Golem: {
-				# Content: Systems are operational.
-				# NoHome: Exposure to elements hastens rusting, requesting home posthaste.
-				# LoveSpace: Acceptable living arrangements have been acquired.
-				# FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
-				# DislikeCrowded: Too many individuals detected in close proximity.
-				# HateCrowded: This unit prefers to be more solitary.
-				# LikeBiome: "{BiomeName} harmonizes with Bluemagic."
-				# LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
-				# DislikeBiome: "Bluemagic has lowered efficiency in {BiomeName}."
-				# HateBiome: "Bluemagic becomes unstable in {BiomeName}."
-				# LikeNPC: "{NPCName} appreciates the power of Bluemagic."
-				# LoveNPC: "This unit would not mind if {NPCName} examined its gears."
-				# DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
-				# HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+				// Content: ""
+				// NoHome: ""
+				// LoveSpace: ""
+				// FarFromHome: ""
+				// DislikeCrowded: ""
+				// HateCrowded: ""
+				// LikeBiome: ""
+				// LoveBiome: ""
+				// DislikeBiome: ""
+				// HateBiome: ""
+				// LikeNPC: ""
+				// LoveNPC: ""
+				// DislikeNPC: ""
+				// HateNPC: ""
 			}
 		}
 
 		Bestiary: {
-			# Golem:
-			# '''
-			# A living automaton powered by the elusive Bluemagic.
-			# It can teach you all there is to know about Magic Storage.
-			# '''
+			// Golem: ""
 		}
 
 		Dialogue: {
 			Golem: {
-				# Greeting: "Hello {0}. Would you like for this unit to teach you something?"
-				# Wizard: "For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic."
-				# NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
-				# Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
-				# Help1:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help2:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help3:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help4:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help5:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help6:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help7:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help8:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help9:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help10:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help11:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help12:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help13:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help14:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help15:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help16:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help17:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help18:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help19:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help20:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help20_Mechs:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help20_Moon:
-				# '''
-				# (See en-US translation)
-				# '''
-				# Help21:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Greeting: ""
+				// Wizard: ""
+				// NotLihzahrd: ""
+				// Bluemagic: ""
+				// Help1: ""
+				// Help2: ""
+				// Help3: ""
+				// Help4: ""
+				// Help5: ""
+				// Help6: ""
+				// Help7: ""
+				// Help8: ""
+				// Help9: ""
+				// Help10: ""
+				// Help11: ""
+				// Help12: ""
+				// Help13: ""
+				// Help14: ""
+				// Help15: ""
+				// Help16: ""
+				// Help17: ""
+				// Help18: ""
+				// Help19: ""
+				// Help20: ""
+				// Help20_Mechs: ""
+				// Help20_Moon: ""
+				// Help21: ""
 			}
 
 			ChatOptions: {
 				Golem: {
-					# NextHelp: Next
-					# PrevHelp: Previous
+					// NextHelp: ""
+					// PrevHelp: ""
 				}
 			}
 		}
 
-		# Active: "Active"
-		# Inactive: "Inactive"
+		// Active: ""
+		// Inactive: ""
 
-		# PortableAccessUnlocated: "Locator is not set to any Storage Heart"
-		# PortableAccessMissing: "Storage Heart is missing!"
-		# PortableAccessOutOfRange: "Locator could not connect to its linked storage system"
-		# PortableAccessNoPylons: "No pylons were close enough to the linked storage system"
+		// PortableAccessUnlocated: ""
+		// PortableAccessMissing: ""
+		// PortableAccessOutOfRange: ""
+		// PortableAccessNoPylons: ""
 
-		# PortableCraftingUnlocated: "Locator is not set to any Crafting Access"
-		# PortableCraftingMissing: "Crafting Access is missing!"
+		// PortableCraftingUnlocated: ""
+		// PortableCraftingMissing: ""
 
-		# RemoteAccessSuccess: "Success!"
-		# RemoteAccessHasLocator: "This Access already has a locator, please mine then replace to reset it"
-		# RemoteAccessUnlocated: "The locator has not been set to a destination"
+		// RemoteAccessSuccess: ""
+		// RemoteAccessHasLocator: ""
+		// RemoteAccessUnlocated: ""
 
-		# StorageUnitActivated: "Storage Unit has been Activated"
-		# StorageUnitDeactivated: "Storage Unit has been Deactivated"
+		// StorageUnitActivated: ""
+		// StorageUnitDeactivated: ""
 
-		# FilterAllMods: "All mods"
+		// FilterAllMods: ""
 
-		# Capacity: "{0} / {1} Items"
+		// Capacity: ""
 
-		# LocatorSet: "Locator successfully set to: X={0}, Y={1}"
+		// LocatorSet: ""
 
-		# StorageAccessFail: "Could not load Storage Heart tile entity!"
-		# StorageAccessFailAlt: "This access is not connected to a Storage Heart!"
-		# StorageAccessFailLoad: "Storage Heart area not loaded! Try again."
+		// StorageAccessFail: ""
+		// StorageAccessFailAlt: ""
+		// StorageAccessFailLoad: ""
 
-		# TestItemSuffix: " !UNTIL RESPAWN!"
+		// TestItemSuffix: ""
 		SetTo: "Mis à: X={0}, Y={1}"
 		SnowBiomeBlock: "Bloc de biome de neige"
 		DepositAll: "Déposer tout"
 		CraftingStations: "Stations d'artisanat"
-		# CraftTooltip: "Left click to Craft"
+		// CraftTooltip: ""
 
 		Crafting: {
 			Plus1: "+1"
@@ -432,9 +264,9 @@ Mods: {
 			Minus1: "-1"
 			Minus10: "-10"
 			Minus100: "-100"
-			# MaxStack: "Max. Stack"
-			# Reset: "Reset"
-			# Amount: "Crafting: {0}"
+			// MaxStack: ""
+			// Reset: ""
+			// Amount: ""
 		}
 
 		Search: "Rechercher"
@@ -442,100 +274,74 @@ Mods: {
 		SearchMod: "Recherche par mod"
 
 		SearchTips: {
-			# SearchName: "Search Name"
-			# SearchMod: "@ModName Search Name"
-			# SearchTooltip: "#Search Tooltip"
-			# SearchModAndTooltip: "@ModName #Search Tooltip"
+			// SearchName: ""
+			// SearchMod: ""
+			// SearchTooltip: ""
+			// SearchModAndTooltip: ""
+
+			// TipModAndTooltip: ""
+			// TipTooltipOnly: ""
 		}
 
 		Recipes: "Recettes"
 		RecipeAvailable: "Afficher les recettes disponibles"
 		RecipeAll: "Afficher toutes les recettes"
-		# RecipeBlacklist: "Show hidden recipes (ctrl+click on recipe to (un)hide)"
+		// RecipeBlacklist: ""
 		SelectedRecipe: "Recette sélectionnée"
 		Ingredients: "Ingrédients"
 		StoredItems: "Ingrédients Stockés"
-		# ShowOnlyFavorited: "Only Favorited"
-		# ViewHistory: "Click to View Recipe History"
-		# ClearHistory: "Clear"
-		# PrevHistory: "Previous Recipe in History"
-		# NextHistory: "Next Recipe in History"
+		// ShowOnlyFavorited: ""
+		// ViewHistory: ""
+		// ClearHistory: ""
+		// PrevHistory: ""
+		// NextHistory: ""
 
-		# PanelTooSmol:
-		# '''
-		# Unable to open a Magic Storage UI.  Reason: Panel height was too short to properly display the UI elements.
-		# Please decrease your UI Scale in Settings or increase your game's Resolution in Video Settings.
-		# '''
+		// PanelTooSmol: ""
 
 		Warnings: {
-			# StorageDefaultToAllItems:
-			# '''
-			# No items displayed even though items exist in storage.  Defaulting to "All" filter mode.
-			# '''
-			# StorageDefaultToAllMods:
-			# '''
-			# No items displayed even though items exist in storage.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
-			# '''
-			# CraftingNoBlacklist:
-			# '''
-			# No recipes displayed even though blacklisted recipes exist.  Ignoring recipe blacklisting.
-			# '''
-			# CraftingDefaultToAllMods:
-			# '''
-			# No recipes displayed even though recipes exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
-			# '''
+			// StorageDefaultToAllItems: ""
+			// StorageDefaultToAllMods: ""
+			// CraftingNoBlacklist: ""
+			// CraftingDefaultToAllMods: ""
 		}
 
-		# RecipeHidden:
-		# '''
-		# Recipe for item "{0}" was blacklisted.
-		# '''
-		# RecipeRevealed:
-		# '''
-		# Recipe for item "{0}" was whitelisted.
-		# '''
+		// RecipeHidden: ""
+		// RecipeRevealed: ""
 
 		RecipeConditions: {
-			# EctoMistOverride:
-			# '''
-			# {$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
-			# '''
-			# CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
+			// EctoMistOverride: ""
+			// CookedMarshmallowCondition: ""
 		}
 
-		# DepositTooltip: "Quick Stack - click, Deposit All - ctrl+click, Restock - right click"
-		# DepositTooltipAlt: "Quick Stack - ctrl+click, Deposit All - click, Restock - right click"
+		// DepositTooltip: ""
+		// DepositTooltipAlt: ""
 
 		StorageGUI: {
-			# ForceRefreshButton: "Force UI refresh"
-			# CompactCoinsButton: "Compact Coins"
-			# DestroyUnloadedButton: "Delete Unloaded Items"
-			# DestroyUnloadedDataButton: "Delete Unloaded Data"
-			# InitShowcaseButton: "Initialize Showcase"
-			# ResetShowcaseButton: "Reset Showcase Items"
-			# ClearItemsButton: "Clear All Items"
+			// ForceRefreshButton: ""
+			// CompactCoinsButton: ""
+			// DestroyUnloadedButton: ""
+			// DestroyUnloadedDataButton: ""
+			// InitShowcaseButton: ""
+			// ResetShowcaseButton: ""
+			// ClearItemsButton: ""
 
-			# SellDuplicatesHeader: "Sell Duplicates"
-			# SellDuplicatesButton: "Sell"
+			// SellDuplicatesHeader: ""
+			// SellDuplicatesButton: ""
 
 			SellDuplicatesMenu: {
-				# NoPrefix: "Sell Duplicates with No Prefix"
-				# KeepMostValue: "Keep Most Expensive"
-				# KeepLeastValue: "Keep Least Expensive"
+				// NoPrefix: ""
+				// KeepMostValue: ""
+				// KeepLeastValue: ""
 			}
 		}
 
 		HoverText: {
-			# Reset: "Reset panel position and size"
+			// Reset: ""
 		}
 
 		EnvironmentGUI: {
-			# EntryDisabledDefault: This module is currently disabled.
-			# NoModules:
-			# '''
-			# No Environment Simulator modules have been detected.
-			# Other mods will need to add some for them to appear here.
-			# '''
+			// EntryDisabledDefault: ""
+			// NoModules: ""
 		}
 
 		FilteringOption: {
@@ -543,25 +349,25 @@ Mods: {
 			Weapons: "Filtrer par armes"
 			Tools: "Filtrer par outils"
 			Equips: "Filtrer par Équipement"
-			# WeaponsMelee: "Filter Melee Weapons"
-			# WeaponsRanged: "Filter Ranged Weapons"
-			# WeaponsMagic: "Filter Magic Weapons"
-			# WeaponsSummon: "Filter Summons"
-			# WeaponsThrown: "Filter Throwing Weapons"
-			# Ammo: "Filter Ammo"
-			# Armor: "Filter Armor"
-			# Accessories: "Filter Accessor
+			// WeaponsMelee: ""
+			// WeaponsRanged: ""
+			// WeaponsMagic: ""
+			// WeaponsSummon: ""
+			// WeaponsThrown: ""
+			// Ammo: ""
+			// Armor: ""
+			// Vanity: ""
 			Potions: "Filtrer par potions"
 			Tiles: "Filtrer par placeable"
 			Misc: "Filtrer par miscellanées"
-			# Recent: "Filter New Recently Added Items"
-			# ArmorAndEquips: "Filter Armor and Equipment"
-			# WeaponsOther: "Filter Other Weapons"
-			# Unstackables: "Filter Unstackables"
-			# Stackables: "Filter Stackables"
-			# NotFullyResearched: "Filter Items Not Fully Researched"
-			# FullyResearched: "Filter Items Fully Researched"
-			# Materials: "Filter Materials"
+			// Recent: ""
+			// ArmorAndEquips: ""
+			// WeaponsOther: ""
+			// Unstackables: ""
+			// Stackables: ""
+			// NotFullyResearched: ""
+			// FullyResearched: ""
+			// Materials: ""
 		}
 
 		SortingOption: {
@@ -570,125 +376,113 @@ Mods: {
 			Name: "Trier par nom"
 			Stack: "Trier par piles"
 			Value: "Trier par valeur"
-			# Dps: "Sort by DPS"
-			# QuantityAbsolute: "Sort by Total Quantity"
-			# QuantityRatio: "Sort by Stack Count"
-			# Damage: "Sort by Damage"
+			// Dps: ""
+			// QuantityAbsolute: ""
+			// QuantityRatio: ""
+			// Damage: ""
 		}
 
-		# ButtonConfigGear: "Open Configuration Panel"
+		// ButtonConfigGear: ""
 
 		UIPages: {
-			# Sorting: "Sorting",
-			# Filtering: "Filtering",
-			# Crafting: "Crafting",
-			# Storage: "Storage",
-			# Controls: "Controls"  # StorageGUI page for the extra controls
-			# Modules: "Modules"    # EnvironmentGUI page for the modules
-			# History: "History"    # CraftingGUI recipe history panel
+			// Sorting: ""
+			// Filtering: ""
+			// Crafting: ""
+			// Storage: ""
+			// Controls: ""   # StorageGUI page for the extra controls
+			// Modules: ""    # EnvironmentGUI page for the modules
+			// History: ""    # CraftingGUI recipe history panel
 		}
 
 		Config: {
-			# Label: "Magic Storage Config"
-			# ServersideLabel: "Magic Storage Server Config"
-			# BetaLabel: "Magic Storage BETA Config"
+			// Label: ""
+			// ServersideLabel: ""
+			// BetaLabel: ""
 
 			Headers: {
-				# Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
-				# Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
-				# StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
-				# General: "General Configs"
+				// Storage: ""
+				// Crafting: ""
+				// StorageAndCrafting: ""
+				// General: ""
 			}
 
 			glowNewItems: {
-				# Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
-				# Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
+				// Label: ""
+				// Tooltip: ""
 			}
 			useConfigFilter: {
-				# Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
-				# Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
+				// Label: ""
+				// Tooltip: ""
 			}
 			showAllRecipes: {
-				# Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
-				# Tooltip: "Enable to default to all recipes, disable to default to available recipes"
+				// Label: ""
+				// Tooltip: ""
 			}
 			quickStackDepositMode: {
-				# Label: "[i:Chest]  Quick stack deposit mode"
-				# Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
+				// Label: ""
+				// Tooltip: ""
 			}
 			clearSearchText: {
-				# Label: "Clear search text"
-				# Tooltip: "Enable to clear the search text when opening the UI"
+				// Label: ""
+				// Tooltip: ""
 			}
 			extraFilterIcons: {
-				# Label: "[i:Cog]  Display extra sorting icons"
-				# Tooltip: "Enable to have the extra sorting options available in the Legacy button layout"
+				// Label: ""
+				// Tooltip: ""
 			}
 			showDps: {
-				# Label: "Estimate the dps of weapons"
-				# Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+				// Label: ""
+				// Tooltip: ""
 			}
 			useOldCraftMenu: {
-				# Label: "[i:WorkBench]  Use old Craft buttons"
-				# Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+				// Label: ""
+				// Tooltip: ""
 			}
 			allowItemDataDebug: {
-				# Label: "[i:IronPickaxe]  Item debug information"
-				# Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
+				// Label: ""
+				// Tooltip: ""
 			}
 			searchBarRefreshOnKey: {
-				# Label: "Search Bar Refreshes on Key Press"
-				# Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+				// Label: ""
+				// Tooltip: ""
 			}
 			uiFavorites: {
-				# Label: "[i:FallenStar]  Favorites Filter Button"
-				# Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+				// Label: ""
+				// Tooltip: ""
 			}
 			recipeBlacklist: {
-				# Label: "Recipe Whitelist/Blacklist"
-				# Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+				// Label: ""
+				// Tooltip: ""
 			}
 			buttonLayout: {
-				# Label: "Sorting/Filtering Button Layout"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Label: ""
+				// Tooltip: ""
 			}
 			clearHistory: {
-				# Label: "[i:Book]  Clear recipe history"
-				# Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
+				// Label: ""
+				// Tooltip: ""
 			}
 			canMovePanels: {
-				# Label: "UI Panel Movement"
-				# Tooltip: "Disable to prevent moving and resizing the UI panels"
+				// Label: ""
+				// Tooltip: ""
 			}
 			recursionDepth: {
-				# Label: "Recipe Recursion Depth"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Label: ""
+				// Tooltip: ""
 			}
 
 			AllowAutomatonToMoveIn: {
-				# Label: "Automaton Housing"
-				# Tooltip: "Enable to allow the Automaton to be able to move into housing"
+				// Label: ""
+				// Tooltip: ""
 			}
 
 			PrintTextToChat: {
-				# Label: "Print logging information to ingame chat"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Label: ""
+				// Tooltip: ""
 			}
 			ShowDebugPylonRangeAreas: {
-				# Label: "Portable Access Range Debug"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Label: ""
+				// Tooltip: ""
 			}
 		}
 	}
