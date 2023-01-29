@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -63,6 +64,10 @@ namespace MagicStorage.UI {
 			resetButton.OnClick += (evt, element) => {
 				SoundEngine.PlaySound(SoundID.MenuOpen);
 				OnMenuReset?.Invoke();
+			};
+			resetButton.OnUpdate += element => {
+				if (element.IsMouseHovering)
+					MagicUI.mouseText = Language.GetTextValue("Mods.MagicStorage.HoverText.Reset");
 			};
 			header.Append(resetButton);
 
