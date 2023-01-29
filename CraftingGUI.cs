@@ -1149,8 +1149,13 @@ namespace MagicStorage
 			results = CompactItemList(results);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results))
+				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results)) {
+#if TML_2022_09
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+#else
+					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+#endif
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
 		}
