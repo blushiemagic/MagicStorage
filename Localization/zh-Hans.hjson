@@ -563,6 +563,10 @@ Mods: {
 			}
 		}
 
+		HoverText: {
+			# Reset: "Reset panel position and size"
+		}
+
 		EnvironmentGUI: {
 			EntryDisabledDefault: 该模块已被禁用
 			NoModules:

@@ -525,6 +525,10 @@ Mods: {
 			}
 		}
 
+		HoverText: {
+			# Reset: "Reset panel position and size"
+		}
+
 		EnvironmentGUI: {
 			# EntryDisabledDefault: This module is currently disabled.
 			# NoModules:
