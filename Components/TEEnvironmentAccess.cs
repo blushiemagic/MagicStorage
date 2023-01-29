@@ -83,7 +83,7 @@ namespace MagicStorage.Components {
 		public override void LoadData(TagCompound tag) {
 			base.LoadData(tag);
 
-			if (tag.GetList<TagCompound>("enabled") is { } list) {
+			if (tag.TryGet("enabled", out List<TagCompound> list)) {
 				enabled = new(EnvironmentModuleLoader.Count);
 
 				foreach (var module in list.Select(t => t.TryGet("mod", out string mod) && t.TryGet("name", out string name) && ModContent.TryFind(mod, name, out EnvironmentModule m) ? m : null).Where(m => m is not null)) {

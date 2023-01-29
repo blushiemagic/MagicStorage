@@ -23,14 +23,14 @@ namespace MagicStorage.Sorting
 			}
 		}
 
-		public static IEnumerable<Item> SortAndFilter(AggregateContext context, int sortMode, int filterMode, string nameFilter, int modSearchIndex, int? takeCount = null)
+		public static IEnumerable<Item> SortAndFilter(AggregateContext context, int sortMode, int filterMode, string nameFilter, int modSearchIndex, int? takeCount = null, bool aggregate = true)
 		{
 			context.items = DoFiltering(context.items, i => i, filterMode, nameFilter, modSearchIndex);
 
 			if (takeCount is int take)
 				context.items = context.items.Take(take);
 
-			context.items = Aggregate(context);
+			context.items = Aggregate(context, aggregate);
 
 			context.sourceItems = DoFiltering(context.sourceItems, i => i[0], filterMode, nameFilter, modSearchIndex);
 
@@ -75,7 +75,7 @@ namespace MagicStorage.Sorting
 
 		//Formerly returned IEnumerable<Item> for lazy evaluation
 		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
-		public static List<Item> Aggregate(AggregateContext context)
+		public static List<Item> Aggregate(AggregateContext context, bool actuallyAggregate = true)
 		{
 			Item lastItem = null;
 
@@ -92,18 +92,20 @@ namespace MagicStorage.Sorting
 					continue;
 				}
 
-				if (ItemCombining.CanCombineItems(item, lastItem) && lastItem.stack + item.stack > 0)
+				if (ItemCombining.CanCombineItems(item, lastItem) && (!actuallyAggregate || lastItem.stack + item.stack > 0))
 				{
-					if (item.favorited) {
-						lastItem.favorited = true;
+					if (actuallyAggregate) {
+						if (item.favorited) {
+							lastItem.favorited = true;
 
-						foreach (var source in context.enumeratedSource[sourceIndex])
-							source.favorited = true;
+							foreach (var source in context.enumeratedSource[sourceIndex])
+								source.favorited = true;
+						}
+
+						Utility.CallOnStackHooks(lastItem, item, item.stack);
+
+						lastItem.stack += item.stack;
 					}
-
-					Utility.CallOnStackHooks(lastItem, item, item.stack);
-
-					lastItem.stack += item.stack;
 
 					context.enumeratedSource[sourceIndex].Add(item);
 				}

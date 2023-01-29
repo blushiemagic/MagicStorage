@@ -286,7 +286,7 @@ namespace MagicStorage
 
 			ItemSorter.AggregateContext context2 = new(simulatorItems);
 
-			items.AddRange(ItemSorter.SortAndFilter(context2, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, "", ModSearchBox.ModIndexAll));
+			items.AddRange(ItemSorter.SortAndFilter(context2, SortingOptionLoader.Definitions.ID.Type, FilteringOptionLoader.Definitions.All.Type, "", ModSearchBox.ModIndexAll, aggregate: false));
 
 			sourceItems.AddRange(context.sourceItems.Concat(context2.sourceItems));
 
@@ -1026,7 +1026,7 @@ namespace MagicStorage
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]]) {
+					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]] && !moduleItems[i]) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							existing.stack += item.stack;
 							item.stack = 0;
