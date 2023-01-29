@@ -209,7 +209,11 @@ namespace MagicStorage
 				return;
 			}
 
+#if TML_2022_09
 			player.QuickSpawnClonedItem(source, item, item.stack);
+#else
+			player.QuickSpawnItem(source, item, item.stack);
+#endif
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
