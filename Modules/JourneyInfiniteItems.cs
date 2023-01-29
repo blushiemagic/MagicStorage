@@ -30,6 +30,13 @@ namespace MagicStorage.Modules {
 				inventoryWasUpdated = true;
 		}
 
+		public bool Has(int item) {
+			if (inventory is null)
+				inventoryWasUpdated = true;
+
+			return Inventory.Contains(item);
+		}
+
 		public IEnumerable<Item> GetItems() {
 			if (inventoryWasUpdated) {
 				inventoryWasUpdated = false;
@@ -69,5 +76,10 @@ namespace MagicStorage.Modules {
 		public override bool IsAvailable() => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 
 		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => inventory.GetItems();
+
+		public override void ConsumeItemForRecipe(EnvironmentSandbox sandbox, Recipe recipe, int type, ref int stack) {
+			if (inventory.Has(type))
+				stack = 0;
+		}
 	}
 }

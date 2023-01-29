@@ -70,6 +70,14 @@ namespace MagicStorage {
 		public virtual void OnConsumeItemsForRecipe(EnvironmentSandbox sandbox, Recipe recipe, List<Item> items) { }
 
 		/// <summary>
+		/// Allows you to modify how much of an item is consumed when it is used in a recipe
+		/// </summary>
+		/// <param name="recipe">The recipe used</param>
+		/// <param name="item">The required item from the recipe</param>
+		/// <param name="stack">The quantity of the item that should be consumed</param>
+		public virtual void ConsumeItemForRecipe(EnvironmentSandbox sandbox, Recipe recipe, Item item, ref int stack) { }
+
+		/// <summary>
 		/// Allows you to reset information in the sandbox's player after processing recipes
 		/// </summary>
 		public virtual void ResetPlayer(EnvironmentSandbox sandbox) { }

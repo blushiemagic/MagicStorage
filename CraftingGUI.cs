@@ -1329,6 +1329,9 @@ namespace MagicStorage
 
 			RecipeLoader.ConsumeItem(selectedRecipe, reqItem.type, ref stackConsumed);
 
+			foreach (EnvironmentModule module in context.modules)
+				module.ConsumeItemForRecipe(context.sandbox, selectedRecipe, reqItem.type, ref stackConsumed);
+
 			if (stackConsumed <= 0)
 				return false;
 
