@@ -20,6 +20,12 @@ public class BiomeGlobeDetour : Edit
 
 	private static void Recipe_FindRecipes(OnRecipe.orig_FindRecipes orig, bool canDelayCheck)
 	{
+		// Bug fix: don't run the logic when in the main menu, since the player might not be valid
+		if (Main.gameMenu) {
+			orig(canDelayCheck);
+			return;
+		}
+
 		Player player = Main.LocalPlayer;
 
 		bool oldGraveyard = player.ZoneGraveyard;
