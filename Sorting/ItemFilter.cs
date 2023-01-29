@@ -41,6 +41,7 @@ namespace MagicStorage.Sorting
 			ItemID.PDA         => false,
 			ItemID.MagicMirror => false,
 			ItemID.IceMirror   => false,
+			ItemID.TreasureMap => false,
 			_                  => item.CountsAsClass(DamageClass.Summon) || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item) || item.sentry,
 		};
 
