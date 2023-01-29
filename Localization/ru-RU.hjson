@@ -48,7 +48,6 @@ Mods: {
 		}
 
 		ItemTooltip: {
-			BiomeGlobe:
 			// BiomeGlobe: ""
 			Locator:
 			'''
