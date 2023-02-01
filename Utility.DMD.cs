@@ -33,7 +33,7 @@ namespace MagicStorage {
 			MethodInfo GlobalItem_OnStack = typeof(GlobalItem).GetMethod(nameof(GlobalItem.OnStack), BindingFlags.Public | BindingFlags.Instance);
 
 			Type HookList_T_InstanceEnumerator = typeof(HookList<GlobalItem>.InstanceEnumerator);
-			MethodInfo HookList_T_Enumerate = typeof(HookList<GlobalItem>).GetMethod(nameof(HookList<GlobalItem>.Enumerate), BindingFlags.Public | BindingFlags.Instance);
+			MethodInfo HookList_T_Enumerate = typeof(HookList<GlobalItem>).GetMethod(nameof(HookList<GlobalItem>.Enumerate), BindingFlags.Public | BindingFlags.Instance, new Type[] { typeof(Instanced<GlobalItem>[]) });
 			MethodInfo HookList_T_InstanceEnumerator_MoveNext = HookList_T_InstanceEnumerator.GetMethod(nameof(HookList<GlobalItem>.InstanceEnumerator.MoveNext), BindingFlags.Public | BindingFlags.Instance);
 			MethodInfo HookList_T_InstanceEnumerator_get_Current = HookList_T_InstanceEnumerator.GetProperty(nameof(HookList<GlobalItem>.InstanceEnumerator.Current), BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
 
@@ -57,24 +57,24 @@ namespace MagicStorage {
 			il.Emit(OpCodes.Ldsfld, ItemLoader_HookOnStack);
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Ldfld, Item_globalItems);
-			il.EmitCall(OpCodes.Call, HookList_T_Enumerate, null);
+			il.Emit(OpCodes.Callvirt, HookList_T_Enumerate);
 			il.Emit(OpCodes.Stloc, enumerator);
 
 			// while (enumerator.MoveNext()) {
 			Label whileBlockStart = il.DefineLabel();
 			Label whileBlockEnd = il.DefineLabel();
 			il.MarkLabel(whileBlockStart);
-			il.Emit(OpCodes.Ldloc, enumerator);
-			il.EmitCall(OpCodes.Call, HookList_T_InstanceEnumerator_MoveNext, null);
+			il.Emit(OpCodes.Ldloca, enumerator);
+			il.Emit(OpCodes.Call, HookList_T_InstanceEnumerator_MoveNext);
 			il.Emit(OpCodes.Brfalse_S, whileBlockEnd);
 
 				// enumerator.Current.OnStack(arg_0, arg_1, arg_2);
-				il.Emit(OpCodes.Ldloc, enumerator);
-				il.EmitCall(OpCodes.Call, HookList_T_InstanceEnumerator_get_Current, null);
+				il.Emit(OpCodes.Ldloca, enumerator);
+				il.Emit(OpCodes.Call, HookList_T_InstanceEnumerator_get_Current);
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Ldarg_1);
 				il.Emit(OpCodes.Ldarg_2);
-				il.EmitCall(OpCodes.Call, GlobalItem_OnStack, null);
+				il.Emit(OpCodes.Callvirt, GlobalItem_OnStack);
 				il.Emit(OpCodes.Br, whileBlockStart);
 			
 			// }
@@ -83,15 +83,15 @@ namespace MagicStorage {
 			// if (arg_0.ModItem is not null) {
 			Label modItemNotNullBlockEnd = il.DefineLabel();
 			il.Emit(OpCodes.Ldarg_0);
-			il.EmitCall(OpCodes.Call, Item_get_ModItem, null);
+			il.Emit(OpCodes.Callvirt, Item_get_ModItem);
 			il.Emit(OpCodes.Brfalse_S, modItemNotNullBlockEnd);
 			
 				// arg_0.ModItem.OnStack(arg_1, arg_2);
 				il.Emit(OpCodes.Ldarg_0);
-				il.EmitCall(OpCodes.Call, Item_get_ModItem, null);
+				il.Emit(OpCodes.Callvirt, Item_get_ModItem);
 				il.Emit(OpCodes.Ldarg_1);
 				il.Emit(OpCodes.Ldarg_2);
-				il.EmitCall(OpCodes.Call, ModItem_OnStack, null);
+				il.Emit(OpCodes.Callvirt, ModItem_OnStack);
 
 			// }
 			il.MarkLabel(modItemNotNullBlockEnd);
