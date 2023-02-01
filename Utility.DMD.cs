@@ -8,7 +8,7 @@ using Terraria.ModLoader.Core;
 namespace MagicStorage {
 	partial class Utility {
 		private static bool onStackHooksDelegateBuilt;
-		private delegate void OnStack(Item increase, Item decrease, int numTransfered);
+		private delegate void OnStack(Item destination, Item source, int numToTransfer);
 		private static OnStack onStackHooksDelegate;
 
 		internal static void UnloadHookDelegate() {
