@@ -446,11 +446,10 @@ namespace MagicStorage {
 		}
 
 		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
-			BuildOnStackHooksDelegate();
-
 			#if TML_144
 			ItemLoader.OnStack(destination, source, numTransfered);
 			#else
+			BuildOnStackHooksDelegate();
 			onStackHooksDelegate?.Invoke(destination, source, numTransfered);
 			#endif
 		}
