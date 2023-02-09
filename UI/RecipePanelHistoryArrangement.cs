@@ -21,8 +21,13 @@ namespace MagicStorage.UI {
 				localization = Language.GetText(hoverKey);
 			}
 
+			#if TML_144
+			public override void LeftClick(UIMouseEvent evt) {
+				base.LeftClick(evt);
+			#else
 			public override void Click(UIMouseEvent evt) {
 				base.Click(evt);
+			#endif
 
 				int offset = forward ? 1 : -1;
 
@@ -57,7 +62,12 @@ namespace MagicStorage.UI {
 
 			button = new(scale);
 
-			button.OnClick += (evt, e) => OnButtonClicked?.Invoke();
+			#if TML_144
+			button.OnLeftClick
+			#else
+			button.OnClick
+			#endif
+				+= (evt, e) => OnButtonClicked?.Invoke();
 
 			prev = new(history, false, "Mods.MagicStorage.PrevHistory", scale) {
 				VAlign = 0.5f

@@ -1,28 +1,4 @@
-﻿[h1]v0.5.7.10[/h1]
+﻿[h1]v0.5.8[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Added [b]MagicStorage.Common.Systems.MagicCache.RecalculateRecipeCaches()[/b] to the mod's public API
-- Added text that will display under the mod loading bar during the [b]Adding Recipes...[/b] phase
-- Added a safeguard in [b]Utility.AreStrictlyEqual()[/b] for when invalid items are used
-- Added error-catching code to a utility method in order to prevent a hard game crash
-- Added hover text for the [b]Reset[/b] button in the Storage, Crafting and Configuration GUIs
-- Added [b]EnvironmentModule.ConsumeItemForRecipe()[/b] and made the [i]Use Journey Infinite Items[/i] module prevent consumption of fully-researched items
-- Added more Chinese localization
-- Improved the description for the mod in the Steam Workshop
-- Modified the support for the OnStack API to only call the hooks
-- Made the [i]Sell Duplicates[/i] menu ignore favorited items
-- Reworked the extended "Quick Stack to nearby storages" logic to hopefully be more stable
-- Modified how the [i]Locator[/i], [i]Locator Drive[/i] and [i]Portable Accesses[/i] store their location data (This fixes a bug where the locations wouldn't be loaded in multiplayer)
-- Optimized and fixed the code responsible for detecting if a [i]Storage Configuration Interface[/i] is connected to a storage system
-- Forced items from Storage Configuration Interface modules to not be sorted/aggregated in order to fix a bug
-- Changed the internal logic for all sorters to be more accurate
-- Fixed a bug in the Crafting GUI which would sometimes throw an [b]Index was out of range.[/b] error
-- Fixed a bug which caused [i]Sort by Quantity[/i] and [i]Sort by Stack Count[/i] to sometimes not properly sort items
-- Fixed a bug which caused the game to lag when hovering over Magic Storage item slots while Recursive Craft is enabled
-- Fixed some bugs related to withdrawing items from storage
-- Fixed a bug where items with knockback would visually get infinite knockback when searched via [b]#Search Tooltip[/b]
-- Fixed an oversight which could cause the crafting logic to end up in an infinite loop
-- Fixed an oversight where the Treasure Map furniture item was appearing in the Summon Weapons filter
-- Fixed an oversight where the Crimson Altar and Demon Altar items weren't researchable
-- Fixed a typo which caused the [i]Portable Remote Crafting Access[/i] to not display its localized name
-- Updated the localization files
+- TODO

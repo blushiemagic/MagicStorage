@@ -2,17 +2,23 @@
 using Terraria;
 using Terraria.ID;
 
+#if TML_144
+using OnChest = Terraria.On_Chest;
+#else
+using OnChest = On.Terraria.Chest;
+#endif
+
 namespace MagicStorage.Edits {
 	internal class QuickStackChestDetour : Edit {
 		public override void LoadEdits() {
-			On.Terraria.Chest.ServerPlaceItem += Chest_ServerPlaceItem;
+			OnChest.ServerPlaceItem += Chest_ServerPlaceItem;
 		}
 
 		public override void UnloadEdits() {
-			On.Terraria.Chest.ServerPlaceItem -= Chest_ServerPlaceItem;
+			OnChest.ServerPlaceItem -= Chest_ServerPlaceItem;
 		}
 
-		private void Chest_ServerPlaceItem(On.Terraria.Chest.orig_ServerPlaceItem orig, int plr, int slot) {
+		private void Chest_ServerPlaceItem(OnChest.orig_ServerPlaceItem orig, int plr, int slot) {
 			Player player = Main.player[plr];
 
 			ref Item item = ref player.inventory[slot];

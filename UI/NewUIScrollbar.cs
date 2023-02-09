@@ -146,8 +146,13 @@ namespace MagicStorage.UI {
 			inner = result;
 		}
 
+		#if TML_144
+		public override void LeftMouseDown(UIMouseEvent evt) {
+			base.LeftMouseDown(evt);
+		#else
 		public override void MouseDown(UIMouseEvent evt) {
 			base.MouseDown(evt);
+		#endif
 
 			if (evt.Target == this) {
 				Rectangle handleRectangle = GetHandleRectangle();
@@ -165,8 +170,13 @@ namespace MagicStorage.UI {
 			}
 		}
 
+		#if TML_144
+		public override void LeftMouseUp(UIMouseEvent evt) {
+			base.LeftMouseUp(evt);
+		#else
 		public override void MouseUp(UIMouseEvent evt) {
 			base.MouseUp(evt);
+		#endif
 
 			if (IsDragging)
 				OnDraggingEnd?.Invoke(this);

@@ -184,8 +184,13 @@ namespace MagicStorage.UI {
 			resultSlot.Context = context;
 		}
 
+		#if TML_144
+		public override void LeftClick(UIMouseEvent evt) {
+			base.LeftClick(evt);
+		#else
 		public override void Click(UIMouseEvent evt) {
 			base.Click(evt);
+		#endif
 
 			history.Goto(index);
 

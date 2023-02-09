@@ -20,7 +20,7 @@ namespace MagicStorage {
 			if (onStackHooksDelegateBuilt)
 				return;
 
-#if TML_2022_09
+#if TML_2022_09 || TML_144
 			onStackHooksDelegate = null;
 #else
 			// Build a DynamicMethod which invokes the hooks

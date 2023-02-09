@@ -16,8 +16,13 @@ namespace MagicStorage.UI {
 
 		public UIStorageControlDepositPlayerInventoryButton(LocalizedText text, float textScale = 1, bool large = false) : base(text, textScale, large) { }
 
+		#if TML_144
+		public override void LeftClick(UIMouseEvent evt) {
+			base.LeftClick(evt);
+		#else
 		public override void Click(UIMouseEvent evt) {
 			base.Click(evt);
+		#endif
 
 			if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 				return;

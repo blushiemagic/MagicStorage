@@ -130,6 +130,11 @@ namespace MagicStorage {
 
 		public static void GetResearchStats(int itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal) {
 			canBeResearched = false;
+
+			#if TML_144
+			if (!Main.LocalPlayerCreativeTracker.ItemSacrifices.TryGetSacrificeNumbers(itemType, out currentSacrificeTotal, out sacrificesNeeded))
+				return;
+			#else
 			currentSacrificeTotal = 0;
 
 			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded))
@@ -137,6 +142,7 @@ namespace MagicStorage {
 
 			if (!Main.LocalPlayerCreativeTracker.ItemSacrifices.SacrificesCountByItemIdCache.TryGetValue(itemType, out currentSacrificeTotal))
 				return;
+			#endif
 
 			canBeResearched = true;
 		}
@@ -453,14 +459,21 @@ namespace MagicStorage {
 
 		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 
-		internal static MethodInfo LocalizationLoader_AutoloadTranslations, LocalizationLoader_SetLocalizedText;
-		internal static FieldInfo LanguageManager__localizedTexts;
+		#if !TML_144
+		internal static readonly MethodInfo LocalizationLoader_AutoloadTranslations = typeof(LocalizationLoader).GetMethod("AutoloadTranslations", BindingFlags.NonPublic | BindingFlags.Static)!;
+		internal static readonly MethodInfo LocalizationLoader_SetLocalizedText = typeof(LocalizationLoader).GetMethod("SetLocalizedText", BindingFlags.NonPublic | BindingFlags.Static)!;
+		internal static readonly FieldInfo LanguageManager__localizedTexts = typeof(LanguageManager).GetField("_localizedTexts", BindingFlags.NonPublic | BindingFlags.Instance)!;
+		#else
+		internal static readonly MethodInfo LocalizationLoader_LoadTranslations = typeof(LocalizationLoader).GetMethod("LoadTranslations", BindingFlags.NonPublic | BindingFlags.Static)!;
+		internal static readonly MethodInfo LocalizedText_SetValue = typeof(LocalizedText).GetMethod("SetValue", BindingFlags.NonPublic | BindingFlags.Instance)!;
+		#endif
 
 		/// <summary>
 		/// Force's the localization for the given mod, <paramref name="mod"/>, to be loaded for use with <seealso cref="Language"/>
 		/// </summary>
 		/// <param name="mod">The mod instance</param>
 		public static void ForceLoadModHJsonLocalization(Mod mod) {
+#if !TML_144
 			Dictionary<string, ModTranslation> modTranslationDictionary = new();
 
 			LocalizationLoader_AutoloadTranslations.Invoke(null, new object[] { mod, modTranslationDictionary });
@@ -474,6 +487,13 @@ namespace MagicStorage {
 
 				LocalizationLoader_SetLocalizedText.Invoke(null, new object[] { dict, text });
 			}
+#else
+			var lang = LanguageManager.Instance;
+			var culture = Language.ActiveCulture;
+
+			foreach (var (key, value) in LocalizationLoader_LoadTranslations.Invoke(null, new object[] { mod, culture }) as List<(string, string)>)
+				LocalizedText_SetValue.Invoke(lang.GetText(key), new object[] { value });
+#endif
 		}
 	}
 }

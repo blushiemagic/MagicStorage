@@ -13,10 +13,20 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
-	public abstract partial class FilteringOption : ModTexturedType {
+	public abstract partial class FilteringOption : ModTexturedType
+	#if TML_144
+		, ILocalizedModType
+	#endif
+	{
 		public int Type { get; private set; }
 
+		#if TML_144
+		public string LocalizationCategory => "SortingOption";
+
+		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
+		#else
 		public ModTranslation Tooltip { get; private set; }
+		#endif
 
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
@@ -43,7 +53,9 @@ namespace MagicStorage.CrossMod {
 
 			Type = FilteringOptionLoader.Add(this);
 
+			#if !TML_144
 			Tooltip = LocalizationLoader.GetOrCreateTranslation(Mod, $"FilteringOption.{Name}");
+			#endif
 		}
 
 		public sealed override void SetupContent() {
@@ -55,8 +67,10 @@ namespace MagicStorage.CrossMod {
 		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
 		/// </summary>
 		public virtual void AutoStaticDefaults() {
+			#if !TML_144
 			if (Tooltip.IsDefault())
 				Tooltip.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
+			#endif
 		}
 
 		public bool Visible { get; private set; } = true;
@@ -130,7 +144,12 @@ namespace MagicStorage.CrossMod {
 			this.option = option;
 		}
 
-		protected override string GetHoverText() => option.Tooltip.GetTranslation(Language.ActiveCulture);
+		protected override string GetHoverText() =>
+		#if TML_144
+			option.Tooltip.Value;
+		#else
+			option.Tooltip.GetTranslation(Language.ActiveCulture);
+		#endif
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;
 

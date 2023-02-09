@@ -109,7 +109,13 @@ namespace MagicStorage.NPCs {
 				Dust.NewDust(NPC.position, NPC.width, NPC.height, Main.rand.Next(new[] { DustID.Stone, DustID.Iron, DustID.WoodFurniture }));
 		}
 
-		public override bool CanTownNPCSpawn(int numTownNPCs, int money) => MagicStorageServerConfig.AllowAutomatonToMoveIn;
+		#if TML_144
+		public override bool CanTownNPCSpawn(int numTownNPCs) {
+		#else
+		public override bool CanTownNPCSpawn(int numTownNPCs, int money) {
+		#endif
+			return MagicStorageServerConfig.AllowAutomatonToMoveIn;
+		}
 
 		public override ITownNPCProfile TownNPCProfile() => new GolemProfile();
 

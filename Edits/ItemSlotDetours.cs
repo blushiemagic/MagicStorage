@@ -4,38 +4,44 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
+#if TML_144
+using OnItemSlot = Terraria.UI.On_ItemSlot;
+#else
+using OnItemSlot = On.Terraria.UI.ItemSlot;
+#endif
+
 namespace MagicStorage.Edits {
 	internal class ItemSlotDetours : Edit {
 		public override void LoadEdits()
 		{
-			On.Terraria.UI.ItemSlot.MouseHover_ItemArray_int_int += ItemSlot_MouseHover_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += ItemSlot_LeftClick_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.RightClick_ItemArray_int_int += ItemSlot_RightClick_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.OverrideHover_ItemArray_int_int += ItemSlot_OverrideHover_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.OverrideLeftClick += ItemSlot_OverrideLeftClick;
+			OnItemSlot.MouseHover_ItemArray_int_int += ItemSlot_MouseHover_ItemArray_int_int;
+			OnItemSlot.LeftClick_ItemArray_int_int += ItemSlot_LeftClick_ItemArray_int_int;
+			OnItemSlot.RightClick_ItemArray_int_int += ItemSlot_RightClick_ItemArray_int_int;
+			OnItemSlot.OverrideHover_ItemArray_int_int += ItemSlot_OverrideHover_ItemArray_int_int;
+			OnItemSlot.OverrideLeftClick += ItemSlot_OverrideLeftClick;
 		}
 
-		private void ItemSlot_MouseHover_ItemArray_int_int(On.Terraria.UI.ItemSlot.orig_MouseHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+		private void ItemSlot_MouseHover_ItemArray_int_int(OnItemSlot.orig_MouseHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
 			if (!PreventActions())
 				orig(inv, context, slot);
 		}
 
-		private void ItemSlot_LeftClick_ItemArray_int_int(On.Terraria.UI.ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+		private void ItemSlot_LeftClick_ItemArray_int_int(OnItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
 			if (!PreventActions())
 				orig(inv, context, slot);
 		}
 
-		private void ItemSlot_RightClick_ItemArray_int_int(On.Terraria.UI.ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+		private void ItemSlot_RightClick_ItemArray_int_int(OnItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
 			if (!PreventActions())
 				orig(inv, context, slot);
 		}
 
-		private void ItemSlot_OverrideHover_ItemArray_int_int(On.Terraria.UI.ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+		private void ItemSlot_OverrideHover_ItemArray_int_int(OnItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
 			if (!PreventActions())
 				orig(inv, context, slot);
 		}
 
-		private bool ItemSlot_OverrideLeftClick(On.Terraria.UI.ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+		private bool ItemSlot_OverrideLeftClick(OnItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
 			return !PreventActions() && orig(inv, context, slot);
 		}
 
@@ -62,11 +68,11 @@ namespace MagicStorage.Edits {
 
 		public override void UnloadEdits()
 		{
-			On.Terraria.UI.ItemSlot.MouseHover_ItemArray_int_int -= ItemSlot_MouseHover_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int -= ItemSlot_LeftClick_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.RightClick_ItemArray_int_int -= ItemSlot_RightClick_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.OverrideHover_ItemArray_int_int -= ItemSlot_OverrideHover_ItemArray_int_int;
-			On.Terraria.UI.ItemSlot.OverrideLeftClick -= ItemSlot_OverrideLeftClick;
+			OnItemSlot.MouseHover_ItemArray_int_int -= ItemSlot_MouseHover_ItemArray_int_int;
+			OnItemSlot.LeftClick_ItemArray_int_int -= ItemSlot_LeftClick_ItemArray_int_int;
+			OnItemSlot.RightClick_ItemArray_int_int -= ItemSlot_RightClick_ItemArray_int_int;
+			OnItemSlot.OverrideHover_ItemArray_int_int -= ItemSlot_OverrideHover_ItemArray_int_int;
+			OnItemSlot.OverrideLeftClick -= ItemSlot_OverrideLeftClick;
 		}
 	}
 }
