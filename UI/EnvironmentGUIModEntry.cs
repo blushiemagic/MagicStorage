@@ -46,7 +46,13 @@ namespace MagicStorage.UI {
 			float top = 40;
 
 			foreach (EnvironmentModule module in modules) {
-				EnvironmentGUIToggleLabel label = new(this, module.DisplayName.GetTranslation(Language.ActiveCulture), module.Name, defaultState: true);
+				#if TML_144
+				string name = module.DisplayName.Value;
+				#else
+				string name = module.DisplayName.GetTranslation(Language.ActiveCulture);
+				#endif
+
+				EnvironmentGUIToggleLabel label = new(this, name, module.Name, defaultState: true);
 				label.Top.Set(top, 0f);
 				label.Height.Set(20, 0f);
 				label.Width.Set(0, 1f);

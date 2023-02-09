@@ -7,14 +7,20 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 
+#if TML_144
+using ILMain = Terraria.IL_Main;
+#else
+using ILMain = IL.Terraria.Main;
+#endif
+
 namespace MagicStorage.Edits {
 	internal class OpCommandCodeSendHandlerDetour : Edit {
 		public override void LoadEdits() {
-			IL.Terraria.Main.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
+			ILMain.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
 		}
 
 		public override void UnloadEdits() {
-			IL.Terraria.Main.DoUpdate_HandleChat -= Main_DoUpdate_HandleChat;
+			ILMain.DoUpdate_HandleChat -= Main_DoUpdate_HandleChat;
 		}
 
 		private void Main_DoUpdate_HandleChat(ILContext il) {

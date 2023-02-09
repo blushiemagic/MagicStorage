@@ -23,7 +23,11 @@ namespace MagicStorage.UI {
 			clearButton.Width.Set(100, 0);
 			clearButton.Left.Set(-45 - 100, 1);
 			clearButton.BackgroundColor.A = 255;
+			#if TML_144
+			clearButton.OnLeftClick += (evt, element) => {
+			#else
 			clearButton.OnClick += (evt, element) => {
+			#endif
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				this.history.Clear();
 

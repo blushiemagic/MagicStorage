@@ -8,7 +8,11 @@ namespace MagicStorage.Stations
 	{
 		public override void SetStaticDefaults()
 		{
+			#if TML_144
+			Item.ResearchUnlockCount = 5;
+			#else
 			SacrificeTotal = 5;
+			#endif
 		}
 
 		public override void SetDefaults()

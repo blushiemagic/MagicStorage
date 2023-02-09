@@ -220,24 +220,28 @@ namespace MagicStorage.Sorting
 			hoverItem.knockBack = knockBack;
 
 			if (Main.npcShop > 0 && hoverItem.value >= 0 && (hoverItem.type < ItemID.CopperCoin || hoverItem.type > ItemID.PlatinumCoin)) {
+				#if TML_144
+				Main.LocalPlayer.GetItemExpectedPrice(hoverItem, out long calcForSelling, out long calcForBuying);
+				#else
 				Main.LocalPlayer.GetItemExpectedPrice(hoverItem, out int calcForSelling, out int calcForBuying);
-				int num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
+				#endif
+				long num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
 				if (hoverItem.shopSpecialCurrency != -1) {
 					tooltipNames[numLines] = "SpecialPrice";
 					CustomCurrencyManager.GetPriceText(hoverItem.shopSpecialCurrency, array, ref numLines, num5);
 				} else if (num5 > 0) {
 					string text = "";
-					int num6 = 0;
-					int num7 = 0;
-					int num8 = 0;
-					int num9 = 0;
-					int num10 = num5 * hoverItem.stack;
+					long num6 = 0;
+					long num7 = 0;
+					long num8 = 0;
+					long num9 = 0;
+					long num10 = num5 * hoverItem.stack;
 					if (!hoverItem.buy) {
 						num10 = num5 / 5;
 						if (num10 < 1)
 							num10 = 1;
 
-						int num11 = num10;
+						long num11 = num10;
 						num10 *= hoverItem.stack;
 						int amount = Main.shopSellbackHelper.GetAmount(hoverItem);
 						if (amount > 0)

@@ -169,7 +169,11 @@ namespace MagicStorage.UI.States {
 					IgnoreClicks = true  // Purely visual
 				};
 
+				#if TML_144
+				itemSlot.OnLeftClick += (evt, e) => {
+				#else
 				itemSlot.OnClick += (evt, e) => {
+				#endif
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int index = obj.slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
@@ -221,7 +225,11 @@ namespace MagicStorage.UI.States {
 					IgnoreClicks = true  // Purely visual
 				};
 
+				#if TML_144
+				itemSlot.OnLeftClick += (evt, e) => {
+				#else
 				itemSlot.OnClick += (evt, e) => {
+				#endif
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -268,7 +276,7 @@ namespace MagicStorage.UI.States {
 					}
 				};
 
-				itemSlot.OnRightMouseDown += (evt, e) => {
+				itemSlot.OnRightMouseDown += static (evt, e) => {
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -876,12 +884,16 @@ namespace MagicStorage.UI.States {
 
 				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
-				stationZone.InitializeSlot += (slot, scale) => {
+				stationZone.InitializeSlot += static (slot, scale) => {
 					MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
 						IgnoreClicks = true  // Purely visual
 					};
 
-					itemSlot.OnClick += (evt, e) => {
+					#if TML_144
+					itemSlot.OnLeftClick += static (evt, e) => {
+					#else
+					itemSlot.OnClick += static (evt, e) => {
+					#endif
 						MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 						TECraftingAccess access = CraftingGUI.GetCraftingEntity();
@@ -1085,7 +1097,11 @@ namespace MagicStorage.UI.States {
 			protected override float GetSearchBarRight() => recipeButtons.GetDimensions().Width;
 
 			protected override void InitZoneSlotEvents(MagicStorageItemSlot itemSlot) {
+				#if TML_144
+				itemSlot.OnLeftClick += (evt, e) => {
+				#else
 				itemSlot.OnClick += (evt, e) => {
+				#endif
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int objSlot = obj.slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);

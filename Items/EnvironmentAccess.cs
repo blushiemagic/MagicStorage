@@ -59,7 +59,7 @@ namespace MagicStorage.Items {
 
 			tooltipCounter = 0;
 
-			List<string> lines = available.Select(e => e.DisplayName.GetTranslation(Language.ActiveCulture)).ToList();
+			List<string> lines = available.Select(GetModuleDisplayName).ToList();
 
 			const int maxLines = 7;
 			
@@ -78,6 +78,14 @@ namespace MagicStorage.Items {
 			IEnumerable<string> random = GenerateIndices(lines.Count, maxLines).OrderBy(i => i).Select(i => lines[i]);
 
 			Utility.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip = "  " + string.Join("\n  ", random));
+		}
+
+		private static string GetModuleDisplayName(EnvironmentModule e) {
+			#if TML_144
+			return e.DisplayName.Value;
+			#else
+			return e.DisplayName.GetTranslation(Language.ActiveCulture);
+			#endif
 		}
 	}
 }

@@ -69,11 +69,11 @@ namespace MagicStorage.UI {
 				Text.TextColor = Color.Yellow;
 			else {
 				Text.TextColor = Color.Gray;
-				string text =
+				
 				#if TML_144
-					module?.DisabledTooltip.Value;
+				string text = module?.DisabledTooltip.Value;
 				#else
-					module?.DisabledTooltip.GetTranslation(Language.ActiveCulture);
+				string text = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture);
 				#endif
 				
 				MagicUI.mouseText = text ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");

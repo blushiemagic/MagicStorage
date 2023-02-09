@@ -64,7 +64,11 @@ namespace MagicStorage.UI {
 			header.Width.Set(0, 1f);
 			header.Height.Set(30, 0f);
 			header.BackgroundColor.A = 255;
-			header.OnClick += (evt, e) => HeaderClicked();
+			#if TML_144
+			header.OnLeftClick += HeaderClicked;
+			#else
+			header.OnClick += HeaderClicked;
+			#endif
 
 			caption = new(captionText);
 			caption.VAlign = 0.5f;
@@ -120,7 +124,7 @@ namespace MagicStorage.UI {
 			Append(header);
 		}
 
-		private void HeaderClicked() {
+		private void HeaderClicked(UIMouseEvent evt, UIElement element) {
 			SoundEngine.PlaySound(SoundID.MenuTick);
 
 			if (!expanding)

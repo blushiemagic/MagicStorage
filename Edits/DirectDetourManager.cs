@@ -27,7 +27,9 @@ namespace MagicStorage.Edits {
 
 		private static readonly Dictionary<string, MethodInfo> cachedMethods = new();
 
+#if TML_2022_09
 		private static bool requestedNativeAccess;
+#endif
 
 		public static MethodInfo GetCachedMethod(this Type type, string method) {
 			string key = $"{type.FullName}::{method}";
@@ -52,7 +54,9 @@ namespace MagicStorage.Edits {
 			foreach ((MethodInfo method, Delegate hook) in delegates)
 				HookEndpointManager.Unmodify(method, hook);
 
+#if TML_2022_09
 			requestedNativeAccess = false;
+#endif
 		}
 
 #if TML_2022_09

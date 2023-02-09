@@ -390,7 +390,12 @@ namespace MagicStorage.UI.States {
 		private SortingOptionElement CreateDropdownOption(SortingOption option) {
 			SortingOptionElement element = new(option);
 
-			element.OnClick += parentUI.GetPage<SortingPage>("Sorting").ClickOption;
+			#if TML_144
+			element.OnLeftClick
+			#else
+			element.OnClick
+			#endif
+				+= parentUI.GetPage<SortingPage>("Sorting").ClickOption;
 
 			return element;
 		}
@@ -398,7 +403,12 @@ namespace MagicStorage.UI.States {
 		private FilteringOptionElement CreateDropdownOption(FilteringOption option) {
 			FilteringOptionElement element = new(option);
 
-			element.OnClick += parentUI.GetPage<FilteringPage>("Filtering").ClickOption;
+			#if TML_144
+			element.OnLeftClick
+			#else
+			element.OnClick
+			#endif
+				+= parentUI.GetPage<FilteringPage>("Filtering").ClickOption;
 
 			return element;
 		}

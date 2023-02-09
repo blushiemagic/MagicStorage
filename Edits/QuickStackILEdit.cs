@@ -8,10 +8,16 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
+#if TML_144
+using ILPlayer = Terraria.IL_Player;
+#else
+using ILPlayer = IL.Terraria.Player;
+#endif
+
 namespace MagicStorage.Edits {
 	internal class QuickStackILEdit : Edit {
 		public override void LoadEdits() {
-			IL.Terraria.Player.QuickStackAllChests += Player_QuickStackAllChests;
+			ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
 		}
 
 		private void Player_QuickStackAllChests(ILContext il) {
@@ -65,7 +71,7 @@ namespace MagicStorage.Edits {
 		}
 
 		public override void UnloadEdits() {
-			IL.Terraria.Player.QuickStackAllChests -= Player_QuickStackAllChests;
+			ILPlayer.QuickStackAllChests -= Player_QuickStackAllChests;
 		}
 	}
 }
