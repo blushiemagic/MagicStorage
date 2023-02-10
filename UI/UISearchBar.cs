@@ -116,11 +116,7 @@ namespace MagicStorage.UI
 				hasFocus = true;
 				CheckBlockInput();
 
-				#if TML_144
 				base.LeftClick(new(this, UserInterface.ActiveInstance.MousePosition));
-				#else
-				Click(new(this, UserInterface.ActiveInstance.MousePosition));
-				#endif
 			}
 			else if (hasFocus && !mouseOver)
 			{

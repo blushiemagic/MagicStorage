@@ -41,13 +41,8 @@ namespace MagicStorage.UI {
 			header.Width.Set(0, 1f);
 			header.Height.Set(30, 0f);
 			header.BackgroundColor.A = 255;
-			#if TML_144
 			header.OnLeftMouseDown += Header_MouseDown;
 			header.OnLeftMouseUp += Header_MouseUp;
-			#else
-			header.OnMouseDown += Header_MouseDown;
-			header.OnMouseUp += Header_MouseUp;
-			#endif
 			Append(header);
 
 			var closeButton = new UITextPanel<char>('X');
@@ -55,11 +50,7 @@ namespace MagicStorage.UI {
 			closeButton.Width.Set(40, 0);
 			closeButton.Left.Set(-40, 1);
 			closeButton.BackgroundColor.A = 255;
-			#if TML_144
 			closeButton.OnLeftClick += (evt, element) => {
-			#else
-			closeButton.OnClick += (evt, element) => {
-			#endif
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				OnMenuClose?.Invoke();
 			};
@@ -70,11 +61,7 @@ namespace MagicStorage.UI {
 			resetButton.Width.Set(100, 0);
 			resetButton.Left.Set(-45 - 100, 1);
 			resetButton.BackgroundColor.A = 255;
-			#if TML_144
 			resetButton.OnLeftClick += (evt, element) => {
-			#else
-			resetButton.OnClick += (evt, element) => {
-			#endif
 				SoundEngine.PlaySound(SoundID.MenuOpen);
 				OnMenuReset?.Invoke();
 			};
@@ -155,21 +142,13 @@ namespace MagicStorage.UI {
 		}
 
 		private void Header_MouseDown(UIMouseEvent evt, UIElement element) {
-			#if TML_144
 			base.LeftMouseDown(evt);
-			#else
-			base.MouseDown(evt);
-			#endif
 
 			DragStart(evt);
 		}
 
 		private void Header_MouseUp(UIMouseEvent evt, UIElement element) {
-			#if TML_144
 			base.LeftMouseUp(evt);
-			#else
-			base.MouseUp(evt);
-			#endif
 
 			DragEnd(evt);
 		}

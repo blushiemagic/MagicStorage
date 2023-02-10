@@ -7,12 +7,7 @@ using MonoMod.Cil;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-
-#if TML_144
 using ILPlayer = Terraria.IL_Player;
-#else
-using ILPlayer = IL.Terraria.Player;
-#endif
 
 namespace MagicStorage.Edits;
 

@@ -43,24 +43,14 @@ namespace MagicStorage.UI {
 			Append(icon);
 		}
 
-		#if TML_144
 		public override void LeftMouseDown(UIMouseEvent evt) {
 			base.LeftMouseDown(evt);
-		#else
-		public override void MouseDown(UIMouseEvent evt) {
-			base.MouseDown(evt);
-		#endif
 
 			DragStart(evt);
 		}
 
-		#if TML_144
 		public override void LeftMouseUp(UIMouseEvent evt) {
 			base.LeftMouseUp(evt);
-		#else
-		public override void MouseUp(UIMouseEvent evt) {
-			base.MouseUp(evt);
-		#endif
 
 			DragEnd(evt);
 		}

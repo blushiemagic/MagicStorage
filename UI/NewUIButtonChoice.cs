@@ -92,12 +92,6 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		#if !TML_144
-		public void AssignButtons(Asset<Texture2D>[] textures, ModTranslation[] texts) {
-			AssignButtons(textures, texts.Select(t => t.GetTranslation(Language.ActiveCulture)).ToArray());
-		}
-		#endif
-
 		public void AssignButtons(Asset<Texture2D>[] textures, LocalizedText[] texts) {
 			AssignButtons(textures, texts.Select(t => t.Value).ToArray());
 		}
@@ -177,10 +171,6 @@ namespace MagicStorage.UI {
 
 			public ChoiceElement(int option, Asset<Texture2D> texture, LocalizedText text, int buttonSize = 21) : this(option, texture, text.Value, buttonSize) { }
 
-			#if !TML_144
-			public ChoiceElement(int option, Asset<Texture2D> texture, ModTranslation translation, int buttonSize = 21) : this(option, texture, translation.GetTranslation(Language.ActiveCulture), buttonSize) { }
-			#endif
-
 			public ChoiceElement(int option, Asset<Texture2D> texture, string text, int buttonSize = 21) {
 				this.option = option;
 				this.texture = texture;
@@ -203,13 +193,8 @@ namespace MagicStorage.UI {
 				MagicUI.mouseText = "";
 			}
 
-			#if TML_144
 			public override void LeftClick(UIMouseEvent evt) {
 				base.LeftClick(evt);
-			#else
-			public override void Click(UIMouseEvent evt) {
-				base.Click(evt);
-			#endif
 
 				if (canInvokeAction && Parent is NewUIButtonChoice buttons) {
 					int old = buttons.Choice;
@@ -240,13 +225,8 @@ namespace MagicStorage.UI {
 				canInvokeAction = false;
 			}
 
-			#if TML_144
 			public override void LeftClick(UIMouseEvent evt) {
 				base.LeftClick(evt);
-			#else
-			public override void Click(UIMouseEvent evt) {
-				base.Click(evt);
-			#endif
 
 				if (Parent is NewUIButtonChoice buttons)
 					buttons._onGearChoiceSelected?.Invoke();

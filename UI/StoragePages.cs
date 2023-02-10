@@ -86,11 +86,7 @@ namespace MagicStorage.UI {
 
 			foreach (TOption option in GetOptions()) {
 				TElement element = CreateElement(option);
-				#if TML_144
 				element.OnLeftClick += ClickOption;
-				#else
-				element.OnClick += ClickOption;
-				#endif
 
 				element.Left.Set(leftOrig + buttonSizeWithBuffer * (index % columns), 0f);
 				element.Top.Set(topOrig + buttonSizeWithBuffer * (index / columns), 0f);

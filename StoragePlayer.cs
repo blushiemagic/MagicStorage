@@ -47,11 +47,7 @@ namespace MagicStorage
 			FavoritedRecipes.Load(tag);
 		}
 
-		#if TML_144
 		public override void OnEnterWorld() {
-		#else
-		public override void OnEnterWorld(Player player) {
-		#endif
 			if (MagicStorageMod.UsingPrivateBeta) {
 				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
 					"Do note that using this private beta build will cause a ton of text to be printed to the chat (when the config is enabled) and to your log files.",
@@ -213,11 +209,7 @@ namespace MagicStorage
 				return;
 			}
 
-#if TML_2022_09
-			player.QuickSpawnClonedItem(source, item, item.stack);
-#else
 			player.QuickSpawnItem(source, item, item.stack);
-#endif
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)

@@ -77,7 +77,6 @@ namespace MagicStorage {
 
 			optionsConfig = null;
 
-			Utility.UnloadHookDelegate();
 			RecursiveRecipe.UnloadDelegates();
 		}
 

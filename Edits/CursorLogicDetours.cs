@@ -1,10 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
-
-#if TML_144
 using OnMain = Terraria.On_Main;
-#else
-using OnMain = On.Terraria.Main;
-#endif
 
 namespace MagicStorage.Edits {
 	internal class CursorLogicDetours : Edit {

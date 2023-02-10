@@ -27,10 +27,6 @@ namespace MagicStorage.Edits {
 
 		private static readonly Dictionary<string, MethodInfo> cachedMethods = new();
 
-#if TML_2022_09
-		private static bool requestedNativeAccess;
-#endif
-
 		public static MethodInfo GetCachedMethod(this Type type, string method) {
 			string key = $"{type.FullName}::{method}";
 			if (cachedMethods.TryGetValue(key, out MethodInfo value))
@@ -53,26 +49,9 @@ namespace MagicStorage.Edits {
 
 			foreach ((MethodInfo method, Delegate hook) in delegates)
 				HookEndpointManager.Unmodify(method, hook);
-
-#if TML_2022_09
-			requestedNativeAccess = false;
-#endif
 		}
-
-#if TML_2022_09
-		private static void TryRequestAccess() {
-			if (!requestedNativeAccess) {
-				MonoModHooks.RequestNativeAccess();
-				requestedNativeAccess = true;
-			}
-		}
-#endif
 
 		public static void ILHook(MethodInfo orig, MethodInfo modify) {
-#if TML_2022_09
-			TryRequestAccess();
-#endif
-
 			try {
 				ArgumentNullException.ThrowIfNull(orig);
 				ArgumentNullException.ThrowIfNull(modify);
@@ -90,10 +69,6 @@ namespace MagicStorage.Edits {
 		}
 
 		public static void DetourHook(MethodInfo orig, MethodInfo modify) {
-#if TML_2022_09
-			TryRequestAccess();
-#endif
-
 			try {
 				ArgumentNullException.ThrowIfNull(orig);
 				ArgumentNullException.ThrowIfNull(modify);

@@ -81,11 +81,7 @@ namespace MagicStorage.Items {
 		}
 
 		private static string GetModuleDisplayName(EnvironmentModule e) {
-			#if TML_144
 			return e.DisplayName.Value;
-			#else
-			return e.DisplayName.GetTranslation(Language.ActiveCulture);
-			#endif
 		}
 	}
 }
