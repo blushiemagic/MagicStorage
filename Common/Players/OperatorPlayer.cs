@@ -8,11 +8,7 @@ namespace MagicStorage.Common.Players {
 
 		internal bool manualOp;
 
-		#if TML_144
-		public override void OnEnterWorld() {
-		#else
 		public override void OnEnterWorld(Player player) {
-		#endif
 			Netcode.RequestingOperatorKey = false;
 		}
 	}

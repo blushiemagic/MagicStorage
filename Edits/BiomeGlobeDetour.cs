@@ -2,12 +2,7 @@
 using MagicStorage.Items;
 using Terraria;
 using Terraria.ID;
-
-#if TML_144
-using OnRecipe = Terraria.On_Recipe;
-#else
 using OnRecipe = On.Terraria.Recipe;
-#endif
 
 namespace MagicStorage.Edits;
 

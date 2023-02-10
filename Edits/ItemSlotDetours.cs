@@ -3,12 +3,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
-
-#if TML_144
-using OnItemSlot = Terraria.UI.On_ItemSlot;
-#else
 using OnItemSlot = On.Terraria.UI.ItemSlot;
-#endif
 
 namespace MagicStorage.Edits {
 	internal class ItemSlotDetours : Edit {

@@ -1,12 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Terraria;
 using Terraria.ID;
-
-#if TML_144
-using OnChest = Terraria.On_Chest;
-#else
 using OnChest = On.Terraria.Chest;
-#endif
 
 namespace MagicStorage.Edits {
 	internal class QuickStackChestDetour : Edit {

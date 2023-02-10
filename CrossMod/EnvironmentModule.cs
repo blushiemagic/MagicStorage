@@ -10,33 +10,19 @@ namespace MagicStorage {
 	/// <summary>
 	/// A module of information for use in a Storage Configuration Interface. Only one instance is assumed to be active at once.
 	/// </summary>
-	public abstract class EnvironmentModule : ModType
-	#if TML_144
-		, ILocalizedModType
-	#endif
-	{
+	public abstract class EnvironmentModule : ModType {
 		public int Type { get; private set; }
 		
-		#if TML_144
-		public string LocalizationCategory { get; }
-
-		public LocalizedText DisplayName => this.GetLocalization(nameof(DisplayName), PrettyPrintName);
-
-		public LocalizedText DisabledTooltip => this.GetLocalization(nameof(DisabledTooltip), GetDisabledTooltipDefault);
-		#else
 		public ModTranslation DisplayName { get; private set; }
 
 		public ModTranslation DisabledTooltip { get; private set; }
-		#endif
 
 		protected sealed override void Register() {
 			ModTypeLookup<EnvironmentModule>.Register(this);
 			Type = EnvironmentModuleLoader.Add(this);
 
-			#if !TML_144
 			DisplayName = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleName.{Name}");
 			DisabledTooltip = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleDisabled.{Name}");
-			#endif
 
 			MagicStorageMod.Instance.Logger.Debug($"EnvironmentModule \"{FullName}\" added by mod \"{Mod.Name}\"");
 		}
@@ -50,13 +36,11 @@ namespace MagicStorage {
 		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
 		/// </summary>
 		public virtual void AutoStaticDefaults() {
-			#if !TML_144
 			if (DisplayName.IsDefault())
 				DisplayName.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
 
 			if (DisabledTooltip.IsDefault())
 				DisabledTooltip.SetDefault(Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault"));
-			#endif
 		}
 
 		public static string GetDisabledTooltipDefault() => Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");

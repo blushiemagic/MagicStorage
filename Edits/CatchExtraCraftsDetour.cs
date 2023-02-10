@@ -1,12 +1,7 @@
 ﻿#nullable enable
 using Terraria;
 using Terraria.DataStructures;
-
-#if TML_144
-using OnPlayer = Terraria.On_Player;
-#else
 using OnPlayer = On.Terraria.Player;
-#endif
 
 namespace MagicStorage.Edits;
 

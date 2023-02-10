@@ -6,12 +6,7 @@ using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-
-#if TML_144
-using ILMain = Terraria.IL_Main;
-#else
 using ILMain = IL.Terraria.Main;
-#endif
 
 namespace MagicStorage.Edits {
 	internal class OpCommandCodeSendHandlerDetour : Edit {

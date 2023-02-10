@@ -37,15 +37,10 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		#if TML_144
-		public override void LeftClick(UIMouseEvent evt) {
-			//UIToggleImage.LeftClick() calls Toggle(), so we don't have to
-			base.LeftClick(evt);
-		#else
 		public override void Click(UIMouseEvent evt) {
 			//UIToggleImage.Click() calls Toggle(), so we don't have to
 			base.Click(evt);
-		#endif
+
 			if (!Source.IsAvailable(Module, out var module))
 				return;
 
@@ -70,11 +65,7 @@ namespace MagicStorage.UI {
 			else {
 				Text.TextColor = Color.Gray;
 				
-				#if TML_144
-				string text = module?.DisabledTooltip.Value;
-				#else
 				string text = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture);
-				#endif
 				
 				MagicUI.mouseText = text ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 			}

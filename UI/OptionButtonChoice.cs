@@ -26,11 +26,7 @@ namespace MagicStorage.UI {
 			AssignButtons(textures, translations);
 		}
 
-		#if TML_144
-		private static void GenerateAssetsAndText(IEnumerable<SortingOption> collection, out Asset<Texture2D>[] textures, out LocalizedText[] translations) {
-		#else
 		private static void GenerateAssetsAndText(IEnumerable<SortingOption> collection, out Asset<Texture2D>[] textures, out ModTranslation[] translations) {
-		#endif
 			List<SortingOption> list = collection.ToList();
 
 			textures = list.Select(o => o.TextureAsset).ToArray();
@@ -62,11 +58,8 @@ namespace MagicStorage.UI {
 
 			AssignButtons(textures, translations);
 		}
-		#if TML_144
-		private static void GenerateAssetsAndText(IEnumerable<FilteringOption> collection, out Asset<Texture2D>[] textures, out LocalizedText[] translations) {
-		#else
+
 		private static void GenerateAssetsAndText(IEnumerable<FilteringOption> collection, out Asset<Texture2D>[] textures, out ModTranslation[] translations) {
-		#endif
 			List<FilteringOption> list = collection.ToList();
 
 			textures = list.Select(o => o.TextureAsset).ToArray();
