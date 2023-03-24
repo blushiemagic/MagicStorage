@@ -111,8 +111,17 @@ namespace MagicStorage.Sorting
 				}
 				else
 				{
+					// Transfer stack from current item to "next item"
+					Item next = item.Clone();
+					int transfer = int.MaxValue - lastItem.stack;
+
+					Utility.CallOnStackHooks(lastItem, item, transfer);
+
+					next.stack -= transfer;
+					lastItem.stack = int.MaxValue;
+
 					aggregate.Add(lastItem);
-					lastItem = item.Clone();
+					lastItem = next;
 					context.enumeratedSource.Add(new() { item });
 					sourceIndex++;
 				}
