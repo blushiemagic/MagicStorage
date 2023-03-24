@@ -565,7 +565,7 @@ namespace MagicStorage
 			Campfire = false;
 
 			itemCounts.Clear();
-			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.Sum())))
+			foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.ConstrainedSum())))
 				itemCounts[type] = amount;
 
 			foreach (Item item in GetCraftingStations())

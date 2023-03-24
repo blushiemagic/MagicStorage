@@ -447,6 +447,20 @@ namespace MagicStorage {
 		public static IEnumerable<T> Evaluate<T>(this IEnumerable<T> enumerable)
 			=> enumerable.ToArray();
 
+		internal static int ConstrainedSum(this IEnumerable<int> source) {
+			int sum = 0;
+
+			foreach (int i in source) {
+				// Check overflow
+				if (sum + i < 0)
+					return int.MaxValue;
+
+				sum += i;
+			}
+			
+			return sum;
+		}
+
 		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 
 		internal static readonly MethodInfo LocalizationLoader_AutoloadTranslations = typeof(LocalizationLoader).GetMethod("AutoloadTranslations", BindingFlags.NonPublic | BindingFlags.Static)!;
