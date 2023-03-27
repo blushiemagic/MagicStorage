@@ -80,7 +80,7 @@ namespace MagicStorage.UI
 			if (!MagicUI.CanUpdateSearchBars || !active) {
 				if (active) {
 					if (mouseOver && GetHoverText?.Invoke() is string s) {
-						if (MagicUI.lastKnownSearchBarErrorReason is not null)
+						if (MagicUI.lastKnownSearchBarErrorReason is not null && !StorageGUI.CurrentlyRefreshing)
 							s += $"\n[c/ff0000:{MagicUI.lastKnownSearchBarErrorReason}]";
 
 						if (!string.IsNullOrWhiteSpace(s))
@@ -247,7 +247,7 @@ namespace MagicStorage.UI
 			Color color = Color.Black;
 			if (isEmpty)
 				color *= 0.75f;
-			if (MagicUI.lastKnownSearchBarErrorReason is not null)
+			if (MagicUI.lastKnownSearchBarErrorReason is not null && !StorageGUI.CurrentlyRefreshing)
 				color = Color.Red;
 			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + Padding, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			if (!isEmpty && hasFocus && cursorTimer < 30)

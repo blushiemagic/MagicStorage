@@ -230,7 +230,9 @@ namespace MagicStorage.UI.States {
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * StorageGUI.inventoryScale;
 
-				int numRows = (StorageGUI.items.Count + StorageGUI.numColumns - 1) / StorageGUI.numColumns;
+				int count = StorageGUI.CurrentlyRefreshing ? 0 : StorageGUI.items.Count;
+
+				int numRows = (count + StorageGUI.numColumns - 1) / StorageGUI.numColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + StorageGUI.padding);
 
 				if (numRows > 0 && displayRows <= 0) {
@@ -241,7 +243,9 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				slotZone.SetDimensions(StorageGUI.numColumns, displayRows);
+				if (slotZone.Parent is not null)
+					slotZone.SetDimensions(StorageGUI.numColumns, displayRows);
+
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
 					noDisplayRows = 0;
@@ -262,6 +266,9 @@ namespace MagicStorage.UI.States {
 			}
 
 			internal Item GetItem(int slot, ref int context) {
+				if (StorageGUI.CurrentlyRefreshing)
+					return new Item();
+
 				int index = slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 				Item item = index < StorageGUI.items.Count ? StorageGUI.items[index] : new Item();
 

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
@@ -53,6 +56,10 @@ namespace MagicStorage
 
 		public static bool needRefresh;
 
+		public static bool CurrentlyRefreshing { get; internal set; }
+
+		private static CancellationTokenSource threadSorting = new();
+
 		public static event Action OnRefresh;
 
 		internal static void CheckRefresh() {
@@ -62,105 +69,225 @@ namespace MagicStorage
 
 		internal static void InvokeOnRefresh() => OnRefresh?.Invoke();
 
+		public class ThreadContext {
+			public ItemSorter.AggregateContext context;
+			private readonly CancellationTokenSource tokenSource;
+			public readonly CancellationToken token;
+			public TEStorageHeart heart;
+			public int sortMode, filterMode;
+			public string searchText;
+			public bool onlyFavorites;
+			public int modSearch;
+			private readonly Action<ThreadContext> work;
+			private readonly Action<ThreadContext> afterWork;
+			public object state;
+			private readonly ManualResetEvent cancelWait = new(false);
+
+			public ThreadContext(CancellationTokenSource tokenSource, Action<ThreadContext> work, Action<ThreadContext> afterWork) {
+				ArgumentNullException.ThrowIfNull(tokenSource);
+				ArgumentNullException.ThrowIfNull(work);
+
+				this.tokenSource = tokenSource;
+				token = tokenSource.Token;
+				this.work = work;
+				this.afterWork = afterWork;
+			}
+
+			public ThreadContext Clone(int? newSortMode = null, int? newFilterMode = null, string newSearchText = null, int? newModSearch = null) {
+				return new ThreadContext(tokenSource, work, afterWork) {
+					context = context,
+					heart = heart,
+					sortMode = newSortMode ?? sortMode,
+					filterMode = newFilterMode ?? filterMode,
+					searchText = newSearchText ?? searchText,
+					onlyFavorites = onlyFavorites,
+					modSearch = newModSearch ?? modSearch,
+					state = state
+				};
+			}
+
+			public bool Running { get; private set; }
+
+			public static void Begin(ThreadContext incoming) {
+				activeThread?.Stop();
+
+				if (incoming.Running)
+					throw new ArgumentException("Incoming thread state was already running");
+
+				activeThread = incoming;
+				activeThread.Running = true;
+
+				// Variable capturing
+				ThreadContext ctx = incoming;
+
+				Task.Run(() => {
+					try {
+						ctx.work(ctx);
+						ctx.afterWork?.Invoke(ctx);
+					} catch when (ctx.token.IsCancellationRequested) { }
+
+					ctx.cancelWait.Set();
+				});
+			}
+
+			public void Stop() {
+				if (!Running)
+					return;
+
+				Running = false;
+				tokenSource.Cancel();
+				cancelWait.WaitOne();
+			}
+		}
+
+		internal static ThreadContext activeThread;
+
 		public static void RefreshItems()
 		{
+			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
+			needRefresh = false;
+
+			// No refreshing required
+			if (StoragePlayer.IsStorageEnvironment())
+				return;
+
 			if (StoragePlayer.IsStorageCrafting())
 			{
 				CraftingGUI.RefreshItems();
 				return;
 			}
 
-			if (StoragePlayer.IsStorageEnvironment())
-				return;
+			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
+
+			storagePage.RequestThreadWait(waiting: true);
+
+			if (CurrentlyRefreshing) {
+				activeThread?.Stop();
+				activeThread = null;
+			}
 
 			items.Clear();
 			didMatCheck.Clear();
 			sourceItems.Clear();
 			TEStorageHeart heart = GetHeart();
-			if (heart == null)
+			if (heart == null) {
+				storagePage.RequestThreadWait(waiting: false);
+
+				InvokeOnRefresh();
 				return;
+			}
 
 			NetHelper.Report(true, "Refreshing storage items");
 
+			CurrentlyRefreshing = true;
+
 			int sortMode = MagicUI.storageUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.storageUI.GetPage<FilteringPage>("Filtering").option;
-
-			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
 
 			string searchText = storagePage.searchBar.Text;
 			bool onlyFavorites = storagePage.filterFavorites.Value;
 			int modSearch = storagePage.modSearchBox.ModIndex;
 
-			void DoFiltering()
-			{
-				ItemSorter.AggregateContext context;
+			ThreadContext thread = new(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
+				heart = heart,
+				sortMode = sortMode,
+				filterMode = filterMode,
+				searchText = searchText,
+				onlyFavorites = onlyFavorites,
+				modSearch = modSearch
+			};
 
-				if (filterMode == FilteringOptionLoader.Definitions.Recent.Type)
-				{
-					Dictionary<int, Item> stored = heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+			if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type) {
+				Dictionary<int, Item> stored = thread.heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
 
-					IEnumerable<Item> toFilter = heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
+				IEnumerable<Item> toFilter = thread.heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
 
-					context = new(toFilter);
-
-					context.items = ItemSorter.SortAndFilter(context, sortMode == SortingOptionLoader.Definitions.Default.Type ? -1 : sortMode, FilteringOptionLoader.Definitions.All.Type, searchText, modSearch, 100);
-				}
-				else
-				{
-					context = new(heart.GetStoredItems());
-					context.items = ItemSorter.SortAndFilter(context, sortMode, filterMode, searchText, modSearch);
-				}
-
-				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					context.items = context.items.OrderByDescending(x => x.favorited ? 1 : 0);
-					context.sourceItems = context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
-				}
-
-				items.AddRange(context.items.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x.favorited));
-
-				sourceItems.AddRange(context.sourceItems.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !onlyFavorites || x[0].favorited));
-
-				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
+				thread.context = new(toFilter);
+			} else {
+				thread.context = new(thread.heart.GetStoredItems());
 			}
 
-			DoFiltering();
+			ThreadContext.Begin(thread);
+		}
+
+		private static void SortAndFilter(ThreadContext thread) {
+			DoFiltering(thread);
 			
 			bool didDefault = false;
 
 			// now if nothing found we disable filters one by one
-			if (searchText.Trim().Length > 0)
+			if (thread.searchText.Trim().Length > 0)
 			{
-				if (items.Count == 0 && filterMode != FilteringOptionLoader.Definitions.All.Type)
+				if (items.Count == 0 && thread.filterMode != FilteringOptionLoader.Definitions.All.Type)
 				{
 					// search all categories
-					filterMode = FilteringOptionLoader.Definitions.All.Type;
+					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllItems");
 					didDefault = true;
 
-					DoFiltering();
+					DoFiltering(thread);
 				}
 
-				if (items.Count == 0 && modSearch != ModSearchBox.ModIndexAll)
+				if (items.Count == 0 && thread.modSearch != ModSearchBox.ModIndexAll)
 				{
 					// search all mods
-					modSearch = ModSearchBox.ModIndexAll;
+					thread.modSearch = ModSearchBox.ModIndexAll;
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllMods");
 					didDefault = true;
 
-					DoFiltering();
+					DoFiltering(thread);
 				}
 			}
 
 			if (!didDefault)
 				MagicUI.lastKnownSearchBarErrorReason = null;
+		}
 
+		private static void DoFiltering(ThreadContext thread)
+		{
+			try {
+				if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type)
+				{
+					if (thread.sortMode == SortingOptionLoader.Definitions.Default.Type)
+						thread.sortMode = -1;
+
+					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
+
+					thread.context.items = ItemSorter.SortAndFilter(thread, 100);
+				}
+				else
+				{
+					thread.context.items = ItemSorter.SortAndFilter(thread);
+				}
+
+				if (MagicStorageConfig.CraftingFavoritingEnabled) {
+					thread.context.items = thread.context.items.OrderByDescending(x => x.favorited ? 1 : 0);
+					thread.context.sourceItems = thread.context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
+				}
+
+				items.AddRange(thread.context.items.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !thread.onlyFavorites || x.favorited));
+
+				sourceItems.AddRange(thread.context.sourceItems.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !thread.onlyFavorites || x[0].favorited));
+
+				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
+			} catch when (thread.token.IsCancellationRequested) {
+				items.Clear();
+				sourceItems.Clear();
+				throw;
+			}
+		}
+
+		private static void AfterSorting(ThreadContext thread) {
 			for (int k = 0; k < items.Count; k++)
 				didMatCheck.Add(false);
 
 			OnRefresh?.Invoke();
-			needRefresh = false;
+
+			CurrentlyRefreshing = false;
+
+			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage").RequestThreadWait(waiting: false);
 		}
 
 		internal static void ResetSlotFocus()

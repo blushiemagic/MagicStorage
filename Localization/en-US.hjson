@@ -530,6 +530,8 @@ Mods: {
 		SearchName: "Search Name"
 		SearchMod: "Search Mod"
 
+		SortWaiting: "Loading ..."
+
 		SearchTips: {
 			SearchName: "Search Name"
 			SearchMod: "@ModName Search Name"

@@ -273,6 +273,8 @@ Mods: {
 		SearchName: "Recherche par nom"
 		SearchMod: "Recherche par mod"
 
+		// SortWaiting: ""
+
 		SearchTips: {
 			// SearchName: ""
 			// SearchMod: ""

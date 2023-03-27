@@ -502,6 +502,8 @@ Mods: {
 		SearchName: "以名称搜索"
 		SearchMod: "以模组搜索"
 
+		// SortWaiting: ""
+
 		SearchTips: {
 			SearchName: "以名称搜索"
 			SearchMod: "@模组名 以模组搜索"

@@ -525,6 +525,8 @@ Mods: {
 		SearchName: "Название"
 		SearchMod: "Мод"
 
+		// SortWaiting: ""
+
 		SearchTips: {
 			SearchName: "Название"
 			SearchMod: "@Мод Название"

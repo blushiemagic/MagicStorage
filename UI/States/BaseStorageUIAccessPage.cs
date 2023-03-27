@@ -3,6 +3,7 @@ using MagicStorage.Components;
 using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace MagicStorage.UI.States {
 		public ModSearchBox modSearchBox;
 
 		public NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
+
+		private UIText waitText;
 
 		//Used to order the buttons
 		public UIElement topBar;   //Search Bar, recipe buttons, Deposit All
@@ -144,6 +147,11 @@ namespace MagicStorage.UI.States {
 			slotZone.Width.Set(0f, 1f);
 			Append(slotZone);
 
+			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true);
+
+			waitText.Left.Set(24f, 0f);
+			waitText.Top.Set(24f, 0f);
+
 			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
 			slotZone.Append(scrollBar);
@@ -218,6 +226,10 @@ namespace MagicStorage.UI.States {
 			slotZone.Height.Set(-(zoneTop + bottomMargin), 1f);
 
 			slotZone.Recalculate();
+
+			waitText.Top = slotZone.Top;
+
+			waitText.Recalculate();
 			
 			bottomBar.Height.Set(bottomMargin, 0f);
 			bottomBar.Top.Set(-bottomMargin, 1f);
@@ -405,8 +417,33 @@ namespace MagicStorage.UI.States {
 
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);
 
+		protected virtual void SetThreadWait(bool waiting) {
+			waitText.Remove();
+			slotZone.Remove();
+
+			if (waiting)
+				Append(waitText);
+			else
+				Append(slotZone);
+		}
+
+		private bool? delayedThreadWait;
+
+		public void RequestThreadWait(bool waiting) {
+			if (AssetRepository.IsMainThread)
+				SetThreadWait(waiting);
+			else
+				delayedThreadWait = waiting;
+		}
+
 		public override void Update(GameTime gameTime) {
 			PendingZoneRefresh = false;
+
+			if (delayedThreadWait is { } waiting) {
+				SetThreadWait(waiting);
+				delayedThreadWait = null;
+				PendingZoneRefresh = true;
+			}
 
 			if (pendingConfiguration) {
 				//Use the current config just in case "pendingConfiguration" is modified where it's not intended to be

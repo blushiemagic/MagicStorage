@@ -273,6 +273,8 @@ Mods: {
 		// SearchName: ""
 		// SearchMod: ""
 
+		// SortWaiting: ""
+
 		SearchTips: {
 			// SearchName: ""
 			// SearchMod: ""

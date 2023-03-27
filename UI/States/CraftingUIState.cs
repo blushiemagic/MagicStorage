@@ -27,6 +27,9 @@ namespace MagicStorage.UI.States {
 		private UIText reqObjText2;
 		private UIText storedItemsText;
 
+		private UIPanel recipeWaitPanel;
+		private UIText recipeWaitText;
+
 		public readonly RecipeHistory history = new();
 		private RecipePanelHistoryArrangement recipeHistory;
 		private RecipeHistoryPanel recipeHistoryPanel;
@@ -321,6 +324,20 @@ namespace MagicStorage.UI.States {
 
 			ToggleCraftButtons(hide: config);
 
+			recipeWaitPanel = new();
+
+			recipeWaitPanel.Left = recipePanel.Left;
+			recipeWaitPanel.Top = recipePanel.Top;
+			recipeWaitPanel.Width = recipePanel.Width;
+			recipeWaitPanel.Height = recipePanel.Height;
+
+			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f);
+
+			recipeWaitText.Left.Set(12f, 0f);
+			recipeWaitText.Top.Set(12f, 0f);
+
+			recipeWaitPanel.Append(recipeWaitText);
+
 			lastKnownUseOldCraftButtons = config;
 		}
 
@@ -332,6 +349,10 @@ namespace MagicStorage.UI.States {
 
 			recipeHeight = panel.Height.Pixels;
 			recipePanel.Height.Set(recipeHeight, 0f);
+
+			recipeWaitPanel.Left = recipePanel.Left;
+			recipeWaitPanel.Top = recipePanel.Top;
+			recipeWaitPanel.Height = recipePanel.Height;
 			
 			recipeHistory.Left.Set(-recipeHistory.Width.Pixels, 1f);
 
@@ -400,6 +421,8 @@ namespace MagicStorage.UI.States {
 			craftReset.PaddingBottom = craftP1.PaddingBottom;
 		}
 
+		private bool? pendingPanelChange;
+
 		public override void Update(GameTime gameTime) {
 			CraftingGUI.PlayerZoneCache.Cache();
 
@@ -409,6 +432,21 @@ namespace MagicStorage.UI.States {
 					MagicUI.BlockItemSlotActionsDetour = false;
 
 				base.Update(gameTime);
+
+				if (pendingPanelChange is bool { } waiting) {
+					recipePanel.Remove();
+					recipeWaitPanel.Remove();
+
+					if (waiting) {
+						Append(recipeWaitPanel);
+						recipeWaitPanel.Update(gameTime);
+					} else {
+						Append(recipePanel);
+						recipePanel.Update(gameTime);
+					}
+
+					pendingPanelChange = null;
+				}
 
 				MagicUI.BlockItemSlotActionsDetour = oldBlock;
 
@@ -733,6 +771,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		internal Item GetStorage(int slot, ref int context) {
+			if (StorageGUI.CurrentlyRefreshing)
+				return new Item();
+
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < CraftingGUI.storageItems.Count ? CraftingGUI.storageItems[index] : new Item();
 			if (CraftingGUI.blockStorageItems.Contains(new ItemData(item)))
@@ -962,6 +1003,13 @@ namespace MagicStorage.UI.States {
 				Refresh();
 			}
 
+			protected override void SetThreadWait(bool waiting) {
+				base.SetThreadWait(waiting);
+
+				var parent = parentUI as CraftingUIState;
+				parent.pendingPanelChange = waiting;
+			}
+
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
@@ -1007,7 +1055,9 @@ namespace MagicStorage.UI.States {
 
 				AdjustCommonElements();
 
-				int numRows = ((CraftingGUI.recipes?.Count ?? 0) + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
+				int count = StorageGUI.CurrentlyRefreshing ? 0 : CraftingGUI.recipes?.Count ?? 0;
+
+				int numRows = (count + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + CraftingGUI.Padding);
 
 				if (numRows > 0 && displayRows <= 0) {
@@ -1019,7 +1069,8 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
+				if (slotZone.Parent is not null)
+					slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
 
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
@@ -1046,6 +1097,9 @@ namespace MagicStorage.UI.States {
 			}
 
 			internal Item GetRecipe(int slot, ref int context) {
+				if (StorageGUI.CurrentlyRefreshing)
+					return new Item();
+
 				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
 				Item item = index >= 0 && index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
 

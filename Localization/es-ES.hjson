@@ -274,6 +274,8 @@ Mods: {
 		SearchName: "búsqueda por nombre"
 		SearchMod: "búsqueda por mod"
 
+		// SortWaiting: ""
+
 		SearchTips: {
 			// SearchName: ""
 			// SearchMod: ""
