@@ -301,6 +301,10 @@ namespace MagicStorage.UI.States {
 
 			protected override void InitZoneSlotEvents(MagicStorageItemSlot itemSlot) {
 				itemSlot.OnClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					Player player = Main.LocalPlayer;
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
@@ -351,6 +355,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnMouseOver += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
@@ -359,6 +367,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnUpdate += e => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					if (!e.IsMouseHovering || !Main.mouseRight)
 						return;  //Not right clicking
 

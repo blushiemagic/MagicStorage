@@ -111,6 +111,10 @@ namespace MagicStorage.UI.States {
 				};
 				
 				itemSlot.OnRightClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					if (CraftingGUI.selectedRecipe is null)
 						return;
 
@@ -173,6 +177,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int index = obj.slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
@@ -225,6 +233,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -272,6 +284,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnRightMouseDown += static (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -1133,6 +1149,10 @@ namespace MagicStorage.UI.States {
 
 			protected override void InitZoneSlotEvents(MagicStorageItemSlot itemSlot) {
 				itemSlot.OnClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int objSlot = obj.slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
