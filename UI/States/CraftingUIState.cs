@@ -324,17 +324,17 @@ namespace MagicStorage.UI.States {
 
 			ToggleCraftButtons(hide: config);
 
-			recipeWaitPanel = new();
+			recipeWaitPanel = new UIPanel();
 
-			recipeWaitPanel.Left = recipePanel.Left;
-			recipeWaitPanel.Top = recipePanel.Top;
-			recipeWaitPanel.Width = recipePanel.Width;
-			recipeWaitPanel.Height = recipePanel.Height;
+			recipeWaitPanel.Left.Set(0f, 0.05f);
+			recipeWaitPanel.Top.Set(70f, 0f);
+			recipeWaitPanel.Width.Set(0f, 0.9f);
+			recipeWaitPanel.Height.Set(50f, 0f);
 
-			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f);
-
-			recipeWaitText.Left.Set(12f, 0f);
-			recipeWaitText.Top.Set(12f, 0f);
+			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f) {
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
 
 			recipeWaitPanel.Append(recipeWaitText);
 
@@ -348,11 +348,6 @@ namespace MagicStorage.UI.States {
 			recipePanel.Top.Set(recipeTop, 0f);
 
 			recipeHeight = panel.Height.Pixels;
-			recipePanel.Height.Set(recipeHeight, 0f);
-
-			recipeWaitPanel.Left = recipePanel.Left;
-			recipeWaitPanel.Top = recipePanel.Top;
-			recipeWaitPanel.Height = recipePanel.Height;
 			
 			recipeHistory.Left.Set(-recipeHistory.Width.Pixels, 1f);
 
@@ -434,15 +429,13 @@ namespace MagicStorage.UI.States {
 				base.Update(gameTime);
 
 				if (pendingPanelChange is bool { } waiting) {
-					recipePanel.Remove();
-					recipeWaitPanel.Remove();
-
 					if (waiting) {
-						Append(recipeWaitPanel);
-						recipeWaitPanel.Update(gameTime);
+						if (recipeWaitPanel.Parent is null) {
+							recipePanel.Append(recipeWaitPanel);
+							recipeWaitPanel.Update(gameTime);
+						}
 					} else {
-						Append(recipePanel);
-						recipePanel.Update(gameTime);
+						recipeWaitPanel.Remove();
 					}
 
 					pendingPanelChange = null;
@@ -1069,7 +1062,7 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				if (slotZone.Parent is not null)
+				if (!IsWaitTextVisible)
 					slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
 
 				int noDisplayRows = numRows - displayRows;

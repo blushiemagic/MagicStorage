@@ -120,6 +120,8 @@ namespace MagicStorage
 				// Variable capturing
 				ThreadContext ctx = incoming;
 
+				NetHelper.Report(true, "Threading logic started");
+
 				Task.Run(() => {
 					try {
 						ctx.work(ctx);
@@ -137,6 +139,8 @@ namespace MagicStorage
 				Running = false;
 				tokenSource.Cancel();
 				cancelWait.WaitOne();
+
+				NetHelper.Report(true, "Current thread halted");
 			}
 		}
 

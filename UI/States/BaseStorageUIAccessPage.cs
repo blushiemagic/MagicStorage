@@ -22,7 +22,10 @@ namespace MagicStorage.UI.States {
 
 		public NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
 
+		private UIPanel waitPanel;
 		private UIText waitText;
+
+		protected bool IsWaitTextVisible => waitPanel.Parent is null;
 
 		//Used to order the buttons
 		public UIElement topBar;   //Search Bar, recipe buttons, Deposit All
@@ -147,10 +150,19 @@ namespace MagicStorage.UI.States {
 			slotZone.Width.Set(0f, 1f);
 			Append(slotZone);
 
-			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true);
+			waitPanel = new UIPanel();
 
-			waitText.Left.Set(24f, 0f);
-			waitText.Top.Set(24f, 0f);
+			waitPanel.Left.Set(0f, 0.1f);
+			waitPanel.Top.Set(20f, 0f);
+			waitPanel.Width.Set(0f, 0.8f);
+			waitPanel.Height.Set(80f, 0f);
+
+			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true) {
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
+
+			waitPanel.Append(waitText);
 
 			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
@@ -227,9 +239,9 @@ namespace MagicStorage.UI.States {
 
 			slotZone.Recalculate();
 
-			waitText.Top = slotZone.Top;
+			waitPanel.Top.Set(zoneTop + 20f, 0f);
 
-			waitText.Recalculate();
+			waitPanel.Recalculate();
 			
 			bottomBar.Height.Set(bottomMargin, 0f);
 			bottomBar.Top.Set(-bottomMargin, 1f);
@@ -418,13 +430,11 @@ namespace MagicStorage.UI.States {
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);
 
 		protected virtual void SetThreadWait(bool waiting) {
-			waitText.Remove();
-			slotZone.Remove();
-
-			if (waiting)
-				Append(waitText);
-			else
-				Append(slotZone);
+			if (waiting) {
+				if (waitPanel.Parent is null)
+					Append(waitPanel);
+			} else
+				waitPanel.Remove();
 		}
 
 		private bool? delayedThreadWait;
