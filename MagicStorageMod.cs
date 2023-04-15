@@ -144,7 +144,7 @@ namespace MagicStorage {
 					if (npcID < 0)
 						ThrowWithMessage("NPC ID must be positive", 1);
 					else if (npcID < NPCID.Count)
-						ThrowWithMessage("NPC ID must refer to a vanilla NPC ID", 1);
+						ThrowWithMessage("NPC ID must refer to a modded NPC ID", 1);
 
 					StorageWorld.moddedDiamondDropRulesByType.Add(npcID, rule);
 					break;

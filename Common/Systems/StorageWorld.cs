@@ -32,6 +32,7 @@ namespace MagicStorage.Common.Systems
 
 		//Modded support
 		public static HashSet<int> moddedDiamonds;
+		private static HashSet<string> unloadedModdedDiamonds;
 
 		internal static HashSet<int> disallowDropModded;
 		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
@@ -64,6 +65,7 @@ namespace MagicStorage.Common.Systems
 			empressDiamond = false;
 
 			moddedDiamonds = new();
+			unloadedModdedDiamonds = new();
 		}
 
 		public override void PreSaveAndQuit() {
@@ -90,7 +92,7 @@ namespace MagicStorage.Common.Systems
 			tag["moonlordDiamond"] = moonlordDiamond;
 			tag["queenSlimeDiamond"] = queenSlimeDiamond;
 			tag["empressDiamond"] = empressDiamond;
-			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").ToList();
+			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -126,6 +128,8 @@ namespace MagicStorage.Common.Systems
 
 					if (ModLoader.TryGetMod(split[0], out Mod source) && source.TryFind(split[1], out ModNPC npc))
 						moddedDiamonds.Add(npc.Type);
+					else
+						unloadedModdedDiamonds.Add(identifier);
 				}
 			}
 		}
