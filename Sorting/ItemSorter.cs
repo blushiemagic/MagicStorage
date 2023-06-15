@@ -200,7 +200,14 @@ namespace MagicStorage.Sorting
 				//First character is a "#"?  Treat the search as a tooltip search
 				if (filter.Length > 1) {
 					filter = filter[1..];
-					return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					try
+					{
+						return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					}
+					catch
+					{
+						return false;
+					}
 				} else
 					return true;  //Empty tooltip = anything is valid
 			} else if (first == '@' && !modSearched) {
