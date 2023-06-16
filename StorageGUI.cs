@@ -58,8 +58,6 @@ namespace MagicStorage
 
 		public static bool CurrentlyRefreshing { get; internal set; }
 
-		private static CancellationTokenSource threadSorting = new();
-
 		public static event Action OnRefresh;
 
 		internal static void CheckRefresh() {
