@@ -114,9 +114,10 @@ namespace MagicStorage {
 			return equal;
 		}
 
-		private static byte[] TagIOSave(Item item) {
+		private static byte[] TagIOSave(Item item)
+		{
 			using MemoryStream memoryStream = new();
-			TagIO.ToStream(ItemIO.Save(item), memoryStream);
+			TagIO.ToStream(ItemIO.Save(item), memoryStream, false);
 			return memoryStream.ToArray();
 		}
 
