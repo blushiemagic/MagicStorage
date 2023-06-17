@@ -125,8 +125,9 @@ namespace MagicStorage
 						ctx.work(ctx);
 						ctx.afterWork?.Invoke(ctx);
 					} catch when (ctx.token.IsCancellationRequested) { }
-
-					ctx.cancelWait.Set();
+					finally { 
+						ctx.cancelWait.Set();
+					}
 				});
 			}
 
