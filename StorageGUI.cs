@@ -162,7 +162,7 @@ namespace MagicStorage
 
 			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
 
-			storagePage.RequestThreadWait(waiting: true);
+			storagePage?.RequestThreadWait(waiting: true);
 
 			if (CurrentlyRefreshing) {
 				activeThread?.Stop();
@@ -174,7 +174,7 @@ namespace MagicStorage
 			sourceItems.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
-				storagePage.RequestThreadWait(waiting: false);
+				storagePage?.RequestThreadWait(waiting: false);
 
 				InvokeOnRefresh();
 				return;
