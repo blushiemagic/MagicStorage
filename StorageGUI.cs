@@ -121,12 +121,16 @@ namespace MagicStorage
 				NetHelper.Report(true, "Threading logic started");
 
 				Task.Run(() => {
-					try {
+					try
+					{
 						ctx.work(ctx);
 						ctx.afterWork?.Invoke(ctx);
-					} catch when (ctx.token.IsCancellationRequested) { }
-
-					ctx.cancelWait.Set();
+					}
+					catch when (ctx.token.IsCancellationRequested) { }
+					finally
+					{
+						ctx.cancelWait.Set();
+					}
 				});
 			}
 
@@ -161,7 +165,7 @@ namespace MagicStorage
 
 			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
 
-			storagePage.RequestThreadWait(waiting: true);
+			storagePage?.RequestThreadWait(waiting: true);
 
 			if (CurrentlyRefreshing) {
 				activeThread?.Stop();
@@ -173,7 +177,7 @@ namespace MagicStorage
 			sourceItems.Clear();
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
-				storagePage.RequestThreadWait(waiting: false);
+				storagePage?.RequestThreadWait(waiting: false);
 
 				InvokeOnRefresh();
 				return;

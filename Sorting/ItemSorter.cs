@@ -94,7 +94,8 @@ namespace MagicStorage.Sorting
 		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
 		public static List<Item> Aggregate(AggregateContext context, CancellationToken token, bool actuallyAggregate = true)
 		{
-			try {
+			try
+			{
 				Item lastItem = null;
 
 				int sourceIndex = 0;
@@ -156,9 +157,15 @@ namespace MagicStorage.Sorting
 					aggregate.Add(lastItem);
 
 				return aggregate;
-			} catch when (token.IsCancellationRequested) {
+			}
+			catch when (token.IsCancellationRequested)
+			{
 				context.enumeratedSource.Clear();
 
+				return new();
+			}
+			catch (Exception e) {
+				MagicStorageMod.Instance.Logger.Error(e);
 				return new();
 			}
 		}
