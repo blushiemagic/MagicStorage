@@ -121,11 +121,14 @@ namespace MagicStorage
 				NetHelper.Report(true, "Threading logic started");
 
 				Task.Run(() => {
-					try {
+					try
+					{
 						ctx.work(ctx);
 						ctx.afterWork?.Invoke(ctx);
-					} catch when (ctx.token.IsCancellationRequested) { }
-					finally { 
+					}
+					catch when (ctx.token.IsCancellationRequested) { }
+					finally
+					{
 						ctx.cancelWait.Set();
 					}
 				});
