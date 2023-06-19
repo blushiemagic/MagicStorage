@@ -598,8 +598,8 @@ Mods: {
 		StorageGUI: {
 			ForceRefreshButton: "Принуд. обновление интерфейса"
 			CompactCoinsButton: "Сжать монеты (100з-1платина)"
-			DestroyUnloadedButton: "Удалить незагруженные предметы"
-			DestroyUnloadedDataButton: "Удалить незагруженные данные"
+			DestroyUnloadedButton: "удалить неустановленные элементы мода"
+			DestroyUnloadedDataButton: "удалить удаленные данные мода"
 			DepositPiggyBank: "Положить все предметы с свино-копилки"
 			DepositSafe: "Положить все предметы с сейфа"
 			DepositForge: "Положить все предметы с печи защитника"

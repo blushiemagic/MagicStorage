@@ -603,8 +603,8 @@ Mods: {
 		StorageGUI: {
 			ForceRefreshButton: "Force UI refresh"
 			CompactCoinsButton: "Compact Coins"
-			DestroyUnloadedButton: "Delete Unloaded Items"
-			DestroyUnloadedDataButton: "Delete Unloaded Data"
+			DestroyUnloadedButton: "Delete Unloaded Mod Items"
+			DestroyUnloadedDataButton: "Delete Unloaded Mod Data"
 			DepositPiggyBank: "Deposit Piggy Bank Items"
 			DepositSafe: "Deposit Safe Items"
 			DepositForge: "Deposit Defender's Forge Items"
