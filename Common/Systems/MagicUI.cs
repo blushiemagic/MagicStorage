@@ -161,6 +161,8 @@ public class MagicUI : ModSystem
 						BlockItemSlotActionsDetour = true;
 
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
+						if (CanUpdateMouseText())
+							Main.instance.MouseText(mouseText);
 
 						BlockItemSlotActionsDetour = false;
 					}
@@ -237,9 +239,6 @@ public class MagicUI : ModSystem
 		}
 
 		BlockItemSlotActionsDetour = false;
-
-		if (CanUpdateMouseText())
-			Main.instance.MouseText(mouseText);
 	}
 
 	private static bool CanUpdateMouseText()
