@@ -294,6 +294,7 @@ Mods: {
 				LoveNPC: "This unit would not mind if {NPCName} examined its gears."
 				DislikeNPC: "This unit regrets mentioning Bluemagic to {NPCName}."
 				HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+				LikeNPC_Princess: "{NPCName} is best friends with my creator."
 			}
 		}
 

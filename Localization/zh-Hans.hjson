@@ -288,6 +288,7 @@ Mods: {
 				LoveNPC: "附近的{NPCName}个体对本单元拥有一切操纵权."
 				DislikeNPC: "本单元不屑于向{NPCName}提及蓝魔法。"
 				HateNPC: "{NPCName}需要改变其试图将蓝魔法用于盈利的想法"
+				// LikeNPC_Princess: ""
 			}
 		}
 

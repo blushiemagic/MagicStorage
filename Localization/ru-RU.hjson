@@ -290,6 +290,7 @@ Mods: {
 				LoveNPC: "Обожаю {NPCName}."
 				DislikeNPC: "Не нравится {NPCName}."
 				HateNPC: "{NPCName} ненавижу."
+				// LikeNPC_Princess: ""
 			}
 		}
 
