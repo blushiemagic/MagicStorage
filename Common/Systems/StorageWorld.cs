@@ -117,7 +117,7 @@ namespace MagicStorage.Common.Systems
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
 
-			if (tag.GetList<string>("modded") is List<string> list)
+			if (tag.TryGet("modded", out List<string> list))
 			{
 				foreach (string identifier in list)
 				{

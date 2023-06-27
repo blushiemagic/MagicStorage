@@ -805,6 +805,13 @@ Mods: {
 				  Less processing required and more control at the cost of more complexity.
 				'''
 			}
+			automatonRemembers: {
+				Label: "Automaton remembers last help tip"
+				Tooltip:
+				'''
+				The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
+				'''
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "Automaton Housing"

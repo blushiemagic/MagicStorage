@@ -757,6 +757,10 @@ Mods: {
 				// Label: ""
 				// Tooltip: ""
 			}
+			automatonRemembers: {
+				// Label: ""
+				// Tooltip: ""
+			}
 
 			AllowAutomatonToMoveIn: {
 				Label: "自动机入住"

@@ -760,6 +760,10 @@ Mods: {
 				// Label: ""
 				// Tooltip: ""
 			}
+			automatonRemembers: {
+				// Label: ""
+				// Tooltip: ""
+			}
 
 			AllowAutomatonToMoveIn: {
 				// Label: ""
