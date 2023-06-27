@@ -175,7 +175,7 @@ namespace MagicStorage.Items
 				NPCID.HallowBoss        => !StorageWorld.empressDiamond,
 				_                       => false //Default to false to shove everything else under the rug
 			}
-			|| ShadowDiamondDrop.CanModdedNPCDrop(info.npc);
+			|| (ShadowDiamondDrop.CanModdedNPCDrop(info.npc) && !StorageWorld.moddedDiamonds.Contains(info.npc.type));
 
 		public bool CanShowItemDropInUI() => true; //Don't make the item show up in the bestiary
 

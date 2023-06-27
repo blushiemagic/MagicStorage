@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -67,7 +68,9 @@ namespace MagicStorage {
 			return count;
 		}
 
-		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false, bool checkPrefix = true) {
+		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false, bool checkPrefix = true) => AreStrictlyEqual(item1, item2, checkStack, checkPrefix, null);
+
+		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack, bool checkPrefix, ConditionalWeakTable<Item, byte[]> savedItemTagIO) {
 			int stack1 = item1.stack;
 			int stack2 = item2.stack;
 			int prefix1 = item1.prefix;
@@ -96,7 +99,7 @@ namespace MagicStorage {
 			}
 
 			try {
-				equal = TagIOSave(item1).SequenceEqual(TagIOSave(item2));
+				equal = TagIOSave(item1, savedItemTagIO).SequenceEqual(TagIOSave(item2, savedItemTagIO));
 			} catch {
 				// Swallow the exception and disallow stacking
 				equal = false;
@@ -114,10 +117,17 @@ namespace MagicStorage {
 			return equal;
 		}
 
-		private static byte[] TagIOSave(Item item) {
-			using MemoryStream memoryStream = new();
-			TagIO.ToStream(ItemIO.Save(item), memoryStream);
-			return memoryStream.ToArray();
+		private static byte[] TagIOSave(Item item, ConditionalWeakTable<Item, byte[]> savedItemTagIO)
+		{
+			if (savedItemTagIO?.TryGetValue(item, out byte[] retVal) is true)
+			{
+				return retVal;
+			}
+			using MemoryStream memoryStream = new(200);
+			TagIO.ToStream(ItemIO.Save(item), memoryStream, false);
+			retVal = memoryStream.ToArray();
+			savedItemTagIO?.Add(item, retVal);
+			return retVal;
 		}
 
 		public static void Write(this BinaryWriter writer, Point16 position) {

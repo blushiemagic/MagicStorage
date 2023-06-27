@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -15,7 +16,9 @@ namespace MagicStorage {
 
 		public abstract bool CanCombine(Item item1, Item item2);
 
-		public static bool CanCombineItems(Item item1, Item item2, bool checkPrefix = true) {
+		public static bool CanCombineItems(Item item1, Item item2, bool checkPrefix = true) => CanCombineItems(item1, item2, checkPrefix, null);
+
+		public static bool CanCombineItems(Item item1, Item item2, bool checkPrefix, ConditionalWeakTable<Item, byte[]> savedItemTagIO) {
 			int prefix1 = item1.prefix;
 			int prefix2 = item2.prefix;
 
@@ -49,7 +52,7 @@ namespace MagicStorage {
 
 			//Regardless of if the above allows combining, prevent items with different ModItemData from combining if they aren't the same
 			if (combine)
-				combine &= Utility.AreStrictlyEqual(item1, item2, checkPrefix: checkPrefix);
+				combine &= Utility.AreStrictlyEqual(item1, item2, checkStack: false, checkPrefix: checkPrefix, savedItemTagIO: savedItemTagIO);
 
 			item1.prefix = prefix1;
 			item2.prefix = prefix2;

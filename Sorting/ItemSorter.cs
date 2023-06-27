@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using Terraria.ID;
 using MagicStorage.CrossMod;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Sorting
 {
@@ -16,11 +17,13 @@ namespace MagicStorage.Sorting
 		public class AggregateContext {
 			public IEnumerable<Item> items;
 			public IEnumerable<List<Item>> sourceItems;
+			public ConditionalWeakTable<Item, byte[]> savedItemTagIO;
 			internal List<List<Item>> enumeratedSource;
 
 			public AggregateContext(IEnumerable<Item> items) {
 				this.items = items;
 				sourceItems = enumeratedSource = new();
+				savedItemTagIO = new();
 			}
 		}
 
@@ -91,14 +94,15 @@ namespace MagicStorage.Sorting
 		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
 		public static List<Item> Aggregate(AggregateContext context, CancellationToken token, bool actuallyAggregate = true)
 		{
-			try {
+			try
+			{
 				Item lastItem = null;
 
 				int sourceIndex = 0;
 
 				List<Item> aggregate = new();
 
-				foreach (Item item in context.items.OrderBy(i => i.type))
+				foreach (Item item in context.items.OrderBy(i => i.type).ThenBy(i => i.prefix))
 				{
 					if (lastItem is null)
 					{
@@ -107,10 +111,13 @@ namespace MagicStorage.Sorting
 						continue;
 					}
 
-					if (ItemCombining.CanCombineItems(item, lastItem) && (!actuallyAggregate || lastItem.stack + item.stack > 0))
+					bool combiningPermitted = ItemCombining.CanCombineItems(item, lastItem, checkPrefix: true, savedItemTagIO: context.savedItemTagIO);
+					if (combiningPermitted && (!actuallyAggregate || lastItem.stack + item.stack > 0))
 					{
-						if (actuallyAggregate) {
-							if (item.favorited) {
+						if (actuallyAggregate)
+						{
+							if (item.favorited)
+							{
 								lastItem.favorited = true;
 
 								foreach (var source in context.enumeratedSource[sourceIndex])
@@ -126,14 +133,18 @@ namespace MagicStorage.Sorting
 					}
 					else
 					{
-						// Transfer stack from current item to "next item"
 						Item next = item.Clone();
-						int transfer = int.MaxValue - lastItem.stack;
 
-						Utility.CallOnStackHooks(lastItem, item, transfer);
+						// Transfer stack from current item to "next item"
+						if (combiningPermitted)
+						{
+							int transfer = int.MaxValue - lastItem.stack;
 
-						next.stack -= transfer;
-						lastItem.stack = int.MaxValue;
+							Utility.CallOnStackHooks(lastItem, item, transfer);
+
+							next.stack -= transfer;
+							lastItem.stack = int.MaxValue;
+						}
 
 						aggregate.Add(lastItem);
 						lastItem = next;
@@ -146,9 +157,15 @@ namespace MagicStorage.Sorting
 					aggregate.Add(lastItem);
 
 				return aggregate;
-			} catch when (token.IsCancellationRequested) {
+			}
+			catch when (token.IsCancellationRequested)
+			{
 				context.enumeratedSource.Clear();
 
+				return new();
+			}
+			catch (Exception e) {
+				MagicStorageMod.Instance.Logger.Error(e);
 				return new();
 			}
 		}
@@ -193,7 +210,14 @@ namespace MagicStorage.Sorting
 				//First character is a "#"?  Treat the search as a tooltip search
 				if (filter.Length > 1) {
 					filter = filter[1..];
-					return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					try
+					{
+						return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					}
+					catch
+					{
+						return false;
+					}
 				} else
 					return true;  //Empty tooltip = anything is valid
 			} else if (first == '@' && !modSearched) {
