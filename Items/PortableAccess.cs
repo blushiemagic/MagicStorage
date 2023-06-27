@@ -202,22 +202,6 @@ namespace MagicStorage.Items
 			}
 		}
 
-		public override void ModifyTooltips(List<TooltipLine> lines)
-		{
-			Point16 location = Location;
-			bool isSet = location.X >= 0 && location.Y >= 0;
-			for (int k = 0; k < lines.Count; k++)
-				if (isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip1")
-				{
-					lines[k].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
-				}
-				else if (!isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip2")
-				{
-					lines.RemoveAt(k);
-					k--;
-				}
-		}
-
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();

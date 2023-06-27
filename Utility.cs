@@ -7,10 +7,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.DataStructures;
@@ -24,23 +22,6 @@ using Terraria.UI;
 namespace MagicStorage {
 	public static partial class Utility {
 		public static bool DownedAllMechs => NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3;
-
-		public static string GetSimplifiedGenericTypeName(this Type type) {
-			//Handle all invalid cases here:
-			if (type.FullName is null)
-				return type.Name;
-
-			if (!type.IsGenericType)
-				return type.FullName;
-
-			string parent = type.GetGenericTypeDefinition().FullName!;
-
-			//Include all but the "`X" part
-			parent = parent[..parent.IndexOf('`')];
-
-			//Construct the child types
-			return $"{parent}<{string.Join(", ", type.GetGenericArguments().Select(GetSimplifiedGenericTypeName))}>";
-		}
 
 		public static int GetCardinality(this BitArray bitArray) {
 			int[] ints = new int[(bitArray.Count >> 5) + 1];
@@ -421,31 +402,6 @@ namespace MagicStorage {
 			return flag;
 		}
 
-		public static void FindAndModify(List<TooltipLine> tooltips, string searchPhrase, string replacePhrase) {
-			int searchIndex = tooltips.FindIndex(t => t.Text.Contains(searchPhrase));
-			if (searchIndex >= 0)
-				tooltips[searchIndex].Text = tooltips[searchIndex].Text.Replace(searchPhrase, replacePhrase);
-		}
-
-		public static void FindAndRemoveLine(List<TooltipLine> tooltips, string fullLine) {
-			int searchIndex = tooltips.FindIndex(t => t.Text == fullLine);
-			if (searchIndex >= 0)
-				tooltips.RemoveAt(searchIndex);
-		}
-
-		public static void FindAndInsertLines(Mod mod, List<TooltipLine> tooltips, string searchLine, Func<int, string> lineNames, string replaceLines) {
-			int searchIndex = tooltips.FindIndex(t => t.Text == searchLine);
-			if (searchIndex >= 0) {
-				tooltips.RemoveAt(searchIndex);
-
-				int inserted = 0;
-				foreach (var line in replaceLines.Split('\n')) {
-					tooltips.Insert(searchIndex++, new TooltipLine(mod, lineNames(inserted), line));
-					inserted++;
-				}
-			}
-		}
-
 		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
 			BuildOnStackHooksDelegate();
 			onStackHooksDelegate?.Invoke(destination, source, numTransfered);
@@ -473,28 +429,57 @@ namespace MagicStorage {
 
 		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 
-		internal static readonly MethodInfo LocalizationLoader_AutoloadTranslations = typeof(LocalizationLoader).GetMethod("AutoloadTranslations", BindingFlags.NonPublic | BindingFlags.Static)!;
-		internal static readonly MethodInfo LocalizationLoader_SetLocalizedText = typeof(LocalizationLoader).GetMethod("SetLocalizedText", BindingFlags.NonPublic | BindingFlags.Static)!;
-		internal static readonly FieldInfo LanguageManager__localizedTexts = typeof(LanguageManager).GetField("_localizedTexts", BindingFlags.NonPublic | BindingFlags.Instance)!;
+		public static void ConvertToGPSCoordinates(Vector2 worldCoordinate, out int compassCoordinate, out int depthCoordinate) {
+			// Copy/paste of logic from the info accessories
+			compassCoordinate = (int)(worldCoordinate.X * 2f / 16f - Main.maxTilesX);
+			depthCoordinate = (int)(worldCoordinate.Y * 2f / 16f - Main.worldSurface * 2.0);
+		}
 
-		/// <summary>
-		/// Force's the localization for the given mod, <paramref name="mod"/>, to be loaded for use with <seealso cref="Language"/>
-		/// </summary>
-		/// <param name="mod">The mod instance</param>
-		public static void ForceLoadModHJsonLocalization(Mod mod) {
-			Dictionary<string, ModTranslation> modTranslationDictionary = new();
+		public static void ConvertToGPSCoordinates(Point16 tileCoordinate, out int compassCoordinate, out int depthCoordinate) {
+			// Copy/paste of logic from the info accessories
+			compassCoordinate = (int)(tileCoordinate.X * 2f - Main.maxTilesX);
+			depthCoordinate = (int)(tileCoordinate.Y * 2f - Main.worldSurface * 2.0);
+		}
 
-			LocalizationLoader_AutoloadTranslations.Invoke(null, new object[] { mod, modTranslationDictionary });
+		public static void ConvertToGPSCoordinates(Vector2 worldCoordinate, out string compassText, out string depthText) {
+			// Copy/paste of logic from the info accessories
+			ConvertToGPSCoordinates(worldCoordinate, out int compass, out int depth);
 
-			Dictionary<string, LocalizedText> dict = LanguageManager__localizedTexts.GetValue(LanguageManager.Instance) as Dictionary<string, LocalizedText>;
+			// Get the compass text
+			compassText = compass switch {
+				>0 => Language.GetTextValue("GameUI.CompassEast", compass),
+				 0 => Language.GetTextValue("GameUI.CompassCenter"),
+				<0 => Language.GetTextValue("GameUI.CompassWest", compass)
+			};
+			
+			// Get the depth text
+			float sizeFactor = Main.maxTilesX / 4200f;
+			sizeFactor *= sizeFactor;
 
-			var culture = Language.ActiveCulture;
-			foreach (ModTranslation translation in modTranslationDictionary.Values) {
-				//LocalizedText text = new LocalizedText(translation.Key, translation.GetTranslation(culture));
-				LocalizedText text = Activator.CreateInstance(typeof(LocalizedText), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object[] { translation.Key, translation.GetTranslation(culture) }, CultureInfo.InvariantCulture) as LocalizedText;
+			int cavernsOffset = 1200;
 
-				LocalizationLoader_SetLocalizedText.Invoke(null, new object[] { dict, text });
-			}
+			float surface = (float)((worldCoordinate.Y / 16f - (65f + 10f * sizeFactor)) / (Main.worldSurface / 5.0));
+
+			string layerText;
+			if (worldCoordinate.Y > (Main.maxTilesY - 204) * 16)
+				layerText = Language.GetTextValue("GameUI.LayerUnderworld");
+			else if (worldCoordinate.Y > Main.rockLayer * 16.0 + cavernsOffset / 2f + 16.0)
+				layerText = Language.GetTextValue("GameUI.LayerCaverns");
+			else if (depth > 0)
+				layerText = Language.GetTextValue("GameUI.LayerUnderground");
+			else if (surface < 1f)
+				layerText = Language.GetTextValue("GameUI.LayerSpace");
+			else
+				layerText = Language.GetTextValue("GameUI.LayerSurface");
+
+			depth = Math.Abs(depth);
+
+			string coordText = depth switch {
+				0 => Language.GetTextValue("GameUI.DepthLevel"),
+				_ => Language.GetTextValue("GameUI.Depth", depth)
+			};
+
+			depthText = $"{coordText} {layerText}";
 		}
 	}
 }

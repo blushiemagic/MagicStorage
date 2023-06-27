@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Items;
 using MagicStorage.Stations;
+using SerousCommonLib.API.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace MagicStorage.Common.Systems {
 
 		public override void AddRecipeGroups()
 		{
-			MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicRecipes::AddRecipeGroups");
+			ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicRecipes::AddRecipeGroups");
 
 			IEnumerable<int> vanillaItems = Enumerable.Range(0, ItemID.Count);
 
@@ -171,7 +172,7 @@ namespace MagicStorage.Common.Systems {
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.DemoniteBar)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDemoniteBar", group);
 
-			MagicStorageMod.SetLoadingSubProgressText("");
+			ModLoadingProgressHelper.SetLoadingSubProgressText("");
 		}
 	}
 }

@@ -44,16 +44,19 @@ namespace MagicStorage.Items
 		{
 			Point16 location = Location;
 			bool isSet = location.X >= 0 && location.Y >= 0;
-			for (int k = 0; k < lines.Count; k++)
-				if (isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip0")
-				{
-					lines[k].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", location.X, location.Y);
+			
+			if (!isSet) {
+				int index = lines.FindIndex(static line => line.Mod == "Terraria" && line.Name == "Tooltip1");
+				if (index >= 0)
+					lines.RemoveAt(index);
+			} else {
+				int index = lines.FindIndex(static line => line.Mod == "Terraria" && line.Name == "Tooltip0");
+				if (index >= 0) {
+					Utility.ConvertToGPSCoordinates(location.ToWorldCoordinates(), out int compassCoordinate, out int depthCoordinate);
+
+					lines[index].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", compassCoordinate, depthCoordinate);
 				}
-				else if (!isSet && lines[k].Mod == "Terraria" && lines[k].Name == "Tooltip1")
-				{
-					lines.RemoveAt(k);
-					k--;
-				}
+			}
 		}
 
 		public override void AddRecipes()
