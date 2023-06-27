@@ -1,4 +1,6 @@
-﻿# If some text marked with "#" is translated, please remove the "#" sign.
+﻿# If some text marked with "//" is translated, please remove the "//" sign.
+// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: ""
+
 Mods: {
 	MagicStorage: {
 		ItemName: {

@@ -1,4 +1,6 @@
-﻿# If some text marked with "#" is translated, please remove the "#" sign.
+﻿# If some text marked with "//" is translated, please remove the "//" sign.
+// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: ""
+
 Mods: {
 	MagicStorage: {
 		ItemName: {
@@ -478,7 +480,7 @@ Mods: {
 		StorageAccessFailAlt: "该存储装置没有与存储核心连接！"
 		StorageAccessFailLoad: "存储核心区域未加载！请再试一次"
 
-		# TestItemSuffix: " ！UNTIL RESPAWN！"
+		// TestItemSuffix: ""
 		SetTo: "已连接至 [{0}, {1}]"
 		SnowBiomeBlock: "雪地环境方块"
 		DepositAll: "全部存入"
@@ -487,12 +489,12 @@ Mods: {
 		CraftTooltipOld: "左键单击以制作（按住Ctrl全部制作）"
 
 		Crafting: {
-			# Plus1: "+1"
-			# Plus10: "+10"
-			# Plus100: "+100"
-			# Minus1: "-1"
-			# Minus10: "-10"
-			# Minus100: "-100"
+			// Plus1: ""
+			// Plus10: ""
+			// Plus100: ""
+			// Minus1: ""
+			// Minus10: ""
+			// Minus100: ""
 			MaxStack: "设为最大"
 			Reset: "重置"
 			Amount: "数量: {0}"
@@ -579,9 +581,9 @@ Mods: {
 			DepositForge: "转移护卫熔炉物品"
 			DepositVault: "转移虚空保险库物品"
 
-			# InitShowcaseButton: "Initialize Showcase"
-			# ResetShowcaseButton: "Reset Showcase Items"
-			# ClearItemsButton: "Clear All Items"
+			// InitShowcaseButton: ""
+			// ResetShowcaseButton: ""
+			// ClearItemsButton: ""
 
 			SellDuplicatesHeader: "出售同种物品"
 			SellDuplicatesButton: "出售"
@@ -751,11 +753,8 @@ Mods: {
 				Tooltip: "关闭后，UI界面将无法调节大小或进行拖动"
 			}
 			recursionDepth: {
-				# Label: "Recipe Recursion Depth"
-				# Tooltip:
-				# '''
-				# (See en-US translation)
-				# '''
+				// Label: ""
+				// Tooltip: ""
 			}
 
 			AllowAutomatonToMoveIn: {
