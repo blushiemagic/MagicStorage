@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="RecursiveCraft">
-      <HintPath>lib\RecursiveCraft.dll</HintPath>
+      <HintPath>..\references\RecursiveCraft.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
