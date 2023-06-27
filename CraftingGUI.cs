@@ -213,12 +213,10 @@ namespace MagicStorage
 						SetSelectedRecipe(selectedRecipe);
 				}
 
-				IEnumerable<int> allItemTypes = new int[] { selectedRecipe.createItem.type }.Concat(selectedRecipe.requiredItem.Select(i => i.type));
+				IEnumerable<int> allItemTypes = selectedRecipe.requiredItem.Select(i => i.type).Prepend(selectedRecipe.createItem.type);
 
-				IEnumerable<Recipe> affectedRecipes = allItemTypes.SelectMany(i => MagicCache.RecipesUsingItemType.TryGetValue(i, out var recipes) ? recipes.Value : Array.Empty<Recipe>());
-
-				//If no recipes were affected, that's fine, none of the recipes will be touched due to the array being empty
-				RefreshItemsAndSpecificRecipes(affectedRecipes.ToArray());
+				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calulated Recipe array being empty
+				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
 				SoundEngine.PlaySound(SoundID.Grab);
 			}
 
@@ -268,8 +266,40 @@ namespace MagicStorage
 		}
 
 		private static bool currentlyThreading;
+		private static Recipe[] recipesToRefresh;
+
+		public static void SetNextDefaultRecipeCollectionToRefresh(Recipe[] recipes) {
+			if (recipesToRefresh is null) {
+				if (recipes is not null)
+					NetHelper.Report(true, $"Setting next refresh to check {recipes.Length} recipes");
+
+				recipesToRefresh = recipes;
+				return;
+			}
+
+			if (recipes is null)
+				return;
+
+			recipesToRefresh = recipesToRefresh.Concat(recipes).DistinctBy(static r => r, ReferenceEqualityComparer.Instance).ToArray();
+
+			NetHelper.Report(true, $"Setting next refresh to check {recipes.Length} recipes");
+		}
+
+		public static void SetNextDefaultRecipeCollectionToRefresh(int affectedItemType) {
+			SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingItemType.TryGetValue(affectedItemType, out var result) ? result.Value : null);
+		}
+
+		public static void SetNextDefaultRecipeCollectionToRefresh(IEnumerable<int> affectedItemTypes) {
+			SetNextDefaultRecipeCollectionToRefresh(affectedItemTypes.SelectMany(static i => MagicCache.RecipesUsingItemType.TryGetValue(i, out var result) ? result.Value : Array.Empty<Recipe>())
+				.DistinctBy(static r => r, ReferenceEqualityComparer.Instance)
+				.ToArray());
+		}
 
 		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
+			// Custom array provided?  Refresh the default array anyway
+			SetNextDefaultRecipeCollectionToRefresh(toRefresh);
+			toRefresh = recipesToRefresh;
+
 			var craftingPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
 
 			craftingPage.RequestThreadWait(waiting: true);
@@ -383,6 +413,7 @@ namespace MagicStorage
 			}
 
 			currentlyThreading = false;
+			recipesToRefresh = null;
 		}
 
 		private static void AfterSorting(StorageGUI.ThreadContext thread) {
@@ -411,6 +442,8 @@ namespace MagicStorage
 					newFilterMode: FilteringOptionLoader.Definitions.All.Type,
 					newSearchText: "",
 					newModSearch: ModSearchBox.ModIndexAll);
+
+				NetHelper.Report(true, "Loading stored items from storage system...");
 
 				clone.context = new(state.heartItems);
 
@@ -444,7 +477,7 @@ namespace MagicStorage
 		private static void SafelyRefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
 			try {
 				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
-				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(b => b));
+				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(static b => b));
 
 				if (state.recipesToRefresh is null)
 					RefreshRecipes(thread, state);  //Refresh all recipes
@@ -508,6 +541,8 @@ namespace MagicStorage
 			{
 				if (recipes.Count == 0 && state.hiddenRecipes.Count > 0)
 				{
+					NetHelper.Report(true, "No recipes passed the filter.  Attempting filter with no hidden recipes");
+
 					// search hidden recipes too
 					state.hiddenRecipes = ItemTypeOrderedSet.Empty;
 
@@ -528,6 +563,8 @@ namespace MagicStorage
 
 				if (recipes.Count == 0 && thread.modSearch != ModSearchBox.ModIndexAll)
 				{
+					NetHelper.Report(true, "No recipes passed the filter.  Attempting filter with All Mods setting");
+
 					// search all mods
 					thread.modSearch = ModSearchBox.ModIndexAll;
 
@@ -545,7 +582,11 @@ namespace MagicStorage
 		private static void DoFiltering(StorageGUI.ThreadContext thread, ThreadState state)
 		{
 			try {
+				NetHelper.Report(true, "Retrieving recipes...");
+
 				var filteredRecipes = ItemSorter.GetRecipes(thread);
+
+				NetHelper.Report(true, "Sorting recipes...");
 
 				IEnumerable<Recipe> sortedRecipes = SortRecipes(thread, state, filteredRecipes);
 
@@ -554,6 +595,8 @@ namespace MagicStorage
 
 				if (state.recipeFilterChoice == RecipeButtonsAvailableChoice)
 				{
+					NetHelper.Report(true, "Filtering out only available recipes...");
+
 					recipes.AddRange(sortedRecipes.Where(r => IsAvailable(r)));
 					recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
 				}
@@ -662,6 +705,8 @@ namespace MagicStorage
 
 		private static void AnalyzeIngredients()
 		{
+			NetHelper.Report(true, "Analyzing crafting stations and environment requirements...");
+
 			Player player = Main.LocalPlayer;
 			if (adjTiles.Length != player.adjTile.Length)
 				Array.Resize(ref adjTiles, player.adjTile.Length);
@@ -948,11 +993,15 @@ namespace MagicStorage
 
 		private static void RefreshStorageItems()
 		{
+			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
+
 			storageItems.Clear();
 			storageItemsFromModules.Clear();
 			result = null;
-			if (selectedRecipe is null)
+			if (selectedRecipe is null) {
+				NetHelper.Report(true, "Failed.  No recipe is selected.");
 				return;
+			}
 
 			int index = 0;
 			bool hasItemFromStorage = false;
@@ -991,6 +1040,8 @@ namespace MagicStorage
 			}
 
 			result ??= new Item(selectedRecipe.createItem.type, 0);
+
+			NetHelper.Report(true, $"Success! Found {storageItems.Count} items and {(result.IsAir ? "no result items" : "a result item")}");
 		}
 
 		private static bool RecipeGroupMatch(Recipe recipe, int inventoryType, int requiredType)
@@ -1010,6 +1061,8 @@ namespace MagicStorage
 		internal static void SetSelectedRecipe(Recipe recipe)
 		{
 			ArgumentNullException.ThrowIfNull(recipe);
+
+			NetHelper.Report(true, "Reassigning current recipe...");
 
 			if (RecursiveCraftIntegration.Enabled)
 			{
@@ -1036,6 +1089,8 @@ namespace MagicStorage
 			selectedRecipe = recipe;
 			RefreshStorageItems();
 			blockStorageItems.Clear();
+
+			NetHelper.Report(true, "Successfully reassigned current recipe!");
 		}
 
 		internal static void SlotFocusLogic()
@@ -1209,11 +1264,17 @@ namespace MagicStorage
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
+			NetHelper.Report(true, $"Attempting to craft {toCraft} items...");
+
 			//Safeguard against absurdly high craft targets
+			int origCraftRequest = toCraft;
 			toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
 
+			if (toCraft != origCraftRequest)
+				NetHelper.Report(true, $"Craft amount reduced to {toCraft}");
+
 			if (toCraft <= 0)
-				return;  //Bail
+				return;  // Bail
 
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
@@ -1237,12 +1298,11 @@ namespace MagicStorage
 			};
 
 			int target = toCraft;
-			NetHelper.Report(true, "Attempting to craft " + toCraft + " items");
 
 			ExecuteInCraftingGuiEnvironment(() => {
 				//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
 				if (!AttemptLazyBatchCraft(context)) {
-					NetHelper.Report(false, "Batch craft operation failed.");
+					NetHelper.Report(false, "Batch craft operation failed.  Attempting repeated crafting of a single result.");
 
 					AttemptCraft(AttemptSingleCraft, context);
 				}
@@ -1255,10 +1315,14 @@ namespace MagicStorage
 				return;
 			}
 
+			NetHelper.Report(true, "Compacting results list...");
+
 			toWithdraw = CompactItemList(toWithdraw);
 			results = CompactItemList(results);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
+				NetHelper.Report(true, "Spawning excess results on player...");
+
 				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results)) {
 #if TML_2022_09
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
@@ -1266,8 +1330,11 @@ namespace MagicStorage
 					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
 #endif
 				}
-			} else if (Main.netMode == NetmodeID.MultiplayerClient)
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				NetHelper.Report(true, "Sending craft results to server...");
+
 				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
+			}
 		}
 
 		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {
@@ -1596,9 +1663,17 @@ namespace MagicStorage
 		internal static bool TryDepositResult(Item item)
 		{
 			int oldStack = item.stack;
+			int oldType = item.type;
 			TEStorageHeart heart = GetHeart();
 			heart.TryDeposit(item);
-			return oldStack != item.stack;
+
+			if (oldStack != item.stack) {
+				SetNextDefaultRecipeCollectionToRefresh(oldType);
+
+				return true;
+			}
+
+			return false;
 		}
 
 		internal static Item DoWithdrawResult(Item item, bool toInventory = false)
@@ -1644,8 +1719,10 @@ namespace MagicStorage
 					});
 			}
 
-			if (!withdrawn.IsAir)
+			if (!withdrawn.IsAir) {
 				StorageGUI.needRefresh = true;
+				SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingItemType.TryGetValue(withdrawn.type, out var result) ? result.Value : null);
+			}
 
 			return withdrawn;
 		}

@@ -277,6 +277,7 @@ namespace MagicStorage.UI.States {
 
 					if (changed) {
 						StorageGUI.needRefresh = true;
+
 						SoundEngine.PlaySound(SoundID.Grab);
 
 						obj.IgnoreNextHandleAction = true;

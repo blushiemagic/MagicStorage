@@ -21,6 +21,8 @@ public class MagicUI : ModSystem
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI;
 
+	public static bool IsCraftingUIOpen() => craftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, craftingUI);
+
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;
 

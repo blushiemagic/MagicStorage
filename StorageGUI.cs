@@ -121,14 +121,16 @@ namespace MagicStorage
 				NetHelper.Report(true, "Threading logic started");
 
 				Task.Run(() => {
-					try
-					{
+					try {
 						ctx.work(ctx);
+						NetHelper.Report(true, "Main work for thread finished");
+
 						ctx.afterWork?.Invoke(ctx);
-					}
-					catch when (ctx.token.IsCancellationRequested) { }
-					finally
-					{
+						if (ctx.afterWork is not null)
+							NetHelper.Report(true, "Final work for thread finished");
+					} catch when (ctx.token.IsCancellationRequested) {
+						NetHelper.Report(true, "Thread work was cancelled");
+					} finally {
 						ctx.cancelWait.Set();
 					}
 				});
@@ -226,6 +228,8 @@ namespace MagicStorage
 			{
 				if (items.Count == 0 && thread.filterMode != FilteringOptionLoader.Definitions.All.Type)
 				{
+					NetHelper.Report(true, "No items passed the filter.  Attempting filter with All setting");
+
 					// search all categories
 					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
 
@@ -237,6 +241,8 @@ namespace MagicStorage
 
 				if (items.Count == 0 && thread.modSearch != ModSearchBox.ModIndexAll)
 				{
+					NetHelper.Report(true, "No items passed the filter.  Attempting filter with All Mods setting");
+
 					// search all mods
 					thread.modSearch = ModSearchBox.ModIndexAll;
 
@@ -254,6 +260,8 @@ namespace MagicStorage
 		private static void DoFiltering(ThreadContext thread)
 		{
 			try {
+				NetHelper.Report(true, "Applying item filters...");
+
 				if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type)
 				{
 					if (thread.sortMode == SortingOptionLoader.Definitions.Default.Type)
@@ -277,7 +285,7 @@ namespace MagicStorage
 
 				sourceItems.AddRange(thread.context.sourceItems.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !thread.onlyFavorites || x[0].favorited));
 
-				NetHelper.Report(false, "Filtering applied.  Item count: " + items.Count);
+				NetHelper.Report(true, "Filtering applied.  Item count: " + items.Count);
 			} catch when (thread.token.IsCancellationRequested) {
 				items.Clear();
 				sourceItems.Clear();

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MagicStorage.Common.Systems;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 
@@ -34,7 +35,7 @@ namespace MagicStorage.Modules {
 				}
 			}
 
-			if (needRefresh)
+			if (needRefresh && MagicUI.IsCraftingUIOpen())
 				StorageGUI.needRefresh = true;
 		}
 	}
