@@ -142,6 +142,9 @@ namespace MagicStorage.Common.Systems
 			bb = new(mechBoss3Diamond, plantBossDiamond, golemBossDiamond, fishronDiamond, ancientCultistDiamond, moonlordDiamond, queenSlimeDiamond, empressDiamond);
 			writer.Write(bb);
 
+			// HOTFIX: some mods use NetSend too early, which causes this collection to be null and throw an exception
+			moddedDiamonds ??= new();
+
 			writer.Write((ushort)moddedDiamonds.Count);
 			foreach (int modded in moddedDiamonds)
 				writer.Write(modded);
