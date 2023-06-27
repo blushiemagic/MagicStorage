@@ -20,5 +20,8 @@
     <Reference Include="RecursiveCraft">
       <HintPath>..\references\RecursiveCraft.dll</HintPath>
     </Reference>
+    <Reference Include="SerousCommonLib">
+      <HintPath>..\references\SerousCommonLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

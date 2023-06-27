@@ -1,50 +1,71 @@
 ﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour.HookGen;
+using SerousCommonLib.API;
 using System;
 using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {
+		private static readonly MethodInfo RecipeLoader_AddRecipes = typeof(RecipeLoader).GetMethod("AddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
+		private static event ILContext.Manipulator IL_RecipeLoader_AddRecipes {
+			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_AddRecipes, value);
+			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_AddRecipes, value);
+		}
+
+		private static readonly MethodInfo RecipeLoader_PostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
+		private static event ILContext.Manipulator IL_RecipeLoader_PostAddRecipes {
+			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_PostAddRecipes, value);
+			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_PostAddRecipes, value);
+		}
+
+		private static readonly MethodInfo RecipeLoader_PostSetupRecipes = typeof(RecipeLoader).GetMethod("PostSetupRecipes", BindingFlags.NonPublic | BindingFlags.Static);
+		private static event ILContext.Manipulator IL_RecipeLoader_PostSetupRecipes {
+			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_PostSetupRecipes, value);
+			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_PostSetupRecipes, value);
+		}
+
 		public override void LoadEdits() {
-			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("AddRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
-			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("PostAddRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
-			DirectDetourManager.ILHook(typeof(RecipeLoader).GetCachedMethod("PostSetupRecipes"), typeof(RecipeCheckingILEdit).GetCachedMethod(nameof(RecipeLoader_Hook)));
+			try {
+				IL_RecipeLoader_AddRecipes += RecipeLoader_Hook;
+				IL_RecipeLoader_PostAddRecipes += RecipeLoader_Hook;
+				IL_RecipeLoader_PostSetupRecipes += RecipeLoader_Hook;
+			} catch (Exception ex) when (BuildInfo.IsDev) {
+				// Swallow exceptions on dev builds
+				MagicStorageMod.Instance.Logger.Error($"An edit for \"{nameof(RecipeCheckingILEdit)}\" failed", ex);
+			}
 		}
 
 		public override void UnloadEdits() { }
 
 		private static void RecipeLoader_Hook(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, DoCommonPatching);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
 		}
 
 		private static bool DoCommonPatching(ILCursor c, ref string badReturnReason) {
-			int patchNum = 1;
-
 			//Get the local num for "Mod mod"
 			int modLocalNum = -1;
 			if (!c.TryGotoNext(MoveType.After, i => i.MatchLdloc(out _),
 				i => i.MatchLdloc(out _),
 				i => i.MatchLdelemRef(),
-				i => i.MatchStloc(out modLocalNum)))
-				goto bad_il;
+				i => i.MatchStloc(out modLocalNum))) {
+				badReturnReason = "Could not find instruction sequence for initializing Mod local";
+				return false;
+			}
 
-			patchNum++;
+			if (!c.TryGotoNext(MoveType.Before, i => i.MatchLeaveS(out _))) {
+				badReturnReason = "Could not find end of handler clause";
+				return false;
+			}
 
-			if (!c.TryGotoNext(MoveType.Before, i => i.MatchLeaveS(out _)))
-				goto bad_il;
-
-			patchNum++;
 			c.Emit(OpCodes.Ldloc, modLocalNum);  //Mod mod = CurrentMod;
 			c.EmitDelegate(CheckRecipes);
 
 			return true;
-
-			bad_il:
-			badReturnReason += "\nReason: Could not find instruction sequence for patch #" + patchNum;
-			return false;
 		}
 
 		private static void CheckRecipes(Mod mod) {

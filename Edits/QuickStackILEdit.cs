@@ -2,7 +2,7 @@
 using MagicStorage.Components;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using System;
+using SerousCommonLib.API;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -12,25 +12,32 @@ using ILPlayer = IL.Terraria.Player;
 namespace MagicStorage.Edits {
 	internal class QuickStackILEdit : Edit {
 		public override void LoadEdits() {
-			ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
+			try {
+				ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
+			} catch when (BuildInfo.IsDev) {
+				// Swallow exceptions on dev builds
+				MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(QuickStackILEdit)}\" failed");
+			}
 		}
 
-		private void Player_QuickStackAllChests(ILContext il) {
-			ILCursor c = new(il);
+		public override void UnloadEdits() {
+			ILPlayer.QuickStackAllChests -= Player_QuickStackAllChests;
+		}
 
-			int patchNum = 1;
+		private static void Player_QuickStackAllChests(ILContext il) {
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, PatchMethod);
+		}
 
-			ILHelper.CompleteLog(MagicStorageMod.Instance, c, beforeEdit: true);
-
+		private static bool PatchMethod(ILCursor c, ref string badReturnReason) {
 			int playSoundLocal = -1;
 			if (!c.TryGotoNext(MoveType.Before, i => i.MatchLdloc(out playSoundLocal),
 				i => i.MatchBrfalse(out _),
 				i => i.MatchLdcI4(7),
 				i => i.MatchLdcI4(-1),
-				i => i.MatchLdcI4(-1)))
-				goto bad_il;
-
-			patchNum++;
+				i => i.MatchLdcI4(-1))) {
+				badReturnReason = "Could not find instruction sequence for playSound local variable";
+				return false;
+			}
 
 			c.Emit(OpCodes.Ldarg_0);
 			c.Emit(OpCodes.Ldloca, playSoundLocal);
@@ -50,23 +57,7 @@ namespace MagicStorage.Edits {
 				}
 			});
 
-			ILHelper.UpdateInstructionOffsets(c);
-
-			ILHelper.CompleteLog(MagicStorageMod.Instance, c, beforeEdit: false);
-
-			return;
-			bad_il:
-			string msg = "Unable to fully patch " + il.Method.Name + "()\n" +
-				"Reason: Could not find instruction sequence for patch #" + patchNum;
-
-			if (!BuildInfo.IsDev)
-				throw new Exception(msg);
-			else
-				Mod.Logger.Error(msg);
-		}
-
-		public override void UnloadEdits() {
-			ILPlayer.QuickStackAllChests -= Player_QuickStackAllChests;
+			return true;
 		}
 	}
 }
