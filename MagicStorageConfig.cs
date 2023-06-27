@@ -103,10 +103,10 @@ namespace MagicStorage {
 		[DefaultValue(true)]
 		public bool canMovePanels;
 
-		[Label("$Mods.MagicStorage.Config.automatonRemmembers.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.automatonRemmembers.Tooltip")]
+		[Label("$Mods.MagicStorage.Config.automatonRemembers.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.automatonRemembers.Tooltip")]
 		[DefaultValue(true)]
-		public bool automatonRemmembers;
+		public bool automatonRemembers;
 
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
@@ -165,7 +165,7 @@ namespace MagicStorage {
 		public static RecursionMode RecipeRecursionMode => Instance.recursionMode;
 
 		[JsonIgnore]
-		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemmembers;
+		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 
