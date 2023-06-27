@@ -223,7 +223,7 @@ namespace MagicStorage.UI.States {
 			}
 
 			private bool UpdateZone() {
-				if (Main.gameMenu)
+				if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
 					return false;
 
 				AdjustCommonElements();

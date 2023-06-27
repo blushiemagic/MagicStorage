@@ -751,7 +751,7 @@ namespace MagicStorage.UI.States {
 		}
 
 		public override void Refresh() {
-			if (Main.gameMenu)
+			if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
 				return;
 
 			MoveRecipePanel();
@@ -1032,7 +1032,7 @@ namespace MagicStorage.UI.States {
 			}
 
 			private bool UpdateZones() {
-				if (Main.gameMenu)
+				if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
 					return false;
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
