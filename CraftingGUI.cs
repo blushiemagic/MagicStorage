@@ -268,6 +268,10 @@ namespace MagicStorage
 		private static bool currentlyThreading;
 		private static Recipe[] recipesToRefresh;
 
+		/// <summary>
+		/// Adds <paramref name="recipes"/> to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// </summary>
+		/// <param name="recipes">An array of recipes to update.  If <see langword="null"/>, then nothing happens</param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(Recipe[] recipes) {
 			if (recipesToRefresh is null) {
 				if (recipes is not null)
@@ -285,10 +289,18 @@ namespace MagicStorage
 			NetHelper.Report(true, $"Setting next refresh to check {recipes.Length} recipes");
 		}
 
+		/// <summary>
+		/// Adds all recipes which use <paramref name="affectedItemType"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// </summary>
+		/// <param name="affectedItemType">The item type to use when checking <see cref="MagicCache.RecipesUsingItemType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(int affectedItemType) {
 			SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingItemType.TryGetValue(affectedItemType, out var result) ? result.Value : null);
 		}
 
+		/// <summary>
+		/// Adds all recipes which use the IDs in <paramref name="affectedItemTypes"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// </summary>
+		/// <param name="affectedItemTypes">A collection of item types to use when checking <see cref="MagicCache.RecipesUsingItemType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(IEnumerable<int> affectedItemTypes) {
 			SetNextDefaultRecipeCollectionToRefresh(affectedItemTypes.SelectMany(static i => MagicCache.RecipesUsingItemType.TryGetValue(i, out var result) ? result.Value : Array.Empty<Recipe>())
 				.DistinctBy(static r => r, ReferenceEqualityComparer.Instance)
@@ -302,7 +314,7 @@ namespace MagicStorage
 
 			var craftingPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
 
-			craftingPage.RequestThreadWait(waiting: true);
+			craftingPage?.RequestThreadWait(waiting: true);
 
 			if (StorageGUI.CurrentlyRefreshing) {
 				StorageGUI.activeThread?.Stop();
@@ -314,7 +326,7 @@ namespace MagicStorage
 			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
-				craftingPage.RequestThreadWait(waiting: true);
+				craftingPage?.RequestThreadWait(waiting: false);
 
 				StorageGUI.InvokeOnRefresh();
 				return;
@@ -427,7 +439,7 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 
-			MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting").RequestThreadWait(waiting: false);
+			MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: false);
 
 			StorageGUI.CurrentlyRefreshing = false;
 		}

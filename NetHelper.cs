@@ -391,7 +391,7 @@ namespace MagicStorage
 			Report(false, "Operation: " + op);
 		}
 
-		public static void SendRefreshNetworkItems(Point16 position)
+		public static void SendRefreshNetworkItems(Point16 position, bool forceFullRefresh = false, IEnumerable<int> typesToRefresh = null)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
@@ -399,6 +399,19 @@ namespace MagicStorage
 				packet.Write((byte)MessageType.RefreshNetworkItems);
 				packet.Write(position.X);
 				packet.Write(position.Y);
+
+				if (typesToRefresh is null || !typesToRefresh.Any())
+					packet.Write((ushort)0);
+				else {
+					List<int> types = typesToRefresh.ToList();
+					packet.Write((ushort)types.Count);
+
+					foreach (int id in types)
+						packet.Write(id);
+				}
+
+				packet.Write(forceFullRefresh);
+
 				packet.Send();
 
 				Report(true, MessageType.RefreshNetworkItems + " packet sent from client " + Main.myPlayer);
@@ -408,11 +421,22 @@ namespace MagicStorage
 		private static void ReceiveRefreshNetworkItems(BinaryReader reader)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+			int count = reader.ReadUInt16();
+
+			List<int> types = new();
+			for (int i = 0; i < count; i++)
+				types.Add(reader.ReadInt32());
+
+			bool forceFullRefresh = reader.ReadBoolean();
+
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByPosition.ContainsKey(position))
+			if (TileEntity.ByPosition.ContainsKey(position)) {
+				StorageGUI.SetNextItemTypesToRefresh(types);
+				StorageGUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				StorageGUI.RefreshItems();
+			}
 
 			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
 		}
@@ -675,14 +699,22 @@ namespace MagicStorage
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
+			HashSet<int> typesToUpdate = new();
+
 			List<Item> toWithdraw = new();
-			for (int k = 0; k < withdrawCount; k++)
-				toWithdraw.Add(ItemIO.Receive(reader, true, true));
+			for (int k = 0; k < withdrawCount; k++) {
+				Item withdrawn = ItemIO.Receive(reader, true, true);
+				toWithdraw.Add(withdrawn);
+				typesToUpdate.Add(withdrawn.type);
+			}
 
 			int resultsCount = reader.ReadInt32();
 			List<Item> results = new();
-			for (int k = 0; k < resultsCount; k++)
-				results.Add(ItemIO.Receive(reader, true, true));
+			for (int k = 0; k < resultsCount; k++) {
+				Item result = ItemIO.Receive(reader, true, true);
+				results.Add(result);
+				typesToUpdate.Add(result.type);
+			}
 
 			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
 
@@ -700,7 +732,7 @@ namespace MagicStorage
 				Report(false, MessageType.CraftResult + " packet sent to all clients");
 			}
 
-			SendRefreshNetworkItems(position);
+			SendRefreshNetworkItems(position, false, typesToUpdate);
 		}
 
 		public static void ReceiveCraftResult(BinaryReader reader)
@@ -857,7 +889,7 @@ namespace MagicStorage
 				ProcessUpdateQueue();
 
 			if (destination.GetHeart() is TEStorageHeart heart)
-				SendRefreshNetworkItems(heart.Position);
+				SendRefreshNetworkItems(heart.Position, false, transferredItems.Select(static i => i.type).Distinct());
 
 			return true;
 		}

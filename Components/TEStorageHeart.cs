@@ -123,9 +123,9 @@ namespace MagicStorage.Components
 					environmentAccesses.Remove(environmentAccess);
 			}
 
-			if (Main.netMode == NetmodeID.Server && processClientOperations())
+			if (Main.netMode == NetmodeID.Server && processClientOperations(out bool forcedRefresh, out HashSet<int> typesToRefresh))
 			{
-				NetHelper.SendRefreshNetworkItems(Position);
+				NetHelper.SendRefreshNetworkItems(Position, forcedRefresh, typesToRefresh);
 			}
 
 			updateTimer++;
@@ -141,10 +141,14 @@ namespace MagicStorage.Components
 			}
 		}
 
-		private bool processClientOperations()
+		private bool processClientOperations(out bool forcedRefresh, out HashSet<int> typesToRefresh)
 		{
 			int opCount = clientOpQ.Count;
 			bool networkRefresh = false;
+			
+			forcedRefresh = false;
+			typesToRefresh = new();
+
 			for (int i = 0; i < opCount; ++i)
 			{
 				NetOperation op;
@@ -159,6 +163,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(item, packet, true, true);
 							packet.Send(op.client);
+
+							typesToRefresh.Add(item.type);
 						}
 					}
 					else if (op.type == Operation.Deposit)
@@ -169,6 +175,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(op.item, packet, true, true);
 							packet.Send(op.client);
+
+							typesToRefresh.Add(op.item.type);
 						}
 					}
 					else if (op.type == Operation.DepositAll)
@@ -181,6 +189,8 @@ namespace MagicStorage.Components
 							if (!item.IsAir)
 							{
 								leftOvers.Add(item);
+
+								typesToRefresh.Add(item.type);
 							}
 						}
 						NetHelper.ProcessUpdateQueue();
@@ -205,6 +215,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							packet.Write(op.item.type);
 							packet.Send();
+
+							forcedRefresh = true;
 						}
 					}
 					else if (op.type == Operation.DeleteUnloadedGlobalItemData)
@@ -213,9 +225,15 @@ namespace MagicStorage.Components
 
 						ModPacket packet = PrepareServerResult(op.type);
 						packet.Send();
+
+						forcedRefresh = true;
 					}
 				}
 			}
+
+			if (forcedRefresh)
+				typesToRefresh = null;
+
 			return networkRefresh;
 		}
 
@@ -342,22 +360,32 @@ namespace MagicStorage.Components
 			bool hasChange = false;
 			NetHelper.StartUpdateQueue();
 			Item tryMove = inactiveUnit.WithdrawStack();
+
+			HashSet<int> typesToRefresh = new();
+
 			foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>().Where(unit => !unit.Inactive))
 				while (storageUnit.HasSpaceFor(tryMove) && !tryMove.IsAir)
 				{
+					typesToRefresh.Add(tryMove.type);
+
 					storageUnit.DepositItem(tryMove);
 					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
 						tryMove = inactiveUnit.WithdrawStack();
 					hasChange = true;
 				}
 
-			if (!tryMove.IsAir)
+			if (!tryMove.IsAir) {
+				typesToRefresh.Add(tryMove.type);
 				inactiveUnit.DepositItem(tryMove);
+			}
+
 			NetHelper.ProcessUpdateQueue();
+
 			if (hasChange)
-				NetHelper.SendRefreshNetworkItems(Position);
+				NetHelper.SendRefreshNetworkItems(Position, false, typesToRefresh);
 			else
 				compactStage++;
+
 			return hasChange;
 		}
 
@@ -428,13 +456,13 @@ namespace MagicStorage.Components
 					if (storageUnit2.IsEmpty)
 						continue;
 
-					if (!storageUnit.FlattenFrom(storageUnit2))
+					if (!storageUnit.FlattenFrom(storageUnit2, out List<Item> transferredItems))
 						continue;
 
 					NetHelper.Report(true, $"Items flattened between units {storageUnit.ID} and {storageUnit2.ID}");
 
 					NetHelper.ProcessUpdateQueue();
-					NetHelper.SendRefreshNetworkItems(Position);
+					NetHelper.SendRefreshNetworkItems(Position, false, transferredItems.Select(static i => i.type).Distinct());
 					return true;
 				}
 
@@ -613,6 +641,7 @@ namespace MagicStorage.Components
 				if (result.stack > 0) {
 					ResetCompactStage();
 					StorageGUI.needRefresh = true;
+					StorageGUI.ForceNextRefreshToBeFull = true;
 				}
 			}
 		}
@@ -647,6 +676,7 @@ namespace MagicStorage.Components
 			if (didSomething) {
 				ResetCompactStage();
 				StorageGUI.needRefresh = true;
+				StorageGUI.ForceNextRefreshToBeFull = true;
 			}
 		}
 

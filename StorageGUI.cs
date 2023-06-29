@@ -150,17 +150,45 @@ namespace MagicStorage
 
 		internal static ThreadContext activeThread;
 
+		// Specialized collection for making only certain item types get recalculated
+		internal static HashSet<int> itemTypesToUpdate;
+		private static bool forceFullRefresh;
+
+		public static bool ForceNextRefreshToBeFull {
+			get => forceFullRefresh;
+			set => forceFullRefresh |= value;
+		}
+
+		public static void SetNextItemTypeToRefresh(int itemType) {
+			itemTypesToUpdate ??= new();
+			itemTypesToUpdate.Add(itemType);
+		}
+
+		public static void SetNextItemTypesToRefresh(IEnumerable<int> itemTypes) {
+			itemTypesToUpdate ??= new();
+			
+			foreach (int id in itemTypes)
+				itemTypesToUpdate.Add(id);
+		}
+
 		public static void RefreshItems()
 		{
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
 			needRefresh = false;
 
-			// No refreshing required
-			if (StoragePlayer.IsStorageEnvironment())
-				return;
+			if (forceFullRefresh)
+				itemTypesToUpdate = null;
 
-			if (StoragePlayer.IsStorageCrafting())
-			{
+			// No refreshing required
+			if (StoragePlayer.IsStorageEnvironment()) {
+				itemTypesToUpdate = null;
+				forceFullRefresh = false;
+				return;
+			}
+
+			if (StoragePlayer.IsStorageCrafting()) {
+				itemTypesToUpdate = null;
+				forceFullRefresh = false;
 				CraftingGUI.RefreshItems();
 				return;
 			}
@@ -174,18 +202,58 @@ namespace MagicStorage
 				activeThread = null;
 			}
 
-			items.Clear();
+			if (itemTypesToUpdate is null)
+				RefreshAllItems(storagePage);
+			else
+				RefreshSpecificItems(storagePage);
+		}
+
+		private static void RefreshAllItems(StorageUIState.StoragePage storagePage) {
+			if (InitializeThreadContext(storagePage, false) is not ThreadContext thread)
+				return;
+			
+			// Assign the thread context
+			AdjustItemCollectionAndAssignToThread(thread, thread.heart.GetStoredItems());
+
+			// Start the thread
+			ThreadContext.Begin(thread);
+		}
+
+		private static void RefreshSpecificItems(StorageUIState.StoragePage storagePage) {
+			if (InitializeThreadContext(storagePage, false) is not ThreadContext thread)
+				return;
+			
+			// Get the items that need to be updated
+			IEnumerable<Item> itemsToUpdate = thread.heart.GetStoredItems().Where(static i => itemTypesToUpdate.Contains(i.type));
+
+			// Remove the types from the existing collection, then append the items to update
+			IEnumerable<Item> collection = items.Where(static i => !itemTypesToUpdate.Contains(i.type)).Concat(itemsToUpdate);
+
+			// Assign the thread context
+			AdjustItemCollectionAndAssignToThread(thread, collection);
+
+			// Start the thread
+			ThreadContext.Begin(thread);
+		}
+
+		private static ThreadContext InitializeThreadContext(StorageUIState.StoragePage storagePage, bool clearItemLists) {
 			didMatCheck.Clear();
-			sourceItems.Clear();
+
+			if (clearItemLists) {
+				items.Clear();
+				sourceItems.Clear();
+			}
+
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
+				itemTypesToUpdate = null;
 				storagePage?.RequestThreadWait(waiting: false);
 
 				InvokeOnRefresh();
-				return;
+				return null;
 			}
 
-			NetHelper.Report(true, "Refreshing storage items");
+			NetHelper.Report(true, $"Refreshing {(itemTypesToUpdate is null ? "all" : $"{itemTypesToUpdate.Count}")} storage items");
 
 			CurrentlyRefreshing = true;
 
@@ -196,7 +264,7 @@ namespace MagicStorage
 			bool onlyFavorites = storagePage.filterFavorites.Value;
 			int modSearch = storagePage.modSearchBox.ModIndex;
 
-			ThreadContext thread = new(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
+			return new ThreadContext(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
 				heart = heart,
 				sortMode = sortMode,
 				filterMode = filterMode,
@@ -204,18 +272,19 @@ namespace MagicStorage
 				onlyFavorites = onlyFavorites,
 				modSearch = modSearch
 			};
+		}
 
+		private static void AdjustItemCollectionAndAssignToThread(ThreadContext thread, IEnumerable<Item> source) {
+			// Adjust the thread context based on the filter mode
 			if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type) {
-				Dictionary<int, Item> stored = thread.heart.GetStoredItems().GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+				Dictionary<int, Item> stored = source.GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
 
 				IEnumerable<Item> toFilter = thread.heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
 
 				thread.context = new(toFilter);
 			} else {
-				thread.context = new(thread.heart.GetStoredItems());
+				thread.context = new(source);
 			}
-
-			ThreadContext.Begin(thread);
 		}
 
 		private static void SortAndFilter(ThreadContext thread) {
@@ -257,6 +326,8 @@ namespace MagicStorage
 				MagicUI.lastKnownSearchBarErrorReason = null;
 		}
 
+		private static bool filterOutFavorites;
+
 		private static void DoFiltering(ThreadContext thread)
 		{
 			try {
@@ -277,13 +348,15 @@ namespace MagicStorage
 				}
 
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					thread.context.items = thread.context.items.OrderByDescending(x => x.favorited ? 1 : 0);
-					thread.context.sourceItems = thread.context.sourceItems.OrderByDescending(x => x[0].favorited ? 1 : 0);
+					thread.context.items = thread.context.items.OrderByDescending(static x => x.favorited ? 1 : 0);
+					thread.context.sourceItems = thread.context.sourceItems.OrderByDescending(static x => x[0].favorited ? 1 : 0);
 				}
 
-				items.AddRange(thread.context.items.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !thread.onlyFavorites || x.favorited));
+				filterOutFavorites = thread.onlyFavorites;
 
-				sourceItems.AddRange(thread.context.sourceItems.Where(x => !MagicStorageConfig.CraftingFavoritingEnabled || !thread.onlyFavorites || x[0].favorited));
+				items.AddRange(thread.context.items.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x.favorited));
+
+				sourceItems.AddRange(thread.context.sourceItems.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x[0].favorited));
 
 				NetHelper.Report(true, "Filtering applied.  Item count: " + items.Count);
 			} catch when (thread.token.IsCancellationRequested) {
@@ -299,9 +372,12 @@ namespace MagicStorage
 
 			OnRefresh?.Invoke();
 
+			itemTypesToUpdate = null;
+			forceFullRefresh = false;
+
 			CurrentlyRefreshing = false;
 
-			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage").RequestThreadWait(waiting: false);
+			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage")?.RequestThreadWait(waiting: false);
 		}
 
 		internal static void ResetSlotFocus()
@@ -548,6 +624,8 @@ namespace MagicStorage
 				item.favorited = doFavorite;
 
 			needRefresh = true;
+
+			SetNextItemTypeToRefresh(sourceItems[slot][0].type);
 		}
 
 		/// <summary>
@@ -564,9 +642,16 @@ namespace MagicStorage
 
 			if (wrapper.Valid) {
 				int oldStack = item.stack;
+				int oldType = item.type;
 				TEStorageHeart heart = wrapper.Heart;
 				heart.TryDeposit(item);
-				return oldStack != item.stack;
+
+				if (oldStack != item.stack) {
+					if (GetHeart()?.Position == heart.Position)
+						SetNextItemTypeToRefresh(oldType);
+
+					return true;
+				}
 			}
 			
 			return false;
@@ -580,9 +665,16 @@ namespace MagicStorage
 		public static bool TryDeposit(Item item)
 		{
 			int oldStack = item.stack;
+			int oldType = item.type;
 			TEStorageHeart heart = GetHeart();
 			heart.TryDeposit(item);
-			return oldStack != item.stack;
+
+			if (oldStack != item.stack) {
+				SetNextItemTypeToRefresh(oldType);
+				return true;
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -600,7 +692,15 @@ namespace MagicStorage
 
 			if (wrapper.Valid) {
 				TEStorageHeart heart = wrapper.Heart;
-				return heart.TryDeposit(items);
+				int[] types = items.Select(static i => i.type).ToArray();
+
+				if (heart.TryDeposit(items)) {
+					if (GetHeart()?.Position == heart.Position)
+						SetNextItemTypesToRefresh(types);
+					return true;
+				}
+
+				return false;
 			}
 
 			return false;
@@ -626,7 +726,15 @@ namespace MagicStorage
 				if (quickStack)
 					items = new(items.Where(i => heart.HasItem(i, ignorePrefix: true)));
 
-				return heart.TryDeposit(items);
+				int[] types = items.Select(static i => i.type).ToArray();
+
+				if (heart.TryDeposit(items)) {
+					if (GetHeart()?.Position == heart.Position)
+						SetNextItemTypesToRefresh(types);
+					return true;
+				}
+
+				return false;
 			}
 
 			return false;
@@ -640,7 +748,14 @@ namespace MagicStorage
 		public static bool TryDeposit(List<Item> items)
 		{
 			TEStorageHeart heart = GetHeart();
-			return heart.TryDeposit(items);
+			int[] types = items.Select(static i => i.type).ToArray();
+			
+			if (heart.TryDeposit(items)) {
+				SetNextItemTypesToRefresh(types);
+				return true;
+			}
+
+			return false;
 		}
 
 		internal static bool TryDepositAll(bool quickStack)
@@ -658,7 +773,14 @@ namespace MagicStorage
 					items.Add(item);
 			}
 
-			return heart.TryDeposit(items);
+			int[] types = items.Select(static i => i.type).ToArray();
+
+			if (heart.TryDeposit(items)) {
+				SetNextItemTypesToRefresh(types);
+				return true;
+			}
+
+			return false;
 		}
 
 		internal static bool TryRestock()
@@ -704,7 +826,12 @@ namespace MagicStorage
 
 			if (wrapper.Valid) {
 				TEStorageHeart heart = wrapper.Heart;
-				return heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
+				Item withdrawn = heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
+
+				if (!withdrawn.IsAir && GetHeart()?.Position == heart.Position)
+					SetNextItemTypeToRefresh(withdrawn.type);
+
+				return withdrawn;
 			}
 
 			return new Item();
@@ -723,7 +850,12 @@ namespace MagicStorage
 		public static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
 			TEStorageHeart heart = GetHeart();
-			return heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
+			Item withdrawn = heart.TryWithdraw(item, keepOneIfFavorite, toInventory);
+
+			if (!withdrawn.IsAir)
+				SetNextItemTypeToRefresh(withdrawn.type);
+
+			return withdrawn;
 		}
 	}
 }

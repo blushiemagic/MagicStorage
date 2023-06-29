@@ -312,6 +312,7 @@ namespace MagicStorage.UI.States {
 
 					bool changed = false, canRefresh = false;
 					if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
+						int type = Main.mouseItem.type;
 						if (StorageGUI.TryDeposit(Main.mouseItem)) {
 							changed = true;
 							canRefresh = true;

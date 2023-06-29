@@ -314,16 +314,18 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal bool FlattenFrom(TEStorageUnit source) {
+		internal bool FlattenFrom(TEStorageUnit source, out List<Item> transferredItems) {
+			transferredItems = null;
+
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.ClientRequestItemTransfer(this, source);
 				return false;
 			} else if (Main.netMode == NetmodeID.Server)
 				return NetHelper.AttemptItemTransferAndSendResult(this, source, false);
 
-			AttemptItemTransfer(this, source, out List<Item> transferred);
+			AttemptItemTransfer(this, source, out transferredItems);
 
-			if (transferred.Count == 0)
+			if (transferredItems.Count == 0)
 				return false;
 
 			PostChangeContents();
