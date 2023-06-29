@@ -33,6 +33,13 @@ namespace MagicStorage {
 
 		public UIOptionConfigurationManager optionsConfig;
 
+		public MagicStorageMod() {
+			PreJITFilter = new CheckModBuildVersionBeforeJIT();
+			CheckModBuildVersionBeforeJIT.Mod = this;
+		}
+
+		internal const string build144Version = "2023.6";
+
 		public override void Load()
 		{
 			UsingPrivateBeta = DisplayName.Contains("BETA");
@@ -70,6 +77,9 @@ namespace MagicStorage {
 
 			Utility.UnloadHookDelegate();
 			RecursiveRecipe.UnloadDelegates();
+
+			CheckModBuildVersionBeforeJIT.Mod = null;
+			CheckModBuildVersionBeforeJIT.versionChecked = false;
 		}
 
 		public override void PostSetupContent() {
