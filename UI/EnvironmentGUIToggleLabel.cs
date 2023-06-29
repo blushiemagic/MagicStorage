@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
@@ -51,7 +52,8 @@ namespace MagicStorage.UI {
 
 				NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);
 
-				NetHelper.Report(false, $"\"{Text.Text}\" label toggled to {IsOn}");
+				string state = IsOn ? "[c/00ff00:enabled]" : "[c/ff0000:disabled]";
+				Main.NewText($"Module \"{Text.Text}\" was set to {state}.");
 
 				SoundEngine.PlaySound(SoundID.MenuTick);
 			}
