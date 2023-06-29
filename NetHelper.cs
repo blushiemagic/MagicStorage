@@ -115,8 +115,7 @@ namespace MagicStorage
 
 			Report(true, "Received message " + type + " from player " + sender);
 
-			switch (type)
-			{
+			switch (type) {
 				case MessageType.SearchAndRefreshNetwork:
 					ReceiveSearchAndRefresh(reader);
 					break;
@@ -203,6 +202,12 @@ namespace MagicStorage
 					break;
 				case MessageType.PlayerBankDepositResult:
 					ClientReceiveDepositFromBankResult(reader);
+					break;
+				case MessageType.ComponentPlacement:
+					ServerReceiveComponentPlacement(reader, sender);
+					break;
+				case MessageType.ComponentDestruction:
+					ServerReceiveComponentDestruction(reader, sender);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
@@ -1353,6 +1358,44 @@ namespace MagicStorage
 
 			Report(true, MessageType.PlayerBankDepositResult + " packet received by client " + Main.myPlayer);
 		}
+
+		public static void SendComponentPlacement(Point16 position) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ComponentPlacement);
+			packet.Write(position);
+			packet.Send();
+		}
+
+		public static void ServerReceiveComponentPlacement(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			PrintClientRequest(sender, "Component Placement", position);
+		}
+
+		public static void SendComponentDestruction(Point16 position) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ComponentDestruction);
+			packet.Write(position);
+			packet.Send();
+		}
+
+		public static void ServerReceiveComponentDestruction(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			PrintClientRequest(sender, "Component Destruction", position);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1385,6 +1428,8 @@ namespace MagicStorage
 		ServerOpConfirmationResult,
 		PlayerHasServerOp,
 		ClientRequestPlayerBankDeposit,
-		PlayerBankDepositResult
+		PlayerBankDepositResult,
+		ComponentPlacement,
+		ComponentDestruction
 	}
 }

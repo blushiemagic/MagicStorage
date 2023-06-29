@@ -41,6 +41,7 @@ namespace MagicStorage.Components
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				NetHelper.SendComponentPlace(i - 1, j - 1, Type);
+				NetHelper.SendComponentPlacement(new Point16(i - 1, j - 1));
 				return -1;
 			}
 
@@ -55,6 +56,7 @@ namespace MagicStorage.Components
 			{
 				NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 2, 2);
 				NetHelper.SendSearchAndRefresh(i - 1, j - 1);
+				NetHelper.SendComponentPlacement(new Point16(i - 1, j - 1));
 				return 0;
 			}
 
@@ -69,9 +71,10 @@ namespace MagicStorage.Components
 
 		public override void OnKill()
 		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.SendSearchAndRefresh(Position.X, Position.Y);
-			else
+				NetHelper.SendComponentDestruction(Position);
+			} else
 				SearchAndRefreshNetwork(Position);
 		}
 
