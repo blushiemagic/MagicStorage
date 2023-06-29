@@ -121,7 +121,7 @@ namespace MagicStorage.Common.Systems {
 			return accessLocation.X >= 0;
 		}
 
-		private void DrawAreas(Player player, SpriteBatch spriteBatch, Point16 access, float playerToPylonRange, bool drawNear) {
+		private static void DrawAreas(Player player, SpriteBatch spriteBatch, Point16 access, float playerToPylonRange, bool drawNear) {
 			GetDrawingInformation(player, access, playerToPylonRange, drawNear, out var contexts);
 
 			foreach (DrawingContext context in contexts) {

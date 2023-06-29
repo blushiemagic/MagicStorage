@@ -9,6 +9,7 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using System.Reflection;
 using Terraria.ModLoader.Default;
+using XPT.Core.Audio.MP3Sharp.Decoding;
 
 namespace MagicStorage.Components
 {
@@ -244,11 +245,15 @@ namespace MagicStorage.Components
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, keepOneIfFavorite, client));
+
+				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
+
+				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 			else if (op == Operation.DepositAll)
 			{
@@ -260,15 +265,21 @@ namespace MagicStorage.Components
 					items.Add(item);
 				}
 				clientOpQ.Enqueue(new NetOperation(op, items, client));
+
+				NetHelper.PrintClientRequest(client, "Deposit All", Position);
 			}
 			else if (op == Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
 				clientOpQ.Enqueue(new NetOperation(op, new Item(type), client));
+
+				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Items", Position);
 			}
 			else if (op == Operation.DeleteUnloadedGlobalItemData)
 			{
 				clientOpQ.Enqueue(new NetOperation(op, (Item)null, client));
+
+				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Data", Position);
 			}
 		}
 

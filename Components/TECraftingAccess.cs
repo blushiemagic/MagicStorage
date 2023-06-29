@@ -109,11 +109,15 @@ namespace MagicStorage.Components
 			{
 				byte slot = reader.ReadByte();
 				clientOpQ.Enqueue(new NetOperation(op, slot, client));
+
+				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
+
+				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 		}
 
