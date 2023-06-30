@@ -58,6 +58,9 @@ namespace MagicStorage
 		[Obsolete("Use the SetRefresh() method or RefreshStorageUI property instead", error: true)]
 		public static bool needRefresh;
 
+		[Obsolete]
+		private static ref bool Obsolete_needRefresh() => ref needRefresh;
+
 		private static bool _refreshUI;
 		public static bool RefreshUI {
 			get => _refreshUI;
@@ -73,7 +76,7 @@ namespace MagicStorage
 		private static bool forceFullRefresh;
 
 		public static bool ForceNextRefreshToBeFull {
-			get => forceFullRefresh;
+			get => forceFullRefresh || Obsolete_needRefresh();
 			set => forceFullRefresh |= value;
 		}
 
@@ -191,6 +194,7 @@ namespace MagicStorage
 		{
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
 			_refreshUI = false;
+			Obsolete_needRefresh() = false;
 
 			if (forceFullRefresh)
 				itemTypesToUpdate = null;
