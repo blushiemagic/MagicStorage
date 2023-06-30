@@ -40,7 +40,11 @@ namespace MagicStorage.Edits {
 			}
 		}
 
-		public override void UnloadEdits() { }
+		public override void UnloadEdits() {
+			IL_RecipeLoader_AddRecipes -= RecipeLoader_Hook;
+			IL_RecipeLoader_PostAddRecipes -= RecipeLoader_Hook;
+			IL_RecipeLoader_PostSetupRecipes -= RecipeLoader_Hook;
+		}
 
 		private static void RecipeLoader_Hook(ILContext il) {
 			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
