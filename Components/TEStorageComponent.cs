@@ -152,7 +152,7 @@ namespace MagicStorage.Components
 				centerEnt.ResetAndSearch();
 
 				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && centerEnt.GetHeart()?.Position == StoragePlayer.LocalPlayer.GetStorageHeart().Position)
-					StorageGUI.needRefresh = true;
+					StorageGUI.SetRefresh(forceFullRefresh: false);
 			}
 		}
 	}

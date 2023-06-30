@@ -9,8 +9,10 @@ namespace MagicStorage.Common.Global {
 			if (fullyResearched) {
 				JourneyInfiniteItems.inventory.Add(item.type);
 
-				if (MagicUI.IsCraftingUIOpen())
-					StorageGUI.needRefresh = true;
+				if (MagicUI.IsCraftingUIOpen()) {
+					StorageGUI.SetRefresh(forceFullRefresh: false);
+					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(item.type);
+				}
 			}
 		}
 	}

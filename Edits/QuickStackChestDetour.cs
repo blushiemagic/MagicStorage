@@ -28,7 +28,7 @@ namespace MagicStorage.Edits {
 			NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
 
 			if (success)
-				NetHelper.SendQuickStackToStorage(plr);
+				NetHelper.SendQuickStackToStorage(plr, item.type);
 		}
 	}
 }

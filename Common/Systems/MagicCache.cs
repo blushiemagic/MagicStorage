@@ -27,6 +27,20 @@ public class MagicCache : ModSystem
 		public Recipe[] Value => lazy.Value;
 	}
 
+	public class LazyRecipeTile {
+		public readonly int tileType;
+
+		private readonly Lazy<Recipe[]> lazy;
+
+		public LazyRecipeTile(int tileType) {
+			this.tileType = tileType;
+
+			lazy = new(() => EnabledRecipes.Where(r => r.requiredTile.Any(t => t == this.tileType)).ToArray(), isThreadSafe: false);
+		}
+
+		public Recipe[] Value => lazy.Value;
+	}
+
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
@@ -41,6 +55,8 @@ public class MagicCache : ModSystem
 
 	public static Dictionary<int, LazyRecipe> RecipesUsingItemType { get; private set; } = null!;
 
+	public static Dictionary<int, LazyRecipeTile> RecipesUsingTileType { get; private set; } = null!;
+
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
 	/// Also forces the active crafting UI to refresh if applicable.
@@ -49,7 +65,7 @@ public class MagicCache : ModSystem
 		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
 
 		if (!Main.gameMenu && MagicUI.IsCraftingUIOpen())
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 
 		// TODO: refresh recursive recipes
 	}
@@ -135,6 +151,11 @@ public class MagicCache : ModSystem
 
 		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
 			.ToDictionary(kvp => kvp.Key, kvp => new LazyRecipe(kvp.Key));
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingTileType");
+
+		RecipesUsingTileType = Enumerable.Range(TileID.Dirt, TileLoader.TileCount)
+			.ToDictionary(type => type, type => new LazyRecipeTile(type));
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
 	}

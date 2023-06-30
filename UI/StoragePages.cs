@@ -107,14 +107,14 @@ namespace MagicStorage.UI {
 		internal void ClickOption(UIMouseEvent evt, UIElement e) {
 			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable) {
 				OnConfigurationClicked(e as TElement);
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh(forceFullRefresh: true);
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				return;
 			}
 
 			option = GetOptionType(e as TElement);
 
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 			SoundEngine.PlaySound(SoundID.MenuTick);
 
 			SetLoaderSelection(option);

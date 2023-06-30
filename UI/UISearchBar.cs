@@ -153,7 +153,7 @@ namespace MagicStorage.UI
 			cursorPosition = Text.Length;
 
 			if (forced || !MagicStorageConfig.SearchBarRefreshOnKey)
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		private void HandleTextInput()
@@ -177,7 +177,7 @@ namespace MagicStorage.UI
 				cursorPosition = newStringLength;
 
 				if (MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.needRefresh = true;
+					StorageGUI.SetRefresh(forceFullRefresh: true);
 			}
 
 			if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
@@ -185,7 +185,7 @@ namespace MagicStorage.UI
 				Text = Text.Remove(cursorPosition, 1);
 
 				if (MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.needRefresh = true;
+					StorageGUI.SetRefresh(forceFullRefresh: true);
 			}
 
 			if (KeyTyped(Keys.Left) && cursorPosition > 0)
@@ -202,7 +202,7 @@ namespace MagicStorage.UI
 				CheckBlockInput();
 
 				if (!MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.needRefresh = true;
+					StorageGUI.SetRefresh(forceFullRefresh: true);
 			}
 		}
 

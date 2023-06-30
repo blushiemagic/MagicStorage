@@ -136,7 +136,8 @@ namespace MagicStorage.UI.States {
 						}
 
 						CraftingGUI.SetSelectedRecipe(selected);
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 
 						UpdatePanelHeight(PanelHeight);
 
@@ -260,6 +261,7 @@ namespace MagicStorage.UI.States {
 						if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							result.favorited = !result.favorited;
 							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+							CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 						} else {
 							Item toWithdraw = result.Clone();
 							
@@ -276,7 +278,7 @@ namespace MagicStorage.UI.States {
 					}
 
 					if (changed) {
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
 
 						SoundEngine.PlaySound(SoundID.Grab);
 
@@ -918,7 +920,7 @@ namespace MagicStorage.UI.States {
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
-				recipeButtons = new(() => StorageGUI.needRefresh = true, 32, 5, forceGearIconToNotBeCreated: true);
+				recipeButtons = new(() => StorageGUI.SetRefresh(forceFullRefresh: true), 32, 5, forceGearIconToNotBeCreated: true);
 				InitFilterButtons();
 				topBar.Append(recipeButtons);
 
@@ -961,7 +963,7 @@ namespace MagicStorage.UI.States {
 						}
 
 						if (changed) {
-							StorageGUI.needRefresh = true;
+							StorageGUI.SetRefresh();
 							SoundEngine.PlaySound(SoundID.Grab);
 
 							obj.IgnoreNextHandleAction = true;
@@ -1167,7 +1169,8 @@ namespace MagicStorage.UI.States {
 						if (!storagePlayer.FavoritedRecipes.Add(obj.StoredItem))
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
@@ -1186,7 +1189,7 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 						
-						StorageGUI.needRefresh = true;
+						StorageGUI.RefreshStorageUI = true;
 
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}

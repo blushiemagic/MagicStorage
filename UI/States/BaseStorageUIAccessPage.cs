@@ -53,6 +53,8 @@ namespace MagicStorage.UI.States {
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
 
+				// Ensure that the UI is refreshed completely
+				StorageGUI.ForceNextRefreshToBeFull = true;
 				StorageGUI.CheckRefresh();
 			};
 
@@ -103,7 +105,7 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), () => StorageGUI.needRefresh = true) {
+			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), static () => StorageGUI.SetRefresh(forceFullRefresh: true)) {
 				GetHoverText = () => {
 					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
 						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
@@ -197,7 +199,7 @@ namespace MagicStorage.UI.States {
 			if (oldNeedsMod != needsMod)
 				searchBar.SetDefaultText(GetRandomSearchText(needsMod));
 
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		private static readonly LocalizedText[] searchTextDefaults = new[] {

@@ -495,6 +495,9 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
+			if (!toDeposit.IsAir)
+				StorageGUI.SetNextItemTypeToRefresh(toDeposit.type);
+
 			int oldStack = toDeposit.stack;
 			int remember = toDeposit.type;
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -592,6 +595,9 @@ namespace MagicStorage.Components
 							result = withdrawn;
 						else
 							result.stack += withdrawn.stack;
+
+						StorageGUI.SetNextItemTypeToRefresh(withdrawn.type);
+
 						if (lookFor.stack <= 0)
 						{
 							ResetCompactStage();
@@ -651,8 +657,8 @@ namespace MagicStorage.Components
 
 				if (result.stack > 0) {
 					ResetCompactStage();
-					StorageGUI.needRefresh = true;
-					StorageGUI.ForceNextRefreshToBeFull = true;
+					StorageGUI.SetRefresh();
+					StorageGUI.SetNextItemTypeToRefresh(type);
 				}
 			}
 		}
@@ -668,6 +674,8 @@ namespace MagicStorage.Components
 
 			bool didSomething = false;
 
+			HashSet<int> typesToRefresh = new();
+
 			foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
 				//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
 				if (item is null || item.IsAir || item.ModItem is UnloadedItem)
@@ -681,13 +689,15 @@ namespace MagicStorage.Components
 				if (array.Length != globalItems.Length) {
 					Item_globalItems.SetValue(item, array);
 					didSomething = true;
+
+					typesToRefresh.Add(item.type);
 				}
 			}
 
 			if (didSomething) {
 				ResetCompactStage();
-				StorageGUI.needRefresh = true;
-				StorageGUI.ForceNextRefreshToBeFull = true;
+				StorageGUI.SetRefresh();
+				StorageGUI.SetNextItemTypesToRefresh(typesToRefresh);
 			}
 		}
 

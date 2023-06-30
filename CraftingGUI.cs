@@ -307,10 +307,34 @@ namespace MagicStorage
 				.ToArray());
 		}
 
+		/// <summary>
+		/// Adds all recipes which use <paramref name="affectedTileType"/> as a required tile to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// </summary>
+		/// <param name="affectedTileType">The tile type to use when checking <see cref="MagicCache.RecipesUsingTileType"/></param>
+		public static void SetNextDefaultRecipeCollectionToRefreshFromTile(int affectedTileType) {
+			SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingTileType.TryGetValue(affectedTileType, out var result) ? result.Value : null);
+		}
+
+		/// <summary>
+		/// Adds all recipes which the IDs in <paramref name="affectedTileTypes"/> as a required tile to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// </summary>
+		/// <param name="affectedTileTypes">A collection of the tile type to use when checking <see cref="MagicCache.RecipesUsingTileType"/></param>
+		public static void SetNextDefaultRecipeCollectionToRefreshFromTile(IEnumerable<int> affectedTileTypes) {
+			SetNextDefaultRecipeCollectionToRefresh(affectedTileTypes.SelectMany(static t => MagicCache.RecipesUsingTileType.TryGetValue(t, out var result) ? result.Value : Array.Empty<Recipe>())
+				.DistinctBy(static r => r, ReferenceEqualityComparer.Instance)
+				.ToArray());
+		}
+
 		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
-			// Custom array provided?  Refresh the default array anyway
-			SetNextDefaultRecipeCollectionToRefresh(toRefresh);
-			toRefresh = recipesToRefresh;
+			if (!StorageGUI.ForceNextRefreshToBeFull) {
+				// Custom array provided?  Refresh the default array anyway
+				SetNextDefaultRecipeCollectionToRefresh(toRefresh);
+				toRefresh = recipesToRefresh;
+			} else {
+				// Force all recipes to be recalculated
+				recipesToRefresh = null;
+				toRefresh = null;
+			}
 
 			var craftingPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
 
@@ -430,7 +454,7 @@ namespace MagicStorage
 
 		private static void AfterSorting(StorageGUI.ThreadContext thread) {
 			StorageGUI.InvokeOnRefresh();
-			StorageGUI.needRefresh = false;
+			StorageGUI.RefreshStorageUI = false;
 
 			var sandbox = (thread.state as ThreadState).sandbox;
 
@@ -1102,6 +1126,8 @@ namespace MagicStorage
 			RefreshStorageItems();
 			blockStorageItems.Clear();
 
+			SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
+
 			NetHelper.Report(true, "Successfully reassigned current recipe!");
 		}
 
@@ -1132,7 +1158,7 @@ namespace MagicStorage
 
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
-					StorageGUI.needRefresh = true;
+					StorageGUI.SetRefresh();
 				}
 
 				rightClickTimer--;
@@ -1732,7 +1758,7 @@ namespace MagicStorage
 			}
 
 			if (!withdrawn.IsAir) {
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh();
 				SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingItemType.TryGetValue(withdrawn.type, out var result) ? result.Value : null);
 			}
 

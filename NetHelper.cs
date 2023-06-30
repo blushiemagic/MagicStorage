@@ -177,7 +177,7 @@ namespace MagicStorage
 					ReceiveStorageUnitStyle(reader, sender);
 					break;
 				case MessageType.InformQuickStackToStorage:
-					ClientReceiveQuickStackToStorage();
+					ClientReceiveQuickStackToStorage(reader);
 					break;
 				case MessageType.GolemHelpTextUpdate:
 					ClientReceiveGolemTextUpdate();
@@ -1084,21 +1084,29 @@ namespace MagicStorage
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
 
-		public static void SendQuickStackToStorage(int player) {
+		public static void SendQuickStackToStorage(int player, int itemType) {
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.InformQuickStackToStorage);
+			packet.Write(itemType);
 			packet.Send(toClient: player);
 		}
 
-		public static void ClientReceiveQuickStackToStorage() {
+		public static void ClientReceiveQuickStackToStorage(BinaryReader reader) {
+			int itemType = reader.ReadInt32();
+
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
 			SoundEngine.PlaySound(SoundID.Grab);
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh();
+
+			if (MagicUI.IsCraftingUIOpen())
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
+			else
+				StorageGUI.SetNextItemTypeToRefresh(itemType);
 		}
 
 		public static void SendGolemTextUpdate() {

@@ -14,23 +14,29 @@ namespace MagicStorage.Modules {
 			Item[] inv = Main.LocalPlayer.inventory;
 
 			bool needRefresh = false;
+			HashSet<int> typesToUpdate = new();
 
 			for (int i = 0; i < 58; i++) {
 				Item item = inv[i];
 
 				if (types[i] != item.type) {
+					typesToUpdate.Add(types[i]);
 					types[i] = item.type;
 					needRefresh = true;
+					typesToUpdate.Add(item.type);
 				}
 
 				if (stacks[i] != item.stack) {
 					stacks[i] = item.stack;
 					needRefresh = true;
+					typesToUpdate.Add(item.stack);
 				}
 			}
 
-			if (needRefresh && MagicUI.IsCraftingUIOpen())
-				StorageGUI.needRefresh = true;
+			if (needRefresh && MagicUI.IsCraftingUIOpen()) {
+				StorageGUI.SetRefresh();
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(typesToUpdate);
+			}
 		}
 	}
 }

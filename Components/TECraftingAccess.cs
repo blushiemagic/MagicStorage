@@ -162,6 +162,8 @@ namespace MagicStorage.Components
 					item.stack--;
 					if (item.stack <= 0)
 						item.SetDefaults();
+
+					UpdateRecipesFromStationAction(nItem.createTile);
 				}
 			}
 
@@ -193,7 +195,19 @@ namespace MagicStorage.Components
 			var item = stations[slot];
 			stations.RemoveAt(slot);
 
+			UpdateRecipesFromStationAction(item.createTile);
+
 			return item;
+		}
+
+		private static void UpdateRecipesFromStationAction(int stationTile) {
+			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
+
+			TileLoader.AdjTiles(Main.LocalPlayer, stationTile);
+
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0).Prepend(stationTile));
+
+			Main.LocalPlayer.adjTile = adjTiles;
 		}
 
 		public Item TryWithdrawStation(int slot, bool toInventory = false)

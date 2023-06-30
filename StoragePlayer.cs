@@ -244,7 +244,17 @@ namespace MagicStorage
 			if (item.type != oldType || item.stack != oldStack)
 			{
 				SoundEngine.PlaySound(SoundID.Grab);
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh();
+
+				int[] types = new int[] {
+					item.type,
+					oldType
+				};
+
+				if (MagicUI.IsCraftingUIOpen())
+					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(types);
+				else
+					StorageGUI.SetNextItemTypesToRefresh(types);
 			}
 
 			return true;

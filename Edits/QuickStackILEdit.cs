@@ -52,7 +52,7 @@ namespace MagicStorage.Edits {
 						bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref flag);
 
 						if (success && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
-							StorageGUI.needRefresh = true;
+							StorageGUI.SetRefresh();
 					}
 				}
 			});

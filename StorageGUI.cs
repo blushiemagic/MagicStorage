@@ -54,14 +54,35 @@ namespace MagicStorage
 
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		public static bool needRefresh;
+		private static bool _needRefresh;
+		public static bool RefreshStorageUI {
+			get => _needRefresh;
+			set => _needRefresh |= value;
+		}
 
 		public static bool CurrentlyRefreshing { get; internal set; }
 
 		public static event Action OnRefresh;
 
+		// Specialized collection for making only certain item types get recalculated
+		internal static HashSet<int> itemTypesToUpdate;
+		private static bool forceFullRefresh;
+
+		public static bool ForceNextRefreshToBeFull {
+			get => forceFullRefresh;
+			set => forceFullRefresh |= value;
+		}
+
+		/// <summary>
+		/// Shorthand for setting <see cref="RefreshStorageUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
+		/// </summary>
+		public static void SetRefresh(bool forceFullRefresh = false) {
+			RefreshStorageUI = true;
+			StorageGUI.forceFullRefresh = forceFullRefresh;
+		}
+
 		internal static void CheckRefresh() {
-			if (needRefresh)
+			if (RefreshStorageUI)
 				RefreshItems();
 		}
 
@@ -150,15 +171,6 @@ namespace MagicStorage
 
 		internal static ThreadContext activeThread;
 
-		// Specialized collection for making only certain item types get recalculated
-		internal static HashSet<int> itemTypesToUpdate;
-		private static bool forceFullRefresh;
-
-		public static bool ForceNextRefreshToBeFull {
-			get => forceFullRefresh;
-			set => forceFullRefresh |= value;
-		}
-
 		public static void SetNextItemTypeToRefresh(int itemType) {
 			itemTypesToUpdate ??= new();
 			itemTypesToUpdate.Add(itemType);
@@ -174,7 +186,7 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
-			needRefresh = false;
+			RefreshStorageUI = false;
 
 			if (forceFullRefresh)
 				itemTypesToUpdate = null;
@@ -187,9 +199,9 @@ namespace MagicStorage
 			}
 
 			if (StoragePlayer.IsStorageCrafting()) {
+				CraftingGUI.RefreshItems();
 				itemTypesToUpdate = null;
 				forceFullRefresh = false;
-				CraftingGUI.RefreshItems();
 				return;
 			}
 
@@ -206,6 +218,9 @@ namespace MagicStorage
 				RefreshAllItems(storagePage);
 			else
 				RefreshSpecificItems(storagePage);
+
+			itemTypesToUpdate = null;
+			forceFullRefresh = false;
 		}
 
 		private static void RefreshAllItems(StorageUIState.StoragePage storagePage) {
@@ -372,9 +387,6 @@ namespace MagicStorage
 
 			OnRefresh?.Invoke();
 
-			itemTypesToUpdate = null;
-			forceFullRefresh = false;
-
 			CurrentlyRefreshing = false;
 
 			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage")?.RequestThreadWait(waiting: false);
@@ -413,7 +425,7 @@ namespace MagicStorage
 						Main.mouseItem.stack += result.stack;
 					}
 
-					needRefresh = true;
+					SetRefresh();
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 
@@ -573,7 +585,7 @@ namespace MagicStorage
 
 			DepositTheItems:
 			heart.TryDeposit(showcaseItems.Select(i => i.Clone()).ToList());
-			needRefresh = true;
+			SetRefresh();
 		}
 
 		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -623,7 +635,7 @@ namespace MagicStorage
 			foreach (var item in sourceItems[slot])
 				item.favorited = doFavorite;
 
-			needRefresh = true;
+			RefreshStorageUI = true;
 
 			SetNextItemTypeToRefresh(sourceItems[slot][0].type);
 		}
