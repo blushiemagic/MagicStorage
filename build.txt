@@ -7,4 +7,5 @@ hideResources = false
 includeSource = true
 includePDB = true
 buildIgnore = OldArt\*, .git\*
+modReferences = SerousCommonLib
 weakReferences = RecursiveCraft@2.0
