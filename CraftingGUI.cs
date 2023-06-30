@@ -453,8 +453,13 @@ namespace MagicStorage
 		}
 
 		private static void AfterSorting(StorageGUI.ThreadContext thread) {
-			StorageGUI.InvokeOnRefresh();
-			StorageGUI.RefreshUI = false;
+			// Refresh logic in the UIs will only run when this is false
+			if (!thread.token.IsCancellationRequested)
+				StorageGUI.CurrentlyRefreshing = false;
+
+			// Ensure that race conditions with the UI can't occur
+			// QueueMainThreadAction will execute the logic in a very specific place
+			Main.QueueMainThreadAction(StorageGUI.InvokeOnRefresh);
 
 			var sandbox = (thread.state as ThreadState).sandbox;
 
@@ -464,8 +469,6 @@ namespace MagicStorage
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 
 			MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: false);
-
-			StorageGUI.CurrentlyRefreshing = false;
 		}
 
 		private static void LoadStoredItems(StorageGUI.ThreadContext thread, ThreadState state) {

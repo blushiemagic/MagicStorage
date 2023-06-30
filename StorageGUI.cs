@@ -247,12 +247,23 @@ namespace MagicStorage
 				return;
 
 			thread.state = itemTypesToUpdate;
-			
+
 			// Get the items that need to be updated
 			IEnumerable<Item> itemsToUpdate = thread.heart.GetStoredItems().Where(ShouldItemUpdate);
 
-			// Remove the types from the existing collection, then append the items to update
-			IEnumerable<Item> collection = items.Where(static i => !ShouldItemUpdate(i)).Concat(itemsToUpdate);
+			IEnumerable<Item> source;
+			if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type) {
+				// Recent filter needs the entire storage as context, but the existing collection only has the results from the previous filter
+				// If items are removed, this can cause the displayed amount to be not 100, which is undesirable
+				// Using the entire storage is fine since only the first 100 items are used
+				source = thread.heart.GetStoredItems();
+			} else {
+				// Reuse the existing collection for better sorting/filtering time
+				source = items;
+			}
+
+			// Remove the types to update from the collection, then append the items to update
+			IEnumerable<Item> collection = source.Where(static i => !ShouldItemUpdate(i)).Concat(itemsToUpdate);
 
 			// Assign the thread context
 			AdjustItemCollectionAndAssignToThread(thread, collection);
@@ -262,9 +273,8 @@ namespace MagicStorage
 		}
 
 		private static ThreadContext InitializeThreadContext(StorageUIState.StoragePage storagePage, bool clearItemLists) {
-			didMatCheck.Clear();
-
 			if (clearItemLists) {
+				didMatCheck.Clear();
 				items.Clear();
 				sourceItems.Clear();
 			}
@@ -387,6 +397,13 @@ namespace MagicStorage
 
 				filterOutFavorites = thread.onlyFavorites;
 
+				if (thread.state is not null) {
+					// Specific IDs were refreshed, meaning the lists weren't cleared.  Clear them now
+					items.Clear();
+					sourceItems.Clear();
+					didMatCheck.Clear();
+				}
+
 				items.AddRange(thread.context.items.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x.favorited));
 
 				sourceItems.AddRange(thread.context.sourceItems.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x[0].favorited));
@@ -395,17 +412,22 @@ namespace MagicStorage
 			} catch when (thread.token.IsCancellationRequested) {
 				items.Clear();
 				sourceItems.Clear();
+				didMatCheck.Clear();
 				throw;
 			}
 		}
 
 		private static void AfterSorting(ThreadContext thread) {
+			// Refresh logic in the UIs will only run when this is false
+			if (!thread.token.IsCancellationRequested)
+				CurrentlyRefreshing = false;
+
 			for (int k = 0; k < items.Count; k++)
 				didMatCheck.Add(false);
 
-			OnRefresh?.Invoke();
-
-			CurrentlyRefreshing = false;
+			// Ensure that race conditions with the UI can't occur
+			// QueueMainThreadAction will execute the logic in a very specific place
+			Main.QueueMainThreadAction(InvokeOnRefresh);
 
 			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage")?.RequestThreadWait(waiting: false);
 		}
