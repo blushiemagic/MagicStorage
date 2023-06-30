@@ -454,7 +454,7 @@ namespace MagicStorage
 
 		private static void AfterSorting(StorageGUI.ThreadContext thread) {
 			StorageGUI.InvokeOnRefresh();
-			StorageGUI.RefreshStorageUI = false;
+			StorageGUI.RefreshUI = false;
 
 			var sandbox = (thread.state as ThreadState).sandbox;
 

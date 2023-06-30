@@ -1189,7 +1189,7 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 						
-						StorageGUI.RefreshStorageUI = true;
+						StorageGUI.RefreshUI = true;
 
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}

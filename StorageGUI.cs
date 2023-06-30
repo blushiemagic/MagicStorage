@@ -54,10 +54,14 @@ namespace MagicStorage
 
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		private static bool _needRefresh;
-		public static bool RefreshStorageUI {
-			get => _needRefresh;
-			set => _needRefresh |= value;
+		// Field included for backwards compatibility, but made Obsolete to encourage modders to use the new API
+		[Obsolete("Use the SetRefresh() method or RefreshStorageUI property instead", error: true)]
+		public static bool needRefresh;
+
+		private static bool _refreshUI;
+		public static bool RefreshUI {
+			get => _refreshUI;
+			set => _refreshUI |= value;
 		}
 
 		public static bool CurrentlyRefreshing { get; internal set; }
@@ -74,15 +78,15 @@ namespace MagicStorage
 		}
 
 		/// <summary>
-		/// Shorthand for setting <see cref="RefreshStorageUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
+		/// Shorthand for setting <see cref="RefreshUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
 		/// </summary>
 		public static void SetRefresh(bool forceFullRefresh = false) {
-			RefreshStorageUI = true;
+			RefreshUI = true;
 			StorageGUI.forceFullRefresh = forceFullRefresh;
 		}
 
 		internal static void CheckRefresh() {
-			if (RefreshStorageUI)
+			if (RefreshUI)
 				RefreshItems();
 		}
 
@@ -186,7 +190,7 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
-			_needRefresh = false;
+			_refreshUI = false;
 
 			if (forceFullRefresh)
 				itemTypesToUpdate = null;
@@ -635,7 +639,7 @@ namespace MagicStorage
 			foreach (var item in sourceItems[slot])
 				item.favorited = doFavorite;
 
-			RefreshStorageUI = true;
+			RefreshUI = true;
 
 			SetNextItemTypeToRefresh(sourceItems[slot][0].type);
 		}
