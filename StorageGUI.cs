@@ -186,7 +186,7 @@ namespace MagicStorage
 		public static void RefreshItems()
 		{
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
-			RefreshStorageUI = false;
+			_needRefresh = false;
 
 			if (forceFullRefresh)
 				itemTypesToUpdate = null;
