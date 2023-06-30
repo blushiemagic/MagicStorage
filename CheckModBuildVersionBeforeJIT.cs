@@ -14,7 +14,7 @@ namespace MagicStorage {
 				versionChecked = true;
 			}
 
-			return true;
+			return base.ShouldJIT(member);
 		}
 
 		private static readonly Version first143Preview = new Version(2022, 10);
