@@ -72,7 +72,7 @@ namespace MagicStorage
 		public static event Action OnRefresh;
 
 		// Specialized collection for making only certain item types get recalculated
-		internal static HashSet<int> itemTypesToUpdate;
+		private static HashSet<int> itemTypesToUpdate;
 		private static bool forceFullRefresh;
 
 		public static bool ForceNextRefreshToBeFull {
@@ -232,7 +232,7 @@ namespace MagicStorage
 		}
 
 		private static void RefreshAllItems(StorageUIState.StoragePage storagePage) {
-			if (InitializeThreadContext(storagePage, false) is not ThreadContext thread)
+			if (InitializeThreadContext(storagePage, true) is not ThreadContext thread)
 				return;
 			
 			// Assign the thread context
@@ -245,12 +245,14 @@ namespace MagicStorage
 		private static void RefreshSpecificItems(StorageUIState.StoragePage storagePage) {
 			if (InitializeThreadContext(storagePage, false) is not ThreadContext thread)
 				return;
+
+			thread.state = itemTypesToUpdate;
 			
 			// Get the items that need to be updated
-			IEnumerable<Item> itemsToUpdate = thread.heart.GetStoredItems().Where(static i => itemTypesToUpdate.Contains(i.type));
+			IEnumerable<Item> itemsToUpdate = thread.heart.GetStoredItems().Where(ShouldItemUpdate);
 
 			// Remove the types from the existing collection, then append the items to update
-			IEnumerable<Item> collection = items.Where(static i => !itemTypesToUpdate.Contains(i.type)).Concat(itemsToUpdate);
+			IEnumerable<Item> collection = items.Where(static i => !ShouldItemUpdate(i)).Concat(itemsToUpdate);
 
 			// Assign the thread context
 			AdjustItemCollectionAndAssignToThread(thread, collection);
@@ -293,8 +295,16 @@ namespace MagicStorage
 				filterMode = filterMode,
 				searchText = searchText,
 				onlyFavorites = onlyFavorites,
-				modSearch = modSearch
+				modSearch = modSearch,
+				state = itemTypesToUpdate
 			};
+		}
+
+		private static bool ShouldItemUpdate(Item item) {
+			if (activeThread?.state is not HashSet<int> toUpdate)
+				return true;
+
+			return toUpdate.Contains(item.type);
 		}
 
 		private static void AdjustItemCollectionAndAssignToThread(ThreadContext thread, IEnumerable<Item> source) {
