@@ -576,6 +576,8 @@ Mods: {
 			'''
 			Рецепты не отображаются, даже если рецепты из других модов существует.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
 			'''
+			// DeleteItemsFailed: ""
+			// DeleteDataFailed: ""
 		}
 
 		RecipeHidden:

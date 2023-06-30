@@ -581,6 +581,14 @@ Mods: {
 			'''
 			No recipes displayed even though recipes exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
 			'''
+			DeleteItemsFailed:
+			'''
+			Deletion operation failed for unknown reasons.  Please try again, or delete the items manually if necessary.
+			'''
+			DeleteDataFailed:
+			'''
+			Deletion operation failed for unknown reasons.  Some items may still contain unloaded mod data.
+			'''
 		}
 
 		RecipeHidden:

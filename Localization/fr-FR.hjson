@@ -308,6 +308,8 @@ Mods: {
 			// StorageDefaultToAllMods: ""
 			// CraftingNoBlacklist: ""
 			// CraftingDefaultToAllMods: ""
+			// DeleteItemsFailed: ""
+			// DeleteDataFailed: ""
 		}
 
 		// RecipeHidden: ""

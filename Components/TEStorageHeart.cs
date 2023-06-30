@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using Terraria.ModLoader.Default;
 using XPT.Core.Audio.MP3Sharp.Decoding;
+using Terraria.Localization;
+using Microsoft.Xna.Framework;
 
 namespace MagicStorage.Components
 {
@@ -637,29 +639,35 @@ namespace MagicStorage.Components
 				return;
 			}
 
-			Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
+			try {
+				Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
 
-			if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
-				//Clone of Withdraw, but it will keep trying to remove items, even if any were found
-				foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
-					lookFor = lookForOrig;
-					while (storageUnit.HasItem(lookFor, true)) {
-						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
+				if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
+					//Clone of Withdraw, but it will keep trying to remove items, even if any were found
+					foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
+						lookFor = lookForOrig;
+						while (storageUnit.HasItem(lookFor, true)) {
+							Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
 
-						if (!withdrawn.IsAir) {
-							if (result.IsAir)
-								result = withdrawn;
-							else
-								result.stack += withdrawn.stack;
+							if (!withdrawn.IsAir) {
+								if (result.IsAir)
+									result = withdrawn;
+								else
+									result.stack += withdrawn.stack;
+							}
 						}
 					}
-				}
 
-				if (result.stack > 0) {
-					ResetCompactStage();
-					StorageGUI.SetRefresh();
-					StorageGUI.SetNextItemTypeToRefresh(type);
+					if (result.stack > 0) {
+						ResetCompactStage();
+						StorageGUI.SetRefresh();
+						StorageGUI.SetNextItemTypeToRefresh(type);
+					}
 				}
+			} catch {
+				// Swallow exception and let the user know that something went wrong
+				if (Main.netMode != NetmodeID.Server)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.DeleteItemsFailed"), color: Color.Red);
 			}
 		}
 
@@ -672,32 +680,38 @@ namespace MagicStorage.Components
 				return;
 			}
 
-			bool didSomething = false;
+			try {
+				bool didSomething = false;
 
-			HashSet<int> typesToRefresh = new();
+				HashSet<int> typesToRefresh = new();
 
-			foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
-				//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
-				if (item is null || item.IsAir || item.ModItem is UnloadedItem)
-					continue;
+				foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
+					//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
+					if (item is null || item.IsAir || item.ModItem is UnloadedItem)
+						continue;
 
-				if (Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
-					continue;
+					if (Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
+						continue;
 
-				Instanced<GlobalItem>[] array = globalItems.Where(i => i.Instance is not UnloadedGlobalItem).ToArray();
+					Instanced<GlobalItem>[] array = globalItems.Where(i => i.Instance is not UnloadedGlobalItem).ToArray();
 
-				if (array.Length != globalItems.Length) {
-					Item_globalItems.SetValue(item, array);
-					didSomething = true;
+					if (array.Length != globalItems.Length) {
+						Item_globalItems.SetValue(item, array);
+						didSomething = true;
 
-					typesToRefresh.Add(item.type);
+						typesToRefresh.Add(item.type);
+					}
 				}
-			}
 
-			if (didSomething) {
-				ResetCompactStage();
-				StorageGUI.SetRefresh();
-				StorageGUI.SetNextItemTypesToRefresh(typesToRefresh);
+				if (didSomething) {
+					ResetCompactStage();
+					StorageGUI.SetRefresh();
+					StorageGUI.SetNextItemTypesToRefresh(typesToRefresh);
+				}
+			} catch {
+				// Swallow exception and let the user know that something went wrong
+				if (Main.netMode != NetmodeID.Server)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.DeleteDataFailed"), color: Color.Red);
 			}
 		}
 

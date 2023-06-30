@@ -550,6 +550,8 @@ Mods: {
 			'''
 			此模组中搜索不到任何配方。目前显示的是搜索所有配方的结果
 			'''
+			// DeleteItemsFailed: ""
+			// DeleteDataFailed: ""
 		}
 
 		RecipeHidden:
