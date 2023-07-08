@@ -1,10 +1,12 @@
-# If some text marked with "//" is translated, please remove the "//" sign.
-// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: ""
+# I recommend using the hjson key to translate all future text additions
+# Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
+# -Crapsky233
+TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} - такой интересный робот, интересно , как он двигается?"
 
 Mods: {
 	MagicStorage: {
 		ItemName: {
-			BiomeGlobe: Биомный глобус
+			BiomeGlobe: Глобус биомов
 			CraftingAccess: Модуль создания предметов
 			CreativeStorageUnit: Творческая ячейка хранилища
 			Locator: Локатор
@@ -47,6 +49,10 @@ Mods: {
 			EnvironmentAccess: Интерфейс настройки хранилища
 			PortableAccessPreHM: Портативный удаленный доступ к хранилищу (Обычный)
 			PortableAccessHM: Портативный удаленный доступ к хранилищу (Необычный)
+			Config_GlowItemGlowing: "Config//GlowItemGlowing"
+			Config_GlowItemNotGlowing: "Config//GlowItemNotGlowing"
+			Config_RecipeFilterAvailable: "Config//RecipeFilterAvailable"
+			Config_RecipeFilterAll: "Config//RecipeFilterAll"
 		}
 
 		ItemTooltip: {
@@ -290,7 +296,7 @@ Mods: {
 				LoveNPC: "Обожаю {NPCName}."
 				DislikeNPC: "Не нравится {NPCName}."
 				HateNPC: "{NPCName} ненавижу."
-				// LikeNPC_Princess: ""
+				LikeNPC_Princess: "{NPCName} - лучший друг моего создателя."
 			}
 		}
 
@@ -528,13 +534,13 @@ Mods: {
 		SearchName: "Название"
 		SearchMod: "Мод"
 
-		// SortWaiting: ""
+		SortWaiting: "Загрузка..."
 
 		SearchTips: {
 			SearchName: "Название"
-			SearchMod: "@Мод Название"
+			SearchMod: "@Мод или Название"
 			SearchTooltip: "#Описание"
-			SearchModAndTooltip: "@Мод #Описание"
+			SearchModAndTooltip: "@Мод или #Описание"
 
 			TipModAndTooltip: "[c/ffff00:@Мод], [c/ffff00:#Описание] (могут быть объединены в таком порядке)"
 			TipTooltipOnly: "[c/ffff00:#Описание] поиск предмета по описанию"
@@ -545,8 +551,8 @@ Mods: {
 		RecipeAll: "Показать все рецепты"
 		RecipeBlacklist: "Показать скрытые рецепты (ctrl+click по рецепту, чтобы скрыть/показать)"
 		SelectedRecipe: "Выбранный рецепт"
-		Ingredients: "Ингредиенты"
-		StoredItems: "Хранимые ингредиенты"
+		Ingredients: "Нужные ингредиенты:"
+		StoredItems: "Хранимые ингредиенты:"
 		ShowOnlyFavorited: "Только избранные"
 		ViewHistory: "Нажмите, чтобы просмотреть историю рецептов"
 		ClearHistory: "Очистить"
@@ -576,8 +582,6 @@ Mods: {
 			'''
 			Рецепты не отображаются, даже если рецепты из других модов существует.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
 			'''
-			// DeleteItemsFailed: ""
-			// DeleteDataFailed: ""
 		}
 
 		RecipeHidden:
@@ -594,7 +598,7 @@ Mods: {
 			'''
 			{$RecipeConditions.InGraveyardBiome} / Стоя рядом с {$Mods.MagicStorage.ItemName.CombinedStations4Item}
 			'''
-			CookedMarshmallowCondition: "Биомный глобус в модуле создания предметов"
+			CookedMarshmallowCondition: "Глобус биомов в модуле создания предметов"
 		}
 
 		DepositTooltip: "Положить - клик, Положить все - ctrl+клик, Пополнить запасы - ПКМ"
@@ -603,8 +607,8 @@ Mods: {
 		StorageGUI: {
 			ForceRefreshButton: "Принуд. обновление интерфейса"
 			CompactCoinsButton: "Сжать монеты (100з-1платина)"
-			DestroyUnloadedButton: "удалить неустановленные элементы мода"
-			DestroyUnloadedDataButton: "удалить удаленные данные мода"
+			DestroyUnloadedButton: "Удалить незагруженные предметы"
+			DestroyUnloadedDataButton: "Удалить незагруженные данные"
 			DepositPiggyBank: "Положить все предметы с свино-копилки"
 			DepositSafe: "Положить все предметы с сейфа"
 			DepositForge: "Положить все предметы с печи защитника"
@@ -687,98 +691,142 @@ Mods: {
 		}
 
 		Config: {
-			// Label: ""
-			// ServersideLabel: ""
-			// BetaLabel: ""
+			Label: "Magic Storage Config"
+			ServersideLabel: "Magic Storage Server Config"
+			BetaLabel: "Magic Storage BETA Config"
 
 			Headers: {
-				// Storage: ""
-				// Crafting: ""
-				// StorageAndCrafting: ""
-				// General: ""
+				Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
+				Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
+				General: "General Configs"
 			}
 
 			glowNewItems: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
+				Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
 			}
 			useConfigFilter: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
+				Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
 			}
 			showAllRecipes: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
+				Tooltip: "Enable to default to all recipes, disable to default to available recipes"
 			}
 			quickStackDepositMode: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:Chest]  Quick stack deposit mode"
+				Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
 			}
 			clearSearchText: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Clear search text"
+				Tooltip: "Enable to clear the search text when opening the UI"
 			}
 			extraFilterIcons: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:Cog]  Display extra sorting icons"
+				Tooltip: "Enable to have the extra sorting options available in the Legacy button layout"
 			}
 			showDps: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Estimate the dps of weapons"
+				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
 			}
 			useOldCraftMenu: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:WorkBench]  Use old Craft buttons"
+				Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
 			}
 			allowItemDataDebug: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:IronPickaxe]  Item debug information"
+				Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
 			}
 			searchBarRefreshOnKey: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Search Bar Refreshes on Key Press"
+				Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
 			}
 			uiFavorites: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:FallenStar]  Favorites Filter Button"
+				Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
 			}
 			recipeBlacklist: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Recipe Whitelist/Blacklist"
+				Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
 			}
 			buttonLayout: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Sorting/Filtering Button Layout"
+				Tooltip:
+				'''
+				Legacy:
+				  Layout from v0.5.6.5 and previous versions.
+				  The Sorting and Filtering pages are disabled.
+				ModernPaged:
+				  Sorting and filtering options moved to the Sorting and Filtering pages.
+				ModernConfigurable:
+				  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+				LegacyWithGear:
+				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+				  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
+				  The Sorting and Filtering pages are disabled.
+				LegacyBasicWithPaged:
+				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+				  Additional icons are in the Sorting and Filtering pages.
+				ModernDropdown:
+				  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
+				  The Sorting and Filtering pages are disabled.
+				'''
 			}
 			clearHistory: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[i:Book]  Clear recipe history"
+				Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
 			}
 			canMovePanels: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "UI Panel Movement"
+				Tooltip: "Disable to prevent moving and resizing the UI panels"
 			}
 			recursionDepth: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "[DISABLED] Recipe Recursion Depth"
+				Tooltip:
+				'''
+				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+				How deep the recursion goes for crafting recipes in the Crafting UI.
+				Set to 0 to disable this feature.
+				Set to -1 for infinite depth
+				'''
 			}
-			automatonRemembers: {
-				// Label: ""
-				// Tooltip: ""
+			recursionMode: {
+				Label: "[DISABLED] Recipe Recursion Mode"
+				Tooltip:
+				'''
+				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+				Legacy:
+				  Logic is kept in line with how it worked in the Recursive Craft integration.
+				  That is, recursive recipes are "combined" into one singular recipe.
+				  Simplicity at the cost of more processing required and less control.
+				Modern:
+				  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
+				  Sub-recipes can be swapped out in a special UI in the Crafting UI.
+				  Less processing required and more control at the cost of more complexity.
+				'''
 			}
 
 			AllowAutomatonToMoveIn: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Automaton Housing"
+				Tooltip: "Enable to allow the Automaton to be able to move into housing"
 			}
 
 			PrintTextToChat: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Print logging information to ingame chat"
+				Tooltip:
+				'''
+				Enable to print logging information to the ingame chat.
+				Logging information will be printed to your client.log and server.log files regardless.
+				'''
 			}
 			ShowDebugPylonRangeAreas: {
-				// Label: ""
-				// Tooltip: ""
+				Label: "Portable Access Range Debug"
+				Tooltip:
+				'''
+				Enable to show the valid ranges for a Portable Remote Access while the player is holding it.
+				For accesses with infinite range, nothing is displayed.
+				'''
 			}
 		}
 	}
