@@ -691,141 +691,141 @@ Mods: {
 		}
 
 		Config: {
-			Label: "Magic Storage Config"
-			ServersideLabel: "Magic Storage Server Config"
-			BetaLabel: "Magic Storage BETA Config"
+			Label: "Magic Storage конфигурация"
+			ServersideLabel: "Magic Storage конфигурация сервера"
+			BetaLabel: "Magic Storage BETA конфигурация"
 
 			Headers: {
-				Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
-				Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
-				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
-				General: "General Configs"
+				Storage: "[i:MagicStorage/StorageHeart]  Конфигурация интерфейса хранилища"
+				Crafting: "[i:MagicStorage/CraftingAccess]  Конфигурация интерфейса создания"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Конфигурация интерфейсов хранения и крафта"
+				General: "Дополнительно"
 			}
 
 			glowNewItems: {
-				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
-				Tooltip: "Toggles whether new items in the storage will glow to indicate they're new"
+				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Показывать новые предметы/рецепты"
+				Tooltip: "Включает подсветку новых предметов в хранилище для обозначения их новизны"
 			}
 			useConfigFilter: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
-				Tooltip: "Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр"
+				Tooltip: "Включите, чтобы использовать нижеуказанный фильтр, выключите, чтобы запомнить последний выбранный фильтр в игре (фильтр все равно используется при первом открытии после загрузки мода)"
 			}
 			showAllRecipes: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
-				Tooltip: "Enable to default to all recipes, disable to default to available recipes"
+				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр рецептов"
+				Tooltip: "Включите, чтобы использовать все рецепты по умолчанию, выключите, чтобы использовать только доступные рецепты по умолчанию"
 			}
 			quickStackDepositMode: {
-				Label: "[i:Chest]  Quick stack deposit mode"
-				Tooltip: "Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released"
+				Label: "[i:Chest]  Режим быстрой стопки"
+				Tooltip: "Включите, чтобы быстро укладывать предметы с зажатой клавишей Control (Ctrl), выключите, чтобы быстро укладывать предметы с отпущенной клавишей Control (Ctrl)"
 			}
 			clearSearchText: {
-				Label: "Clear search text"
-				Tooltip: "Enable to clear the search text when opening the UI"
+				Label: "Очищать текст поиска"
+				Tooltip: "Включите, чтобы очистить текст поиска при открытии интерфейса"
 			}
 			extraFilterIcons: {
-				Label: "[i:Cog]  Display extra sorting icons"
-				Tooltip: "Enable to have the extra sorting options available in the Legacy button layout"
+				Label: "[i:Cog]  Показывать дополнительные значки сортировки"
+				Tooltip: "Включите, чтобы использовать дополнительные варианты сортировки в интерфейсе с классическим расположением кнопок"
 			}
 			showDps: {
-				Label: "Estimate the dps of weapons"
-				Tooltip: "Enable to show a tooltip with the estimated dps of the item"
+				Label: "Оценивать урон оружия в секунду (DPS)"
+				Tooltip:  "Включите, чтобы отображать подсказку с оценкой урона оружия"
 			}
 			useOldCraftMenu: {
-				Label: "[i:WorkBench]  Use old Craft buttons"
-				Tooltip: "Enable to use the older UI for crafting in the Crafting GUI"
+				Label: "[i:WorkBench]  Использовать старое меню создания"
+				Tooltip: "Включите, чтобы использовать старый интерфейс для модуля создания"
 			}
 			allowItemDataDebug: {
-				Label: "[i:IronPickaxe]  Item debug information"
-				Tooltip: "Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the \"Print Item Data\" keybinding to print data"
+				Label: "[i:IronPickaxe]  Отладочная информация предметов"
+				Tooltip: "Включите, чтобы в интерфейсе хранилища отображались сведения о наличии данных предмета и разрешить клавишу \"Print Item Data\" для вывода данных"
 			}
 			searchBarRefreshOnKey: {
-				Label: "Search Bar Refreshes on Key Press"
-				Tooltip: "Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected"
+				Label: "Обновление строки поиска по нажатию клавиши"
+				Tooltip: "Включите, чтобы в интерфейсах хранилища и создания обновлялся интерфейс после каждого нажатия клавиши, выключите, чтобы обновление происходило только при снятии выделения с строки поиска"
 			}
 			uiFavorites: {
-				Label: "[i:FallenStar]  Favorites Filter Button"
-				Tooltip: "Enable to allow favoriting items/recipes in the Crafting GUI"
+				Label: "[i:FallenStar]  Кнопка "Избранное" в фильтре"
+				Tooltip: "Включите, чтобы разрешить добавление предметов/рецептов в избранное в интерфейсе создания"
 			}
 			recipeBlacklist: {
-				Label: "Recipe Whitelist/Blacklist"
-				Tooltip: "Enable to allow whitelisting and blacklisting recipes in the Crafting GUI"
+				Label: "Белый/черный список рецептов"
+				Tooltip: "Включите, чтобы разрешить добавление исключений в рецептах в интерфейсе создания"
 			}
 			buttonLayout: {
-				Label: "Sorting/Filtering Button Layout"
+				Label: "Расположение кнопок сортировки/фильтрации"
 				Tooltip:
 				'''
 				Legacy:
-				  Layout from v0.5.6.5 and previous versions.
-				  The Sorting and Filtering pages are disabled.
+				  Заготовка v0.5.6.5 и предыдущих версий.
+				  Страницы сортировки и фильтрации отключены.
 				ModernPaged:
-				  Sorting and filtering options moved to the Sorting and Filtering pages.
+				  Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
 				ModernConfigurable:
-				  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+				  Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
 				LegacyWithGear:
-				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-				  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
-				  The Sorting and Filtering pages are disabled.
+				  Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
+                                  Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
+                                  Страницы сортировки и фильтрации отключены.
 				LegacyBasicWithPaged:
-				  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-				  Additional icons are in the Sorting and Filtering pages.
+				  Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
+				  Дополнительные значки находятся на страницах «Сортировка и фильтрация».
 				ModernDropdown:
-				  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
-				  The Sorting and Filtering pages are disabled.
+				  На главную страницу пользовательского интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
+				  Страницы сортировки и фильтрации отключены.
 				'''
 			}
 			clearHistory: {
-				Label: "[i:Book]  Clear recipe history"
-				Tooltip: "Enable to clear the recipe history in the Crafting GUI when opening it"
+				Label: "[i:Book]  Очистить историю рецептов"
+				Tooltip: "Включите, чтобы история рецептов в интерфейсе модуля создания очищалась при его открытии."
 			}
 			canMovePanels: {
-				Label: "UI Panel Movement"
-				Tooltip: "Disable to prevent moving and resizing the UI panels"
+				Label: "Перемещение пользовательского интерфейса"
+				Tooltip: "Отключите, чтобы предотвратить перемещение и изменение размера панелей пользовательского интерфейса."
 			}
 			recursionDepth: {
-				Label: "[DISABLED] Recipe Recursion Depth"
+				Label: "[ОТКЛЮЧЕНО] Глубина рекурсии"
 				Tooltip:
 				'''
-				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-				How deep the recursion goes for crafting recipes in the Crafting UI.
-				Set to 0 to disable this feature.
-				Set to -1 for infinite depth
+				== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
+				Насколько глубокой будет рекурсия для рецептов создания в интерфейсе модуля создания.
+				Установите значение 0, чтобы отключить эту функцию.
+				Установите значение -1 для бесконечной глубины
 				'''
 			}
 			recursionMode: {
-				Label: "[DISABLED] Recipe Recursion Mode"
+				Label: "[ОТКЛЮЧЕНО] Режим рекурсии"
 				Tooltip:
 				'''
-				== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-				Legacy:
-				  Logic is kept in line with how it worked in the Recursive Craft integration.
-				  That is, recursive recipes are "combined" into one singular recipe.
-				  Simplicity at the cost of more processing required and less control.
-				Modern:
-				  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
-				  Sub-recipes can be swapped out in a special UI in the Crafting UI.
-				  Less processing required and more control at the cost of more complexity.
+				== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
+				Старая версия:
+                  Логика приведена в соответствие с тем, как она работала в интеграции Recursive Craft. 
+				  То есть рекурсивные рецепты "объединяются" в один единственный рецепт.
+				  Упрощение за счет большего объема обработки и меньшего контроля.
+				Новая версия:
+				  Каждый подрецепт в рекурсивном рецепте обрабатывает свои ингредиенты и условия отдельно.
+				  Подрецепты можно менять местами в специальном пользовательском интерфейсе Crafting UI.
+				  Меньше необходимости в обработке и больше контроля за счет большей сложности.
 				'''
 			}
 
 			AllowAutomatonToMoveIn: {
-				Label: "Automaton Housing"
-				Tooltip: "Enable to allow the Automaton to be able to move into housing"
+				Label: "Жилье для робота"
+				Tooltip: "Включите, чтобы робот мог появиться в городе"
 			}
 
 			PrintTextToChat: {
-				Label: "Print logging information to ingame chat"
+				Label: "Писать информацию о действиях во внутриигровом чате"
 				Tooltip:
 				'''
-				Enable to print logging information to the ingame chat.
-				Logging information will be printed to your client.log and server.log files regardless.
+				Включить печать информации о логах во внутриигровой чат.
+				Информация о логах будет выводиться в файлы client.log и server.log независимо от этого.
 				'''
 			}
 			ShowDebugPylonRangeAreas: {
-				Label: "Portable Access Range Debug"
+				Label: "Отладка диапазона портативного доступа"
 				Tooltip:
 				'''
-				Enable to show the valid ranges for a Portable Remote Access while the player is holding it.
-				For accesses with infinite range, nothing is displayed.
+				Включить отображение допустимых диапазонов для портативного удаленного доступа, когда игрок держит его в руках.
+				Для доступа с бесконечным диапазоном ничего не отображается.
 				'''
 			}
 		}
