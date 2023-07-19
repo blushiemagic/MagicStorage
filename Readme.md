@@ -19,6 +19,7 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 * [Microsoft XNA Framework Redistributable 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=20914)
 * tModLoader 1.4.3
 * SerousCommonLib (absoluteAquarian Utilities) - Download from the #commonlib-downloads channel in the Discord
+	1. Use the [TML Patcher](https://www.nuget.org/packages/Tomat.TML.Patcher/) tool to get the assemblies files 
 * [RecursiveCraft](https://steamcommunity.com/sharedfiles/filedetails/?id=2575830168) (Recursive Craft) 
 	1. Subscribe to [the mod](https://steamcommunity.com/sharedfiles/filedetails/?id=2575830168)
 	2. Copy the file from `Steam/steamapps/workshop/content/1281930/2575830168`
