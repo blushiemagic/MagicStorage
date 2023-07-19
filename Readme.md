@@ -6,8 +6,7 @@ This mod offers a solution to storage problems once and for all. It allows you t
 
 The magic storage scales as you progress in your playthrough. It is accessible very early in the game, but with limited power. As you defeat bosses and earn more materials, you will be able to upgrade your storage to perform more functions and more easily expand the storage capacity.
 
-## Description and discussion
-A full description and discussion concerning this mod can be found at the [Terraria forum thread](https://forums.terraria.org/index.php?threads/magic-storage.56294/)
+Are you unable to keep track of the dozens of crafting stations in your base? This mod will help you to keep track of all of them with its Combined Crafting Stations! The Combined Crafting Stations combine the functionality of several crafting stations into each tier, with the next tier having all of the previous tiers' crafting stations.
 
 ## Credits
  * [@AdipemDragon](https://forums.terraria.org/index.php?members/adipemdragon.2930/) - Spriting
