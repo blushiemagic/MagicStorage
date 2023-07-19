@@ -18,10 +18,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="RecursiveCraft">
-      <HintPath>..\references\RecursiveCraft.dll</HintPath>
+      <HintPath>..\references\1.4.3\RecursiveCraft.dll</HintPath>
     </Reference>
     <Reference Include="SerousCommonLib">
-      <HintPath>..\references\SerousCommonLib.dll</HintPath>
+      <HintPath>..\references\1.4.3\SerousCommonLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
