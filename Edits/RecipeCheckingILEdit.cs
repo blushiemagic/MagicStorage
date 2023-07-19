@@ -5,6 +5,7 @@ using SerousCommonLib.API;
 using System;
 using System.Linq;
 using System.Reflection;
+using MonoMod.RuntimeDetour;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -13,20 +14,20 @@ namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {
 		private static readonly MethodInfo RecipeLoader_AddRecipes = typeof(RecipeLoader).GetMethod("AddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
 		private static event ILContext.Manipulator IL_RecipeLoader_AddRecipes {
-			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_AddRecipes, value);
-			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_AddRecipes, value);
+			add => new ILHook(RecipeLoader_AddRecipes, value);
+			remove => new ILHook(RecipeLoader_AddRecipes, null);
 		}
 
 		private static readonly MethodInfo RecipeLoader_PostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
 		private static event ILContext.Manipulator IL_RecipeLoader_PostAddRecipes {
-			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_PostAddRecipes, value);
-			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_PostAddRecipes, value);
+			add => new ILHook(RecipeLoader_PostAddRecipes, value);
+			remove => new ILHook(RecipeLoader_PostAddRecipes, null);
 		}
 
 		private static readonly MethodInfo RecipeLoader_PostSetupRecipes = typeof(RecipeLoader).GetMethod("PostSetupRecipes", BindingFlags.NonPublic | BindingFlags.Static);
 		private static event ILContext.Manipulator IL_RecipeLoader_PostSetupRecipes {
-			add => HookEndpointManager.Modify<ILContext.Manipulator>(RecipeLoader_PostSetupRecipes, value);
-			remove => HookEndpointManager.Unmodify<ILContext.Manipulator>(RecipeLoader_PostSetupRecipes, value);
+			add => new ILHook(RecipeLoader_PostSetupRecipes, value);
+			remove => new ILHook(RecipeLoader_PostSetupRecipes, null);
 		}
 
 		public override void LoadEdits() {

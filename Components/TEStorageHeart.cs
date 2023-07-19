@@ -690,10 +690,10 @@ namespace MagicStorage.Components
 					if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 						continue;
 
-					if (Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
+					if (Item_globalItems.GetValue(item) is not Ref<GlobalItem>[] globalItems || globalItems.Length == 0)
 						continue;
 
-					Instanced<GlobalItem>[] array = globalItems.Where(i => i.Instance is not UnloadedGlobalItem).ToArray();
+					Ref<GlobalItem>[] array = globalItems.Where(i => i.Value is not UnloadedGlobalItem).ToArray();
 
 					if (array.Length != globalItems.Length) {
 						Item_globalItems.SetValue(item, array);

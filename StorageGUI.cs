@@ -630,40 +630,48 @@ namespace MagicStorage
 
 		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
 
-		private static void AddRandomUnloadedItemDataToItem(Item item) {
+		private static void AddRandomUnloadedItemDataToItem(Item item)
+		{
 			if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 				return;
 
-			if (TEStorageHeart.Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
+			if (TEStorageHeart.Item_globalItems.GetValue(item) is not Ref<GlobalItem>[] globalItems || globalItems.Length == 0)
 				return;
 
-			//Create the data
-			TagCompound modData = new() {
+			// Create the data
+			TagCompound modData = new()
+			{
 				["mod"] = "MagicStorage",
 				["name"] = "ShowcaseItemData",
-				["data"] = new TagCompound() {
+				["data"] = new TagCompound()
+				{
 					["randomData"] = Main.rand.Next()
 				}
 			};
 
 			if (item.TryGetGlobalItem(out UnloadedGlobalItem obj))
 				(UnloadedGlobalItem_data.GetValue(obj) as IList<TagCompound>).Add(modData);
-			else {
-				Instanced<GlobalItem>[] array = (Instanced<GlobalItem>[])globalItems.Clone();
+			else
+			{
+				Ref<GlobalItem>[] array = (Ref<GlobalItem>[])globalItems.Clone();
 				int index = array.Length;
 
 				Array.Resize(ref array, array.Length + 1);
-			
-				//Create the instance
-				obj = new();
 
+				// Create the instance
+				obj = new UnloadedGlobalItem();
 				UnloadedGlobalItem_data.SetValue(obj, new List<TagCompound>() { modData });
 
-				array[^1] = new((ushort)index, obj);
+				Ref<GlobalItem> newItemRef = new Ref<GlobalItem>();
+				newItemRef.Value = obj;
+
+				array[^1] = newItemRef;
 
 				TEStorageHeart.Item_globalItems.SetValue(item, array);
 			}
 		}
+
+
 
 		internal static void FavoriteItem(int slot) {
 			if (slot < 0 || slot >= items.Count)

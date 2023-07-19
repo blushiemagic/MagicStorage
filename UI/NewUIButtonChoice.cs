@@ -171,7 +171,10 @@ namespace MagicStorage.UI {
 
 			public ChoiceElement(int option, Asset<Texture2D> texture, LocalizedText text, int buttonSize = 21) : this(option, texture, text.Value, buttonSize) { }
 
-			public ChoiceElement(int option, Asset<Texture2D> texture, LocalizedText translation, int buttonSize = 21) : this(option, texture, translation.GetTranslation(Language.ActiveCulture), buttonSize) { }
+			
+			//--1.4.4 TESTING--//
+			//Do we need this second one?
+			//public ChoiceElement(int option, Asset<Texture2D> texture, LocalizedText translation, int buttonSize = 21) : this(option, texture, translation.GetTranslation(Language.ActiveCulture), buttonSize) { }
 
 			public ChoiceElement(int option, Asset<Texture2D> texture, string text, int buttonSize = 21) {
 				this.option = option;

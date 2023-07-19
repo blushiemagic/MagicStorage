@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using Terraria;
@@ -32,14 +33,14 @@ namespace MagicStorage {
 			MethodInfo ModItem_OnStack = typeof(ModItem).GetMethod(nameof(ModItem.OnStack), BindingFlags.Public | BindingFlags.Instance);
 			MethodInfo GlobalItem_OnStack = typeof(GlobalItem).GetMethod(nameof(GlobalItem.OnStack), BindingFlags.Public | BindingFlags.Instance);
 
-			Type HookList_T_InstanceEnumerator = typeof(HookList<GlobalItem>.InstanceEnumerator);
-			MethodInfo HookList_T_Enumerate = typeof(HookList<GlobalItem>).GetMethod(nameof(HookList<GlobalItem>.Enumerate), BindingFlags.Public | BindingFlags.Instance, new Type[] { typeof(Instanced<GlobalItem>[]) });
-			MethodInfo HookList_T_InstanceEnumerator_MoveNext = HookList_T_InstanceEnumerator.GetMethod(nameof(HookList<GlobalItem>.InstanceEnumerator.MoveNext), BindingFlags.Public | BindingFlags.Instance);
-			MethodInfo HookList_T_InstanceEnumerator_get_Current = HookList_T_InstanceEnumerator.GetProperty(nameof(HookList<GlobalItem>.InstanceEnumerator.Current), BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
+			Type HookList_T_Enumerator = typeof(List<IIndexed>.Enumerator);
+			MethodInfo HookList_T_Enumerate = typeof(HookList<IIndexed>).GetMethod(nameof(HookList<IIndexed>.Enumerate), BindingFlags.Public | BindingFlags.Instance, new Type[] { typeof(List<IIndexed>) });
+			MethodInfo HookList_T_Enumerator_MoveNext = HookList_T_Enumerator.GetMethod(nameof(List<IIndexed>.Enumerator.MoveNext), BindingFlags.Public | BindingFlags.Instance);
+			MethodInfo HookList_T_Enumerator_get_Current = HookList_T_Enumerator.GetProperty(nameof(List<IIndexed>.Enumerator.Current), BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
 
 			DynamicMethod dmd = new(typeof(Utility).FullName + ".BuildOnStackHooksDelegate.<>DMD", null, new Type[] { typeof(Item), typeof(Item), typeof(int) }, typeof(MagicStorageMod).Module, skipVisibility: true);
 			ILGenerator il = dmd.GetILGenerator();
-			LocalBuilder enumerator = il.DeclareLocal(HookList_T_InstanceEnumerator);
+			LocalBuilder enumerator = il.DeclareLocal(HookList_T_Enumerator);
 
 			/*
 			Desired resulting method:
@@ -65,12 +66,12 @@ namespace MagicStorage {
 			Label whileBlockEnd = il.DefineLabel();
 			il.MarkLabel(whileBlockStart);
 			il.Emit(OpCodes.Ldloca, enumerator);
-			il.Emit(OpCodes.Call, HookList_T_InstanceEnumerator_MoveNext);
+			il.Emit(OpCodes.Call, HookList_T_Enumerator_MoveNext);
 			il.Emit(OpCodes.Brfalse_S, whileBlockEnd);
 
 				// enumerator.Current.OnStack(arg_0, arg_1, arg_2);
 				il.Emit(OpCodes.Ldloca, enumerator);
-				il.Emit(OpCodes.Call, HookList_T_InstanceEnumerator_get_Current);
+				il.Emit(OpCodes.Call, HookList_T_Enumerator_get_Current);
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Ldarg_1);
 				il.Emit(OpCodes.Ldarg_2);

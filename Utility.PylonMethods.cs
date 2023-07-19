@@ -30,7 +30,7 @@ namespace MagicStorage {
 		}
 
 		private static void CheckNPCDanger(TeleportPylonInfo info, ref bool flag) {
-			flag &= !NPC.AnyDanger(quickBossNPCCheck: false, ignorePillars: true);
+			flag &= !NPC.AnyDanger(quickBossNPCCheck: false, ignorePillarsAndMoonlordCountdown: true);
 			flag = PylonLoader.ValidTeleportCheck_PreAnyDanger(info) is bool value
 				? value
 				: info.ModPylon?.ValidTeleportCheck_AnyDanger(info) ?? flag;

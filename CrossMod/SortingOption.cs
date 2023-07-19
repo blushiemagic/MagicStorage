@@ -125,7 +125,10 @@ namespace MagicStorage.CrossMod {
 			this.option = option;
 		}
 
-		protected override string GetHoverText() => option.Tooltip.GetTranslation(Language.ActiveCulture);
+		//protected override string GetHoverText() => option.Tooltip.GetTranslation(Language.ActiveCulture);
+		//--1.4.4 TESTING--//
+		//Fix this to have proper localization
+		protected override string GetHoverText() => "1.4.4 TODO";
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;
 

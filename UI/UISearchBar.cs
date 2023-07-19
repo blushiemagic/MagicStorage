@@ -116,7 +116,10 @@ namespace MagicStorage.UI
 				hasFocus = true;
 				CheckBlockInput();
 
-				LeftClick(new(this, UserInterface.ActiveInstance.MousePosition));
+				//--1.4.4 TESTING--//
+				//This needs extra looking
+				LeftClick(false);
+
 			}
 			else if (hasFocus && !mouseOver)
 			{

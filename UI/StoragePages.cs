@@ -86,7 +86,7 @@ namespace MagicStorage.UI {
 
 			foreach (TOption option in GetOptions()) {
 				TElement element = CreateElement(option);
-				element.OnClick += ClickOption;
+				element.OnLeftClick += ClickOption;
 
 				element.Left.Set(leftOrig + buttonSizeWithBuffer * (index % columns), 0f);
 				element.Top.Set(topOrig + buttonSizeWithBuffer * (index / columns), 0f);

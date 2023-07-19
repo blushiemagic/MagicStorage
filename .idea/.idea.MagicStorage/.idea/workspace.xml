@@ -8,141 +8,59 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="51b97d7a-c2a6-4b65-90b5-0098c4b0dfd7" name="Changes" comment="wip: tmod loader and localization - with some manual adjustments">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/projectSettingsUpdater.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/workspace.xml" beforeDir="false" />
+    <list default="true" id="ed00d007-6d2a-4376-9577-b4c081ad98b1" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MagicStorage/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Common/Global/GUITooltips.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Common/Global/GUITooltips.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/TEStorageHeart.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Components/TEStorageHeart.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CrossMod/FilteringOption.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CrossMod/FilteringOption.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CrossMod/SortingOption.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CrossMod/SortingOption.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Edits/NearbyEffectsBlockingDuringPylonScanningDetour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Edits/NearbyEffectsBlockingDuringPylonScanningDetour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Edits/RecipeCheckingILEdit.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Edits/RecipeCheckingILEdit.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Items/EnvironmentAccess.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Items/EnvironmentAccess.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Sorting/ItemSorter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Sorting/ItemSorter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StorageGUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StorageGUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/EnvironmentGUIModEntry.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UI/EnvironmentGUIModEntry.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/EnvironmentGUIToggleLabel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UI/EnvironmentGUIToggleLabel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/NewUIButtonChoice.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UI/NewUIButtonChoice.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/StoragePages.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UI/StoragePages.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/UISearchBar.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UI/UISearchBar.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utility.DMD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utility.DMD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utility.PylonMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Utility.PylonMethods.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="1.4" />
-      </map>
-    </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/22/6513bcb9/NPC.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/27/d3027ed1/UnloadedGlobalItem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/3c/7cbd1377/Player.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/70/07f9dfde/GlobalType`2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/98/2398ee2a/Main.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/ad/52b36cc7/ItemLoader.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d00483c6e9234e80b72e5a235d142b04144bc00/c4/2c994cde/GlobalItem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/d59531b243ef4df79b769bcddbf4608bbc00/72/e1a35465/Edit.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/37acc24a937f5bfdc8937427b8df43c12c81fa748ad1625840c321940c475/ILContext.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/b63b4f07587b3987138202fb1c0eee585aea1061ade71cc1635e2131fad57b/HookEndpointManager.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f0118a40d11a74ed8f2728cd8898673539653f0fd2295a26620b48a74453d26/ILHook.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Common/Systems/RecursiveCraftIntegration.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Components/StorageConnector.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/CrossMod/EnvironmentModule.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Edits/BiomeGlobeDetour.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Edits/CatchExtraCraftsDetour.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Edits/CursorLogicDetours.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/EnvironmentGUI.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ItemData.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/MagicStorageMod.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Stations/CrimsonAltar.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/Stations/DemonAltar.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/UI/EnvironmentGUIToggleLabel.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/UI/States/BaseStorageUI.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/UI/States/BaseStorageUIAccessPage.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/rusta/Documents/My Games/Terraria/tModLoader/ModSources/MagicStorage/UI/States/CraftingUIState.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
-  <component name="MarkdownSettingsMigration">
-    <option name="stateVersion" value="1" />
-  </component>
-  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
-  <component name="ProjectId" id="2SlksdiQtfsI0YBz9n9c2YxZaRm" />
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="false" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="1" id="Add" />
   </component>
-  <component name="ProjectViewState">
-    <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showLibraryContents" value="true" />
-  </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;1.4.4-testing&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.notifications&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-  },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;C:\\Users\\rusta\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\DecompilerCache&quot;,
-      &quot;C:\\Users\\rusta\\AppData\\Roaming\\JetBrains\\Rider2023.1\\resharper-host\\SourcesCache&quot;,
-      &quot;C:\\Users\\rusta\\AppData\\Local\\Symbols\\src&quot;
-    ]
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "1.4.4-testing",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
-  <component name="RunManager" selected=".NET Launch Settings Profile.MagicStorage: Terraria">
-    <configuration name="MagicStorage: Terraria" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/MagicStorage.csproj" />
-      <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
-      <option name="LAUNCH_PROFILE_NAME" value="Terraria" />
-      <option name="USE_EXTERNAL_CONSOLE" value="0" />
-      <option name="USE_MONO" value="0" />
-      <option name="RUNTIME_ARGUMENTS" value="" />
-      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
-      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
-      <option name="SEND_DEBUG_REQUEST" value="1" />
-      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
-      <method v="2">
-        <option name="Build" />
-      </method>
-    </configuration>
-    <configuration name="MagicStorage: TerrariaServer" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
-      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/MagicStorage.csproj" />
-      <option name="LAUNCH_PROFILE_TFM" value="net6.0" />
-      <option name="LAUNCH_PROFILE_NAME" value="TerrariaServer" />
-      <option name="USE_EXTERNAL_CONSOLE" value="0" />
-      <option name="USE_MONO" value="0" />
-      <option name="RUNTIME_ARGUMENTS" value="" />
-      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
-      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
-      <option name="SEND_DEBUG_REQUEST" value="1" />
-      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
-      <method v="2">
-        <option name="Build" />
-      </method>
-    </configuration>
-  </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+}]]></component>
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="51b97d7a-c2a6-4b65-90b5-0098c4b0dfd7" name="Changes" comment="" />
-      <created>1689728763351</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1689728763351</updated>
-      <workItem from="1689728764224" duration="615000" />
-      <workItem from="1689730195891" duration="1611000" />
-      <workItem from="1689732469754" duration="1723000" />
-      <workItem from="1689735990966" duration="605000" />
-    </task>
-    <task id="LOCAL-00001" summary="wip: tmod loader and localization - with some manual adjustments">
-      <option name="closed" value="true" />
-      <created>1689736150020</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1689736150021</updated>
-    </task>
-    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
-  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
-  <component name="VcsManagerConfiguration">
-    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-    <MESSAGE value="wip: tmod loader and localization - with some manual adjustments" />
-    <option name="LAST_COMMIT_MESSAGE" value="wip: tmod loader and localization - with some manual adjustments" />
-  </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="false" />
 </project>

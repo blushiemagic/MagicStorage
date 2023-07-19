@@ -46,7 +46,10 @@ namespace MagicStorage.UI {
 			float top = 40;
 
 			foreach (EnvironmentModule module in modules) {
-				string name = module.DisplayName.GetTranslation(Language.ActiveCulture);
+					//--1.4.4 TESTING--//
+            		//Fix this to have proper localization
+				//string name = module.DisplayName.GetTranslation(Language.ActiveCulture);
+				string name = "DERP 1.4.4";
 
 				EnvironmentGUIToggleLabel label = new(this, name, module.Name, defaultState: true);
 				label.Top.Set(top, 0f);
