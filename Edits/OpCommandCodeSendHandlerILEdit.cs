@@ -7,7 +7,7 @@ using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Terraria.Main;
+using ILMain = Terraria.IL_Main;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {

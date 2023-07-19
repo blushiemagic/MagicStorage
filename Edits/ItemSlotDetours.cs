@@ -4,7 +4,7 @@ using SerousCommonLib.API;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
-using Terraria.UI.ItemSlot;
+using OnItemSlot = Terraria.UI.On_ItemSlot;
 
 namespace MagicStorage.Edits {
 	internal class ItemSlotDetours : Edit {

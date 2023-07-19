@@ -1,7 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using SerousCommonLib.API;
 using Terraria;
-using Terraria.Chest;
+using OnChest = Terraria.On_Chest;
 using Terraria.ID;
 
 namespace MagicStorage.Edits {

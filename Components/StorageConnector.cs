@@ -28,7 +28,10 @@ namespace MagicStorage.Components
 			AddMapEntry(new Color(153, 107, 61), CreateMapEntryName());
 
 			DustType = 7;
-			ItemDrop/* tModPorter Note: Removed. Tiles and walls will drop the item which places them automatically. Use RegisterItemDrop to alter the automatic drop if necessary. */ = ModContent.ItemType<Items.StorageConnector>();
+			
+			//--1.4.4 TESTING--//
+			//Check if actually needed
+			//ItemDrop/* tModPorter Note: Removed. Tiles and walls will drop the item which places them automatically. Use RegisterItemDrop to alter the automatic drop if necessary. */ = ModContent.ItemType<Items.StorageConnector>();
 
 			// Make the tile count as a door for housing purposes (like how platforms work)
 			AddToArray(ref TileID.Sets.RoomNeeds.CountsAsDoor);

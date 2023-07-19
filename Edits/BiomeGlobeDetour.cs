@@ -3,7 +3,7 @@ using MagicStorage.Items;
 using SerousCommonLib.API;
 using Terraria;
 using Terraria.ID;
-using Terraria.Recipe;
+using OnRecipe = Terraria.On_Recipe;
 
 namespace MagicStorage.Edits;
 
