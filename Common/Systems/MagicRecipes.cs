@@ -30,11 +30,11 @@ namespace MagicStorage.Common.Systems {
 				if (recipe.Disabled)
 					continue;
 
-				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+				if (recipe.HasCondition(Condition.InGraveyard))
 				{
 					Recipe copy = recipe.Clone();
 
-					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
+					copy.RemoveCondition(Condition.InGraveyard);
 					copy.AddCondition(MagicStorageMod.EctoMistOverride);
 
 					copy.Register();

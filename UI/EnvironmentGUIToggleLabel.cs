@@ -38,9 +38,9 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		public override void Click(UIMouseEvent evt) {
+		public override void LeftClick(UIMouseEvent evt) {
 			//UIToggleImage.Click() calls Toggle(), so we don't have to
-			base.Click(evt);
+			base.LeftClick(evt);
 
 			if (!Source.IsAvailable(Module, out var module))
 				return;

@@ -112,14 +112,14 @@ namespace MagicStorage.NPCs {
 			}
 		}
 
-		public override void HitEffect(int hitDirection, double damage) {
+		public override void HitEffect(NPC.HitInfo hit) {
 			int num = NPC.life > 0 ? 1 : 5;
 
 			for (int k = 0; k < num; k++)
 				Dust.NewDust(NPC.position, NPC.width, NPC.height, Main.rand.Next(new[] { DustID.Stone, DustID.Iron, DustID.WoodFurniture }));
 		}
 
-		public override bool CanTownNPCSpawn(int numTownNPCs, int money) {
+		public override bool CanTownNPCSpawn(int numTownNPCs)/* tModPorter Suggestion: Copy the implementation of NPC.SpawnAllowed_Merchant in vanilla if you to count money, and be sure to set a flag when unlocked, so you don't count every tick. */ {
 			return MagicStorageServerConfig.AllowAutomatonToMoveIn;
 		}
 
@@ -177,7 +177,7 @@ namespace MagicStorage.NPCs {
 
 		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 21, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
 
-		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
+		public override void OnChatButtonClicked(bool firstButton, ref string shopName) {
 			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
 
 			if (helpOption == 0) {
@@ -249,7 +249,7 @@ namespace MagicStorage.NPCs {
 			randExtraCooldown = 30;
 		}
 
-		public override void DrawTownAttackSwing(ref Texture2D item, ref int itemSize, ref float scale, ref Vector2 offset) {
+		public override void DrawTownAttackSwing(ref Texture2D item, ref Rectangle itemFrame, ref int itemSize, ref float scale, ref Vector2 offset) {
 			item = TextureAssets.Item[ModContent.ItemType<StorageDeactivator>()].Value;
 			scale = 1f;
 		}

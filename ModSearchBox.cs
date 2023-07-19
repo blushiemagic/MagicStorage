@@ -72,8 +72,8 @@ namespace MagicStorage
 			BackgroundColor = new Color(63, 82, 151) * 0.7f;
 		}
 
-		public override void Click(UIMouseEvent evt) {
-			base.Click(evt);
+		public override void LeftClick(UIMouseEvent evt) {
+			base.LeftClick(evt);
 
 			var allMods = MagicCache.AllMods;
 			int index = ModIndex;

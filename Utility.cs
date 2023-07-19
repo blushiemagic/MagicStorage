@@ -126,7 +126,7 @@ namespace MagicStorage {
 			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded))
 				return;
 
-			canBeResearched = Main.LocalPlayerCreativeTracker.ItemSacrifices.SacrificesCountByItemIdCache.TryGetValue(itemType, out currentSacrificeTotal);
+			canBeResearched = Main.LocalPlayerCreativeTracker.ItemSacrifices.GetSacrificeCount(itemType) >= currentSacrificeTotal;
 		}
 
 		public static bool IsFullyResearched(int itemType, bool mustBeResearchable) {

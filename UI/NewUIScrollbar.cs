@@ -146,8 +146,8 @@ namespace MagicStorage.UI {
 			inner = result;
 		}
 
-		public override void MouseDown(UIMouseEvent evt) {
-			base.MouseDown(evt);
+		public override void LeftMouseDown(UIMouseEvent evt) {
+			base.LeftMouseDown(evt);
 
 			if (evt.Target == this) {
 				Rectangle handleRectangle = GetHandleRectangle();
@@ -165,8 +165,8 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		public override void MouseUp(UIMouseEvent evt) {
-			base.MouseUp(evt);
+		public override void LeftMouseUp(UIMouseEvent evt) {
+			base.LeftMouseUp(evt);
 
 			if (IsDragging)
 				OnDraggingEnd?.Invoke(this);

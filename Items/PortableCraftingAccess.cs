@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 namespace MagicStorage.Items {
 	public class PortableCraftingAccess : PortableAccess {
 		public override void SetStaticDefaults() {
-			SacrificeTotal = 1;
+			Item.ResearchUnlockCount = 1;
 		}
 
 		public override void SetDefaults()

@@ -146,7 +146,7 @@ namespace MagicStorage.UI.States {
 				page.Width = StyleDimension.Fill;
 				page.Height = StyleDimension.Fill;
 
-				tab.OnClick += (evt, e) => {
+				tab.OnLeftClick += (evt, e) => {
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					SetPage((e as UIPanelTab).Name);
 				};

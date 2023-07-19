@@ -13,35 +13,24 @@ namespace MagicStorage {
 	public abstract class EnvironmentModule : ModType {
 		public int Type { get; private set; }
 		
-		public ModTranslation DisplayName { get; private set; }
+		public LocalizedText DisplayName { get; private set; }
 
-		public ModTranslation DisabledTooltip { get; private set; }
+		public LocalizedText DisabledTooltip { get; private set; }
 
 		protected sealed override void Register() {
 			ModTypeLookup<EnvironmentModule>.Register(this);
 			Type = EnvironmentModuleLoader.Add(this);
 
-			DisplayName = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleName.{Name}");
-			DisabledTooltip = LocalizationLoader.GetOrCreateTranslation(Mod, $"ModuleDisabled.{Name}");
+			DisplayName = Language.GetOrRegister(Mod, $"ModuleName.{Name}");
+			DisabledTooltip = Language.GetOrRegister(Mod, $"ModuleDisabled.{Name}");
 
 			MagicStorageMod.Instance.Logger.Debug($"EnvironmentModule \"{FullName}\" added by mod \"{Mod.Name}\"");
 		}
 
 		public sealed override void SetupContent() {
-			AutoStaticDefaults();
 			SetStaticDefaults();
 		}
 
-		/// <summary>
-		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
-		/// </summary>
-		public virtual void AutoStaticDefaults() {
-			if (DisplayName.IsDefault())
-				DisplayName.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
-
-			if (DisabledTooltip.IsDefault())
-				DisabledTooltip.SetDefault(Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault"));
-		}
 
 		public static string GetDisabledTooltipDefault() => Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 

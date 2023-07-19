@@ -43,14 +43,14 @@ namespace MagicStorage.UI {
 			Append(icon);
 		}
 
-		public override void MouseDown(UIMouseEvent evt) {
-			base.MouseDown(evt);
+		public override void LeftMouseDown(UIMouseEvent evt) {
+			base.LeftMouseDown(evt);
 
 			DragStart(evt);
 		}
 
-		public override void MouseUp(UIMouseEvent evt) {
-			base.MouseUp(evt);
+		public override void LeftMouseUp(UIMouseEvent evt) {
+			base.LeftMouseUp(evt);
 
 			DragEnd(evt);
 		}

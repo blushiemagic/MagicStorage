@@ -1,277 +1,367 @@
-# If some text marked with "//" is translated, please remove the "//" sign.
-// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: ""
+# I recommend using the hjson key to translate all future text additions
+# Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
+# -Crapsky233
+/* TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} is such an interesting machine, how does it move?" */
 
 Mods: {
 	MagicStorage: {
-		ItemName: {
-			BiomeGlobe: Биомный глобус
-			CraftingAccess: Модуль создания предметов
-			CreativeStorageUnit: Творческая ячейка хранилища
-			Locator: Локатор
-			LocatorDisk: Локатор с CD Приводом
-			PortableAccess: Портативный удаленный доступ к хранилищу (Эпический)
-			PortableCraftingAccess: Портативный удаленный доступ к созданию предметов
-			RadiantJewel: Сияющая драгоценность
-			RemoteAccess: Модуль удаленного доступа к хранилищу
-			ShadowDiamond: Теневой алмаз
-			SnowBiomeEmulator: Зимняя сфера
-			StorageAccess: Модуль доступа к хранилищу
-			StorageComponent: Компонент хранилища
-			StorageConnector: Провод для хранилища
-			StorageDeactivator: Жезл ячейки хранилища
-			StorageHeart: Сердце хранилища
-			StorageUnit: Ячейка хранилища
-			StorageUnitBlueChlorophyte: Синяя хлорофитовая Ячейка Хранилища
-			StorageUnitCrimtane: Кримтановая ячейка хранилища
-			StorageUnitDemonite: Демонитовая ячейка хранилища
-			StorageUnitHallowed: Святая ячейка Хранилища
-			StorageUnitHellstone: Адская ячейка хранилища
-			StorageUnitLuminite: Люминитовая ячейка хранилища
-			StorageUnitTerra: Терра ячейка хранилища
-			StorageUnitTiny: Малая ячейка хранилища
-			UpgradeBlueChlorophyte: Синее хлорофитовое улучшение ячейки
-			UpgradeCrimtane: Кримтанитовое улучшение ячейки хранилища
-			UpgradeDemonite: Демонитовое улучшение ячейки хранилища
-			UpgradeHallowed: Святое улучшение ячейки хранилища
-			UpgradeHellstone: Адское улучшение ячейки хранилища
-			UpgradeLuminite: Люминитовое улучшение ячейки хранилища
-			UpgradeTerra: Терра улучшение ячейки хранилища
-			CrimsonAltar: Багровый алтарь
-			DemonAltar: Демонический алтарь
-			CombinedFurnitureStations1Item: Соединенные дополнительные станции (Ур. 1)
-			CombinedFurnitureStations2Item: Соединенные дополнительные станции (Ур. 2)
-			CombinedStations1Item: Соединенные станции (Ур. 1)
-			CombinedStations2Item: Соединенные станции (Ур. 2)
-			CombinedStations3Item: Соединенные станции (Ур. 3)
-			CombinedStations4Item: Соединенные станции (Ур. последний)
-			EnvironmentAccess: Интерфейс настройки хранилища
-			PortableAccessPreHM: Портативный удаленный доступ к хранилищу (Обычный)
-			PortableAccessHM: Портативный удаленный доступ к хранилищу (Необычный)
+		Items: {
+			BiomeGlobe: {
+				DisplayName: Биомный глобус
+				Tooltip:
+					'''
+					'Мировая мощь у вас под кончиками пальцев'
+					Позволяет создавать рецепты, для которых требуются Снежный биом, Экто-туман,
+					Демонический/Багровый алтарь и Вода/Лава/Мед.
+					Может находиться в инвентаре или в слоте станции интерфейса крафта,
+					Если зефир есть в инвентаре, его можно будет приготовить, не стоя у костра
+					Позволяет готовить зефир в интерфейсе создания предметов
+					Действует как пляжный мяч, когда его бросают
+					'''
+			}
+
+			CraftingAccess: {
+				DisplayName: Модуль создания предметов
+				Tooltip: Позволяет создавать предметы, используя сердце хранилища
+			}
+
+			CreativeStorageUnit.DisplayName: Творческая ячейка хранилища
+
+			Locator: {
+				DisplayName: Локатор
+				Tooltip:
+					'''
+					<right> по Cердцу Хранилища чтобы запомнить его местоположение
+					<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища
+					'''
+			}
+
+			LocatorDisk: {
+				DisplayName: Локатор с CD Приводом
+				Tooltip:
+					'''
+					<right> по Cердцу Хранилища чтобы запомнить его местоположение"
+					<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища"
+					Не пропадает при использовании
+					'''
+			}
+
+			PortableAccess: {
+				DisplayName: Портативный удаленный доступ к хранилищу (Эпический)
+				Tooltip:
+					'''
+					<right> по сердцу хранилища, чтобы запомнить локацию
+					В данный момент локация не установлена
+					Используйте предмет, чтобы получить удаленный доступ к хранилищу
+					Имеет неограниченный диапазон доступа
+					'''
+			}
+
+			PortableCraftingAccess: {
+				DisplayName: Портативный удаленный доступ к созданию предметов
+				Tooltip:
+					'''
+					<right> по модулю создания предметов, чтобы запомнить локацию
+					В данный момент локация не установлена
+					Используйте предмет, чтобы получить удаленный доступ к созданию предметов
+					Имеет неограниченный диапазон доступа
+					'''
+			}
+
+			RadiantJewel: {
+				DisplayName: Сияющая драгоценность
+				Tooltip: "'Сияет ослепительным светом'"
+			}
+
+			RemoteAccess: {
+				DisplayName: Модуль удаленного доступа к хранилищу
+				Tooltip:
+					'''
+					Позволяет создать удаленный доступ к сердцу хранилища
+					Действует как "центр хранения" для таких компонентов, как модуль создания предметов
+					'''
+			}
+
+			ShadowDiamond: {
+				DisplayName: Теневой алмаз
+				Tooltip: Следы света все еще мелькают внутри
+			}
+
+			SnowBiomeEmulator: {
+				DisplayName: Зимняя сфера
+				Tooltip: Позволяет Модулю Создания Предметов создавать предметы требующие нахождения игрока в снежном биоме
+			}
+
+			StorageAccess: {
+				DisplayName: Модуль доступа к хранилищу
+				Tooltip: Действует как еще одна точка доступа для просмотра предметов, находящихся в сердце хранилища
+			}
+
+			StorageComponent: {
+				DisplayName: Компонент хранилища
+				Tooltip: Базовый предмет для создания любого компонента из мода Magic Storage
+			}
+
+			StorageConnector: {
+				DisplayName: Провод для хранилища
+				Tooltip: Действует как мост для соединения компонентов из мода Magic Storage
+			}
+
+			StorageDeactivator: {
+				DisplayName: Жезл ячейки хранилища
+				Tooltip:
+					'''
+					<right> Включает/отключает ячейку хранилища
+					Отключенные ячейки хранилища попытаются перенести предметы во включенные ячейки хранилища
+					'''
+			}
+
+			StorageHeart: {
+				DisplayName: Сердце хранилища
+				Tooltip:
+					'''
+					Основной компонент для любой системы хранения мода Magic Storage
+					Требуется для функционирования системы хранения
+					'''
+			}
+
+			StorageUnit: {
+				DisplayName: Ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 40 предметов
+					'''
+			}
+
+			StorageUnitBlueChlorophyte: {
+				DisplayName: Синяя хлорофитовая Ячейка Хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 240 предметов
+					'''
+			}
+
+			StorageUnitCrimtane: {
+				DisplayName: Кримтановая ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 80 предметов
+					'''
+			}
+
+			StorageUnitDemonite: {
+				DisplayName: Демонитовая ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 80 предметов
+					'''
+			}
+
+			StorageUnitHallowed: {
+				DisplayName: Святая ячейка Хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 160 предметов
+					'''
+			}
+
+			StorageUnitHellstone: {
+				DisplayName: Адская ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 120 предметов
+					'''
+			}
+
+			StorageUnitLuminite: {
+				DisplayName: Люминитовая ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения.
+					Может хранить до 320 предметов
+					'''
+			}
+
+			StorageUnitTerra: {
+				DisplayName: Терра ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 640 предметов
+					'''
+			}
+
+			StorageUnitTiny: {
+				DisplayName: Малая ячейка хранилища
+				Tooltip:
+					'''
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить до 4 предметов
+					'''
+			}
+
+			UpgradeBlueChlorophyte: {
+				DisplayName: Синее хлорофитовое улучшение ячейки
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 240
+					<right> по Святой ячейке хранилища для улучшения
+					'''
+			}
+
+			UpgradeCrimtane: {
+				DisplayName: Кримтанитовое улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 80
+					<right> по ячейке хранилища для улучшения
+					'''
+			}
+
+			UpgradeDemonite: {
+				DisplayName: Демонитовое улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 80
+					<right> по Ячейке хранилища для улучшения
+					'''
+			}
+
+			UpgradeHallowed: {
+				DisplayName: Святое улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 160
+					<right> по Адской ячейке хранилища для улучшения
+					'''
+			}
+
+			UpgradeHellstone: {
+				DisplayName: Адское улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 120
+					<right> по Демонитовой/Кримтановой ячейке хранилища для улучшения
+					'''
+			}
+
+			UpgradeLuminite: {
+				DisplayName: Люминитовое улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 320
+					<right> по Синей хлорофитовой ячейке Хранилища для улучшения
+					'''
+			}
+
+			UpgradeTerra: {
+				DisplayName: Терра улучшение ячейки хранилища
+				Tooltip:
+					'''
+					Увеличивает количество слотов в Ячейке Хранилища до 640
+					<right> по Люминитовой Ячейке Хранилища для улучшения
+					'''
+			}
+
+			CrimsonAltar: {
+				DisplayName: Багровый алтарь
+				Tooltip: Размещаемый багровый алтарь. Не может быть добыт для получения руд
+			}
+
+			DemonAltar: {
+				DisplayName: Демонический алтарь
+				Tooltip: Размещаемый демонический алтарь. Не может быть добыт для получения руд
+			}
+
+			CombinedFurnitureStations1Item: {
+				DisplayName: Соединенные дополнительные станции (Ур. 1)
+				Tooltip: Сочетает в себе функциональность нескольких дополнительных станций
+			}
+
+			CombinedFurnitureStations2Item: {
+				DisplayName: Соединенные дополнительные станции (Ур. 2)
+				Tooltip: Сочетает в себе функциональность нескольких дополнительных станций
+			}
+
+			CombinedStations1Item: {
+				DisplayName: Соединенные станции (Ур. 1)
+				Tooltip: Сочетает в себе функциональность нескольких крафтовых станций
+			}
+
+			CombinedStations2Item: {
+				DisplayName: Соединенные станции (Ур. 2)
+				Tooltip: Сочетает в себе функциональность нескольких крафтовых станций
+			}
+
+			CombinedStations3Item: {
+				DisplayName: Соединенные станции (Ур. 3)
+				Tooltip: Сочетает в себе функциональность нескольких крафтовых станций
+			}
+
+			CombinedStations4Item: {
+				DisplayName: Соединенные станции (Ур. последний)
+				Tooltip: Сочетает в себе функциональность нескольких крафтовых станций
+			}
+
+			EnvironmentAccess: {
+				DisplayName: Интерфейс настройки хранилища
+				Tooltip:
+					'''
+					Настройки системы хранения
+					Отображает список переключаемых модулей среды,
+					добавленных другими модами, или ничего, если модули отсутствуют
+					Доступные модули:
+					<MODULES>
+					'''
+			}
+
+			PortableAccessPreHM: {
+				DisplayName: Портативный удаленный доступ к хранилищу (Обычный)
+				Tooltip:
+					'''
+					<right> по сердцу хранилища, чтобы запомнить локацию
+					В данный момент локация не установлена
+					Используйте предмет, чтобы получить удаленный доступ к хранилищу
+					Имеет маленький диапозон доступа 
+					'''
+			}
+
+			PortableAccessHM: {
+				DisplayName: Портативный удаленный доступ к хранилищу (Необычный)
+				Tooltip:
+					'''
+					<right> по сердцу хранилища, чтобы запомнить локацию
+					В данный момент локация не установлена
+					Используйте предмет, чтобы получить удаленный доступ к хранилищу
+					Имеет большой диапозон доступа
+					'''
+			}
+
+			/* Config_GlowItemGlowing.DisplayName: Config//GlowItemGlowing */
+			/* Config_GlowItemNotGlowing.DisplayName: Config//GlowItemNotGlowing */
+			/* Config_RecipeFilterAvailable.DisplayName: Config//RecipeFilterAvailable */
+			/* Config_RecipeFilterAll.DisplayName: Config//RecipeFilterAll */
 		}
 
-		ItemTooltip: {
-			BiomeGlobe:
-			'''
-			'Мировая мощь у вас под кончиками пальцев'
-			Позволяет создавать рецепты, для которых требуются Снежный биом, Экто-туман,
-			Демонический/Багровый алтарь и Вода/Лава/Мед.
-			Может находиться в инвентаре или в слоте станции интерфейса крафта,
-			Если зефир есть в инвентаре, его можно будет приготовить, не стоя у костра
-			Позволяет готовить зефир в интерфейсе создания предметов
-			Действует как пляжный мяч, когда его бросают
-			'''
-			Locator:
-			'''
-			<right> по Cердцу Хранилища чтобы запомнить его местоположение
-			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища
-			'''
-			LocatorDisk:
-			'''
-			<right> по Cердцу Хранилища чтобы запомнить его местоположение"
-			<right> на Модуль Удаленного Доступа к Хранилищу чтобы привязать его к Сердцу Хранилища"
-			Не пропадает при использовании
-			'''
-			PortableAccess:
-			'''
-			<right> по сердцу хранилища, чтобы запомнить локацию
-			В данный момент локация не установлена
-			Используйте предмет, чтобы получить удаленный доступ к хранилищу
-			Имеет неограниченный диапазон доступа
-			'''
-			PortableCraftingAccess:
-			'''
-			<right> по модулю создания предметов, чтобы запомнить локацию
-			В данный момент локация не установлена
-			Используйте предмет, чтобы получить удаленный доступ к созданию предметов
-			Имеет неограниченный диапазон доступа
-			'''
-			RadiantJewel:
-			'''
-			'Сияет ослепительным светом'
-			'''
-			ShadowDiamond:
-			'''
-			Следы света все еще мелькают внутри
-			'''
-			SnowBiomeEmulator:
-			'''
-			Позволяет Модулю Создания Предметов создавать предметы требующие нахождения игрока в снежном биоме
-			'''
-			StorageDeactivator:
-			'''
-			<right> по Ячейке хранилища что бы активировать/деактивировать ее
-			'''
-			UpgradeBlueChlorophyte:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 240
-			<right> по Святой ячейке хранилища для улучшения
-			'''
-			UpgradeCrimtane:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 80
-			<right> по ячейке хранилища для улучшения
-			'''
-			UpgradeDemonite:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 80
-			<right> по Ячейке хранилища для улучшения
-			'''
-			UpgradeHallowed:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 160
-			<right> по Адской ячейке хранилища для улучшения
-			'''
-			UpgradeHellstone:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 120
-			<right> по Демонитовой/Кримтановой ячейке хранилища для улучшения
-			'''
-			UpgradeLuminite:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 320
-			<right> по Синей хлорофитовой ячейке Хранилища для улучшения
-			'''
-			UpgradeTerra:
-			'''
-			Увеличивает количество слотов в Ячейке Хранилища до 640
-			<right> по Люминитовой Ячейке Хранилища для улучшения
-			'''
-			CrimsonAltar:
-			'''
-			Размещаемый багровый алтарь. Не может быть добыт для получения руд
-			'''
-			DemonAltar:
-			'''
-			Размещаемый демонический алтарь. Не может быть добыт для получения руд
-			'''
-			CombinedFurnitureStations1Item:
-			'''
-			Сочетает в себе функциональность нескольких дополнительных станций
-			'''
-			CombinedFurnitureStations2Item:
-			'''
-			Сочетает в себе функциональность нескольких дополнительных станций
-			'''
-			CombinedStations1Item:
-			'''
-			Сочетает в себе функциональность нескольких крафтовых станций
-			'''
-			CombinedStations2Item:
-			'''
-			Сочетает в себе функциональность нескольких крафтовых станций
-			'''
-			CombinedStations3Item:
-			'''
-			Сочетает в себе функциональность нескольких крафтовых станций
-			'''
-			CombinedStations4Item:
-			'''
-			Сочетает в себе функциональность нескольких крафтовых станций
-			'''
-			CraftingAccess: Позволяет создавать предметы, используя сердце хранилища
-			RemoteAccess:
-			'''
-			Позволяет создать удаленный доступ к сердцу хранилища
-			Действует как "центр хранения" для таких компонентов, как модуль создания предметов
-			'''
-			StorageAccess: Действует как еще одна точка доступа для просмотра предметов, находящихся в сердце хранилища
-			StorageComponent: Базовый предмет для создания любого компонента из мода Magic Storage
-			StorageConnector: Действует как мост для соединения компонентов из мода Magic Storage
-			StorageDeactivator:
-			'''
-			<right> Включает/отключает ячейку хранилища
-			Отключенные ячейки хранилища попытаются перенести предметы во включенные ячейки хранилища
-			'''
-			StorageHeart:
-			'''
-			Основной компонент для любой системы хранения мода Magic Storage
-			Требуется для функционирования системы хранения
-			'''
-			StorageUnit:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 40 предметов
-			'''
-			StorageUnitBlueChlorophyte:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 240 предметов
-			'''
-			StorageUnitCrimtane:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 80 предметов
-			'''
-			StorageUnitDemonite:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 80 предметов
-			'''
-			StorageUnitHallowed:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 160 предметов
-			'''
-			StorageUnitHellstone:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 120 предметов
-			'''
-			StorageUnitLuminite:
-			'''
-			Ячейка хранилища, которая используется для системы хранения.
-			Может хранить до 320 предметов
-			'''
-			StorageUnitTerra:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 640 предметов
-			'''
-			StorageUnitTiny:
-			'''
-			Ячейка хранилища, которая используется для системы хранения
-			Может хранить до 4 предметов
-			'''
-			EnvironmentAccess:
-			'''
-			Настройки системы хранения
-			Отображает список переключаемых модулей среды,
-			добавленных другими модами, или ничего, если модули отсутствуют
-			Доступные модули:
-			<MODULES>
-			'''
-			PortableAccessPreHM:
-			'''
-			<right> по сердцу хранилища, чтобы запомнить локацию
-			В данный момент локация не установлена
-			Используйте предмет, чтобы получить удаленный доступ к хранилищу
-			Имеет маленький диапозон доступа 
-			'''
-			PortableAccessHM:
-			'''
-			<right> по сердцу хранилища, чтобы запомнить локацию
-			В данный момент локация не установлена
-			Используйте предмет, чтобы получить удаленный доступ к хранилищу
-			Имеет большой диапозон доступа
-			'''
-		}
-
-		ProjectileName: {
-			BiomeGlobeThrown: Biome Globe
-		}
-
-		NPCName: {
-			Golem: "Рем"
-		}
+		Projectiles.BiomeGlobeThrown.DisplayName: Biome Globe
+		NPCs.Golem.DisplayName: Рем
 
 		ModuleName: {
-			UseInventoryModule: "Использовать предметы из инвентаря игрока"
-			UseInventoryNoFavoritesModule: "Использовать неизбранные предметы из инвентаря игрока"
-			JourneyInfiniteItems: "Использовать бесконечные предметы из режима приключений"
+			UseInventoryModule: Использовать предметы из инвентаря игрока
+			UseInventoryNoFavoritesModule: Использовать неизбранные предметы из инвентаря игрока
+			JourneyInfiniteItems: Использовать бесконечные предметы из режима приключений
 		}
 
 		ModuleDisabled: {
-			JourneyInfiniteItems: "Этот модуль может быть использован только персонажами режима путешествия."
+			JourneyInfiniteItems: Этот модуль может быть использован только персонажами режима путешествия.
+			/* UseInventoryModule: This module is currently disabled. */
+			/* UseInventoryNoFavoritesModule: This module is currently disabled. */
 		}
 
 		TownNPCMood: {
@@ -282,190 +372,171 @@ Mods: {
 				FarFromHome: Это устройство должно вернуться домой, чтобы как можно скорее зарядить свой конденсатор.
 				DislikeCrowded: Слишком много особей обнаружено в непосредственной близости.
 				HateCrowded: Этот NPC предпочитает быть более уединенным.
-				LikeBiome: "Нравится {BiomeName}."
-				LoveBiome: "Обожаю {BiomeName}."
-				DislikeBiome: "Не нравится {BiomeName}."
-				HateBiome: "Ненавижу {BiomeName}."
+				LikeBiome: Нравится {BiomeName}.
+				LoveBiome: Обожаю {BiomeName}.
+				DislikeBiome: Не нравится {BiomeName}.
+				HateBiome: Ненавижу {BiomeName}.
 				LikeNPC: "{NPCName} нравится."
-				LoveNPC: "Обожаю {NPCName}."
-				DislikeNPC: "Не нравится {NPCName}."
+				LoveNPC: Обожаю {NPCName}.
+				DislikeNPC: Не нравится {NPCName}.
 				HateNPC: "{NPCName} ненавижу."
-				// LikeNPC_Princess: ""
+				/* LikeNPC_Princess: "{NPCName} is best friends with my creator." */
 			}
 		}
 
-		MapObject: {
-			CraftingAccess: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
-			CreativeStorageUnit: "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
-			RemoteAccess: "{$Mods.MagicStorage.ItemName.RemoteAccess}"
-			StorageAccess: "{$Mods.MagicStorage.ItemName.StorageAccess}"
-			StorageComponent: "{$Mods.MagicStorage.ItemName.StorageComponent}"
-			StorageConnector: "{$Mods.MagicStorage.ItemName.StorageConnector}"
-			StorageHeart: "{$Mods.MagicStorage.ItemName.StorageHeart}"
-			StorageUnit: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			CrimsonAltar: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			DemonAltar: "{$Mods.MagicStorage.ItemName.DemonAltar}"
-			CombinedFurnitureStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
-			CombinedFurnitureStations2Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
-			CombinedStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
-			CombinedStations2Tile: "{$Mods.MagicStorage.ItemName.CombinedStations2Item}"
-			CombinedStations3Tile: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
-			CombinedStations4Tile: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
-			EnvironmentAccess: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+		Tiles: {
+			CraftingAccess.MapEntry: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
+			CreativeStorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
+			RemoteAccess.MapEntry: "{$Mods.MagicStorage.ItemName.RemoteAccess}"
+			StorageAccess.MapEntry: "{$Mods.MagicStorage.ItemName.StorageAccess}"
+			StorageComponent.MapEntry: "{$Mods.MagicStorage.ItemName.StorageComponent}"
+			StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
+			StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
+			StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
+			CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
+			DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
+			CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
+			CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
+			CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
+			CombinedStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations2Item}"
+			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
+			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+			/* EvilAltarTile.MapEntry: Mods.MagicStorage.MapObject.EvilAltarTile */
 		}
 
-		Bestiary: {
-			Golem:
-			'''
-			Робот, который расскажет вам о системе хранения.
-			'''
-		}
+		Bestiary.Golem: Робот, который расскажет вам о системе хранения.
 
 		Dialogue: {
 			Golem: {
-				Greeting: "Здраствуй, {0}. Хотели бы вы, чтобы я научил вас чему-нибудь?"
-				Wizard: "Для того, кто разбирается в магии, {0} не может понять, как работает система хранения. Честно говоря, на самом деле это не волшебство."
+				Greeting: Здраствуй, {0}. Хотели бы вы, чтобы я научил вас чему-нибудь?
+				Wizard: Для того, кто разбирается в магии, {0} не может понять, как работает система хранения. Честно говоря, на самом деле это не волшебство.
 				NotLihzahrd: Это устройство построено не из кирпича Lihzahrd. Пожалуйста, перестань спрашивать.
 				Bluemagic: Система хранения - это прекрасно. Было бы разумно не недооценивать его возможности.
-				NewTextAvailable: "Здраствуй, {0}. Я подготовил для вас несколько новых справочных текстов о переносимых средствах удаленного доступа."
+				NewTextAvailable: Здраствуй, {0}. Я подготовил для вас несколько новых справочных текстов о переносимых средствах удаленного доступа.
 				Help1:
-				'''
-				Чтобы начать, вам нужно будет создать некоторые компоненты для хранения. Этот предмет является основой для всех компонентов системы хранения данных. Отдайте один из них гиду, чтобы он посмотрел, для чего его можно использовать!
-				Рецепт: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
-				'''
+					'''
+					Чтобы начать, вам нужно будет создать некоторые компоненты для хранения. Этот предмет является основой для всех компонентов системы хранения данных. Отдайте один из них гиду, чтобы он посмотрел, для чего его можно использовать!
+					Рецепт: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
+					'''
 				Help2:
-				'''
-				Как только вы получите [i:MagicStorage/StorageComponent], вам нужно будет создать сердце хранилища. Сердце хранилища - это место, где вы можете получить доступ к сохраненным предметам, и оно необходимо для функционирования системы хранения.
-				Рецепт: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
-				'''
+					'''
+					Как только вы получите [i:MagicStorage/StorageComponent], вам нужно будет создать сердце хранилища. Сердце хранилища - это место, где вы можете получить доступ к сохраненным предметам, и оно необходимо для функционирования системы хранения.
+					Рецепт: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
+					'''
 				Help3:
-				'''
-				После размещения [i:MagicStorage/StorageHeart], вам нужно будет создать ячейки хранилища,чтобы сохранить предметы в сердце хранилища.
-				Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
-				'''
+					'''
+					После размещения [i:MagicStorage/StorageHeart], вам нужно будет создать ячейки хранилища,чтобы сохранить предметы в сердце хранилища.
+					Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
+					'''
 				Help4:
-				'''
-				Чтобы создавать предметы в системе хранения, вам нужно будет создать модуль создания предметов.
-				Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
-				'''
+					'''
+					Чтобы создавать предметы в системе хранения, вам нужно будет создать модуль создания предметов.
+					Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
+					'''
 				Help5:
-				'''
-				Слоты для станций в модуле создания предметов более мощные, чем кажутся. Некоторые предметы могут использовать сразу несколько требований к крафту!
-				[i:GlassKiln] функционирует как [i:Furnace]
-				[i:BewitchingTable] функционирует как [i:WoodenTable]
-				[rg:MagicStorage:AnyTombstone] позволяет использовать рецепты экто-тумана
-				[i:AlchemyTable] функционирует как [i:WoodenTable] and [i:Bottle]
-				[rg:MagicStorage:AnyTable] функционирует как [i:WoodenChair]
-				'''
+					'''
+					Слоты для станций в модуле создания предметов более мощные, чем кажутся. Некоторые предметы могут использовать сразу несколько требований к крафту!
+					[i:GlassKiln] функционирует как [i:Furnace]
+					[i:BewitchingTable] функционирует как [i:WoodenTable]
+					[rg:MagicStorage:AnyTombstone] позволяет использовать рецепты экто-тумана
+					[i:AlchemyTable] функционирует как [i:WoodenTable] and [i:Bottle]
+					[rg:MagicStorage:AnyTable] функционирует как [i:WoodenChair]
+					'''
 				Help6:
-				'''
-				The [i:AlchemyTable] сохраняет свой 33%-ный шанс не употреблять ингредиенты для зелья.
-				[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] и любой другой предмет, который считается источником воды, позволяет использовать рецепты приготовления воды.
-				[i:LavaBucket] позволяет создавать предметы, требующие лаву.
-				[i:HoneyBucket] позволяет создавать предметы, требующие мед.
-				[i:MagicStorage/DemonAltar] и [i:MagicStorage/CrimsonAltar] позволяет использовать рецепты, требующие Демонического/Багрового алтаря.
-				[i:MagicStorage/SnowBiomeEmulator] позволяет создавать предметы, требующие снежный биом.
-				'''
+					'''
+					The [i:AlchemyTable] сохраняет свой 33%-ный шанс не употреблять ингредиенты для зелья.
+					[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] и любой другой предмет, который считается источником воды, позволяет использовать рецепты приготовления воды.
+					[i:LavaBucket] позволяет создавать предметы, требующие лаву.
+					[i:HoneyBucket] позволяет создавать предметы, требующие мед.
+					[i:MagicStorage/DemonAltar] и [i:MagicStorage/CrimsonAltar] позволяет использовать рецепты, требующие Демонического/Багрового алтаря.
+					[i:MagicStorage/SnowBiomeEmulator] позволяет создавать предметы, требующие снежный биом.
+					'''
 				Help7:
-				'''
-				Все компоненты системы хранения должны быть соединены вместе. Если вы хотите отделить свои [i:MagicStorage/StorageUnit ] от вашего
-				[i:MagicStorage/StorageHeart], вы можете использовать разъемы для их подключения.
-				Рецепт: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
-				'''
-				Help8:
-				'''
-				В сердцевинах всех боссов спрятан Теневой алмаз. Этот проклятый драгоценный камень можно использовать в качестве альтернативы [i:Diamond] для всех рецептов MagicStorage. Как только вы получили Теневой алмаз от босса, вы больше ничего от него не получите! С другой стороны, некоторые боссы сбрасывают больше одного.
-				'''
+					'''
+					Все компоненты системы хранения должны быть соединены вместе. Если вы хотите отделить свои [i:MagicStorage/StorageUnit ] от вашего
+					[i:MagicStorage/StorageHeart], вы можете использовать разъемы для их подключения.
+					Рецепт: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
+					'''
+				Help8: В сердцевинах всех боссов спрятан Теневой алмаз. Этот проклятый драгоценный камень можно использовать в качестве альтернативы [i:Diamond] для всех рецептов MagicStorage. Как только вы получили Теневой алмаз от босса, вы больше ничего от него не получите! С другой стороны, некоторые боссы сбрасывают больше одного.
 				Help9:
-				'''
-				Заканчивается хранилище? Обновляйте свои ячейки хранилища с помощью улучшение ячейки хранилища! Улучшение хранилища может быть применено только единожды для ячейки хранения предыдущего уровня.
-				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
-				[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
-				[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
-				[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
-				'''
+					'''
+					Заканчивается хранилище? Обновляйте свои ячейки хранилища с помощью улучшение ячейки хранилища! Улучшение хранилища может быть применено только единожды для ячейки хранения предыдущего уровня.
+					[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
+					[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
+					[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+					[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
+					'''
 				Help10:
-				'''
-				Если вы не хотите перемещать свое хранилище, используйте вместо этого удаленный доступ к хранилищу! Этот компонент можно использовать как сердце хранилища для просмотра элементов в вашем хранилище.
-				Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
-				'''
+					'''
+					Если вы не хотите перемещать свое хранилище, используйте вместо этого удаленный доступ к хранилищу! Этот компонент можно использовать как сердце хранилища для просмотра элементов в вашем хранилище.
+					Рецепт: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
+					'''
 				Help11:
-				'''
-				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет предмет глобус биомов. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
-				Рецепт: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
-				'''
+					'''
+					В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет предмет глобус биомов. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
+					Рецепт: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
+					'''
 				Help12:
-				'''
-				Иногда вы хотите иметь доступ к своему хранилищу в других точках мира, но необходимость подключать хранилище с помощью проводов является одновременно хлопотной и дорогостоящей. Решение? Создайте удаленный доступ и свяжите его с центром хранения с помощью [i:MagicStorage/Locator ] или [i:MagicStorage/LocatorDisk ].
-				Рецепты:
-				[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
-				[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
-				[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
-				'''
-				Help13:
-				'''
-				Вы можете подключить компоненты хранилища к удаленному доступу и по-прежнему иметь доступ к основной системе хранения. Это очень полезно для того, чтобы иметь доступ к крафту вдали от системы хранения.
-				'''
-				Help14:
-				'''
-				Деактиватор хранилища позволяет отключить [i:MagicStorage/StorageUnit]. Отключенный [i:MagicStorage/StorageUnit] не может хранить элементы и попытается переместить свои предметы в подключенную [i:MagicStorage/StorageUnit] ячейку хранилища. Если он не может переместить свои предметы, то они остаются в отключенном [i:MagicStorage/StorageUnit].
-				'''
+					'''
+					Иногда вы хотите иметь доступ к своему хранилищу в других точках мира, но необходимость подключать хранилище с помощью проводов является одновременно хлопотной и дорогостоящей. Решение? Создайте удаленный доступ и свяжите его с центром хранения с помощью [i:MagicStorage/Locator ] или [i:MagicStorage/LocatorDisk ].
+					Рецепты:
+					[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+					[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+					'''
+				Help13: Вы можете подключить компоненты хранилища к удаленному доступу и по-прежнему иметь доступ к основной системе хранения. Это очень полезно для того, чтобы иметь доступ к крафту вдали от системы хранения.
+				Help14: Деактиватор хранилища позволяет отключить [i:MagicStorage/StorageUnit]. Отключенный [i:MagicStorage/StorageUnit] не может хранить элементы и попытается переместить свои предметы в подключенную [i:MagicStorage/StorageUnit] ячейку хранилища. Если он не может переместить свои предметы, то они остаются в отключенном [i:MagicStorage/StorageUnit].
 				Help15:
-				'''
-				Для удобства пользователей Magic Storage добавляет рецепты для размещаемых алтарей Демонический/Багряный. Хотя их добыча не дает вам руды, вы все равно можете использовать их в качестве станций создания предметов.
-				Рецепты:
-				[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
-				[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
-				'''
+					'''
+					Для удобства пользователей Magic Storage добавляет рецепты для размещаемых алтарей Демонический/Багряный. Хотя их добыча не дает вам руды, вы все равно можете использовать их в качестве станций создания предметов.
+					Рецепты:
+					[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
+					[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
+					'''
 				Help16:
-				'''
-				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет несколько комбинированных крафтовых станций. Каждая комбинированная станция крафта наследует свойства своих станций крафта материалов.ing stations.
-				Рецепты:
-				[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
-				[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
-				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
-				'''
+					'''
+					В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет несколько комбинированных крафтовых станций. Каждая комбинированная станция крафта наследует свойства своих станций крафта материалов.ing stations.
+					Рецепты:
+					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
+					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
+					'''
 				Help17:
-				'''
-				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет несколько комбинированных крафтовых станций. Каждая комбинированная станция крафта наследует свойства своих станций крафта материалов.
-				Рецепты:
-				[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
-				[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
-				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-				'''
-				Help18:
-				'''
-				Лунный лорд охраняет Сияющую драгоценность, драгоценный камень невероятной силы. Вы можете использовать его для создания портативных средств удаленного доступа с неограниченным диапазоном доступа!
-				'''
-				Help19:
-				'''
-				[i:MagicStorage/EnvironmentAccess] является довольно причудливым компонентом. Ходят слухи, что он допускает внешнее вмешательство в системы хранения Magic Storage, но только разработчик мода сможет использовать его.
-				'''
+					'''
+					В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет несколько комбинированных крафтовых станций. Каждая комбинированная станция крафта наследует свойства своих станций крафта материалов.
+					Рецепты:
+					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					'''
+				Help18: Лунный лорд охраняет Сияющую драгоценность, драгоценный камень невероятной силы. Вы можете использовать его для создания портативных средств удаленного доступа с неограниченным диапазоном доступа!
+				Help19: "[i:MagicStorage/EnvironmentAccess] является довольно причудливым компонентом. Ходят слухи, что он допускает внешнее вмешательство в системы хранения Magic Storage, но только разработчик мода сможет использовать его."
 				Help20:
-				'''
-				[i:MagicStorage/RemoteAccess ] Очень удобнен, иногда вам нужно иметь доступ к своему хранилищу, находясь вдали от дома.
-				Также, вы можете создать портативный удаленный доступ к хранилищу!
-				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
-				'''
+					'''
+					[i:MagicStorage/RemoteAccess ] Очень удобнен, иногда вам нужно иметь доступ к своему хранилищу, находясь вдали от дома.
+					Также, вы можете создать портативный удаленный доступ к хранилищу!
+					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+					'''
 				Help20_Mechs:
-				'''
-				{$Mods.MagicStorage.Dialogue.Golem.Help20}
-				[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
-				'''
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help20}
+					[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+					'''
 				Help20_Moon:
-				'''
-				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
-				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
-				'''
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
+					[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+					[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
+					'''
 				Help21:
-				'''
-				Вы также можете обновить ячейку хранилища до следующего уровня, щелкнув по нему правой кнопкой мыши с улучшением ячейки хранилища.
-				[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
-				[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
-				[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
-				[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
-				'''
+					'''
+					Вы также можете обновить ячейку хранилища до следующего уровня, щелкнув по нему правой кнопкой мыши с улучшением ячейки хранилища.
+					[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
+					[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
+					[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
+					'''
 			}
 
 			ChatOptions: {
@@ -476,309 +547,341 @@ Mods: {
 			}
 		}
 
-		Active: "Активно"
-		Inactive: "Неактивно"
-
-		PortableAccessUnlocated: "Локатор не настроен ни на какое хранилище."
-		PortableAccessMissing: "Сердце хранилища отсутствует!"
-		PortableAccessOutOfRange: "Локатору не удалось подключиться к своей связанной системе хранения."
-		PortableAccessNoPylons: "Никакие столбы не находятся достаточно близко к связанной системе хранения."
-
-		PortableCraftingUnlocated: "Локатор не настроен ни на какой модуль создания предметов."
-		PortableCraftingMissing: "Модуль создания предметов отсутсвует!"
-
-		RemoteAccessSuccess: "Успех!"
-		RemoteAccessHasLocator: "У этого удаленного доступа уже есть привязанный локатор, замените, чтобы сбросить его"
-		RemoteAccessUnlocated: "Локатор не настроен."
-
-		StorageUnitActivated: "Ячейка хранилища была включена"
-		StorageUnitDeactivated: "Ячейка хранилища была отключена"
-
-		FilterAllMods: "Все моды"
-
+		Active: Активно
+		Inactive: Неактивно
+		PortableAccessUnlocated: Локатор не настроен ни на какое хранилище.
+		PortableAccessMissing: Сердце хранилища отсутствует!
+		PortableAccessOutOfRange: Локатору не удалось подключиться к своей связанной системе хранения.
+		PortableAccessNoPylons: Никакие столбы не находятся достаточно близко к связанной системе хранения.
+		PortableCraftingUnlocated: Локатор не настроен ни на какой модуль создания предметов.
+		PortableCraftingMissing: Модуль создания предметов отсутсвует!
+		RemoteAccessSuccess: Успех!
+		RemoteAccessHasLocator: У этого удаленного доступа уже есть привязанный локатор, замените, чтобы сбросить его
+		RemoteAccessUnlocated: Локатор не настроен.
+		StorageUnitActivated: Ячейка хранилища была включена
+		StorageUnitDeactivated: Ячейка хранилища была отключена
+		FilterAllMods: Все моды
 		Capacity: "{0} / {1} предметов"
-
-		LocatorSet: "Локатор успешно установлен: X={0}, Y={1}"
-
-		StorageAccessFail: "Не удалось загрузить объект Сердце хранилища!"
-		StorageAccessFailAlt: "Этот доступ не подключен к сердцу хранилища!"
-		StorageAccessFailLoad: "Сердце хранилища не загружено! Пожалуйста, попробуйте снова."
-
+		LocatorSet: Локатор успешно установлен: X={0}, Y={1}
+		StorageAccessFail: Не удалось загрузить объект Сердце хранилища!
+		StorageAccessFailAlt: Этот доступ не подключен к сердцу хранилища!
+		StorageAccessFailLoad: Сердце хранилища не загружено! Пожалуйста, попробуйте снова.
 		TestItemSuffix: " !ДО ВОЗРОЖДЕНИЯ!"
-		SetTo: "Set to: X={0}, Y={1}"
-		SnowBiomeBlock: "Блок снежного биома"
-		DepositAll: "Положить все"
-		CraftingStations: "Станции создания предметов"
-		CraftTooltip: "ЛКМ, чтобы создать"
-		CraftTooltipOld: "ЛКМ, чтобы создать (ctrl - создать максимум)"
+		SetTo: Set to: X={0}, Y={1}
+		SnowBiomeBlock: Блок снежного биома
+		DepositAll: Положить все
+		CraftingStations: Станции создания предметов
+		CraftTooltip: ЛКМ, чтобы создать
+		CraftTooltipOld: ЛКМ, чтобы создать (ctrl - создать максимум)
 
 		Crafting: {
-			Plus1: "+1"
-			Plus10: "+10"
-			Plus100: "+100"
+			Plus1: +1
+			Plus10: +10
+			Plus100: +100
 			Minus1: "-1"
 			Minus10: "-10"
 			Minus100: "-100"
-			MaxStack: "Максимум"
-			Reset: "Сброс"
-			Amount: "Создать: {0}"
+			MaxStack: Максимум
+			Reset: Сброс
+			Amount: Создать: {0}
 		}
 
-		Search: "Поиск"
-		SearchName: "Название"
-		SearchMod: "Мод"
-
-		// SortWaiting: ""
+		Search: Поиск
+		SearchName: Название
+		SearchMod: Мод
+		/* SortWaiting: Loading ... */
 
 		SearchTips: {
-			SearchName: "Название"
-			SearchMod: "@Мод Название"
+			SearchName: Название
+			SearchMod: @Мод Название
 			SearchTooltip: "#Описание"
-			SearchModAndTooltip: "@Мод #Описание"
-
+			SearchModAndTooltip: @Мод #Описание
 			TipModAndTooltip: "[c/ffff00:@Мод], [c/ffff00:#Описание] (могут быть объединены в таком порядке)"
 			TipTooltipOnly: "[c/ffff00:#Описание] поиск предмета по описанию"
 		}
 
-		Recipes: "Рецепты"
-		RecipeAvailable: "Показать доступные рецепты"
-		RecipeAll: "Показать все рецепты"
-		RecipeBlacklist: "Показать скрытые рецепты (ctrl+click по рецепту, чтобы скрыть/показать)"
-		SelectedRecipe: "Выбранный рецепт"
-		Ingredients: "Ингредиенты"
-		StoredItems: "Хранимые ингредиенты"
-		ShowOnlyFavorited: "Только избранные"
-		ViewHistory: "Нажмите, чтобы просмотреть историю рецептов"
-		ClearHistory: "Очистить"
-		PrevHistory: "Предыдущий рецепт в истории"
-		NextHistory: "Следующий рецепт в истории"
-
+		Recipes: Рецепты
+		RecipeAvailable: Показать доступные рецепты
+		RecipeAll: Показать все рецепты
+		RecipeBlacklist: Показать скрытые рецепты (ctrl+click по рецепту, чтобы скрыть/показать)
+		SelectedRecipe: Выбранный рецепт
+		Ingredients: Ингредиенты
+		StoredItems: Хранимые ингредиенты
+		ShowOnlyFavorited: Только избранные
+		ViewHistory: Нажмите, чтобы просмотреть историю рецептов
+		ClearHistory: Очистить
+		PrevHistory: Предыдущий рецепт в истории
+		NextHistory: Следующий рецепт в истории
 		PanelTooSmol:
-		'''
-		Не удается открыть пользовательский интерфейс Magic Storage.Причина: Высота панели была слишком мала для правильного отображения элементов пользовательского интерфейса.
-		Пожалуйста, уменьшите масштаб вашего пользовательского интерфейса в настройках или увеличьте разрешение игры в настройках видео.
-		'''
+			'''
+			Не удается открыть пользовательский интерфейс Magic Storage.Причина: Высота панели была слишком мала для правильного отображения элементов пользовательского интерфейса.
+			Пожалуйста, уменьшите масштаб вашего пользовательского интерфейса в настройках или увеличьте разрешение игры в настройках видео.
+			'''
 
 		Warnings: {
-			StorageDefaultToAllItems:
-			'''
-			Предметы не отображаются, даже если они есть в хранилище. По умолчанию используется режим фильтрации "Все".
-			'''
-			StorageDefaultToAllMods:
-			'''
-			Предметы не отображаются, даже если они есть в хранилище.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
-			'''
-			CraftingNoBlacklist:
-			'''
-			Рецепты не отображаются, даже если рецепты из черного списка существуют.  Игнорирование рецептов из черного список.
-			'''
-			CraftingDefaultToAllMods:
-			'''
-			Рецепты не отображаются, даже если рецепты из других модов существует.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
-			'''
-			// DeleteItemsFailed: ""
-			// DeleteDataFailed: ""
+			StorageDefaultToAllItems: Предметы не отображаются, даже если они есть в хранилище. По умолчанию используется режим фильтрации "Все".
+			StorageDefaultToAllMods: Предметы не отображаются, даже если они есть в хранилище.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
+			CraftingNoBlacklist: Рецепты не отображаются, даже если рецепты из черного списка существуют.  Игнорирование рецептов из черного список.
+			CraftingDefaultToAllMods: Рецепты не отображаются, даже если рецепты из других модов существует.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
+			/* DeleteItemsFailed: Deletion operation failed for unknown reasons.  Please try again, or delete the items manually if necessary. */
+			/* DeleteDataFailed: Deletion operation failed for unknown reasons.  Some items may still contain unloaded mod data. */
 		}
 
-		RecipeHidden:
-		'''
-		"{0}" рецептов были скрыты.
-		'''
-		RecipeRevealed:
-		'''
-		"{0}" рецептов были показаны.
-		'''
+		RecipeHidden: '''"{0}" рецептов были скрыты.'''
+		RecipeRevealed: '''"{0}" рецептов были показаны.'''
 
 		RecipeConditions: {
-			EctoMistOverride:
-			'''
-			{$RecipeConditions.InGraveyardBiome} / Стоя рядом с {$Mods.MagicStorage.ItemName.CombinedStations4Item}
-			'''
-			CookedMarshmallowCondition: "Биомный глобус в модуле создания предметов"
+			EctoMistOverride: "{$RecipeConditions.InGraveyardBiome} / Стоя рядом с {$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			CookedMarshmallowCondition: Биомный глобус в модуле создания предметов
 		}
 
-		DepositTooltip: "Положить - клик, Положить все - ctrl+клик, Пополнить запасы - ПКМ"
-		DepositTooltipAlt: "Положить - ctrl+клик, Положить все - клик, Пополнить запасы - ПКМ"
+		DepositTooltip: Положить - клик, Положить все - ctrl+клик, Пополнить запасы - ПКМ
+		DepositTooltipAlt: Положить - ctrl+клик, Положить все - клик, Пополнить запасы - ПКМ
 
 		StorageGUI: {
-			ForceRefreshButton: "Принуд. обновление интерфейса"
-			CompactCoinsButton: "Сжать монеты (100з-1платина)"
-			DestroyUnloadedButton: "удалить неустановленные элементы мода"
-			DestroyUnloadedDataButton: "удалить удаленные данные мода"
-			DepositPiggyBank: "Положить все предметы с свино-копилки"
-			DepositSafe: "Положить все предметы с сейфа"
-			DepositForge: "Положить все предметы с печи защитника"
-			DepositVault: "Положить все предметы с п.сейфа/мешка"
-
-			InitShowcaseButton: "Создание предпросмотра"
-			ResetShowcaseButton: "Сброс предметов предпросмотра"
-			ClearItemsButton: "Очистить все предметы"
-
-			SellDuplicatesHeader: "Продажа дубликатов"
-			SellDuplicatesButton: "Продать"
+			ForceRefreshButton: Принуд. обновление интерфейса
+			CompactCoinsButton: Сжать монеты (100з-1платина)
+			DestroyUnloadedButton: удалить неустановленные элементы мода
+			DestroyUnloadedDataButton: удалить удаленные данные мода
+			DepositPiggyBank: Положить все предметы с свино-копилки
+			DepositSafe: Положить все предметы с сейфа
+			DepositForge: Положить все предметы с печи защитника
+			DepositVault: Положить все предметы с п.сейфа/мешка
+			InitShowcaseButton: Создание предпросмотра
+			ResetShowcaseButton: Сброс предметов предпросмотра
+			ClearItemsButton: Очистить все предметы
+			SellDuplicatesHeader: Продажа дубликатов
+			SellDuplicatesButton: Продать
 
 			SellDuplicatesMenu: {
-				NoPrefix: "Продать дубликаты без модификаторов"
-				KeepMostValue: "Оставить дорогие предметы"
-				KeepLeastValue: "Оставить дешевые предметы"
+				NoPrefix: Продать дубликаты без модификаторов
+				KeepMostValue: Оставить дорогие предметы
+				KeepLeastValue: Оставить дешевые предметы
 			}
 		}
 
-		HoverText: {
-			Reset: "Сбросить положение и размер панели"
-		}
+		HoverText.Reset: Сбросить положение и размер панели
 
 		EnvironmentGUI: {
 			EntryDisabledDefault: В настоящее время этот модуль отключен.
 			NoModules:
-			'''
-			Другие модули не найдены.
-			Другим модам нужно будет добавить некоторые из них, чтобы они появились здесь.
-			'''
+				'''
+				Другие модули не найдены.
+				Другим модам нужно будет добавить некоторые из них, чтобы они появились здесь.
+				'''
 		}
 
 		FilteringOption: {
-			All: "Фильтр (Всё)"
-			Weapons: "Фильтр (Оружия)"
-			Tools: "Фильтр (Инструменты)"
-			Equips: "Фильтр (Экипировка)"
-			WeaponsMelee: "Фильтр (Оружие воина)"
-			WeaponsRanged: "Фильтр (Оружие стрелка)"
-			WeaponsMagic: "Фильтр (Оружие мага)"
-			WeaponsSummon: "Фильтр (Оружие призывателя)"
-			WeaponsThrown: "Фильтр (Метательное оружие)"
-			Ammo: "Фильтр (Амуниция)"
-			Armor: "Фильтр (Броня)"
-			Vanity: "Фильтр (Украшения)"
-			Potions: "Фильтр (Зелья)"
-			Tiles: "Фильтр (Размещаемое)"
-			Misc: "Фильтр (Разное)"
-			Recent: "Фильтр (Недавно добавленные предметы)"
-			ArmorAndEquips: "Фильтр (Снаряжение)"
-			WeaponsOther: "Фильтр (Нестандартные оружия)"
-			Unstackables: "Фильтр (Не стекируемое)"
-			Stackables: "Фильтр (Стекируемое)"
-			NotFullyResearched: "Фильтр (Непросмотренное)"
-			FullyResearched: "Фильтр (Просмотренное)"
-			Materials: "Фильтр (Материалы)"
+			All: Фильтр (Всё)
+			Weapons: Фильтр (Оружия)
+			Tools: Фильтр (Инструменты)
+			Equips: Фильтр (Экипировка)
+			WeaponsMelee: Фильтр (Оружие воина)
+			WeaponsRanged: Фильтр (Оружие стрелка)
+			WeaponsMagic: Фильтр (Оружие мага)
+			WeaponsSummon: Фильтр (Оружие призывателя)
+			WeaponsThrown: Фильтр (Метательное оружие)
+			Ammo: Фильтр (Амуниция)
+			Armor: Фильтр (Броня)
+			Vanity: Фильтр (Украшения)
+			Potions: Фильтр (Зелья)
+			Tiles: Фильтр (Размещаемое)
+			Misc: Фильтр (Разное)
+			Recent: Фильтр (Недавно добавленные предметы)
+			ArmorAndEquips: Фильтр (Снаряжение)
+			WeaponsOther: Фильтр (Нестандартные оружия)
+			Unstackables: Фильтр (Не стекируемое)
+			Stackables: Фильтр (Стекируемое)
+			NotFullyResearched: Фильтр (Непросмотренное)
+			FullyResearched: Фильтр (Просмотренное)
+			Materials: Фильтр (Материалы)
 		}
 
 		SortingOption: {
-			Default: "Стандартная сортировка"
-			ID: "Сортировка по ID"
-			Name: "Сортировка по имени"
-			Value: "Сортировка по значению"
-			Dps: "Сортировка по DPS"
-			QuantityAbsolute: "Сортировка по общему кол-ву"
-			QuantityRatio: "Сортировка по кол-ву стека"
-			Damage: "Сортировка по урону"
+			Default: Стандартная сортировка
+			ID: Сортировка по ID
+			Name: Сортировка по имени
+			Value: Сортировка по значению
+			Dps: Сортировка по DPS
+			QuantityAbsolute: Сортировка по общему кол-ву
+			QuantityRatio: Сортировка по кол-ву стека
+			Damage: Сортировка по урону
+			/* Stack: Mods.MagicStorage.SortingOption.Stack */
 		}
 
-		ButtonConfigGear: "Открыть панель конфигурации"
+		ButtonConfigGear: Открыть панель конфигурации
 
 		UIPages: {
-			Sorting: "Сортировка"
-			Filtering: "Фильтрация"
-			Crafting: "Создание"
-			Storage: "Хранилище"
-			Controls: "Настройки"  # StorageGUI page for the extra controls
-			Modules: "Модули"    # EnvironmentGUI page for the modules
-			History: "История"    # CraftingGUI recipe history panel
+			Sorting: Сортировка
+			Filtering: Фильтрация
+			Crafting: Создание
+			Storage: Хранилище
+			Controls: "Настройки"
+			# StorageGUI page for the extra controls
+			Modules: "Модули"
+			# EnvironmentGUI page for the modules
+			History: История
 		}
 
 		Config: {
-			// Label: ""
-			// ServersideLabel: ""
-			// BetaLabel: ""
+			/* Label: Magic Storage Config */
+			/* ServersideLabel: Magic Storage Server Config */
+			/* BetaLabel: Magic Storage BETA Config */
 
 			Headers: {
-				// Storage: ""
-				// Crafting: ""
-				// StorageAndCrafting: ""
-				// General: ""
+				/* Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config" */
+				/* Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config" */
+				/* StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config" */
+				/* General: General Configs */
 			}
 
 			glowNewItems: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes" */
+				/* Tooltip: Toggles whether new items in the storage will glow to indicate they're new */
 			}
+
 			useConfigFilter: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter" */
+				/* Tooltip: Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load) */
 			}
+
 			showAllRecipes: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter" */
+				/* Tooltip: Enable to default to all recipes, disable to default to available recipes */
 			}
+
 			quickStackDepositMode: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:Chest]  Quick stack deposit mode" */
+				/* Tooltip: Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released */
 			}
+
 			clearSearchText: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Clear search text */
+				/* Tooltip: Enable to clear the search text when opening the UI */
 			}
+
 			extraFilterIcons: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:Cog]  Display extra sorting icons" */
+				/* Tooltip: Enable to have the extra sorting options available in the Legacy button layout */
 			}
+
 			showDps: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Estimate the dps of weapons */
+				/* Tooltip: Enable to show a tooltip with the estimated dps of the item */
 			}
+
 			useOldCraftMenu: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:WorkBench]  Use old Craft buttons" */
+				/* Tooltip: Enable to use the older UI for crafting in the Crafting GUI */
 			}
+
 			allowItemDataDebug: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:IronPickaxe]  Item debug information" */
+				/* Tooltip: Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the "Print Item Data" keybinding to print data */
 			}
+
 			searchBarRefreshOnKey: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Search Bar Refreshes on Key Press */
+				/* Tooltip: Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected */
 			}
+
 			uiFavorites: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:FallenStar]  Favorites Filter Button" */
+				/* Tooltip: Enable to allow favoriting items/recipes in the Crafting GUI */
 			}
+
 			recipeBlacklist: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Recipe Whitelist/Blacklist */
+				/* Tooltip: Enable to allow whitelisting and blacklisting recipes in the Crafting GUI */
 			}
+
 			buttonLayout: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Sorting/Filtering Button Layout */
+				/* Tooltip:
+					'''
+					Legacy:
+					  Layout from v0.5.6.5 and previous versions.
+					  The Sorting and Filtering pages are disabled.
+					ModernPaged:
+					  Sorting and filtering options moved to the Sorting and Filtering pages.
+					ModernConfigurable:
+					  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+					LegacyWithGear:
+					  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+					  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
+					  The Sorting and Filtering pages are disabled.
+					LegacyBasicWithPaged:
+					  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+					  Additional icons are in the Sorting and Filtering pages.
+					ModernDropdown:
+					  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
+					  The Sorting and Filtering pages are disabled.
+					''' */
 			}
+
 			clearHistory: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[i:Book]  Clear recipe history" */
+				/* Tooltip: Enable to clear the recipe history in the Crafting GUI when opening it */
 			}
+
 			canMovePanels: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: UI Panel Movement */
+				/* Tooltip: Disable to prevent moving and resizing the UI panels */
 			}
+
 			recursionDepth: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: "[DISABLED] Recipe Recursion Depth" */
+				/* Tooltip:
+					'''
+					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+					How deep the recursion goes for crafting recipes in the Crafting UI.
+					Set to 0 to disable this feature.
+					Set to -1 for infinite depth
+					''' */
 			}
+
+			recursionMode: {
+				/* Label: "[DISABLED] Recipe Recursion Mode" */
+				/* Tooltip:
+					'''
+					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+					Legacy:
+					  Logic is kept in line with how it worked in the Recursive Craft integration.
+					  That is, recursive recipes are "combined" into one singular recipe.
+					  Simplicity at the cost of more processing required and less control.
+					Modern:
+					  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
+					  Sub-recipes can be swapped out in a special UI in the Crafting UI.
+					  Less processing required and more control at the cost of more complexity.
+					''' */
+			}
+
 			automatonRemembers: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Automaton remembers last help tip */
+				/* Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with. */
 			}
 
 			AllowAutomatonToMoveIn: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Automaton Housing */
+				/* Tooltip: Enable to allow the Automaton to be able to move into housing */
 			}
 
 			PrintTextToChat: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Print logging information to ingame chat */
+				/* Tooltip:
+					'''
+					Enable to print logging information to the ingame chat.
+					Logging information will be printed to your client.log and server.log files regardless.
+					''' */
 			}
+
 			ShowDebugPylonRangeAreas: {
-				// Label: ""
-				// Tooltip: ""
+				/* Label: Portable Access Range Debug */
+				/* Tooltip:
+					'''
+					Enable to show the valid ranges for a Portable Remote Access while the player is holding it.
+					For accesses with infinite range, nothing is displayed.
+					''' */
 			}
 		}
 	}

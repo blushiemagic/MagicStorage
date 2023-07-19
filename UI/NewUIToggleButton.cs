@@ -31,8 +31,8 @@ namespace MagicStorage.UI {
 			MinHeight.Set(buttonSize, 0f);
 		}
 
-		public override void Click(UIMouseEvent evt) {
-			base.Click(evt);
+		public override void LeftClick(UIMouseEvent evt) {
+			base.LeftClick(evt);
 
 			bool oldValue = Value;
 			Value = !Value;

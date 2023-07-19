@@ -1,8 +1,8 @@
 ﻿using MagicStorage.Common.Systems;
 using SerousCommonLib.API;
 using Terraria;
+using Terraria.Chest;
 using Terraria.ID;
-using OnChest = On.Terraria.Chest;
 
 namespace MagicStorage.Edits {
 	internal class QuickStackChestDetour : Edit {

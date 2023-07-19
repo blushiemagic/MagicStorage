@@ -169,7 +169,7 @@ namespace MagicStorage.Common.Systems
 				moddedDiamonds.Add(reader.ReadInt32());
 		}
 
-		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref float totalWeight) {
+		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight) {
 			if (!MagicStorageServerConfig.AllowAutomatonToMoveIn)
 				return;
 

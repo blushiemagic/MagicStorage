@@ -24,7 +24,7 @@ namespace MagicStorage.UI {
 				if (StorageGUI.oldMouse.LeftButton == ButtonState.Released)
 					SoundEngine.PlaySound(SoundID.MenuTick);
 
-				MouseDown(new(this, UserInterface.ActiveInstance.MousePosition));
+				LeftMouseDown(new(this, UserInterface.ActiveInstance.MousePosition));
 
 				bool stillCrafting = false;
 				CraftingGUI.ClickCraftButton(ref stillCrafting);

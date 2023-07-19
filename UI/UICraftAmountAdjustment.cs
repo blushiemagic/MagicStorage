@@ -21,7 +21,7 @@ namespace MagicStorage.UI {
 			if (StorageGUI.MouseClicked) {
 				SoundEngine.PlaySound(SoundID.MenuTick);
 
-				Click(new(this, UserInterface.ActiveInstance.MousePosition));
+				LeftClick(new(this, UserInterface.ActiveInstance.MousePosition));
 				CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
 			}
 		}

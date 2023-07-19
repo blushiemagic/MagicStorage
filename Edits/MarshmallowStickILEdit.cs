@@ -8,7 +8,7 @@ using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using ILPlayer = IL.Terraria.Player;
+using Terraria.Player;
 
 namespace MagicStorage.Edits;
 

@@ -16,7 +16,7 @@ namespace MagicStorage.CrossMod {
 	public abstract partial class FilteringOption : ModTexturedType {
 		public int Type { get; private set; }
 
-		public ModTranslation Tooltip { get; private set; }
+		public LocalizedText Tooltip { get; private set; }
 
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
@@ -43,20 +43,11 @@ namespace MagicStorage.CrossMod {
 
 			Type = FilteringOptionLoader.Add(this);
 
-			Tooltip = LocalizationLoader.GetOrCreateTranslation(Mod, $"FilteringOption.{Name}");
+			Tooltip = Language.GetOrRegister(Mod, $"FilteringOption.{Name}");
 		}
 
 		public sealed override void SetupContent() {
-			AutoStaticDefaults();
 			SetStaticDefaults();
-		}
-
-		/// <summary>
-		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
-		/// </summary>
-		public virtual void AutoStaticDefaults() {
-			if (Tooltip.IsDefault())
-				Tooltip.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
 		}
 
 		public bool Visible { get; private set; } = true;

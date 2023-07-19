@@ -64,7 +64,7 @@ namespace MagicStorage.UI {
 			header.Width.Set(0, 1f);
 			header.Height.Set(30, 0f);
 			header.BackgroundColor.A = 255;
-			header.OnClick += HeaderClicked;
+			header.OnLeftClick += HeaderClicked;
 
 			caption = new(captionText);
 			caption.VAlign = 0.5f;

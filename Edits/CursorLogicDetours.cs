@@ -1,6 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using SerousCommonLib.API;
-using OnMain = On.Terraria.Main;
+using Terraria.Main;
 
 namespace MagicStorage.Edits {
 	internal class CursorLogicDetours : Edit {

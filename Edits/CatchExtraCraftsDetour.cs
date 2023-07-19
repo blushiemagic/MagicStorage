@@ -2,7 +2,7 @@
 using SerousCommonLib.API;
 using Terraria;
 using Terraria.DataStructures;
-using OnPlayer = On.Terraria.Player;
+using Terraria.Player;
 
 namespace MagicStorage.Edits;
 

@@ -59,7 +59,7 @@ namespace MagicStorage
 			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);
 		}
 
-		public override void OnEnterWorld(Player player) {
+		public override void OnEnterWorld() {
 			if (MagicStorageMod.UsingPrivateBeta) {
 				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
 					"Do note that using this private beta build will cause a ton of text to be printed to the chat (when the config is enabled) and to your log files.",
