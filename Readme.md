@@ -29,8 +29,3 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`
 3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references` folder created above.
 4. Click play!
-
-### TODO
-* Crafting Interface
-* Money Compactor
-* Wait for bug reports
