@@ -2,7 +2,7 @@
 using Terraria.ID;
 
 namespace MagicStorage.Items {
-	public class PortableAccessHM : PortableAccess {
+	public class PortableCraftingAccessHM : PortableCraftingAccess {
 		public override void SetStaticDefaults() {
 			SacrificeTotal = 1;
 		}
@@ -26,7 +26,7 @@ namespace MagicStorage.Items {
 
 		public override void AddRecipes() {
 			CreateRecipe()
-				.AddIngredient<PortableAccessPreHM>()
+				.AddIngredient<PortableCraftingAccessPreHM>()
 				.AddIngredient(ItemID.Pearlwood, 20)
 				.AddRecipeGroup("MagicStorage:AnyMythrilBar", 15)
 				.AddIngredient(ItemID.ChlorophyteBar, 10)

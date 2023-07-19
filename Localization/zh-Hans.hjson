@@ -47,6 +47,8 @@ Mods: {
 			EnvironmentAccess: 存储网络配置单元
 			PortableAccessPreHM: 基础便携远程存储装置
 			PortableAccessHM: 进阶便携远程存储装置
+			// PortableCraftingAccessPreHM: ""
+			// PortableCraftingAccessHM: ""
 		}
 
 		ItemTooltip: {
@@ -252,6 +254,8 @@ Mods: {
 			使用以访问相应存储核心
 			访问距离较小
 			'''
+			// PortableCraftingAccessPreHM: ""
+			// PortableCraftingAccessHM: ""
 		}
 
 		ProjectileName: {
@@ -432,7 +436,7 @@ Mods: {
 				Help20_Moon:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
 				'''
 				Help21:

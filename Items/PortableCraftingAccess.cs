@@ -29,13 +29,12 @@ namespace MagicStorage.Items {
 
 		public override void AddRecipes()
 		{
-			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient<LocatorDisk>();
-			recipe.AddIngredient(ItemID.LunarBar, 15);
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			recipe.AddIngredient(ItemID.Sapphire, 3);
-			recipe.AddTile(TileID.LunarCraftingStation);
-			recipe.Register();
+			CreateRecipe()
+				.AddIngredient<PortableCraftingAccessHM>()
+				.AddIngredient(ItemID.MartianConduitPlating, 20)
+				.AddIngredient(ItemID.LunarBar, 15)
+				.AddTile(TileID.LunarCraftingStation)
+				.Register();
 		}
 	}
 }

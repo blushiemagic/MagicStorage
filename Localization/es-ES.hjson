@@ -47,6 +47,8 @@ Mods: {
 			// EnvironmentAccess: ""
 			// PortableAccessPreHM: ""
 			// PortableAccessHM: ""
+			// PortableCraftingAccessPreHM: ""
+			// PortableCraftingAccessHM: ""
 		}
 
 		ItemTooltip: {
@@ -143,6 +145,8 @@ Mods: {
 			// EnvironmentAccess: ""
 			// PortableAccessPreHM: ""
 			// PortableAccessHM: ""
+			// PortableCraftingAccessPreHM: ""
+			// PortableCraftingAccessHM: ""
 		}
 
 		ProjectileName: {
