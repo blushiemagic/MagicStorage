@@ -12,7 +12,26 @@ A full description and discussion concerning this mod can be found at the [Terra
 ## Credits
  * [@AdipemDragon](https://forums.terraria.org/index.php?members/adipemdragon.2930/) - Spriting
 
-## TODO
+## Contributing
+
+### Dependencies
+* Join the Discord to discuss
+* .NET 6
+* [Microsoft XNA Framework Redistributable 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=20914)
+* tModLoader 1.4.3
+* SerousCommonLib (absoluteAquarian Utilities) - Download from the #commonlib-downloads folder in the Discord
+* [RecursiveCraft](https://steamcommunity.com/sharedfiles/filedetails/?id=2575830168) (Terraria Mod) 
+	1. Subscribe to https://steamcommunity.com/sharedfiles/filedetails/?id=2575830168
+	2. Copy the file from Steam/steamapps/workshop/content/1281930/2575830168
+	3. Use [TML Patcher](https://www.nuget.org/packages/Tomat.TML.Patcher/) to get the assemblies files 
+
+### Getting your Project Setup
+1. Clone the project to `Documents/My Games/Terraria/tModLoader/ModSources/`
+2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`
+3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references` folder created above.
+4. Click play!
+
+### TODO
 * Crafting Interface
 * Money Compactor
 * Wait for bug reports
