@@ -32,6 +32,6 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 
 ### Getting your Project Setup
 1. Clone the project to `Documents/My Games/Terraria/tModLoader/ModSources/`
-2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`
-3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references` folder created above.
+2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`, and a `1.4.3` folder in that folder
+3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references/1.4.3/` folder created above.
 4. Click play!
