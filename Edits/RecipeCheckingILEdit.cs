@@ -1,40 +1,37 @@
-﻿using Mono.Cecil.Cil;
+﻿﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour.HookGen;
 using SerousCommonLib.API;
 using System;
 using System.Linq;
 using System.Reflection;
-using MonoMod.RuntimeDetour;
-using Terraria;
+ using MonoMod.RuntimeDetour;
+ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {
 		private static readonly MethodInfo RecipeLoader_AddRecipes = typeof(RecipeLoader).GetMethod("AddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static event ILContext.Manipulator IL_RecipeLoader_AddRecipes {
-			add => new ILHook(RecipeLoader_AddRecipes, value);
-			remove => new ILHook(RecipeLoader_AddRecipes, null);
-		}
+		private static event ILContext.Manipulator IL_RecipeLoader_AddRecipes;
+		private static Hook _ilHookRecipeLoaderAddRecipes;
 
-		private static readonly MethodInfo RecipeLoader_PostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static event ILContext.Manipulator IL_RecipeLoader_PostAddRecipes {
-			add => new ILHook(RecipeLoader_PostAddRecipes, value);
-			remove => new ILHook(RecipeLoader_PostAddRecipes, null);
-		}
+		private static readonly MethodInfo RecipeLoaderPostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
+		private static event ILContext.Manipulator IL_RecipeLoader_PostAddRecipes;
+		private static Hook _ilHookRecipeLoaderPostAddRecipes;
 
 		private static readonly MethodInfo RecipeLoader_PostSetupRecipes = typeof(RecipeLoader).GetMethod("PostSetupRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static event ILContext.Manipulator IL_RecipeLoader_PostSetupRecipes {
-			add => new ILHook(RecipeLoader_PostSetupRecipes, value);
-			remove => new ILHook(RecipeLoader_PostSetupRecipes, null);
-		}
+		private static event ILContext.Manipulator IL_RecipeLoader_PostSetupRecipes;
+		private static Hook ILHook_RecipeLoader_PostSetupRecipes;
 
 		public override void LoadEdits() {
 			try {
 				IL_RecipeLoader_AddRecipes += RecipeLoader_Hook;
+				//_ilHookRecipeLoaderAddRecipes = new Hook(RecipeLoader_AddRecipes, new ILContext.Manipulator(RecipeLoader_Hook));
 				IL_RecipeLoader_PostAddRecipes += RecipeLoader_Hook;
+				//_ilHookRecipeLoaderPostAddRecipes = new Hook(RecipeLoaderPostAddRecipes, new ILContext.Manipulator(RecipeLoader_Hook));
 				IL_RecipeLoader_PostSetupRecipes += RecipeLoader_Hook;
+				//ILHook_RecipeLoader_PostSetupRecipes = new Hook(RecipeLoader_PostSetupRecipes, new ILContext.Manipulator(RecipeLoader_Hook));
 			} catch (Exception ex) when (BuildInfo.IsDev) {
 				// Swallow exceptions on dev builds
 				MagicStorageMod.Instance.Logger.Error($"An edit for \"{nameof(RecipeCheckingILEdit)}\" failed", ex);
@@ -43,8 +40,11 @@ namespace MagicStorage.Edits {
 
 		public override void UnloadEdits() {
 			IL_RecipeLoader_AddRecipes -= RecipeLoader_Hook;
+			//_ilHookRecipeLoaderAddRecipes.Dispose();
 			IL_RecipeLoader_PostAddRecipes -= RecipeLoader_Hook;
+			//_ilHookRecipeLoaderPostAddRecipes.Dispose();
 			IL_RecipeLoader_PostSetupRecipes -= RecipeLoader_Hook;
+			//ILHook_RecipeLoader_PostSetupRecipes.Dispose();
 		}
 
 		private static void RecipeLoader_Hook(ILContext il) {
