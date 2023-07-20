@@ -1,10 +1,11 @@
 ﻿using Terraria;
+using Terraria.GameContent.Creative;
 using Terraria.ID;
 
 namespace MagicStorage.Items {
-	public class PortableAccessHM : PortableAccess {
+	public class PortableCraftingAccessHM : PortableCraftingAccess {
 		public override void SetStaticDefaults() {
-			Item.ResearchUnlockCount = 1;
+			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
 		}
 
 		public override void SetDefaults() {
@@ -26,7 +27,7 @@ namespace MagicStorage.Items {
 
 		public override void AddRecipes() {
 			CreateRecipe()
-				.AddIngredient<PortableAccessPreHM>()
+				.AddIngredient<PortableCraftingAccessPreHM>()
 				.AddIngredient(ItemID.Pearlwood, 20)
 				.AddRecipeGroup("MagicStorage:AnyMythrilBar", 15)
 				.AddIngredient(ItemID.ChlorophyteBar, 10)

@@ -204,13 +204,13 @@ namespace MagicStorage.Items
 
 		public override void AddRecipes()
 		{
-			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient<LocatorDisk>();
-			recipe.AddIngredient<RadiantJewel>();
-			recipe.AddRecipeGroup("MagicStorage:AnyDiamond", 3);
-			recipe.AddIngredient(ItemID.Ruby, 3);
-			recipe.AddTile(TileID.LunarCraftingStation);
-			recipe.Register();
+			CreateRecipe()
+				.AddIngredient<PortableAccessHM>()
+				.AddIngredient(ItemID.MartianConduitPlating, 15)
+				.AddIngredient(ItemID.LunarBar, 8)
+				.AddIngredient<RadiantJewel>()
+				.AddTile(TileID.LunarCraftingStation)
+				.Register();
 		}
 	}
 }
