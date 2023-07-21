@@ -24,7 +24,10 @@ Mods: {
 				Tooltip: Enables crafting with the items in a storage system
 			}
 
-			CreativeStorageUnit.DisplayName: Creative Storage Unit
+			CreativeStorageUnit: {
+				DisplayName: Creative Storage Unit
+				Tooltip: ""
+			}
 
 			Locator: {
 				DisplayName: Locator
@@ -341,14 +344,63 @@ Mods: {
 					'''
 			}
 
-			Config_GlowItemGlowing.DisplayName: Config//GlowItemGlowing
-			Config_GlowItemNotGlowing.DisplayName: Config//GlowItemNotGlowing
-			Config_RecipeFilterAvailable.DisplayName: Config//RecipeFilterAvailable
-			Config_RecipeFilterAll.DisplayName: Config//RecipeFilterAll
+			Config_GlowItemGlowing: {
+				DisplayName: Config//GlowItemGlowing
+				Tooltip: ""
+			}
+
+			Config_GlowItemNotGlowing: {
+				DisplayName: Config//GlowItemNotGlowing
+				Tooltip: ""
+			}
+
+			Config_RecipeFilterAvailable: {
+				DisplayName: Config//RecipeFilterAvailable
+				Tooltip: ""
+			}
+
+			Config_RecipeFilterAll: {
+				DisplayName: Config//RecipeFilterAll
+				Tooltip: ""
+			}
+
+			PortableCraftingAccessHM: {
+				DisplayName: Portable Crafting Access H M
+				Tooltip: ""
+			}
+
+			PortableCraftingAccessPreHM: {
+				DisplayName: Portable Crafting Access Pre H M
+				Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: Biome Globe
-		NPCs.Golem.DisplayName: Automaton
+
+		NPCs: {
+			Golem: {
+				DisplayName: Automaton
+
+				TownNPCMood: {
+					Content: "{$Mods.MagicStorage.TownNPCMood.Golem.Content}"
+					NoHome: "{$Mods.MagicStorage.TownNPCMood.Golem.NoHome}"
+					FarFromHome: "{$Mods.MagicStorage.TownNPCMood.Golem.FarFromHome}"
+					LoveSpace: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveSpace}"
+					DislikeCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeCrowded}"
+					HateCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.HateCrowded}"
+					LoveBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveBiome}"
+					LikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeBiome}"
+					DislikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeBiome}"
+					HateBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.HateBiome}"
+					LoveNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveNPC}"
+					LikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC}"
+					DislikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeNPC}"
+					HateNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.HateNPC}"
+					LikeNPC_Princess: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC_Princess}"
+					Princess_LovesNPC: "{$TownNPCMood_Princess.LoveNPC_MagicStorage/Golem}"
+				}
+			}
+		}
 
 		ModuleName: {
 			UseInventoryModule: Use Player Inventory Items
@@ -718,9 +770,9 @@ Mods: {
 			Filtering: Filtering
 			Crafting: Crafting
 			Storage: Storage
-			Controls: "Controls"
+			Controls: Controls
 			# StorageGUI page for the extra controls
-			Modules: "Modules"
+			Modules: Modules
 			# EnvironmentGUI page for the modules
 			History: History
 		}
@@ -884,6 +936,124 @@ Mods: {
 					Enable to show the valid ranges for a Portable Remote Access while the player is holding it.
 					For accesses with infinite range, nothing is displayed.
 					'''
+			}
+		}
+
+		"Keybinds.Print Item Data.DisplayName": Print  Item  Data
+
+		Configs: {
+			MagicStorageConfig: {
+				DisplayName: "{$Mods.MagicStorage.Config.Label}"
+
+				quickStackDepositMode: {
+					Label: "{$Mods.MagicStorage.Config.quickStackDepositMode.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip}"
+				}
+
+				useConfigFilter: {
+					Label: "{$Mods.MagicStorage.Config.useConfigFilter.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.useConfigFilter.Tooltip}"
+				}
+
+				showAllRecipes: {
+					Label: "{$Mods.MagicStorage.Config.showAllRecipes.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.showAllRecipes.Tooltip}"
+				}
+
+				useOldCraftMenu: {
+					Label: "{$Mods.MagicStorage.Config.useOldCraftMenu.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip}"
+				}
+
+				recipeBlacklist: {
+					Label: "{$Mods.MagicStorage.Config.recipeBlacklist.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.recipeBlacklist.Tooltip}"
+				}
+
+				clearHistory: {
+					Label: "{$Mods.MagicStorage.Config.clearHistory.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.clearHistory.Tooltip}"
+				}
+
+				recursionDepth: {
+					Label: "{$Mods.MagicStorage.Config.recursionDepth.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.recursionDepth.Tooltip}"
+				}
+
+				recursionMode: {
+					Label: "{$Mods.MagicStorage.Config.recursionMode.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.recursionMode.Tooltip}"
+				}
+
+				glowNewItems: {
+					Label: "{$Mods.MagicStorage.Config.glowNewItems.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.glowNewItems.Tooltip}"
+				}
+
+				clearSearchText: {
+					Label: "{$Mods.MagicStorage.Config.clearSearchText.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.clearSearchText.Tooltip}"
+				}
+
+				searchBarRefreshOnKey: {
+					Label: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip}"
+				}
+
+				uiFavorites: {
+					Label: "{$Mods.MagicStorage.Config.uiFavorites.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.uiFavorites.Tooltip}"
+				}
+
+				extraFilterIcons: {
+					Label: "{$Mods.MagicStorage.Config.extraFilterIcons.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.extraFilterIcons.Tooltip}"
+				}
+
+				buttonLayout: {
+					Label: "{$Mods.MagicStorage.Config.buttonLayout.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.buttonLayout.Tooltip}"
+				}
+
+				itemDataDebug: {
+					Label: "{$Mods.MagicStorage.Config.allowItemDataDebug.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip}"
+				}
+
+				canMovePanels: {
+					Label: "{$Mods.MagicStorage.Config.canMovePanels.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.canMovePanels.Tooltip}"
+				}
+
+				automatonRemembers: {
+					Label: "{$Mods.MagicStorage.Config.automatonRemembers.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.automatonRemembers.Tooltip}"
+				}
+			}
+
+			RecursionMode: {
+				Tooltip: ""
+				Legacy.Label: Legacy
+				Modern.Label: Modern
+			}
+
+			ButtonConfigurationMode: {
+				Tooltip: ""
+				Legacy.Label: Legacy
+				ModernPaged.Label: Modern Paged
+				ModernConfigurable.Label: Modern Configurable
+				LegacyWithGear.Label: Legacy With Gear
+				LegacyBasicWithPaged.Label: Legacy Basic With Paged
+				ModernDropdown.Label: Modern Dropdown
+			}
+
+			MagicStorageServerConfig: {
+				DisplayName: "{$Mods.MagicStorage.Config.ServersideLabel}"
+
+				allowAutomatonToMoveIn: {
+					Label: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label}"
+					Tooltip: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip}"
+				}
 			}
 		}
 	}
