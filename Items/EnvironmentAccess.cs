@@ -82,10 +82,7 @@ namespace MagicStorage.Items {
 		}
 
 		private static string GetModuleDisplayName(EnvironmentModule e) {
-			//--1.4.4 TESTING--//
-			//Fix this to have proper localization
-			//return e.DisplayName.GetTranslation(Language.ActiveCulture);
-			return "Magic Storage";
+			return e.DisplayName.Value;
 		}
 	}
 }
