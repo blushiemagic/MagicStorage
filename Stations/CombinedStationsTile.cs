@@ -52,12 +52,5 @@ namespace MagicStorage.Stations
 
 			return arr;
 		}
-
-		public sealed override void KillMultiTile(int i, int j, int frameX, int frameY)
-		{
-			GetTileDimensions(out int width, out int height);
-			var source = new EntitySource_TileBreak(i, j);
-			Item.NewItem(source, i * 16, j * 16, width * 16, height * 16, ModContent.ItemType<TItem>());
-		}
 	}
 }

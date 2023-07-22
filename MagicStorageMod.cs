@@ -26,9 +26,9 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		public static readonly Condition HasCampfire = new Condition(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
+		public static readonly Condition HasCampfire = new(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
 
-		public static readonly Condition EctoMistOverride = new Condition(Language.GetText("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
+		public static readonly Condition EctoMistOverride = new(Language.GetText("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
 			() => /*Condition.InGraveyard.RecipeAvailable(recipe) ||*/ Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
 
 		public UIOptionConfigurationManager optionsConfig;
@@ -49,8 +49,8 @@ namespace MagicStorage {
 			InterfaceHelper.Initialize();
 
 			//Census mod support
-			if (ModLoader.TryGetMod("Census", out Mod Census)) {
-				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
+			if (ModLoader.TryGetMod("Census", out var census)) {
+				census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
 			}
 
 			//Sorting options

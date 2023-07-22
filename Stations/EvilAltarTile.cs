@@ -28,13 +28,5 @@ namespace MagicStorage.Stations
 
 			AddMapEntry(Color.MediumPurple, CreateMapEntryName());
 		}
-
-		public override void KillMultiTile(int i, int j, int frameX, int frameY)
-		{
-			int type = frameX / 54 == 0 ? ModContent.ItemType<DemonAltar>() : ModContent.ItemType<CrimsonAltar>();
-
-			var source = new EntitySource_TileBreak(i, j);
-			Item.NewItem(source, i * 16, j * 16, 48, 32, type);
-		}
 	}
 }
