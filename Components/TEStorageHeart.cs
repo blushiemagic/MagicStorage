@@ -9,6 +9,9 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using System.Reflection;
 using Terraria.ModLoader.Default;
+using XPT.Core.Audio.MP3Sharp.Decoding;
+using Terraria.Localization;
+using Microsoft.Xna.Framework;
 
 namespace MagicStorage.Components
 {
@@ -123,9 +126,9 @@ namespace MagicStorage.Components
 					environmentAccesses.Remove(environmentAccess);
 			}
 
-			if (Main.netMode == NetmodeID.Server && processClientOperations())
+			if (Main.netMode == NetmodeID.Server && processClientOperations(out bool forcedRefresh, out HashSet<int> typesToRefresh))
 			{
-				NetHelper.SendRefreshNetworkItems(Position);
+				NetHelper.SendRefreshNetworkItems(Position, forcedRefresh, typesToRefresh);
 			}
 
 			updateTimer++;
@@ -141,10 +144,14 @@ namespace MagicStorage.Components
 			}
 		}
 
-		private bool processClientOperations()
+		private bool processClientOperations(out bool forcedRefresh, out HashSet<int> typesToRefresh)
 		{
 			int opCount = clientOpQ.Count;
 			bool networkRefresh = false;
+			
+			forcedRefresh = false;
+			typesToRefresh = new();
+
 			for (int i = 0; i < opCount; ++i)
 			{
 				NetOperation op;
@@ -159,6 +166,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(item, packet, true, true);
 							packet.Send(op.client);
+
+							typesToRefresh.Add(item.type);
 						}
 					}
 					else if (op.type == Operation.Deposit)
@@ -169,6 +178,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(op.item, packet, true, true);
 							packet.Send(op.client);
+
+							typesToRefresh.Add(op.item.type);
 						}
 					}
 					else if (op.type == Operation.DepositAll)
@@ -181,6 +192,8 @@ namespace MagicStorage.Components
 							if (!item.IsAir)
 							{
 								leftOvers.Add(item);
+
+								typesToRefresh.Add(item.type);
 							}
 						}
 						NetHelper.ProcessUpdateQueue();
@@ -205,6 +218,8 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							packet.Write(op.item.type);
 							packet.Send();
+
+							forcedRefresh = true;
 						}
 					}
 					else if (op.type == Operation.DeleteUnloadedGlobalItemData)
@@ -213,9 +228,15 @@ namespace MagicStorage.Components
 
 						ModPacket packet = PrepareServerResult(op.type);
 						packet.Send();
+
+						forcedRefresh = true;
 					}
 				}
 			}
+
+			if (forcedRefresh)
+				typesToRefresh = null;
+
 			return networkRefresh;
 		}
 
@@ -226,11 +247,15 @@ namespace MagicStorage.Components
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, keepOneIfFavorite, client));
+
+				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
+
+				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 			else if (op == Operation.DepositAll)
 			{
@@ -242,15 +267,21 @@ namespace MagicStorage.Components
 					items.Add(item);
 				}
 				clientOpQ.Enqueue(new NetOperation(op, items, client));
+
+				NetHelper.PrintClientRequest(client, "Deposit All", Position);
 			}
 			else if (op == Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
 				clientOpQ.Enqueue(new NetOperation(op, new Item(type), client));
+
+				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Items", Position);
 			}
 			else if (op == Operation.DeleteUnloadedGlobalItemData)
 			{
 				clientOpQ.Enqueue(new NetOperation(op, (Item)null, client));
+
+				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Data", Position);
 			}
 		}
 
@@ -342,22 +373,32 @@ namespace MagicStorage.Components
 			bool hasChange = false;
 			NetHelper.StartUpdateQueue();
 			Item tryMove = inactiveUnit.WithdrawStack();
+
+			HashSet<int> typesToRefresh = new();
+
 			foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>().Where(unit => !unit.Inactive))
 				while (storageUnit.HasSpaceFor(tryMove) && !tryMove.IsAir)
 				{
+					typesToRefresh.Add(tryMove.type);
+
 					storageUnit.DepositItem(tryMove);
 					if (tryMove.IsAir && !inactiveUnit.IsEmpty)
 						tryMove = inactiveUnit.WithdrawStack();
 					hasChange = true;
 				}
 
-			if (!tryMove.IsAir)
+			if (!tryMove.IsAir) {
+				typesToRefresh.Add(tryMove.type);
 				inactiveUnit.DepositItem(tryMove);
+			}
+
 			NetHelper.ProcessUpdateQueue();
+
 			if (hasChange)
-				NetHelper.SendRefreshNetworkItems(Position);
+				NetHelper.SendRefreshNetworkItems(Position, false, typesToRefresh);
 			else
 				compactStage++;
+
 			return hasChange;
 		}
 
@@ -428,13 +469,13 @@ namespace MagicStorage.Components
 					if (storageUnit2.IsEmpty)
 						continue;
 
-					if (!storageUnit.FlattenFrom(storageUnit2))
+					if (!storageUnit.FlattenFrom(storageUnit2, out List<Item> transferredItems))
 						continue;
 
 					NetHelper.Report(true, $"Items flattened between units {storageUnit.ID} and {storageUnit2.ID}");
 
 					NetHelper.ProcessUpdateQueue();
-					NetHelper.SendRefreshNetworkItems(Position);
+					NetHelper.SendRefreshNetworkItems(Position, false, transferredItems.Select(static i => i.type).Distinct());
 					return true;
 				}
 
@@ -456,6 +497,9 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
+			if (!toDeposit.IsAir)
+				StorageGUI.SetNextItemTypeToRefresh(toDeposit.type);
+
 			int oldStack = toDeposit.stack;
 			int remember = toDeposit.type;
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -553,6 +597,9 @@ namespace MagicStorage.Components
 							result = withdrawn;
 						else
 							result.stack += withdrawn.stack;
+
+						StorageGUI.SetNextItemTypeToRefresh(withdrawn.type);
+
 						if (lookFor.stack <= 0)
 						{
 							ResetCompactStage();
@@ -592,28 +639,35 @@ namespace MagicStorage.Components
 				return;
 			}
 
-			Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
+			try {
+				Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
 
-			if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
-				//Clone of Withdraw, but it will keep trying to remove items, even if any were found
-				foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
-					lookFor = lookForOrig;
-					while (storageUnit.HasItem(lookFor, true)) {
-						Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
+				if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
+					//Clone of Withdraw, but it will keep trying to remove items, even if any were found
+					foreach (TEStorageUnit storageUnit in GetStorageUnits().OfType<TEStorageUnit>()) {
+						lookFor = lookForOrig;
+						while (storageUnit.HasItem(lookFor, true)) {
+							Item withdrawn = storageUnit.TryWithdraw(lookFor, true, false);
 
-						if (!withdrawn.IsAir) {
-							if (result.IsAir)
-								result = withdrawn;
-							else
-								result.stack += withdrawn.stack;
+							if (!withdrawn.IsAir) {
+								if (result.IsAir)
+									result = withdrawn;
+								else
+									result.stack += withdrawn.stack;
+							}
 						}
 					}
-				}
 
-				if (result.stack > 0) {
-					ResetCompactStage();
-					StorageGUI.needRefresh = true;
+					if (result.stack > 0) {
+						ResetCompactStage();
+						StorageGUI.SetRefresh();
+						StorageGUI.SetNextItemTypeToRefresh(type);
+					}
 				}
+			} catch {
+				// Swallow exception and let the user know that something went wrong
+				if (Main.netMode != NetmodeID.Server)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.DeleteItemsFailed"), color: Color.Red);
 			}
 		}
 
@@ -626,27 +680,38 @@ namespace MagicStorage.Components
 				return;
 			}
 
-			bool didSomething = false;
+			try {
+				bool didSomething = false;
 
-			foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
-				//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
-				if (item is null || item.IsAir || item.ModItem is UnloadedItem)
-					continue;
+				HashSet<int> typesToRefresh = new();
 
-				if (Item_globalItems.GetValue(item) is not Instanced<GlobalItem>[] globalItems || globalItems.Length == 0)
-					continue;
+				foreach (Item item in GetStorageUnits().OfType<TEStorageUnit>().SelectMany(s => s.GetItems())) {
+					//Filter out air items and Unloaded Items (their data might belong to the mod they're from)
+					if (item is null || item.IsAir || item.ModItem is UnloadedItem)
+						continue;
 
-				Instanced<GlobalItem>[] array = globalItems.Where(i => i.Instance is not UnloadedGlobalItem).ToArray();
+					if (Item_globalItems.GetValue(item) is not Ref<GlobalItem>[] globalItems || globalItems.Length == 0)
+						continue;
 
-				if (array.Length != globalItems.Length) {
-					Item_globalItems.SetValue(item, array);
-					didSomething = true;
+					Ref<GlobalItem>[] array = globalItems.Where(i => i.Value is not UnloadedGlobalItem).ToArray();
+
+					if (array.Length != globalItems.Length) {
+						Item_globalItems.SetValue(item, array);
+						didSomething = true;
+
+						typesToRefresh.Add(item.type);
+					}
 				}
-			}
 
-			if (didSomething) {
-				ResetCompactStage();
-				StorageGUI.needRefresh = true;
+				if (didSomething) {
+					ResetCompactStage();
+					StorageGUI.SetRefresh();
+					StorageGUI.SetNextItemTypesToRefresh(typesToRefresh);
+				}
+			} catch {
+				// Swallow exception and let the user know that something went wrong
+				if (Main.netMode != NetmodeID.Server)
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.Warnings.DeleteDataFailed"), color: Color.Red);
 			}
 		}
 

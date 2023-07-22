@@ -5,6 +5,8 @@ using MagicStorage.CrossMod.Control;
 using MagicStorage.Items;
 using MagicStorage.NPCs;
 using MagicStorage.Stations;
+using SerousCommonLib.API;
+using SerousCommonLib.API.Helpers;
 using System;
 using System.IO;
 using System.Reflection;
@@ -24,35 +26,31 @@ namespace MagicStorage {
 		public static string GithubUserName => "blushiemagic";
 		public static string GithubProjectName => "MagicStorage";
 
-		public static readonly Recipe.Condition HasCampfire = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.CookedMarshmallowCondition"), recipe => CraftingGUI.Campfire);
+		public static readonly Condition HasCampfire = new(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
 
-		public static readonly Recipe.Condition EctoMistOverride = new Recipe.Condition(NetworkText.FromKey("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
-			recipe => Recipe.Condition.InGraveyardBiome.RecipeAvailable(recipe) || Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
+		public static readonly Condition EctoMistOverride = new(Language.GetText("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
+			() => /*Condition.InGraveyard.RecipeAvailable(recipe) ||*/ Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
 
 		public UIOptionConfigurationManager optionsConfig;
 
-		private static FieldInfo Interface_loadMods;
-		private static MethodInfo UIProgress_set_SubProgressText;
+		public MagicStorageMod() {
+			PreJITFilter = new CheckModBuildVersionBeforeJIT();
+			CheckModBuildVersionBeforeJIT.Mod = this;
+		}
 
-		public static string ProgressText_FinishResourceLoading => Language.GetTextValue("tModLoader.MSFinishingResourceLoading");
-
-		public static void SetLoadingSubProgressText(string text)
-			=> UIProgress_set_SubProgressText.Invoke(Interface_loadMods.GetValue(null), new object[] { text });
+		internal const string build144Version = "2023.6";
 
 		public override void Load()
 		{
 			UsingPrivateBeta = DisplayName.Contains("BETA");
 
-			Interface_loadMods = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface")!.GetField("loadMods", BindingFlags.NonPublic | BindingFlags.Static);
-			UIProgress_set_SubProgressText = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UIProgress")!.GetProperty("SubProgressText", BindingFlags.Public | BindingFlags.Instance)!.GetSetMethod();
-
-			Utility.ForceLoadModHJsonLocalization(this);
+			LocalizationHelper.ForceLoadModHJsonLocalization(this);
 
 			InterfaceHelper.Initialize();
 
 			//Census mod support
-			if (ModLoader.TryGetMod("Census", out Mod Census)) {
-				Census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
+			if (ModLoader.TryGetMod("Census", out var census)) {
+				census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
 			}
 
 			//Sorting options
@@ -77,7 +75,11 @@ namespace MagicStorage {
 
 			optionsConfig = null;
 
+			Utility.UnloadHookDelegate();
 			RecursiveRecipe.UnloadDelegates();
+
+			CheckModBuildVersionBeforeJIT.Mod = null;
+			CheckModBuildVersionBeforeJIT.versionChecked = false;
 		}
 
 		public override void PostSetupContent() {
@@ -143,7 +145,7 @@ namespace MagicStorage {
 					if (npcID < 0)
 						ThrowWithMessage("NPC ID must be positive", 1);
 					else if (npcID < NPCID.Count)
-						ThrowWithMessage("NPC ID must refer to a vanilla NPC ID", 1);
+						ThrowWithMessage("NPC ID must refer to a modded NPC ID", 1);
 
 					StorageWorld.moddedDiamondDropRulesByType.Add(npcID, rule);
 					break;

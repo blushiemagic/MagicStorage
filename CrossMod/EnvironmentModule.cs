@@ -10,32 +10,27 @@ namespace MagicStorage {
 	/// <summary>
 	/// A module of information for use in a Storage Configuration Interface. Only one instance is assumed to be active at once.
 	/// </summary>
-	public abstract class EnvironmentModule : ModType, ILocalizedModType
-	{
+	public abstract class EnvironmentModule : ModType {
 		public int Type { get; private set; }
 		
-		public string LocalizationCategory => "EnvironmentModule";
+		public LocalizedText DisplayName { get; private set; }
 
-		public LocalizedText DisplayName => this.GetLocalization(nameof(DisplayName), PrettyPrintName);
-
-		public LocalizedText DisabledTooltip => this.GetLocalization(nameof(DisabledTooltip), GetDisabledTooltipDefault);
+		public LocalizedText DisabledTooltip { get; private set; }
 
 		protected sealed override void Register() {
 			ModTypeLookup<EnvironmentModule>.Register(this);
 			Type = EnvironmentModuleLoader.Add(this);
 
+			DisplayName = Language.GetOrRegister(Mod, $"ModuleName.{Name}");
+			DisabledTooltip = Language.GetOrRegister(Mod, $"ModuleDisabled.{Name}");
+
 			MagicStorageMod.Instance.Logger.Debug($"EnvironmentModule \"{FullName}\" added by mod \"{Mod.Name}\"");
 		}
 
 		public sealed override void SetupContent() {
-			AutoStaticDefaults();
 			SetStaticDefaults();
 		}
 
-		/// <summary>
-		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
-		/// </summary>
-		public virtual void AutoStaticDefaults() { }
 
 		public static string GetDisabledTooltipDefault() => Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 

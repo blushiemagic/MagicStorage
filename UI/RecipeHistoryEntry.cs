@@ -45,7 +45,8 @@ namespace MagicStorage.UI {
 				return;
 
 			CraftingGUI.SetSelectedRecipe(history[entry].OriginalRecipe);
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh();
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 
 			Current = entry;
 			RefreshEntries();

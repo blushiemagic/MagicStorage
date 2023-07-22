@@ -1,4 +1,5 @@
-﻿using MagicStorage.Modules;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Modules;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -7,7 +8,11 @@ namespace MagicStorage.Common.Global {
 		public override void OnResearched(Item item, bool fullyResearched) {
 			if (fullyResearched) {
 				JourneyInfiniteItems.inventory.Add(item.type);
-				StorageGUI.needRefresh = true;
+
+				if (MagicUI.IsCraftingUIOpen()) {
+					StorageGUI.SetRefresh(forceFullRefresh: false);
+					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(item.type);
+				}
 			}
 		}
 	}

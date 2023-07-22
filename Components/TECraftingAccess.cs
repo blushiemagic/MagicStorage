@@ -109,11 +109,15 @@ namespace MagicStorage.Components
 			{
 				byte slot = reader.ReadByte();
 				clientOpQ.Enqueue(new NetOperation(op, slot, client));
+
+				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
+
+				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 		}
 
@@ -158,6 +162,8 @@ namespace MagicStorage.Components
 					item.stack--;
 					if (item.stack <= 0)
 						item.SetDefaults();
+
+					UpdateRecipesFromStationAction(nItem.createTile);
 				}
 			}
 
@@ -189,7 +195,19 @@ namespace MagicStorage.Components
 			var item = stations[slot];
 			stations.RemoveAt(slot);
 
+			UpdateRecipesFromStationAction(item.createTile);
+
 			return item;
+		}
+
+		private static void UpdateRecipesFromStationAction(int stationTile) {
+			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
+
+			TileLoader.AdjTiles(Main.LocalPlayer, stationTile);
+
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0).Prepend(stationTile));
+
+			Main.LocalPlayer.adjTile = adjTiles;
 		}
 
 		public Item TryWithdrawStation(int slot, bool toInventory = false)

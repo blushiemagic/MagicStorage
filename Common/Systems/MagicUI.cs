@@ -21,6 +21,8 @@ public class MagicUI : ModSystem
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI;
 
+	public static bool IsCraftingUIOpen() => craftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, craftingUI);
+
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;
 
@@ -161,6 +163,8 @@ public class MagicUI : ModSystem
 						BlockItemSlotActionsDetour = true;
 
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
+						if (CanUpdateMouseText())
+							Main.instance.MouseText(mouseText);
 
 						BlockItemSlotActionsDetour = false;
 					}
@@ -237,9 +241,6 @@ public class MagicUI : ModSystem
 		}
 
 		BlockItemSlotActionsDetour = false;
-
-		if (CanUpdateMouseText())
-			Main.instance.MouseText(mouseText);
 	}
 
 	private static bool CanUpdateMouseText()

@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
@@ -38,7 +39,7 @@ namespace MagicStorage.UI {
 		}
 
 		public override void LeftClick(UIMouseEvent evt) {
-			//UIToggleImage.LeftClick() calls Toggle(), so we don't have to
+			//UIToggleImage.Click() calls Toggle(), so we don't have to
 			base.LeftClick(evt);
 
 			if (!Source.IsAvailable(Module, out var module))
@@ -51,7 +52,8 @@ namespace MagicStorage.UI {
 
 				NetHelper.ClientSendTEUpdate(EnvironmentGUI.currentAccess.Position);
 
-				NetHelper.Report(false, $"\"{Text.Text}\" label toggled to {IsOn}");
+				string state = IsOn ? "[c/00ff00:enabled]" : "[c/ff0000:disabled]";
+				Main.NewText($"Module \"{Text.Text}\" was set to {state}.");
 
 				SoundEngine.PlaySound(SoundID.MenuTick);
 			}
@@ -65,8 +67,11 @@ namespace MagicStorage.UI {
 			else {
 				Text.TextColor = Color.Gray;
 				
-				string text = module?.DisabledTooltip.Value;
-				
+				//--1.4.4 TESTING--//
+				//Fix this to have proper localization
+				//string text = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture);
+				var text = "DERP 1.4.4";
+
 				MagicUI.mouseText = text ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 			}
 		}

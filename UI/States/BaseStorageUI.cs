@@ -227,7 +227,7 @@ namespace MagicStorage.UI.States {
 				else if (obj.Name == "Filtering")
 					defPage.filteringButtons.Choice = -1;
 				
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh(forceFullRefresh: true);
 			};
 
 			configPage.Width = StyleDimension.Fill;
@@ -372,7 +372,7 @@ namespace MagicStorage.UI.States {
 			optionPage.option = buttons.SelectionType;
 			optionPage.SetLoaderSelection(optionPage.option);
 			
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		internal void OpenModernConfigPanel(string page) {

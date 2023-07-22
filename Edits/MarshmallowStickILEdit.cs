@@ -1,9 +1,10 @@
 ﻿#nullable enable
-using System;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using SerousCommonLib.API;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,39 +16,37 @@ public class MarshmallowStickILEdit : Edit
 {
 	public override void LoadEdits()
 	{
-		ILPlayer.ItemCheck_ApplyHoldStyle_Inner += ILPlayerOnItemCheck_ApplyHoldStyle_Inner;
+		try {
+			ILPlayer.ItemCheck_ApplyHoldStyle_Inner += Player_ItemCheck_ApplyHoldStyle_Inner;
+		} catch when (BuildInfo.IsDev) {
+			// Swallow exceptions on dev builds
+			MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(MarshmallowStickILEdit)}\" failed");
+		}
 	}
 
 	public override void UnloadEdits()
 	{
-		ILPlayer.ItemCheck_ApplyHoldStyle_Inner -= ILPlayerOnItemCheck_ApplyHoldStyle_Inner;
+		ILPlayer.ItemCheck_ApplyHoldStyle_Inner -= Player_ItemCheck_ApplyHoldStyle_Inner;
 	}
 
-	private void ILPlayerOnItemCheck_ApplyHoldStyle_Inner(ILContext il)
-	{
-		//Ignore this IL edit if not building on release (Stable/Preview)
-		//Can't check if tML was built for Debug or Release, so this is the next best thing
-		if (BuildInfo.IsDev)
-			return;
+	private static void Player_ItemCheck_ApplyHoldStyle_Inner(ILContext il) {
+		ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, PatchMethod);
+	}
 
-		//Jump forward and grab an instruction so we can use it as the branch target
-		ILCursor c = new(il);
-
-		int patchNum = 1;
-
+	private static bool PatchMethod(ILCursor c, ref string badReturnReason) {
 		if (!c.TryGotoNext(MoveType.Before,
-				i => i.MatchLdarg(0),
-				i => i.MatchLdflda<Player>("itemLocation"),
-				i => i.MatchLdarg(0),
-				i => i.MatchLdflda<Entity>("position"),
-				i => i.MatchLdfld<Vector2>("Y"),
-				i => i.MatchLdcR4(24),
-				i => i.MatchAdd(),
-				i => i.MatchLdarg(1),
-				i => i.MatchAdd()))
-			goto bad_il;
-
-		patchNum++;
+			i => i.MatchLdarg(0),
+			i => i.MatchLdflda<Player>("itemLocation"),
+			i => i.MatchLdarg(0),
+			i => i.MatchLdflda<Entity>("position"),
+			i => i.MatchLdfld<Vector2>("Y"),
+			i => i.MatchLdcR4(24),
+			i => i.MatchAdd(),
+			i => i.MatchLdarg(1),
+			i => i.MatchAdd())) {
+			badReturnReason = "Could not find instruction sequence for positioning the Marshmallow on a Stick";
+			return false;
+		}
 
 		ILLabel jumpLabel = c.MarkLabel();
 
@@ -55,18 +54,17 @@ public class MarshmallowStickILEdit : Edit
 		c.Index = 0;
 
 		if (!c.TryGotoNext(MoveType.After,
-				i => i.MatchLdarg(2),
-				i => i.MatchLdfld<Item>("type"),
-				i => i.MatchLdcI4(ItemID.MarshmallowonaStick),
-				i => i.MatchBneUn(out _)))
-			goto bad_il;
-
-		patchNum++;
+			i => i.MatchLdarg(2),
+			i => i.MatchLdfld<Item>("type"),
+			i => i.MatchLdcI4(ItemID.MarshmallowonaStick),
+			i => i.MatchBneUn(out _))) {
+			badReturnReason = "Could not find instruction sequence for skipping the logic for the Marshmallow on a Stick";
+			return false;
+		}
 
 		//After the check that the type is valid, but before the actual use code
 		c.Emit(OpCodes.Ldarg_0);
-		c.EmitDelegate<Func<Player, bool>>(player =>
-		{
+		c.EmitDelegate<Func<Player, bool>>(static player => {
 			bool isGlobe = player.GetModPlayer<BiomePlayer>().biomeGlobe;
 
 			//Mimic the code that sets the X position of the item since that's being skipped
@@ -77,14 +75,6 @@ public class MarshmallowStickILEdit : Edit
 		});
 		c.Emit(OpCodes.Brtrue, jumpLabel);
 
-		return;
-		bad_il:
-		string msg = $"Unable to fully patch {il.Method.Name}()\n" +
-			$"Reason: Could not find instruction sequence for patch #{patchNum}";
-
-		if (!BuildInfo.IsDev)
-			throw new Exception(msg);
-		else
-			Mod.Logger.Error(msg);
+		return true;
 	}
 }

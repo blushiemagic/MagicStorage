@@ -62,6 +62,46 @@ namespace MagicStorage
 			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
 		}
 
+		public static void PrintToServerLogAndConsole(bool reportTime, string message) {
+			if (!Main.dedServ)
+				return;
+
+			if (reportTime) {
+				ConsoleColor fg = Console.ForegroundColor;
+				ConsoleColor bg = Console.BackgroundColor;
+
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.BackgroundColor = ConsoleColor.Black;
+
+				Console.WriteLine("Time: " + DateTime.Now.Ticks);
+
+				Console.ForegroundColor = fg;
+				Console.BackgroundColor = bg;
+			}
+
+			Console.WriteLine(message);
+
+			StringBuilder sb = new();
+
+			if (reportTime)
+				sb.Append("Time: " + DateTime.Now.Ticks + " ");
+
+			sb.Append(message);
+
+			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
+		}
+
+		public static void PrintClientRequest(int sender, string requestName, Vector2 worldCoordinates) {
+			if (!MagicStorageMod.UsingPrivateBeta) {
+				Utility.ConvertToGPSCoordinates(worldCoordinates, out string compassText, out string depthText);
+				PrintToServerLogAndConsole(true, $"Client \"{Netplay.Clients[sender].Name}\" requested action \"{requestName}\" at location: {compassText} | {depthText}");
+			}
+		}
+
+		public static void PrintClientRequest(int sender, string requestName, Point16 tileCoordinates) {
+			PrintClientRequest(sender, requestName, tileCoordinates.ToWorldCoordinates());
+		}
+
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
 			MessageType type = (MessageType)reader.ReadByte();
@@ -75,8 +115,7 @@ namespace MagicStorage
 
 			Report(true, "Received message " + type + " from player " + sender);
 
-			switch (type)
-			{
+			switch (type) {
 				case MessageType.SearchAndRefreshNetwork:
 					ReceiveSearchAndRefresh(reader);
 					break;
@@ -138,7 +177,7 @@ namespace MagicStorage
 					ReceiveStorageUnitStyle(reader, sender);
 					break;
 				case MessageType.InformQuickStackToStorage:
-					ClientReceiveQuickStackToStorage();
+					ClientReceiveQuickStackToStorage(reader);
 					break;
 				case MessageType.GolemHelpTextUpdate:
 					ClientReceiveGolemTextUpdate();
@@ -164,8 +203,14 @@ namespace MagicStorage
 				case MessageType.PlayerBankDepositResult:
 					ClientReceiveDepositFromBankResult(reader);
 					break;
+				case MessageType.ComponentPlacement:
+					ServerReceiveComponentPlacement(reader, sender);
+					break;
+				case MessageType.ComponentDestruction:
+					ServerReceiveComponentDestruction(reader, sender);
+					break;
 				default:
-					throw new ArgumentOutOfRangeException();
+					throw new ArgumentOutOfRangeException(nameof(type));
 			}
 		}
 
@@ -391,7 +436,7 @@ namespace MagicStorage
 			Report(false, "Operation: " + op);
 		}
 
-		public static void SendRefreshNetworkItems(Point16 position)
+		public static void SendRefreshNetworkItems(Point16 position, bool forceFullRefresh = false, IEnumerable<int> typesToRefresh = null)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
@@ -399,6 +444,19 @@ namespace MagicStorage
 				packet.Write((byte)MessageType.RefreshNetworkItems);
 				packet.Write(position.X);
 				packet.Write(position.Y);
+
+				if (typesToRefresh is null || !typesToRefresh.Any())
+					packet.Write((ushort)0);
+				else {
+					List<int> types = typesToRefresh.ToList();
+					packet.Write((ushort)types.Count);
+
+					foreach (int id in types)
+						packet.Write(id);
+				}
+
+				packet.Write(forceFullRefresh);
+
 				packet.Send();
 
 				Report(true, MessageType.RefreshNetworkItems + " packet sent from client " + Main.myPlayer);
@@ -408,11 +466,22 @@ namespace MagicStorage
 		private static void ReceiveRefreshNetworkItems(BinaryReader reader)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+			int count = reader.ReadUInt16();
+
+			List<int> types = new();
+			for (int i = 0; i < count; i++)
+				types.Add(reader.ReadInt32());
+
+			bool forceFullRefresh = reader.ReadBoolean();
+
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByPosition.ContainsKey(position))
+			if (TileEntity.ByPosition.ContainsKey(position)) {
+				StorageGUI.SetNextItemTypesToRefresh(types);
+				StorageGUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				StorageGUI.RefreshItems();
+			}
 
 			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
 		}
@@ -451,6 +520,8 @@ namespace MagicStorage
 				}
 
 				Report(true, MessageType.ClientSendDeactivate + " packet received by server from client " + sender);
+
+				PrintClientRequest(sender, $"{(inActive ? "Deactivate" : "Activate")} Unit", position);
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -672,17 +743,27 @@ namespace MagicStorage
 				return;
 			}
 
+			PrintClientRequest(sender, "Craft", position);
+
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
+			HashSet<int> typesToUpdate = new();
+
 			List<Item> toWithdraw = new();
-			for (int k = 0; k < withdrawCount; k++)
-				toWithdraw.Add(ItemIO.Receive(reader, true, true));
+			for (int k = 0; k < withdrawCount; k++) {
+				Item withdrawn = ItemIO.Receive(reader, true, true);
+				toWithdraw.Add(withdrawn);
+				typesToUpdate.Add(withdrawn.type);
+			}
 
 			int resultsCount = reader.ReadInt32();
 			List<Item> results = new();
-			for (int k = 0; k < resultsCount; k++)
-				results.Add(ItemIO.Receive(reader, true, true));
+			for (int k = 0; k < resultsCount; k++) {
+				Item result = ItemIO.Receive(reader, true, true);
+				results.Add(result);
+				typesToUpdate.Add(result.type);
+			}
 
 			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
 
@@ -700,7 +781,7 @@ namespace MagicStorage
 				Report(false, MessageType.CraftResult + " packet sent to all clients");
 			}
 
-			SendRefreshNetworkItems(position);
+			SendRefreshNetworkItems(position, false, typesToUpdate);
 		}
 
 		public static void ReceiveCraftResult(BinaryReader reader)
@@ -711,8 +792,11 @@ namespace MagicStorage
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-
+#if TML_2022_09
+				player.QuickSpawnClonedItem(new EntitySource_TileEntity(heart), item, item.stack);
+#else
 				player.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
+#endif
 			}
 
 			Report(true, MessageType.CraftResult + " packet received by client " + Main.myPlayer);
@@ -777,6 +861,8 @@ namespace MagicStorage
 				packet.Send(ignoreClient: sender);
 
 				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
+
+				PrintClientRequest(sender, "Refresh UI", storage);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
 					CraftingGUI.RefreshItems();
@@ -854,7 +940,7 @@ namespace MagicStorage
 				ProcessUpdateQueue();
 
 			if (destination.GetHeart() is TEStorageHeart heart)
-				SendRefreshNetworkItems(heart.Position);
+				SendRefreshNetworkItems(heart.Position, false, transferredItems.Select(static i => i.type).Distinct());
 
 			return true;
 		}
@@ -876,6 +962,8 @@ namespace MagicStorage
 
 				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
+
+				PrintClientRequest(sender, "Compact Coins", position);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				reader.ReadPoint16();
 
@@ -922,6 +1010,8 @@ namespace MagicStorage
 
 				Report(false, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
+
+				PrintClientRequest(sender, "Sell Duplicates", position);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				reader.ReadPoint16();
 				reader.ReadInt32();
@@ -982,6 +1072,8 @@ namespace MagicStorage
 			//Safeguard:  Ensure that the map section exists before sending data
 			RemoteClient.CheckSection(sender, unit.ToWorldCoordinates());
 
+			PrintClientRequest(sender, "Update Unit Type", unit);
+
 			if (!TileEntity.ByPosition.TryGetValue(unit, out TileEntity entity) || entity is not TEStorageUnit storageUnit) {
 				Report(true, MessageType.RequestStorageUnitStyle + " packet was malformed: Storage Unit location did not have a Storage Unit");
 				return;
@@ -992,21 +1084,29 @@ namespace MagicStorage
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
 
-		public static void SendQuickStackToStorage(int player) {
+		public static void SendQuickStackToStorage(int player, int itemType) {
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.InformQuickStackToStorage);
+			packet.Write(itemType);
 			packet.Send(toClient: player);
 		}
 
-		public static void ClientReceiveQuickStackToStorage() {
+		public static void ClientReceiveQuickStackToStorage(BinaryReader reader) {
+			int itemType = reader.ReadInt32();
+
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
 			SoundEngine.PlaySound(SoundID.Grab);
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh();
+
+			if (MagicUI.IsCraftingUIOpen())
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
+			else
+				StorageGUI.SetNextItemTypeToRefresh(itemType);
 		}
 
 		public static void SendGolemTextUpdate() {
@@ -1119,6 +1219,9 @@ namespace MagicStorage
 			packet.Send(toClient: sender);
 
 			Report(false, MessageType.ServerOpConfirmationResult + " packet sent to client " + sender);
+
+			if (valid)
+				PrintClientRequest(sender, "Enable Server Oprator", Main.player[sender].Center);
 		}
 
 		public static void ClientReceiveOperatorConformationResult(BinaryReader reader) {
@@ -1238,6 +1341,8 @@ namespace MagicStorage
 			packet.Send(toClient: sender);
 
 			Report(false, MessageType.PlayerBankDepositResult + " packet sent to client " + sender);
+
+			PrintClientRequest(sender, "Deposit Items from Bank/Safe/Forge", heart);
 		}
 
 		public static void ClientReceiveDepositFromBankResult(BinaryReader reader) {
@@ -1260,6 +1365,44 @@ namespace MagicStorage
 				SoundEngine.PlaySound(SoundID.Grab);
 
 			Report(true, MessageType.PlayerBankDepositResult + " packet received by client " + Main.myPlayer);
+		}
+
+		public static void SendComponentPlacement(Point16 position) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ComponentPlacement);
+			packet.Write(position);
+			packet.Send();
+		}
+
+		public static void ServerReceiveComponentPlacement(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			PrintClientRequest(sender, "Component Placement", position);
+		}
+
+		public static void SendComponentDestruction(Point16 position) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ComponentDestruction);
+			packet.Write(position);
+			packet.Send();
+		}
+
+		public static void ServerReceiveComponentDestruction(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			PrintClientRequest(sender, "Component Destruction", position);
 		}
 	}
 
@@ -1293,6 +1436,8 @@ namespace MagicStorage
 		ServerOpConfirmationResult,
 		PlayerHasServerOp,
 		ClientRequestPlayerBankDeposit,
-		PlayerBankDepositResult
+		PlayerBankDepositResult,
+		ComponentPlacement,
+		ComponentDestruction
 	}
 }

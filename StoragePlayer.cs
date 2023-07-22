@@ -29,6 +29,10 @@ namespace MagicStorage
 		internal int wirelessLatency = -1;
 		internal const int MaxLatency = 10;
 
+		// Automaton help tips
+		internal bool unlockedTip_Mechs, unlockedTip_MoonLord;
+		internal int automatonHelpTip;
+
 		protected override bool CloneNewInstances => false;
 
 		public ItemTypeOrderedSet HiddenRecipes { get; } = new("HiddenItems");
@@ -39,12 +43,20 @@ namespace MagicStorage
 		{
 			HiddenRecipes.Save(tag);
 			FavoritedRecipes.Save(tag);
+			tag["automaton"] = automatonHelpTip;
+
+			BitsByte unlocked = new(unlockedTip_Mechs, unlockedTip_MoonLord);
+			tag["unlocked"] = (byte)unlocked;
 		}
 
 		public override void LoadData(TagCompound tag)
 		{
 			HiddenRecipes.Load(tag);
 			FavoritedRecipes.Load(tag);
+			automatonHelpTip = tag.GetInt("automaton");
+
+			BitsByte unlocked = tag.GetByte("unlocked");
+			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);
 		}
 
 		public override void OnEnterWorld() {
@@ -209,7 +221,11 @@ namespace MagicStorage
 				return;
 			}
 
+#if TML_2022_09
+			player.QuickSpawnClonedItem(source, item, item.stack);
+#else
 			player.QuickSpawnItem(source, item, item.stack);
+#endif
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot)
@@ -228,7 +244,17 @@ namespace MagicStorage
 			if (item.type != oldType || item.stack != oldStack)
 			{
 				SoundEngine.PlaySound(SoundID.Grab);
-				StorageGUI.needRefresh = true;
+				StorageGUI.SetRefresh();
+
+				int[] types = new int[] {
+					item.type,
+					oldType
+				};
+
+				if (MagicUI.IsCraftingUIOpen())
+					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(types);
+				else
+					StorageGUI.SetNextItemTypesToRefresh(types);
 			}
 
 			return true;

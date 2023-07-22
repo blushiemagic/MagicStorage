@@ -1,7 +1,7 @@
 # I recommend using the hjson key to translate all future text additions
-# Also add them into other hjsons, but mark them with "#", and wait for translators to translate the text
+# Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
 # -Crapsky233
-/* TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} is such an interesting machine, how does it move?" */
+// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} is such an interesting machine, how does it move?"
 
 Mods: {
 	MagicStorage: {
@@ -24,7 +24,10 @@ Mods: {
 				Tooltip: 能够使用存储系统中的物品进行制作
 			}
 
-			CreativeStorageUnit.DisplayName: 创造单元
+			CreativeStorageUnit: {
+				DisplayName: 创造单元
+				// Tooltip: ""
+			}
 
 			Locator: {
 				DisplayName: 定位器
@@ -341,23 +344,74 @@ Mods: {
 					'''
 			}
 
-			/* Config_GlowItemGlowing.DisplayName: Config//GlowItemGlowing */
-			/* Config_GlowItemNotGlowing.DisplayName: Config//GlowItemNotGlowing */
-			/* Config_RecipeFilterAvailable.DisplayName: Config//RecipeFilterAvailable */
-			/* Config_RecipeFilterAll.DisplayName: Config//RecipeFilterAll */
+			Config_GlowItemGlowing: {
+				// DisplayName: Config//GlowItemGlowing
+				// Tooltip: ""
+			}
+
+			Config_GlowItemNotGlowing: {
+				// DisplayName: Config//GlowItemNotGlowing
+				// Tooltip: ""
+			}
+
+			Config_RecipeFilterAvailable: {
+				// DisplayName: Config//RecipeFilterAvailable
+				// Tooltip: ""
+			}
+
+			Config_RecipeFilterAll: {
+				// DisplayName: Config//RecipeFilterAll
+				// Tooltip: ""
+			}
+
+			PortableCraftingAccessHM: {
+				// DisplayName: Portable Crafting Access H M
+				// Tooltip: ""
+			}
+
+			PortableCraftingAccessPreHM: {
+				// DisplayName: Portable Crafting Access Pre H M
+				// Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: 生态球
-		NPCs.Golem.DisplayName: 自动机
 
-		EnvironmentModule: {
-			UseInventoryModule.DisplayName: 制作时采用物品栏内物品
-			UseInventoryNoFavoritesModule.DisplayName: 制作时采用物品栏内未收藏的物品
+		NPCs: {
+			Golem: {
+				DisplayName: 自动机
 
-			JourneyInfiniteItems: {
-				DisplayName: 制作时采用旅途模式研究过的物品
-				DisabledTooltip: 该模块仅供旅途模式人物使用
+				TownNPCMood: {
+					// Content: "{$Mods.MagicStorage.TownNPCMood.Golem.Content}"
+					// NoHome: "{$Mods.MagicStorage.TownNPCMood.Golem.NoHome}"
+					// FarFromHome: "{$Mods.MagicStorage.TownNPCMood.Golem.FarFromHome}"
+					// LoveSpace: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveSpace}"
+					// DislikeCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeCrowded}"
+					// HateCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.HateCrowded}"
+					// LoveBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveBiome}"
+					// LikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeBiome}"
+					// DislikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeBiome}"
+					// HateBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.HateBiome}"
+					// LoveNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveNPC}"
+					// LikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC}"
+					// DislikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeNPC}"
+					// HateNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.HateNPC}"
+					// LikeNPC_Princess: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC_Princess}"
+					// Princess_LovesNPC: "{$TownNPCMood_Princess.LoveNPC_MagicStorage/Golem}"
+				}
 			}
+		}
+
+		ModuleName: {
+			UseInventoryModule: 制作时采用物品栏内物品
+			UseInventoryNoFavoritesModule: 制作时采用物品栏内未收藏的物品
+			JourneyInfiniteItems: 制作时采用旅途模式研究过的物品
+		}
+
+		ModuleDisabled: {
+			JourneyInfiniteItems: 该模块仅供旅途模式人物使用
+			// UseInventoryModule: This module is currently disabled.
+			// UseInventoryNoFavoritesModule: This module is currently disabled.
 		}
 
 		TownNPCMood: {
@@ -370,35 +424,35 @@ Mods: {
 				HateCrowded: 本单元请求独处。
 				LikeBiome: "{BiomeName}与蓝魔法相容。"
 				LoveBiome: "{BiomeName}与蓝魔法完美协调。"
-				DislikeBiome: "已检测到{BiomeName}使得蓝魔法效率下降。"
-				HateBiome: "检测到处于{BiomeName}，蓝魔法已停用。"
-				LikeNPC: "检测到{NPCName}欣赏蓝魔法。"
-				LoveNPC: "附近的{NPCName}个体对本单元拥有一切操纵权."
-				DislikeNPC: "本单元不屑于向{NPCName}提及蓝魔法。"
+				DislikeBiome: 已检测到{BiomeName}使得蓝魔法效率下降。
+				HateBiome: 检测到处于{BiomeName}，蓝魔法已停用。
+				LikeNPC: 检测到{NPCName}欣赏蓝魔法。
+				LoveNPC: 附近的{NPCName}个体对本单元拥有一切操纵权.
+				DislikeNPC: 本单元不屑于向{NPCName}提及蓝魔法。
 				HateNPC: "{NPCName}需要改变其试图将蓝魔法用于盈利的想法"
-				/* LikeNPC_Princess: "{NPCName} is best friends with my creator." */
+				// LikeNPC_Princess: "{NPCName} is best friends with my creator."
 			}
 		}
 
 		Tiles: {
-			CraftingAccess.MapEntry: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
-			CreativeStorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
-			RemoteAccess.MapEntry: "{$Mods.MagicStorage.ItemName.RemoteAccess}"
-			StorageAccess.MapEntry: "{$Mods.MagicStorage.ItemName.StorageAccess}"
-			StorageComponent.MapEntry: "{$Mods.MagicStorage.ItemName.StorageComponent}"
-			StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
-			StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
-			StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
-			CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
-			CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
-			CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
-			CombinedStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations2Item}"
-			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
-			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
-			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
-			/* EvilAltarTile.MapEntry: Demon/Crimson Altar */
+			// CraftingAccess.MapEntry: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
+			// CreativeStorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
+			// RemoteAccess.MapEntry: "{$Mods.MagicStorage.ItemName.RemoteAccess}"
+			// StorageAccess.MapEntry: "{$Mods.MagicStorage.ItemName.StorageAccess}"
+			// StorageComponent.MapEntry: "{$Mods.MagicStorage.ItemName.StorageComponent}"
+			// StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
+			// StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
+			// StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
+			// CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
+			// DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
+			// CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
+			// CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
+			// CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
+			// CombinedStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations2Item}"
+			// CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
+			// CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			// EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+			// EvilAltarTile.MapEntry: Mods.MagicStorage.MapObject.EvilAltarTile
 		}
 
 		Bestiary.Golem:
@@ -413,7 +467,7 @@ Mods: {
 				Wizard: 尽管{0}看上去精通魔法，他仍不能理解蓝魔法的工作方式。因为实际上这并不能算作纯粹的魔法。
 				NotLihzahrd: 请停止询问，本单元并非由丛林神庙砖构成。
 				Bluemagic: 蓝魔法是一种惊人的力量来源，你不会想要低估它的能力的。
-				/* NewTextAvailable: Hello {0}. This unit has prepared some new help text about Portable Remote Accesses for you. */
+				// NewTextAvailable: Hello {0}. This unit has prepared some new help text about Portable Remote Accesses for you.
 				Help1:
 					'''
 					首先，你需要合成一些存储组件。存储组件是组件存储网络的基础，你可以在{0}那里询问存储单元的用途。
@@ -517,17 +571,17 @@ Mods: {
 					如果你想远程访问存储网络，可以制作一个便携远程存储装置
 					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
 					'''
-				/* Help20_Mechs:
+				Help20_Mechs:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help20}
 					[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
-					''' */
-				/* Help20_Moon:
+					'''
+				Help20_Moon:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
 					[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 					[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
-					''' */
+					'''
 				Help21:
 					'''
 					使用升级珠右键点击存储单元也可以使其升级
@@ -560,13 +614,13 @@ Mods: {
 		StorageUnitActivated: 该存储单元已被启用
 		StorageUnitDeactivated: 该存储单元已被禁用
 		FilterAllMods: 所有物品
-		Capacity: "容量: {0} / {1}"
-		LocatorSet: "已连接至 [{0}, {1}]"
+		Capacity: 容量: {0} / {1}
+		LocatorSet: 已连接至 [{0}, {1}]
 		StorageAccessFail: 无法加载存储核心！
 		StorageAccessFailAlt: 该存储装置没有与存储核心连接！
 		StorageAccessFailLoad: 存储核心区域未加载！请再试一次
-		/* TestItemSuffix: " !UNTIL RESPAWN!" */
-		SetTo: "已连接至 [{0}, {1}]"
+		// TestItemSuffix: " !UNTIL RESPAWN!"
+		SetTo: 已连接至 [{0}, {1}]
 		SnowBiomeBlock: 雪地环境方块
 		DepositAll: 全部存入
 		CraftingStations: 制作站
@@ -574,28 +628,29 @@ Mods: {
 		CraftTooltipOld: 左键单击以制作（按住Ctrl全部制作）
 
 		Crafting: {
-			/* Plus1: +1 */
-			/* Plus10: +10 */
-			/* Plus100: +100 */
-			/* Minus1: "-1" */
-			/* Minus10: "-10" */
-			/* Minus100: "-100" */
+			// Plus1: +1
+			// Plus10: +10
+			// Plus100: +100
+			// Minus1: "-1"
+			// Minus10: "-10"
+			// Minus100: "-100"
 			MaxStack: 设为最大
 			Reset: 重置
-			Amount: "数量: {0}"
+			Amount: 数量: {0}
 		}
 
 		Search: 搜索
 		SearchName: 以名称搜索
 		SearchMod: 以模组搜索
+		// SortWaiting: Loading ...
 
 		SearchTips: {
 			SearchName: 以名称搜索
 			SearchMod: @模组名 以模组搜索
 			SearchTooltip: "#物品介绍 以介绍搜索"
-			SearchModAndTooltip: "@模组名 #物品介绍"
-			/* TipModAndTooltip: "[c/ffff00:@ModName] to search by mod, [c/ffff00:#Search Tooltip] to search by tooltip (can be combined in that order)" */
-			/* TipTooltipOnly: "[c/ffff00:#Search Tooltip] to search by tooltip" */
+			SearchModAndTooltip: @模组名 #物品介绍
+			// TipModAndTooltip: "[c/ffff00:@ModName] to search by mod, [c/ffff00:#Search Tooltip] to search by tooltip (can be combined in that order)"
+			// TipTooltipOnly: "[c/ffff00:#Search Tooltip] to search by tooltip"
 		}
 
 		Recipes: 合成配方
@@ -621,6 +676,8 @@ Mods: {
 			StorageDefaultToAllMods: 当前筛选模式下搜索不到任何物品，即使存储中有相应物品。目前显示的是搜索所有物品的结果
 			CraftingNoBlacklist: 由于黑名单设置搜索不到任何配方。目前显示的是搜索所有配方的结果
 			CraftingDefaultToAllMods: 此模组中搜索不到任何配方。目前显示的是搜索所有配方的结果
+			// DeleteItemsFailed: Deletion operation failed for unknown reasons.  Please try again, or delete the items manually if necessary.
+			// DeleteDataFailed: Deletion operation failed for unknown reasons.  Some items may still contain unloaded mod data.
 		}
 
 		RecipeHidden: 隐藏物品 "{0}" 的制作配方
@@ -637,15 +694,15 @@ Mods: {
 		StorageGUI: {
 			ForceRefreshButton: 强制刷新UI
 			CompactCoinsButton: 合并钱币
-			DestroyUnloadedButton: 删除卸载物品
-			DestroyUnloadedDataButton: 删除被卸载的数据
+			DestroyUnloadedButton: 删除卸载的模组项目
+			DestroyUnloadedDataButton: 删除卸载的模组数据
 			DepositPiggyBank: 转移猪猪存钱罐物品
 			DepositSafe: 转移保险箱物品
 			DepositForge: 转移护卫熔炉物品
 			DepositVault: 转移虚空保险库物品
-			/* InitShowcaseButton: Initialize Showcase */
-			/* ResetShowcaseButton: Reset Showcase Items */
-			/* ClearItemsButton: Clear All Items */
+			// InitShowcaseButton: Initialize Showcase
+			// ResetShowcaseButton: Reset Showcase Items
+			// ClearItemsButton: Clear All Items
 			SellDuplicatesHeader: 出售同种物品
 			SellDuplicatesButton: 出售
 
@@ -656,7 +713,7 @@ Mods: {
 			}
 		}
 
-		/* HoverText.Reset: Reset panel position and size */
+		// HoverText.Reset: Reset panel position and size
 
 		EnvironmentGUI: {
 			EntryDisabledDefault: 该模块已被禁用
@@ -668,53 +725,54 @@ Mods: {
 		}
 
 		FilteringOption: {
-			All.Tooltip: 全部
-			Weapons.Tooltip: 武器
-			Tools.Tooltip: 工具
-			Equips.Tooltip: 饰品
-			WeaponsMelee.Tooltip: 近战武器
-			WeaponsRanged.Tooltip: 远程武器
-			WeaponsMagic.Tooltip: 魔法武器
-			WeaponsSummon.Tooltip: 召唤武器
-			WeaponsThrown.Tooltip: 投掷武器
-			Ammo.Tooltip: 弹药
-			Armor.Tooltip: 盔甲
-			Vanity.Tooltip: 时装
-			Potions.Tooltip: 药水
-			Tiles.Tooltip: 物块
-			Misc.Tooltip: 杂项
-			Recent.Tooltip: 最近存入的物品
-			ArmorAndEquips.Tooltip: 装备与饰品
-			WeaponsOther.Tooltip: 其他杂项武器
-			Unstackables.Tooltip: 不可堆叠物品
-			Stackables.Tooltip: 可堆叠物品
-			NotFullyResearched.Tooltip: 未完全研究的物品
-			FullyResearched.Tooltip: 已完全研究的物品
-			Materials.Tooltip: 材料
+			All: 全部
+			Weapons: 武器
+			Tools: 工具
+			Equips: 饰品
+			WeaponsMelee: 近战武器
+			WeaponsRanged: 远程武器
+			WeaponsMagic: 魔法武器
+			WeaponsSummon: 召唤武器
+			WeaponsThrown: 投掷武器
+			Ammo: 弹药
+			Armor: 盔甲
+			Vanity: 时装
+			Potions: 药水
+			Tiles: 物块
+			Misc: 杂项
+			Recent: 最近存入的物品
+			ArmorAndEquips: 装备与饰品
+			WeaponsOther: 其他杂项武器
+			Unstackables: 不可堆叠物品
+			Stackables: 可堆叠物品
+			NotFullyResearched: 未完全研究的物品
+			FullyResearched: 已完全研究的物品
+			Materials: 材料
 		}
 
 		SortingOption: {
-			Default.Tooltip: 默认排序
-			ID.Tooltip: 按ID排序
-			Name.Tooltip: 按名称排序
-			Value.Tooltip: 按价格排序
-			Dps.Tooltip: 按DPS排序
-			QuantityAbsolute.Tooltip: 按堆叠数量排序
-			QuantityRatio.Tooltip: 按堆叠占比排序
-			Damage.Tooltip: 按伤害排序
+			Default: 默认排序
+			ID: 按ID排序
+			Name: 按名称排序
+			Value: 按价格排序
+			Dps: 按DPS排序
+			QuantityAbsolute: 按堆叠数量排序
+			QuantityRatio: 按堆叠占比排序
+			Damage: 按伤害排序
+			// Stack: Mods.MagicStorage.SortingOption.Stack
 		}
 
-		/* ButtonConfigGear: Open Configuration Panel */
+		ButtonConfigGear: Open Configuration Panel
 
 		UIPages: {
 			Sorting: 排序
 			Filtering: 筛选
 			Crafting: 合成
 			Storage: 存储
+			Controls: 控件
 			# StorageGUI page for the extra controls
-			Controls: "控件"
+			Modules: 模块
 			# EnvironmentGUI page for the modules
-			Modules: "模块"
 			History: 历史
 		}
 
@@ -829,7 +887,7 @@ Mods: {
 			}
 
 			recursionDepth: {
-				/* Label: "[DISABLED] Recipe Recursion Depth" */
+				// Label: "[DISABLED] Recipe Recursion Depth"
 				/* Tooltip:
 					'''
 					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
@@ -840,7 +898,7 @@ Mods: {
 			}
 
 			recursionMode: {
-				/* Label: "[DISABLED] Recipe Recursion Mode" */
+				// Label: "[DISABLED] Recipe Recursion Mode"
 				/* Tooltip:
 					'''
 					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
@@ -853,6 +911,11 @@ Mods: {
 					  Sub-recipes can be swapped out in a special UI in the Crafting UI.
 					  Less processing required and more control at the cost of more complexity.
 					''' */
+			}
+
+			automatonRemembers: {
+				// Label: Automaton remembers last help tip
+				// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
 			}
 
 			AllowAutomatonToMoveIn: {
@@ -876,6 +939,124 @@ Mods: {
 					当玩家持有便携远程装置时将显示其有效距离
 					对于具有无限范围的访问，不显示任何东西
 					'''
+			}
+		}
+
+		// "Keybinds.Print Item Data.DisplayName": Print  Item  Data
+
+		Configs: {
+			MagicStorageConfig: {
+				// DisplayName: "{$Mods.MagicStorage.Config.Label}"
+
+				quickStackDepositMode: {
+					// Label: "{$Mods.MagicStorage.Config.quickStackDepositMode.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip}"
+				}
+
+				useConfigFilter: {
+					// Label: "{$Mods.MagicStorage.Config.useConfigFilter.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.useConfigFilter.Tooltip}"
+				}
+
+				showAllRecipes: {
+					// Label: "{$Mods.MagicStorage.Config.showAllRecipes.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.showAllRecipes.Tooltip}"
+				}
+
+				useOldCraftMenu: {
+					// Label: "{$Mods.MagicStorage.Config.useOldCraftMenu.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip}"
+				}
+
+				recipeBlacklist: {
+					// Label: "{$Mods.MagicStorage.Config.recipeBlacklist.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.recipeBlacklist.Tooltip}"
+				}
+
+				clearHistory: {
+					// Label: "{$Mods.MagicStorage.Config.clearHistory.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.clearHistory.Tooltip}"
+				}
+
+				recursionDepth: {
+					// Label: "{$Mods.MagicStorage.Config.recursionDepth.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.recursionDepth.Tooltip}"
+				}
+
+				recursionMode: {
+					// Label: "{$Mods.MagicStorage.Config.recursionMode.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.recursionMode.Tooltip}"
+				}
+
+				glowNewItems: {
+					// Label: "{$Mods.MagicStorage.Config.glowNewItems.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.glowNewItems.Tooltip}"
+				}
+
+				clearSearchText: {
+					// Label: "{$Mods.MagicStorage.Config.clearSearchText.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.clearSearchText.Tooltip}"
+				}
+
+				searchBarRefreshOnKey: {
+					// Label: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip}"
+				}
+
+				uiFavorites: {
+					// Label: "{$Mods.MagicStorage.Config.uiFavorites.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.uiFavorites.Tooltip}"
+				}
+
+				extraFilterIcons: {
+					// Label: "{$Mods.MagicStorage.Config.extraFilterIcons.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.extraFilterIcons.Tooltip}"
+				}
+
+				buttonLayout: {
+					// Label: "{$Mods.MagicStorage.Config.buttonLayout.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.buttonLayout.Tooltip}"
+				}
+
+				itemDataDebug: {
+					// Label: "{$Mods.MagicStorage.Config.allowItemDataDebug.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip}"
+				}
+
+				canMovePanels: {
+					// Label: "{$Mods.MagicStorage.Config.canMovePanels.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.canMovePanels.Tooltip}"
+				}
+
+				automatonRemembers: {
+					// Label: "{$Mods.MagicStorage.Config.automatonRemembers.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.automatonRemembers.Tooltip}"
+				}
+			}
+
+			RecursionMode: {
+				// Tooltip: ""
+				// Legacy.Label: Legacy
+				// Modern.Label: Modern
+			}
+
+			ButtonConfigurationMode: {
+				// Tooltip: ""
+				// Legacy.Label: Legacy
+				// ModernPaged.Label: Modern Paged
+				// ModernConfigurable.Label: Modern Configurable
+				// LegacyWithGear.Label: Legacy With Gear
+				// LegacyBasicWithPaged.Label: Legacy Basic With Paged
+				// ModernDropdown.Label: Modern Dropdown
+			}
+
+			MagicStorageServerConfig: {
+				// DisplayName: "{$Mods.MagicStorage.Config.ServersideLabel}"
+
+				allowAutomatonToMoveIn: {
+					// Label: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label}"
+					// Tooltip: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip}"
+				}
 			}
 		}
 	}

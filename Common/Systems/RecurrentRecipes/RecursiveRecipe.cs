@@ -98,7 +98,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			public readonly List<ItemInfo> consumedItems = new();
 			public readonly List<ItemInfo> excessResults = new();
 			public readonly HashSet<int> usedStations = new();
-			public readonly HashSet<Recipe.Condition> usedConditions = new(ReferenceEqualityComparer.Instance);
+			public readonly HashSet<Condition> usedConditions = new(ReferenceEqualityComparer.Instance);
 		}
 
 		private void CalculateRecurrentRecipes() {

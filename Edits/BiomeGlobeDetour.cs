@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using MagicStorage.Items;
+using SerousCommonLib.API;
 using Terraria;
 using Terraria.ID;
 using OnRecipe = Terraria.On_Recipe;
@@ -20,6 +21,12 @@ public class BiomeGlobeDetour : Edit
 
 	private static void Recipe_FindRecipes(OnRecipe.orig_FindRecipes orig, bool canDelayCheck)
 	{
+		// For whatever reason, this hook can end up running during worldgen and the main menu
+		if (Main.gameMenu || WorldGen.gen) {
+			orig(canDelayCheck);
+			return;
+		}
+
 		Player player = Main.LocalPlayer;
 
 		bool oldGraveyard = player.ZoneGraveyard;

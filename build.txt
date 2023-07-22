@@ -1,10 +1,10 @@
 author = The Magic Storage Team
-version = 0.5.8
+version = 0.6
 displayName = Magic Storage
 homepage = https://github.com/blushiemagic/MagicStorage/wiki
 hideCode = false
 hideResources = false
 includeSource = true
 includePDB = true
-buildIgnore = OldArt\*, .git\*
+modReferences = SerousCommonLib
 weakReferences = RecursiveCraft@2.0

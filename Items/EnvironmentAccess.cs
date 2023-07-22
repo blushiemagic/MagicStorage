@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SerousCommonLib.API;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent.Creative;
@@ -48,12 +49,12 @@ namespace MagicStorage.Items {
 			IEnumerable<EnvironmentModule> available = EnvironmentModuleLoader.modules.Where(e => e.IsAvailable());
 
 			if (!available.Any()) {
-				Utility.FindAndModify(tooltips, "<MODULES>", "  None");
+				TooltipHelper.FindAndModify(tooltips, "<MODULES>", "  None");
 				return;
 			}
 
 			if (++tooltipCounter < MaxCounter) {
-				Utility.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip);
+				TooltipHelper.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip);
 				return;
 			}
 
@@ -77,7 +78,7 @@ namespace MagicStorage.Items {
 
 			IEnumerable<string> random = GenerateIndices(lines.Count, maxLines).OrderBy(i => i).Select(i => lines[i]);
 
-			Utility.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip = "  " + string.Join("\n  ", random));
+			TooltipHelper.FindAndInsertLines(Mod, tooltips, "<MODULES>", i => "ModuleName_" + i, lastKnownTooltip = "  " + string.Join("\n  ", random));
 		}
 
 		private static string GetModuleDisplayName(EnvironmentModule e) {

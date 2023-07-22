@@ -27,6 +27,9 @@ namespace MagicStorage.UI.States {
 		private UIText reqObjText2;
 		private UIText storedItemsText;
 
+		private UIPanel recipeWaitPanel;
+		private UIText recipeWaitText;
+
 		public readonly RecipeHistory history = new();
 		private RecipePanelHistoryArrangement recipeHistory;
 		private RecipeHistoryPanel recipeHistoryPanel;
@@ -108,6 +111,10 @@ namespace MagicStorage.UI.States {
 				};
 				
 				itemSlot.OnRightClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					if (CraftingGUI.selectedRecipe is null)
 						return;
 
@@ -129,7 +136,8 @@ namespace MagicStorage.UI.States {
 						}
 
 						CraftingGUI.SetSelectedRecipe(selected);
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 
 						UpdatePanelHeight(PanelHeight);
 
@@ -170,6 +178,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnLeftClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int index = obj.slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
@@ -222,6 +234,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnLeftClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -245,6 +261,7 @@ namespace MagicStorage.UI.States {
 						if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							result.favorited = !result.favorited;
 							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
+							CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 						} else {
 							Item toWithdraw = result.Clone();
 							
@@ -261,7 +278,8 @@ namespace MagicStorage.UI.States {
 					}
 
 					if (changed) {
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
+
 						SoundEngine.PlaySound(SoundID.Grab);
 
 						obj.IgnoreNextHandleAction = true;
@@ -269,6 +287,10 @@ namespace MagicStorage.UI.States {
 				};
 
 				itemSlot.OnRightMouseDown += static (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					Item result = obj.StoredItem;
@@ -321,6 +343,20 @@ namespace MagicStorage.UI.States {
 
 			ToggleCraftButtons(hide: config);
 
+			recipeWaitPanel = new UIPanel();
+
+			recipeWaitPanel.Left.Set(0f, 0.05f);
+			recipeWaitPanel.Top.Set(70f, 0f);
+			recipeWaitPanel.Width.Set(0f, 0.9f);
+			recipeWaitPanel.Height.Set(50f, 0f);
+
+			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f) {
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
+
+			recipeWaitPanel.Append(recipeWaitText);
+
 			lastKnownUseOldCraftButtons = config;
 		}
 
@@ -331,7 +367,6 @@ namespace MagicStorage.UI.States {
 			recipePanel.Top.Set(recipeTop, 0f);
 
 			recipeHeight = panel.Height.Pixels;
-			recipePanel.Height.Set(recipeHeight, 0f);
 			
 			recipeHistory.Left.Set(-recipeHistory.Width.Pixels, 1f);
 
@@ -400,6 +435,8 @@ namespace MagicStorage.UI.States {
 			craftReset.PaddingBottom = craftP1.PaddingBottom;
 		}
 
+		private bool? pendingPanelChange;
+
 		public override void Update(GameTime gameTime) {
 			CraftingGUI.PlayerZoneCache.Cache();
 
@@ -409,6 +446,19 @@ namespace MagicStorage.UI.States {
 					MagicUI.BlockItemSlotActionsDetour = false;
 
 				base.Update(gameTime);
+
+				if (pendingPanelChange is bool { } waiting) {
+					if (waiting) {
+						if (recipeWaitPanel.Parent is null) {
+							recipePanel.Append(recipeWaitPanel);
+							recipeWaitPanel.Update(gameTime);
+						}
+					} else {
+						recipeWaitPanel.Remove();
+					}
+
+					pendingPanelChange = null;
+				}
 
 				MagicUI.BlockItemSlotActionsDetour = oldBlock;
 
@@ -629,19 +679,19 @@ namespace MagicStorage.UI.States {
 				foreach (int tile in CraftingGUI.selectedRecipe.requiredTile)
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
-				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearWater))
+				if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearWater))
 					AddText(Language.GetTextValue("LegacyInterface.53"));
 
-				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearHoney))
+				if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearHoney))
 					AddText(Language.GetTextValue("LegacyInterface.58"));
 
-				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearLava))
+				if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearLava))
 					AddText(Language.GetTextValue("LegacyInterface.56"));
 
-				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InSnow))
+				if (CraftingGUI.selectedRecipe.HasCondition(Condition.InSnow))
 					AddText(Language.GetTextValue("LegacyInterface.123"));
 
-				if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
+				if (CraftingGUI.selectedRecipe.HasCondition(Condition.InGraveyard))
 					AddText(Language.GetTextValue("LegacyInterface.124"));
 
 				if (isEmpty)
@@ -704,7 +754,7 @@ namespace MagicStorage.UI.States {
 		}
 
 		public override void Refresh() {
-			if (Main.gameMenu)
+			if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
 				return;
 
 			MoveRecipePanel();
@@ -733,6 +783,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		internal Item GetStorage(int slot, ref int context) {
+			if (StorageGUI.CurrentlyRefreshing)
+				return new Item();
+
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 			Item item = index < CraftingGUI.storageItems.Count ? CraftingGUI.storageItems[index] : new Item();
 			if (CraftingGUI.blockStorageItems.Contains(new ItemData(item)))
@@ -867,7 +920,7 @@ namespace MagicStorage.UI.States {
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
-				recipeButtons = new(() => StorageGUI.needRefresh = true, 32, 5, forceGearIconToNotBeCreated: true);
+				recipeButtons = new(() => StorageGUI.SetRefresh(forceFullRefresh: true), 32, 5, forceGearIconToNotBeCreated: true);
 				InitFilterButtons();
 				topBar.Append(recipeButtons);
 
@@ -910,7 +963,7 @@ namespace MagicStorage.UI.States {
 						}
 
 						if (changed) {
-							StorageGUI.needRefresh = true;
+							StorageGUI.SetRefresh();
 							SoundEngine.PlaySound(SoundID.Grab);
 
 							obj.IgnoreNextHandleAction = true;
@@ -962,6 +1015,13 @@ namespace MagicStorage.UI.States {
 				Refresh();
 			}
 
+			protected override void SetThreadWait(bool waiting) {
+				base.SetThreadWait(waiting);
+
+				var parent = parentUI as CraftingUIState;
+				parent.pendingPanelChange = waiting;
+			}
+
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
@@ -975,7 +1035,7 @@ namespace MagicStorage.UI.States {
 			}
 
 			private bool UpdateZones() {
-				if (Main.gameMenu)
+				if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
 					return false;
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
@@ -1007,7 +1067,9 @@ namespace MagicStorage.UI.States {
 
 				AdjustCommonElements();
 
-				int numRows = ((CraftingGUI.recipes?.Count ?? 0) + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
+				int count = StorageGUI.CurrentlyRefreshing ? 0 : CraftingGUI.recipes?.Count ?? 0;
+
+				int numRows = (count + CraftingGUI.RecipeColumns - 1) / CraftingGUI.RecipeColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + CraftingGUI.Padding);
 
 				if (numRows > 0 && displayRows <= 0) {
@@ -1019,7 +1081,8 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
+				if (!IsWaitTextVisible)
+					slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
 
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
@@ -1046,6 +1109,9 @@ namespace MagicStorage.UI.States {
 			}
 
 			internal Item GetRecipe(int slot, ref int context) {
+				if (StorageGUI.CurrentlyRefreshing)
+					return new Item();
+
 				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
 				Item item = index >= 0 && index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
 
@@ -1086,6 +1152,10 @@ namespace MagicStorage.UI.States {
 
 			protected override void InitZoneSlotEvents(MagicStorageItemSlot itemSlot) {
 				itemSlot.OnLeftClick += (evt, e) => {
+					// Prevent actions while refreshing the items
+					if (StorageGUI.CurrentlyRefreshing)
+						return;
+
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 					int objSlot = obj.slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
@@ -1099,7 +1169,8 @@ namespace MagicStorage.UI.States {
 						if (!storagePlayer.FavoritedRecipes.Add(obj.StoredItem))
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
-						StorageGUI.needRefresh = true;
+						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
@@ -1118,7 +1189,7 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 						
-						StorageGUI.needRefresh = true;
+						StorageGUI.RefreshUI = true;
 
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}

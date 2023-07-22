@@ -1,11 +1,15 @@
-﻿using System;
+﻿using MagicStorage.NPCs;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.WorldBuilding;
 
 namespace MagicStorage.Common.Systems
 {
@@ -32,6 +36,7 @@ namespace MagicStorage.Common.Systems
 
 		//Modded support
 		public static HashSet<int> moddedDiamonds;
+		private static HashSet<string> unloadedModdedDiamonds;
 
 		internal static HashSet<int> disallowDropModded;
 		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
@@ -64,6 +69,7 @@ namespace MagicStorage.Common.Systems
 			empressDiamond = false;
 
 			moddedDiamonds = new();
+			unloadedModdedDiamonds = new();
 		}
 
 		public override void PreSaveAndQuit() {
@@ -90,7 +96,7 @@ namespace MagicStorage.Common.Systems
 			tag["moonlordDiamond"] = moonlordDiamond;
 			tag["queenSlimeDiamond"] = queenSlimeDiamond;
 			tag["empressDiamond"] = empressDiamond;
-			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").ToList();
+			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -115,7 +121,7 @@ namespace MagicStorage.Common.Systems
 			queenSlimeDiamond = tag.GetBool("queenSlimeDiamond");
 			empressDiamond = tag.GetBool("empressDiamond");
 
-			if (tag.GetList<string>("modded") is List<string> list)
+			if (tag.TryGet("modded", out List<string> list))
 			{
 				foreach (string identifier in list)
 				{
@@ -126,6 +132,8 @@ namespace MagicStorage.Common.Systems
 
 					if (ModLoader.TryGetMod(split[0], out Mod source) && source.TryFind(split[1], out ModNPC npc))
 						moddedDiamonds.Add(npc.Type);
+					else
+						unloadedModdedDiamonds.Add(identifier);
 				}
 			}
 		}
@@ -137,6 +145,9 @@ namespace MagicStorage.Common.Systems
 
 			bb = new(mechBoss3Diamond, plantBossDiamond, golemBossDiamond, fishronDiamond, ancientCultistDiamond, moonlordDiamond, queenSlimeDiamond, empressDiamond);
 			writer.Write(bb);
+
+			// HOTFIX: some mods use NetSend too early, which causes this collection to be null and throw an exception
+			moddedDiamonds ??= new();
 
 			writer.Write((ushort)moddedDiamonds.Count);
 			foreach (int modded in moddedDiamonds)
@@ -156,6 +167,33 @@ namespace MagicStorage.Common.Systems
 
 			for (int i = 0; i < moddedCount; i++)
 				moddedDiamonds.Add(reader.ReadInt32());
+		}
+
+		public override void ModifyWorldGenTasks(List<GenPass> tasks, ref double totalWeight) {
+			if (!MagicStorageServerConfig.AllowAutomatonToMoveIn)
+				return;
+
+			int index = tasks.FindIndex(static pass => pass.Name == "Guide");
+			if (index < 0)
+				index = tasks.Count - 1;  // Failsafe for when the task was removed
+
+			tasks.Insert(index + 1, new AutomatonGenPass("MagicStorage: Automaton Pass", 0.016f));
+		}
+	}
+
+	internal class AutomatonGenPass : GenPass {
+		public AutomatonGenPass(string name, float loadWeight) : base(name, loadWeight) { }
+
+		protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
+			progress.Message = "Spawning the Automaton";
+
+			NPC golem = NPC.NewNPCDirect(new EntitySource_WorldGen(), Main.spawnTileX * 16, Main.spawnTileY * 16, ModContent.NPCType<Golem>());
+			golem.homeTileX = Main.spawnTileX;
+			golem.homeTileY = Main.spawnTileY;
+			golem.direction = 1;
+			golem.homeless = true;
+
+			progress.Set(1.0f);
 		}
 	}
 }

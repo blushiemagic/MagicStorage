@@ -86,6 +86,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override void PostAI() {
+			if (Main.dedServ)
+				return;
+
 			Lighting.AddLight(NPC.Center, (Color.Orange * 0.3f).ToVector3());
 
 			if (newHelpTextAvailable)
@@ -94,8 +97,15 @@ namespace MagicStorage.NPCs {
 				newHelpTextAvailableCounter = 0;
 
 			if (pendingNewHelpTextCheck) {
-				if (Utility.DownedAllMechs || NPC.downedMoonlord)
+				StoragePlayer player = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+
+				if (Utility.DownedAllMechs && !player.unlockedTip_Mechs) {
+					player.unlockedTip_Mechs = true;
 					newHelpTextAvailable = true;
+				} else if (NPC.downedMoonlord && !player.unlockedTip_MoonLord) {
+					player.unlockedTip_MoonLord = true;
+					newHelpTextAvailable = true;
+				}
 
 				pendingNewHelpTextCheck = false;
 				newHelpTextAvailableCounter = 0;
@@ -109,7 +119,7 @@ namespace MagicStorage.NPCs {
 				Dust.NewDust(NPC.position, NPC.width, NPC.height, Main.rand.Next(new[] { DustID.Stone, DustID.Iron, DustID.WoodFurniture }));
 		}
 
-		public override bool CanTownNPCSpawn(int numTownNPCs) {
+		public override bool CanTownNPCSpawn(int numTownNPCs)/* tModPorter Suggestion: Copy the implementation of NPC.SpawnAllowed_Merchant in vanilla if you to count money, and be sure to set a flag when unlocked, so you don't count every tick. */ {
 			return MagicStorageServerConfig.AllowAutomatonToMoveIn;
 		}
 
@@ -167,7 +177,16 @@ namespace MagicStorage.NPCs {
 
 		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 21, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
 
-		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
+		public override void OnChatButtonClicked(bool firstButton, ref string shopName) {
+			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
+
+			if (helpOption == 0) {
+				if (!MagicStorageConfig.DisplayLastSeenAutomatonTip)
+					savedTip = 0;
+
+				helpOption = savedTip;
+			}
+
 			if (firstButton)
 				helpOption++;
 			else
@@ -177,6 +196,8 @@ namespace MagicStorage.NPCs {
 				helpOption = maxHelp;
 			else if (helpOption < 1)
 				helpOption = 1;
+
+			savedTip = helpOption;
 
 			int option = helpOptionsByIndex[helpOption - 1];
 
@@ -228,7 +249,7 @@ namespace MagicStorage.NPCs {
 			randExtraCooldown = 30;
 		}
 
-		public override void DrawTownAttackSwing(ref Texture2D item, ref int itemSize, ref float scale, ref Vector2 offset) {
+		public override void DrawTownAttackSwing(ref Texture2D item, ref Rectangle itemFrame, ref int itemSize, ref float scale, ref Vector2 offset) {
 			item = TextureAssets.Item[ModContent.ItemType<StorageDeactivator>()].Value;
 			scale = 1f;
 		}

@@ -7,6 +7,8 @@ using Terraria.GameContent.UI;
 using Terraria.ModLoader;
 using Terraria.ID;
 using MagicStorage.CrossMod;
+using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Sorting
 {
@@ -15,134 +17,182 @@ namespace MagicStorage.Sorting
 		public class AggregateContext {
 			public IEnumerable<Item> items;
 			public IEnumerable<List<Item>> sourceItems;
+			public ConditionalWeakTable<Item, byte[]> savedItemTagIO;
 			internal List<List<Item>> enumeratedSource;
 
 			public AggregateContext(IEnumerable<Item> items) {
 				this.items = items;
 				sourceItems = enumeratedSource = new();
+				savedItemTagIO = new();
 			}
 		}
 
-		public static IEnumerable<Item> SortAndFilter(AggregateContext context, int sortMode, int filterMode, string nameFilter, int modSearchIndex, int? takeCount = null, bool aggregate = true)
+		public static IEnumerable<Item> SortAndFilter(StorageGUI.ThreadContext thread, int? takeCount = null, bool aggregate = true)
 		{
-			context.items = DoFiltering(context.items, i => i, filterMode, nameFilter, modSearchIndex);
+			try {
+				thread.context.items = DoFiltering(thread, thread.context.items, i => i);
 
-			if (takeCount is int take)
-				context.items = context.items.Take(take);
+				if (takeCount is int take)
+					thread.context.items = thread.context.items.Take(take);
 
-			context.items = Aggregate(context, aggregate);
+				thread.context.items = Aggregate(thread.context, thread.token, aggregate);
 
-			context.sourceItems = DoFiltering(context.sourceItems, i => i[0], filterMode, nameFilter, modSearchIndex);
+				thread.context.sourceItems = DoFiltering(thread, thread.context.sourceItems, i => i[0]);
 
-			if (takeCount is int take2)
-				context.sourceItems = context.sourceItems.Take(take2);
+				if (takeCount is int take2)
+					thread.context.sourceItems = thread.context.sourceItems.Take(take2);
 
-			context.sourceItems = DoSorting(context.sourceItems, i => i[0], sortMode);
+				thread.context.sourceItems = DoSorting(thread, thread.context.sourceItems, i => i[0]);
 
-			return DoSorting(context.items, i => i, sortMode);
-		}
-
-		public static IEnumerable<T> DoFiltering<T>(IEnumerable<T> source, Func<T, Item> objToItem, int filterMode, string nameFilter, int modSearchIndex) {
-			ArgumentNullException.ThrowIfNull(objToItem);
-
-			var filter = FilteringOptionLoader.Get(filterMode)?.Filter;
-
-			if (filter is null)
-				throw new ArgumentOutOfRangeException(nameof(filterMode), "Filtering ID was invalid or its definition had a null filter");
-
-			return source.Where(x => filter(objToItem(x)) && FilterBySearchText(objToItem(x), nameFilter, modSearchIndex));
-		}
-
-		public static IEnumerable<T> DoSorting<T>(IEnumerable<T> source, Func<T, Item> objToItem, int sortMode) {
-			ArgumentNullException.ThrowIfNull(objToItem);
-
-			if (sortMode < 0)
-				return source;
-
-			//Apply "fuzzy" sorting since it's faster, but less accurate
-			IOrderedEnumerable<T> orderedItems = SortingCache.dictionary.SortFuzzy(source, objToItem, sortMode);
-
-			var sorter = SortingOptionLoader.Get(sortMode);
-
-			if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
-				var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
-
-				orderedItems = orderedItems.OrderByDescending(x => objToItem(x), sortFunc);
+				return DoSorting(thread, thread.context.items, i => i);
+			} catch when (thread.token.IsCancellationRequested) {
+				thread.context.items = Array.Empty<Item>();
+				return Array.Empty<Item>();
 			}
+		}
 
-			return orderedItems.ThenByDescending(x => objToItem(x).type).ThenByDescending(x => objToItem(x).value);
+		public static IEnumerable<T> DoFiltering<T>(StorageGUI.ThreadContext thread, IEnumerable<T> source, Func<T, Item> objToItem) {
+			try {
+				ArgumentNullException.ThrowIfNull(objToItem);
+
+				var filter = FilteringOptionLoader.Get(thread.filterMode)?.Filter;
+
+				if (filter is null)
+					throw new ArgumentOutOfRangeException(nameof(thread) + "." + nameof(thread.filterMode), "Filtering ID was invalid or its definition had a null filter");
+
+				return source.Where(x => filter(objToItem(x)) && FilterBySearchText(objToItem(x), thread.searchText, thread.modSearch));
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<T>();
+			}
+		}
+
+		public static IEnumerable<T> DoSorting<T>(StorageGUI.ThreadContext thread, IEnumerable<T> source, Func<T, Item> objToItem) {
+			try {
+				ArgumentNullException.ThrowIfNull(objToItem);
+
+				if (thread.sortMode < 0)
+					return source;
+
+				//Apply "fuzzy" sorting since it's faster, but less accurate
+				IOrderedEnumerable<T> orderedItems = SortingCache.dictionary.SortFuzzy(source, objToItem, thread.sortMode);
+
+				var sorter = SortingOptionLoader.Get(thread.sortMode);
+
+				if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
+					var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
+
+					orderedItems = orderedItems.OrderByDescending(x => objToItem(x), sortFunc);
+				}
+
+				return orderedItems.ThenByDescending(x => objToItem(x).type).ThenByDescending(x => objToItem(x).value);
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<T>();
+			}
 		}
 
 		//Formerly returned IEnumerable<Item> for lazy evaluation
 		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
-		public static List<Item> Aggregate(AggregateContext context, bool actuallyAggregate = true)
+		public static List<Item> Aggregate(AggregateContext context, CancellationToken token, bool actuallyAggregate = true)
 		{
-			Item lastItem = null;
-
-			int sourceIndex = 0;
-
-			List<Item> aggregate = new();
-
-			foreach (Item item in context.items.OrderBy(i => i.type))
+			try
 			{
-				if (lastItem is null)
+				Item lastItem = null;
+
+				int sourceIndex = 0;
+
+				List<Item> aggregate = new();
+
+				foreach (Item item in context.items.OrderBy(i => i.type).ThenBy(i => i.prefix))
 				{
-					lastItem = item.Clone();
-					context.enumeratedSource.Add(new() { item });
-					continue;
-				}
-
-				if (ItemCombining.CanCombineItems(item, lastItem) && (!actuallyAggregate || lastItem.stack + item.stack > 0))
-				{
-					if (actuallyAggregate) {
-						if (item.favorited) {
-							lastItem.favorited = true;
-
-							foreach (var source in context.enumeratedSource[sourceIndex])
-								source.favorited = true;
-						}
-
-						Utility.CallOnStackHooks(lastItem, item, item.stack);
-
-						lastItem.stack += item.stack;
+					if (lastItem is null)
+					{
+						lastItem = item.Clone();
+						context.enumeratedSource.Add(new() { item });
+						continue;
 					}
 
-					context.enumeratedSource[sourceIndex].Add(item);
+					bool combiningPermitted = ItemCombining.CanCombineItems(item, lastItem, checkPrefix: true, savedItemTagIO: context.savedItemTagIO);
+					if (combiningPermitted && (!actuallyAggregate || lastItem.stack + item.stack > 0))
+					{
+						if (actuallyAggregate)
+						{
+							if (item.favorited)
+							{
+								lastItem.favorited = true;
+
+								foreach (var source in context.enumeratedSource[sourceIndex])
+									source.favorited = true;
+							}
+
+							Utility.CallOnStackHooks(lastItem, item, item.stack);
+
+							lastItem.stack += item.stack;
+						}
+
+						context.enumeratedSource[sourceIndex].Add(item);
+					}
+					else
+					{
+						Item next = item.Clone();
+
+						// Transfer stack from current item to "next item"
+						if (combiningPermitted)
+						{
+							int transfer = int.MaxValue - lastItem.stack;
+
+							Utility.CallOnStackHooks(lastItem, item, transfer);
+
+							next.stack -= transfer;
+							lastItem.stack = int.MaxValue;
+						}
+
+						aggregate.Add(lastItem);
+						lastItem = next;
+						context.enumeratedSource.Add(new() { item });
+						sourceIndex++;
+					}
 				}
-				else
-				{
+
+				if (lastItem is not null)
 					aggregate.Add(lastItem);
-					lastItem = item.Clone();
-					context.enumeratedSource.Add(new() { item });
-					sourceIndex++;
-				}
+
+				return aggregate;
 			}
+			catch when (token.IsCancellationRequested)
+			{
+				context.enumeratedSource.Clear();
 
-			if (lastItem is not null)
-				aggregate.Add(lastItem);
-
-			return aggregate;
+				return new();
+			}
+			catch (Exception e) {
+				MagicStorageMod.Instance.Logger.Error(e);
+				return new();
+			}
 		}
 
-		public static ParallelQuery<Recipe> GetRecipes(int filterMode, string searchFilter, int modSearchIndex) {
-			IEnumerable<Recipe> recipes;
+		public static ParallelQuery<Recipe> GetRecipes(StorageGUI.ThreadContext thread) {
+			try {
+				IEnumerable<Recipe> recipes;
 
-			FilteringOption filterOption = FilteringOptionLoader.Get(filterMode);
+				FilteringOption filterOption = FilteringOptionLoader.Get(thread.filterMode);
 
-			if (filterOption is null)
-				recipes = Array.Empty<Recipe>();  // Failsafe
-			else if (filterOption.UsesFilterCache)
-				recipes = MagicCache.FilteredRecipesCache[filterMode];
-			else {
-				var filter = filterOption.Filter;
+				if (filterOption is null)
+					recipes = Array.Empty<Recipe>();  // Failsafe
+				else if (filterOption.UsesFilterCache)
+					recipes = MagicCache.FilteredRecipesCache[thread.filterMode];
+				else {
+					var filter = filterOption.Filter;
 
-				recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem));
+					recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem));
+				}
+
+				return recipes
+					.AsParallel()
+					.AsOrdered()
+					.Where(recipe => FilterBySearchText(recipe.createItem, thread.searchText, thread.modSearch));
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<Recipe>().AsParallel();
 			}
-
-			return recipes
-				.AsParallel()
-				.AsOrdered()
-				.Where(recipe => FilterBySearchText(recipe.createItem, searchFilter, modSearchIndex));
 		}
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
@@ -160,7 +210,14 @@ namespace MagicStorage.Sorting
 				//First character is a "#"?  Treat the search as a tooltip search
 				if (filter.Length > 1) {
 					filter = filter[1..];
-					return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					try
+					{
+						return GetItemTooltipLines(item).Any(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase));
+					}
+					catch
+					{
+						return false;
+					}
 				} else
 					return true;  //Empty tooltip = anything is valid
 			} else if (first == '@' && !modSearched) {
@@ -186,11 +243,11 @@ namespace MagicStorage.Sorting
 
 		private static IEnumerable<string> GetItemTooltipLines(Item item) {
 			Item hoverItem = item;
-			int yoyoLogo = -1;
-			int researchLine = -1;
-			int rare = hoverItem.rare;
-			float knockBack = hoverItem.knockBack;
-			float num = 1f;
+			var yoyoLogo = -1;
+			var researchLine = -1;
+			var rare = hoverItem.rare;
+			var knockBack = hoverItem.knockBack;
+			var num = 1f;
 			if (hoverItem.CountsAsClass(DamageClass.Melee) && Main.LocalPlayer.kbGlove)
 				num += 1f;
 
@@ -203,7 +260,7 @@ namespace MagicStorage.Sorting
 			if (hoverItem.CountsAsClass(DamageClass.Ranged) && Main.LocalPlayer.shroomiteStealth)
 				hoverItem.knockBack *= 1f + (1f - Main.LocalPlayer.stealth) * 0.5f;
 
-			int num2 = 30;
+			long num2 = 30;
 			int numLines = 1;
 			string[] array = new string[num2];
 			bool[] array2 = new bool[num2];
@@ -214,14 +271,15 @@ namespace MagicStorage.Sorting
 			}
 			string[] tooltipNames = new string[num2];
 
-			Main.MouseText_DrawItemTooltip_GetLinesInfo(item, ref yoyoLogo, ref researchLine, knockBack, ref numLines, array, array2, array3, tooltipNames);
+			Main.MouseText_DrawItemTooltip_GetLinesInfo(item, ref yoyoLogo, ref researchLine, knockBack, ref numLines, array, array2, array3, tooltipNames, out _);
 
 			// Fix a bug where item knockback grows to infinity
 			hoverItem.knockBack = knockBack;
 
 			if (Main.npcShop > 0 && hoverItem.value >= 0 && (hoverItem.type < ItemID.CopperCoin || hoverItem.type > ItemID.PlatinumCoin)) {
 				Main.LocalPlayer.GetItemExpectedPrice(hoverItem, out long calcForSelling, out long calcForBuying);
-				long num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
+
+				var num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
 				if (hoverItem.shopSpecialCurrency != -1) {
 					tooltipNames[numLines] = "SpecialPrice";
 					CustomCurrencyManager.GetPriceText(hoverItem.shopSpecialCurrency, array, ref numLines, num5);
@@ -237,7 +295,7 @@ namespace MagicStorage.Sorting
 						if (num10 < 1)
 							num10 = 1;
 
-						long num11 = num10;
+						var num11 = num10;
 						num10 *= hoverItem.stack;
 						int amount = Main.shopSellbackHelper.GetAmount(hoverItem);
 						if (amount > 0)
@@ -291,7 +349,7 @@ namespace MagicStorage.Sorting
 				}
 			}
 
-			List<TooltipLine> lines = ItemLoader.ModifyTooltips(item, ref numLines, tooltipNames, ref array, ref array2, ref array3, ref yoyoLogo, out _);
+			List<TooltipLine> lines = ItemLoader.ModifyTooltips(item,  ref numLines, tooltipNames, ref array, ref array2, ref array3, ref yoyoLogo, out _, 0);
 
 			return lines.Select(line => line.Text);
 		}

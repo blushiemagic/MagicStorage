@@ -51,19 +51,28 @@ namespace MagicStorage.Common.Global {
 			}
 		}
 
-		internal static IEnumerable<(string, string)> Sources(Item item) {
-			foreach (var instanced in item.Globals) {
-				GlobalItem gItem = instanced.Instance;
+		internal static List<(string, string)> Sources(Item item) {
+			List<(string, string)> results = new List<(string, string)>();
+			var globalsEnumerator = item.Globals.GetEnumerator();
+
+			while (globalsEnumerator.MoveNext())
+			{
+				GlobalItem gItem = globalsEnumerator.Current;
 
 				TagCompound tag = new();
 				gItem.SaveData(item, tag);
 
 				if (tag.Count > 0)
-					yield return (gItem.Mod.Name + "/" + gItem.Name, ToBase64(tag));
+				{
+					results.Add((gItem.Mod.Name + "/" + gItem.Name, ToBase64(tag)));
+				}
 			}
+    
+			return results;
 		}
 
-		internal static string ToBase64(TagCompound tag) {
+
+		private static string ToBase64(TagCompound tag) {
 			MemoryStream ms = new();
 			TagIO.ToStream(tag, ms, true);
 			return Convert.ToBase64String(ms.ToArray());

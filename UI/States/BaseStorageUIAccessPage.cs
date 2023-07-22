@@ -3,6 +3,7 @@ using MagicStorage.Components;
 using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,11 @@ namespace MagicStorage.UI.States {
 		public ModSearchBox modSearchBox;
 
 		public NewUISlotZone slotZone;  //The main slot zone that uses the scroll bar (e.g. recipes, items)
+
+		private UIPanel waitPanel;
+		private UIText waitText;
+
+		protected bool IsWaitTextVisible => waitPanel.Parent is null;
 
 		//Used to order the buttons
 		public UIElement topBar;   //Search Bar, recipe buttons, Deposit All
@@ -47,6 +53,8 @@ namespace MagicStorage.UI.States {
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
 
+				// Ensure that the UI is refreshed completely
+				StorageGUI.ForceNextRefreshToBeFull = true;
 				StorageGUI.CheckRefresh();
 			};
 
@@ -97,7 +105,7 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), () => StorageGUI.needRefresh = true) {
+			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), static () => StorageGUI.SetRefresh(forceFullRefresh: true)) {
 				GetHoverText = () => {
 					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
 						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
@@ -144,6 +152,20 @@ namespace MagicStorage.UI.States {
 			slotZone.Width.Set(0f, 1f);
 			Append(slotZone);
 
+			waitPanel = new UIPanel();
+
+			waitPanel.Left.Set(0f, 0.1f);
+			waitPanel.Top.Set(20f, 0f);
+			waitPanel.Width.Set(0f, 0.8f);
+			waitPanel.Height.Set(80f, 0f);
+
+			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true) {
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
+
+			waitPanel.Append(waitText);
+
 			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
 			slotZone.Append(scrollBar);
@@ -177,7 +199,7 @@ namespace MagicStorage.UI.States {
 			if (oldNeedsMod != needsMod)
 				searchBar.SetDefaultText(GetRandomSearchText(needsMod));
 
-			StorageGUI.needRefresh = true;
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		private static readonly LocalizedText[] searchTextDefaults = new[] {
@@ -218,6 +240,10 @@ namespace MagicStorage.UI.States {
 			slotZone.Height.Set(-(zoneTop + bottomMargin), 1f);
 
 			slotZone.Recalculate();
+
+			waitPanel.Top.Set(zoneTop + 20f, 0f);
+
+			waitPanel.Recalculate();
 			
 			bottomBar.Height.Set(bottomMargin, 0f);
 			bottomBar.Top.Set(-bottomMargin, 1f);
@@ -405,8 +431,31 @@ namespace MagicStorage.UI.States {
 
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);
 
+		protected virtual void SetThreadWait(bool waiting) {
+			if (waiting) {
+				if (waitPanel.Parent is null)
+					Append(waitPanel);
+			} else
+				waitPanel.Remove();
+		}
+
+		private bool? delayedThreadWait;
+
+		public void RequestThreadWait(bool waiting) {
+			if (AssetRepository.IsMainThread)
+				SetThreadWait(waiting);
+			else
+				delayedThreadWait = waiting;
+		}
+
 		public override void Update(GameTime gameTime) {
 			PendingZoneRefresh = false;
+
+			if (delayedThreadWait is { } waiting) {
+				SetThreadWait(waiting);
+				delayedThreadWait = null;
+				PendingZoneRefresh = true;
+			}
 
 			if (pendingConfiguration) {
 				//Use the current config just in case "pendingConfiguration" is modified where it's not intended to be

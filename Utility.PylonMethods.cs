@@ -8,7 +8,7 @@ namespace MagicStorage {
 	partial class Utility {
 		// Copy/pasted from tML source for handling pylon validity
 		// We don't need the "nearby player" checks for limited-range portable accesses, hence why they aren't included
-		private static SceneMetrics _sceneMetrics = new();
+		private static SceneMetrics _sceneMetrics;
 
 		public static int HowManyNPCsDoesPylonNeed(TeleportPylonInfo info) {
 			if (info.TypeOfPylon != TeleportPylonType.Victory)
@@ -42,7 +42,8 @@ namespace MagicStorage {
 		}
 
 		private static void CheckValidDestination(TeleportPylonInfo info, ref bool flag) {
-			// For whatever reason, this code has a chance to throw an error, which causes a hard game crash
+			_sceneMetrics ??= new();
+
 			try {
 				SceneMetrics sceneMetrics = _sceneMetrics;
 				SceneMetricsScanSettings settings = new SceneMetricsScanSettings {

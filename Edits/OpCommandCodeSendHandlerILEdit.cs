@@ -1,17 +1,24 @@
 ﻿using MagicStorage.Common.Systems;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using SerousCommonLib.API;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using ILMain = Terraria.IL_Main;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
-	internal class OpCommandCodeSendHandlerDetour : Edit {
+	internal class OpCommandCodeSendHandlerILEdit : Edit {
 		public override void LoadEdits() {
-			ILMain.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
+			try {
+				ILMain.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
+			} catch when (BuildInfo.IsDev) {
+				// Swallow exceptions on dev builds
+				MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(OpCommandCodeSendHandlerILEdit)}\" failed");
+			}
 		}
 
 		public override void UnloadEdits() {
@@ -19,7 +26,7 @@ namespace MagicStorage.Edits {
 		}
 
 		private void Main_DoUpdate_HandleChat(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, DoCommonPatching);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
 		}
 
 		private static bool DoCommonPatching(ILCursor c, ref string badReturnReason) {

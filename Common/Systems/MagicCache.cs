@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
+using SerousCommonLib.API.Helpers;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -26,6 +27,20 @@ public class MagicCache : ModSystem
 		public Recipe[] Value => lazy.Value;
 	}
 
+	public class LazyRecipeTile {
+		public readonly int tileType;
+
+		private readonly Lazy<Recipe[]> lazy;
+
+		public LazyRecipeTile(int tileType) {
+			this.tileType = tileType;
+
+			lazy = new(() => EnabledRecipes.Where(r => r.requiredTile.Any(t => t == this.tileType)).ToArray(), isThreadSafe: false);
+		}
+
+		public Recipe[] Value => lazy.Value;
+	}
+
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
@@ -40,14 +55,17 @@ public class MagicCache : ModSystem
 
 	public static Dictionary<int, LazyRecipe> RecipesUsingItemType { get; private set; } = null!;
 
+	public static Dictionary<int, LazyRecipeTile> RecipesUsingTileType { get; private set; } = null!;
+
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
-	/// Also forces the active storage/crafting UI to refresh if applicable.
+	/// Also forces the active crafting UI to refresh if applicable.
 	/// </summary>
 	public static void RecalculateRecipeCaches() {
 		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
 
-		StorageGUI.needRefresh = true;
+		if (!Main.gameMenu && MagicUI.IsCraftingUIOpen())
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 
 		// TODO: refresh recursive recipes
 	}
@@ -71,7 +89,7 @@ public class MagicCache : ModSystem
 
 	public override void PostSetupRecipes()
 	{
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::PostSetupRecipes");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::PostSetupRecipes");
 
 		// PostSetupContent() is too early for name sorting, which causes the fuzzy sorting to fail
 		SortingCache.dictionary.Fill();
@@ -102,39 +120,44 @@ public class MagicCache : ModSystem
 			}
 		}
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::SetupSortFilterRecipeCache");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::SetupSortFilterRecipeCache");
 
 		SetupSortFilterRecipeCache();
 
 		var groupedByMod = EnabledRecipes.GroupBy(r => r.Mod).ToArray();
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesByMod");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesByMod");
 
 		RecipesByMod = groupedByMod.Where(x => x.Key is not null).ToDictionary(x => x.Key, x => x.ToArray());
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::VanillaRecipes");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::VanillaRecipes");
 
 		VanillaRecipes = groupedByMod.Where(x => x.Key is null).SelectMany(x => x.ToArray()).ToArray();
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::AllMods");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::AllMods");
 
 		// TODO: Split into mods with recipe and mods with items. Also have to account for it in ModSearchBox
 		AllMods = ModLoader.Mods
 			.Where(mod => RecipesByMod.ContainsKey(mod) || mod.GetContent<ModItem>().Any())
 			.ToArray();
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::IndexByMod");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::IndexByMod");
 
 		IndexByMod = AllMods
 			.Select((mod, index) => (mod, index))
 			.ToDictionary(x => x.mod, x => x.index);
 
-		MagicStorageMod.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
 
 		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
 			.ToDictionary(kvp => kvp.Key, kvp => new LazyRecipe(kvp.Key));
 
-		MagicStorageMod.SetLoadingSubProgressText("");
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingTileType");
+
+		RecipesUsingTileType = Enumerable.Range(TileID.Dirt, TileLoader.TileCount)
+			.ToDictionary(type => type, type => new LazyRecipeTile(type));
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("");
 	}
 
 	private static void SetupSortFilterRecipeCache()
