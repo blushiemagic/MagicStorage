@@ -15,7 +15,7 @@ namespace MagicStorage.CrossMod {
 	public abstract partial class FilteringOption : ModTexturedType, ILocalizedModType {
 		public int Type { get; private set; }
 
-		public string LocalizationCategory => "SortingOption";
+		public string LocalizationCategory => "FilteringOption";
 
 		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
 
