@@ -8,6 +8,7 @@ using MagicStorage.Stations;
 using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Terraria;
@@ -40,6 +41,9 @@ namespace MagicStorage {
 
 		internal const string build144Version = "2023.6";
 
+		// Dictionary used for field mappings when exporting to 1.4.4
+		private static readonly FieldInfo LocalizationLoader_NewLocalizationFormatMapping = typeof(LocalizationLoader).GetField("NewLocalizationFormatMapping", BindingFlags.NonPublic | BindingFlags.Static);
+
 		public override void Load()
 		{
 			UsingPrivateBeta = DisplayName.Contains("BETA");
@@ -58,6 +62,16 @@ namespace MagicStorage {
 
 			//Filtering options
 			FilteringOptionLoader.Load();
+
+			// Safety against possible inclusions of this in the 1.4.4 branch
+			if (BuildInfo.tMLVersion < new Version(2022, 10)) {
+				// Hack the dictionary to add our own entries
+				var NewLocalizationFormatMapping = LocalizationLoader_NewLocalizationFormatMapping.GetValue(null) as Dictionary<string, (string category, string dataName)>;
+				NewLocalizationFormatMapping["ModuleName"] = ("EnvironmentModule", "DisplayName");
+				NewLocalizationFormatMapping["ModuleDisabled"] = ("EnvironmentModule", "DisabledTooltip");
+				NewLocalizationFormatMapping["FilteringOption"] = ("FilteringOption", "Tooltip");
+				NewLocalizationFormatMapping["SortingOption"] = ("SortingOption", "Tooltip");
+			}
 		}
 
 		public override void Unload()
