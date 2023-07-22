@@ -7,16 +7,17 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
-	public abstract partial class FilteringOption : ModTexturedType {
+	public abstract partial class FilteringOption : ModTexturedType, ILocalizedModType {
 		public int Type { get; private set; }
 
-		public LocalizedText Tooltip { get; private set; }
+		public string LocalizationCategory => "SortingOption";
+
+		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
 
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
@@ -42,8 +43,6 @@ namespace MagicStorage.CrossMod {
 			ModTypeLookup<FilteringOption>.Register(this);
 
 			Type = FilteringOptionLoader.Add(this);
-
-			Tooltip = Language.GetOrRegister(Mod, $"FilteringOption.{Name}");
 		}
 
 		public sealed override void SetupContent() {
@@ -120,6 +119,7 @@ namespace MagicStorage.CrossMod {
 		public FilteringOptionElement(FilteringOption option) {
 			this.option = option;
 		}
+
 		protected override string GetHoverText() => option.Tooltip.Value;
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;

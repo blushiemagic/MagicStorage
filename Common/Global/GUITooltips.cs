@@ -51,24 +51,19 @@ namespace MagicStorage.Common.Global {
 			}
 		}
 
-		internal static List<(string, string)> Sources(Item item) {
-			List<(string, string)> results = new List<(string, string)>();
+		internal static IEnumerable<(string, string)> Sources(Item item) {
+			// Why can't this just be "foreach (GlobalItem gItem in item.Globals)"...
 			var globalsEnumerator = item.Globals.GetEnumerator();
-
-			while (globalsEnumerator.MoveNext())
-			{
+			while (globalsEnumerator.MoveNext()) {
 				GlobalItem gItem = globalsEnumerator.Current;
 
 				TagCompound tag = new();
 				gItem.SaveData(item, tag);
 
-				if (tag.Count > 0)
-				{
-					results.Add((gItem.Mod.Name + "/" + gItem.Name, ToBase64(tag)));
+				if (tag.Count > 0) {
+					yield return (gItem.Mod.Name + "/" + gItem.Name, ToBase64(tag));
 				}
 			}
-    
-			return results;
 		}
 
 

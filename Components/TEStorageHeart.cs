@@ -9,7 +9,6 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using System.Reflection;
 using Terraria.ModLoader.Default;
-using XPT.Core.Audio.MP3Sharp.Decoding;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
 
@@ -690,10 +689,10 @@ namespace MagicStorage.Components
 					if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 						continue;
 
-					if (Item_globalItems.GetValue(item) is not Ref<GlobalItem>[] globalItems || globalItems.Length == 0)
+					if (Item_globalItems.GetValue(item) is not GlobalItem[] globalItems || globalItems.Length == 0)
 						continue;
 
-					Ref<GlobalItem>[] array = globalItems.Where(i => i.Value is not UnloadedGlobalItem).ToArray();
+					GlobalItem[] array = globalItems.Where(i => i is not UnloadedGlobalItem).ToArray();
 
 					if (array.Length != globalItems.Length) {
 						Item_globalItems.SetValue(item, array);

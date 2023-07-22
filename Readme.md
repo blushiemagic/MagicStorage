@@ -17,11 +17,11 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 * Join the [Discord Server](https://discord.gg/FemPG7eev4) to discuss
 * .NET 6
 * [Microsoft XNA Framework Redistributable 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=20914)
-* tModLoader 1.4.3
+* tModLoader 1.4.4
 * SerousCommonLib (absoluteAquarian Utilities)
 	- Download from the #commonlib-downloads channel in the Discord
 * [RecursiveCraft](https://steamcommunity.com/sharedfiles/filedetails/?id=2575830168) (Recursive Craft)
-	- The mod file will be at `Steam/steamapps/workshop/content/1281930/2575830168/2022.9/`
+	- The mod file will be at `Steam/steamapps/workshop/content/1281930/2575830168/2023.4/`
 
 ### Extracting Assembly Files via TML.Patcher (Windows Only)
 1. Open `Command Prompt`
@@ -32,6 +32,6 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 
 ### Getting your Project Setup
 1. Clone the project to `Documents/My Games/Terraria/tModLoader/ModSources/`
-2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`, and a `1.4.3` folder in that folder
-3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references/1.4.3/` folder created above.
+2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`, and a `1.4.4` folder in that folder
+3. Copy SerousCommonLib and RecursiveCraft assembly files into the `references/1.4.4/` folder created above.
 4. Click play!

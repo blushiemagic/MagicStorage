@@ -243,11 +243,11 @@ namespace MagicStorage.Sorting
 
 		private static IEnumerable<string> GetItemTooltipLines(Item item) {
 			Item hoverItem = item;
-			var yoyoLogo = -1;
-			var researchLine = -1;
-			var rare = hoverItem.rare;
-			var knockBack = hoverItem.knockBack;
-			var num = 1f;
+			int yoyoLogo = -1;
+			int researchLine = -1;
+			int rare = hoverItem.rare;
+			float knockBack = hoverItem.knockBack;
+			float num = 1f;
 			if (hoverItem.CountsAsClass(DamageClass.Melee) && Main.LocalPlayer.kbGlove)
 				num += 1f;
 
@@ -279,7 +279,7 @@ namespace MagicStorage.Sorting
 			if (Main.npcShop > 0 && hoverItem.value >= 0 && (hoverItem.type < ItemID.CopperCoin || hoverItem.type > ItemID.PlatinumCoin)) {
 				Main.LocalPlayer.GetItemExpectedPrice(hoverItem, out long calcForSelling, out long calcForBuying);
 
-				var num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
+				long num5 = (hoverItem.isAShopItem || hoverItem.buyOnce) ? calcForBuying : calcForSelling;
 				if (hoverItem.shopSpecialCurrency != -1) {
 					tooltipNames[numLines] = "SpecialPrice";
 					CustomCurrencyManager.GetPriceText(hoverItem.shopSpecialCurrency, array, ref numLines, num5);
@@ -295,7 +295,7 @@ namespace MagicStorage.Sorting
 						if (num10 < 1)
 							num10 = 1;
 
-						var num11 = num10;
+						long num11 = num10;
 						num10 *= hoverItem.stack;
 						int amount = Main.shopSellbackHelper.GetAmount(hoverItem);
 						if (amount > 0)
@@ -349,7 +349,7 @@ namespace MagicStorage.Sorting
 				}
 			}
 
-			List<TooltipLine> lines = ItemLoader.ModifyTooltips(item,  ref numLines, tooltipNames, ref array, ref array2, ref array3, ref yoyoLogo, out _, 0);
+			List<TooltipLine> lines = ItemLoader.ModifyTooltips(item, ref numLines, tooltipNames, ref array, ref array2, ref array3, ref yoyoLogo, out _, 0);
 
 			return lines.Select(line => line.Text);
 		}

@@ -5,16 +5,17 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
-	public abstract partial class SortingOption : ModTexturedType {
+	public abstract partial class SortingOption : ModTexturedType, ILocalizedModType {
 		public int Type { get; private set; }
 
-		public LocalizedText Tooltip { get; private set; }
+		public string LocalizationCategory => "SortingOption";
+
+		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
 
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
@@ -37,21 +38,10 @@ namespace MagicStorage.CrossMod {
 			ModTypeLookup<SortingOption>.Register(this);
 
 			Type = SortingOptionLoader.Add(this);
-
-			Tooltip = Language.GetOrRegister(Mod, $"SortingOption.{Name}");
 		}
 
 		public sealed override void SetupContent() {
-			//AutoStaticDefaults();
 			SetStaticDefaults();
-		}
-
-		/// <summary>
-		/// Automatically sets certain static defaults. Override this if you do not want the properties to be set for you.
-		/// </summary>
-		public virtual void AutoStaticDefaults() {
-			//if (Tooltip.IsDefault())
-				// Tooltip.SetDefault(Regex.Replace(Name, "([A-Z])", " $1").Trim());
 		}
 
 		public bool Visible { get; private set; } = true;
@@ -124,6 +114,7 @@ namespace MagicStorage.CrossMod {
 		public SortingOptionElement(SortingOption option) {
 			this.option = option;
 		}
+
 		protected override string GetHoverText() => option.Tooltip.Value;
 
 		protected override Asset<Texture2D> GetIcon() => option.TextureAsset;

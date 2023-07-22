@@ -67,10 +67,7 @@ namespace MagicStorage.UI {
 			else {
 				Text.TextColor = Color.Gray;
 				
-				//--1.4.4 TESTING--//
-				//Fix this to have proper localization
-				//string text = module?.DisabledTooltip.GetTranslation(Language.ActiveCulture);
-				var text = "DERP 1.4.4";
+				string text = module?.DisabledTooltip.Value;
 
 				MagicUI.mouseText = text ?? Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 			}
