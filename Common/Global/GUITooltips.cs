@@ -52,11 +52,14 @@ namespace MagicStorage.Common.Global {
 		}
 
 		internal static IEnumerable<(string, string)> Sources(Item item) {
-			// Why can't this just be "foreach (GlobalItem gItem in item.Globals)"...
 			var globalsEnumerator = item.Globals.GetEnumerator();
-			while (globalsEnumerator.MoveNext()) {
-				GlobalItem gItem = globalsEnumerator.Current;
+			var globals = new List<GlobalItem>();
 
+			// "ref struct" enumerators can't be used in "yield return" blocks...
+			while (globalsEnumerator.MoveNext())
+				globals.Add(globalsEnumerator.Current);
+			
+			foreach (GlobalItem gItem in globals) {
 				TagCompound tag = new();
 				gItem.SaveData(item, tag);
 
