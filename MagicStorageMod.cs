@@ -94,6 +94,15 @@ namespace MagicStorage {
 
 			CheckModBuildVersionBeforeJIT.Mod = null;
 			CheckModBuildVersionBeforeJIT.versionChecked = false;
+
+			// Safety against possible inclusions of this in the 1.4.4 branch
+			if (BuildInfo.tMLVersion < new Version(2022, 10)) {
+				var NewLocalizationFormatMapping = LocalizationLoader_NewLocalizationFormatMapping.GetValue(null) as Dictionary<string, (string category, string dataName)>;
+				NewLocalizationFormatMapping.Remove("ModuleName");
+				NewLocalizationFormatMapping.Remove("ModuleDisabled");
+				NewLocalizationFormatMapping.Remove("FilteringOption");
+				NewLocalizationFormatMapping.Remove("SortingOption");
+			}
 		}
 
 		public override void PostSetupContent() {
