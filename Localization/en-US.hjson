@@ -260,14 +260,14 @@ Mods: {
 			Use item to access your storage
 			Has a large access range
 			'''
-			PortableAccessPreHM:
+			PortableCraftingAccessPreHM:
 			'''
 			<right> Crafting Access to store location
 			Currently not set to any location
 			Use item to access your crafting
 			Has a small access range
 			'''
-			PortableAccessHM:
+			PortableCraftingAccessHM:
 			'''
 			<right> Crafting Access to store location
 			Currently not set to any location
