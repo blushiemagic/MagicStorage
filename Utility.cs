@@ -403,8 +403,7 @@ namespace MagicStorage {
 		}
 
 		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
-			BuildOnStackHooksDelegate();
-			onStackHooksDelegate?.Invoke(destination, source, numTransfered);
+			ItemLoader.OnStack(destination, source, numTransfered);
 		}
 
 		/// <summary>

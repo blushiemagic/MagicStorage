@@ -60,7 +60,7 @@ Mods: {
 			}
 
 			PortableCraftingAccess: {
-				// DisplayName: Portable Remote Crafting Access
+				// DisplayName: Ultimate Portable Remote Crafting Access
 				/* Tooltip:
 					'''
 					<right> Crafting Access to store location
@@ -360,14 +360,26 @@ Mods: {
 				// Tooltip: ""
 			}
 
-			PortableCraftingAccessHM: {
-				// DisplayName: Portable Crafting Access H M
-				// Tooltip: ""
+			PortableCraftingAccessPreHM: {
+				// DisplayName: Basic Portable Remote Crafting Access
+				/* Tooltip:
+					'''
+					<right> Crafting Access to store location
+					Currently not set to any location
+					Use item to access your crafting
+					Has a small access range
+					''' */
 			}
 
-			PortableCraftingAccessPreHM: {
-				// DisplayName: Portable Crafting Access Pre H M
-				// Tooltip: ""
+			PortableCraftingAccessHM: {
+				// DisplayName: Advanced Portable Remote Crafting Access
+				/* Tooltip:
+					'''
+					<right> Crafting Access to store location
+					Currently not set to any location
+					Use item to access your crafting
+					Has a large access range
+					''' */
 			}
 		}
 
@@ -378,55 +390,40 @@ Mods: {
 				// DisplayName: Automaton
 
 				TownNPCMood: {
-					// Content: "{$Mods.MagicStorage.TownNPCMood.Golem.Content}"
-					// NoHome: "{$Mods.MagicStorage.TownNPCMood.Golem.NoHome}"
-					// FarFromHome: "{$Mods.MagicStorage.TownNPCMood.Golem.FarFromHome}"
-					// LoveSpace: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveSpace}"
-					// DislikeCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeCrowded}"
-					// HateCrowded: "{$Mods.MagicStorage.TownNPCMood.Golem.HateCrowded}"
-					// LoveBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveBiome}"
-					// LikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeBiome}"
-					// DislikeBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeBiome}"
-					// HateBiome: "{$Mods.MagicStorage.TownNPCMood.Golem.HateBiome}"
-					// LoveNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LoveNPC}"
-					// LikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC}"
-					// DislikeNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.DislikeNPC}"
-					// HateNPC: "{$Mods.MagicStorage.TownNPCMood.Golem.HateNPC}"
-					// LikeNPC_Princess: "{$Mods.MagicStorage.TownNPCMood.Golem.LikeNPC_Princess}"
-					// Princess_LovesNPC: "{$TownNPCMood_Princess.LoveNPC_MagicStorage/Golem}"
+					// Content: Systems are operational.
+					// NoHome: Exposure to elements hastens rusting, requesting home posthaste.
+					// LoveSpace: Acceptable living arrangements have been acquired.
+					// FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
+					// DislikeCrowded: Too many individuals detected in close proximity.
+					// HateCrowded: This unit prefers to be more solitary.
+					// LikeBiome: "{BiomeName} harmonizes with Bluemagic."
+					// LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
+					// DislikeBiome: Bluemagic has lowered efficiency in {BiomeName}.
+					// HateBiome: Bluemagic becomes unstable in {BiomeName}.
+					// LikeNPC: "{NPCName} appreciates the power of Bluemagic."
+					// LoveNPC: This unit would not mind if {NPCName} examined its gears.
+					// DislikeNPC: This unit regrets mentioning Bluemagic to {NPCName}.
+					// HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
+					// LikeNPC_Princess: "{NPCName} is best friends with my creator."
+					// Princess_LovesNPC: "{NPCName} is such an interesting machine, how does it move?"
 				}
 			}
 		}
 
-		ModuleName: {
-			// UseInventoryModule: Use Player Inventory Items
-			// UseInventoryNoFavoritesModule: Use Non-Favorited Player Inventory Items
-			// JourneyInfiniteItems: Use Journey Mode Infinite Items
-		}
+		EnvironmentModule: {
+			UseInventoryModule: {
+				// DisplayName: Use Player Inventory Items
+				// DisabledTooltip: This module is currently disabled.
+			}
 
-		ModuleDisabled: {
-			// JourneyInfiniteItems: This module can only be used by Journey mode characters.
-			// UseInventoryModule: This module is currently disabled.
-			// UseInventoryNoFavoritesModule: This module is currently disabled.
-		}
+			UseInventoryNoFavoritesModule: {
+				// DisplayName: Use Non-Favorited Player Inventory Items
+				// DisabledTooltip: This module is currently disabled.
+			}
 
-		TownNPCMood: {
-			Golem: {
-				// Content: Systems are operational.
-				// NoHome: Exposure to elements hastens rusting, requesting home posthaste.
-				// LoveSpace: Acceptable living arrangements have been acquired.
-				// FarFromHome: This unit must return to its home to recharge its Bluemagic capacitor ASAP.
-				// DislikeCrowded: Too many individuals detected in close proximity.
-				// HateCrowded: This unit prefers to be more solitary.
-				// LikeBiome: "{BiomeName} harmonizes with Bluemagic."
-				// LoveBiome: "{BiomeName} conducts Bluemagic perfectly."
-				// DislikeBiome: Bluemagic has lowered efficiency in {BiomeName}.
-				// HateBiome: Bluemagic becomes unstable in {BiomeName}.
-				// LikeNPC: "{NPCName} appreciates the power of Bluemagic."
-				// LoveNPC: This unit would not mind if {NPCName} examined its gears.
-				// DislikeNPC: This unit regrets mentioning Bluemagic to {NPCName}.
-				// HateNPC: "{NPCName} needs to learn that Bluemagic cannot be used for profit."
-				// LikeNPC_Princess: "{NPCName} is best friends with my creator."
+			JourneyInfiniteItems: {
+				// DisplayName: Use Journey Mode Infinite Items
+				// DisabledTooltip: This module can only be used by Journey mode characters.
 			}
 		}
 
@@ -571,12 +568,12 @@ Mods: {
 				/* Help20_Mechs:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help20}
-					[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+					[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
 					''' */
 				/* Help20_Moon:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-					[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+					[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 					[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
 					''' */
 				/* Help21:
@@ -722,41 +719,40 @@ Mods: {
 		}
 
 		FilteringOption: {
-			All: Filtrer tout
-			Weapons: Filtrer par armes
-			Tools: Filtrer par outils
-			Equips: Filtrer par Équipement
-			// WeaponsMelee: Filter Melee Weapons
-			// WeaponsRanged: Filter Ranged Weapons
-			// WeaponsMagic: Filter Magic Weapons
-			// WeaponsSummon: Filter Summons
-			// WeaponsThrown: Filter Throwing Weapons
-			// Ammo: Filter Ammo
-			// Armor: Filter Armor
-			// Vanity: Filter Vanity Items
-			Potions: Filtrer par potions
-			Tiles: Filtrer par placeable
-			Misc: Filtrer par miscellanées
-			// Recent: Filter New Recently Added Items
-			// ArmorAndEquips: Filter Armor and Equipment
-			// WeaponsOther: Filter Other Weapons
-			// Unstackables: Filter Unstackables
-			// Stackables: Filter Stackables
-			// NotFullyResearched: Filter Items Not Fully Researched
-			// FullyResearched: Filter Items Fully Researched
-			// Materials: Filter Materials
+			All.Tooltip: Filtrer tout
+			Weapons.Tooltip: Filtrer par armes
+			Tools.Tooltip: Filtrer par outils
+			Equips.Tooltip: Filtrer par Équipement
+			// WeaponsMelee.Tooltip: Filter Melee Weapons
+			// WeaponsRanged.Tooltip: Filter Ranged Weapons
+			// WeaponsMagic.Tooltip: Filter Magic Weapons
+			// WeaponsSummon.Tooltip: Filter Summons
+			// WeaponsThrown.Tooltip: Filter Throwing Weapons
+			// Ammo.Tooltip: Filter Ammo
+			// Armor.Tooltip: Filter Armor
+			// Vanity.Tooltip: Filter Vanity Items
+			Potions.Tooltip: Filtrer par potions
+			Tiles.Tooltip: Filtrer par placeable
+			Misc.Tooltip: Filtrer par miscellanées
+			// Recent.Tooltip: Filter New Recently Added Items
+			// ArmorAndEquips.Tooltip: Filter Armor and Equipment
+			// WeaponsOther.Tooltip: Filter Other Weapons
+			// Unstackables.Tooltip: Filter Unstackables
+			// Stackables.Tooltip: Filter Stackables
+			// NotFullyResearched.Tooltip: Filter Items Not Fully Researched
+			// FullyResearched.Tooltip: Filter Items Fully Researched
+			// Materials.Tooltip: Filter Materials
 		}
 
 		SortingOption: {
-			Default: Tri Standard
-			ID: Trier par ID
-			Name: Trier par nom
-			Value: Trier par valeur
-			// Dps: Sort by DPS
-			// QuantityAbsolute: Sort by Total Quantity
-			// QuantityRatio: Sort by Stack Count
-			// Damage: Sort by Damage
-			Stack: Trier par piles
+			Default.Tooltip: Tri Standard
+			ID.Tooltip: Trier par ID
+			Name.Tooltip: Trier par nom
+			Value.Tooltip: Trier par valeur
+			// Dps.Tooltip: Sort by DPS
+			// QuantityAbsolute.Tooltip: Sort by Total Quantity
+			// QuantityRatio.Tooltip: Sort by Stack Count
+			// Damage.Tooltip: Sort by Damage
 		}
 
 		// ButtonConfigGear: Open Configuration Panel
