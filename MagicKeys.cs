@@ -14,7 +14,7 @@ namespace MagicStorage {
 			if (Main.dedServ)
 				return;
 
-			PrintBase64Data = KeybindLoader.RegisterKeybind(Mod, "Print Item Data", Keys.I);
+			PrintBase64Data = KeybindLoader.RegisterKeybind(Mod, "PrintItemData", Keys.I);
 		}
 
 		public override void ProcessTriggers(TriggersSet triggersSet) {

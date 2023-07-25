@@ -25,7 +25,11 @@ Mods: {
 
 			CreativeStorageUnit: {
 				DisplayName: 创造单元
-				// Tooltip: ""
+				/* Tooltip:
+					'''
+					Stores an unlimited amount of every item type.
+					Does not count toward storage limits when in a storage system.
+					''' */
 			}
 
 			Locator: {
@@ -439,8 +443,6 @@ Mods: {
 			// StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			// StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			// StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			// CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			// DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
 			// CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
 			// CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
 			// CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
@@ -448,7 +450,7 @@ Mods: {
 			// CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
 			// CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
 			// EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
-			// EvilAltarTile.MapEntry: Mods.MagicStorage.MapObject.EvilAltarTile
+			// EvilAltarTile.MapEntry: Evil Altar
 		}
 
 		Bestiary.Golem:
@@ -772,8 +774,6 @@ Mods: {
 		}
 
 		Config: {
-			Label: 魔法存储配置
-			ServersideLabel: 魔法存储服务器配置
 			BetaLabel: 魔法存储测试版配置
 
 			Headers: {
@@ -781,141 +781,6 @@ Mods: {
 				Crafting: "[i:MagicStorage/CraftingAccess]  制作界面"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  存储和制作界面"
 				General: 常规配置
-			}
-
-			glowNewItems: {
-				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  高亮显示新物品/配方"
-				Tooltip: 高亮显示存储核心与制作单元中的新物品和配方
-			}
-
-			useConfigFilter: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  使用默认筛选项"
-				Tooltip: 开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）
-			}
-
-			showAllRecipes: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  显示所有制作配方"
-				Tooltip: 开启以显示所有制作配方，关闭则只会显示可用的制作配方
-			}
-
-			quickStackDepositMode: {
-				Label: "[i:Chest]  快速堆叠与存入快捷键"
-				Tooltip:
-					'''
-					若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可
-					将指针移动到存储核心的“快速存入”按钮上以了解具体信息
-					'''
-			}
-
-			clearSearchText: {
-				Label: 自动清除搜索文本
-				Tooltip: 开启后，每次打开存储核心的UI界面都会自动清除上一次键入的搜索文本
-			}
-
-			extraFilterIcons: {
-				Label: "[i:Cog]  更多排序选项"
-				Tooltip: 开启后，在存储核心的UI界面会显示更多排序选项
-			}
-
-			showDps: {
-				Label: 武器DPS预测
-				Tooltip: 开启后，在武器简介里会显示预计DPS值
-			}
-
-			useOldCraftMenu: {
-				Label: "[i:WorkBench]  使用旧版合成界面"
-				Tooltip: 开启后，制作单元面板将使用旧版的界面
-			}
-
-			allowItemDataDebug: {
-				Label: "[i:IronPickaxe]  显示物品调试信息"
-				Tooltip: 开启后，存放于存储面板的物品将显示其是否有GlobalItem数据，并允许通过按下“Print Item Data”(输出物品数据)快捷键以在聊天栏输出数据
-			}
-
-			searchBarRefreshOnKey: {
-				Label: 搜索结果实时更新
-				Tooltip: 开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果
-			}
-
-			uiFavorites: {
-				Label: "[i:FallenStar]  收藏物品与配方"
-				Tooltip: 开启后，可在制作界面中收藏物品和配方
-			}
-
-			recipeBlacklist: {
-				Label: 制作配方黑白名单
-				Tooltip: 开启后，可将制作配方加入白名单或黑名单
-			}
-
-			buttonLayout: {
-				Label: 排序/筛选按钮布局
-				Tooltip:
-					'''
-					Legacy (主界面按钮):
-					  v0.5.6.5及以前版本的布局
-					  排序和筛选选项不单独分页
-					ModernPaged (独立分页):
-					  排序和筛选按钮单独分页
-					ModernConfigurable (自主配置):
-					  可以单独选择一些排序和筛选按钮使其出现在主界面
-					LegacyWithGear (主界面按钮+小窗按钮):
-					  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
-					  在主界面按钮右侧添加了一个齿轮按钮，点击后将以小窗形式显示额外的排序按钮
-					  排序和筛选选项不单独分页
-					LegacyBasicWithPaged (主界面按钮+独立分页):
-					  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
-					  额外的排序按钮独立分页
-					ModernDropdown (下拉菜单):
-					  在主界面添加了排序和筛选选项的下拉式菜单
-					  排序和筛选选项不单独分页
-					'''
-			}
-
-			clearHistory: {
-				Label: "[i:Book]  清除配方历史记录"
-				Tooltip: 在打开制作界面时自动清除配方历史记录
-			}
-
-			canMovePanels: {
-				Label: 流动UI面板
-				Tooltip: 关闭后，UI界面将无法调节大小或进行拖动
-			}
-
-			recursionDepth: {
-				// Label: "[DISABLED] Recipe Recursion Depth"
-				/* Tooltip:
-					'''
-					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-					How deep the recursion goes for crafting recipes in the Crafting UI.
-					Set to 0 to disable this feature.
-					Set to -1 for infinite depth
-					''' */
-			}
-
-			recursionMode: {
-				// Label: "[DISABLED] Recipe Recursion Mode"
-				/* Tooltip:
-					'''
-					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-					Legacy:
-					  Logic is kept in line with how it worked in the Recursive Craft integration.
-					  That is, recursive recipes are "combined" into one singular recipe.
-					  Simplicity at the cost of more processing required and less control.
-					Modern:
-					  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
-					  Sub-recipes can be swapped out in a special UI in the Crafting UI.
-					  Less processing required and more control at the cost of more complexity.
-					''' */
-			}
-
-			automatonRemembers: {
-				// Label: Automaton remembers last help tip
-				// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
-			}
-
-			AllowAutomatonToMoveIn: {
-				Label: 自动机入住
-				Tooltip: 允许城镇NPC“自动机”入住你的城镇
 			}
 
 			PrintTextToChat: {
@@ -937,120 +802,160 @@ Mods: {
 			}
 		}
 
-		// "Keybinds.Print Item Data.DisplayName": Print  Item  Data
+		// Keybinds.PrintItemData.DisplayName: Print Item Data
 
 		Configs: {
 			MagicStorageConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.Label}"
+				DisplayName: 魔法存储配置
 
 				quickStackDepositMode: {
-					// Label: "{$Mods.MagicStorage.Config.quickStackDepositMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip}"
+					Label: "[i:Chest]  快速堆叠与存入快捷键"
+					Tooltip:
+						'''
+						若开启，则存储核心的快速堆叠功能需要按住Ctrl并左键单击使用，否则只需要左键单击即可
+						将指针移动到存储核心的“快速存入”按钮上以了解具体信息
+						'''
 				}
 
 				useConfigFilter: {
-					// Label: "{$Mods.MagicStorage.Config.useConfigFilter.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useConfigFilter.Tooltip}"
+					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  使用默认筛选项"
+					Tooltip: 开启以使用默认筛选项，关闭则会使用你上次选择的筛选项（模组重新加载后会重置至默认筛选项）
 				}
 
 				showAllRecipes: {
-					// Label: "{$Mods.MagicStorage.Config.showAllRecipes.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.showAllRecipes.Tooltip}"
+					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  显示所有制作配方"
+					Tooltip: 开启以显示所有制作配方，关闭则只会显示可用的制作配方
 				}
 
 				useOldCraftMenu: {
-					// Label: "{$Mods.MagicStorage.Config.useOldCraftMenu.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip}"
+					Label: "[i:WorkBench]  使用旧版合成界面"
+					Tooltip: 开启后，制作单元面板将使用旧版的界面
 				}
 
 				recipeBlacklist: {
-					// Label: "{$Mods.MagicStorage.Config.recipeBlacklist.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recipeBlacklist.Tooltip}"
+					Label: 制作配方黑白名单
+					Tooltip: 开启后，可将制作配方加入白名单或黑名单
 				}
 
 				clearHistory: {
-					// Label: "{$Mods.MagicStorage.Config.clearHistory.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearHistory.Tooltip}"
+					Label: "[i:Book]  清除配方历史记录"
+					Tooltip: 在打开制作界面时自动清除配方历史记录
 				}
 
 				recursionDepth: {
-					// Label: "{$Mods.MagicStorage.Config.recursionDepth.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionDepth.Tooltip}"
+					// Label: "[DISABLED] Recipe Recursion Depth"
+					/* Tooltip:
+						'''
+						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+						How deep the recursion goes for crafting recipes in the Crafting UI.
+						Set to 0 to disable this feature.
+						Set to -1 for infinite depth
+						''' */
 				}
 
 				recursionMode: {
-					// Label: "{$Mods.MagicStorage.Config.recursionMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionMode.Tooltip}"
+					// Label: "[DISABLED] Recipe Recursion Mode"
+					/* Tooltip:
+						'''
+						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+						Legacy:
+						  Logic is kept in line with how it worked in the Recursive Craft integration.
+						  That is, recursive recipes are "combined" into one singular recipe.
+						  Simplicity at the cost of more processing required and less control.
+						Modern:
+						  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
+						  Sub-recipes can be swapped out in a special UI in the Crafting UI.
+						  Less processing required and more control at the cost of more complexity.
+						''' */
 				}
 
 				glowNewItems: {
-					// Label: "{$Mods.MagicStorage.Config.glowNewItems.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.glowNewItems.Tooltip}"
+					Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  高亮显示新物品/配方"
+					Tooltip: 高亮显示存储核心与制作单元中的新物品和配方
 				}
 
 				clearSearchText: {
-					// Label: "{$Mods.MagicStorage.Config.clearSearchText.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearSearchText.Tooltip}"
+					Label: 自动清除搜索文本
+					Tooltip: 开启后，每次打开存储核心的UI界面都会自动清除上一次键入的搜索文本
 				}
 
 				searchBarRefreshOnKey: {
-					// Label: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip}"
+					Label: 搜索结果实时更新
+					Tooltip: 开启后，存储与制作面板的搜索结果将实时更新。如果关闭，则仅在搜索栏取消聚焦(即:点击面板的其他区域)时刷新搜索结果
 				}
 
 				uiFavorites: {
-					// Label: "{$Mods.MagicStorage.Config.uiFavorites.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.uiFavorites.Tooltip}"
+					Label: "[i:FallenStar]  收藏物品与配方"
+					Tooltip: 开启后，可在制作界面中收藏物品和配方
 				}
 
 				extraFilterIcons: {
-					// Label: "{$Mods.MagicStorage.Config.extraFilterIcons.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.extraFilterIcons.Tooltip}"
+					Label: "[i:Cog]  更多排序选项"
+					Tooltip: 开启后，在存储核心的UI界面会显示更多排序选项
 				}
 
 				buttonLayout: {
-					// Label: "{$Mods.MagicStorage.Config.buttonLayout.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.buttonLayout.Tooltip}"
+					Label: 排序/筛选按钮布局
+					Tooltip:
+						'''
+						Legacy (主界面按钮):
+						  v0.5.6.5及以前版本的布局
+						  排序和筛选选项不单独分页
+						ModernPaged (独立分页):
+						  排序和筛选按钮单独分页
+						ModernConfigurable (自主配置):
+						  可以单独选择一些排序和筛选按钮使其出现在主界面
+						LegacyWithGear (主界面按钮+小窗按钮):
+						  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
+						  在主界面按钮右侧添加了一个齿轮按钮，点击后将以小窗形式显示额外的排序按钮
+						  排序和筛选选项不单独分页
+						LegacyBasicWithPaged (主界面按钮+独立分页):
+						  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
+						  额外的排序按钮独立分页
+						ModernDropdown (下拉菜单):
+						  在主界面添加了排序和筛选选项的下拉式菜单
+						  排序和筛选选项不单独分页
+						'''
 				}
 
 				itemDataDebug: {
-					// Label: "{$Mods.MagicStorage.Config.allowItemDataDebug.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip}"
+					Label: "[i:IronPickaxe]  显示物品调试信息"
+					Tooltip: 开启后，存放于存储面板的物品将显示其是否有GlobalItem数据，并允许通过按下“Print Item Data”(输出物品数据)快捷键以在聊天栏输出数据
 				}
 
 				canMovePanels: {
-					// Label: "{$Mods.MagicStorage.Config.canMovePanels.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.canMovePanels.Tooltip}"
+					Label: 流动UI面板
+					Tooltip: 关闭后，UI界面将无法调节大小或进行拖动
 				}
 
 				automatonRemembers: {
-					// Label: "{$Mods.MagicStorage.Config.automatonRemembers.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.automatonRemembers.Tooltip}"
+					// Label: Automaton remembers last help tip
+					// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
 				}
 			}
 
 			RecursionMode: {
 				// Tooltip: ""
-				// Legacy.Label: Legacy
+				// Legacy.Label: RecursiveCraft-like
 				// Modern.Label: Modern
 			}
 
 			ButtonConfigurationMode: {
 				// Tooltip: ""
 				// Legacy.Label: Legacy
-				// ModernPaged.Label: Modern Paged
-				// ModernConfigurable.Label: Modern Configurable
-				// LegacyWithGear.Label: Legacy With Gear
-				// LegacyBasicWithPaged.Label: Legacy Basic With Paged
-				// ModernDropdown.Label: Modern Dropdown
+				// ModernPaged.Label: Paged
+				// ModernConfigurable.Label: Configurable
+				// LegacyWithGear.Label: Legacy + Configurable
+				// LegacyBasicWithPaged.Label: Legacy + Paged
+				// ModernDropdown.Label: Dropdown
 			}
 
 			MagicStorageServerConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.ServersideLabel}"
+				DisplayName: 魔法存储服务器配置
 
 				allowAutomatonToMoveIn: {
-					// Label: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip}"
+					Label: 自动机入住
+					Tooltip: 允许城镇NPC“自动机”入住你的城镇
 				}
 			}
 		}

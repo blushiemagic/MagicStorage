@@ -1,6 +1,5 @@
 ﻿﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour.HookGen;
 using SerousCommonLib.API;
 using System;
 using System.Linq;
@@ -13,33 +12,28 @@ using Terraria.ModLoader;
 namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {
 		private static readonly MethodInfo RecipeLoader_AddRecipes = typeof(RecipeLoader).GetMethod("AddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static ILHook _ilHookRecipeLoaderAddRecipes;
+		private static ILHook IL_HookRecipeLoaderAddRecipes;
 
 		private static readonly MethodInfo RecipeLoaderPostAddRecipes = typeof(RecipeLoader).GetMethod("PostAddRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static ILHook _ilHookRecipeLoaderPostAddRecipes;
+		private static ILHook IL_HookRecipeLoaderPostAddRecipes;
 
 		private static readonly MethodInfo RecipeLoader_PostSetupRecipes = typeof(RecipeLoader).GetMethod("PostSetupRecipes", BindingFlags.NonPublic | BindingFlags.Static);
-		private static ILHook _ilRecipeLoaderPostSetupRecipes;
+		private static ILHook IL_RecipeLoaderPostSetupRecipes;
 
 		public override void LoadEdits() {
-			try {
-				_ilHookRecipeLoaderAddRecipes = new ILHook(RecipeLoader_AddRecipes, RecipeLoader_Hook);
-				_ilHookRecipeLoaderPostAddRecipes = new ILHook(RecipeLoaderPostAddRecipes, RecipeLoader_Hook);
-				_ilRecipeLoaderPostSetupRecipes = new ILHook(RecipeLoader_PostSetupRecipes, RecipeLoader_Hook);
-			} catch (Exception ex) when (BuildInfo.IsDev) {
-				// Swallow exceptions on dev builds
-				MagicStorageMod.Instance.Logger.Error($"An edit for \"{nameof(RecipeCheckingILEdit)}\" failed", ex);
-			}
+			IL_HookRecipeLoaderAddRecipes = new ILHook(RecipeLoader_AddRecipes, RecipeLoader_Hook);
+			IL_HookRecipeLoaderPostAddRecipes = new ILHook(RecipeLoaderPostAddRecipes, RecipeLoader_Hook);
+			IL_RecipeLoaderPostSetupRecipes = new ILHook(RecipeLoader_PostSetupRecipes, RecipeLoader_Hook);
 		}
 
 		public override void UnloadEdits() {
-			_ilHookRecipeLoaderAddRecipes = null;
-			_ilHookRecipeLoaderPostAddRecipes = null;
-			_ilRecipeLoaderPostSetupRecipes = null;
+			IL_HookRecipeLoaderAddRecipes = null;
+			IL_HookRecipeLoaderPostAddRecipes = null;
+			IL_RecipeLoaderPostSetupRecipes = null;
 		}
 
 		private static void RecipeLoader_Hook(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, DoCommonPatching);
 		}
 
 		private static bool DoCommonPatching(ILCursor c, ref string badReturnReason) {

@@ -1,7 +1,6 @@
 # I recommend using the hjson key to translate all future text additions
 # Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
 # -Crapsky233
-TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} - такой классный робот, интересно , как он двигается?"
 
 Mods: {
 	MagicStorage: {
@@ -27,7 +26,11 @@ Mods: {
 
 			CreativeStorageUnit: {
 				DisplayName: Творческая ячейка хранилища
-				// Tooltip: ""
+				/* Tooltip:
+					'''
+					Stores an unlimited amount of every item type.
+					Does not count toward storage limits when in a storage system.
+					''' */
 			}
 
 			Locator: {
@@ -411,7 +414,7 @@ Mods: {
 					DislikeNPC: Не нравится {NPCName}.
 					HateNPC: "{NPCName} ненавижу."
 					LikeNPC_Princess: "{NPCName} - лучший друг моего создателя."
-					// Princess_LovesNPC: "{NPCName} is such an interesting machine, how does it move?"
+					Princess_LovesNPC: "{NPCName} - такой классный робот, интересно , как он двигается?"
 				}
 			}
 		}
@@ -442,8 +445,6 @@ Mods: {
 			StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
 			CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
 			CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
 			CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
@@ -451,7 +452,7 @@ Mods: {
 			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
-			// EvilAltarTile.MapEntry: Mods.MagicStorage.MapObject.EvilAltarTile
+			// EvilAltarTile.MapEntry: Evil Altar
 		}
 
 		Bestiary.Golem: Робот, который расскажет вам о системе хранения.
@@ -772,8 +773,6 @@ Mods: {
 		}
 
 		Config: {
-			Label: Magic Storage конфигурация
-			ServersideLabel: Magic Storage конфигурация сервера
 			BetaLabel: Magic Storage BETA конфигурация
 
 			Headers: {
@@ -781,137 +780,6 @@ Mods: {
 				Crafting: "[i:MagicStorage/CraftingAccess]  Конфигурация интерфейса создания"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Конфигурация интерфейсов хранения и крафта"
 				General: Дополнительно
-			}
-
-			glowNewItems: {
-				Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Показывать новые предметы/рецепты"
-				Tooltip: Включает подсветку новых предметов в хранилище для обозначения их новизны
-			}
-
-			useConfigFilter: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр"
-				Tooltip: Включите, чтобы использовать нижеуказанный фильтр, выключите, чтобы запомнить последний выбранный фильтр в игре (фильтр все равно используется при первом открытии после загрузки мода)
-			}
-
-			showAllRecipes: {
-				Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр рецептов"
-				Tooltip: Включите, чтобы использовать все рецепты по умолчанию, выключите, чтобы использовать только доступные рецепты по умолчанию
-			}
-
-			quickStackDepositMode: {
-				Label: "[i:Chest]  Режим быстрой стопки"
-				Tooltip: Включите, чтобы быстро укладывать предметы с зажатой клавишей Control (Ctrl), выключите, чтобы быстро укладывать предметы с отпущенной клавишей Control (Ctrl)
-			}
-
-			clearSearchText: {
-				Label: Очищать текст поиска
-				Tooltip: Включите, чтобы очистить текст поиска при открытии интерфейса
-			}
-
-			extraFilterIcons: {
-				Label: "[i:Cog]  Показывать дополнительные значки сортировки"
-				Tooltip: Включите, чтобы использовать дополнительные варианты сортировки в интерфейсе с классическим расположением кнопок
-			}
-
-			showDps: {
-				Label: Оценивать урон оружия в секунду (DPS)
-				Tooltip: Включите, чтобы отображать подсказку с оценкой урона оружия
-			}
-
-			useOldCraftMenu: {
-				Label: "[i:WorkBench]  Использовать старое меню создания"
-				Tooltip: Включите, чтобы использовать старый интерфейс для модуля создания
-			}
-
-			allowItemDataDebug: {
-				Label: "[i:IronPickaxe]  Отладочная информация предметов"
-				Tooltip: Включите, чтобы в интерфейсе хранилища отображались сведения о наличии данных предмета и разрешить клавишу "Print Item Data" для вывода данных
-			}
-
-			searchBarRefreshOnKey: {
-				Label: Обновление строки поиска по нажатию клавиши
-				Tooltip: Включите, чтобы в интерфейсах хранилища и создания обновлялся интерфейс после каждого нажатия клавиши, выключите, чтобы обновление происходило только при снятии выделения с строки поиска
-			}
-
-			uiFavorites: {
-				Label: '''[i:FallenStar]  Кнопка "Избранное" в фильтре'''
-				Tooltip: Включите, чтобы разрешить добавление предметов/рецептов в избранное в интерфейсе создания
-			}
-
-			recipeBlacklist: {
-				Label: Белый/черный список рецептов
-				Tooltip: Включите, чтобы разрешить добавление исключений в рецептах в интерфейсе создания
-			}
-
-			buttonLayout: {
-				Label: Расположение кнопок сортировки/фильтрации
-				Tooltip:
-					'''
-					Legacy:
-					  Заготовка v0.5.6.5 и предыдущих версий.
-					  Страницы сортировки и фильтрации отключены.
-					ModernPaged:
-					  Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
-					ModernConfigurable:
-					  Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
-					LegacyWithGear:
-					  Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
-					                              Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
-					                              Страницы сортировки и фильтрации отключены.
-					LegacyBasicWithPaged:
-					  Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
-					  Дополнительные значки находятся на страницах «Сортировка и фильтрация».
-					ModernDropdown:
-					  На главную страницу интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
-					  Страницы сортировки и фильтрации отключены.
-					'''
-			}
-
-			clearHistory: {
-				Label: "[i:Book]  Очистить историю рецептов"
-				Tooltip: Включите, чтобы история рецептов в интерфейсе модуля создания очищалась при его открытии.
-			}
-
-			canMovePanels: {
-				Label: Перемещение пользовательского интерфейса
-				Tooltip: Отключите, чтобы предотвратить перемещение и изменение размера панелей пользовательского интерфейса.
-			}
-
-			recursionDepth: {
-				Label: "[ОТКЛЮЧЕНО] Глубина рекурсии"
-				Tooltip:
-					'''
-					== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
-					Насколько глубокой будет рекурсия для рецептов создания в интерфейсе модуля создания.
-					Установите значение 0, чтобы отключить эту функцию.
-					Установите значение -1 для бесконечной глубины
-					'''
-			}
-
-			recursionMode: {
-				Label: "[ОТКЛЮЧЕНО] Режим рекурсии"
-				Tooltip:
-					'''
-					== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
-					Старая версия:
-					                              Логика приведена в соответствие с тем, как она работала в интеграции Recursive Craft. 
-					  То есть рекурсивные рецепты "объединяются" в один единственный рецепт.
-					  Упрощение за счет большего объема обработки.
-					Новая версия:
-					  Каждый подрецепт в рекурсивном рецепте обрабатывает свои ингредиенты и условия отдельно.
-					  Подрецепты можно менять местами в специальном пользовательском интерфейсе Crafting UI.
-					  Меньше необходимости в обработке и больше контроля за счет большей сложности.
-					'''
-			}
-
-			automatonRemembers: {
-				Label: Робот запоминает последнюю подсказку
-				Tooltip: Робот запомнит, какую подсказку он в последний раз показывал пользователю, и отобразит эту подсказку при взаимодействии с ней.
-			}
-
-			AllowAutomatonToMoveIn: {
-				Label: Жилье для робота
-				Tooltip: Включите, чтобы робот мог появиться в городе
 			}
 
 			PrintTextToChat: {
@@ -933,120 +801,156 @@ Mods: {
 			}
 		}
 
-		// "Keybinds.Print Item Data.DisplayName": Print  Item  Data
+		// Keybinds.PrintItemData.DisplayName: Print Item Data
 
 		Configs: {
 			MagicStorageConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.Label}"
+				DisplayName: Magic Storage конфигурация
 
 				quickStackDepositMode: {
-					// Label: "{$Mods.MagicStorage.Config.quickStackDepositMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip}"
+					Label: "[i:Chest]  Режим быстрой стопки"
+					Tooltip: Включите, чтобы быстро укладывать предметы с зажатой клавишей Control (Ctrl), выключите, чтобы быстро укладывать предметы с отпущенной клавишей Control (Ctrl)
 				}
 
 				useConfigFilter: {
-					// Label: "{$Mods.MagicStorage.Config.useConfigFilter.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useConfigFilter.Tooltip}"
+					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр"
+					Tooltip: Включите, чтобы использовать нижеуказанный фильтр, выключите, чтобы запомнить последний выбранный фильтр в игре (фильтр все равно используется при первом открытии после загрузки мода)
 				}
 
 				showAllRecipes: {
-					// Label: "{$Mods.MagicStorage.Config.showAllRecipes.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.showAllRecipes.Tooltip}"
+					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Стандартный фильтр рецептов"
+					Tooltip: Включите, чтобы использовать все рецепты по умолчанию, выключите, чтобы использовать только доступные рецепты по умолчанию
 				}
 
 				useOldCraftMenu: {
-					// Label: "{$Mods.MagicStorage.Config.useOldCraftMenu.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip}"
+					Label: "[i:WorkBench]  Использовать старое меню создания"
+					Tooltip: Включите, чтобы использовать старый интерфейс для модуля создания
 				}
 
 				recipeBlacklist: {
-					// Label: "{$Mods.MagicStorage.Config.recipeBlacklist.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recipeBlacklist.Tooltip}"
+					Label: Белый/черный список рецептов
+					Tooltip: Включите, чтобы разрешить добавление исключений в рецептах в интерфейсе создания
 				}
 
 				clearHistory: {
-					// Label: "{$Mods.MagicStorage.Config.clearHistory.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearHistory.Tooltip}"
+					Label: "[i:Book]  Очистить историю рецептов"
+					Tooltip: Включите, чтобы история рецептов в интерфейсе модуля создания очищалась при его открытии.
 				}
 
 				recursionDepth: {
-					// Label: "{$Mods.MagicStorage.Config.recursionDepth.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionDepth.Tooltip}"
+					Label: "[ОТКЛЮЧЕНО] Глубина рекурсии"
+					Tooltip:
+						'''
+						== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
+						Насколько глубокой будет рекурсия для рецептов создания в интерфейсе модуля создания.
+						Установите значение 0, чтобы отключить эту функцию.
+						Установите значение -1 для бесконечной глубины
+						'''
 				}
 
 				recursionMode: {
-					// Label: "{$Mods.MagicStorage.Config.recursionMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionMode.Tooltip}"
+					Label: "[ОТКЛЮЧЕНО] Режим рекурсии"
+					Tooltip:
+						'''
+						== ДО ЗАВЕРШЕНИЯ РАБОТЫ НАД ФУНКЦИЕЙ == ЭТА ОПЦИЯ КОНФИГУРАЦИИ ОТКЛЮЧЕНА.
+						Старая версия:
+						  Логика приведена в соответствие с тем, как она работала в интеграции Recursive Craft. 
+						  То есть рекурсивные рецепты "объединяются" в один единственный рецепт.
+						  Упрощение за счет большего объема обработки.
+						Новая версия:
+						  Каждый подрецепт в рекурсивном рецепте обрабатывает свои ингредиенты и условия отдельно.
+						  Подрецепты можно менять местами в специальном пользовательском интерфейсе Crafting UI.
+						  Меньше необходимости в обработке и больше контроля за счет большей сложности.
+						'''
 				}
 
 				glowNewItems: {
-					// Label: "{$Mods.MagicStorage.Config.glowNewItems.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.glowNewItems.Tooltip}"
+					Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Показывать новые предметы/рецепты"
+					Tooltip: Включает подсветку новых предметов в хранилище для обозначения их новизны
 				}
 
 				clearSearchText: {
-					// Label: "{$Mods.MagicStorage.Config.clearSearchText.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearSearchText.Tooltip}"
+					Label: Очищать текст поиска
+					Tooltip: Включите, чтобы очистить текст поиска при открытии интерфейса
 				}
 
 				searchBarRefreshOnKey: {
-					// Label: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip}"
+					Label: Обновление строки поиска по нажатию клавиши
+					Tooltip: Включите, чтобы в интерфейсах хранилища и создания обновлялся интерфейс после каждого нажатия клавиши, выключите, чтобы обновление происходило только при снятии выделения с строки поиска
 				}
 
 				uiFavorites: {
-					// Label: "{$Mods.MagicStorage.Config.uiFavorites.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.uiFavorites.Tooltip}"
+					Label: '''[i:FallenStar]  Кнопка "Избранное" в фильтре'''
+					Tooltip: Включите, чтобы разрешить добавление предметов/рецептов в избранное в интерфейсе создания
 				}
 
 				extraFilterIcons: {
-					// Label: "{$Mods.MagicStorage.Config.extraFilterIcons.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.extraFilterIcons.Tooltip}"
+					Label: "[i:Cog]  Показывать дополнительные значки сортировки"
+					Tooltip: Включите, чтобы использовать дополнительные варианты сортировки в интерфейсе с классическим расположением кнопок
 				}
 
 				buttonLayout: {
-					// Label: "{$Mods.MagicStorage.Config.buttonLayout.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.buttonLayout.Tooltip}"
+					Label: Расположение кнопок сортировки/фильтрации
+					Tooltip:
+						'''
+						Legacy:
+						  Заготовка v0.5.6.5 и предыдущих версий.
+						  Страницы сортировки и фильтрации отключены.
+						ModernPaged:
+						  Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
+						ModernConfigurable:
+						  Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
+						LegacyWithGear:
+						  Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
+						  Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
+						  Страницы сортировки и фильтрации отключены.
+						LegacyBasicWithPaged:
+						  Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
+						  Дополнительные значки находятся на страницах «Сортировка и фильтрация».
+						ModernDropdown:
+						  На главную страницу интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
+						  Страницы сортировки и фильтрации отключены.
+						'''
 				}
 
 				itemDataDebug: {
-					// Label: "{$Mods.MagicStorage.Config.allowItemDataDebug.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip}"
+					Label: "[i:IronPickaxe]  Отладочная информация предметов"
+					Tooltip: Включите, чтобы в интерфейсе хранилища отображались сведения о наличии данных предмета и разрешить клавишу "Print Item Data" для вывода данных
 				}
 
 				canMovePanels: {
-					// Label: "{$Mods.MagicStorage.Config.canMovePanels.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.canMovePanels.Tooltip}"
+					Label: Перемещение пользовательского интерфейса
+					Tooltip: Отключите, чтобы предотвратить перемещение и изменение размера панелей пользовательского интерфейса.
 				}
 
 				automatonRemembers: {
-					// Label: "{$Mods.MagicStorage.Config.automatonRemembers.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.automatonRemembers.Tooltip}"
+					Label: Робот запоминает последнюю подсказку
+					Tooltip: Робот запомнит, какую подсказку он в последний раз показывал пользователю, и отобразит эту подсказку при взаимодействии с ней.
 				}
 			}
 
 			RecursionMode: {
 				// Tooltip: ""
-				// Legacy.Label: Legacy
+				// Legacy.Label: RecursiveCraft-like
 				// Modern.Label: Modern
 			}
 
 			ButtonConfigurationMode: {
 				// Tooltip: ""
 				// Legacy.Label: Legacy
-				// ModernPaged.Label: Modern Paged
-				// ModernConfigurable.Label: Modern Configurable
-				// LegacyWithGear.Label: Legacy With Gear
-				// LegacyBasicWithPaged.Label: Legacy Basic With Paged
-				// ModernDropdown.Label: Modern Dropdown
+				// ModernPaged.Label: Paged
+				// ModernConfigurable.Label: Configurable
+				// LegacyWithGear.Label: Legacy + Configurable
+				// LegacyBasicWithPaged.Label: Legacy + Paged
+				// ModernDropdown.Label: Dropdown
 			}
 
 			MagicStorageServerConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.ServersideLabel}"
+				DisplayName: Magic Storage конфигурация сервера
 
 				allowAutomatonToMoveIn: {
-					// Label: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip}"
+					Label: Жилье для робота
+					Tooltip: Включите, чтобы робот мог появиться в городе
 				}
 			}
 		}

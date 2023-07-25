@@ -1,7 +1,6 @@
 # I recommend using the hjson key to translate all future text additions
 # Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
 # -Crapsky233
-// TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} is such an interesting machine, how does it move?"
 
 Mods: {
 	MagicStorage: {
@@ -26,7 +25,11 @@ Mods: {
 
 			CreativeStorageUnit: {
 				DisplayName: Unidad de Almacenamiento Creativa
-				// Tooltip: ""
+				/* Tooltip:
+					'''
+					Stores an unlimited amount of every item type.
+					Does not count toward storage limits when in a storage system.
+					''' */
 			}
 
 			Locator: {
@@ -437,8 +440,6 @@ Mods: {
 			// StorageConnector.MapEntry: "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			// StorageHeart.MapEntry: "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			// StorageUnit.MapEntry: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			// CrimsonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			// DemonAltar.MapEntry: "{$Mods.MagicStorage.ItemName.DemonAltar}"
 			// CombinedFurnitureStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
 			// CombinedFurnitureStations2Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
 			// CombinedStations1Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
@@ -446,7 +447,7 @@ Mods: {
 			// CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
 			// CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
 			// EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
-			// EvilAltarTile.MapEntry: Mods.MagicStorage.MapObject.EvilAltarTile
+			// EvilAltarTile.MapEntry: Evil Altar
 		}
 
 		/* Bestiary.Golem:
@@ -771,8 +772,6 @@ Mods: {
 		}
 
 		Config: {
-			// Label: Magic Storage Config
-			// ServersideLabel: Magic Storage Server Config
 			// BetaLabel: Magic Storage BETA Config
 
 			Headers: {
@@ -780,137 +779,6 @@ Mods: {
 				// Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
 				// StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
 				// General: General Configs
-			}
-
-			glowNewItems: {
-				// Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
-				// Tooltip: Toggles whether new items in the storage will glow to indicate they're new
-			}
-
-			useConfigFilter: {
-				// Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
-				// Tooltip: Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)
-			}
-
-			showAllRecipes: {
-				// Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
-				// Tooltip: Enable to default to all recipes, disable to default to available recipes
-			}
-
-			quickStackDepositMode: {
-				// Label: "[i:Chest]  Quick stack deposit mode"
-				// Tooltip: Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released
-			}
-
-			clearSearchText: {
-				// Label: Clear search text
-				// Tooltip: Enable to clear the search text when opening the UI
-			}
-
-			extraFilterIcons: {
-				// Label: "[i:Cog]  Display extra sorting icons"
-				// Tooltip: Enable to have the extra sorting options available in the Legacy button layout
-			}
-
-			showDps: {
-				// Label: Estimate the dps of weapons
-				// Tooltip: Enable to show a tooltip with the estimated dps of the item
-			}
-
-			useOldCraftMenu: {
-				// Label: "[i:WorkBench]  Use old Craft buttons"
-				// Tooltip: Enable to use the older UI for crafting in the Crafting GUI
-			}
-
-			allowItemDataDebug: {
-				// Label: "[i:IronPickaxe]  Item debug information"
-				// Tooltip: Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the "Print Item Data" keybinding to print data
-			}
-
-			searchBarRefreshOnKey: {
-				// Label: Search Bar Refreshes on Key Press
-				// Tooltip: Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected
-			}
-
-			uiFavorites: {
-				// Label: "[i:FallenStar]  Favorites Filter Button"
-				// Tooltip: Enable to allow favoriting items/recipes in the Crafting GUI
-			}
-
-			recipeBlacklist: {
-				// Label: Recipe Whitelist/Blacklist
-				// Tooltip: Enable to allow whitelisting and blacklisting recipes in the Crafting GUI
-			}
-
-			buttonLayout: {
-				// Label: Sorting/Filtering Button Layout
-				/* Tooltip:
-					'''
-					Legacy:
-					  Layout from v0.5.6.5 and previous versions.
-					  The Sorting and Filtering pages are disabled.
-					ModernPaged:
-					  Sorting and filtering options moved to the Sorting and Filtering pages.
-					ModernConfigurable:
-					  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
-					LegacyWithGear:
-					  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-					  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
-					  The Sorting and Filtering pages are disabled.
-					LegacyBasicWithPaged:
-					  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-					  Additional icons are in the Sorting and Filtering pages.
-					ModernDropdown:
-					  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
-					  The Sorting and Filtering pages are disabled.
-					''' */
-			}
-
-			clearHistory: {
-				// Label: "[i:Book]  Clear recipe history"
-				// Tooltip: Enable to clear the recipe history in the Crafting GUI when opening it
-			}
-
-			canMovePanels: {
-				// Label: UI Panel Movement
-				// Tooltip: Disable to prevent moving and resizing the UI panels
-			}
-
-			recursionDepth: {
-				// Label: "[DISABLED] Recipe Recursion Depth"
-				/* Tooltip:
-					'''
-					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-					How deep the recursion goes for crafting recipes in the Crafting UI.
-					Set to 0 to disable this feature.
-					Set to -1 for infinite depth
-					''' */
-			}
-
-			recursionMode: {
-				// Label: "[DISABLED] Recipe Recursion Mode"
-				/* Tooltip:
-					'''
-					== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-					Legacy:
-					  Logic is kept in line with how it worked in the Recursive Craft integration.
-					  That is, recursive recipes are "combined" into one singular recipe.
-					  Simplicity at the cost of more processing required and less control.
-					Modern:
-					  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
-					  Sub-recipes can be swapped out in a special UI in the Crafting UI.
-					  Less processing required and more control at the cost of more complexity.
-					''' */
-			}
-
-			automatonRemembers: {
-				// Label: Automaton remembers last help tip
-				// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
-			}
-
-			AllowAutomatonToMoveIn: {
-				// Label: Automaton Housing
-				// Tooltip: Enable to allow the Automaton to be able to move into housing
 			}
 
 			PrintTextToChat: {
@@ -932,120 +800,156 @@ Mods: {
 			}
 		}
 
-		// "Keybinds.Print Item Data.DisplayName": Print  Item  Data
+		// Keybinds.PrintItemData.DisplayName: Print Item Data
 
 		Configs: {
 			MagicStorageConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.Label}"
+				// DisplayName: Magic Storage Config
 
 				quickStackDepositMode: {
-					// Label: "{$Mods.MagicStorage.Config.quickStackDepositMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.quickStackDepositMode.Tooltip}"
+					// Label: "[i:Chest]  Quick stack deposit mode"
+					// Tooltip: Enable to quick stack with control(ctrl) pressed, disable to quick stack with control(ctrl) released
 				}
 
 				useConfigFilter: {
-					// Label: "{$Mods.MagicStorage.Config.useConfigFilter.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useConfigFilter.Tooltip}"
+					// Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Use default filter"
+					// Tooltip: Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)
 				}
 
 				showAllRecipes: {
-					// Label: "{$Mods.MagicStorage.Config.showAllRecipes.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.showAllRecipes.Tooltip}"
+					// Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Default recipe filter"
+					// Tooltip: Enable to default to all recipes, disable to default to available recipes
 				}
 
 				useOldCraftMenu: {
-					// Label: "{$Mods.MagicStorage.Config.useOldCraftMenu.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.useOldCraftMenu.Tooltip}"
+					// Label: "[i:WorkBench]  Use old Craft buttons"
+					// Tooltip: Enable to use the older UI for crafting in the Crafting GUI
 				}
 
 				recipeBlacklist: {
-					// Label: "{$Mods.MagicStorage.Config.recipeBlacklist.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recipeBlacklist.Tooltip}"
+					// Label: Recipe Whitelist/Blacklist
+					// Tooltip: Enable to allow whitelisting and blacklisting recipes in the Crafting GUI
 				}
 
 				clearHistory: {
-					// Label: "{$Mods.MagicStorage.Config.clearHistory.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearHistory.Tooltip}"
+					// Label: "[i:Book]  Clear recipe history"
+					// Tooltip: Enable to clear the recipe history in the Crafting GUI when opening it
 				}
 
 				recursionDepth: {
-					// Label: "{$Mods.MagicStorage.Config.recursionDepth.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionDepth.Tooltip}"
+					// Label: "[DISABLED] Recipe Recursion Depth"
+					/* Tooltip:
+						'''
+						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+						How deep the recursion goes for crafting recipes in the Crafting UI.
+						Set to 0 to disable this feature.
+						Set to -1 for infinite depth
+						''' */
 				}
 
 				recursionMode: {
-					// Label: "{$Mods.MagicStorage.Config.recursionMode.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.recursionMode.Tooltip}"
+					// Label: "[DISABLED] Recipe Recursion Mode"
+					/* Tooltip:
+						'''
+						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
+						Legacy:
+						  Logic is kept in line with how it worked in the Recursive Craft integration.
+						  That is, recursive recipes are "combined" into one singular recipe.
+						  Simplicity at the cost of more processing required and less control.
+						Modern:
+						  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
+						  Sub-recipes can be swapped out in a special UI in the Crafting UI.
+						  Less processing required and more control at the cost of more complexity.
+						''' */
 				}
 
 				glowNewItems: {
-					// Label: "{$Mods.MagicStorage.Config.glowNewItems.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.glowNewItems.Tooltip}"
+					// Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
+					// Tooltip: Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)
 				}
 
 				clearSearchText: {
-					// Label: "{$Mods.MagicStorage.Config.clearSearchText.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.clearSearchText.Tooltip}"
+					// Label: Clear search text
+					// Tooltip: Enable to clear the search text when opening the UI
 				}
 
 				searchBarRefreshOnKey: {
-					// Label: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.searchBarRefreshOnKey.Tooltip}"
+					// Label: Search Bar Refreshes on Key Press
+					// Tooltip: Enable to make the search bar in the Storage and Crafting GUIs refresh the GUI on every key pressed, disable to make the refresh only happen when the search bar is deselected
 				}
 
 				uiFavorites: {
-					// Label: "{$Mods.MagicStorage.Config.uiFavorites.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.uiFavorites.Tooltip}"
+					// Label: "[i:FallenStar]  Favorites Filter Button"
+					// Tooltip: Enable to allow favoriting items/recipes in the Crafting GUI
 				}
 
 				extraFilterIcons: {
-					// Label: "{$Mods.MagicStorage.Config.extraFilterIcons.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.extraFilterIcons.Tooltip}"
+					// Label: "[i:Cog]  Display extra sorting icons"
+					// Tooltip: Enable to have the extra sorting options available in the Legacy button layout
 				}
 
 				buttonLayout: {
-					// Label: "{$Mods.MagicStorage.Config.buttonLayout.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.buttonLayout.Tooltip}"
+					// Label: Sorting/Filtering Button Layout
+					/* Tooltip:
+						'''
+						Legacy:
+						  Layout from v0.5.6.5 and previous versions.
+						  The Sorting and Filtering pages are disabled.
+						Paged:
+						  Sorting and filtering options moved to the Sorting and Filtering pages.
+						Configurable:
+						  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+						Legacy + Configurable:
+						  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+						  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
+						  The Sorting and Filtering pages are disabled.
+						Legacy + Paged:
+						  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+						  Additional icons are in the Sorting and Filtering pages.
+						Dropdown:
+						  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
+						  The Sorting and Filtering pages are disabled.
+						''' */
 				}
 
 				itemDataDebug: {
-					// Label: "{$Mods.MagicStorage.Config.allowItemDataDebug.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.allowItemDataDebug.Tooltip}"
+					// Label: "[i:IronPickaxe]  Item debug information"
+					// Tooltip: Enable to make items in the Storage GUI display whether they have GlobalItem data and allow the "Print Item Data" keybinding to print data
 				}
 
 				canMovePanels: {
-					// Label: "{$Mods.MagicStorage.Config.canMovePanels.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.canMovePanels.Tooltip}"
+					// Label: UI Panel Movement
+					// Tooltip: Disable to prevent moving and resizing the UI panels
 				}
 
 				automatonRemembers: {
-					// Label: "{$Mods.MagicStorage.Config.automatonRemembers.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.automatonRemembers.Tooltip}"
+					// Label: Automaton remembers last help tip
+					// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
 				}
 			}
 
 			RecursionMode: {
 				// Tooltip: ""
-				// Legacy.Label: Legacy
+				// Legacy.Label: RecursiveCraft-like
 				// Modern.Label: Modern
 			}
 
 			ButtonConfigurationMode: {
 				// Tooltip: ""
 				// Legacy.Label: Legacy
-				// ModernPaged.Label: Modern Paged
-				// ModernConfigurable.Label: Modern Configurable
-				// LegacyWithGear.Label: Legacy With Gear
-				// LegacyBasicWithPaged.Label: Legacy Basic With Paged
-				// ModernDropdown.Label: Modern Dropdown
+				// ModernPaged.Label: Paged
+				// ModernConfigurable.Label: Configurable
+				// LegacyWithGear.Label: Legacy + Configurable
+				// LegacyBasicWithPaged.Label: Legacy + Paged
+				// ModernDropdown.Label: Dropdown
 			}
 
 			MagicStorageServerConfig: {
-				// DisplayName: "{$Mods.MagicStorage.Config.ServersideLabel}"
+				// DisplayName: Magic Storage Server Config
 
 				allowAutomatonToMoveIn: {
-					// Label: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Label}"
-					// Tooltip: "{$Mods.MagicStorage.Config.AllowAutomatonToMoveIn.Tooltip}"
+					// Label: Automaton Housing
+					// Tooltip: Enable to allow the Automaton to be able to move into housing
 				}
 			}
 		}
