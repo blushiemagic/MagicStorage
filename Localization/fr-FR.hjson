@@ -186,6 +186,27 @@ Mods: {
 			}
 		}
 
+		MapObject: {
+			CraftingAccess: "{$Mods.MagicStorage.ItemName.CraftingAccess}"
+			CreativeStorageUnit: "{$Mods.MagicStorage.ItemName.CreativeStorageUnit}"
+			RemoteAccess: "{$Mods.MagicStorage.ItemName.RemoteAccess}"
+			StorageAccess: "{$Mods.MagicStorage.ItemName.StorageAccess}"
+			StorageComponent: "{$Mods.MagicStorage.ItemName.StorageComponent}"
+			StorageConnector: "{$Mods.MagicStorage.ItemName.StorageConnector}"
+			StorageHeart: "{$Mods.MagicStorage.ItemName.StorageHeart}"
+			StorageUnit: "{$Mods.MagicStorage.ItemName.StorageUnit}"
+			CrimsonAltar: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
+			DemonAltar: "{$Mods.MagicStorage.ItemName.DemonAltar}"
+			CombinedFurnitureStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
+			CombinedFurnitureStations2Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
+			CombinedStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
+			CombinedStations2Tile: "{$Mods.MagicStorage.ItemName.CombinedStations2Item}"
+			CombinedStations3Tile: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
+			CombinedStations4Tile: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			EnvironmentAccess: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+			// EvilAltar: ""
+		}
+
 		Bestiary: {
 			// Golem: ""
 		}

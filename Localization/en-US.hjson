@@ -336,6 +336,7 @@ Mods: {
 			CombinedStations3Tile: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
 			CombinedStations4Tile: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
 			EnvironmentAccess: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+			EvilAltar: Evil Altar
 		}
 
 		Bestiary: {

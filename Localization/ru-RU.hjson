@@ -329,8 +329,6 @@ Mods: {
 			StorageConnector: "{$Mods.MagicStorage.ItemName.StorageConnector}"
 			StorageHeart: "{$Mods.MagicStorage.ItemName.StorageHeart}"
 			StorageUnit: "{$Mods.MagicStorage.ItemName.StorageUnit}"
-			CrimsonAltar: "{$Mods.MagicStorage.ItemName.CrimsonAltar}"
-			DemonAltar: "{$Mods.MagicStorage.ItemName.DemonAltar}"
 			CombinedFurnitureStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations1Item}"
 			CombinedFurnitureStations2Tile: "{$Mods.MagicStorage.ItemName.CombinedFurnitureStations2Item}"
 			CombinedStations1Tile: "{$Mods.MagicStorage.ItemName.CombinedStations1Item}"
@@ -338,6 +336,7 @@ Mods: {
 			CombinedStations3Tile: "{$Mods.MagicStorage.ItemName.CombinedStations3Item}"
 			CombinedStations4Tile: "{$Mods.MagicStorage.ItemName.CombinedStations4Item}"
 			EnvironmentAccess: "{$Mods.MagicStorage.ItemName.EnvironmentAccess}"
+			// EvilAltar: ""
 		}
 
 		Bestiary: {
