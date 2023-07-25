@@ -61,9 +61,9 @@ namespace MagicStorage.Components
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
 
-				Utility.ConvertToGPSCoordinates(new Point16(i, j), out int compassCoordinate, out int depthCoordinate);
+				Utility.ConvertToGPSCoordinates(new Point16(i, j).ToWorldCoordinates(), out string compassText, out string depthText);
 
-				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", compassCoordinate, depthCoordinate));
+				Main.NewText(Language.GetTextValue("Mods.MagicStorage.LocatorSet", compassText, depthText));
 				return true;
 			}
 
