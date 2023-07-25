@@ -232,12 +232,17 @@ namespace MagicStorage
 		}
 
 		internal static void ClampCraftAmount() {
-			if (craftAmountTarget < 1)
+			if (craftAmountTarget < 1) 
 				craftAmountTarget = 1;
-			else if (!IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe))
+			else if (!IsAvailable(selectedRecipe, false) || !PassesBlock(selectedRecipe)) 
 				craftAmountTarget = 1;
 			else if (craftAmountTarget > selectedRecipe.createItem.maxStack)
-				craftAmountTarget = selectedRecipe.createItem.maxStack;
+			{ 
+				int amountCraftable = AmountCraftable(selectedRecipe); 
+				craftAmountTarget = amountCraftable < selectedRecipe.createItem.maxStack 
+					? amountCraftable
+					: selectedRecipe.createItem.maxStack;
+			}
 		}
 
 		internal static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
