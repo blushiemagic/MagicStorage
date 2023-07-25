@@ -1,7 +1,7 @@
 # I recommend using the hjson key to translate all future text additions
 # Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
 # -Crapsky233
-TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "{NPCName} - такой классный робот, интересно , как он двигается?"
+TownNPCMood_Princess.LoveNPC_MagicStorage/Golem: "Ох, {NPCName} - это настоящее чудо техники! Любопытно узнать, какой механизм позволяет ему так изящно передвигаться."
 
 Mods: {
 	MagicStorage: {
@@ -12,7 +12,7 @@ Mods: {
 			Locator: Локатор
 			LocatorDisk: Локатор с CD Приводом
 			PortableAccess: Портативный удаленный доступ к хранилищу (Эпический)
-			PortableCraftingAccess: Портативный удаленный доступ к созданию предметов
+			PortableCraftingAccess: Портативный удаленный доступ к созданию предметов (Эпический)
 			RadiantJewel: Сияющая драгоценность
 			RemoteAccess: Модуль удаленного доступа к хранилищу
 			ShadowDiamond: Теневой алмаз
@@ -53,8 +53,8 @@ Mods: {
 			Config_GlowItemNotGlowing: "Config//GlowItemNotGlowing"
 			Config_RecipeFilterAvailable: "Config//RecipeFilterAvailable"
 			Config_RecipeFilterAll: "Config//RecipeFilterAll"
-			// PortableCraftingAccessPreHM: ""
-			// PortableCraftingAccessHM: ""
+                        PortableCraftingAccessPreHM: "Портативный удаленный доступ к созданию предметов (Необычный)"
+			PortableCraftingAccessHM: "Портативный удаленный доступ к созданию предметов (Эпический)"
 		}
 
 		ItemTooltip: {
@@ -262,8 +262,20 @@ Mods: {
 			Используйте предмет, чтобы получить удаленный доступ к хранилищу
 			Имеет большой диапозон доступа
 			'''
-			// PortableCraftingAccessPreHM: ""
-			// PortableCraftingAccessHM: ""
+			PortableCraftingAccessPreHM:
+			'''
+			<right> по модулю создания предметов, чтобы запомнить его местоположение
+			В данный момент местоположение не установлено
+			Используйте предмет, чтобы получить удаленный доступ к созданию предметов
+			Имеет маленький диапозон доступа 
+			'''
+			PortableCraftingAccessHM:
+			'''
+			<right> по модулю создания предметов, чтобы запомнить его местоположение
+			В данный момент местоположение не установлено
+			Используйте предмет, чтобы получить удаленный доступ к созданию предметов
+			Имеет большой диапозон доступа
+			'''
 		}
 
 		ProjectileName: {
@@ -287,19 +299,19 @@ Mods: {
 		TownNPCMood: {
 			Golem: {
 				Content: Система находится в рабочем состоянии.
-				NoHome: Воздействие элементов ускоряет процесс ржавления, требую немедленной доставки домой.
+				NoHome: Воздействие элементов ускоряет процесс ржавления, требуется немедленная доставка домой.
 				LoveSpace: Приемлемые условия для проживания.
-				FarFromHome: Это устройство должно вернуться домой, чтобы как можно скорее зарядить свой конденсатор.
-				DislikeCrowded: Слишком много особей обнаружено в непосредственной близости.
-				HateCrowded: Этот NPC предпочитает быть более уединенным.
-				LikeBiome: "Нравится {BiomeName}."
-				LoveBiome: "Обожаю {BiomeName}."
-				DislikeBiome: "Не нравится {BiomeName}."
-				HateBiome: "Ненавижу {BiomeName}."
-				LikeNPC: "{NPCName} нравится."
-				LoveNPC: "Обожаю {NPCName}."
-				DislikeNPC: "Не нравится {NPCName}."
-				HateNPC: "{NPCName} ненавижу."
+				FarFromHome: Устройство должно вернуться домой, чтобы как можно скорее зарядить свой конденсатор.
+				DislikeCrowded: Обнаружено слишком много людей в непосредственной близости.
+				HateCrowded: Устройство предпочитает быть более уединенным.
+				LikeBiome: "{BiomeName} гармонирует с устройством."
+				LoveBiome: "{BiomeName} идеально подходит для проявления силы устройства."
+				DislikeBiome: "Эффективность устройства снижается в {BiomeName}."
+				HateBiome: "Устройство становится нестабильным в {BiomeName}."
+				LikeNPC: "{NPCName} ценит силу устройства."
+				LoveNPC: "Устройство не против, если {NPCName} осмотрит его шестеренки."
+				DislikeNPC: "Устройству не нравится {NPCName}."
+				HateNPC: "{NPCName} должен понять, что устройство нельзя использовать ради прибыли."
 				LikeNPC_Princess: "{NPCName} - лучший друг моего создателя."
 			}
 		}
@@ -460,12 +472,12 @@ Mods: {
 				Help20_Mechs:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20}
-				[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+				[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
 				'''
 				Help20_Moon:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
 				'''
 				Help21:
@@ -513,7 +525,7 @@ Mods: {
 		StorageAccessFailAlt: "Удалённый доступ хранилища не подключен к сердцу хранилища!"
 		StorageAccessFailLoad: "Сердце хранилища не загружено! Пожалуйста, попробуйте снова."
 
-		TestItemSuffix: " !ДО ВОЗРОЖДЕНИЯ!"
+		TestItemSuffix: " !ДО ВОССТАНОВЛЕНИЯ!"
 		SetTo: "Set to: X={0}, Y={1}"
 		SnowBiomeBlock: "Блок снежного биома"
 		DepositAll: "Положить все"
@@ -564,8 +576,8 @@ Mods: {
 
 		PanelTooSmol:
 		'''
-		Не удается открыть пользовательский интерфейс Magic Storage.Причина: Высота панели была слишком мала для правильного отображения элементов пользовательского интерфейса.
-		Пожалуйста, уменьшите масштаб вашего пользовательского интерфейса в настройках или увеличьте разрешение игры в настройках видео.
+		Не удается открыть интерфейс MagicStorage. Причина: Высота панели была слишком мала для правильного отображения элементов интерфейса.
+		Пожалуйста, уменьшите масштаб вашего интерфейса в конфигурации MagicStorage или увеличьте разрешение игры в настройках графики.
 		'''
 
 		Warnings: {
@@ -609,7 +621,7 @@ Mods: {
 			'''
 			{$RecipeConditions.InGraveyardBiome} / Стоя рядом с {$Mods.MagicStorage.ItemName.CombinedStations4Item}
 			'''
-			CookedMarshmallowCondition: "Биом в шаре в модуле создания предметов"
+			CookedMarshmallowCondition: "Биом в шаре в интерфейсе создания предметов"
 		}
 
 		DepositTooltip: "Положить - клик, Положить все - ctrl+клик, Пополнить запасы - ПКМ"
@@ -702,9 +714,9 @@ Mods: {
 		}
 
 		Config: {
-			Label: "Magic Storage конфигурация"
-			ServersideLabel: "Magic Storage конфигурация сервера"
-			BetaLabel: "Magic Storage BETA конфигурация"
+			Label: "MagicStorage конфигурация"
+			ServersideLabel: "MagicStorage конфигурация сервера"
+			BetaLabel: "MagicStorage BETA конфигурация"
 
 			Headers: {
 				Storage: "[i:MagicStorage/StorageHeart]  Конфигурация интерфейса хранилища"
@@ -738,7 +750,7 @@ Mods: {
 				Tooltip: "Включите, чтобы использовать дополнительные варианты сортировки в интерфейсе с классическим расположением кнопок"
 			}
 			showDps: {
-				Label: "Оценивать урон оружия в секунду (DPS)"
+				Label: "Показывать урон оружия в секунду (DPS)"
 				Tooltip:  "Включите, чтобы отображать подсказку с оценкой урона оружия"
 			}
 			useOldCraftMenu: {
@@ -766,18 +778,18 @@ Mods: {
 				Tooltip:
 				'''
 				Legacy:
-				  Заготовка v0.5.6.5 и предыдущих версий.
+				  Макет с версии v0.5.6.5 и предыдущих версий.
 				  Страницы сортировки и фильтрации отключены.
 				ModernPaged:
 				  Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
 				ModernConfigurable:
 				  Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
 				LegacyWithGear:
-				  Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
+				  Макет с версии v0.5.6.5 и предыдущих версий, если была отключена опция "Отображать дополнительные значки сортировки".
                                   Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
                                   Страницы сортировки и фильтрации отключены.
 				LegacyBasicWithPaged:
-				  Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
+				  Макет с версии v0.5.6.5 и предыдущие версии, если была отключена опция «Отображать дополнительные значки сортировки».
 				  Дополнительные значки находятся на страницах «Сортировка и фильтрация».
 				ModernDropdown:
 				  На главную страницу интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
