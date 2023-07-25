@@ -52,9 +52,9 @@ namespace MagicStorage.Items
 			} else {
 				int index = lines.FindIndex(static line => line.Mod == "Terraria" && line.Name == "Tooltip0");
 				if (index >= 0) {
-					Utility.ConvertToGPSCoordinates(location.ToWorldCoordinates(), out int compassCoordinate, out int depthCoordinate);
+					Utility.ConvertToGPSCoordinates(location.ToWorldCoordinates(), out string compassText, out string depthText);
 
-					lines[index].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", compassCoordinate, depthCoordinate);
+					lines[index].Text = Language.GetTextValue("Mods.MagicStorage.SetTo", compassText, depthText);
 				}
 			}
 		}
