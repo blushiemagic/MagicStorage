@@ -72,7 +72,6 @@ namespace MagicStorage.UI.States {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 			float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 			float smallSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.SmallScale;
-			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
 
 			panel.OnRecalculate += MoveRecipePanel;
 
@@ -99,7 +98,18 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(ingredientText);
 
 			recipeHeaderZone = new(CraftingGUI.SmallScale);
+			recipeHeaderZone.InitializeSlot += static (slot, scale) => {
+				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					IgnoreClicks = true  // Purely visual
+				};
+
+				return itemSlot;
+			};
+
 			recipeHeaderZone.SetDimensions(1, 1);
+
+			recipeHeaderZone.Width.Set(recipeHeaderZone.ZoneWidth, 0);
+			recipeHeaderZone.Height.Set(recipeHeaderZone.ZoneHeight, 0);
 			recipePanel.Append(recipeHeaderZone);
 
 			ingredientZone = new(CraftingGUI.SmallScale);
@@ -367,6 +377,7 @@ namespace MagicStorage.UI.States {
 			recipePanel.Top.Set(recipeTop, 0f);
 
 			recipeHeight = panel.Height.Pixels;
+			recipePanel.Height.Set(recipeHeight, 0);
 			
 			recipeHistory.Left.Set(-recipeHistory.Width.Pixels, 1f);
 
