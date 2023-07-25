@@ -32,7 +32,7 @@ Mods: {
 			StorageUnitTerra: Терра ячейка хранилища
 			StorageUnitTiny: Малая ячейка хранилища
 			UpgradeBlueChlorophyte: Синее хлорофитовое улучшение ячейки хранилища
-			UpgradeCrimtane: Багротановая улучшение ячейки хранилища
+			UpgradeCrimtane: Багротановое улучшение ячейки хранилища
 			UpgradeDemonite: Демонитовое улучшение ячейки хранилища
 			UpgradeHallowed: Святое улучшение ячейки хранилища
 			UpgradeHellstone: Адское улучшение ячейки хранилища
@@ -695,7 +695,7 @@ Mods: {
 		}
 
 		SortingOption: {
-			Default: "Стандартная сортировка"
+			Default: "Сортировка по умолчанию"
 			ID: "Сортировка по ID"
 			Name: "Сортировка по имени"
 			Value: "Сортировка по значению"
