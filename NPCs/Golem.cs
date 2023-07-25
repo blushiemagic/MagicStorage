@@ -136,7 +136,9 @@ namespace MagicStorage.NPCs {
 				"557-CLD",  //FF7 Cloud
 				"191-SNC",  //Sonic
 				"183-MIO",  //Mario
-				"109-JTR"   //Jethro, my cat -- absoluteAquarian
+				"109-JTR",  //Jethro, my cat -- absoluteAquarian
+				"805-WLE",  //WALL-E
+				"113-ATO",  //AUTO
 			};
 
 		public override string GetChat() {
@@ -152,6 +154,12 @@ namespace MagicStorage.NPCs {
 			chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Greeting", Main.LocalPlayer.name), 8);
 			chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Bluemagic"), 2);
 			chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.NotLihzahrd"));
+			chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Violence", Main.LocalPlayer.name), 5);
+
+			if (NPC.GivenName == "805-WLE")
+				chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.NoPlant"), 0.5);
+			else if (NPC.GivenName == "113-ATO")
+				chat.Add(Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.NeedPlant", Main.LocalPlayer.name), 0.5);
 
 			int wizard = NPC.FindFirstNPC(NPCID.Wizard);
 			if (wizard >= 0)
