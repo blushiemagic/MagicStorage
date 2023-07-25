@@ -217,6 +217,7 @@ namespace MagicStorage
 
 				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calulated Recipe array being empty
 				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
+				StorageGUI.SetRefresh();
 				SoundEngine.PlaySound(SoundID.Grab);
 			}
 
@@ -225,6 +226,9 @@ namespace MagicStorage
 		}
 
 		internal static void ClickAmountButton(int amount, bool offset) {
+			if (StorageGUI.CurrentlyRefreshing)
+				return;  // Do not read anything until refreshing is completed
+
 			if (offset && (amount == 1 || craftAmountTarget > 1))
 				craftAmountTarget += amount;
 			else

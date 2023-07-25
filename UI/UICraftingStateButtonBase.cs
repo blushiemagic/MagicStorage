@@ -9,6 +9,9 @@ namespace MagicStorage.UI {
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 
+			if (StorageGUI.CurrentlyRefreshing)
+				return;  // Do not read anything until refreshing is completed
+
 			if (CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe)) {
 				if (IsMouseHovering) {
 					OnHoveringAndValidRecipe(gameTime);
