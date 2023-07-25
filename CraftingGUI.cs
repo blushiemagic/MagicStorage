@@ -94,15 +94,7 @@ namespace MagicStorage
 
 		internal static Item GetHeader(int slot, ref int context)
 		{
-			if (selectedRecipe == null)
-				return new Item();
-
-			// TODO: Can we simply return `selectedRecipe.createItem`
-			Item item = selectedRecipe.createItem;
-			if (item.IsAir)
-				item = new Item(item.type, 0);
-
-			return item;
+			return selectedRecipe?.createItem ?? new Item();
 		}
 
 		internal static Item GetIngredient(int slot, ref int context)
