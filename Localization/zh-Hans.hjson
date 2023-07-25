@@ -371,10 +371,11 @@ Mods: {
 				// DisplayName: Basic Portable Remote Crafting Access
 				/* Tooltip:
 					'''
-					<right> Crafting Access to store location
+					<right> Crafting Interface to store location
 					Currently not set to any location
 					Use item to access your crafting
-					Has a small access range
+					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
+					Player must be at most 1000' away from the linked Interface or pylon to access crafting
 					''' */
 			}
 
@@ -382,10 +383,11 @@ Mods: {
 				// DisplayName: Advanced Portable Remote Crafting Access
 				/* Tooltip:
 					'''
-					<right> Crafting Access to store location
+					<right> Crafting Interface to store location
 					Currently not set to any location
 					Use item to access your crafting
-					Has a large access range
+					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
+					Player must be at most 1000' away from the linked Interface or pylon to access crafting
 					''' */
 			}
 		}
