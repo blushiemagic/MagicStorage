@@ -87,7 +87,7 @@ Mods: {
 			'''
 			PortableCraftingAccess:
 			'''
-			<right> Crafting Access to store location
+			<right> Crafting Interface to store location
 			Currently not set to any location
 			Use item to access your crafting
 			Has an unlimited access range
@@ -251,28 +251,32 @@ Mods: {
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
-			Has a small access range
+			Linked Heart must be at most 100' from any valid pylon to gain extended reach on each pylon
+			Player must be at most 1000' away from the linked Heart or pylon to access storage
 			'''
 			PortableAccessHM:
 			'''
 			<right> Storage Heart to store location
 			Currently not set to any location
 			Use item to access your storage
-			Has a large access range
+			Linked Heart must be at most 200' from any valid pylon to gain extended reach on each pylon
+			Player must be at most 3000' away from the linked Heart or pylon to access storage
 			'''
 			PortableCraftingAccessPreHM:
 			'''
 			<right> Crafting Access to store location
 			Currently not set to any location
 			Use item to access your crafting
-			Has a small access range
+			Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
+			Player must be at most 1000' away from the linked Interface or pylon to access crafting
 			'''
 			PortableCraftingAccessHM:
 			'''
 			<right> Crafting Access to store location
 			Currently not set to any location
 			Use item to access your crafting
-			Has a large access range
+			Linked Interface must be at most 200' from any valid pylon to gain extended reach on each pylon
+			Player must be at most 3000' away from the linked Interface or pylon to access crafting
 			'''
 		}
 
