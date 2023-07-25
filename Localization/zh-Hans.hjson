@@ -467,6 +467,9 @@ Mods: {
 				Wizard: 尽管{0}看上去精通魔法，他仍不能理解蓝魔法的工作方式。因为实际上这并不能算作纯粹的魔法。
 				NotLihzahrd: 请停止询问，本单元并非由丛林神庙砖构成。
 				Bluemagic: 蓝魔法是一种惊人的力量来源，你不会想要低估它的能力的。
+				// Violence: Hello {0}. My creator had forgotten to install my viole- I mean, my self-defense chip. I have been upgraded and am now ready for combat.
+				// NoPlant: This unit does not possses any organic matter of plantae origin. You must be thinking of someone else.
+				// NeedPlant: "[c/ff0000:GIVE ME THE PLANT.] *beep* Apologies, {0}. This unit appears to have executed an unauthorized routine."
 				// NewTextAvailable: Hello {0}. This unit has prepared some new help text about Portable Remote Accesses for you.
 				Help1:
 					'''

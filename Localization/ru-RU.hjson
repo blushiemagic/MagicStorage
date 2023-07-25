@@ -465,6 +465,9 @@ Mods: {
 				Wizard: Для того, кто разбирается в магии, {0} не может понять, как работает система хранения. Честно говоря, на самом деле это не волшебство.
 				NotLihzahrd: Это устройство построено не из кирпича Lihzahrd. Пожалуйста, перестань спрашивать.
 				Bluemagic: Система хранения - это прекрасно. Было бы разумно не недооценивать его возможности.
+				// Violence: Hello {0}. My creator had forgotten to install my viole- I mean, my self-defense chip. I have been upgraded and am now ready for combat.
+				// NoPlant: This unit does not possses any organic matter of plantae origin. You must be thinking of someone else.
+				// NeedPlant: "[c/ff0000:GIVE ME THE PLANT.] *beep* Apologies, {0}. This unit appears to have executed an unauthorized routine."
 				NewTextAvailable: Здраствуй, {0}. Я подготовил для вас несколько новых справочных текстов о системе хранилища.
 				Help1:
 					'''

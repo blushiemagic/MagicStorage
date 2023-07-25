@@ -465,6 +465,9 @@ Mods: {
 				// Wizard: For someone versed in magic, {0} cannot comprehend how Bluemagic works. To be fair, it's not really magic.
 				// NotLihzahrd: This unit is not constructed from Lihzahrd Bricks. Please stop asking.
 				// Bluemagic: Bluemagic is an astouding source of power. It would be wise to not underestimate its capabilities.
+				// Violence: Hello {0}. My creator had forgotten to install my viole- I mean, my self-defense chip. I have been upgraded and am now ready for combat.
+				// NoPlant: This unit does not possses any organic matter of plantae origin. You must be thinking of someone else.
+				// NeedPlant: "[c/ff0000:GIVE ME THE PLANT.] *beep* Apologies, {0}. This unit appears to have executed an unauthorized routine."
 				// NewTextAvailable: Hello {0}. This unit has prepared some new help text about Portable Remote Accesses for you.
 				/* Help1:
 					'''
