@@ -227,7 +227,7 @@ Mods: {
 			'''
 			StorageUnitLuminite:
 			'''
-			Ячейка хранилища, которая используется для системы хранения.
+			Ячейка хранилища, которая используется для системы хранения
 			Может хранить до 320 предметов
 			'''
 			StorageUnitTerra:
@@ -339,7 +339,7 @@ Mods: {
 		Bestiary: {
 			Golem:
 			'''
-			Робот, который расскажет вам о системе хранения.
+			Робот, который расскажет вам всё о системе хранения.
 			'''
 		}
 
@@ -347,7 +347,7 @@ Mods: {
 			Golem: {
 				Greeting: "Здраствуй, {0}. Хотели бы вы, чтобы я научил вас чему-нибудь?"
 				Wizard: "Для того, кто разбирается в магии, {0} не может понять, как работает система хранения. Честно говоря, на самом деле это не волшебство."
-				NotLihzahrd: Это устройство построено не из кирпича Lihzahrd. Пожалуйста, перестань спрашивать.
+				NotLihzahrd: Это устройство построено не из кирпичей ящеров. Пожалуйста, перестань спрашивать.
 				Bluemagic: Система хранения - это прекрасно. Было бы разумно не недооценивать его возможности.
 				NewTextAvailable: "Здраствуй, {0}. Я подготовил для вас несколько новых справочных текстов о системе хранилища."
 				Help1:
@@ -400,7 +400,7 @@ Mods: {
 				'''
 				Help9:
 				'''
-				Заканчивается хранилище? Обновляйте свои ячейки хранилища с помощью улучшение ячейки хранилища! Улучшение хранилища может быть применено только единожды для ячейки хранения предыдущего уровня.
+				Заканчивается хранилище? Обновите свои ячейки хранилища при помощи улучшения ячейки хранилища! Улучшение хранилища может быть применено только единожды для ячейки хранения предыдущего уровня.
 				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
 				[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
 				[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
@@ -413,12 +413,12 @@ Mods: {
 				'''
 				Help11:
 				'''
-				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет предмет Биом в шаре. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
+				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, MagicStorage предоставляет предмет Биом в шаре. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
 				Рецепт: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
 				'''
 				Help12:
 				'''
-				Иногда вы хотите иметь доступ к своему хранилищу в других точках мира, но необходимость подключать хранилище с помощью проводов является одновременно хлопотной и дорогостоящей. Решение? Создайте удаленный доступ и свяжите его с центром хранения с помощью [i:MagicStorage/Locator ] или [i:MagicStorage/LocatorDisk ].
+				Иногда вы хотите иметь доступ к своему хранилищу в других точках мира, но необходимость подключать хранилище с помощью проводов является одновременно хлопотной и дорогостоящей. Решение? Создайте удаленный доступ и свяжите его с сердцем хранилища при помощи [i:MagicStorage/Locator ] или [i:MagicStorage/LocatorDisk ].
 				Рецепты:
 				[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
 				[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
@@ -430,7 +430,7 @@ Mods: {
 				'''
 				Help14:
 				'''
-				Деактиватор хранилища позволяет отключить [i:MagicStorage/StorageUnit]. Отключенный [i:MagicStorage/StorageUnit] не может хранить элементы и попытается переместить свои предметы в подключенную [i:MagicStorage/StorageUnit] ячейку хранилища. Если он не может переместить свои предметы, то они остаются в отключенном [i:MagicStorage/StorageUnit].
+				Деактиватор хранилища позволяет отключить [i:MagicStorage/StorageUnit]. Отключенный [i:MagicStorage/StorageUnit] не может хранить предметы и попытается переместить их в подключенную [i:MagicStorage/StorageUnit] ячейку хранилища. Если он не сможет перенести их, то они остаются в отключенном [i:MagicStorage/StorageUnit].
 				'''
 				Help15:
 				'''
@@ -472,17 +472,17 @@ Mods: {
 				Help20_Mechs:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20}
-				[i:MagicStorage/Locator] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+				[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
 				'''
 				Help20_Moon:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/LocatorDisk] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
 				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
 				'''
 				Help21:
 				'''
-				Вы также можете обновить ячейку хранилища до следующего уровня, щелкнув по нему правой кнопкой мыши с улучшением ячейки хранилища.
+				Вы также можете обновить ячейку хранилища до следующего уровня, щелкнув по ней правой кнопкой мыши с улучшением ячейки хранилища.
 				[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
 				[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
 				[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
