@@ -29,11 +29,11 @@ namespace MagicStorage.NPCs {
 			NPCID.Sets.ExtraFramesCount[Type] = 10;
 			NPCID.Sets.AttackFrameCount[Type] = 4;
 			// The amount of pixels away from the center of the npc that it tries to attack enemies.
-			NPCID.Sets.DangerDetectRange[Type] = 7 * 16;
-			NPCID.Sets.AttackType[Type] = 1;
+			NPCID.Sets.DangerDetectRange[Type] = 4 * 16;
+			NPCID.Sets.AttackType[Type] = 3;
 			// The amount of time it takes for the NPC's attack animation to be over once it starts.
 			NPCID.Sets.AttackTime[Type] = 20;
-			NPCID.Sets.AttackAverageChance[Type] = 30;
+			NPCID.Sets.AttackAverageChance[Type] = 11;
 			// For when a party is active, the party hat spawns at a Y offset.
 			NPCID.Sets.HatOffsetY[Type] = -7;
 
@@ -161,18 +161,25 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override void SetChatButtons(ref string button, ref string button2) {
+			// Sanity check
+			if (helpOption < 0)
+				helpOption = 0;
+			else if (helpOption > maxHelp)
+				helpOption = maxHelp;
+
 			button = helpOption == 0
 				? Language.GetTextValue("LegacyInterface.51")
-				: helpOption < maxHelp
-					? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
+				: helpOption > 1
+					? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.PrevHelp")
 					: "";
 
-			button2 = helpOption > 1
-				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.PrevHelp")
+
+			button2 = helpOption > 0 && helpOption < maxHelp
+				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
 				: "";
 		}
 
-		int helpOption = 1;
+		public int helpOption;
 		public const int maxHelp = 21;
 
 		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 21, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
@@ -180,17 +187,21 @@ namespace MagicStorage.NPCs {
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
 
+			bool wasHelpOptionUninitialized = true;
 			if (helpOption == 0) {
 				if (!MagicStorageConfig.DisplayLastSeenAutomatonTip)
 					savedTip = 0;
 
 				helpOption = savedTip;
+				wasHelpOptionUninitialized = false;
 			}
 
-			if (firstButton)
-				helpOption++;
-			else
-				helpOption--;
+			if (!wasHelpOptionUninitialized) {
+				if (firstButton)
+					helpOption--;
+				else
+					helpOption++;
+			}
 
 			if (helpOption > maxHelp)
 				helpOption = maxHelp;
