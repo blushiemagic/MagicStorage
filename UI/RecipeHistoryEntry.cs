@@ -155,7 +155,7 @@ namespace MagicStorage.UI {
 
 			resultSlot.SetItem(used.createItem, clone: true);
 
-			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1), GetIngredient);
+			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1));
 
 			ingredientZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
 			ingredientZone.Width.Set(ingredientZone.ZoneWidth, 0f);
@@ -169,7 +169,7 @@ namespace MagicStorage.UI {
 			Recalculate();
 		}
 
-		private Item GetIngredient(int slot, ref int context) => UsedRecipe.requiredItem[slot];
+		private Item GetIngredient(int slot, ref int context) => slot < UsedRecipe.requiredItem.Count ? UsedRecipe.requiredItem[slot] : new Item();
 
 		public void Refresh() {
 			int context = 0;
