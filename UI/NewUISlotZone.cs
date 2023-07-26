@@ -45,9 +45,14 @@ namespace MagicStorage.UI {
 			ZoneWidth = (int)((slotWidth + Padding) * columns);
 			ZoneHeight = (int)((slotHeight + Padding) * rows);
 
+			// Remember items displayed, effectively just making the zone bigger/smaller to the user
+			List<Item> previousItems = new();
+
 			if (Slots is not null) {
-				foreach (var slot in Slots)
+				foreach (var slot in Slots) {
+					previousItems.Add(slot.StoredItem);
 					slot.Remove();
+				}
 			}
 
 			Slots = new MagicStorageItemSlot[rows, columns];
@@ -63,6 +68,10 @@ namespace MagicStorage.UI {
 
 					slot.Left.Set(x, 0);
 					slot.Top.Set(y, 0);
+
+					// Attempt to get the item in the slot
+					if (slotIndex < previousItems.Count)
+						slot.SetItem(previousItems[slotIndex]);
 
 					Append(slot);
 				}

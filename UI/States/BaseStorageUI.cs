@@ -346,6 +346,10 @@ namespace MagicStorage.UI.States {
 				pendingUIChange = false;
 			}
 
+			// Refreshing slots?  prevent resizing
+			if (StorageGUI.CurrentlyRefreshing)
+				resize.Dragging = false;
+
 			base.Update(gameTime);
 
 			if (needsRecalculate) {

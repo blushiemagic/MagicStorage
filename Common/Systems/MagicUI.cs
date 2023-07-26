@@ -28,7 +28,7 @@ public class MagicUI : ModSystem
 
 	internal static string lastKnownSearchBarErrorReason;
 
-	internal static bool BlockItemSlotActionsDetour { get; set; }
+	internal static bool blockItemSlotActionsDetour;
 
 	public override void Load() {
 		if (Main.dedServ)
@@ -160,13 +160,13 @@ public class MagicUI : ModSystem
 					if (uiInterface?.CurrentState is not null) {
 						Main.hidePlayerCraftingMenu = true;
 
-						BlockItemSlotActionsDetour = true;
+						blockItemSlotActionsDetour = true;
 
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
 						if (CanUpdateMouseText())
 							Main.instance.MouseText(mouseText);
 
-						BlockItemSlotActionsDetour = false;
+						blockItemSlotActionsDetour = false;
 					}
 
 					return true;
@@ -199,7 +199,7 @@ public class MagicUI : ModSystem
 		StorageGUI.oldMouse = StorageGUI.curMouse;
 		StorageGUI.curMouse = Mouse.GetState();
 		
-		BlockItemSlotActionsDetour = true;
+		blockItemSlotActionsDetour = true;
 
 		if (pendingUIChangeForAnyReason) {
 			if (craftingUI is CraftingUIState cUI)
@@ -240,7 +240,7 @@ public class MagicUI : ModSystem
 			pendingClose = false;
 		}
 
-		BlockItemSlotActionsDetour = false;
+		blockItemSlotActionsDetour = false;
 	}
 
 	private static bool CanUpdateMouseText()

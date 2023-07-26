@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
@@ -373,6 +374,8 @@ namespace MagicStorage.UI.States {
 
 			Append(topBar2);
 
+			Recalculate();
+
 			PostReformatPage(current);
 
 			parentUI.UpdatePanelHeight(parentUI.PanelHeight);
@@ -463,13 +466,10 @@ namespace MagicStorage.UI.States {
 				pendingConfiguration = false;
 			}
 
-			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering))
-				MagicUI.BlockItemSlotActionsDetour = false;
-
-			base.Update(gameTime);
-
-			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+			bool block = MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering);
+			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !block)) {
+				base.Update(gameTime);
+			}
 
 			if (scrollBar.ViewPosition != lastKnownScrollBarViewPosition) {
 				lastKnownScrollBarViewPosition = scrollBar.ViewPosition;
@@ -499,13 +499,10 @@ namespace MagicStorage.UI.States {
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
-			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering))
-				MagicUI.BlockItemSlotActionsDetour = false;
-
-			base.Draw(spriteBatch);
-
-			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+			bool block = MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering);
+			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !block)) {
+				base.Draw(spriteBatch);
+			}
 		}
 
 		protected abstract bool ShouldHideItemIcons();

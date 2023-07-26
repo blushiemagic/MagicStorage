@@ -17,7 +17,7 @@ namespace MagicStorage.Common.Global {
 			if (StoragePlayer.LocalPlayer.StorageCrafting() || StoragePlayer.LocalPlayer.StorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
 				return false;
 
-			return !MagicUI.BlockItemSlotActionsDetour;
+			return !MagicUI.blockItemSlotActionsDetour;
 		}
 
 		public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
