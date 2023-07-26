@@ -82,17 +82,25 @@ namespace MagicStorage.Components
 		{
 			int frameX = 0;
 			int frameY = 0;
-			if (WorldGen.InWorld(i - 1, j) && Main.tile[i - 1, j].HasTile && Main.tile[i - 1, j].TileType == Type)
+			if (CanMergeWith(i - 1, j))
 				frameX += 18;
-			if (WorldGen.InWorld(i + 1, j) && Main.tile[i + 1, j].HasTile && Main.tile[i + 1, j].TileType == Type)
+			if (CanMergeWith(i + 1, j))
 				frameX += 36;
-			if (WorldGen.InWorld(i, j - 1) && Main.tile[i, j - 1].HasTile && Main.tile[i, j - 1].TileType == Type)
+			if (CanMergeWith(i, j - 1))
 				frameY += 18;
-			if (WorldGen.InWorld(i, j + 1) && Main.tile[i, j + 1].HasTile && Main.tile[i, j + 1].TileType == Type)
+			if (CanMergeWith(i, j + 1))
 				frameY += 36;
 			Main.tile[i, j].TileFrameX = (short) frameX;
 			Main.tile[i, j].TileFrameY = (short) frameY;
 			return false;
+		}
+
+		private bool CanMergeWith(int i, int j) {
+			if (!WorldGen.InWorld(i, j))
+				return false;
+
+			Tile tile = Main.tile[i, j];
+			return tile.HasTile && (tile.TileType == Type || TileLoader.GetTile(tile.TileType) is StorageComponent);
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
