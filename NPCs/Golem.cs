@@ -195,13 +195,13 @@ namespace MagicStorage.NPCs {
 		public override void OnChatButtonClicked(bool firstButton, ref bool shop) {
 			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
 
-			bool wasHelpOptionUninitialized = true;
+			bool wasHelpOptionUninitialized = false;
 			if (helpOption == 0) {
 				if (!MagicStorageConfig.DisplayLastSeenAutomatonTip)
 					savedTip = 0;
 
 				helpOption = savedTip;
-				wasHelpOptionUninitialized = false;
+				wasHelpOptionUninitialized = true;
 			}
 
 			if (!wasHelpOptionUninitialized) {
