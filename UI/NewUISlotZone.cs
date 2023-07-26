@@ -31,7 +31,7 @@ namespace MagicStorage.UI {
 			inventoryScale = scale;
 		}
 
-		public void SetDimensions(int columns, int rows, UISlotZone.GetItem getItem) {
+		public void SetDimensions(int columns, int rows) {
 			if (NumColumns == columns && NumRows == rows)
 				return;
 
@@ -63,11 +63,6 @@ namespace MagicStorage.UI {
 
 					slot.Left.Set(x, 0);
 					slot.Top.Set(y, 0);
-
-					// Make the slot use the "intended item"
-					int context = 0;
-					slot.SetItem(getItem(slotIndex, ref context));
-					slot.Context = context;
 
 					Append(slot);
 				}
