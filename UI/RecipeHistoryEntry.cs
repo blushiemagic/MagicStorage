@@ -155,7 +155,7 @@ namespace MagicStorage.UI {
 
 			resultSlot.SetItem(used.createItem, clone: true);
 
-			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1));
+			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1), GetIngredient);
 
 			ingredientZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
 			ingredientZone.Width.Set(ingredientZone.ZoneWidth, 0f);

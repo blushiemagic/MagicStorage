@@ -107,7 +107,7 @@ namespace MagicStorage.UI.States {
 				return itemSlot;
 			};
 
-			recipeHeaderZone.SetDimensions(1, 1);
+			recipeHeaderZone.SetDimensions(1, 1, CraftingGUI.GetHeader);
 
 			recipeHeaderZone.Width.Set(recipeHeaderZone.ZoneWidth, 0);
 			recipeHeaderZone.Height.Set(recipeHeaderZone.ZoneHeight, 0);
@@ -318,7 +318,7 @@ namespace MagicStorage.UI.States {
 				return itemSlot;
 			};
 
-			resultZone.SetDimensions(1, 1);
+			resultZone.SetDimensions(1, 1, CraftingGUI.GetResult);
 
 			bool config = MagicStorageConfig.UseOldCraftMenu;
 
@@ -528,7 +528,7 @@ namespace MagicStorage.UI.States {
 				totalRows = 1;
 			float ingredientZoneHeight = 30f * totalRows;
 
-			ingredientZone.SetDimensions(CraftingGUI.IngredientColumns, totalRows);
+			ingredientZone.SetDimensions(CraftingGUI.IngredientColumns, totalRows, CraftingGUI.GetIngredient);
 			ingredientZone.Top.Set(ingredientZoneTop, 0f);
 			ingredientZone.Height.Set(ingredientZoneHeight, 0f);
 			
@@ -570,7 +570,7 @@ namespace MagicStorage.UI.States {
 				return false;
 			}
 
-			storageZone.SetDimensions(CraftingGUI.IngredientColumns, displayRows2);
+			storageZone.SetDimensions(CraftingGUI.IngredientColumns, displayRows2, GetStorage);
 			int noDisplayRows2 = numRows2 - displayRows2;
 			if (noDisplayRows2 < 0)
 				noDisplayRows2 = 0;
@@ -1060,7 +1060,7 @@ namespace MagicStorage.UI.States {
 
 				stationText.Top.Set(top + stationTextTop, 0f);
 
-				stationZone.SetDimensions(TECraftingAccess.Columns, rows);
+				stationZone.SetDimensions(TECraftingAccess.Columns, rows, CraftingGUI.GetStation);
 				stationZone.Height.Set(stationZone.ZoneHeight, 0f);
 				stationZone.Top.Set(top + stationTop, 0f);
 
@@ -1084,7 +1084,7 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
+				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows, GetRecipe);
 
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
