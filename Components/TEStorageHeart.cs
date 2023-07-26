@@ -173,13 +173,12 @@ namespace MagicStorage.Components
 					else if (op.type == Operation.Deposit)
 					{
 						DepositItem(op.item);
+						typesToRefresh.Add(op.item.type);
 						if (!op.item.IsAir)
 						{
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(op.item, packet, true, true);
 							packet.Send(op.client);
-
-							typesToRefresh.Add(op.item.type);
 						}
 					}
 					else if (op.type == Operation.DepositAll)
@@ -189,11 +188,10 @@ namespace MagicStorage.Components
 						foreach (Item item in op.items)
 						{
 							DepositItem(item);
+							typesToRefresh.Add(item.type);
 							if (!item.IsAir)
 							{
 								leftOvers.Add(item);
-
-								typesToRefresh.Add(item.type);
 							}
 						}
 						NetHelper.ProcessUpdateQueue();
