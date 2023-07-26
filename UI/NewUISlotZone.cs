@@ -31,7 +31,7 @@ namespace MagicStorage.UI {
 			inventoryScale = scale;
 		}
 
-		public void SetDimensions(int columns, int rows) {
+		public void SetDimensions(int columns, int rows, UISlotZone.GetItem getItem) {
 			if (NumColumns == columns && NumRows == rows)
 				return;
 
@@ -45,14 +45,9 @@ namespace MagicStorage.UI {
 			ZoneWidth = (int)((slotWidth + Padding) * columns);
 			ZoneHeight = (int)((slotHeight + Padding) * rows);
 
-			// Remember items displayed, effectively just making the zone bigger/smaller to the user
-			List<Item> previousItems = new();
-
 			if (Slots is not null) {
-				foreach (var slot in Slots) {
-					previousItems.Add(slot.StoredItem);
+				foreach (var slot in Slots)
 					slot.Remove();
-				}
 			}
 
 			Slots = new MagicStorageItemSlot[rows, columns];
@@ -69,9 +64,10 @@ namespace MagicStorage.UI {
 					slot.Left.Set(x, 0);
 					slot.Top.Set(y, 0);
 
-					// Attempt to get the item in the slot
-					if (slotIndex < previousItems.Count)
-						slot.SetItem(previousItems[slotIndex]);
+					// Make the slot use the "intended item"
+					int context = 0;
+					slot.SetItem(getItem(slotIndex, ref context));
+					slot.Context = context;
 
 					Append(slot);
 				}

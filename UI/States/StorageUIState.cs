@@ -243,7 +243,7 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				slotZone.SetDimensions(StorageGUI.numColumns, displayRows);
+				slotZone.SetDimensions(StorageGUI.numColumns, displayRows, GetItem);
 
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
