@@ -42,7 +42,7 @@ namespace MagicStorage.Edits {
 		}
 
 		public static bool PreventActions() {
-			if (!Main.playerInventory || Main.ingameOptionsWindow || MagicUI.uiInterface?.CurrentState is null || !Main.hasFocus || MagicUI.BlockItemSlotActionsDetour)
+			if (!Main.playerInventory || Main.ingameOptionsWindow || MagicUI.uiInterface?.CurrentState is null || !Main.hasFocus || MagicUI.blockItemSlotActionsDetour)
 				return false;
 
 			UIElement element = MagicUI.uiInterface.CurrentState.GetElementAt(new Vector2(Main.mouseX, Main.mouseY));

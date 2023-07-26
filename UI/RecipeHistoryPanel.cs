@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -38,26 +39,18 @@ namespace MagicStorage.UI {
 		}
 
 		public override void Update(GameTime gameTime) {
-			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-			if (IsMouseHovering)
-				MagicUI.BlockItemSlotActionsDetour = true;
+			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, IsMouseHovering)) {
+				//Prevent moving the panel
+				Dragging = false;
 
-			//Prevent moving the panel
-			Dragging = false;
-
-			base.Update(gameTime);
-
-			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+				base.Update(gameTime);
+			}
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
-			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-			if (IsMouseHovering)
-				MagicUI.BlockItemSlotActionsDetour = true;
-
-			base.Draw(spriteBatch);
-
-			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, IsMouseHovering)) {
+				base.Draw(spriteBatch);
+			}
 		}
 	}
 }

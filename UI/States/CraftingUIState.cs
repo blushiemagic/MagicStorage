@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -452,26 +453,22 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.PlayerZoneCache.Cache();
 
 			try {
-				bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-				if (recipeHistoryPanel.IsMouseHovering)
-					MagicUI.BlockItemSlotActionsDetour = false;
+				using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !recipeHistoryPanel.IsMouseHovering)) {
+					base.Update(gameTime);
 
-				base.Update(gameTime);
-
-				if (pendingPanelChange is bool { } waiting) {
-					if (waiting) {
-						if (recipeWaitPanel.Parent is null) {
-							recipePanel.Append(recipeWaitPanel);
-							recipeWaitPanel.Update(gameTime);
+					if (pendingPanelChange is bool { } waiting) {
+						if (waiting) {
+							if (recipeWaitPanel.Parent is null) {
+								recipePanel.Append(recipeWaitPanel);
+								recipeWaitPanel.Update(gameTime);
+							}
+						} else {
+							recipeWaitPanel.Remove();
 						}
-					} else {
-						recipeWaitPanel.Remove();
+
+						pendingPanelChange = null;
 					}
-
-					pendingPanelChange = null;
 				}
-
-				MagicUI.BlockItemSlotActionsDetour = oldBlock;
 
 				if (!Main.mouseRight)
 					CraftingGUI.ResetSlotFocus();
@@ -513,13 +510,8 @@ namespace MagicStorage.UI.States {
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
-			bool oldBlock = MagicUI.BlockItemSlotActionsDetour;
-			if (recipeHistoryPanel.IsMouseHovering)
-				MagicUI.BlockItemSlotActionsDetour = false;
-
-			base.Draw(spriteBatch);
-
-			MagicUI.BlockItemSlotActionsDetour = oldBlock;
+			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !recipeHistoryPanel.IsMouseHovering))
+				base.Draw(spriteBatch);
 		}
 		
 		const float ingredientZoneTop = 54f;
@@ -1092,8 +1084,7 @@ namespace MagicStorage.UI.States {
 					return false;
 				}
 
-				if (!IsWaitTextVisible)
-					slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
+				slotZone.SetDimensions(CraftingGUI.RecipeColumns, displayRows);
 
 				int noDisplayRows = numRows - displayRows;
 				if (noDisplayRows < 0)
