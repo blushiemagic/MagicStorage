@@ -46,18 +46,10 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool clearHistory;
 
-		[Label("$Mods.MagicStorage.Config.recursionDepth.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.recursionDepth.Tooltip")]
-		[DefaultValue(0)]
-		[DrawTicks]
-		[Range(-1, 10)]
-		public int recursionDepth;
-
-		[Label("$Mods.MagicStorage.Config.recursionMode.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.recursionMode.Tooltip")]
-		[DefaultValue(RecursionMode.Legacy)]
-		[DrawTicks]
-		public RecursionMode recursionMode;
+		[Label("$Mods.MagicStorage.Config.recursionEnabled.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recursionEnabled.Tooltip")]
+		[DefaultValue(true)]
+		public bool recursionEnabled;
 
 		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
 		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
@@ -153,31 +145,9 @@ namespace MagicStorage {
 		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
 		[JsonIgnore]
-		public static int RecipeRecursionDepth => Instance.recursionDepth;
-		
-		[JsonIgnore]
-		public static bool IsRecursionDisabled => RecipeRecursionDepth == 0;
-
-		[JsonIgnore]
-		public static bool IsRecursionInfinite => RecipeRecursionDepth == -1;
-
-		[JsonIgnore]
-		public static RecursionMode RecipeRecursionMode => Instance.recursionMode;
-
-		[JsonIgnore]
-		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
+		public static bool IsRecursionEnabled => Instance.recursionEnabled;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
-
-		[JsonIgnore]
-		internal int LastKnownDepth = -2;
-
-		public override void OnChanged() {
-			if (recursionDepth != LastKnownDepth)
-				RecursiveRecipe.RecalculateAllRecursiveRecipes();
-
-			LastKnownDepth = recursionDepth;
-		}
 	}
 
 	[Label("$Mods.MagicStorage.Config.ServersideLabel")]
