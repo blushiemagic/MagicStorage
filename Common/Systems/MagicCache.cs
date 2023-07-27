@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using SerousCommonLib.API.Helpers;
@@ -156,6 +157,14 @@ public class MagicCache : ModSystem
 
 		RecipesUsingTileType = Enumerable.Range(TileID.Dirt, TileLoader.TileCount)
 			.ToDictionary(type => type, type => new LazyRecipeTile(type));
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::InitRecursiveTrees");
+
+		foreach (Recipe recipe in EnabledRecipes) {
+			RecursiveRecipe recursive = new RecursiveRecipe(recipe);
+			RecursiveRecipe.recipeToRecursiveRecipe.Add(recipe, recursive);
+			recursive.tree.CalculateTree();
+		}
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
 	}
