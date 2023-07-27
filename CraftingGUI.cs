@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
 using MagicStorage.Items;
@@ -163,9 +163,6 @@ namespace MagicStorage
 				return 0;
 			int maxCraftable = int.MaxValue;
 
-			if (RecursiveCraftIntegration.Enabled)
-				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-
 			int GetMaxCraftsAmount(Item requiredItem)
 			{
 				int total = 0;
@@ -198,12 +195,6 @@ namespace MagicStorage
 					amount = int.MaxValue;
 
 				Craft(amount);
-				if (RecursiveCraftIntegration.Enabled)
-				{
-					RecursiveCraftIntegration.RefreshRecursiveRecipes();
-					if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
-						SetSelectedRecipe(selectedRecipe);
-				}
 
 				IEnumerable<int> allItemTypes = selectedRecipe.requiredItem.Select(i => i.type).Prepend(selectedRecipe.createItem.type);
 
@@ -525,38 +516,6 @@ namespace MagicStorage
 					RefreshSpecificRecipes(thread, state);
 
 				NetHelper.Report(true, "Recipe refreshing finished");
-
-				// TODO is there a better way?
-				static void GuttedSetSelectedRecipe(Recipe recipe, int index)
-				{
-					Recipe compound = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-					if (index != -1)
-						recipes[index] = compound;
-
-					selectedRecipe = compound;
-					RefreshStorageItems();
-					blockStorageItems.Clear();
-				}
-
-				if (RecursiveCraftIntegration.Enabled) {
-					if (selectedRecipe is not null)
-					{
-						// If the selected recipe is compound, replace the overridden recipe with the compound one so it shows as selected in the UI
-						if (RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe))
-						{
-							Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
-							int index = recipes.IndexOf(overridden);
-							GuttedSetSelectedRecipe(overridden, index);
-						}
-						// If the selectedRecipe(which isn't compound) is uncraftable but is in the available list, this means it's compound version is craftable
-						else if (!IsAvailable(selectedRecipe, false))
-						{
-							int index = recipes.IndexOf(selectedRecipe);
-							if (index != -1 && recipeAvailable[index])
-								GuttedSetSelectedRecipe(selectedRecipe, index);
-						}
-					}
-				}
 			} catch (Exception e) {
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
@@ -565,12 +524,6 @@ namespace MagicStorage
 		private static void RefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state)
 		{
 			NetHelper.Report(true, "Refreshing all recipes");
-
-			if (RecursiveCraftIntegration.Enabled) {
-				RecursiveCraftIntegration.RefreshRecursiveRecipes();
-				if (RecursiveCraftIntegration.HasCompoundVariant(selectedRecipe))
-					SetSelectedRecipe(selectedRecipe);
-			}
 
 			DoFiltering(thread, state);
 
@@ -661,21 +614,10 @@ namespace MagicStorage
 				Recipe orig = recipe;
 				Recipe check = recipe;
 
-				if (RecursiveCraftIntegration.Enabled) {
-					if (RecursiveCraftIntegration.HasCompoundVariant(recipe)) {
-						orig = RecursiveCraftIntegration.GetOverriddenRecipe(orig);
-						check = RecursiveCraftIntegration.ApplyCompoundRecipe(check);  //Get the compound recipe
-					}
-				}
-
 				if (check is null)
 					continue;
 
-				int index = recipes.IndexOf(check);  //Compound recipe is in the original recipe list
-
-				//Failsafe?  Sometimes non-compound recipes can be in the list when the compound variant can be used
-				if (RecursiveCraftIntegration.Enabled && index < 0 && RecursiveCraftIntegration.IsCompoundRecipe(check))
-					index = recipes.IndexOf(orig);
+				int index = recipes.IndexOf(check);  // TODO: check.RecipeIndex?
 
 				if (!IsAvailable(check)) {
 					if (index >= 0) {
@@ -890,9 +832,6 @@ namespace MagicStorage
 			if (recipe is null)
 				return false;
 
-			if (RecursiveCraftIntegration.Enabled && checkCompound)
-				recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-
 			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
 
@@ -1104,28 +1043,6 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Reassigning current recipe...");
 
-			if (RecursiveCraftIntegration.Enabled)
-			{
-				int index;
-				if (selectedRecipe != null && RecursiveCraftIntegration.IsCompoundRecipe(selectedRecipe) && selectedRecipe != recipe)
-				{
-					Recipe overridden = RecursiveCraftIntegration.GetOverriddenRecipe(selectedRecipe);
-					if (overridden != recipe)
-					{
-						index = recipes.IndexOf(selectedRecipe);
-						if (index != -1)
-							recipes[index] = overridden;
-					}
-				}
-
-				index = recipes.IndexOf(recipe);
-				if (index != -1)
-				{
-					recipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-					recipes[index] = recipe;
-				}
-			}
-
 			selectedRecipe = recipe;
 			RefreshStorageItems();
 			blockStorageItems.Clear();
@@ -1308,16 +1225,70 @@ namespace MagicStorage
 		public static void Craft(int toCraft) {
 			NetHelper.Report(true, $"Attempting to craft {toCraft} items...");
 
-			//Safeguard against absurdly high craft targets
-			int origCraftRequest = toCraft;
-			toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
+			CraftingContext context;
+			if (MagicStorageConfig.IsRecursionEnabled) {
+				// Recursive crafting uses special logic which can't just be injected into the previous logic
+				context = Craft_WithRecursion(toCraft);
 
-			if (toCraft != origCraftRequest)
-				NetHelper.Report(true, $"Craft amount reduced to {toCraft}");
+				if (context is null)
+					return;  // Bail
+			} else {
+				//Safeguard against absurdly high craft targets
+				int origCraftRequest = toCraft;
+				toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
 
-			if (toCraft <= 0)
-				return;  // Bail
+				if (toCraft != origCraftRequest)
+					NetHelper.Report(true, $"Craft amount reduced to {toCraft}");
 
+				if (toCraft <= 0)
+					return;  // Bail
+
+				context = InitCraftingContext(toCraft);
+
+				int target = toCraft;
+
+				ExecuteInCraftingGuiEnvironment(() => Craft_DoStandardCraft(context));
+
+				NetHelper.Report(true, $"Crafted {target - context.toCraft} items");
+
+				if (target == context.toCraft) {
+					//Could not craft anything, bail
+					return;
+				}
+			}
+
+			NetHelper.Report(true, "Compacting results list...");
+
+			context.toWithdraw = CompactItemList(context.toWithdraw);
+			context.results = CompactItemList(context.results);
+
+			if (Main.netMode == NetmodeID.SinglePlayer) {
+				NetHelper.Report(true, "Spawning excess results on player...");
+
+				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), context.toWithdraw, context.results)) {
+#if TML_2022_09
+					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+#else
+					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+#endif
+				}
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				NetHelper.Report(true, "Sending craft results to server...");
+
+				NetHelper.SendCraftRequest(GetHeart().Position, context.toWithdraw, context.results);
+			}
+		}
+
+		private static void Craft_DoStandardCraft(CraftingContext context) {
+			//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
+			if (!AttemptLazyBatchCraft(context)) {
+				NetHelper.Report(false, "Batch craft operation failed.  Attempting repeated crafting of a single result.");
+
+				AttemptCraft(AttemptSingleCraft, context);
+			}
+		}
+
+		private static CraftingContext InitCraftingContext(int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
@@ -1327,7 +1298,7 @@ namespace MagicStorage
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
-			CraftingContext context = new() {
+			return new CraftingContext() {
 				sourceItems = sourceItems,
 				availableItems = availableItems,
 				toWithdraw = toWithdraw,
@@ -1338,45 +1309,108 @@ namespace MagicStorage
 				modules = heart.GetModules(),
 				toCraft = toCraft
 			};
+		}
 
-			int target = toCraft;
+		private static CraftingContext Craft_WithRecursion(int toCraft) {
+			// Unlike normal crafting, the crafting tree has to be respected
+			// This means that simple IsAvailable and AmountCraftable checks would just slow it down
+			// Hence, the logic here will just assume that it's craftable and just ignore branches in the recursion tree that aren't available or are already satisfied
+			if (!selectedRecipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
+				throw new InvalidOperationException("Recipe object did not have a RecursiveRecipe object assigned to it");
 
+			if (toCraft <= 0)
+				return null;  // Bail
+
+			NetHelper.Report(true, "Retrieving crafting tree for recipe...");
+
+			OrderedRecipeTree order = recursiveRecipe.GetCraftingTree(toCraft);
+			CraftingContext context = InitCraftingContext(order.context.amountToCraft);
+
+			NetHelper.Report(true, "Trimming branches...");
+
+			// Go from the top of the tree down, cutting off any branches when necessary
+			Queue<OrderedRecipeTree> queue = new();
+			foreach (var leaf in order.Leaves)
+				queue.Enqueue(leaf);
+
+			Dictionary<int, List<OrderedRecipeContext>> processByDepth = new();
+			int depth, maxDepth = 0;
+			while (queue.TryDequeue(out OrderedRecipeTree branch)) {
+				// Check if the amount needed has been satisfied
+				// If it is, this recipe and its children are not needed
+				Recipe recipe = branch.context.recipe;
+
+				int result = recipe.createItem.type;
+				ref int remaining = ref branch.context.amountToCraft;
+
+				remaining -= CountItems(context, recipe, result);
+
+				depth = branch.context.depth;
+				if (remaining <= 0) {
+					NetHelper.Report(false, $"Branch trimmed: Depth = {depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
+
+					branch.Clear();
+				} else {
+					// Add the branch to the list of recipes to process since it's initially unfulfilled
+					if (maxDepth < depth)
+						maxDepth = depth;
+					if (!processByDepth.TryGetValue(depth, out var list))
+						processByDepth[depth] = list = new();
+
+					list.Add(branch.context);
+
+					foreach (var leaf in branch.Leaves)
+						queue.Enqueue(leaf);
+				}
+			}
+
+			NetHelper.Report(true, "Attempting recurrent crafting...");
+
+			// Local capturing
+			int md = maxDepth;
+			var processes = processByDepth;
+			var ctx = context;
+			
+			// With the branches that are left, go from the bottom up and attempt to craft them
 			ExecuteInCraftingGuiEnvironment(() => {
-				//Do lazy crafting first (batch loads of ingredients into one "craft"), then do normal crafting
-				if (!AttemptLazyBatchCraft(context)) {
-					NetHelper.Report(false, "Batch craft operation failed.  Attempting repeated crafting of a single result.");
+				for (int depth = md; depth >= 0; depth--) {
+					if (processes.TryGetValue(depth, out var list)) {
+						// Process the recipes
+						foreach (var recipeContext in list) {
+							int target = recipeContext.amountToCraft;
 
-					AttemptCraft(AttemptSingleCraft, context);
+							if (target <= 0)
+								continue;
+
+							string itemName = Lang.GetItemNameValue(recipeContext.recipe.createItem.type);
+
+							NetHelper.Report(false, $"Attempting to craft {recipeContext.amountToCraft} {itemName}");
+
+							Craft_DoStandardCraft(ctx);
+
+							NetHelper.Report(false, $"Crafted {target - recipeContext.amountToCraft} {itemName}");
+						}
+					}
 				}
 			});
 
-			NetHelper.Report(true, "Crafted " + (target - context.toCraft) + " items");
+			return context;
+		}
 
-			if (target == context.toCraft) {
-				//Could not craft anything, bail
-				return;
-			}
+		private static int CountItems(CraftingContext context, Recipe recipe, int type) {
+			int sum = 0;
 
-			NetHelper.Report(true, "Compacting results list...");
+			foreach (Item item in context.availableItems) {
+				if (item.type == type || RecipeGroupMatch(recipe, item.type, type)) {
+					// Check for overflow
+					if (sum + item.stack < 0)
+						return int.MaxValue;
 
-			toWithdraw = CompactItemList(toWithdraw);
-			results = CompactItemList(results);
-
-			if (Main.netMode == NetmodeID.SinglePlayer) {
-				NetHelper.Report(true, "Spawning excess results on player...");
-
-				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), toWithdraw, results)) {
-#if TML_2022_09
-					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-#else
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-#endif
+					sum += item.stack;
 				}
-			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				NetHelper.Report(true, "Sending craft results to server...");
-
-				NetHelper.SendCraftRequest(GetHeart().Position, toWithdraw, results);
 			}
+
+			return sum;
 		}
 
 		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {

@@ -905,16 +905,18 @@ namespace MagicStorage
 
 			Report(true, MessageType.TransferItems + " packet was successfully received by server from client " + sender);
 
-			AttemptItemTransferAndSendResult(unitDestination, unitSource);
+			AttemptItemTransferAndSendResult(unitDestination, unitSource, out _);
 		}
 
-		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, bool netQueue = true) {
+		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems, bool netQueue = true) {
+			transferredItems = null;
+
 			if (Main.netMode != NetmodeID.Server)
 				return false;
 
 			Report(true, $"Performing AttemptItemTransferAndSendResult on source unit (X: {source.Position.X}, Y: {source.Position.Y}) and destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})...");
 
-			TEStorageUnit.AttemptItemTransfer(destination, source, out List<Item> transferredItems);
+			TEStorageUnit.AttemptItemTransfer(destination, source, out transferredItems);
 
 			if (transferredItems.Count == 0) {
 				//Nothing to do

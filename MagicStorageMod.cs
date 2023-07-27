@@ -75,8 +75,6 @@ namespace MagicStorage {
 
 			optionsConfig = null;
 
-			RecursiveRecipe.UnloadDelegates();
-
 			CheckModBuildVersionBeforeJIT.Mod = null;
 			CheckModBuildVersionBeforeJIT.versionChecked = false;
 		}
