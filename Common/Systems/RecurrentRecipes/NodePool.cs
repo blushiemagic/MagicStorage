@@ -18,7 +18,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		private static readonly Dictionary<int, List<Node>> resultToNodes = new();
 
 		public static Node FindOrCreate(Recipe recipe) {
-			if (recipe.IsRecursiveRecipe() || recipe.Disabled)
+			if (recipe.Disabled)
 				return null;
 
 			int type = recipe.createItem.type;

@@ -8,6 +8,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class RecursionTree {
 		public readonly Recipe originalRecipe;
 
+		/// <summary>
+		/// The node containing the branches for this recursion tree.  If <see cref="originalRecipe"/> is disabled, this will be <see langword="null"/>.
+		/// </summary>
 		public Node Root { get; private set; }
 
 		public RecursionTree(Recipe recipe) {
@@ -20,7 +23,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		private void CalculateTree(HashSet<int> processedNodes) {
-			if (Root is not null)
+			if (Root is not null || originalRecipe.Disabled)
 				return;
 
 			Root = NodePool.FindOrCreate(originalRecipe);
