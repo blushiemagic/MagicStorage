@@ -92,6 +92,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		 */
 
 		private void ModifyCraftingTree(HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
+			// Safety check
+			if (tree.Root is null)
+				return;
+
 			// Check for infinitely recursive recipe branches (e.g. Wood -> Wood Platform -> Wood)
 			if (!recursionStack.Add(tree.Root.poolIndex))
 				return;

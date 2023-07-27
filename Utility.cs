@@ -419,7 +419,7 @@ namespace MagicStorage {
 			return sum;
 		}
 
-		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
+		public static bool HasRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 
 		public static RecursiveRecipe GetRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out RecursiveRecipe recursive) ? recursive : null;
 
