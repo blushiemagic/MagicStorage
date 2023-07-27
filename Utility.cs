@@ -429,6 +429,10 @@ namespace MagicStorage {
 
 		public static bool IsRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out _);
 
+		public static RecursiveRecipe GetRecursiveRecipe(this Recipe recipe) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out RecursiveRecipe recursive) ? recursive : null;
+
+		public static bool TryGetRecursiveRecipe(this Recipe recipe, out RecursiveRecipe recursive) => RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(recipe, out recursive);
+
 		public static void ConvertToGPSCoordinates(Vector2 worldCoordinate, out int compassCoordinate, out int depthCoordinate) {
 			// Copy/paste of logic from the info accessories
 			compassCoordinate = (int)(worldCoordinate.X * 2f / 16f - Main.maxTilesX);

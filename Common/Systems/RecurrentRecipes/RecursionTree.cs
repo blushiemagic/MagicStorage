@@ -18,21 +18,24 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				}
 			}
 
-			public class RecipeInfo : List<RecursionTree> {
+			public class RecipeInfo : List<List<RecursionTree>> {
 				public readonly Recipe sourceRecipe;
 
 				public RecipeInfo(Recipe recipe) : base(InitTree(recipe)) {
 					sourceRecipe = recipe;
 				}
 
-				private static IEnumerable<RecursionTree> InitTree(Recipe recipe) {
-					foreach (var item in recipe.requiredItem) {
-						if (!MagicCache.ResultToRecipe.TryGetValue(item.type, out var recipes))
-							continue;
+				private static IEnumerable<List<RecursionTree>> InitTree(Recipe recipe) {
+					foreach (var item in recipe.requiredItem)
+						yield return new List<RecursionTree>(InitIngredientTree(item.type));
+				}
 
-						foreach (var ingredientRecipe in recipes.Where(r => !r.Disabled))
-							yield return new RecursionTree(ingredientRecipe);
-					}
+				private static IEnumerable<RecursionTree> InitIngredientTree(int type) {
+					if (!MagicCache.ResultToRecipe.TryGetValue(type, out var recipes))
+						yield break;
+
+					foreach (var ingredientRecipe in recipes.Where(r => !r.Disabled))
+						yield return new RecursionTree(ingredientRecipe);
 				}
 			}
 
@@ -86,27 +89,24 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public void CalculateTree() {
-			if (Root is not null)
-				return;  // Tree was already calculated
-
 			HashSet<int> processedNodes = new();
+			CalculateTree(processedNodes);
+		}
+
+		private void CalculateTree(HashSet<int> processedNodes) {
+			if (Root is not null)
+				return;
 
 			Root = NodePool.FindOrCreate(originalRecipe);
+			
+			// Prevent recursion by not checking nodes multiple times
+			if (!processedNodes.Add(Root.poolIndex))
+				return;
 
-			Queue<NodePool.Node> nodeQueue = new();
-			nodeQueue.Enqueue(Root);
-
-			// Process the full tree, bottom-up
-			while (nodeQueue.TryDequeue(out var node)) {
-				// Prevent recursion by not checking nodes multiple times
-				if (node is null || !processedNodes.Add(node.poolIndex))
-					continue;
-
-				foreach (var ingredient in node.ingredientTrees) {
-					ingredient.CalculateTree();
-
-					nodeQueue.Enqueue(ingredient.Root);
-				}
+			// Process the nodes for each child
+			foreach (var ingredientTree in Root.ingredientTrees) {
+				foreach (var ingredientRecipe in ingredientTree)
+					ingredientRecipe.CalculateTree(processedNodes);
 			}
 		}
 
