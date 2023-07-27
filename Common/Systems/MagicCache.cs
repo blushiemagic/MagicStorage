@@ -22,10 +22,26 @@ public class MagicCache : ModSystem
 		public LazyRecipe(int itemType) {
 			this.itemType = itemType;
 
-			lazy = new(() => EnabledRecipes.Where(r => r.createItem.type == this.itemType || r.requiredItem.Any(i => i.type == this.itemType)).ToArray(), isThreadSafe: false);
+			lazy = new(() => GetRecipes().ToArray(), isThreadSafe: false);
 		}
 
 		public Recipe[] Value => lazy.Value;
+
+		private IEnumerable<Recipe> GetRecipes() {
+			foreach (Recipe recipe in EnabledRecipes) {
+				if (recipe.createItem.type == itemType || recipe.requiredItem.Any(i => i.type == itemType))
+					yield return recipe;
+
+				// Check recipe groups
+				foreach (int id in recipe.acceptedGroups) {
+					RecipeGroup group = RecipeGroup.recipeGroups[id];
+					if (group.ContainsItem(itemType)) {
+						yield return recipe;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	public class LazyRecipeTile {
@@ -118,6 +134,18 @@ public class MagicCache : ModSystem
 					hasTile[tile] = list = new();
 
 				list.Add(recipe);
+			}
+
+			foreach (var id in recipe.acceptedGroups)
+			{
+				RecipeGroup group = RecipeGroup.recipeGroups[id];
+				foreach (var item in group.ValidItems)
+				{
+					if (!hasIngredient.TryGetValue(item, out var list))
+						hasIngredient[item] = list = new();
+
+					list.Add(recipe);
+				}
 			}
 		}
 

@@ -162,14 +162,6 @@ namespace MagicStorage {
 		}
 
 		internal static bool RecipesMatchForHistory(Recipe recipe1, Recipe recipe2) {
-			if (RecursiveCraftIntegration.Enabled) {
-				if (RecursiveCraftIntegration.IsCompoundRecipe(recipe1))
-					recipe1 = RecursiveCraftIntegration.GetOverriddenRecipe(recipe1);
-
-				if (RecursiveCraftIntegration.IsCompoundRecipe(recipe2))
-					recipe2 = RecursiveCraftIntegration.GetOverriddenRecipe(recipe2);
-			}
-
 			return recipe1.createItem.type == recipe2.createItem.type
 				&& recipe1.requiredItem.SequenceEqual(recipe2.requiredItem, ItemTypeComparer.Instance)
 				&& recipe1.requiredTile.SequenceEqual(recipe2.requiredTile, EqualityComparer<int>.Default);

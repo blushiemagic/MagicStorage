@@ -53,9 +53,6 @@ namespace MagicStorage.UI {
 		}
 
 		public void AddHistory(Recipe recipe) {
-			if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(recipe))
-				recipe = RecursiveCraftIntegration.GetOverriddenRecipe(recipe);
-
 			if (history.Take(Current + 1).Select(h => h.OriginalRecipe).Any(r => Utility.RecipesMatchForHistory(recipe, r)))
 				return;
 
@@ -143,14 +140,6 @@ namespace MagicStorage.UI {
 		}
 
 		internal void SetRecipe(Recipe recipe) {
-			if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.IsCompoundRecipe(recipe))
-				recipe = RecursiveCraftIntegration.GetOverriddenRecipe(recipe);
-
-			OriginalRecipe = recipe;
-
-			if (RecursiveCraftIntegration.Enabled && RecursiveCraftIntegration.HasCompoundVariant(recipe))
-				CompoundRecipe = RecursiveCraftIntegration.ApplyCompoundRecipe(recipe);
-
 			Recipe used = UsedRecipe;
 
 			resultSlot.SetItem(used.createItem, clone: true);

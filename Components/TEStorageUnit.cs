@@ -321,7 +321,7 @@ namespace MagicStorage.Components
 				NetHelper.ClientRequestItemTransfer(this, source);
 				return false;
 			} else if (Main.netMode == NetmodeID.Server)
-				return NetHelper.AttemptItemTransferAndSendResult(this, source, false);
+				return NetHelper.AttemptItemTransferAndSendResult(this, source, out transferredItems, false);
 
 			AttemptItemTransfer(this, source, out transferredItems);
 

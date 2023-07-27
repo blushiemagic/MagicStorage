@@ -7,4 +7,3 @@ hideResources = false
 includeSource = true
 includePDB = true
 modReferences = SerousCommonLib
-weakReferences = RecursiveCraft@2.0
