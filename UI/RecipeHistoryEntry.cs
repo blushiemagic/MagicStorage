@@ -44,7 +44,7 @@ namespace MagicStorage.UI {
 			if (entry < 0 || entry >= history.Count)
 				return;
 
-			CraftingGUI.SetSelectedRecipe(history[entry].OriginalRecipe);
+			CraftingGUI.SetSelectedRecipe(history[entry].Recipe);
 			StorageGUI.SetRefresh();
 			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 
@@ -53,7 +53,7 @@ namespace MagicStorage.UI {
 		}
 
 		public void AddHistory(Recipe recipe) {
-			if (history.Take(Current + 1).Select(h => h.OriginalRecipe).Any(r => Utility.RecipesMatchForHistory(recipe, r)))
+			if (history.Take(Current + 1).Select(h => h.Recipe).Any(r => Utility.RecipesMatchForHistory(recipe, r)))
 				return;
 
 			RecipeHistoryEntry entry = new(Current + 1, this);
@@ -102,11 +102,7 @@ namespace MagicStorage.UI {
 		public readonly RecipeHistory history;
 		public readonly int index;
 
-		public Recipe OriginalRecipe { get; private set; }
-
-		public Recipe CompoundRecipe { get; private set; }
-
-		public Recipe UsedRecipe => CompoundRecipe ?? OriginalRecipe;
+		public Recipe Recipe { get; private set; }
 
 		public RecipeHistoryEntry(int index, RecipeHistory history) {
 			this.index = index;
@@ -140,11 +136,11 @@ namespace MagicStorage.UI {
 		}
 
 		internal void SetRecipe(Recipe recipe) {
-			Recipe used = UsedRecipe;
+			Recipe = recipe;
 
-			resultSlot.SetItem(used.createItem, clone: true);
+			resultSlot.SetItem(recipe.createItem, clone: true);
 
-			ingredientZone.SetDimensions(7, Math.Max((used.requiredItem.Count - 1) / 7 + 1, 1));
+			ingredientZone.SetDimensions(7, Math.Max((recipe.requiredItem.Count - 1) / 7 + 1, 1));
 
 			ingredientZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
 			ingredientZone.Width.Set(ingredientZone.ZoneWidth, 0f);
@@ -153,23 +149,26 @@ namespace MagicStorage.UI {
 			Width.Set(resultSlot.Width.Pixels + 4 + ingredientZone.ZoneWidth + 4, 0f);
 			Height.Set(Math.Max(resultSlot.Height.Pixels, ingredientZone.ZoneHeight) + 4, 0f);
 
-			ingredientZone.SetItemsAndContexts(used.requiredItem.Count, GetIngredient);
+			ingredientZone.SetItemsAndContexts(recipe.requiredItem.Count, GetIngredient);
 
 			Recalculate();
 		}
 
-		private Item GetIngredient(int slot, ref int context) => slot < UsedRecipe.requiredItem.Count ? UsedRecipe.requiredItem[slot] : new Item();
+		private Item GetIngredient(int slot, ref int context) {
+			Recipe recipe = Recipe;
+			return slot < recipe.requiredItem.Count ? recipe.requiredItem[slot] : new Item();
+		}
 
 		public void Refresh() {
 			int context = 0;
 
-			Recipe used = UsedRecipe;
+			Recipe recipe = Recipe;
 
 			// TODO can this be nicer?
-			if (used == CraftingGUI.selectedRecipe)
+			if (recipe == CraftingGUI.selectedRecipe)
 				context = ItemSlot.Context.TrashItem;
-			else if (!CraftingGUI.IsAvailable(used))
-				context = used == CraftingGUI.selectedRecipe ? ItemSlot.Context.BankItem : ItemSlot.Context.ChestItem;
+			else if (!CraftingGUI.IsAvailable(recipe))
+				context = recipe == CraftingGUI.selectedRecipe ? ItemSlot.Context.BankItem : ItemSlot.Context.ChestItem;
 
 			resultSlot.Context = context;
 		}
