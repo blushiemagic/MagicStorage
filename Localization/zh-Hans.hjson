@@ -848,11 +848,8 @@ Mods: {
 				}
 
 				recursionEnabled: {
-					// Label: "Crafting Recursion"
-					/* Tooltip:
-						'''
-						When enabled, the Crafting UI gets new crafting buttons and a new menu for handling recursive crafting.
-						''' */
+					// Label: Crafting Recursion
+					// Tooltip: When enabled, the Crafting UI gets new crafting buttons and a new menu for handling recursive crafting.
 				}
 
 				glowNewItems: {
