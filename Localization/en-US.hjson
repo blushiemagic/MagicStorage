@@ -846,30 +846,11 @@ Mods: {
 					Tooltip: Enable to clear the recipe history in the Crafting GUI when opening it
 				}
 
-				recursionDepth: {
-					Label: "[DISABLED] Recipe Recursion Depth"
+				recursionEnabled: {
+					Label: "Crafting Recursion"
 					Tooltip:
 						'''
-						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-						How deep the recursion goes for crafting recipes in the Crafting UI.
-						Set to 0 to disable this feature.
-						Set to -1 for infinite depth
-						'''
-				}
-
-				recursionMode: {
-					Label: "[DISABLED] Recipe Recursion Mode"
-					Tooltip:
-						'''
-						== THIS CONFIG OPTION IS DISABLED UNTIL THE FEATURE IS COMPLETED ==
-						Legacy:
-						  Logic is kept in line with how it worked in the Recursive Craft integration.
-						  That is, recursive recipes are "combined" into one singular recipe.
-						  Simplicity at the cost of more processing required and less control.
-						Modern:
-						  Each sub-recipe in a recursive recipe processes its ingredients and conditions separately.
-						  Sub-recipes can be swapped out in a special UI in the Crafting UI.
-						  Less processing required and more control at the cost of more complexity.
+						When enabled, the Crafting UI gets new crafting buttons and a new menu for handling recursive crafting.
 						'''
 				}
 
@@ -936,12 +917,6 @@ Mods: {
 					Label: Automaton remembers last help tip
 					Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
 				}
-			}
-
-			RecursionMode: {
-				Tooltip: ""
-				Legacy.Label: RecursiveCraft-like
-				Modern.Label: Modern
 			}
 
 			ButtonConfigurationMode: {
