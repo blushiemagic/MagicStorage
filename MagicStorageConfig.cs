@@ -147,6 +147,9 @@ namespace MagicStorage {
 		[JsonIgnore]
 		public static bool IsRecursionEnabled => Instance.recursionEnabled;
 
+		[JsonIgnore]
+		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
+
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 	}
 
