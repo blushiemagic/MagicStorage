@@ -110,7 +110,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
 				if (ingredient.trees.Count == 0)
-					continue;  // Cannot recurse further, go to next recipe
+					continue;  // Cannot recurse further, go to next ingredient
 
 				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
 
