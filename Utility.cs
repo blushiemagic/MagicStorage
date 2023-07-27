@@ -395,8 +395,8 @@ namespace MagicStorage {
 		}
 
 		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
-			BuildOnStackHooksDelegate();
-			onStackHooksDelegate?.Invoke(destination, source, numTransfered);
+			// Does nothing in 1.4.3 since the API does not exist
+			// Call is left in to reduce code differences
 		}
 
 		/// <summary>

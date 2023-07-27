@@ -1265,13 +1265,8 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				NetHelper.Report(true, "Spawning excess results on player...");
 
-				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), context.toWithdraw, context.results)) {
-#if TML_2022_09
+				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), context.toWithdraw, context.results))
 					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-#else
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
-#endif
-				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending craft results to server...");
 
@@ -1429,11 +1424,7 @@ namespace MagicStorage
 
 				var consumed = context.ConsumedItems.ToList();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed
-#if !TML_2022_09
-					, new Item()
-#endif
-					);
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed);
 
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
@@ -1526,11 +1517,7 @@ namespace MagicStorage
 
 				var consumed = context.ConsumedItems.ToList();
 
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed
-#if !TML_2022_09
-					, new Item()
-#endif
-					);
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed);
 
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);

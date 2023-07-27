@@ -17,9 +17,6 @@
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="RecursiveCraft">
-      <HintPath>..\references\1.4.3\RecursiveCraft.dll</HintPath>
-    </Reference>
     <Reference Include="SerousCommonLib">
       <HintPath>..\references\1.4.3\SerousCommonLib.dll</HintPath>
     </Reference>
