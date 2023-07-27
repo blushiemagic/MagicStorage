@@ -109,6 +109,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				maxDepth = depth;
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
+				if (ingredient.trees.Count == 0)
+					continue;  // Cannot recurse further, go to next recipe
+
 				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
 
 				Recipe recipe = ingredient.SelectedRecipe;
@@ -119,7 +122,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft));
 				root.Add(orderedTree);
 
-				if (ingredient.SelectedRecipe.TryGetRecursiveRecipe(out var recursive))
+				if (recipe.TryGetRecursiveRecipe(out var recursive))
 					recursive.ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 			}
 
