@@ -389,6 +389,8 @@ namespace MagicStorage.UI.States {
 			recipePanel.Recalculate();
 		}
 
+		const int AMOUNT_BUTTON_HEIGHT = 24;
+
 		private void InitCraftButtonDimensions() {
 			craftAmount.Top.Set(craftButton.Top.Pixels - 16, 1f);
 			craftAmount.Left.Set(12, 0f);
@@ -400,7 +402,7 @@ namespace MagicStorage.UI.States {
 
 			craftP1.Left.Set(craftButton.Width.Pixels + 4, 0f);
 			craftP1.Width.Set(24, 0f);
-			craftP1.Height.Set(18, 0f);
+			craftP1.Height.Set(AMOUNT_BUTTON_HEIGHT, 0f);
 			craftP1.PaddingTop = 4;
 			craftP1.PaddingBottom = 3;
 
@@ -552,7 +554,7 @@ namespace MagicStorage.UI.States {
 
 			storageZone.Top.Set(storageZoneTop, 0f);
 
-			storageZone.Height.Set(-storageZoneTop - 68, 1f);
+			storageZone.Height.Set(-storageZoneTop - 60 - AMOUNT_BUTTON_HEIGHT, 1f);
 
 			storageZone.Recalculate();
 
@@ -593,7 +595,7 @@ namespace MagicStorage.UI.States {
 
 				float craftButtonTop = craftButton.Top.Pixels;
 
-				craftP1.Top.Set(craftButtonTop - 18, 1f);
+				craftP1.Top.Set(craftButtonTop - AMOUNT_BUTTON_HEIGHT - 6, 1f);
 				
 				craftP1.Recalculate();
 

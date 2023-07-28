@@ -792,11 +792,8 @@ namespace MagicStorage
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-#if TML_2022_09
-				player.QuickSpawnClonedItem(new EntitySource_TileEntity(heart), item, item.stack);
-#else
+
 				player.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
-#endif
 			}
 
 			Report(true, MessageType.CraftResult + " packet received by client " + Main.myPlayer);
@@ -905,16 +902,18 @@ namespace MagicStorage
 
 			Report(true, MessageType.TransferItems + " packet was successfully received by server from client " + sender);
 
-			AttemptItemTransferAndSendResult(unitDestination, unitSource);
+			AttemptItemTransferAndSendResult(unitDestination, unitSource, out _);
 		}
 
-		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, bool netQueue = true) {
+		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems, bool netQueue = true) {
+			transferredItems = null;
+
 			if (Main.netMode != NetmodeID.Server)
 				return false;
 
 			Report(true, $"Performing AttemptItemTransferAndSendResult on source unit (X: {source.Position.X}, Y: {source.Position.Y}) and destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})...");
 
-			TEStorageUnit.AttemptItemTransfer(destination, source, out List<Item> transferredItems);
+			TEStorageUnit.AttemptItemTransfer(destination, source, out transferredItems);
 
 			if (transferredItems.Count == 0) {
 				//Nothing to do
