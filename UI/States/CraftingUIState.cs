@@ -134,6 +134,10 @@ namespace MagicStorage.UI.States {
 					if (obj.slot >= CraftingGUI.selectedRecipe.requiredItem.Count)
 						return;
 
+					// Right click will do nothing when recursive crafting is enabled, since it would be pointless
+					if (MagicStorageConfig.IsRecursionEnabled)
+						return;
+
 					// select ingredient recipe by right clicking
 					Item item = CraftingGUI.selectedRecipe.requiredItem[obj.slot];
 					if (MagicCache.ResultToRecipe.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0) {
