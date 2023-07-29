@@ -85,8 +85,6 @@ public class MagicCache : ModSystem
 
 		if (!Main.gameMenu && MagicUI.IsCraftingUIOpen())
 			StorageGUI.SetRefresh(forceFullRefresh: true);
-
-		// TODO: refresh recursive recipes
 	}
 
 	public override void Unload()
