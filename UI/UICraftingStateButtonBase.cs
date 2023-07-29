@@ -12,7 +12,8 @@ namespace MagicStorage.UI {
 			if (StorageGUI.CurrentlyRefreshing)
 				return;  // Do not read anything until refreshing is completed
 
-			if (CraftingGUI.IsAvailable(CraftingGUI.selectedRecipe, false) && CraftingGUI.PassesBlock(CraftingGUI.selectedRecipe)) {
+			// TODO: cache this calculation?
+			if (CraftingGUI.IsCurrentRecipeFullyAvailable()) {
 				if (IsMouseHovering) {
 					OnHoveringAndValidRecipe(gameTime);
 					BackgroundColor = new Color(73, 94, 171);

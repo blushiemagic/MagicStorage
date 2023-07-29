@@ -6,29 +6,17 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public readonly struct ItemInfo {
-		public readonly int itemType;
-		public readonly int itemStack;
+		public readonly int type;
+		public readonly int stack;
+		public readonly int prefix;  // Used when converting to ItemData
 
-		public ItemInfo(int type, int stack) {
-			itemType = type;
-			itemStack = stack;
+		public ItemInfo(int type, int stack, int prefix = 0) {
+			this.type = type;
+			this.stack = stack;
+			this.prefix = prefix;
 		}
 
-		public void Deconstruct(out int type, out int stack) {
-			type = itemType;
-			stack = itemStack;
-		}
-	}
-
-	public sealed class RecurrentRecipeInfo {
-		public readonly Recipe recipe;
-
-		public readonly List<ItemInfo> excessResults;
-
-		internal RecurrentRecipeInfo(Recipe recipe) {
-			this.recipe = recipe;
-			excessResults = new();
-		}
+		public ItemInfo(Item item) : this(item.type, item.stack, item.prefix) { }
 	}
 
 	public sealed class RecursiveRecipe {
@@ -67,10 +55,43 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		/// <summary>
-		/// Returns the order that the recipes for this recursive recipe should be processed in
+		/// Returns an enumeration of every recipe used in this recursion tree
 		/// </summary>
-		/// <param name="amountToCraft">How many items are expected to be crafted</param>
-		public OrderedRecipeTree GetCraftingTree(int amountToCraft) {
+		public IEnumerable<Recipe> GetAllRecipes() {
+			HashSet<int> checkedRecipes = new();
+			Queue<RecursiveRecipe> recipeQueue = new();
+			recipeQueue.Enqueue(this);
+			Queue<int> depths = new();
+			depths.Enqueue(0);
+
+			while (recipeQueue.TryDequeue(out RecursiveRecipe recipe)) {
+				Node root = recipe.tree.Root;
+				int depth = depths.Dequeue();
+
+				if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
+					continue;
+
+				if (!checkedRecipes.Add(root.poolIndex))
+					continue;
+
+				yield return recipe.original;
+
+				foreach (var ingredient in root.info.ingredientTrees) {
+					if (ingredient.RecipeCount == 0 || !ingredient.SelectedRecipe.TryGetRecursiveRecipe(out RecursiveRecipe ingredientRecipe))
+						continue;
+
+					recipeQueue.Enqueue(ingredientRecipe);
+					depths.Enqueue(depth + 1);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Returns a tree representing the recipes this recursive recipe will use and their expected crafted quantities
+		/// </summary>
+		/// <param name="amountToCraft">How many items are expected to be crafted.  Defaults to 1</param>
+		/// <param name="availableInventory">An optional dictionary indicating which item types are available and their quantities</param>
+		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, Dictionary<int, int> availableInventory = null) {
 			int batchSize = original.createItem.stack;
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 
@@ -78,26 +99,21 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, batches * batchSize));
 			int depth = 0, maxDepth = 0;
 
-			ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+			ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 
 			return orderedTree;
 		}
 
-		// TODO: the below comment
-		/*   CraftingGUI should go through the order and calculate "how many" of each sub-recipe is needed to craft the requested amount of the final recipe
-		 *       - logic for that will reverse this reversed list
-		 *       - slower, but making the API sensible is more important
-		 *   It should then go through the order, skipping those which are 0 or less, and attempt to craft that much
-		 *   If any recipe could not be crafted, the logic should just move on to the next (any recipes further up in the tree will fail as well)
-		 */
+		private void ModifyCraftingTree(Dictionary<int, int> availableInventory, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
+			if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
+				return;
 
-		private void ModifyCraftingTree(HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
 			// Safety check
 			if (tree.Root is null)
 				return;
 
 			// Check for infinitely recursive recipe branches (e.g. Wood -> Wood Platform -> Wood)
-			if (!recursionStack.Add(tree.Root.poolIndex))
+			if (!recursionStack.Add(tree.originalRecipe.createItem.type))
 				return;
 
 			// Ensure that the tree is calculated
@@ -109,24 +125,26 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				maxDepth = depth;
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
-				if (ingredient.trees.Count == 0)
+				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
 				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
 
+				ingredient.FindBestMatchAndSetRecipe(availableInventory);
+
 				Recipe recipe = ingredient.SelectedRecipe;
 
-				int amountToCraft = parentBatches * recipe.createItem.stack;
-				int batches = (int)Math.Ceiling(amountToCraft / (double)requiredPerCraft);
+				int batchSize = recipe.createItem.stack;
+				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft));
+				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches * batchSize));
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
-					recursive.ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+					recursive.ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 			}
 
-			recursionStack.Remove(tree.Root.poolIndex);
+			recursionStack.Remove(tree.originalRecipe.createItem.type);
 
 			depth--;
 		}
