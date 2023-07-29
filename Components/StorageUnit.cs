@@ -2,6 +2,7 @@ using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
@@ -146,9 +147,12 @@ namespace MagicStorage.Components
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
 
+				SoundEngine.PlaySound(SoundID.MaxMana, storageUnit.Position.ToWorldCoordinates());
+				Dust.NewDustPerfect(storageUnit.Position.ToWorldCoordinates(), DustID.PureSpray, Vector2.Zero, Scale: 2, newColor: Color.Green);
+
 				return true;
 			}
-
+			
 			return false;
 		}
 
