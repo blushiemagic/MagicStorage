@@ -849,6 +849,27 @@ namespace MagicStorage
 			return available;
 		}
 
+		/// <summary>
+		/// Returns the trimmed recursion crafting tree for <paramref name="recipe"/> if it exists and recursion is enabled, or <see langword="null"/> otherwise.
+		/// </summary>
+		/// <param name="recipe">The recipe</param>
+		/// <param name="toCraft">The quantity of the final recipe's crafted item to create</param>
+		public static OrderedRecipeTree GetDefaultTrimmedCraftingTree(Recipe recipe, int toCraft = 1) {
+			if (!MagicStorageConfig.IsRecursionEnabled || !recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
+				return null;
+
+			NetHelper.Report(true, "Calculating recursion tree for recipe...");
+
+			var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
+
+			// Trim the branches of any recipes that have been met
+			isAvailable_ItemCountsDictionary = itemCounts;
+			craftingTree.TrimBranches(IsAvailable_GetItemCount);
+			isAvailable_ItemCountsDictionary = null;
+
+			return craftingTree;
+		}
+
 		public static bool IsAvailable(Recipe recipe, bool checkRecursive = true)
 		{
 			if (recipe is null)
@@ -857,15 +878,7 @@ namespace MagicStorage
 			NetHelper.Report(true, "Checking if recipe is available...");
 
 			bool available;
-			if (checkRecursive && MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
-				NetHelper.Report(false, "Recursive recipe detected.  Calculating recipe order...");
-
-				var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
-
-				// Trim the branches of any recipes that have been met
-				isAvailable_ItemCountsDictionary = itemCounts;
-				craftingTree.TrimBranches(IsAvailable_GetItemCount);
-
+			if (checkRecursive && GetDefaultTrimmedCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
 				// Put all remaining recipes on a stack, and then process them in that order
 				// If any recipe ends up not being fulfilled, the original recipe will not be available
 				Stack<OrderedRecipeContext> recipeStack = craftingTree.GetProcessingOrder();
@@ -1103,15 +1116,9 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Checking if recipe passes \"blocked ingredients\" check...");
 
-			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
-				NetHelper.Report(false, "Recursive recipe detected...");
-
+			if (GetDefaultTrimmedCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
 				// Data list will need to be modified.  Cache the old value
 				List<ItemInfo> oldInfo = new List<ItemInfo>(storageItemInfo);
-
-				var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
-				isAvailable_ItemCountsDictionary = itemCounts;
-				craftingTree.TrimBranches(IsAvailable_GetItemCount);
 
 				Stack<OrderedRecipeContext> recipeStack = craftingTree.GetProcessingOrder();
 
