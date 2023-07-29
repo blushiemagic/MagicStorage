@@ -22,9 +22,8 @@ namespace MagicStorage.Edits {
 			//Basically manually doing Chest.ServerPlaceItem, but inserting TryPlaceItemInNearbyStorageSystems before the SendData call
 			item = Chest.PutItemInNearbyChest(item, player.Center);
 
-			bool playSound = false;
 			int type = item.type;
-			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player, item, ref playSound);
+			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player, item);
 
 			NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
 

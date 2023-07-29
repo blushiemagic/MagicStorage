@@ -11,9 +11,8 @@ using ILPlayer = Terraria.IL_Player;
 
 namespace MagicStorage.Edits {
 	internal class QuickStackILEdit : Edit {
-		public override void LoadEdits() {
-			// TODO: edit no longer loads, might need to edit different method(s)
-		//	ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
+		public override void LoadEdits() { 
+			ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
 		}
 
 		public override void UnloadEdits() {
@@ -21,23 +20,22 @@ namespace MagicStorage.Edits {
 		}
 
 		private static void Player_QuickStackAllChests(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, PatchMethod);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: true, PatchMethod);
 		}
 
 		private static bool PatchMethod(ILCursor c, ref string badReturnReason) {
-			int playSoundLocal = -1;
-			if (!c.TryGotoNext(MoveType.Before, i => i.MatchLdloc(out playSoundLocal),
-				i => i.MatchBrfalse(out _),
-				i => i.MatchLdcI4(7),
-				i => i.MatchLdcI4(-1),
-				i => i.MatchLdcI4(-1))) {
-				badReturnReason = "Could not find instruction sequence for playSound local variable";
+
+			// Finds all return instructions and picks the last one :|
+			if (!c.TryFindNext(out ILCursor[] foundRets, i => i.MatchRet())) {
+				badReturnReason = "Failed to find any IL returns";
 				return false;
 			}
 
-			c.Emit(OpCodes.Ldarg_0);
-			c.Emit(OpCodes.Ldloca, playSoundLocal);
-			c.EmitDelegate((Player self, ref bool flag) => {
+			ILCursor d = foundRets[foundRets.Length-1];
+			d.GotoPrev(MoveType.After);
+
+			d.Emit(OpCodes.Ldarg_0);
+			d.EmitDelegate((Player self) => {
 				//Guaranteed to run only in singleplayer/servers
 				IEnumerable<TEStorageHeart> hearts = self.GetNearbyNetworkHearts();
 
@@ -45,7 +43,7 @@ namespace MagicStorage.Edits {
 					Item item = self.inventory[i];
 
 					if (item.type > ItemID.None && item.stack > 0 && !item.favorited && !item.IsACoin) {
-						bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref flag);
+						bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item);
 
 						if (success && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
 							StorageGUI.SetRefresh();

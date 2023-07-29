@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -54,10 +55,10 @@ namespace MagicStorage.Common.Systems {
 				Main.NewText("Server Operator status was successfully modified.", Color.Green);
 		}
 
-		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound)
-			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item)
+			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyNetworkHearts(), item);
 
-		internal static bool TryQuickStackItemIntoNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item) {
 			if (item.IsAir)
 				return false;
 
@@ -72,7 +73,7 @@ namespace MagicStorage.Common.Systems {
 				heart.DepositItem(item);
 
 				if (oldType != item.type || oldStack != item.stack)
-					playSound = true;
+					SoundEngine.PlaySound(SoundID.Grab);
 
 				if (item.IsAir)
 					return true;
