@@ -844,7 +844,7 @@ Mods: {
 				}
 
 				recursionDepth: {
-					// Label: "Recipe Recursion Depth"
+					// Label: Recipe Recursion Depth
 					/* Tooltip:
 						'''
 						How deep the recursion goes for crafting recipes in the Crafting UI.
