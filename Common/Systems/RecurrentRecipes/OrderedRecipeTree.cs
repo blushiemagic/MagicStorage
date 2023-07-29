@@ -38,7 +38,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// </summary>
 		/// <param name="getItemCountForIngredient">A function taking the recipe, the ingredient type and returning how many items can satisfy that ingredient requirement</param>
 		public void TrimBranches(Func<Recipe, int, int> getItemCountForIngredient) {
-			NetHelper.Report(true, "Trimming branches...");
+			NetHelper.Report(true, "Trimming branches of recipe tree...");
 
 			// Go from the top of the tree down, cutting off any branches when necessary
 			Queue<OrderedRecipeTree> queue = new();

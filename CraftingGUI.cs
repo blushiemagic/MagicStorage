@@ -854,8 +854,12 @@ namespace MagicStorage
 			if (recipe is null)
 				return false;
 
+			NetHelper.Report(true, "Checking if recipe is available...");
+
 			bool available;
 			if (checkRecursive && MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				NetHelper.Report(false, "Recursive recipe detected.  Calculating recipe order...");
+
 				var craftingTree = recursiveRecipe.GetCraftingTree(1);
 
 				// Trim the branches of any recipes that have been met
@@ -874,6 +878,7 @@ namespace MagicStorage
 				EnvironmentSandbox sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
 				IEnumerable<EnvironmentModule> modules = heart.GetModules();
 
+				NetHelper.Report(true, "Processing recipe order...");
 				available = true;
 				while (recipeStack.TryPop(out OrderedRecipeContext context)) {
 					if (!IsAvailable_CheckRecipe(context.recipe)) {
@@ -916,6 +921,7 @@ namespace MagicStorage
 				isAvailable_ItemCountsDictionary = null;
 			}
 
+			NetHelper.Report(true, $"Recipe {(available ? "was" : "was not")} available");
 			return available;
 		}
 
@@ -1095,7 +1101,11 @@ namespace MagicStorage
 			if (recipe is null || storageItemInfo is null)
 				return false;
 
+			NetHelper.Report(true, "Checking if recipe passes \"blocked ingredients\" check...");
+
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				NetHelper.Report(false, "Recursive recipe detected...");
+
 				// Data list will need to be modified.  Cache the old value
 				List<ItemInfo> oldInfo = new List<ItemInfo>(storageItemInfo);
 
@@ -1110,6 +1120,7 @@ namespace MagicStorage
 
 					if (!PassesBlock_CheckRecipe(contextRecipe, consumeStoredItems: true)) {
 						storageItemInfo = oldInfo;
+						NetHelper.Report(true, "Recipe failed the ingredients check");
 						return false;
 					}
 
@@ -1144,9 +1155,14 @@ namespace MagicStorage
 				}
 
 				storageItemInfo = oldInfo;
+
+				NetHelper.Report(true, "Recipe passed the ingredients check");
 				return true;
-			} else
-				return PassesBlock_CheckRecipe(recipe);
+			} else {
+				bool success = PassesBlock_CheckRecipe(recipe);
+				NetHelper.Report(true, $"Recipe {(success ? "passed" : "failed")} the ingredients check");
+				return success;
+			}
 		}
 
 		private static bool PassesBlock_CheckRecipe(Recipe recipe, bool consumeStoredItems = false) {
