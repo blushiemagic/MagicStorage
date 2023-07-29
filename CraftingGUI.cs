@@ -134,7 +134,7 @@ namespace MagicStorage
 				// context == 0 - Available - Default Blue
 				if (context != 0)
 				{
-					bool craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => AmountCraftable(recipe) > 0);
+					bool craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe));
 					if (craftable)
 						context = 6; // Craftable - Light green // ItemSlot.Context.TrashItem
 				}
@@ -156,28 +156,57 @@ namespace MagicStorage
 			return false;
 		}
 
+		private static int? amountCraftableForCurrentRecipe;
+		private static Recipe recentRecipeAmountCraftable;
+
+		public static int AmountCraftableForCurrentRecipe() {
+			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
+				return 0;  // Delay logic until threading stops
+
+			if (object.ReferenceEquals(recentRecipeAmountCraftable, selectedRecipe) && amountCraftableForCurrentRecipe is { } amount)
+				return amount;
+
+			// Calculate the value
+			recentRecipeAmountCraftable = selectedRecipe;
+			amountCraftableForCurrentRecipe = amount = AmountCraftable(selectedRecipe);
+			return amount;
+		}
+
+		internal static bool requestingAmountFromUI;
+
 		// Calculates how many times a recipe can be crafted using available items
-		// TODO is this correct?
 		internal static int AmountCraftable(Recipe recipe)
 		{
+			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				// Clone the available inventory
+				Dictionary<int, int> availableInventory = new Dictionary<int, int>(itemCounts);
+
+				requestingAmountFromUI = false;
+				using (FlagSwitch.Create(ref requestingAmountFromUI, true))
+					return recursiveRecipe.GetMaxCraftable(availableInventory);
+			}
+
+			// Handle the old logic
 			if (!IsAvailable(recipe))
 				return 0;
-			int maxCraftable = int.MaxValue;
 
-			int GetMaxCraftsAmount(Item requiredItem)
-			{
+			// Local capturing
+			Recipe r = recipe;
+
+			int GetMaxCraftsAmount(Item requiredItem) {
 				int total = 0;
-				foreach (Item inventoryItem in items)
-					if (inventoryItem.type == requiredItem.type || RecipeGroupMatch(recipe, inventoryItem.type, requiredItem.type))
+				foreach (Item inventoryItem in items) {
+					if (inventoryItem.type == requiredItem.type || RecipeGroupMatch(r, inventoryItem.type, requiredItem.type))
 						total += inventoryItem.stack;
+				}
 
 				int craftable = total / requiredItem.stack;
 				return craftable;
 			}
 
-			maxCraftable = recipe.requiredItem.Select(GetMaxCraftsAmount).Prepend(maxCraftable).Min();
+			int maxCrafts = recipe.requiredItem.Select(GetMaxCraftsAmount).Prepend(int.MaxValue).Min();
 
-			return maxCraftable * recipe.createItem.stack;
+			return maxCrafts * recipe.createItem.stack;
 		}
 
 		internal static Item GetResult(int slot, ref int context) => slot == 0 && result is not null ? result : new Item();
@@ -224,16 +253,17 @@ namespace MagicStorage
 		}
 
 		internal static void ClampCraftAmount() {
-			if (craftAmountTarget < 1) 
+			if (craftAmountTarget < 1)
 				craftAmountTarget = 1;
-			else if (!IsCurrentRecipeFullyAvailable()) 
+			else if (!IsCurrentRecipeFullyAvailable())
 				craftAmountTarget = 1;
-			else if (craftAmountTarget > selectedRecipe.createItem.maxStack)
-			{ 
-				int amountCraftable = AmountCraftable(selectedRecipe); 
-				craftAmountTarget = amountCraftable < selectedRecipe.createItem.maxStack 
-					? amountCraftable
-					: selectedRecipe.createItem.maxStack;
+			else
+			{
+				int amountCraftable = AmountCraftableForCurrentRecipe();
+				int max = Math.Min(amountCraftable, selectedRecipe.createItem.maxStack);
+
+				if (craftAmountTarget > max)
+					craftAmountTarget = max;
 			}
 		}
 
@@ -337,6 +367,10 @@ namespace MagicStorage
 				StorageGUI.activeThread?.Stop();
 				StorageGUI.activeThread = null;
 			}
+
+			// Always reset these cached values
+			recentRecipeAvailable = null;
+			recentRecipeAmountCraftable = null;
 
 			items.Clear();
 			sourceItems.Clear();
@@ -923,10 +957,10 @@ namespace MagicStorage
 					CatchDroppedItems = false;
 
 					// Add the "results" and extra items to the inventory
-					IsAvailable_AddOrSumCount(isAvailable_ItemCountsDictionary, createItem.type, createItem.stack * batches);
+					isAvailable_ItemCountsDictionary.AddOrSumCount(createItem.type, createItem.stack * batches);
 
 					foreach (Item droppedItem in DroppedItems)
-						IsAvailable_AddOrSumCount(isAvailable_ItemCountsDictionary, droppedItem.type, droppedItem.stack);
+						isAvailable_ItemCountsDictionary.AddOrSumCount(droppedItem.type, droppedItem.stack);
 				}
 			} else {
 				isAvailable_ItemCountsDictionary = itemCounts;
@@ -947,13 +981,13 @@ namespace MagicStorage
 
 				if (count >= consume) {
 					isAvailable_ItemCountsDictionary[item.type] = count - consume;
-					IsAvailable_AddOrSumCount(consumedItemCounts, item.type, consume);
+					consumedItemCounts.AddOrSumCount(item.type, consume);
 				} else {
 					// Item would be wholly consumed
 					if (count > 0) {
 						consume -= count;
 						isAvailable_ItemCountsDictionary.Remove(item.type);
-						IsAvailable_AddOrSumCount(consumedItemCounts, item.type, count);
+						consumedItemCounts.AddOrSumCount(item.type, count);
 					}
 
 					// Check for recipe groups
@@ -967,13 +1001,13 @@ namespace MagicStorage
 								if (count >= consume) {
 									// Nothing left to consume
 									isAvailable_ItemCountsDictionary[groupItem] = count - consume;
-									IsAvailable_AddOrSumCount(consumedItemCounts, groupItem, consume);
+									consumedItemCounts.AddOrSumCount(groupItem, consume);
 									goto afterGroupCheck;
 								} else if (count > 0) {
 									// Item would be wholly consumed
 									consume -= count;
 									isAvailable_ItemCountsDictionary.Remove(groupItem);
-									IsAvailable_AddOrSumCount(consumedItemCounts, groupItem, count);
+									consumedItemCounts.AddOrSumCount(groupItem, count);
 								}
 							}
 						}
@@ -982,13 +1016,6 @@ namespace MagicStorage
 					afterGroupCheck: ;
 				}
 			}
-		}
-
-		private static void IsAvailable_AddOrSumCount(Dictionary<int, int> itemCounts, int type, int count) {
-			if (!itemCounts.ContainsKey(type))
-				itemCounts[type] = count;
-			else
-				itemCounts[type] += count;
 		}
 
 		private static bool IsAvailable_CheckRecipe(Recipe recipe) {
@@ -1333,7 +1360,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool RecipeGroupMatch(Recipe recipe, int inventoryType, int requiredType)
+		public static bool RecipeGroupMatch(Recipe recipe, int inventoryType, int requiredType)
 		{
 			foreach (int num in recipe.acceptedGroups)
 			{
@@ -1343,8 +1370,6 @@ namespace MagicStorage
 			}
 
 			return false;
-
-			//return recipe.useWood(type1, type2) || recipe.useSand(type1, type2) || recipe.useIronBar(type1, type2) || recipe.useFragment(type1, type2) || recipe.AcceptedByItemGroups(type1, type2) || recipe.usePressurePlate(type1, type2);
 		}
 
 		internal static void SetSelectedRecipe(Recipe recipe)
@@ -1545,7 +1570,7 @@ namespace MagicStorage
 			} else {
 				//Safeguard against absurdly high craft targets
 				int origCraftRequest = toCraft;
-				toCraft = Math.Min(toCraft, AmountCraftable(selectedRecipe));
+				toCraft = Math.Min(toCraft, AmountCraftableForCurrentRecipe());
 
 				if (toCraft != origCraftRequest)
 					NetHelper.Report(true, $"Craft amount reduced to {toCraft}");

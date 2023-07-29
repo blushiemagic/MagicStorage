@@ -78,14 +78,20 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
 
 						// Attempt to use items that are valid in the group
-						if (group.ContainsItem(item.type) && availableInventory.TryGetValue(item.type, out count)) {
-							usedRecipeGroup = true;
-							stack -= count;
+						if (group.ContainsItem(item.type)) {
+							foreach (int groupItem in group.ValidItems) {
+								if (availableInventory.TryGetValue(item.type, out count)) {
+									usedRecipeGroup = true;
+									stack -= count;
 
-							if (stack <= 0)
-								break;
+									if (stack <= 0)
+										goto checkNonRecipeGroup;
+								}
+							}
 						}
 					}
+
+					checkNonRecipeGroup:
 
 					if (!usedRecipeGroup && availableInventory.TryGetValue(item.type, out count))
 						stack -= count;
