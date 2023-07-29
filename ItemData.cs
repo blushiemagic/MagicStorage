@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using System;
 using Terraria;
 
@@ -15,6 +16,10 @@ namespace MagicStorage
 		}
 
 		public ItemData(Item item) : this(item.type, item.prefix)
+		{
+		}
+
+		public ItemData(ItemInfo info) : this(info.type, info.prefix)
 		{
 		}
 
