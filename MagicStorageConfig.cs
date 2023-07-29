@@ -46,10 +46,10 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool clearHistory;
 
-		[Label("$Mods.MagicStorage.Config.recursionEnabled.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.recursionEnabled.Tooltip")]
-		[DefaultValue(true)]
-		public bool recursionEnabled;
+		[DefaultValue(3)]
+		[DrawTicks]
+		[Range(-1, 10)]
+		public int recursionDepth;
 
 		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
 		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
@@ -145,7 +145,13 @@ namespace MagicStorage {
 		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
 		[JsonIgnore]
-		public static bool IsRecursionEnabled => Instance.recursionEnabled;
+		public static int RecipeRecursionDepth => Instance.recursionDepth;
+		
+		[JsonIgnore]
+		public static bool IsRecursionEnabled => RecipeRecursionDepth != 0;
+
+		[JsonIgnore]
+		public static bool IsRecursionInfinite => RecipeRecursionDepth == -1;
 
 		[JsonIgnore]
 		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;

@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Components;
 using MagicStorage.Edits;
@@ -406,15 +407,10 @@ namespace MagicStorage {
 			=> enumerable.ToArray();
 
 		internal static int ConstrainedSum(this IEnumerable<int> source) {
-			int sum = 0;
+			ClampedArithmetic sum = 0;
 
-			foreach (int i in source) {
-				// Check overflow
-				if (sum + i < 0)
-					return int.MaxValue;
-
+			foreach (int i in source)
 				sum += i;
-			}
 			
 			return sum;
 		}
