@@ -860,7 +860,7 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Calculating recursion tree for recipe...");
 
-			var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
+			var craftingTree = recursiveRecipe.GetCraftingTree(toCraft, availableInventory: itemCounts);
 
 			// Trim the branches of any recipes that have been met
 			isAvailable_ItemCountsDictionary = itemCounts;
