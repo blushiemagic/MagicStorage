@@ -847,9 +847,14 @@ Mods: {
 					Tooltip: 在打开制作界面时自动清除配方历史记录
 				}
 
-				recursionEnabled: {
-					// Label: Crafting Recursion
-					// Tooltip: When enabled, the Crafting UI gets new crafting buttons and a new menu for handling recursive crafting.
+				recursionDepth: {
+					// Label: "Recipe Recursion Depth"
+					/* Tooltip:
+						'''
+						How deep the recursion goes for crafting recipes in the Crafting UI.
+						Set to 0 to disable this feature.
+						Set to -1 for infinite depth
+						''' */
 				}
 
 				glowNewItems: {
