@@ -472,5 +472,12 @@ namespace MagicStorage {
 
 			depthText = $"{coordText} {layerText}";
 		}
+
+		public static void AddOrSumCount(this Dictionary<int, int> itemCounts, int type, int count) {
+			if (!itemCounts.ContainsKey(type))
+				itemCounts[type] = count;
+			else
+				itemCounts[type] += count;
+		}
 	}
 }

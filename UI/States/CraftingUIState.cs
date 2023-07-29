@@ -1121,23 +1121,38 @@ namespace MagicStorage.UI.States {
 					return new Item();
 
 				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
-				Item item = index >= 0 && index < CraftingGUI.recipes.Count ? CraftingGUI.recipes[index].createItem : new Item();
 
-				if (!item.IsAir) {
-					// TODO can this be nicer?
-					if (CraftingGUI.recipes[index] == CraftingGUI.selectedRecipe)
-						context = 6;
+				// Fail early if the index is invalid
+				if (index < 0 || index >= CraftingGUI.recipes.Count)
+					return new Item();
 
-					if (!CraftingGUI.recipeAvailable[index])
-						context = CraftingGUI.recipes[index] == CraftingGUI.selectedRecipe ? 4 : 3;
+				try {
+					Recipe recipe = CraftingGUI.recipes[index];
+					bool available = CraftingGUI.recipeAvailable[index];
+
+					Item item = recipe.createItem;
+
+					// Air item should display as an "empty slot" without special contexts
+					if (!item.IsAir) {
+						bool selected = object.ReferenceEquals(recipe, CraftingGUI.selectedRecipe);
+
+						if (selected)
+							context = 6;
+
+						if (!available)
+							context = selected ? 4 : 3;
 					
-					if (StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
-						item = item.Clone();
-						item.favorited = true;
+						if (StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
+							item = item.Clone();
+							item.favorited = true;
+						}
 					}
-				}
 
-				return item;
+					return item;
+				} catch {
+					// Failsafe: return empty item on error
+					return new Item();
+				}
 			}
 
 			public override void GetZoneDimensions(out float top, out float bottomMargin) {
