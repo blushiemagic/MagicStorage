@@ -901,10 +901,10 @@ namespace MagicStorage
 					Item clonedItem = createItem.Clone();
 
 					for (int i = 0; i < batches; i++) {
-						RecipeLoader.OnCraft(clonedItem, selectedRecipe, consumedItems, new Item());
+						RecipeLoader.OnCraft(clonedItem, context.recipe, consumedItems, new Item());
 
 						foreach (EnvironmentModule module in modules)
-							module.OnConsumeItemsForRecipe(sandbox, selectedRecipe, consumedItems);
+							module.OnConsumeItemsForRecipe(sandbox, context.recipe, consumedItems);
 					}
 
 					CatchDroppedItems = false;
@@ -1242,7 +1242,7 @@ namespace MagicStorage
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
 			storageItems.Clear();
-			storageItemInfo.Clear();
+			storageItemInfo = new();
 			storageItemsFromModules.Clear();
 			result = null;
 			if (selectedRecipe is null) {
