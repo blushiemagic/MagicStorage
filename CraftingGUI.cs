@@ -1195,6 +1195,8 @@ namespace MagicStorage
 				if (!useRecipeGroup) {
 					storageIndex = -1;
 					foreach (ItemInfo item in storageItemInfo) {
+						storageIndex++;
+
 						if (!blockStorageItems.Contains(new ItemData(item)) && item.type == ingredient.type) {
 							if (consumeStoredItems) {
 								if (item.stack >= stack)

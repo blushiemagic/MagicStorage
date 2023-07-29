@@ -112,7 +112,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				return;
 
 			// Check for infinitely recursive recipe branches (e.g. Wood -> Wood Platform -> Wood)
-			if (!recursionStack.Add(tree.Root.poolIndex))
+			if (!recursionStack.Add(tree.originalRecipe.createItem.type))
 				return;
 
 			// Ensure that the tree is calculated
@@ -130,18 +130,18 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
 
 				Recipe recipe = ingredient.SelectedRecipe;
+				int perCraft = recipe.createItem.stack;
 
-				int amountToCraft = parentBatches * recipe.createItem.stack;
-				int batches = (int)Math.Ceiling(amountToCraft / (double)requiredPerCraft);
+				int batches = (int)Math.Ceiling(requiredPerCraft / (double)perCraft * parentBatches);
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft));
+				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches));
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
 					recursive.ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 			}
 
-			recursionStack.Remove(tree.Root.poolIndex);
+			recursionStack.Remove(tree.originalRecipe.createItem.type);
 
 			depth--;
 		}
