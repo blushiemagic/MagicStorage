@@ -860,7 +860,7 @@ namespace MagicStorage
 			if (checkRecursive && MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				NetHelper.Report(false, "Recursive recipe detected.  Calculating recipe order...");
 
-				var craftingTree = recursiveRecipe.GetCraftingTree(1);
+				var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
 
 				// Trim the branches of any recipes that have been met
 				isAvailable_ItemCountsDictionary = itemCounts;
@@ -1109,8 +1109,8 @@ namespace MagicStorage
 				// Data list will need to be modified.  Cache the old value
 				List<ItemInfo> oldInfo = new List<ItemInfo>(storageItemInfo);
 
-				var craftingTree = recursiveRecipe.GetCraftingTree(1);
-				isAvailable_ItemCountsDictionary = null;
+				var craftingTree = recursiveRecipe.GetCraftingTree(availableInventory: itemCounts);
+				isAvailable_ItemCountsDictionary = itemCounts;
 				craftingTree.TrimBranches(IsAvailable_GetItemCount);
 
 				Stack<OrderedRecipeContext> recipeStack = craftingTree.GetProcessingOrder();
@@ -1126,6 +1126,7 @@ namespace MagicStorage
 
 					// Add the result items to the list
 					Item resultItem = contextRecipe.createItem.Clone();
+					resultItem.stack = context.amountToCraft;
 					resultItem.Prefix(-1);
 
 					int resultStack = resultItem.stack;
@@ -1562,6 +1563,7 @@ namespace MagicStorage
 			NetHelper.Report(true, "Compacting results list...");
 
 			context.toWithdraw = CompactItemList(context.toWithdraw);
+			
 			context.results = CompactItemList(context.results);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
@@ -1620,8 +1622,8 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Retrieving crafting tree for recipe...");
 
-			OrderedRecipeTree order = recursiveRecipe.GetCraftingTree(toCraft);
-			CraftingContext context = InitCraftingContext(order.context.amountToCraft);
+			OrderedRecipeTree order = recursiveRecipe.GetCraftingTree(toCraft, itemCounts);
+			CraftingContext context = InitCraftingContext(0);
 
 			order.TrimBranches((recipe, result) => CountItems(context, recipe, result));
 
@@ -1641,15 +1643,19 @@ namespace MagicStorage
 					if (target <= 0)
 						continue;
 
-					string itemName = Lang.GetItemNameValue(recipeContext.recipe.createItem.type);
+					NetHelper.Report(false, $"Attempting to craft {recipeContext.amountToCraft} {Lang.GetItemNameValue(recipeContext.recipe.createItem.type)}");
 
-					NetHelper.Report(false, $"Attempting to craft {recipeContext.amountToCraft} {itemName}");
+					ctx.toCraft = recipeContext.amountToCraft;
 
+					selectedRecipe = recipeContext.recipe;
 					Craft_DoStandardCraft(ctx);
 
-					NetHelper.Report(false, $"Crafted {target - recipeContext.amountToCraft} {itemName}");
+					NetHelper.Report(false, $"Crafted {target - ctx.toCraft} {Lang.GetItemNameValue(recipeContext.recipe.createItem.type)}");
 				}
 			});
+
+			// Sanity check
+			selectedRecipe = order.context.recipe;
 
 			return context;
 		}
@@ -1760,8 +1766,12 @@ namespace MagicStorage
 			//Consume the batched items
 			foreach (Item item in batch) {
 				int stack = item.stack;
-				if (!AttemptToConsumeItem(context, context.availableItems, item.type, ref stack, addToWithdraw: true))
-					ConsumeItemFromSource(context, item.type, item.stack);
+
+				// Recursive crafting will put the intermediate results in "results".  These need to be consumed first
+				if (!MagicStorageConfig.IsRecursionEnabled || !AttemptToConsumeItem(context, context.results, item.type, ref stack, addToWithdraw: false)) {
+					if (!AttemptToConsumeItem(context, context.availableItems, item.type, ref stack, addToWithdraw: true))
+						ConsumeItemFromSource(context, item.type, item.stack);
+				}
 			}
 
 			SkipItemConsumption:
@@ -1871,31 +1881,30 @@ namespace MagicStorage
 					//Don't attempt to withdraw if the item is from a module, since it doesn't exist in the storage system anyway
 					bool canWithdraw = context.simulation || (addToWithdraw && !context.fromModule[listIndex]);
 
-					if (canWithdraw) {
-						int stackToConsume;
+					int stackToConsume;
 
-						if (tryItem.stack > stack) {
-							stackToConsume = stack;
-							stack = 0;
-						} else {
-							stackToConsume = tryItem.stack;
-							stack -= tryItem.stack;
-						}
+					if (tryItem.stack > stack) {
+						stackToConsume = stack;
+						stack = 0;
+					} else {
+						stackToConsume = tryItem.stack;
+						stack -= tryItem.stack;
+					}
 
+					if (!context.simulation)
 						OnConsumeItemForRecipe_Obsolete(context, tryItem, stackToConsume);
 
-						if (!context.simulation) {
-							Item temp = tryItem.Clone();
-							temp.stack = stackToConsume;
+					if (addToWithdraw && !context.simulation && !context.fromModule[listIndex]) {
+						Item temp = tryItem.Clone();
+						temp.stack = stackToConsume;
 
-							context.toWithdraw.Add(temp);
-						}
-
-						tryItem.stack -= stackToConsume;
-
-						if (tryItem.stack <= 0)
-							tryItem.type = ItemID.None;
+						context.toWithdraw.Add(temp);
 					}
+
+					tryItem.stack -= stackToConsume;
+
+					if (tryItem.stack <= 0)
+						tryItem.type = ItemID.None;
 
 					if (stack <= 0)
 						break;

@@ -50,5 +50,62 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public void SetRecipe(int index = -1) {
 			_selectedRecipe = index < 0 || index >= trees.Count ? 0 : index;
 		}
+
+		/// <summary>
+		/// Attempts to update <see cref="SelectedRecipe"/> depending on which possible recipe's ingredients requirement was satisfied the most.<br/>
+		/// If no recipe was found as a "best match", <see cref="SelectedRecipe"/> is not updated
+		/// </summary>
+		/// <param name="availableInventory">A collection of item quantities, indexed by type.  If <see langword="null"/>, <see cref="SelectedRecipe"/> is not updated</param>
+		public void FindBestMatchAndSetRecipe(Dictionary<int, int> availableInventory) {
+			if (availableInventory is null)
+				return;
+
+			// Attempt to find the recipe with the best "availability", i.e. the recipe that has the most ingredients partially or fully satisfied
+			// If one exists, modify the "_selectedRecipe" index to that recipe.  Otherwise, don't modify it
+			int bestMatch = -1;
+			float bestPercent = 0;
+
+			for (int i = 0; i < trees.Count; i++) {
+				Recipe subrecipe = trees[i].originalRecipe;
+
+				float percent = 0;
+				foreach (Item item in subrecipe.requiredItem) {
+					bool usedRecipeGroup = false;
+					ClampedArithmetic stack = item.stack;
+
+					int count;
+					foreach (int groupID in subrecipe.acceptedGroups) {
+						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
+
+						// Attempt to use items that are valid in the group
+						if (group.ContainsItem(item.type) && availableInventory.TryGetValue(item.type, out count)) {
+							usedRecipeGroup = true;
+							stack -= count;
+
+							if (stack <= 0)
+								break;
+						}
+					}
+
+					if (!usedRecipeGroup && availableInventory.TryGetValue(item.type, out count))
+						stack -= count;
+
+					if (stack < 0)
+						stack = 0;
+
+					float stackConsumedFactor = (float)(item.stack - stack) / item.stack;
+					percent += stackConsumedFactor / subrecipe.requiredItem.Count;
+				}
+
+				if (percent > bestPercent) {
+					bestMatch = i;
+					bestPercent = percent;
+				}
+			}
+
+			// Update the initially selected recipe
+			if (bestMatch >= 0)
+				_selectedRecipe = bestMatch;
+		}
 	}
 }

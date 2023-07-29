@@ -89,8 +89,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// <summary>
 		/// Returns a tree representing the recipes this recursive recipe will use and their expected crafted quantities
 		/// </summary>
-		/// <param name="amountToCraft">How many items are expected to be crafted</param>
-		public OrderedRecipeTree GetCraftingTree(int amountToCraft) {
+		/// <param name="amountToCraft">How many items are expected to be crafted.  Defaults to 1</param>
+		/// <param name="availableInventory">An optional dictionary indicating which item types are available and their quantities</param>
+		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, Dictionary<int, int> availableInventory = null) {
 			int batchSize = original.createItem.stack;
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 
@@ -98,12 +99,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, batches * batchSize));
 			int depth = 0, maxDepth = 0;
 
-			ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+			ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 
 			return orderedTree;
 		}
 
-		private void ModifyCraftingTree(HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
+		private void ModifyCraftingTree(Dictionary<int, int> availableInventory, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
 			if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
 				return;
 
@@ -124,21 +125,23 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				maxDepth = depth;
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
-				if (ingredient.trees.Count == 0)
+				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
 				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
 
+				ingredient.FindBestMatchAndSetRecipe(availableInventory);
+
 				Recipe recipe = ingredient.SelectedRecipe;
-				int perCraft = recipe.createItem.stack;
 
-				int batches = (int)Math.Ceiling(requiredPerCraft / (double)perCraft * parentBatches);
+				int batchSize = recipe.createItem.stack;
+				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches));
+				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches * batchSize));
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
-					recursive.ModifyCraftingTree(recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+					recursive.ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
 			}
 
 			recursionStack.Remove(tree.originalRecipe.createItem.type);
