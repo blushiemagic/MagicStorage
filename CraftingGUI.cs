@@ -883,6 +883,13 @@ namespace MagicStorage
 			return available;
 		}
 
+		public static void ResetRecentRecipeCache() {
+			recentRecipeAvailable = null;
+			currentRecipeIsAvailable = null;
+			recentRecipeAmountCraftable = null;
+			amountCraftableForCurrentRecipe = null;
+		}
+
 		/// <summary>
 		/// Returns the trimmed recursion crafting tree for <paramref name="recipe"/> if it exists and recursion is enabled, or <see langword="null"/> otherwise.
 		/// </summary>
