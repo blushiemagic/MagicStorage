@@ -210,6 +210,9 @@ namespace MagicStorage.UI.States {
 					else
 						CraftingGUI.blockStorageItems.Add(data);
 
+					// Force the "recipe available" logic to update
+					CraftingGUI.ResetRecentRecipeCache();
+
 					storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
 				};
 
