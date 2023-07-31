@@ -6,20 +6,6 @@ using Terraria;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
-	public readonly struct ItemInfo {
-		public readonly int type;
-		public readonly int stack;
-		public readonly int prefix;  // Used when converting to ItemData
-
-		public ItemInfo(int type, int stack, int prefix = 0) {
-			this.type = type;
-			this.stack = stack;
-			this.prefix = prefix;
-		}
-
-		public ItemInfo(Item item) : this(item.type, item.stack, item.prefix) { }
-	}
-
 	public sealed class RecursiveRecipe {
 		private class Loadable : ILoadable {
 			public void Load(Mod mod) { }
@@ -133,7 +119,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
-				int requiredPerCraft = original.requiredItem[ingredient.recipeIngredientIndex].stack;
+				int requiredPerCraft = ingredient.parent.sourceRecipe.requiredItem[ingredient.recipeIngredientIndex].stack;
 
 				ingredient.FindBestMatchAndSetRecipe(availableInventory);
 
@@ -155,6 +141,43 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		/// <summary>
+		/// Returns a list of materials needed to craft this recursive recipe
+		/// </summary>
+		/// <param name="amountToCraft">How many items are expected to be crafted</param>
+		/// <param name="excessResults">A list of excess items that would be created when processing this recipe</param>
+		/// <param name="availableInventory">
+		/// An optional dictionary indicating which item types are available and their quantities.<br/>
+		/// This dictionary is used to trim the crafting tree before getting its required materials.
+		/// </param>
+		public List<RequiredMaterialInfo> GetRequiredMaterials(int amountToCraft, out List<ItemInfo> excessResults, Dictionary<int, int> availableInventory = null) {
+			var craftingTree = GetCraftingTree(amountToCraft);
+
+			if (availableInventory is not null) {
+				// Local capturing
+				var inv = availableInventory;
+				craftingTree.TrimBranches((recipe, result) => GetItemCount(recipe, result, inv));
+			}
+
+			return craftingTree.GetRequiredMaterials(out excessResults);
+		}
+
+		private static int GetItemCount(Recipe recipe, int result, Dictionary<int, int> availableInventory) {
+			ClampedArithmetic count = 0;
+			bool useRecipeGroup = false;
+			foreach (var (item, quantity) in availableInventory) {
+				if (CraftingGUI.RecipeGroupMatch(recipe, item, result)) {
+					count += quantity;
+					useRecipeGroup = true;
+				}
+			}
+
+			if (!useRecipeGroup && availableInventory.TryGetValue(result, out int amount))
+				count += amount;
+
+			return count;
+		}
+
+		/// <summary>
 		/// Iterate's through this recursive recipe's crafting tree and calculates the maximum amount of this recipe that can be crafted
 		/// </summary>
 		/// <param name="availableInventory">A dictionary indicating which item types are available and their quantities.  This dictionary <b>will be modified</b> by the time this method finishes executing</param>
@@ -162,121 +185,35 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public int GetMaxCraftable(Dictionary<int, int> availableInventory) {
 			ArgumentNullException.ThrowIfNull(availableInventory);
 
-			// Use GetCraftingTree(1) to get the tree (do NOT trim branches, all of the info will be needed!)
-			// Then, for each recipe in the tree's processing order, calculate how many crafts are possible and perform them
-			// After all of this processing has been handled, the final result will be the amount of crafts possible for the final recipe
-			var craftingTree = GetCraftingTree(1);
-			var recipeStack = craftingTree.GetProcessingOrder();
+			// Get the materials required, then check how many crafts can be performed to create each material
+			var materials = GetRequiredMaterials(1, out _, availableInventory);
 
-			EnvironmentSandbox sandbox;
-			IEnumerable<EnvironmentModule> modules;
-			if (CraftingGUI.requestingAmountFromUI) {
-				var heart = CraftingGUI.GetHeart();
+			// Local capturing
+			var inv = availableInventory;
+			int GetMaxCraftsAmount(RequiredMaterialInfo requiredMaterial) {
+				ClampedArithmetic total = 0;
 
-				sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
-				modules = heart.GetModules();
-			} else {
-				sandbox = default;
-				modules = Array.Empty<EnvironmentModule>();
-			}
-
-			OrderedRecipeContext recentContext = null;
-			while (recipeStack.TryPop(out OrderedRecipeContext context)) {
-				// Calculate how many items can be crafted using this recipe
-				Recipe recipe = context.recipe;
-
-				// Local capturing
-				var inv = availableInventory;
-				Recipe r = recipe;
-
-				int GetMaxCraftsAmount(Item requiredItem) {
-					ClampedArithmetic total = 0;
-
-					foreach (var (type, quantity) in inv) {
-						if (type == requiredItem.type || CraftingGUI.RecipeGroupMatch(r, type, requiredItem.type))
+				foreach (var (type, quantity) in inv) {
+					foreach (int validType in requiredMaterial.GetValidItems()) {
+						if (type == validType) {
 							total += quantity;
-					}
-
-					return total / requiredItem.stack;
-				}
-				
-				int maxCrafts = recipe.requiredItem.Select(GetMaxCraftsAmount).Prepend(int.MaxValue).Min();
-
-				// Overwrite amountToCraft to the actual amount craftable based on the available ingredients
-				context.amountToCraft = maxCrafts * recipe.createItem.stack;
-
-				// Consume the ingredients
-				Dictionary<int, int> consumedItemCounts = new();
-				foreach (Item item in recipe.requiredItem) {
-					int required = item.stack * maxCrafts;
-					int consume = required;
-
-					// Check the recipe groups
-					bool usedRecipeGroup = false;
-					foreach (int groupID in recipe.acceptedGroups) {
-						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
-						if (group.ContainsItem(item.type)) {
-							foreach (int groupItem in group.ValidItems) {
-								ConsumeItems(availableInventory, groupItem, ref consume, ref usedRecipeGroup, consumedItemCounts);
-
-								if (consume <= 0)
-									goto checkNonRecipeGroup;
-							}
+							break;
 						}
 					}
-
-					checkNonRecipeGroup:
-
-					if (!usedRecipeGroup)
-						ConsumeItems(availableInventory, item.type, ref consume, ref usedRecipeGroup, consumedItemCounts);
 				}
 
-				// Fake the crafts and add the results to the inventory
-				CraftingGUI.CatchDroppedItems = true;
-				CraftingGUI.DroppedItems.Clear();
-
-				List<Item> consumedItems = consumedItemCounts.Select(kvp => new Item(kvp.Key, kvp.Value / maxCrafts)).ToList();
-				Item createItem = recipe.createItem.Clone();
-
-				for (int i = 0; i < maxCrafts; i++) {
-					RecipeLoader.OnCraft(createItem, recipe, consumedItems, new Item());
-
-					foreach (EnvironmentModule module in modules)
-						module.OnConsumeItemsForRecipe(sandbox, recipe, consumedItems);
-				}
-
-				CraftingGUI.CatchDroppedItems = false;
-
-				availableInventory.AddOrSumCount(recipe.createItem.type, context.amountToCraft);
-
-				foreach (Item item in CraftingGUI.DroppedItems)
-					availableInventory.AddOrSumCount(item.type, item.stack);
-
-				// Remember the context, since it won't exist in a collection after this loop
-				recentContext = context;
+				return total / requiredMaterial.stack;
 			}
 
-			// Final recipe now has the amount that can be crafted
-			if (recentContext is null)
-				return 0;
-
-			return recentContext.amountToCraft / recentContext.recipe.createItem.stack;
+			return materials.Select(GetMaxCraftsAmount).Prepend(int.MaxValue).Min();
 		}
 
-		private static void ConsumeItems(Dictionary<int, int> availableInventory, int type, ref int consume, ref bool usedRecipeGroup, Dictionary<int, int> consumedItemCounts) {
-			int count = availableInventory.TryGetValue(type, out int c) ? c : 0;
+		public IEnumerable<int> GetRequiredTiles() {
+			return GetAllRecipes().SelectMany(static r => r.requiredTile).Distinct();
+		}
 
-			if (count >= consume) {
-				usedRecipeGroup = true;
-				availableInventory[type] = count - consume;
-				consumedItemCounts.AddOrSumCount(type, consume);
-				consume = 0;
-			} else if (count > 0) {
-				usedRecipeGroup = true;
-				availableInventory.Remove(type);
-				consumedItemCounts.AddOrSumCount(type, count);
-				consume -= count;
-			}
+		public bool HasCondition(Condition condition) {
+			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 	}
 }

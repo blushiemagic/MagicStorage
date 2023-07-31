@@ -152,7 +152,7 @@ namespace MagicStorage {
 	/// <summary>
 	/// The config for beta builds.  Make sure to wrap uses of this class with <c>#if NETPLAY</c>
 	/// </summary>
-	[LabelKey("$Mods.MagicStorage.Config.BetaLabel")]
+	[Label("$Mods.MagicStorage.Config.BetaLabel")]
 	public class MagicStorageBetaConfig : ModConfig {
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 

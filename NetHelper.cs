@@ -19,6 +19,7 @@ using static MagicStorage.Common.Systems.StringScrambling;
 using MagicStorage.Common.Players;
 using MagicStorage.UI;
 using System.Threading;
+using ReLogic.Content;
 
 namespace MagicStorage
 {
@@ -30,10 +31,23 @@ namespace MagicStorage
 
 		[Conditional("NETPLAY")]
 		public static void Report(bool reportTime, string message) {
+			if (!AssetRepository.IsMainThread) {
+				// Local capturing
+				bool report = reportTime;
+				string msg = message;
+				DateTime now = DateTime.Now;
+
+				Main.QueueMainThreadAction(() => Report_Inner(report, msg, now));
+			} else
+				Report_Inner(reportTime, message, DateTime.Now);
+		}
+
+		[Conditional("NETPLAY")]
+		private static void Report_Inner(bool reportTime, string message, DateTime now) {
 			StringBuilder sb = new();
 
 			if (reportTime)
-				sb.Append("Time: " + DateTime.Now.Ticks + " ");
+				sb.Append("Time: " + now.Ticks + " ");
 
 			sb.Append(message);
 
@@ -50,7 +64,7 @@ namespace MagicStorage
 					Console.ForegroundColor = ConsoleColor.Red;
 					Console.BackgroundColor = ConsoleColor.Black;
 
-					Console.WriteLine("Time: " + DateTime.Now.Ticks);
+					Console.WriteLine("Time: " + now.Ticks);
 
 					Console.ForegroundColor = fg;
 					Console.BackgroundColor = bg;

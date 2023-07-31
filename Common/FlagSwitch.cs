@@ -20,5 +20,15 @@ namespace MagicStorage.Common {
 		}
 
 		public static FlagSwitch Create(ref bool flag, bool value) => new FlagSwitch(ref flag, value);
+
+		public static FlagSwitch ToggleTrue(ref bool flag) {
+			flag = false;
+			return new FlagSwitch(ref flag, true);
+		}
+
+		public static FlagSwitch ToggleFalse(ref bool flag) {
+			flag = true;
+			return new FlagSwitch(ref flag, false);
+		}
 	}
 }

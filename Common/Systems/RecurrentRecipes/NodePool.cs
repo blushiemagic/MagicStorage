@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Terraria.ModLoader;
 using Terraria;
 
@@ -16,6 +15,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		private static readonly List<Node> pool = new();
 		private static readonly Dictionary<int, List<Node>> resultToNodes = new();
+
+		internal static Node Get(int index) => pool[index];
+
+		internal static List<Node> ResultToNodes(int type) => resultToNodes[type];
 
 		public static Node FindOrCreate(Recipe recipe) {
 			if (recipe.Disabled)
