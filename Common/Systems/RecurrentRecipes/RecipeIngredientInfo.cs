@@ -5,7 +5,7 @@ using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class RecipeIngredientInfo {
-		public readonly Recipe sourceRecipe;
+		public readonly RecipeInfo parent;
 
 		public readonly int recipeIngredientIndex;
 
@@ -27,15 +27,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// </summary>
 		public int RecipeCount => trees.Count;
 
-		internal RecipeIngredientInfo(Recipe recipe, int index) {
-			sourceRecipe = recipe;
+		internal RecipeIngredientInfo(RecipeInfo recipeInfo, int index) {
+			parent = recipeInfo;
 			recipeIngredientIndex = index;
 
 			// Account for recipe groups as well
-			int recipeItem = recipe.requiredItem[index].type;
+			int recipeItem = recipeInfo.sourceRecipe.requiredItem[index].type;
 			HashSet<int> types = new() { recipeItem };
 
-			foreach (int id in recipe.acceptedGroups) {
+			foreach (int id in recipeInfo.sourceRecipe.acceptedGroups) {
 				RecipeGroup group = RecipeGroup.recipeGroups[id];
 				if (group.ContainsItem(recipeItem))
 					types.UnionWith(group.ValidItems);

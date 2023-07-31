@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -164,11 +165,12 @@ namespace MagicStorage.UI {
 
 			Recipe recipe = Recipe;
 
-			// TODO can this be nicer?
-			if (recipe == CraftingGUI.selectedRecipe)
-				context = ItemSlot.Context.TrashItem;
-			else if (!CraftingGUI.IsAvailable(recipe))
-				context = recipe == CraftingGUI.selectedRecipe ? ItemSlot.Context.BankItem : ItemSlot.Context.ChestItem;
+			using (FlagSwitch.ToggleTrue(ref CraftingGUI.disableNetPrintingForIsAvailable)) {
+				if (recipe == CraftingGUI.selectedRecipe)
+					context = ItemSlot.Context.TrashItem;
+				else if (!CraftingGUI.IsAvailable(recipe))
+					context = ItemSlot.Context.ChestItem;
+			}
 
 			resultSlot.Context = context;
 		}
