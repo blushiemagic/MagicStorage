@@ -97,10 +97,20 @@ namespace MagicStorage.Components
 		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
 			killTile = new Point16(i, j);
+			ModTileEntity tileEntity = GetTileEntity();
+			if (tileEntity is not null)
+			{
+				tileEntity.Kill(i, j);
+			}
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
 			else
-				TEStorageComponent.SearchAndRefreshNetwork(killTile);
+			{
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					NetHelper.SendSearchAndRefresh(killTile.X, killTile.Y);
+				else
+					TEStorageComponent.SearchAndRefreshNetwork(killTile);
+			}
 			killTile = Point16.NegativeOne;
 		}
 	}

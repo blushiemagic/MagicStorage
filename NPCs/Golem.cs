@@ -119,7 +119,7 @@ namespace MagicStorage.NPCs {
 				Dust.NewDust(NPC.position, NPC.width, NPC.height, Main.rand.Next(new[] { DustID.Stone, DustID.Iron, DustID.WoodFurniture }));
 		}
 
-		public override bool CanTownNPCSpawn(int numTownNPCs)/* tModPorter Suggestion: Copy the implementation of NPC.SpawnAllowed_Merchant in vanilla if you to count money, and be sure to set a flag when unlocked, so you don't count every tick. */ {
+		public override bool CanTownNPCSpawn(int numTownNPCs) {
 			return MagicStorageServerConfig.AllowAutomatonToMoveIn;
 		}
 

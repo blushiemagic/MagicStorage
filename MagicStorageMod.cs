@@ -8,9 +8,7 @@ using MagicStorage.Stations;
 using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
 using System;
-using System.Collections.Concurrent;
 using System.IO;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
@@ -30,7 +28,7 @@ namespace MagicStorage {
 		public static readonly Condition HasCampfire = new(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
 
 		public static readonly Condition EctoMistOverride = new(Language.GetText("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
-			() => /*Condition.InGraveyard.RecipeAvailable(recipe) ||*/ Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
+			() => Condition.InGraveyard.IsMet() || Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
 
 		public UIOptionConfigurationManager optionsConfig;
 
