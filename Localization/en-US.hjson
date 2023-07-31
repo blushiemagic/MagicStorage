@@ -808,11 +808,13 @@ Mods: {
 				Label: "UI Panel Movement"
 				Tooltip: "Disable to prevent moving and resizing the UI panels"
 			}
-			recursionEnabled: {
-				Label: "Crafting Recursion"
+			recursionDepth: {
+				Label: "Recipe Recursion Depth"
 				Tooltip:
 				'''
-				When enabled, the Crafting UI gets new crafting buttons and a new menu for handling recursive crafting.
+				How deep the recursion goes for crafting recipes in the Crafting UI.
+				Set to 0 to disable this feature.
+				Set to -1 for infinite depth
 				'''
 			}
 			automatonRemembers: {

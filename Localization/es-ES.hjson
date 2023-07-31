@@ -502,7 +502,7 @@ Mods: {
 				// Label: ""
 				// Tooltip: ""
 			}
-			recursionEnabled: {
+			recursionDepth: {
 				// Label: ""
 				// Tooltip: ""
 			}

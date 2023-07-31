@@ -46,6 +46,8 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool clearHistory;
 
+		[Label("$Mods.MagicStorage.Config.recursionDepth.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recursionDepth.Tooltip")]
 		[DefaultValue(3)]
 		[DrawTicks]
 		[Range(-1, 10)]
