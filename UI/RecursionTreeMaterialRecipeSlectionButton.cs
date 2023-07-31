@@ -15,8 +15,8 @@ namespace MagicStorage.UI {
 			this.next = next;
 		}
 
-		public override void LeftClick(UIMouseEvent evt) {
-			base.LeftClick(evt);
+		public override void Click(UIMouseEvent evt) {
+			base.Click(evt);
 
 			int offset = next ? 1 : -1;
 

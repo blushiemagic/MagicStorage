@@ -9,6 +9,7 @@ using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Terraria;

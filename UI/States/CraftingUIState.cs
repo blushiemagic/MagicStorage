@@ -704,34 +704,34 @@ namespace MagicStorage.UI.States {
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
 				if (recursiveRecipe is null) {
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearWater))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearHoney))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearHoney))
 						AddText(Language.GetTextValue("LegacyInterface.58"));
 
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearLava))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearLava))
 						AddText(Language.GetTextValue("LegacyInterface.56"));
 
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.InSnow))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InSnow))
 						AddText(Language.GetTextValue("LegacyInterface.123"));
 
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.InGraveyard))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				} else {
-					if (recursiveRecipe.HasCondition(Condition.NearWater))
+					if (recursiveRecipe.HasCondition(Recipe.Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
-					if (recursiveRecipe.HasCondition(Condition.NearHoney))
+					if (recursiveRecipe.HasCondition(Recipe.Condition.NearHoney))
 						AddText(Language.GetTextValue("LegacyInterface.58"));
 
-					if (recursiveRecipe.HasCondition(Condition.NearLava))
+					if (recursiveRecipe.HasCondition(Recipe.Condition.NearLava))
 						AddText(Language.GetTextValue("LegacyInterface.56"));
 
-					if (recursiveRecipe.HasCondition(Condition.InSnow))
+					if (recursiveRecipe.HasCondition(Recipe.Condition.InSnow))
 						AddText(Language.GetTextValue("LegacyInterface.123"));
 
-					if (recursiveRecipe.HasCondition(Condition.InGraveyard))
+					if (recursiveRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				}
 

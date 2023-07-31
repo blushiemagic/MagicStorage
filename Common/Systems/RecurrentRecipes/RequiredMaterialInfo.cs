@@ -20,7 +20,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public static RequiredMaterialInfo FromGroup(int groupID, int stack) => new RequiredMaterialInfo(groupID, stack, true);
 
-		public static RequiredMaterialInfo FromGroup(RecipeGroup group, int stack) => new RequiredMaterialInfo(group.RegisteredId, stack, true);
+		public static RequiredMaterialInfo FromGroup(RecipeGroup group, int stack) => new RequiredMaterialInfo(group.ID, stack, true);
 
 		public IEnumerable<int> GetValidItems() {
 			if (!recipeGroup) {

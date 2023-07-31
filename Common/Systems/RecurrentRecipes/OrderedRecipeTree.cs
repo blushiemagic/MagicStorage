@@ -191,7 +191,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				Item createItem = recipe.createItem.Clone();
 
 				for (int i = 0; i < ingredientBatches; i++) {
-					RecipeLoader.OnCraft(createItem, recipe, recipe.requiredItem, new Item());
+					RecipeLoader.OnCraft(createItem, recipe, recipe.requiredItem);
 
 					foreach (EnvironmentModule module in modules)
 						module.OnConsumeItemsForRecipe(sandbox, recipe, recipe.requiredItem);

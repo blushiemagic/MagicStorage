@@ -966,7 +966,7 @@ namespace MagicStorage
 					Item clonedItem = createItem.Clone();
 
 					for (int i = 0; i < batches; i++) {
-						RecipeLoader.OnCraft(clonedItem, context.recipe, consumedItems, new Item());
+						RecipeLoader.OnCraft(clonedItem, context.recipe, consumedItems);
 
 						foreach (EnvironmentModule module in modules)
 							module.OnConsumeItemsForRecipe(sandbox, context.recipe, consumedItems);
@@ -1634,7 +1634,7 @@ namespace MagicStorage
 				NetHelper.Report(true, "Spawning excess results on player...");
 
 				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), context.toWithdraw, context.results))
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+					Main.LocalPlayer.QuickSpawnClonedItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
 
 				StorageGUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
