@@ -9,7 +9,6 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using System.Reflection;
 using Terraria.ModLoader.Default;
-using XPT.Core.Audio.MP3Sharp.Decoding;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
 

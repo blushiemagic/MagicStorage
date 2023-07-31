@@ -23,12 +23,13 @@ namespace MagicStorage.Edits {
 			item = Chest.PutItemInNearbyChest(item, player.Center);
 
 			bool playSound = false;
+			int type = item.type;
 			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player, item, ref playSound);
 
 			NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
 
 			if (success)
-				NetHelper.SendQuickStackToStorage(plr, item.type);
+				NetHelper.SendQuickStackToStorage(plr, type);
 		}
 	}
 }

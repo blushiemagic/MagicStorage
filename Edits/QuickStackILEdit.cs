@@ -6,18 +6,12 @@ using SerousCommonLib.API;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using ILPlayer = IL.Terraria.Player;
 
 namespace MagicStorage.Edits {
 	internal class QuickStackILEdit : Edit {
 		public override void LoadEdits() {
-			try {
-				ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
-			} catch when (BuildInfo.IsDev) {
-				// Swallow exceptions on dev builds
-				MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(QuickStackILEdit)}\" failed");
-			}
+			ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
 		}
 
 		public override void UnloadEdits() {
@@ -25,7 +19,7 @@ namespace MagicStorage.Edits {
 		}
 
 		private static void Player_QuickStackAllChests(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, PatchMethod);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, PatchMethod);
 		}
 
 		private static bool PatchMethod(ILCursor c, ref string badReturnReason) {

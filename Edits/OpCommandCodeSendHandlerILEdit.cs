@@ -7,18 +7,12 @@ using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Terraria.ModLoader;
 using ILMain = IL.Terraria.Main;
 
 namespace MagicStorage.Edits {
 	internal class OpCommandCodeSendHandlerILEdit : Edit {
 		public override void LoadEdits() {
-			try {
-				ILMain.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
-			} catch when (BuildInfo.IsDev) {
-				// Swallow exceptions on dev builds
-				MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(OpCommandCodeSendHandlerILEdit)}\" failed");
-			}
+			ILMain.DoUpdate_HandleChat += Main_DoUpdate_HandleChat;
 		}
 
 		public override void UnloadEdits() {
@@ -26,7 +20,7 @@ namespace MagicStorage.Edits {
 		}
 
 		private void Main_DoUpdate_HandleChat(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, DoCommonPatching);
 		}
 
 		private static bool DoCommonPatching(ILCursor c, ref string badReturnReason) {

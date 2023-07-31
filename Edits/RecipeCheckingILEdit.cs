@@ -30,14 +30,9 @@ namespace MagicStorage.Edits {
 		}
 
 		public override void LoadEdits() {
-			try {
-				IL_RecipeLoader_AddRecipes += RecipeLoader_Hook;
-				IL_RecipeLoader_PostAddRecipes += RecipeLoader_Hook;
-				IL_RecipeLoader_PostSetupRecipes += RecipeLoader_Hook;
-			} catch (Exception ex) when (BuildInfo.IsDev) {
-				// Swallow exceptions on dev builds
-				MagicStorageMod.Instance.Logger.Error($"An edit for \"{nameof(RecipeCheckingILEdit)}\" failed", ex);
-			}
+			IL_RecipeLoader_AddRecipes += RecipeLoader_Hook;
+			IL_RecipeLoader_PostAddRecipes += RecipeLoader_Hook;
+			IL_RecipeLoader_PostSetupRecipes += RecipeLoader_Hook;
 		}
 
 		public override void UnloadEdits() {
@@ -47,7 +42,7 @@ namespace MagicStorage.Edits {
 		}
 
 		private static void RecipeLoader_Hook(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, DoCommonPatching);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, DoCommonPatching);
 		}
 
 		private static bool DoCommonPatching(ILCursor c, ref string badReturnReason) {

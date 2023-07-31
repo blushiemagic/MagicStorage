@@ -7,7 +7,6 @@ using SerousCommonLib.API;
 using System;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 using ILPlayer = IL.Terraria.Player;
 
 namespace MagicStorage.Edits;
@@ -16,12 +15,7 @@ public class MarshmallowStickILEdit : Edit
 {
 	public override void LoadEdits()
 	{
-		try {
-			ILPlayer.ItemCheck_ApplyHoldStyle_Inner += Player_ItemCheck_ApplyHoldStyle_Inner;
-		} catch when (BuildInfo.IsDev) {
-			// Swallow exceptions on dev builds
-			MagicStorageMod.Instance.Logger.Error($"Edit for \"{nameof(MarshmallowStickILEdit)}\" failed");
-		}
+		ILPlayer.ItemCheck_ApplyHoldStyle_Inner += Player_ItemCheck_ApplyHoldStyle_Inner;
 	}
 
 	public override void UnloadEdits()
@@ -30,7 +24,7 @@ public class MarshmallowStickILEdit : Edit
 	}
 
 	private static void Player_ItemCheck_ApplyHoldStyle_Inner(ILContext il) {
-		ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, PatchMethod);
+		ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, PatchMethod);
 	}
 
 	private static bool PatchMethod(ILCursor c, ref string badReturnReason) {
