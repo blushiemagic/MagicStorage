@@ -65,7 +65,7 @@ namespace MagicStorage
 		[ThreadStatic]
 		public static bool CatchDroppedItems;
 		[ThreadStatic]
-		public static List<Item> DroppedItems = new();
+		public static List<Item> DroppedItems;
 
 		private static bool[] adjTiles = new bool[TileLoader.TileCount];
 		private static bool adjWater;
@@ -140,8 +140,10 @@ namespace MagicStorage
 				if (context != 0) {
 					bool craftable;
 
-					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
-						craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe));
+					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
+						// Forcibly prevent any subrecipes using this item type from being "available"
+						craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe, true, selectedRecipe.createItem.type));
+					}
 
 					if (craftable)
 						context = ItemSlot.Context.TrashItem;  // Craftable - Light green
@@ -902,16 +904,19 @@ namespace MagicStorage
 		/// </summary>
 		/// <param name="recipe">The recipe</param>
 		/// <param name="toCraft">The quantity of the final recipe's crafted item to create</param>
-		public static OrderedRecipeTree GetCraftingTree(Recipe recipe, int toCraft = 1) {
+		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
+		public static OrderedRecipeTree GetCraftingTree(Recipe recipe, int toCraft = 1, int blockedSubrecipeIngredient = 0) {
 			if (!MagicStorageConfig.IsRecursionEnabled || !recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
 				return null;
 
-			return recursiveRecipe.GetCraftingTree(toCraft, availableInventory: itemCounts);
+			return recursiveRecipe.GetCraftingTree(toCraft, availableInventory: itemCounts, blockedSubrecipeIngredient);
 		}
 
 		internal static bool disableNetPrintingForIsAvailable;
 
-		public static bool IsAvailable(Recipe recipe, bool checkRecursive = true)
+		public static bool IsAvailable(Recipe recipe, bool checkRecursive = true) => IsAvailable(recipe, checkRecursive, recipe.createItem.type);
+
+		private static bool IsAvailable(Recipe recipe, bool checkRecursive, int ignoreItem)
 		{
 			if (recipe is null)
 				return false;
@@ -924,12 +929,15 @@ namespace MagicStorage
 			}
 
 			bool available;
-			if (checkRecursive && GetCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
+			if (checkRecursive && GetCraftingTree(recipe, blockedSubrecipeIngredient: ignoreItem) is OrderedRecipeTree craftingTree) {
 				// NOTE: [ThreadStatic] only runs the field initializer on one thread
 				DroppedItems ??= new();
 
 				// Clone the item counts so that the inventory can be faked
 				isAvailable_ItemCountsDictionary = new Dictionary<int, int>(itemCounts);
+
+				if (ignoreItem > 0)
+					isAvailable_ItemCountsDictionary.Remove(ignoreItem);
 
 				craftingTree.TrimBranches(IsAvailable_GetItemCount);
 
@@ -1371,7 +1379,7 @@ namespace MagicStorage
 			int addedIndex = 0;
 
 			foreach (Item item in itemsFromSource) {
-				if (wasItemAdded?[addedIndex] is false) {
+				if (item.type != selectedRecipe.createItem.type && wasItemAdded?[addedIndex] is false) {
 					foreach (Item reqItem in recipe.requiredItem) {
 						if (item.type == reqItem.type || RecipeGroupMatch(recipe, item.type, reqItem.type)) {
 							//Module items must refer to the original item instances

@@ -78,7 +78,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// </summary>
 		/// <param name="amountToCraft">How many items are expected to be crafted.  Defaults to 1</param>
 		/// <param name="availableInventory">An optional dictionary indicating which item types are available and their quantities</param>
-		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, Dictionary<int, int> availableInventory = null) {
+		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
+		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, Dictionary<int, int> availableInventory = null, int blockedSubrecipeIngredient = 0) {
 			int batchSize = original.createItem.stack;
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 
@@ -90,12 +91,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			int depth = 0, maxDepth = 0;
 
 			if (MagicStorageConfig.IsRecursionEnabled)
-				ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+				ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
 
 			return orderedTree;
 		}
 
-		private void ModifyCraftingTree(Dictionary<int, int> availableInventory, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches) {
+		private void ModifyCraftingTree(Dictionary<int, int> availableInventory, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches, int ignoreItem) {
 			if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
 				return;
 
@@ -104,7 +105,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				return;
 
 			// Check for infinitely recursive recipe branches (e.g. Wood -> Wood Platform -> Wood)
-			if (!recursionStack.Add(tree.originalRecipe.createItem.type))
+			// Also, if the created item is blocked by UI logic, block this recipe
+			int createItem = tree.originalRecipe.createItem.type;
+			if (!recursionStack.Add(createItem))
 				return;
 
 			// Ensure that the tree is calculated
@@ -119,7 +122,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
-				int requiredPerCraft = ingredient.parent.sourceRecipe.requiredItem[ingredient.recipeIngredientIndex].stack;
+				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
+				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
+				if (ignoreItem > 0 && ignoreItem == requiredItem.type || CraftingGUI.RecipeGroupMatch(sourceRecipe, ignoreItem, requiredItem.type))
+					continue;
+
+				int requiredPerCraft = requiredItem.stack;
 
 				ingredient.FindBestMatchAndSetRecipe(availableInventory);
 
@@ -132,10 +140,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
-					recursive.ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches);
+					recursive.ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches, ignoreItem);
 			}
 
-			recursionStack.Remove(tree.originalRecipe.createItem.type);
+			recursionStack.Remove(createItem);
 
 			depth--;
 		}
