@@ -1429,8 +1429,6 @@ namespace MagicStorage
 			RefreshStorageItems();
 			blockStorageItems.Clear();
 
-			SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
-
 			NetHelper.Report(true, "Successfully reassigned current recipe!");
 		}
 
@@ -1717,7 +1715,7 @@ namespace MagicStorage
 				List<RequiredMaterialInfo> materials;
 				List<ItemInfo> excess;
 				using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-					materials = recursiveRecipe.GetRequiredMaterials(toCraft, out excess);
+					materials = recursiveRecipe.GetRequiredMaterials(toCraft, out excess, itemCounts);
 
 				NetHelper.Report(true, "Attempting crafting...");
 

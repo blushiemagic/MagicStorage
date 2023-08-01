@@ -136,7 +136,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int batchSize = recipe.createItem.stack;
 				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches * batchSize));
+				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches * requiredPerCraft));
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
@@ -158,7 +158,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// This dictionary is used to trim the crafting tree before getting its required materials.
 		/// </param>
 		public List<RequiredMaterialInfo> GetRequiredMaterials(int amountToCraft, out List<ItemInfo> excessResults, Dictionary<int, int> availableInventory = null) {
-			var craftingTree = GetCraftingTree(amountToCraft);
+			var craftingTree = GetCraftingTree(amountToCraft, availableInventory);
 
 			if (availableInventory is not null) {
 				// Local capturing
