@@ -318,7 +318,7 @@ namespace MagicStorage
 
 			recipesToRefresh = recipesToRefresh.Concat(recipes).DistinctBy(static r => r, ReferenceEqualityComparer.Instance).ToArray();
 
-			NetHelper.Report(true, $"Setting next refresh to check {recipes.Length} recipes");
+			NetHelper.Report(true, $"Setting next refresh to check {recipesToRefresh.Length} recipes");
 		}
 
 		/// <summary>
@@ -1605,7 +1605,7 @@ namespace MagicStorage
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
-			NetHelper.Report(true, $"Attempting to craft {toCraft} items...");
+			NetHelper.Report(true, $"Attempting to craft {toCraft} {Lang.GetItemNameValue(selectedRecipe.createItem.type)}");
 
 			// Additional safeguard against absurdly high craft targets
 			int origCraftRequest = toCraft;
@@ -1614,8 +1614,10 @@ namespace MagicStorage
 			if (toCraft != origCraftRequest)
 				NetHelper.Report(false, $"Craft amount reduced to {toCraft}");
 
-			if (toCraft <= 0)
-				return;  // Bail
+			if (toCraft <= 0) {
+				NetHelper.Report(false, "Amount to craft was less than 1, aborting");
+				return;
+			}
 
 			CraftingContext context;
 			if (MagicStorageConfig.IsRecursionEnabled) {
@@ -1758,6 +1760,12 @@ namespace MagicStorage
 
 				ctx.simulation = false;
 
+				NetHelper.Report(true, $"Recursion crafting used the following materials:\n  {
+					(consumedItems.Count > 0
+						? string.Join("\n  ", consumedItems.Select(static i => $"{i.stack} {Lang.GetItemNameValue(i.type)}"))
+						: "none")
+					}");
+
 				// Actually consume the items
 				foreach (Item item in consumedItems) {
 					int stack = item.stack;
@@ -1820,8 +1828,10 @@ namespace MagicStorage
 			int crafts = (int)Math.Ceiling(context.toCraft / (float)selectedRecipe.createItem.stack);
 
 			//Skip item consumption code for recipes that have no ingredients
-			if (selectedRecipe.requiredItem.Count == 0)
+			if (selectedRecipe.requiredItem.Count == 0) {
+				NetHelper.Report(false, "Recipe had no ingredients, skipping consumption...");
 				goto SkipItemConsumption;
+			}
 
 			context.simulation = true;
 
@@ -1871,6 +1881,8 @@ namespace MagicStorage
 				if (!AttemptToConsumeItem(context, context.availableItems, item.type, ref stack, addToWithdraw: true))
 					ConsumeItemFromSource(context, item.type, item.stack);
 			}
+
+			NetHelper.Report(true, $"Batch crafting used the following materials:\n  {string.Join("\n  ", batch.Select(static i => $"{i.stack} {Lang.GetItemNameValue(i.type)}"))}");
 
 			SkipItemConsumption:
 
