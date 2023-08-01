@@ -74,7 +74,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				remaining -= getItemCountForIngredient(recipe, result);
 
 				depth = branch.context.depth;
-				if (remaining <= 0) {
+				if (remaining < 0) {
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
 						NetHelper.Report(false, $"Branch trimmed: Depth = {depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
 

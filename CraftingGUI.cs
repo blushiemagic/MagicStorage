@@ -914,7 +914,7 @@ namespace MagicStorage
 
 		internal static bool disableNetPrintingForIsAvailable;
 
-		public static bool IsAvailable(Recipe recipe, bool checkRecursive = true) => IsAvailable(recipe, checkRecursive, recipe.createItem.type);
+		public static bool IsAvailable(Recipe recipe, bool checkRecursive = true) => IsAvailable(recipe, checkRecursive, recipe?.createItem.type ?? 0);
 
 		private static bool IsAvailable(Recipe recipe, bool checkRecursive, int ignoreItem)
 		{
