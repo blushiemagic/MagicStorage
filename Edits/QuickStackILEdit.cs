@@ -94,7 +94,7 @@ namespace MagicStorage.Edits {
 				int type = item.type;
 				bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref playSound);
 
-				if (success && Main.netMode == NetmodeID.SinglePlayer && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0) {
+				if (success && Main.netMode != NetmodeID.Server && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0) {
 					StorageGUI.SetRefresh();
 					StorageGUI.SetNextItemTypeToRefresh(type);
 					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(type);

@@ -62,7 +62,9 @@ namespace MagicStorage
 
 		internal static int maxRightClickTimer = StartMaxRightClickTimer;
 
+		[ThreadStatic]
 		public static bool CatchDroppedItems;
+		[ThreadStatic]
 		public static List<Item> DroppedItems = new();
 
 		private static bool[] adjTiles = new bool[TileLoader.TileCount];
