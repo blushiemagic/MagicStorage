@@ -110,6 +110,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				modules = Array.Empty<EnvironmentModule>();
 			}
 
+			// NOTE: [ThreadStatic] only runs the field initializer on one thread
+			CraftingGUI.DroppedItems ??= new();
+
 			foreach (OrderedRecipeContext context in recipeStack) {
 				// Trimmed branch?  Ignore
 				if (context.amountToCraft <= 0)
