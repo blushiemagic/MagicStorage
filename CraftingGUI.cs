@@ -959,12 +959,12 @@ namespace MagicStorage
 					if (context.amountToCraft <= 0)
 						continue;
 
-					if (!IsAvailable_CheckRecipe(context.recipe)) {
+					int batches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
+
+					if (!IsAvailable_CheckRecipe(context.recipe, batches)) {
 						available = false;
 						break;
 					}
-
-					int batches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
 
 					// Remove the required items from the inventory
 					IsAvailable_ConsumeFakeCounts(context, batches, out Dictionary<int, int> consumedItemCounts);
@@ -1051,7 +1051,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static bool IsAvailable_CheckRecipe(Recipe recipe) {
+		private static bool IsAvailable_CheckRecipe(Recipe recipe, int batches = 1) {
 			if (recipe is null)
 				return false;
 
@@ -1060,7 +1060,7 @@ namespace MagicStorage
 
 			foreach (Item ingredient in recipe.requiredItem)
 			{
-				if (ingredient.stack - IsAvailable_GetItemCount(recipe, ingredient.type) > 0)
+				if (ingredient.stack * batches - IsAvailable_GetItemCount(recipe, ingredient.type) > 0)
 					return false;
 			}
 
