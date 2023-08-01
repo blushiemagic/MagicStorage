@@ -72,10 +72,8 @@ namespace MagicStorage.Common.Systems {
 
 				heart.TryDeposit(item);
 
-				if (oldType != item.type || oldStack != item.stack) {
+				if (oldType != item.type || oldStack != item.stack)
 					playSound = true;
-					Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, heart.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
-				}
 
 				if (item.stack <= 0)
 					item.TurnToAir();

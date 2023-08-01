@@ -358,7 +358,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Deposit)
+				if (op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
@@ -397,7 +397,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
+				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
@@ -415,7 +415,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
+			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
