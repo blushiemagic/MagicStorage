@@ -39,7 +39,7 @@ namespace MagicStorage.Edits {
 
 				c.Emit(OpCodes.Ldarg_0);
 				c.Emit(OpCodes.Ldarg_1);
-				c.Emit(OpCodes.Ldloca_S, typeLocal);
+				c.Emit(OpCodes.Ldloca, typeLocal);
 				c.EmitDelegate<TryStorageItemTransferDelegate>(static (int plr, int slot, out int type) => {
 					Player player = Main.player[plr];
 
@@ -54,7 +54,7 @@ namespace MagicStorage.Edits {
 					type = item.type;
 					return Netcode.TryQuickStackItemIntoNearbyStorageSystems(player, item, ref playSound);
 				});
-				c.Emit(OpCodes.Stloc_S, successLocal);
+				c.Emit(OpCodes.Stloc, successLocal);
 
 				if (!c.TryGotoNext(MoveType.After, i => i.MatchCall(NetMessage_SendData))) {
 					badReturnReason = "Could not find NetMessage.SendData() call after vanilla Chest.PutItemInNearbyChest() call";
@@ -62,10 +62,10 @@ namespace MagicStorage.Edits {
 				}
 
 				c.EmitIfBlock(out _,
-					condition: cursor => cursor.Emit(OpCodes.Ldloca_S, successLocal),
+					condition: cursor => cursor.Emit(OpCodes.Ldloca, successLocal),
 					action: cursor => {
 						cursor.Emit(OpCodes.Ldarg_0);
-						cursor.Emit(OpCodes.Ldloc_S, typeLocal);
+						cursor.Emit(OpCodes.Ldloc, typeLocal);
 						cursor.EmitDelegate(NetHelper.SendQuickStackToStorage);
 					});
 			}
