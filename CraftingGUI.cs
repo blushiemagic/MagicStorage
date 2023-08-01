@@ -1332,7 +1332,7 @@ namespace MagicStorage
 
 			int index = 0;
 			bool hasItemFromStorage = false;
-			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+			if (GetCraftingTree(selectedRecipe) is not OrderedRecipeTree craftingTree) {
 				NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
 				foreach (List<Item> itemsFromSource in sourceItems) {
@@ -1343,7 +1343,7 @@ namespace MagicStorage
 				NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
 				// Check each recipe in the tree
-				List<Recipe> recipes = recursiveRecipe.GetAllRecipes().ToList();
+				List<Recipe> recipes = craftingTree.GetAllRecipes().ToList();
 
 				foreach (List<Item> itemsFromSource in sourceItems) {
 					bool[] wasItemAdded = new bool[itemsFromSource.Count];

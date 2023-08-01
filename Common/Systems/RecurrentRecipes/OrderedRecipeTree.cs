@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -85,6 +86,33 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						queue.Enqueue(leaf);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Returns an enumeration of every recipe used in this recursion tree
+		/// </summary>
+		public IEnumerable<Recipe> GetAllRecipes() {
+			Queue<OrderedRecipeTree> treeQueue = new();
+			HashSet<Recipe> usedRecipes = new HashSet<Recipe>(ReferenceEqualityComparer.Instance);
+			treeQueue.Enqueue(this);
+
+			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
+				Recipe recipe = branch.context.recipe;
+
+				if (usedRecipes.Add(recipe))
+					yield return recipe;
+
+				foreach (var leaf in branch.Leaves)
+					treeQueue.Enqueue(leaf);
+			}
+		}
+
+		public IEnumerable<int> GetRequiredTiles() {
+			return GetAllRecipes().SelectMany(static r => r.requiredTile).Distinct();
+		}
+
+		public bool HasCondition(Condition condition) {
+			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 
 		public List<RequiredMaterialInfo> GetRequiredMaterials(out List<ItemInfo> excessResults) {
