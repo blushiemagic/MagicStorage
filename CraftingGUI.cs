@@ -1064,6 +1064,8 @@ namespace MagicStorage
 			return retValue;
 		}
 
+		// Prevents multiple threads from trying to manipulate the same object
+		[ThreadStatic]
 		private static Dictionary<int, int> isAvailable_ItemCountsDictionary;
 
 		private static int IsAvailable_GetItemCount(Recipe recipe, int type) {
