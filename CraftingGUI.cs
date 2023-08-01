@@ -269,7 +269,7 @@ namespace MagicStorage
 			else
 			{
 				int amountCraftable = AmountCraftableForCurrentRecipe();
-				int max = Math.Min(amountCraftable, selectedRecipe.createItem.maxStack);
+				int max = Utils.Clamp(amountCraftable, 1, selectedRecipe.createItem.stack);
 
 				if (craftAmountTarget > max)
 					craftAmountTarget = max;
