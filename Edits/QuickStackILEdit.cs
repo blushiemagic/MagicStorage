@@ -43,10 +43,18 @@ namespace MagicStorage.Edits {
 					Item item = self.inventory[i];
 
 					if (item.type > ItemID.None && item.stack > 0 && !item.favorited && !item.IsACoin) {
+						int type = item.type;
 						bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref flag);
 
-						if (success && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0)
+						if (success && Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0) {
+							NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, self.whoAmI, PlayerItemSlotID.Inventory0 + i, self.inventory[i].prefix);
+							NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
+							self.inventoryChestStack[i] = true;
+
 							StorageGUI.SetRefresh();
+							StorageGUI.SetNextItemTypeToRefresh(type);
+							CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(type);
+						}
 					}
 				}
 			});

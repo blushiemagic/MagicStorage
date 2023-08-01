@@ -69,10 +69,13 @@ namespace MagicStorage.Common.Systems {
 				int oldType = item.type;
 				int oldStack = item.stack;
 
-				heart.DepositItem(item);
+				heart.TryDeposit(item);
 
 				if (oldType != item.type || oldStack != item.stack)
 					playSound = true;
+
+				if (item.stack <= 0)
+					item.TurnToAir();
 
 				if (item.IsAir)
 					return true;
