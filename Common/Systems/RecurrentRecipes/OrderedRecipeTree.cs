@@ -111,7 +111,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return GetAllRecipes().SelectMany(static r => r.requiredTile).Distinct();
 		}
 
-		public bool HasCondition(Condition condition) {
+		public bool HasCondition(Recipe.Condition condition) {
 			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 

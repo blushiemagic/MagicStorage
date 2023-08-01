@@ -705,7 +705,7 @@ namespace MagicStorage.UI.States {
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
 				if (craftingTree is null) {
-					if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearWater))
+					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
 					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearHoney))
@@ -720,19 +720,19 @@ namespace MagicStorage.UI.States {
 					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				} else {
-					if (craftingTree.HasCondition(Condition.NearWater))
+					if (craftingTree.HasCondition(Recipe.Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
-					if (craftingTree.HasCondition(Condition.NearHoney))
+					if (craftingTree.HasCondition(Recipe.Condition.NearHoney))
 						AddText(Language.GetTextValue("LegacyInterface.58"));
 
-					if (craftingTree.HasCondition(Condition.NearLava))
+					if (craftingTree.HasCondition(Recipe.Condition.NearLava))
 						AddText(Language.GetTextValue("LegacyInterface.56"));
 
-					if (craftingTree.HasCondition(Condition.InSnow))
+					if (craftingTree.HasCondition(Recipe.Condition.InSnow))
 						AddText(Language.GetTextValue("LegacyInterface.123"));
 
-					if (craftingTree.HasCondition(Condition.InGraveyard))
+					if (craftingTree.HasCondition(Recipe.Condition.InGraveyardBiome))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				}
 
