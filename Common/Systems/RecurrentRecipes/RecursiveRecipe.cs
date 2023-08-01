@@ -124,7 +124,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
 				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
-				if (ignoreItem > 0 && ignoreItem == requiredItem.type || CraftingGUI.RecipeGroupMatch(sourceRecipe, ignoreItem, requiredItem.type))
+				if ((ignoreItem > 0 && ignoreItem == requiredItem.type) || CraftingGUI.RecipeGroupMatch(sourceRecipe, ignoreItem, requiredItem.type))
 					continue;
 
 				int requiredPerCraft = requiredItem.stack;
