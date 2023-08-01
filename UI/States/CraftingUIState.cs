@@ -1225,7 +1225,6 @@ namespace MagicStorage.UI.States {
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
 						StorageGUI.SetRefresh();
-						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
