@@ -42,38 +42,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		/// <summary>
-		/// Returns an enumeration of every recipe used in this recursion tree
-		/// </summary>
-		public IEnumerable<Recipe> GetAllRecipes() {
-			HashSet<int> checkedRecipes = new();
-			Queue<RecursiveRecipe> recipeQueue = new();
-			recipeQueue.Enqueue(this);
-			Queue<int> depths = new();
-			depths.Enqueue(0);
-
-			while (recipeQueue.TryDequeue(out RecursiveRecipe recipe)) {
-				Node root = recipe.tree.Root;
-				int depth = depths.Dequeue();
-
-				if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
-					continue;
-
-				if (!checkedRecipes.Add(root.poolIndex))
-					continue;
-
-				yield return recipe.original;
-
-				foreach (var ingredient in root.info.ingredientTrees) {
-					if (ingredient.RecipeCount == 0 || !ingredient.SelectedRecipe.TryGetRecursiveRecipe(out RecursiveRecipe ingredientRecipe))
-						continue;
-
-					recipeQueue.Enqueue(ingredientRecipe);
-					depths.Enqueue(depth + 1);
-				}
-			}
-		}
-
-		/// <summary>
 		/// Returns a tree representing the recipes this recursive recipe will use and their expected crafted quantities
 		/// </summary>
 		/// <param name="amountToCraft">How many items are expected to be crafted.  Defaults to 1</param>
@@ -214,14 +182,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			}
 
 			return materials.Select(GetMaxCraftsAmount).Prepend(int.MaxValue).Min();
-		}
-
-		public IEnumerable<int> GetRequiredTiles() {
-			return GetAllRecipes().SelectMany(static r => r.requiredTile).Distinct();
-		}
-
-		public bool HasCondition(Condition condition) {
-			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 	}
 }
