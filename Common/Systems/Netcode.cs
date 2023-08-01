@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Terraria;
+using Terraria.GameContent.Drawing;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -69,10 +70,15 @@ namespace MagicStorage.Common.Systems {
 				int oldType = item.type;
 				int oldStack = item.stack;
 
-				heart.DepositItem(item);
+				heart.TryDeposit(item);
 
-				if (oldType != item.type || oldStack != item.stack)
+				if (oldType != item.type || oldStack != item.stack) {
 					playSound = true;
+					Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, heart.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
+				}
+
+				if (item.stack <= 0)
+					item.TurnToAir();
 
 				if (item.IsAir)
 					return true;

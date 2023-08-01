@@ -172,11 +172,12 @@ namespace MagicStorage {
 
 			List<(StorageAccess access, Point16 position)> storageAccesses = new();
 
-			for (int x = centerTile.X - 17; x <= centerTile.X + 17; x++) {
+			const int range = 39;
+			for (int x = centerTile.X - range; x <= centerTile.X + range; x++) {
 				if (x < 0 || x >= Main.maxTilesX)
 					continue;
 
-				for (int y = centerTile.Y - 17; y <= centerTile.Y + 17; y++) {
+				for (int y = centerTile.Y - range; y <= centerTile.Y + range; y++) {
 					if (y < 0 || y >= Main.maxTilesY)
 						continue;
 
