@@ -925,6 +925,9 @@ namespace MagicStorage
 
 			bool available;
 			if (checkRecursive && GetCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
+				// NOTE: [ThreadStatic] only runs the field initializer on one thread
+				DroppedItems ??= new();
+
 				// Clone the item counts so that the inventory can be faked
 				isAvailable_ItemCountsDictionary = new Dictionary<int, int>(itemCounts);
 
@@ -1768,6 +1771,9 @@ namespace MagicStorage
 		}
 
 		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {
+			// NOTE: [ThreadStatic] only runs the field initializer on one thread
+			DroppedItems ??= new();
+
 			while (context.toCraft > 0) {
 				if (!func(context))
 					break;  // Could not craft any more items
@@ -1859,6 +1865,9 @@ namespace MagicStorage
 			}
 
 			SkipItemConsumption:
+
+			// NOTE: [ThreadStatic] only runs the field initializer on one thread
+			DroppedItems ??= new();
 
 			//Create the resulting items
 			for (int i = 0; i < crafts; i++) {
