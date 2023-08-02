@@ -159,8 +159,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// <summary>
 		/// Iterate's through this recursive recipe's crafting tree and calculates the maximum amount of this recipe that can be crafted
 		/// </summary>
-		/// <param name="availableInventory">A dictionary indicating which item types are available and their quantities.  This dictionary <b>will be modified</b> by the time this method finishes executing</param>
+		/// <param name="availableInventory">A dictionary indicating which item types are available and their quantities</param>
 		/// <returns>The maximum amount of this recipe that can be crafted, or 0 if <paramref name="availableInventory"/> does not have enough ingredients</returns>
+		/// <exception cref="ArgumentNullException"/>
 		public int GetMaxCraftable(Dictionary<int, int> availableInventory) {
 			ArgumentNullException.ThrowIfNull(availableInventory);
 
