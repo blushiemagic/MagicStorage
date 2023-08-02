@@ -35,6 +35,8 @@ namespace MagicStorage.Edits {
 			while (c.TryGotoNext(MoveType.After, i => i.MatchLdarg(0),
 				i => i.MatchCall(Player_useVoidBag),
 				i => i.MatchBrtrue(out _))) {
+				foundAny = true;
+
 				// Emit the logic
 				c.Emit(OpCodes.Ldarg_0);
 				c.EmitDelegate(TryStorageQuickStack);
