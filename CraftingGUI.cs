@@ -261,7 +261,7 @@ namespace MagicStorage
 		internal static void ClampCraftAmount() {
 			if (craftAmountTarget < 1)
 				craftAmountTarget = 1;
-			else if (selectedRecipe.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
+			else if (selectedRecipe?.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
 				craftAmountTarget = 1;
 			else
 			{
