@@ -1376,7 +1376,7 @@ namespace MagicStorage
 			int addedIndex = 0;
 
 			foreach (Item item in itemsFromSource) {
-				if (item.type != selectedRecipe.createItem.type && wasItemAdded?[addedIndex] is false) {
+				if (item.type != selectedRecipe.createItem.type && wasItemAdded?[addedIndex] is not true) {
 					foreach (Item reqItem in recipe.requiredItem) {
 						if (item.type == reqItem.type || RecipeGroupMatch(recipe, item.type, reqItem.type)) {
 							//Module items must refer to the original item instances
@@ -1385,7 +1385,8 @@ namespace MagicStorage
 							storageItemInfo.Add(new(clone));
 							storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
 
-							wasItemAdded[addedIndex] = true;
+							if (wasItemAdded is not null)
+								wasItemAdded[addedIndex] = true;
 						}
 					}
 				}
