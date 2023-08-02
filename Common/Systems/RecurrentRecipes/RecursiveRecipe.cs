@@ -104,7 +104,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int batchSize = recipe.createItem.stack;
 				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, batches * requiredPerCraft));
+				// Any extras above the required amount will either end up recycled by other subrecipes or be extra results
+				int amountToCraft = Math.Min(requiredPerCraft, batches * batchSize);
+
+				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft));
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
