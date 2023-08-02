@@ -188,11 +188,8 @@ namespace MagicStorage
 		internal static int AmountCraftable(Recipe recipe)
 		{
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
-				// Clone the available inventory
-				Dictionary<int, int> availableInventory = new Dictionary<int, int>(itemCounts);
-
 				using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-					return recursiveRecipe.GetMaxCraftable(availableInventory);
+					return recursiveRecipe.GetMaxCraftable(GetItemCountsWithBlockedItemsRemoved());
 			}
 
 			// Handle the old logic
@@ -264,7 +261,7 @@ namespace MagicStorage
 		internal static void ClampCraftAmount() {
 			if (craftAmountTarget < 1)
 				craftAmountTarget = 1;
-			else if (!IsCurrentRecipeFullyAvailable())
+			else if (selectedRecipe.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
 				craftAmountTarget = 1;
 			else
 			{
@@ -909,7 +906,7 @@ namespace MagicStorage
 			if (!MagicStorageConfig.IsRecursionEnabled || !recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
 				return null;
 
-			return recursiveRecipe.GetCraftingTree(toCraft, availableInventory: itemCounts, blockedSubrecipeIngredient);
+			return recursiveRecipe.GetCraftingTree(toCraft, availableInventory: GetItemCountsWithBlockedItemsRemoved(), blockedSubrecipeIngredient);
 		}
 
 		internal static bool disableNetPrintingForIsAvailable;
@@ -934,7 +931,7 @@ namespace MagicStorage
 				DroppedItems ??= new();
 
 				// Clone the item counts so that the inventory can be faked
-				isAvailable_ItemCountsDictionary = new Dictionary<int, int>(itemCounts);
+				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true);
 
 				if (ignoreItem > 0)
 					isAvailable_ItemCountsDictionary.Remove(ignoreItem);
@@ -994,7 +991,7 @@ namespace MagicStorage
 						isAvailable_ItemCountsDictionary.AddOrSumCount(droppedItem.type, droppedItem.stack);
 				}
 			} else {
-				isAvailable_ItemCountsDictionary = itemCounts;
+				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
 				available = IsAvailable_CheckRecipe(recipe);
 				isAvailable_ItemCountsDictionary = null;
 			}
@@ -1179,7 +1176,7 @@ namespace MagicStorage
 			NetHelper.Report(true, "Checking if recipe passes \"blocked ingredients\" check...");
 
 			if (GetCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
-				isAvailable_ItemCountsDictionary = itemCounts;
+				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
 				craftingTree.TrimBranches(IsAvailable_GetItemCount);
 				isAvailable_ItemCountsDictionary = null;
 
@@ -1691,6 +1688,18 @@ namespace MagicStorage
 			};
 		}
 
+		private static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) {
+			if (!cloneIfBlockEmpty && blockStorageItems.Count == 0)
+				return itemCounts;
+
+			Dictionary<int, int> counts = new(itemCounts);
+
+			foreach (var data in blockStorageItems)
+				counts.Remove(data.Type);
+
+			return counts;
+		}
+
 		private static CraftingContext Craft_WithRecursion(int toCraft) {
 			// Unlike normal crafting, the crafting tree has to be respected
 			// This means that simple IsAvailable and AmountCraftable checks would just slow it down
@@ -1715,7 +1724,7 @@ namespace MagicStorage
 				List<RequiredMaterialInfo> materials;
 				List<ItemInfo> excess;
 				using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-					materials = recursiveRecipe.GetRequiredMaterials(toCraft, out excess, itemCounts);
+					materials = recursiveRecipe.GetRequiredMaterials(toCraft, out excess, GetItemCountsWithBlockedItemsRemoved());
 
 				NetHelper.Report(true, "Attempting crafting...");
 
@@ -1742,11 +1751,12 @@ namespace MagicStorage
 								NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(item.type)}\"");
 							else {
 								// Did not have enough items
+								NetHelper.Report(false, $"Material requirement \"{Lang.GetItemNameValue(item.type)}\" could not be met, aborting");
 								return;
 							}
 						} else {
 							// Consume the item
-							material = material.SetStack(stackConsumed);
+							material = material.UpdateStack(-stackConsumed);
 							item.stack = stackConsumed;
 							consumedItems.Add(item);
 
