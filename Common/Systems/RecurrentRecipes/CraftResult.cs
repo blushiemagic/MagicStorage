@@ -3,14 +3,16 @@ using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public readonly struct CraftResult {
+		public readonly HashSet<Recipe> usedRecipes;
 		public readonly List<RequiredMaterialInfo> requiredMaterials;
 		public readonly List<ItemInfo> excessResults;
 		public readonly HashSet<int> requiredTiles;
 		public readonly HashSet<Condition> requiredConditions;
 
-		public static CraftResult Default => new CraftResult(new(), new(), new(), new(ReferenceEqualityComparer.Instance));
+		public static CraftResult Default => new CraftResult(new(ReferenceEqualityComparer.Instance), new(), new(), new(), new(ReferenceEqualityComparer.Instance));
 
-		public CraftResult(List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Condition> conditions) {
+		public CraftResult(HashSet<Recipe> recipes, List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Condition> conditions) {
+			usedRecipes = recipes;
 			requiredMaterials = materials;
 			excessResults = excess;
 			requiredTiles = tiles;
@@ -18,6 +20,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public CraftResult CombineWith(in CraftResult other) {
+			var recipes = new HashSet<Recipe>(usedRecipes, ReferenceEqualityComparer.Instance);
 			var materials = new List<RequiredMaterialInfo>(requiredMaterials);
 			var excess = new List<ItemInfo>(excessResults);
 			var tiles = new HashSet<int>(requiredTiles);
@@ -83,11 +86,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					excess[index] = excess[index].UpdateStack(info.stack);
 			}
 
-			// Merge the required tiles and conditions
+			// Merge everything else
+			recipes.UnionWith(other.usedRecipes);
 			tiles.UnionWith(other.requiredTiles);
 			conditions.UnionWith(other.requiredConditions);
 
-			return new CraftResult(materials, excess, tiles, conditions);
+			return new CraftResult(recipes, materials, excess, tiles, conditions);
 		}
 	}
 }

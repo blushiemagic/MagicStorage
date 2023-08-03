@@ -1364,17 +1364,25 @@ namespace MagicStorage
 				// Check each recipe in the tree
 				List<Recipe> recipes = craftingTree.GetAllRecipes().ToList();
 
-				foreach (List<Item> itemsFromSource in sourceItems) {
-					bool[] wasItemAdded = new bool[itemsFromSource.Count];
-					bool checkedHighestRecipe = false;
+				var simulation = GetCraftingSimulationForCurrentRecipe();
 
-					foreach (Recipe recipe in recipes) {
-						// Only allow the "final recipe" to affect the result item
-						CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded, checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
-						checkedHighestRecipe = true;
+				bool checkedHighestRecipe = false;
+				List<bool[]> wasItemAdded = new List<bool[]>();
+				foreach (Recipe recipe in recipes) {
+					if (!simulation.UsedRecipe(recipe))
+						continue;  // Recipe would not be used, so don't try to make it influence the Stored Ingredients list
+
+					index = 0;
+
+					foreach (List<Item> itemsFromSource in sourceItems) {
+						if (wasItemAdded.Count <= index)
+							wasItemAdded.Add(new bool[itemsFromSource.Count]);
+
+						// Only allow the "final recipe" (i.e. the first in the list) to affect the result item
+						CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded[index], checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
+
+						index++;
 					}
-
-					index++;
 				}
 			}
 

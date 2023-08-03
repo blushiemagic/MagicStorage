@@ -132,6 +132,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			Dictionary<int, int> excessIndicies = new();
 
 			result = CraftResult.Default;
+			var recipes = result.usedRecipes;
 			var materials = result.requiredMaterials;
 			var excessResults = result.excessResults;
 			var requiredTiles = result.requiredTiles;
@@ -253,6 +254,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						excessResults[itemIndex] = excessResults[itemIndex].UpdateStack(item.stack);
 				}
 
+				recipes.Add(recipe);
 				requiredTiles.UnionWith(recipe.requiredTile);
 				requiredConditions.UnionWith(recipe.Conditions);
 			}
