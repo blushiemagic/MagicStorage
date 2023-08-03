@@ -55,8 +55,7 @@ namespace MagicStorage.UI.States {
 				modSearchBox.Reset(false);
 
 				// Ensure that the UI is refreshed completely
-				StorageGUI.ForceNextRefreshToBeFull = true;
-				StorageGUI.CheckRefresh();
+				StorageGUI.SetRefresh(forceFullRefresh: true);
 			};
 
 			OnPageDeselected += () => {
