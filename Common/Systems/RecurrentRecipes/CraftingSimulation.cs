@@ -10,11 +10,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public IReadOnlyList<RequiredMaterialInfo> RequiredMaterials => simulationResult.requiredMaterials;
 		public IReadOnlyList<ItemInfo> ExcessResults => simulationResult.excessResults;
 		public IEnumerable<int> RequiredTiles => simulationResult.requiredTiles;
-		public IEnumerable<Condition> RequiredConditions => simulationResult.requiredConditions;
+		public IEnumerable<Recipe.Condition> RequiredConditions => simulationResult.requiredConditions;
 
 		public int AmountCrafted { get; private set; }
 
-		public bool HasCondition(Condition condition) {
+		public bool HasCondition(Recipe.Condition condition) {
 			return simulationResult.requiredConditions.Contains(condition);
 		}
 

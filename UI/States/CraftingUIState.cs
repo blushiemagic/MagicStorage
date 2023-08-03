@@ -732,7 +732,7 @@ namespace MagicStorage.UI.States {
 					if (craftingSimulation.HasCondition(Recipe.Condition.InSnow))
 						AddText(Language.GetTextValue("LegacyInterface.123"));
 
-					if (craftingSimulation.HasCondition(Recipe.Condition.InGraveyard))
+					if (craftingSimulation.HasCondition(Recipe.Condition.InGraveyardBiome))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				}
 

@@ -7,11 +7,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public readonly List<RequiredMaterialInfo> requiredMaterials;
 		public readonly List<ItemInfo> excessResults;
 		public readonly HashSet<int> requiredTiles;
-		public readonly HashSet<Condition> requiredConditions;
+		public readonly HashSet<Recipe.Condition> requiredConditions;
 
 		public static CraftResult Default => new CraftResult(new(ReferenceEqualityComparer.Instance), new(), new(), new(), new(ReferenceEqualityComparer.Instance));
 
-		public CraftResult(HashSet<Recipe> recipes, List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Condition> conditions) {
+		public CraftResult(HashSet<Recipe> recipes, List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Recipe.Condition> conditions) {
 			usedRecipes = recipes;
 			requiredMaterials = materials;
 			excessResults = excess;
@@ -24,7 +24,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			var materials = new List<RequiredMaterialInfo>(requiredMaterials);
 			var excess = new List<ItemInfo>(excessResults);
 			var tiles = new HashSet<int>(requiredTiles);
-			var conditions = new HashSet<Condition>(requiredConditions, ReferenceEqualityComparer.Instance);
+			var conditions = new HashSet<Recipe.Condition>(requiredConditions, ReferenceEqualityComparer.Instance);
 
 			// Copy to make manipulation not affect the caller's scope
 			var otherMaterials = new List<RequiredMaterialInfo>(other.requiredMaterials);
