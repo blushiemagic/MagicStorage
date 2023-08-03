@@ -720,9 +720,9 @@ Mods: {
 		}
 
 		Config: {
-			Label: "MagicStorage конфигурация"
-			ServersideLabel: "MagicStorage конфигурация сервера"
-			BetaLabel: "MagicStorage BETA конфигурация"
+			Label: "Конфигурация"
+			ServersideLabel: "Конфигурация сервера"
+			BetaLabel: "Конфигурация (БЕТА)"
 
 			Headers: {
 				Storage: "[i:MagicStorage/StorageHeart]  Конфигурация интерфейса хранилища"
