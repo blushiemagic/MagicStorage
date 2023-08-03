@@ -34,7 +34,7 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool clearHistory;
 
-		[DefaultValue(3)]
+		[DefaultValue(0)]
 		[DrawTicks]
 		[Range(-1, 10)]
 		public int recursionDepth;

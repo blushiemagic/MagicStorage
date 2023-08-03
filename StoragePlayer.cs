@@ -64,6 +64,12 @@ namespace MagicStorage
 				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
 					"Do note that using this private beta build will cause a ton of text to be printed to the chat (when the config is enabled) and to your log files.",
 					c: Color.LightBlue);
+			} else {
+				Main.NewTextMultiline("Thank you for using Magic Storage!\n" +
+					"Do note that the new \"recursion crafting\" feature is experimental and may not be functional.\n" +
+					"Its config entry, \"Recursion Depth\", will default to 0 in the meantime.\n" +
+					"This message will be removed in a future update once the feature becomes stable enough.",
+					c: Color.LightBlue);
 			}
 		}
 
