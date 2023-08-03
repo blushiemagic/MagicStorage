@@ -1383,6 +1383,8 @@ namespace MagicStorage
 
 						index++;
 					}
+
+					checkedHighestRecipe = true;
 				}
 			}
 
@@ -1735,9 +1737,6 @@ namespace MagicStorage
 		private static CraftingSimulation simulatedCraftForCurrentRecipe;
 
 		public static CraftingSimulation GetCraftingSimulationForCurrentRecipe() {
-			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
-				return new CraftingSimulation();  // Delay logic until threading stops
-
 			if (object.ReferenceEquals(recentRecipeSimulation, selectedRecipe) && simulatedCraftForCurrentRecipe is not null)
 				return simulatedCraftForCurrentRecipe;
 
