@@ -940,6 +940,8 @@ Mods: {
 					Tooltip: 允许城镇NPC“自动机”入住你的城镇
 				}
 			}
+
+			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
 		}
 	}
 }

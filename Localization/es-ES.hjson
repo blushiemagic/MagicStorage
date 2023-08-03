@@ -936,6 +936,8 @@ Mods: {
 					// Tooltip: Enable to allow the Automaton to be able to move into housing
 				}
 			}
+
+			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
 		}
 	}
 }

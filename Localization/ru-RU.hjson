@@ -935,6 +935,8 @@ Mods: {
 					Tooltip: Включите, чтобы робот мог появиться в городе
 				}
 			}
+
+			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
 		}
 	}
 }
