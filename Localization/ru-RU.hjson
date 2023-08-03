@@ -725,9 +725,9 @@ Mods: {
 			BetaLabel: "Конфигурация (БЕТА)"
 
 			Headers: {
-				Storage: "[i:MagicStorage/StorageHeart]  Конфигурация интерфейса хранилища"
-				Crafting: "[i:MagicStorage/CraftingAccess]  Конфигурация интерфейса создания"
-				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Конфигурация интерфейсов хранения и создания"
+				Storage: "[i:MagicStorage/StorageHeart]  Интерфейс хранилища"
+				Crafting: "[i:MagicStorage/CraftingAccess]  Интерфейс создания"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Интерфейс хранения и создания"
 				General: "Дополнительно"
 			}
 
