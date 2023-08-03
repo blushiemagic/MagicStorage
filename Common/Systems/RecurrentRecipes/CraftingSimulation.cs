@@ -6,6 +6,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class CraftingSimulation {
 		private CraftResult simulationResult = CraftResult.Default;
 
+		public IEnumerable<Recipe> UsedRecipes => simulationResult.usedRecipes;
 		public IReadOnlyList<RequiredMaterialInfo> RequiredMaterials => simulationResult.requiredMaterials;
 		public IReadOnlyList<ItemInfo> ExcessResults => simulationResult.excessResults;
 		public IEnumerable<int> RequiredTiles => simulationResult.requiredTiles;
@@ -15,6 +16,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public bool HasCondition(Condition condition) {
 			return simulationResult.requiredConditions.Contains(condition);
+		}
+
+		public bool UsedRecipe(Recipe recipe) {
+			return simulationResult.usedRecipes.Contains(recipe);
 		}
 
 		public void SimulateCrafts(RecursiveRecipe recipe, int amountToCraft, Dictionary<int, int> availableInventory) {
