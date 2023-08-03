@@ -70,14 +70,10 @@ namespace MagicStorage.Common.Systems {
 				int oldType = item.type;
 				int oldStack = item.stack;
 
-				heart.TryDeposit(item);
+				heart.TryDepositFromFarAway(item, Main.LocalPlayer.Center);
 
-				if (oldType != item.type || oldStack != item.stack) {
+				if (oldType != item.type || oldStack != item.stack)
 					playSound = true;
-
-					if (Main.netMode == NetmodeID.SinglePlayer)
-						Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, heart.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
-				}
 
 				if (item.stack <= 0)
 					item.TurnToAir();

@@ -694,17 +694,17 @@ namespace MagicStorage.UI.States {
 				}
 
 				IEnumerable<int> requiredTiles;
-				OrderedRecipeTree craftingTree = null;
-				if (CraftingGUI.GetCraftingTree(CraftingGUI.selectedRecipe) is OrderedRecipeTree tree) {
-					craftingTree = tree;
-					requiredTiles = tree.GetRequiredTiles();
+				CraftingSimulation craftingSimulation = null;
+				if (CraftingGUI.GetCraftingSimulationForCurrentRecipe() is CraftingSimulation simulation) {
+					craftingSimulation = simulation;
+					requiredTiles = simulation.RequiredTiles;
 				} else
 					requiredTiles = CraftingGUI.selectedRecipe.requiredTile;
 
 				foreach (int tile in requiredTiles)
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
-				if (craftingTree is null) {
+				if (craftingSimulation is null) {
 					if (CraftingGUI.selectedRecipe.HasCondition(Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
@@ -720,19 +720,19 @@ namespace MagicStorage.UI.States {
 					if (CraftingGUI.selectedRecipe.HasCondition(Condition.InGraveyard))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				} else {
-					if (craftingTree.HasCondition(Condition.NearWater))
+					if (craftingSimulation.HasCondition(Condition.NearWater))
 						AddText(Language.GetTextValue("LegacyInterface.53"));
 
-					if (craftingTree.HasCondition(Condition.NearHoney))
+					if (craftingSimulation.HasCondition(Condition.NearHoney))
 						AddText(Language.GetTextValue("LegacyInterface.58"));
 
-					if (craftingTree.HasCondition(Condition.NearLava))
+					if (craftingSimulation.HasCondition(Condition.NearLava))
 						AddText(Language.GetTextValue("LegacyInterface.56"));
 
-					if (craftingTree.HasCondition(Condition.InSnow))
+					if (craftingSimulation.HasCondition(Condition.InSnow))
 						AddText(Language.GetTextValue("LegacyInterface.123"));
 
-					if (craftingTree.HasCondition(Condition.InGraveyard))
+					if (craftingSimulation.HasCondition(Condition.InGraveyard))
 						AddText(Language.GetTextValue("LegacyInterface.124"));
 				}
 

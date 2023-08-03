@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Terraria;
 
@@ -38,6 +40,26 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public RequiredMaterialInfo SetStack(int newStack) {
 			return new RequiredMaterialInfo(itemOrGroupID, newStack, recipeGroup);
+		}
+
+		public override bool Equals([NotNullWhen(true)] object obj) {
+			return obj is RequiredMaterialInfo other && itemOrGroupID == other.itemOrGroupID && stack == other.stack && recipeGroup == other.recipeGroup;
+		}
+
+		public bool EqualsIgnoreStack(RequiredMaterialInfo other) {
+			return itemOrGroupID == other.itemOrGroupID && recipeGroup == other.recipeGroup;
+		}
+
+		public override int GetHashCode() {
+			return HashCode.Combine(itemOrGroupID, stack, recipeGroup);
+		}
+
+		public static bool operator ==(RequiredMaterialInfo left, RequiredMaterialInfo right) {
+			return left.itemOrGroupID == right.itemOrGroupID && left.stack == right.stack && left.recipeGroup == right.recipeGroup;
+		}
+
+		public static bool operator !=(RequiredMaterialInfo left, RequiredMaterialInfo right) {
+			return !(left == right);
 		}
 	}
 }
