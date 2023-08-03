@@ -48,7 +48,7 @@ namespace MagicStorage {
 
 		[Label("$Mods.MagicStorage.Config.recursionDepth.Label")]
 		[Tooltip("$Mods.MagicStorage.Config.recursionDepth.Tooltip")]
-		[DefaultValue(3)]
+		[DefaultValue(0)]
 		[DrawTicks]
 		[Range(-1, 10)]
 		public int recursionDepth;
