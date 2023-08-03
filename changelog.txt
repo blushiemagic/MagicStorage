@@ -1,4 +1,28 @@
 ﻿[h1]v0.6[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- TODO
+This is a short version of the changelog.  The full changelog can be found [url=https://gist.github.com/absoluteAquarian/7aad3fcd72be2818d4433fe82bb1649d]here[/url].
+
+- Added a few new items
+- Modified the recipes for some items
+- Connector tiles now connect to storage components
+- Added a new, [b]experimental[/b] recursion crafting system
+- Removed the integration with [i]Recursive Craft[/i]
+- The Automaton will now attack monsters with a Storage Unit Wand
+- Added a config option to allow the Automaton to remember its most recently displayed help tip
+- Added new name options for the Automaton
+- Added some missing dialogue localization for the Automaton liking the Princess and vice versa
+- Added some new dialogue options for the Automaton
+- The Automaton now spawns alongside the Guide during world generation
+- Coordinate displays for certain items' tooltips is now in GPS/Depth Meter measurements
+- Logic for sorting and filtering items/recipes has been moved to a separate thread
+- Renamed a couple buttons in the Controls tab of the Storage UI
+- Heavily optimized the logic for refreshing the Crafting and Storage UIs
+- Enabling and disabling a module in the [i]Storage Configuration Interface[/b] now prints a message to the chat
+- Multiplayer client interactions with a storage system are reported to the server log, like an audit
+- IL edits made by Magic Storage no longer throw errors on fail
+- The buttons for changing the crafting target amount are now taller
+- Fixed Quick Stack to Nearby Storage not working
+- (1.4.4 only) Quick Stack to Nearby Storage now play the item transfer visual
+- Fixed various bugs and oversights
+- Updated the localization files
