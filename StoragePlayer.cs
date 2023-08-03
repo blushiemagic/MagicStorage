@@ -148,7 +148,7 @@ namespace MagicStorage
 				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting")?.searchBar?.Reset();
 			}
 
-			StorageGUI.RefreshItems();
+			StorageGUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		//Intended to only be used with StorageHeartAccessWrapper

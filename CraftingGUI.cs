@@ -453,19 +453,6 @@ namespace MagicStorage
 				}
 			};
 
-			// Unlike in StorageGUI, items need to be read ASAP due to EnvironmentModule adding them
-			var clone = thread.Clone(
-				newSortMode: SortingOptionLoader.Definitions.ID.Type,
-				newFilterMode: FilteringOptionLoader.Definitions.All.Type,
-				newSearchText: "",
-				newModSearch: ModSearchBox.ModIndexAll);
-
-			thread.context = clone.context = new(state.simulatorItems);
-
-			items.AddRange(ItemSorter.SortAndFilter(clone, aggregate: false));
-
-			numSimulatorItems = items.Count;
-
 			// Update the adjacent tiles and condition contexts
 			AnalyzeIngredients();
 
@@ -524,15 +511,21 @@ namespace MagicStorage
 
 		private static void LoadStoredItems(StorageGUI.ThreadContext thread, ThreadState state) {
 			try {
-				var simulatorItems = thread.context.sourceItems;
-
-				// Prepend the heart items before the module items
 				var clone = thread.Clone(
 					newSortMode: SortingOptionLoader.Definitions.ID.Type,
 					newFilterMode: FilteringOptionLoader.Definitions.All.Type,
 					newSearchText: "",
 					newModSearch: ModSearchBox.ModIndexAll);
 
+				thread.context = clone.context = new(state.simulatorItems);
+
+				items.AddRange(ItemSorter.SortAndFilter(clone, aggregate: false));
+
+				numSimulatorItems = items.Count;
+
+				var simulatorItems = thread.context.sourceItems;
+
+				// Prepend the heart items before the module items
 				NetHelper.Report(true, "Loading stored items from storage system...");
 
 				clone.context = new(state.heartItems);
@@ -566,13 +559,13 @@ namespace MagicStorage
 
 		private static void SafelyRefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
 			try {
-				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
-				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(static b => b));
-
 				if (state.recipesToRefresh is null)
 					RefreshRecipes(thread, state);  //Refresh all recipes
 				else
 					RefreshSpecificRecipes(thread, state);
+
+				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
+				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(static b => b));
 
 				NetHelper.Report(true, "Recipe refreshing finished");
 			} catch (Exception e) {
@@ -644,6 +637,9 @@ namespace MagicStorage
 
 				recipes.Clear();
 				recipeAvailable.Clear();
+				
+				// For some reason, the loading text likes to hide itself here...
+				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: true);
 
 				using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
 					if (state.recipeFilterChoice == RecipeButtonsAvailableChoice)
@@ -659,6 +655,9 @@ namespace MagicStorage
 						recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
 					}
 				}
+
+				// For some reason, the loading text likes to hide itself here...
+				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: true);
 			} catch when (thread.token.IsCancellationRequested) {
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -943,7 +942,7 @@ namespace MagicStorage
 			if (!disableNetPrintingForIsAvailable) {
 				NetHelper.Report(true, "Checking if recipe is available...");
 
-				if (checkRecursive)
+				if (checkRecursive && MagicStorageConfig.IsRecursionEnabled)
 					NetHelper.Report(false, "Calculating recursion tree for recipe...");
 			}
 
