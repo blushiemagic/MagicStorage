@@ -8,13 +8,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class OrderedRecipeTree {
 		private readonly List<OrderedRecipeTree> leaves = new();
 		public readonly OrderedRecipeContext context;
+		public readonly int parentLeafIndex;
 
 		public IReadOnlyList<OrderedRecipeTree> Leaves => leaves;
 
 		public OrderedRecipeTree Root { get; private set; }
 
-		public OrderedRecipeTree(OrderedRecipeContext context) {
+		public OrderedRecipeTree(OrderedRecipeContext context, int parentLeafIndex) {
 			this.context = context;
+			this.parentLeafIndex = parentLeafIndex;
 		}
 
 		public void Add(OrderedRecipeTree tree) {
@@ -63,7 +65,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			foreach (var leaf in leaves)
 				queue.Enqueue(leaf);
 
-			int depth;
 			while (queue.TryDequeue(out OrderedRecipeTree branch)) {
 				// Check if the amount needed has been satisfied
 				// If it is, this recipe and its children are not needed
@@ -72,15 +73,19 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int result = recipe.createItem.type;
 				ref int remaining = ref branch.context.amountToCraft;
 
-				remaining -= getItemCountForIngredient(recipe, result);
+				int count = getItemCountForIngredient(recipe, result);
 
-				depth = branch.context.depth;
-				if (remaining <= 0) {
+				if (count >= branch.Root.context.recipe.requiredItem[branch.parentLeafIndex].stack) {
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
-						NetHelper.Report(false, $"Branch trimmed: Depth = {depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
+						NetHelper.Report(false, $"Branch trimmed: Depth = {branch.context.depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
 
 					branch.Clear();
 				} else {
+					remaining -= count;
+
+					if (remaining < 0)
+						remaining = 0;
+
 					// Check the leaves
 					foreach (var leaf in branch.Leaves)
 						queue.Enqueue(leaf);
@@ -97,6 +102,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			treeQueue.Enqueue(this);
 
 			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
+				if (branch.context.amountToCraft <= 0)
+					continue;
+
 				Recipe recipe = branch.context.recipe;
 
 				if (usedRecipes.Add(recipe))
@@ -115,16 +123,19 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 
-		public List<RequiredMaterialInfo> GetRequiredMaterials(out List<ItemInfo> excessResults) {
+		public void GetCraftingInformation(out CraftResult result) {
 			// Get the info for one craft, then multiply the contents by how many batches would be needed
 			var recipeStack = GetProcessingOrder();
 
 			Dictionary<int, int> itemIndices = new();
 			Dictionary<int, int> groupIndices = new();
-			List<RequiredMaterialInfo> materials = new();
-
-			excessResults = new();
 			Dictionary<int, int> excessIndicies = new();
+
+			result = CraftResult.Default;
+			var materials = result.requiredMaterials;
+			var excessResults = result.excessResults;
+			var requiredTiles = result.requiredTiles;
+			var requiredConditions = result.requiredConditions;
 
 			EnvironmentSandbox sandbox;
 			IEnumerable<EnvironmentModule> modules;
@@ -132,7 +143,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				var heart = CraftingGUI.GetHeart();
 
 				sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
-				modules = heart.GetModules();
+				modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>();
 			} else {
 				sandbox = default;
 				modules = Array.Empty<EnvironmentModule>();
@@ -158,7 +169,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 						if (info.stack >= stack) {
 							excessResults[excessIndex] = info.UpdateStack(-stack);
-							stack = 0;
 							continue;
 						} else {
 							stack -= info.stack;
@@ -242,9 +252,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					} else
 						excessResults[itemIndex] = excessResults[itemIndex].UpdateStack(item.stack);
 				}
-			}
 
-			return materials;
+				requiredTiles.UnionWith(recipe.requiredTile);
+				requiredConditions.UnionWith(recipe.Conditions);
+			}
 		}
 	}
 }

@@ -69,7 +69,7 @@ namespace MagicStorage.Common.Systems {
 				int oldType = item.type;
 				int oldStack = item.stack;
 
-				heart.TryDeposit(item);
+				heart.TryDepositFromFarAway(item, Main.LocalPlayer.Center);
 
 				if (oldType != item.type || oldStack != item.stack)
 					playSound = true;

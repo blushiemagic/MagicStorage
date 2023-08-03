@@ -60,6 +60,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (availableInventory is null)
 				return;
 
+			if (trees.Count < 2) {
+				_selectedRecipe = 0;
+				return;
+			}
+
 			// Attempt to find the recipe with the best "availability", i.e. the recipe that has the most ingredients partially or fully satisfied
 			// If one exists, modify the "_selectedRecipe" index to that recipe.  Otherwise, don't modify it
 			int bestMatch = -1;

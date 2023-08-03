@@ -1,0 +1,93 @@
+﻿using System.Collections.Generic;
+using Terraria;
+
+namespace MagicStorage.Common.Systems.RecurrentRecipes {
+	public readonly struct CraftResult {
+		public readonly List<RequiredMaterialInfo> requiredMaterials;
+		public readonly List<ItemInfo> excessResults;
+		public readonly HashSet<int> requiredTiles;
+		public readonly HashSet<Condition> requiredConditions;
+
+		public static CraftResult Default => new CraftResult(new(), new(), new(), new(ReferenceEqualityComparer.Instance));
+
+		public CraftResult(List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Condition> conditions) {
+			requiredMaterials = materials;
+			excessResults = excess;
+			requiredTiles = tiles;
+			requiredConditions = conditions;
+		}
+
+		public CraftResult CombineWith(in CraftResult other) {
+			var materials = new List<RequiredMaterialInfo>(requiredMaterials);
+			var excess = new List<ItemInfo>(excessResults);
+			var tiles = new HashSet<int>(requiredTiles);
+			var conditions = new HashSet<Condition>(requiredConditions, ReferenceEqualityComparer.Instance);
+
+			// Copy to make manipulation not affect the caller's scope
+			var otherMaterials = new List<RequiredMaterialInfo>(other.requiredMaterials);
+
+			// For each new material required, remove them from the excess results first
+			if (excess.Count > 0) {
+				for (int i = 0; i < otherMaterials.Count; i++) {
+					var mat = otherMaterials[i];
+
+					if (mat.stack <= 0)
+						continue;  // Empty material, ignore
+
+					for (int j = 0; j < excess.Count; j++) {
+						var info = excess[j];
+
+						if (info.stack <= 0)
+							continue;  // Fully consumed, empty slot
+
+						foreach (int item in mat.GetValidItems()) {
+							if (info.type == item) {
+								// Item type matched, attempt to consume from excess materials list
+								if (info.stack >= mat.stack) {
+									excess[j] = info = info.UpdateStack(-mat.stack);
+									otherMaterials[i] = mat.SetStack(0);
+									goto checkNextMaterial;
+								} else {
+									otherMaterials[i] = mat = mat.UpdateStack(-info.stack);
+									excess[j] = info.SetStack(0);
+								}
+							}
+						}
+					}
+
+					checkNextMaterial: ;
+				}
+			}
+
+			// Merge the required materials
+			foreach (RequiredMaterialInfo material in otherMaterials) {
+				if (material.stack <= 0)
+					continue;  // Material was no longer needed
+
+				int index = materials.FindIndex(m => m.EqualsIgnoreStack(material));
+				if (index < 0)
+					materials.Add(material);
+				else
+					materials[index] = materials[index].UpdateStack(material.stack);
+			}
+
+			// Merge the excess results
+			foreach (ItemInfo info in other.excessResults) {
+				if (info.stack <= 0)
+					continue;  // Fully consumed, empty slot
+
+				int index = excess.FindIndex(i => i.EqualsIgnoreStack(info));
+				if (index < 0)
+					excess.Add(info);
+				else
+					excess[index] = excess[index].UpdateStack(info.stack);
+			}
+
+			// Merge the required tiles and conditions
+			tiles.UnionWith(other.requiredTiles);
+			conditions.UnionWith(other.requiredConditions);
+
+			return new CraftResult(materials, excess, tiles, conditions);
+		}
+	}
+}

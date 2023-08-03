@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using System;
+using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public readonly struct ItemInfo {
@@ -17,5 +18,25 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public ItemInfo UpdateStack(int add) => new ItemInfo(type, stack + add, prefix);
 
 		public ItemInfo SetStack(int newStack) => new ItemInfo(type, newStack, prefix);
+
+		public override bool Equals(object obj) {
+			return obj is ItemInfo info && type == info.type && stack == info.stack && prefix == info.prefix;
+		}
+
+		public bool EqualsIgnoreStack(ItemInfo other) {
+			return type == other.type && prefix == other.prefix;
+		}
+
+		public override int GetHashCode() {
+			return HashCode.Combine(type, stack, prefix);
+		}
+
+		public static bool operator ==(ItemInfo left, ItemInfo right) {
+			return left.type == right.type && left.stack == right.stack && left.prefix == right.prefix;
+		}
+
+		public static bool operator !=(ItemInfo left, ItemInfo right) {
+			return !(left == right);
+		}
 	}
 }
