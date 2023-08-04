@@ -40,6 +40,8 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
+				NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 2, 2, 4);
+				NetMessage.SendTileSquare(Main.myPlayer, i - 2, j - 1, 4, 2);
 				NetHelper.SendComponentPlace(i - 1, j - 1, Type);
 				NetHelper.SendComponentPlacement(new Point16(i - 1, j - 1));
 				return -1;
@@ -47,6 +49,7 @@ namespace MagicStorage.Components
 
 			int id = Place(i - 1, j - 1);
 			((TEStorageComponent) ByID[id]).OnPlace();
+			UpdateNearbyConnectors(i - 1, j - 1);
 			return id;
 		}
 
@@ -54,14 +57,38 @@ namespace MagicStorage.Components
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 1, 2, 2);
+				NetMessage.SendTileSquare(Main.myPlayer, i - 1, j - 2, 2, 4);
+				NetMessage.SendTileSquare(Main.myPlayer, i - 2, j - 1, 4, 2);
 				NetHelper.SendSearchAndRefresh(i - 1, j - 1);
 				NetHelper.SendComponentPlacement(new Point16(i - 1, j - 1));
 				return 0;
 			}
 
 			SearchAndRefreshNetwork(new Point16(i - 1, j - 1));
+			UpdateNearbyConnectors(i - 1, j - 1);
 			return 0;
+		}
+
+		private static void UpdateNearbyConnectors(int x, int y)
+		{
+			// Forcibly update the frames of adjacent Connectors
+			for (int i = -1; i < 3; i++) {
+				for (int j = -1; j < 3; j++) {
+					// Ignore corners
+					if ((i == -1 || i == 2) && (j == -1 || j == 2))
+						continue;
+
+					int tx = x + i, ty = y + j;
+					if (!WorldGen.InWorld(tx, ty))
+						continue;
+
+					// Only update connector tiles
+					if (TileLoader.GetTile(Main.tile[tx, ty].TileType) is not StorageConnector)
+						continue;
+
+					WorldGen.TileFrame(tx, ty, resetFrame: true, noBreak: true);
+				}
+			}
 		}
 
 		public virtual void OnPlace()
