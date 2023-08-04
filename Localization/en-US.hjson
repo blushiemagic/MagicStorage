@@ -808,7 +808,7 @@ Mods: {
 				Label: "UI Panel Movement"
 				Tooltip: "Disable to prevent moving and resizing the UI panels"
 			}
-			recursionDepth: {
+			recursionCraftingDepth: {
 				Label: "Recipe Recursion Depth"
 				Tooltip:
 				'''

@@ -46,12 +46,12 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool clearHistory;
 
-		[Label("$Mods.MagicStorage.Config.recursionDepth.Label")]
-		[Tooltip("$Mods.MagicStorage.Config.recursionDepth.Tooltip")]
+		[Label("$Mods.MagicStorage.Config.recursionCraftingDepth.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.recursionCraftingDepth.Tooltip")]
 		[DefaultValue(0)]
 		[DrawTicks]
 		[Range(-1, 10)]
-		public int recursionDepth;
+		public int recursionCraftingDepth;
 
 		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
 		[Label("$Mods.MagicStorage.Config.glowNewItems.Label")]
@@ -147,7 +147,7 @@ namespace MagicStorage {
 		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
 		[JsonIgnore]
-		public static int RecipeRecursionDepth => Instance.recursionDepth;
+		public static int RecipeRecursionDepth => Instance.recursionCraftingDepth;
 		
 		[JsonIgnore]
 		public static bool IsRecursionEnabled => RecipeRecursionDepth != 0;

@@ -783,7 +783,7 @@ Mods: {
 				Label: "流动UI面板"
 				Tooltip: "关闭后，UI界面将无法调节大小或进行拖动"
 			}
-			recursionDepth: {
+			recursionCraftingDepth: {
 				// Label: ""
 				// Tooltip: ""
 			}
