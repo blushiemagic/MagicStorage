@@ -195,6 +195,15 @@ namespace MagicStorage.Sorting
 			}
 		}
 
+		public static bool RecipePassesFilter(Recipe recipe, StorageGUI.ThreadContext thread) {
+			FilteringOption filterOption = FilteringOptionLoader.Get(thread.filterMode);
+
+			if (filterOption is null)
+				return true;  // Failsafe
+
+			return filterOption.Filter(recipe.createItem) && FilterBySearchText(recipe.createItem, thread.searchText, thread.modSearch);
+		}
+
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
 			if (!modSearched && modSearchIndex != ModSearchBox.ModIndexAll)
 				filter += "@" + ModSearchBox.GetNameFromIndex(modSearchIndex);

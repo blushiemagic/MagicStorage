@@ -671,16 +671,16 @@ namespace MagicStorage
 			bool needsResort = false;
 
 			foreach (Recipe recipe in state.recipesToRefresh) {
-				Recipe orig = recipe;
-				Recipe check = recipe;
-
-				if (check is null)
+				if (recipe is null)
 					continue;
 
-				int index = recipes.IndexOf(check);  // TODO: check.RecipeIndex?
+				if (!ItemSorter.RecipePassesFilter(recipe, thread))
+					continue;
+
+				int index = recipes.IndexOf(recipe);
 
 				using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
-					if (!IsAvailable(check)) {
+					if (!IsAvailable(recipe)) {
 						if (index >= 0) {
 							if (state.recipeFilterChoice == RecipeButtonsAvailableChoice) {
 								//Remove the recipe
@@ -693,9 +693,9 @@ namespace MagicStorage
 						}
 					} else {
 						if (state.recipeFilterChoice == RecipeButtonsAvailableChoice) {
-							if (index < 0 && CanBeAdded(thread, state, orig)) {
+							if (index < 0 && CanBeAdded(thread, state, recipe)) {
 								//Add the recipe
-								recipes.Add(orig);
+								recipes.Add(recipe);
 								needsResort = true;
 							}
 						} else {
