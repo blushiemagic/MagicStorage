@@ -88,9 +88,16 @@ namespace MagicStorage
 			StorageGUI.forceFullRefresh = forceFullRefresh;
 		}
 
+		public static int CurrentThreadingDuration { get; private set; }
+
 		internal static void CheckRefresh() {
 			if (RefreshUI)
 				RefreshItems();
+
+			if (activeThread?.Running is true)
+				CurrentThreadingDuration++;
+			else
+				CurrentThreadingDuration = 0;
 		}
 
 		internal static void InvokeOnRefresh() => OnRefresh?.Invoke();
