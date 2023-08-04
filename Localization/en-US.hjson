@@ -627,7 +627,7 @@ Mods: {
 		RecipeConditions: {
 			EctoMistOverride:
 			'''
-			{$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}
+			{$RecipeConditions.InGraveyardBiome} / {$Mods.MagicStorage.ItemName.CombinedStations4Item}
 			'''
 			CookedMarshmallowCondition: "Biome Globe in a Crafting Interface"
 		}

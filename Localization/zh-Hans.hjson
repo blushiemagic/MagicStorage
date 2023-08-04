@@ -594,7 +594,7 @@ Mods: {
 		RecipeConditions: {
 			EctoMistOverride:
 			'''
-			{$RecipeConditions.InGraveyardBiome} / 站在 {$Mods.MagicStorage.ItemName.CombinedStations4Item} 旁
+			{$RecipeConditions.InGraveyardBiome} / {$Mods.MagicStorage.ItemName.CombinedStations4Item}
 			'''
 			CookedMarshmallowCondition: "存放于制作单元的生态球"
 		}
