@@ -120,13 +120,8 @@ namespace MagicStorage {
 			=> new(reader.ReadInt16(), reader.ReadInt16());
 
 		public static void GetResearchStats(int itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal) {
-			canBeResearched = false;
-			currentSacrificeTotal = 0;
-
-			if (!CreativeItemSacrificesCatalog.Instance.TryGetSacrificeCountCapToUnlockInfiniteItems(itemType, out sacrificesNeeded))
-				return;
-
-			canBeResearched = Main.LocalPlayerCreativeTracker.ItemSacrifices.GetSacrificeCount(itemType) >= currentSacrificeTotal;
+			// NOTE: 1.4.4 adds this handy method which does all of the work for me.  cool!
+			canBeResearched = Main.LocalPlayerCreativeTracker.ItemSacrifices.TryGetSacrificeNumbers(itemType, out currentSacrificeTotal, out sacrificesNeeded);
 		}
 
 		public static bool IsFullyResearched(int itemType, bool mustBeResearchable) {
