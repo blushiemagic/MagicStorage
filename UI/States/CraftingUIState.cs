@@ -708,58 +708,28 @@ namespace MagicStorage.UI.States {
 
 				IEnumerable<int> requiredTiles;
 				CraftingSimulation craftingSimulation = null;
-				if (CraftingGUI.GetCraftingSimulationForCurrentRecipe() is CraftingSimulation simulation) {
-					craftingSimulation = simulation;
-					requiredTiles = simulation.RequiredTiles;
+				if (MagicStorageConfig.IsRecursionEnabled) {
+					craftingSimulation = CraftingGUI.GetCraftingSimulationForCurrentRecipe();
+					requiredTiles = craftingSimulation.RequiredTiles;
 				} else
 					requiredTiles = CraftingGUI.selectedRecipe.requiredTile;
 
 				foreach (int tile in requiredTiles)
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
 
-				if (craftingSimulation is null) {
-					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearWater))
-						AddText(Language.GetTextValue("LegacyInterface.53"));
+				IEnumerable<Recipe.Condition> conditions;
+				if (MagicStorageConfig.IsRecursionEnabled)
+					conditions = craftingSimulation.RequiredConditions;
+				else
+					conditions = CraftingGUI.selectedRecipe.Conditions;
 
-					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearHoney))
-						AddText(Language.GetTextValue("LegacyInterface.58"));
-
-					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.NearLava))
-						AddText(Language.GetTextValue("LegacyInterface.56"));
-
-					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InSnow))
-						AddText(Language.GetTextValue("LegacyInterface.123"));
-
-					if (CraftingGUI.selectedRecipe.HasCondition(Recipe.Condition.InGraveyardBiome))
-						AddText(Language.GetTextValue("LegacyInterface.124"));
-				} else {
-					if (craftingSimulation.HasCondition(Recipe.Condition.NearWater))
-						AddText(Language.GetTextValue("LegacyInterface.53"));
-
-					if (craftingSimulation.HasCondition(Recipe.Condition.NearHoney))
-						AddText(Language.GetTextValue("LegacyInterface.58"));
-
-					if (craftingSimulation.HasCondition(Recipe.Condition.NearLava))
-						AddText(Language.GetTextValue("LegacyInterface.56"));
-
-					if (craftingSimulation.HasCondition(Recipe.Condition.InSnow))
-						AddText(Language.GetTextValue("LegacyInterface.123"));
-
-					if (craftingSimulation.HasCondition(Recipe.Condition.InGraveyardBiome))
-						AddText(Language.GetTextValue("LegacyInterface.124"));
-				}
+				foreach (Recipe.Condition condition in conditions)
+					AddText(condition.Description);
 
 				if (isEmpty)
 					text = Language.GetTextValue("LegacyInterface.23");
 
 				reqObjText2.SetText(text);
-
-				/*
-				double dps = CompareDps.GetDps(CraftingGUI.selectedRecipe.createItem);
-				string dpsText = dps >= 1d ? $"DPS = {dps:F}" : string.Empty;
-
-				recipePanelHeader.SetText(dpsText);
-				*/
 			}
 		}
 
