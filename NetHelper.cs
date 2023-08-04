@@ -358,8 +358,13 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
+				if (op == TEStorageHeart.Operation.Deposit)
 				{
+					_ = ItemIO.Receive(reader, true, true);
+				}
+				else if (op == TEStorageHeart.Operation.DepositFromFarAway)
+				{
+					_ = reader.ReadVector2();
 					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory)
@@ -397,8 +402,12 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
+				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 				{
+					_ = ItemIO.Receive(reader, true, true);
+				}
+				else if (op == TEStorageHeart.Operation.DepositFromFarAway) {
+					_ = reader.ReadVector2();
 					_ = ItemIO.Receive(reader, true, true);
 				}
 				else if (op == TEStorageHeart.Operation.DepositAll)

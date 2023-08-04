@@ -171,17 +171,25 @@ namespace MagicStorage.Components
 							typesToRefresh.Add(item.type);
 						}
 					}
-					else if (op.type == Operation.Deposit || op.type == Operation.DepositFromFarAway)
+					else if (op.type == Operation.Deposit)
 					{
 						DepositItem(op.item);
 						typesToRefresh.Add(op.item.type);
 						if (!op.item.IsAir)
 						{
 							ModPacket packet = PrepareServerResult(op.type);
-
-							if (op.type == Operation.DepositFromFarAway)
-								packet.WriteVector2((Vector2)op.state);
-
+							ItemIO.Send(op.item, packet, true, true);
+							packet.Send(op.client);
+						}
+					}
+					else if (op.type == Operation.DepositFromFarAway)
+					{
+						// TryDepositItemFromFarAway will just redirect to DepositItem in this context
+						TryDepositFromFarAway(op.item, (Vector2)op.state);
+						typesToRefresh.Add(op.item.type);
+						if (!op.item.IsAir)
+						{
+							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(op.item, packet, true, true);
 							packet.Send(op.client);
 						}
