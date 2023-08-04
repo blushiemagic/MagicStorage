@@ -684,6 +684,9 @@ namespace MagicStorage.UI.States {
 		}
 
 		private void UpdateRecipeText() {
+			if (StorageGUI.CurrentlyRefreshing)
+				return;  // Do not read anything until refreshing is completed
+
 			if (CraftingGUI.selectedRecipe == null) {
 				reqObjText2.SetText("");
 				recipePanelHeader.SetText(Language.GetText("Mods.MagicStorage.SelectedRecipe").Value);
