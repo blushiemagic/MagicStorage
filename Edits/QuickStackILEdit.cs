@@ -32,6 +32,7 @@ namespace MagicStorage.Edits {
 			// The storage quick stacking logic should be run there as well
 
 			bool foundAny = false;
+			int searchCount = 0;
 			while (c.TryGotoNext(MoveType.After, i => i.MatchLdarg(0),
 				i => i.MatchCall(Player_useVoidBag),
 				i => i.MatchBrtrue(out _))) {
@@ -43,11 +44,11 @@ namespace MagicStorage.Edits {
 
 				// Go to the second "ret" after the one for this if block, then emit the logic again
 				int retFound = 0;
-				while (c.TryGotoNext(MoveType.After, i => i.MatchRet()) && retFound < 2)
+				while (c.TryGotoNext(MoveType.After, i => i.MatchRet()) && retFound < 1)
 					retFound++;
 
-				if (retFound != 2) {
-					badReturnReason = $"Mismatch for ret instructions detected.  Expected 2 matches, found {retFound} instead";
+				if (retFound != 1) {
+					badReturnReason = $"Mismatch for ret instructions detected.  Expected 1 match, found {retFound} instead";
 					return false;
 				}
 
@@ -56,10 +57,17 @@ namespace MagicStorage.Edits {
 
 				c.Emit(OpCodes.Ldarg_0);
 				c.EmitDelegate(TryStorageQuickStack);
+
+				searchCount++;
 			}
 
 			if (!foundAny) {
 				badReturnReason = "Could not find any calls to Player.useVoidBag()";
+				return false;
+			}
+
+			if (searchCount != 2) {
+				badReturnReason = "Could not find all target locations for edits";
 				return false;
 			}
 
