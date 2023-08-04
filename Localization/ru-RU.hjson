@@ -686,7 +686,7 @@ Mods: {
 		RecipeRevealed: '''"{0}" рецептов были показаны.'''
 
 		RecipeConditions: {
-			EctoMistOverride: "{$RecipeConditions.InGraveyardBiome} / Стоя рядом с {$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			CookedMarshmallowCondition: Биом в шаре в модуле создания предметов
 		}
 

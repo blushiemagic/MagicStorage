@@ -690,7 +690,7 @@ Mods: {
 		RecipeRevealed: Recipe for item "{0}" was whitelisted.
 
 		RecipeConditions: {
-			EctoMistOverride: "{$RecipeConditions.InGraveyardBiome} / Standing near a {$Mods.MagicStorage.ItemName.CombinedStations4Item}"
+			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			CookedMarshmallowCondition: Biome Globe in a Crafting Interface
 		}
 

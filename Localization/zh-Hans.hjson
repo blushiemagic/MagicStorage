@@ -687,7 +687,7 @@ Mods: {
 		RecipeRevealed: 显示物品 "{0}" 的制作配方
 
 		RecipeConditions: {
-			EctoMistOverride: "{$RecipeConditions.InGraveyardBiome} / 站在 {$Mods.MagicStorage.ItemName.CombinedStations4Item} 旁"
+			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			CookedMarshmallowCondition: 存放于制作单元的生态球
 		}
 
