@@ -1,6 +1,4 @@
-﻿[h1]v0.6.0.1[/h1]
+﻿[h1]v0.6.0.2[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Fixed some oversights which were causing the Crafting UI to severely lag the game when opened
-- Added code to ensure that the [b]Loading...[/b] text stays visible during recipe refreshing logic
-- (1.4.3 build) Added code that I had forgotten to backport from the 1.4.4 build
+- TODO
