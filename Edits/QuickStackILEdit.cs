@@ -70,7 +70,7 @@ namespace MagicStorage.Edits {
 			// Guaranteed to run only in singleplayer or on a multiplayer client due to QuickStackAllChests only being invoked from the inventory UI button
 			IEnumerable<TEStorageHeart> hearts = player.GetNearbyNetworkHearts();
 
-			for (int i = 0; i < 50; i++) {
+			for (int i = 10; i < 50; i++) {
 				if (TryItemTransfer(player, player.inventory[i], hearts) && Main.netMode == NetmodeID.MultiplayerClient) {
 					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, player.inventory[i].prefix);
 					NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
