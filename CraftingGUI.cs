@@ -1947,17 +1947,24 @@ namespace MagicStorage
 
 			//Reduce the number of batch crafts until this recipe can be completely batched for the number of crafts
 			while (crafts > 0) {
+				bool didAttemptToConsumeItem = false;
+
 				foreach (Item reqItem in selectedRecipe.requiredItem) {
 					Item clone = reqItem.Clone();
 					clone.stack *= crafts;
 
 					if (!CanConsumeItem(context, clone, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed)) {
-						if (wasAvailable)
+						if (wasAvailable) {
 							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(reqItem.type)}\". (Batching {crafts} crafts)");
-						else {
+
+							// Indicate to later logic that an attempt was made
+							didAttemptToConsumeItem = true;
+						} else {
 							// Did not have enough items
 							crafts--;
 							batch.Clear();
+							didAttemptToConsumeItem = false;
+							break;
 						}
 					} else {
 						//Consume the item
@@ -1966,7 +1973,7 @@ namespace MagicStorage
 					}
 				}
 
-				if (batch.Count > 0) {
+				if (batch.Count > 0 || didAttemptToConsumeItem) {
 					//Successfully batched items for the craft
 					break;
 				}

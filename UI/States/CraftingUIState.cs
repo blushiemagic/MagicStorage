@@ -462,6 +462,19 @@ namespace MagicStorage.UI.States {
 		}
 
 		private bool? pendingPanelChange;
+		private bool isWaitPanelWaitingToOpen;
+
+		private void SetThreadWait(bool waiting) {
+			if (waiting) {
+				if (!AssetRepository.IsMainThread)
+					pendingPanelChange = waiting;
+				else if (recipeWaitPanel.Parent is null)
+					isWaitPanelWaitingToOpen = true;
+			} else {
+				recipeWaitPanel.Remove();
+				isWaitPanelWaitingToOpen = false;
+			}
+		}
 
 		public override void Update(GameTime gameTime) {
 			CraftingGUI.PlayerZoneCache.Cache();
@@ -471,16 +484,16 @@ namespace MagicStorage.UI.States {
 					base.Update(gameTime);
 
 					if (pendingPanelChange is bool { } waiting) {
-						if (waiting) {
-							if (recipeWaitPanel.Parent is null) {
-								recipePanel.Append(recipeWaitPanel);
-								recipeWaitPanel.Update(gameTime);
-							}
-						} else {
-							recipeWaitPanel.Remove();
-						}
-
+						SetThreadWait(waiting);
 						pendingPanelChange = null;
+					}
+
+					// Wait for at least 10 game ticks to display the prompt
+					if (isWaitPanelWaitingToOpen && StorageGUI.CurrentThreadingDuration > 10) {
+						isWaitPanelWaitingToOpen = false;
+
+						if (recipeWaitPanel.Parent is null)
+							recipePanel.Append(recipeWaitPanel);  // Delay appending to here
 					}
 				}
 
@@ -1059,9 +1072,7 @@ namespace MagicStorage.UI.States {
 
 			protected override void SetThreadWait(bool waiting) {
 				base.SetThreadWait(waiting);
-
-				var parent = parentUI as CraftingUIState;
-				parent.pendingPanelChange = waiting;
+				(parentUI as CraftingUIState).SetThreadWait(waiting);
 			}
 
 			public override void Update(GameTime gameTime) {
