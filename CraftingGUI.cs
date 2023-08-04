@@ -289,8 +289,12 @@ namespace MagicStorage
 					craftAmountTarget = max;
 			}
 
-			if (oldTarget != craftAmountTarget)
+			if (oldTarget != craftAmountTarget) {
 				ResetCachedCraftingSimulation();
+
+				if (MagicStorageConfig.IsRecursionEnabled)
+					RefreshStorageItems();
+			}
 		}
 
 		internal static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
