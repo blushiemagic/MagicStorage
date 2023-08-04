@@ -1771,29 +1771,7 @@ namespace MagicStorage
 
 			// Local capturing
 			var ctx = context;
-			
-			// With the branches that are left, go from the bottom up and attempt to craft them
-			ExecuteInCraftingGuiEnvironment(() => {
-				bool tryAgain = false;
-				int target = toCraft;
-
-				Dictionary<int, int> availableInventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true);
-
-				while (true) {
-					if (tryAgain)
-						NetHelper.Report(false, $"Target amount not met ({target} remaining), attempting additonal craft...");
-
-					if (!Craft_DoRecursionCraft(ref toCraft, recursiveRecipe, ctx, availableInventory)) {
-						// Craft failed, bail
-						return;
-					}
-
-					target -= toCraft;
-
-					if (target <= 0)
-						break;
-				}
-			});
+			ExecuteInCraftingGuiEnvironment(() => Craft_DoRecursionCraft(ctx));
 
 			// Sanity check
 			selectedRecipe = recursiveRecipe.original;
@@ -1801,21 +1779,14 @@ namespace MagicStorage
 			return context;
 		}
 
-		private static bool Craft_DoRecursionCraft(ref int toCraft, RecursiveRecipe recursiveRecipe, CraftingContext ctx, Dictionary<int, int> availableInventory) {
-			if (toCraft <= 0) {
-				NetHelper.Report(false, "Requested amount to craft was zero, aborting");
-				return false;
-			}
-
+		private static void Craft_DoRecursionCraft(CraftingContext ctx) {
 			NetHelper.Report(true, "Attempting crafting...");
 
-			var simulation = new CraftingSimulation();
-			simulation.SimulateCrafts(recursiveRecipe, toCraft, availableInventory);
-			toCraft = simulation.AmountCrafted;
+			var simulation = GetCraftingSimulationForCurrentRecipe();
 
-			if (toCraft <= 0) {
+			if (simulation.AmountCrafted <= 0) {
 				NetHelper.Report(false, "Crafting simulation resulted in zero crafts, aborting");
-				return false;
+				return;
 			}
 
 			// At this point, the amount to craft has already been clamped by the max amount possible
@@ -1842,18 +1813,10 @@ namespace MagicStorage
 						else {
 							// Did not have enough items
 							NetHelper.Report(false, $"Material requirement \"{Lang.GetItemNameValue(item.type)}\" could not be met, aborting");
-							toCraft = 0;
-							return false;
+							return;
 						}
 					} else {
 						// Consume the item
-						if (availableInventory.TryGetValue(type, out int quantity)) {
-							if (quantity > stackConsumed)
-								availableInventory[type] = quantity - stackConsumed;
-							else
-								availableInventory.Remove(type);
-						}
-
 						material = material.UpdateStack(-stackConsumed);
 						item.stack = stackConsumed;
 						consumedItems.Add(item);
@@ -1866,10 +1829,6 @@ namespace MagicStorage
 
 			// Immediately add the excess to the context's results
 			ctx.results.AddRange(simulation.ExcessResults.Where(static i => i.stack > 0).Select(static i => new Item(i.type, i.stack, i.prefix)));
-
-			// Update the inventory with the excess results as well
-			foreach (ItemInfo info in simulation.ExcessResults)
-				availableInventory.AddOrSumCount(info.type, info.stack);
 
 			ctx.simulation = false;
 
@@ -1890,8 +1849,6 @@ namespace MagicStorage
 			}
 
 			NetHelper.Report(true, $"Success! Crafted {simulation.AmountCrafted} items and {simulation.ExcessResults.Count - 1} extra item types");
-
-			return true;
 		}
 
 		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {
