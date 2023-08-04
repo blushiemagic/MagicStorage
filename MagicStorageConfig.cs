@@ -172,8 +172,14 @@ namespace MagicStorage {
 		[DefaultValue(true)]
 		public bool allowAutomatonToMoveIn;
 
+		[DefaultValue(false)]
+		public bool auditLog;
+
 		[JsonIgnore]
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
+
+		[JsonIgnore]
+		public static bool ReportClientStorageUsage => Instance.auditLog;
 
 		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref string message) {
 			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)

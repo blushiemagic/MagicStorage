@@ -106,7 +106,7 @@ namespace MagicStorage
 		}
 
 		public static void PrintClientRequest(int sender, string requestName, Vector2 worldCoordinates) {
-			if (!MagicStorageMod.UsingPrivateBeta) {
+			if (!MagicStorageMod.UsingPrivateBeta && MagicStorageServerConfig.ReportClientStorageUsage) {
 				Utility.ConvertToGPSCoordinates(worldCoordinates, out string compassText, out string depthText);
 				PrintToServerLogAndConsole(true, $"Client \"{Netplay.Clients[sender].Name}\" requested action \"{requestName}\" at location: {compassText} | {depthText}");
 			}
