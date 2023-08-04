@@ -684,8 +684,7 @@ namespace MagicStorage
 			foreach (var item in sourceItems[slot])
 				item.favorited = doFavorite;
 
-			RefreshUI = true;
-
+			SetRefresh();
 			SetNextItemTypeToRefresh(sourceItems[slot][0].type);
 		}
 

@@ -310,13 +310,15 @@ namespace MagicStorage.UI.States {
 					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 					bool changed = false, canRefresh = false;
+					int type = 0;
 					if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
-						int type = Main.mouseItem.type;
+						type = Main.mouseItem.type;
 						if (StorageGUI.TryDeposit(Main.mouseItem)) {
 							changed = true;
 							canRefresh = true;
 						}
 					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
+						type = StorageGUI.items[objSlot].type;
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							if (Main.netMode == NetmodeID.SinglePlayer) {
 								StorageGUI.FavoriteItem(objSlot);
@@ -347,6 +349,8 @@ namespace MagicStorage.UI.States {
 
 					if (canRefresh) {
 						StorageGUI.SetRefresh();
+						StorageGUI.SetNextItemTypeToRefresh(type);
+
 						obj.IgnoreNextHandleAction = true;
 					}
 
