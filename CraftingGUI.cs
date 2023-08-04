@@ -564,6 +564,8 @@ namespace MagicStorage
 				else
 					RefreshSpecificRecipes(thread, state);
 
+				forceSpecificRecipeResort = false;
+
 				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
 				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(static b => b));
 
@@ -664,11 +666,13 @@ namespace MagicStorage
 			}
 		}
 
+		internal static bool forceSpecificRecipeResort;
+
 		private static void RefreshSpecificRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
 			NetHelper.Report(true, "Refreshing " + state.recipesToRefresh.Length + " recipes");
 
 			//Assumes that the recipes are visible in the GUI
-			bool needsResort = false;
+			bool needsResort = forceSpecificRecipeResort;
 
 			foreach (Recipe recipe in state.recipesToRefresh) {
 				if (recipe is null)

@@ -1206,6 +1206,8 @@ namespace MagicStorage.UI.States {
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
 						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(obj.StoredItem.type);
+						CraftingGUI.forceSpecificRecipeResort = true;
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
 							if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
@@ -1220,11 +1222,14 @@ namespace MagicStorage.UI.States {
 								slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 							}
 						}
+
+						StorageGUI.SetRefresh();
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(obj.StoredItem.type);
 					} else {
 						CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[objSlot]);
 						(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 						
-						StorageGUI.RefreshUI = true;
+						StorageGUI.SetRefresh();
 
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}
