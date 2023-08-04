@@ -44,7 +44,7 @@ namespace MagicStorage
 		internal static readonly List<List<Item>> sourceItems = new();
 		internal static readonly List<bool> didMatCheck = new();
 
-		public const int WAIT_PANEL_MINIMUM_TICKS = 25;
+		public const int WAIT_PANEL_MINIMUM_TICKS = 45;
 
 		//Legacy properties required for UISearchBar to function properly
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
