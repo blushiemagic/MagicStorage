@@ -1806,9 +1806,10 @@ namespace MagicStorage
 					Item item = new Item(type, material.stack);
 
 					if (!CanConsumeItem(ctx, item, origWithdraw, origResults, out bool wasAvailable, out int stackConsumed, checkRecipeGroup: false)) {
-						if (wasAvailable)
+						if (wasAvailable) {
 							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(item.type)}\"");
-						else {
+							break;
+						} else {
 							// Did not have enough items
 							NetHelper.Report(false, $"Material requirement \"{Lang.GetItemNameValue(item.type)}\" could not be met, aborting");
 							return;
