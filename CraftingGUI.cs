@@ -239,7 +239,7 @@ namespace MagicStorage
 				int amount = craftAmountTarget;
 
 				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
-					amount = int.MaxValue;
+					amount = 9999;
 
 				Craft(amount);
 
@@ -274,14 +274,14 @@ namespace MagicStorage
 		}
 
 		internal static void ClampCraftAmount() {
+			if (StorageGUI.CurrentlyRefreshing)
+				return;  // Recipe/ingredient information may not be available
+
 			int oldTarget = craftAmountTarget;
 
-			if (craftAmountTarget < 1)
+			if (craftAmountTarget < 1 || selectedRecipe is null || selectedRecipe.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
 				craftAmountTarget = 1;
-			else if (selectedRecipe?.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
-				craftAmountTarget = 1;
-			else
-			{
+			else {
 				int amountCraftable = AmountCraftableForCurrentRecipe();
 				int max = Utils.Clamp(amountCraftable, 1, selectedRecipe.createItem.maxStack);
 
