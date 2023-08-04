@@ -37,7 +37,7 @@ namespace MagicStorage {
 		[DefaultValue(0)]
 		[DrawTicks]
 		[Range(-1, 10)]
-		public int recursionDepth;
+		public int recursionCraftingDepth;  // Renamed in v0.6.0.2 to force a value reset
 
 		[Header($"$Mods.MagicStorage.Config.Headers.StorageAndCrafting")]
 		[DefaultValue(false)]
@@ -115,7 +115,7 @@ namespace MagicStorage {
 		public static bool CanMoveUIPanels => Instance.canMovePanels;
 
 		[JsonIgnore]
-		public static int RecipeRecursionDepth => Instance.recursionDepth;
+		public static int RecipeRecursionDepth => Instance.recursionCraftingDepth;
 		
 		[JsonIgnore]
 		public static bool IsRecursionEnabled => RecipeRecursionDepth != 0;

@@ -842,7 +842,7 @@ Mods: {
 					Tooltip: Включите, чтобы история рецептов в интерфейсе модуля создания очищалась при его открытии.
 				}
 
-				recursionDepth: {
+				recursionCraftingDepth: {
 					Label: Глубина рекурсии
 					Tooltip:
 						'''

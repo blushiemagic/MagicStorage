@@ -843,7 +843,7 @@ Mods: {
 					// Tooltip: Enable to clear the recipe history in the Crafting GUI when opening it
 				}
 
-				recursionDepth: {
+				recursionCraftingDepth: {
 					// Label: Recipe Recursion Depth
 					/* Tooltip:
 						'''

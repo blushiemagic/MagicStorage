@@ -847,7 +847,7 @@ Mods: {
 					Tooltip: 在打开制作界面时自动清除配方历史记录
 				}
 
-				recursionDepth: {
+				recursionCraftingDepth: {
 					// Label: Recipe Recursion Depth
 					/* Tooltip:
 						'''
