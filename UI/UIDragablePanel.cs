@@ -69,6 +69,9 @@ namespace MagicStorage.UI {
 				if (element.IsMouseHovering)
 					MagicUI.mouseText = Language.GetTextValue("Mods.MagicStorage.HoverText.Reset");
 			};
+			resetButton.OnMouseOut += (evt, element) => {
+				MagicUI.mouseText = "";
+			};
 			header.Append(resetButton);
 
 			viewArea = new();
