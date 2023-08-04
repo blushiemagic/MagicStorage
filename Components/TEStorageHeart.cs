@@ -270,8 +270,8 @@ namespace MagicStorage.Components
 			}
 			else if (op == Operation.DepositFromFarAway)
 			{
-				Item item = ItemIO.Receive(reader, true, true);
 				Vector2 origin = reader.ReadVector2();
+				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client) { state = origin });
 
 				Chest.VisualizeChestTransfer(origin, Position.ToWorldCoordinates(16, 16), item, item.stack);
