@@ -515,6 +515,10 @@ Mods: {
 				// Label: ""
 				// Tooltip: ""
 			}
+			auditLog: {
+				/// Label: ""
+				// Tooltip: ""
+			}
 
 			PrintTextToChat: {
 				// Label: ""

@@ -796,6 +796,10 @@ Mods: {
 				Label: "自动机入住"
 				Tooltip: "允许城镇NPC“自动机”入住你的城镇"
 			}
+			auditLog: {
+				/// Label: ""
+				// Tooltip: ""
+			}
 
 			PrintTextToChat: {
 				Label: "输出日志信息到聊天框"

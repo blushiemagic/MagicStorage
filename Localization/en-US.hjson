@@ -829,6 +829,10 @@ Mods: {
 				Label: "Automaton Housing"
 				Tooltip: "Enable to allow the Automaton to be able to move into housing"
 			}
+			auditLog: {
+				Label: Server Audit Log
+				Tooltip: Enable to make client interactions with any storage system be reported to an audit log
+			}
 
 			PrintTextToChat: {
 				Label: "Print logging information to ingame chat"

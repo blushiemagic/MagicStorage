@@ -172,6 +172,8 @@ namespace MagicStorage {
 		[DefaultValue(true)]
 		public bool allowAutomatonToMoveIn;
 
+		[Label("$Mods.MagicStorage.Config.auditLog.Label")]
+		[Tooltip("$Mods.MagicStorage.Config.auditLog.Tooltip")]
 		[DefaultValue(false)]
 		public bool auditLog;
 
