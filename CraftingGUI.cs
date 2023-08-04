@@ -1780,8 +1780,6 @@ namespace MagicStorage
 		}
 
 		private static void Craft_DoRecursionCraft(CraftingContext ctx) {
-			NetHelper.Report(true, "Attempting crafting...");
-
 			var simulation = GetCraftingSimulationForCurrentRecipe();
 
 			if (simulation.AmountCrafted <= 0) {
