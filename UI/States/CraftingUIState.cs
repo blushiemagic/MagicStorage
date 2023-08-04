@@ -157,7 +157,6 @@ namespace MagicStorage.UI.States {
 
 						CraftingGUI.SetSelectedRecipe(selected);
 						StorageGUI.SetRefresh();
-						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
 
 						UpdatePanelHeight(PanelHeight);
 
@@ -284,7 +283,7 @@ namespace MagicStorage.UI.States {
 						if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 							result.favorited = !result.favorited;
 							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
-							CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(Array.Empty<Recipe>());
+							StorageGUI.SetRefresh();
 						} else {
 							Item toWithdraw = result.Clone();
 							
