@@ -939,6 +939,11 @@ Mods: {
 					Label: 自动机入住
 					Tooltip: 允许城镇NPC“自动机”入住你的城镇
 				}
+
+				auditLog: {
+					// Label: Server Audit Log
+					// Tooltip: Enable to make client interactions with any storage system be reported to an audit log
+				}
 			}
 
 			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"

@@ -934,6 +934,11 @@ Mods: {
 					Label: Жилье для робота
 					Tooltip: Включите, чтобы робот мог появиться в городе
 				}
+
+				auditLog: {
+					// Label: Server Audit Log
+					// Tooltip: Enable to make client interactions with any storage system be reported to an audit log
+				}
 			}
 
 			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
