@@ -25,6 +25,7 @@ namespace MagicStorage.UI.States {
 
 		private UIPanel waitPanel;
 		private UIText waitText;
+		private bool isWaitPanelWaitingToOpen;
 
 		protected bool IsWaitTextVisible => waitPanel.Parent is null;
 
@@ -436,9 +437,11 @@ namespace MagicStorage.UI.States {
 		protected virtual void SetThreadWait(bool waiting) {
 			if (waiting) {
 				if (waitPanel.Parent is null)
-					Append(waitPanel);
-			} else
+					isWaitPanelWaitingToOpen = true;
+			} else {
 				waitPanel.Remove();
+				isWaitPanelWaitingToOpen = false;
+			}
 		}
 
 		private bool? delayedThreadWait;
@@ -456,7 +459,16 @@ namespace MagicStorage.UI.States {
 			if (delayedThreadWait is { } waiting) {
 				SetThreadWait(waiting);
 				delayedThreadWait = null;
-				PendingZoneRefresh = true;
+
+				// Wait for at least 10 game ticks to display the prompt
+				if (!isWaitPanelWaitingToOpen || StorageGUI.CurrentThreadingDuration > 10) {
+					PendingZoneRefresh = true;
+
+					if (waiting && waitPanel.Parent is null) {
+						isWaitPanelWaitingToOpen = false;
+						Append(waitPanel);  // Delay appending to here
+					}
+				}
 			}
 
 			if (pendingConfiguration) {
