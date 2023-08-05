@@ -613,7 +613,7 @@ namespace MagicStorage.Components
 				DepositItem(item);
 
 				if (oldType != item.type || oldStack != item.stack)
-					Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
+					Chest.VisualizeChestTransfer(depositOrigin, Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
 			}
 		}
 
