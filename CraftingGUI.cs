@@ -1612,6 +1612,10 @@ namespace MagicStorage
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {
+			TEStorageHeart heart = GetHeart();
+			if (heart is null)
+				return;  // Bail
+
 			NetHelper.Report(true, $"Attempting to craft {toCraft} {Lang.GetItemNameValue(selectedRecipe.createItem.type)}");
 
 			// Additional safeguard against absurdly high craft targets
@@ -1657,14 +1661,14 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				NetHelper.Report(true, "Spawning excess results on player...");
 
-				foreach (Item item in HandleCraftWithdrawAndDeposit(GetHeart(), context.toWithdraw, context.results))
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(GetHeart()), item, item.stack);
+				foreach (Item item in HandleCraftWithdrawAndDeposit(heart, context.toWithdraw, context.results))
+					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 
 				StorageGUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending craft results to server...");
 
-				NetHelper.SendCraftRequest(GetHeart().Position, context.toWithdraw, context.results);
+				NetHelper.SendCraftRequest(heart.Position, context.toWithdraw, context.results);
 			}
 		}
 
@@ -1695,7 +1699,7 @@ namespace MagicStorage
 				sandbox = sandbox,
 				consumedItemsFromModules = new(),
 				fromModule = fromModule,
-				modules = heart.GetModules(),
+				modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>(),
 				toCraft = toCraft
 			};
 		}
@@ -2167,6 +2171,10 @@ namespace MagicStorage
 			int oldStack = item.stack;
 			int oldType = item.type;
 			TEStorageHeart heart = GetHeart();
+
+			if (heart is null)
+				return false;
+
 			heart.TryDeposit(item);
 
 			if (oldStack != item.stack) {
@@ -2181,6 +2189,9 @@ namespace MagicStorage
 		internal static Item DoWithdrawResult(Item item, bool toInventory = false)
 		{
 			TEStorageHeart heart = GetHeart();
+			if (heart is null)
+				return new Item();
+
 			Item withdrawn = heart.TryWithdraw(item, false, toInventory);
 
 			if (withdrawn.IsAir && items.Count != numItemsWithoutSimulators) {
