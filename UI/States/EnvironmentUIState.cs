@@ -102,8 +102,10 @@ namespace MagicStorage.UI.States {
 			public void LoadModules(TEEnvironmentAccess access) {
 				//Assign the "state" for each module
 				foreach (var entry in entriesByMod.Values) {
-					foreach (var module in access.Modules.Where(m => m.Mod == entry.Mod))
-						entry.SetLabel(module, access.Enabled(module));
+					foreach (var module in EnvironmentModuleLoader.modules.Where(m => m.Mod == entry.Mod)) {
+						if (entry.labelsByName.TryGetValue(module.Name, out var label))
+							label.SetState(access.Enabled(module));
+					}
 				}
 			}
 
