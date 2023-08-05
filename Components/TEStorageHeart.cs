@@ -67,6 +67,8 @@ namespace MagicStorage.Components
 		public HashSet<Point16> environmentAccesses = new();
 		private int updateTimer = 60;
 
+		internal bool[] clientUsingHeart = new bool[Main.maxPlayers];
+
 		public bool IsAlive { get; private set; } = true;
 
 		public IEnumerable<Item> UniqueItemsPutHistory => _uniqueItemsPutHistory.Items;
@@ -79,6 +81,34 @@ namespace MagicStorage.Components
 		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<StorageHeart>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override TEStorageHeart GetHeart() => this;
+
+		public bool AnyClientUsingThis() {
+			for (int i = 0; i < Main.maxPlayers; i++) {
+				if (!Main.player[i].active) {
+					clientUsingHeart[i] = false;
+					continue;
+				}
+
+				if (clientUsingHeart[i])
+					return true;
+			}
+
+			return false;
+		}
+
+		public void LockOnCurrentClient() {
+			if (!clientUsingHeart[Main.myPlayer]) {
+				clientUsingHeart[Main.myPlayer] = true;
+				NetHelper.ClientInformStorageHeartUsage(this);
+			}
+		}
+
+		public void UnlockOnCurrentClient() {
+			if (clientUsingHeart[Main.myPlayer]) {
+				clientUsingHeart[Main.myPlayer] = false;
+				NetHelper.ClientInformStorageHeartUsage(this);
+			}
+		}
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{

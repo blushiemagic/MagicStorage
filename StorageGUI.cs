@@ -450,6 +450,9 @@ namespace MagicStorage
 
 		internal static void SlotFocusLogic()
 		{
+			if (CurrentlyRefreshing)
+				return;  // Delay logic until threading stops
+
 			if (slotFocus >= items.Count ||
 				!Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
