@@ -265,14 +265,22 @@ namespace MagicStorage
 			else
 				craftAmountTarget = amount;  //Snap directly to the amount if the amount target was 1 (this makes clicking 10 when at 1 just go to 10 instead of 11)
 
-			ClampCraftAmount();
+			using (FlagSwitch.ToggleFalse(ref clampCraftAmountAllowCacheReset))
+				ClampCraftAmount();
 
-			if (craftAmountTarget != oldTarget)
+			if (craftAmountTarget != oldTarget) {
 				ResetCachedCraftingSimulation();
+
+				if (MagicStorageConfig.IsRecursionEnabled) {
+					RefreshStorageItems();
+					StorageGUI.SetRefresh();
+				}
+			}
 
 			SoundEngine.PlaySound(SoundID.MenuTick);
 		}
 
+		private static bool clampCraftAmountAllowCacheReset;
 		internal static void ClampCraftAmount() {
 			if (StorageGUI.CurrentlyRefreshing)
 				return;  // Recipe/ingredient information may not be available
@@ -289,11 +297,13 @@ namespace MagicStorage
 					craftAmountTarget = max;
 			}
 
-			if (oldTarget != craftAmountTarget) {
+			if (clampCraftAmountAllowCacheReset && oldTarget != craftAmountTarget) {
 				ResetCachedCraftingSimulation();
 
-				if (MagicStorageConfig.IsRecursionEnabled)
+				if (MagicStorageConfig.IsRecursionEnabled) {
 					RefreshStorageItems();
+					StorageGUI.SetRefresh();
+				}
 			}
 		}
 
@@ -1358,7 +1368,7 @@ namespace MagicStorage
 
 			int index = 0;
 			bool hasItemFromStorage = false;
-			if (GetCraftingTree(selectedRecipe) is not OrderedRecipeTree craftingTree) {
+			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe()) {
 				NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
 				foreach (List<Item> itemsFromSource in sourceItems) {
@@ -1369,16 +1379,18 @@ namespace MagicStorage
 				NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
 				// Check each recipe in the tree
-				List<Recipe> recipes = craftingTree.GetAllRecipes().ToList();
-
 				var simulation = GetCraftingSimulationForCurrentRecipe();
+
+				IEnumerable<Recipe> recipes;
+				if (simulation.AmountCrafted <= 0) {
+					// Default to using the recipes for the "current crafting tree" since the simulation couldn't craft anything
+					recipes = GetCraftingTree(selectedRecipe).GetAllRecipes();
+				} else
+					recipes = simulation.UsedRecipes;
 
 				bool checkedHighestRecipe = false;
 				List<bool[]> wasItemAdded = new List<bool[]>();
 				foreach (Recipe recipe in recipes) {
-					if (!simulation.UsedRecipe(recipe))
-						continue;  // Recipe would not be used, so don't try to make it influence the Stored Ingredients list
-
 					index = 0;
 
 					foreach (List<Item> itemsFromSource in sourceItems) {
@@ -1655,7 +1667,7 @@ namespace MagicStorage
 			}
 
 			CraftingContext context;
-			if (MagicStorageConfig.IsRecursionEnabled) {
+			if (MagicStorageConfig.IsRecursionEnabled && selectedRecipe.HasRecursiveRecipe()) {
 				// Recursive crafting uses special logic which can't just be injected into the previous logic
 				context = Craft_WithRecursion(toCraft);
 

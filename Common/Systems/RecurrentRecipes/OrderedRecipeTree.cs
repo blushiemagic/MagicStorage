@@ -254,7 +254,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						excessResults[itemIndex] = excessResults[itemIndex].UpdateStack(item.stack);
 				}
 
-				recipes.Add(recipe);
+				recipes.Add(new RecursedRecipe(context.depth, recipe));
 				requiredTiles.UnionWith(recipe.requiredTile);
 				requiredConditions.UnionWith(recipe.Conditions);
 			}

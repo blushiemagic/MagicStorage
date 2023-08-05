@@ -299,6 +299,8 @@ namespace MagicStorage.UI.States {
 			protected override float GetSearchBarRight() => depositButtonRight + CraftingGUI.Padding;
 
 			protected override void InitZoneSlotEvents(MagicStorageItemSlot itemSlot) {
+				itemSlot.CanShareItemToChat = true;
+
 				itemSlot.OnLeftClick += (evt, e) => {
 					// Prevent actions while refreshing the items
 					if (StorageGUI.CurrentlyRefreshing)
@@ -319,18 +321,21 @@ namespace MagicStorage.UI.States {
 						}
 					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
 						type = StorageGUI.items[objSlot].type;
-						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
-							if (Main.netMode == NetmodeID.SinglePlayer) {
-								StorageGUI.FavoriteItem(objSlot);
-								canRefresh = true;
-							} else {
-								Main.NewTextMultiline(
-									"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again",
-									c: Color.White);
+						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Main.FavoriteKey)) {
+							// Skip favoriting logic if the item would be shared to the chat instead
+							if (!Main.drawingPlayerChat) {
+								if (Main.netMode == NetmodeID.SinglePlayer) {
+									StorageGUI.FavoriteItem(objSlot);
+									canRefresh = true;
+								} else {
+									Main.NewTextMultiline(
+										"Toggling item as favorite is not implemented in multiplayer but you can withdraw this item, toggle it in inventory and deposit again",
+										c: Color.White);
+								}
+								// there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
+								// a workaropund would be to withdraw and deposit it back with changed favorite flag
+								// but it still might look ugly for the player that initiates operation
 							}
-							// there is no item instance id and there is no concept of slot # in heart so we can't send this in operation
-							// a workaropund would be to withdraw and deposit it back with changed favorite flag
-							// but it still might look ugly for the player that initiates operation
 						} else {
 							Item toWithdraw = StorageGUI.items[objSlot].Clone();
 

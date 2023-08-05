@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class CraftingSimulation {
 		private CraftResult simulationResult = CraftResult.Default;
 
-		public IEnumerable<Recipe> UsedRecipes => simulationResult.usedRecipes;
+		public IEnumerable<Recipe> UsedRecipes => simulationResult.usedRecipes.OrderBy(static r => r.recursionDepth).Select(static r => r.recipe).DistinctBy(static r => r, ReferenceEqualityComparer.Instance);
 		public IReadOnlyList<RequiredMaterialInfo> RequiredMaterials => simulationResult.requiredMaterials;
 		public IReadOnlyList<ItemInfo> ExcessResults => simulationResult.excessResults;
 		public IEnumerable<int> RequiredTiles => simulationResult.requiredTiles;
@@ -19,7 +20,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public bool UsedRecipe(Recipe recipe) {
-			return simulationResult.usedRecipes.Contains(recipe);
+			return simulationResult.usedRecipes.Any(r => object.ReferenceEquals(r.recipe, recipe));
 		}
 
 		public void SimulateCrafts(RecursiveRecipe recipe, int amountToCraft, Dictionary<int, int> availableInventory) {

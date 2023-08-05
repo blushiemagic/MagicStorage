@@ -138,7 +138,7 @@ namespace MagicStorage.UI.States {
 						return;
 
 					// Right click will do nothing when recursive crafting is enabled, since it would be pointless
-					if (MagicStorageConfig.IsRecursionEnabled)
+					if (MagicStorageConfig.IsRecursionEnabled && CraftingGUI.selectedRecipe.HasRecursiveRecipe())
 						return;
 
 					// select ingredient recipe by right clicking
@@ -355,7 +355,7 @@ namespace MagicStorage.UI.States {
 			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"), SmallerScale);
 			craftM100.SetAmountInformation(-100, true);
 			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallerScale);
-			craftMax.SetAmountInformation(int.MaxValue, false);
+			craftMax.SetAmountInformation(9999, false);
 			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallerScale);
 			craftReset.SetAmountInformation(1, false);
 
@@ -709,21 +709,19 @@ namespace MagicStorage.UI.States {
 				}
 
 				IEnumerable<int> requiredTiles;
-				CraftingSimulation craftingSimulation = null;
-				if (MagicStorageConfig.IsRecursionEnabled) {
-					craftingSimulation = CraftingGUI.GetCraftingSimulationForCurrentRecipe();
-					requiredTiles = craftingSimulation.RequiredTiles;
-				} else
+				IEnumerable<Condition> conditions;
+				bool useRecursion = MagicStorageConfig.IsRecursionEnabled && CraftingGUI.selectedRecipe.HasRecursiveRecipe();
+				if (useRecursion) {
+					CraftingSimulation simulation = CraftingGUI.GetCraftingSimulationForCurrentRecipe();
+					requiredTiles = simulation.RequiredTiles;
+					conditions = simulation.RequiredConditions;
+				} else {
 					requiredTiles = CraftingGUI.selectedRecipe.requiredTile;
+					conditions = CraftingGUI.selectedRecipe.Conditions;
+				}
 
 				foreach (int tile in requiredTiles)
 					AddText(Lang.GetMapObjectName(MapHelper.TileToLookup(tile, 0)));
-
-				IEnumerable<Condition> conditions;
-				if (MagicStorageConfig.IsRecursionEnabled)
-					conditions = craftingSimulation.RequiredConditions;
-				else
-					conditions = CraftingGUI.selectedRecipe.Conditions;
 
 				foreach (Condition condition in conditions)
 					AddText(condition.Description.Value);
@@ -1204,7 +1202,7 @@ namespace MagicStorage.UI.States {
 
 					StoragePlayer storagePlayer = StoragePlayer.LocalPlayer;
 
-					if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Keys.LeftAlt)) {
+					if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Main.FavoriteKey)) {
 						if (!storagePlayer.FavoritedRecipes.Add(obj.StoredItem))
 							storagePlayer.FavoritedRecipes.Remove(obj.StoredItem);
 
