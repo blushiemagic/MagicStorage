@@ -159,20 +159,19 @@ namespace MagicStorage.Components
 					networkRefresh = true;
 					if (op.type == Operation.Withdraw || op.type == Operation.WithdrawToInventory)
 					{
+						typesToRefresh.Add(op.item.type);
 						Item item = Withdraw(op.item, op.keepOneInFavorite);
 						if (!item.IsAir)
 						{
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(item, packet, true, true);
 							packet.Send(op.client);
-
-							typesToRefresh.Add(item.type);
 						}
 					}
 					else if (op.type == Operation.Deposit)
 					{
-						DepositItem(op.item);
 						typesToRefresh.Add(op.item.type);
+						DepositItem(op.item);
 						if (!op.item.IsAir)
 						{
 							ModPacket packet = PrepareServerResult(op.type);
@@ -186,8 +185,8 @@ namespace MagicStorage.Components
 						List<Item> leftOvers = new List<Item>();
 						foreach (Item item in op.items)
 						{
-							DepositItem(item);
 							typesToRefresh.Add(item.type);
+							DepositItem(item);
 							if (!item.IsAir)
 							{
 								leftOvers.Add(item);
