@@ -2,9 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Chat;
 using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace MagicStorage.UI {
 	public class MagicStorageItemSlot : UIElement {
@@ -33,6 +37,8 @@ namespace MagicStorage.UI {
 		public bool IgnoreClicks { get; set; }
 
 		public bool IgnoreNextHandleAction { get; set; }
+
+		public bool CanShareItemToChat { get; set; }
 
 		public readonly int slot;
 
@@ -81,12 +87,23 @@ namespace MagicStorage.UI {
 					storedItem = dummy[10];
 
 					if (ItemChanged || ItemTypeChanged)
-						OnItemChanged?.Invoke(storedItem);
+						OnItemChanged?.Invoke(storedItemBeforeHandle);
 
 					Main.mouseLeft = oldLeft;
 					Main.mouseLeftRelease = oldLeftRelease;
 					Main.mouseRight = oldRight;
 					Main.mouseRightRelease = oldRightRelease;
+
+					if (CanShareItemToChat && Main.keyState.IsKeyDown(Main.FavoriteKey) && !StoredItem.IsAir && Main.drawingPlayerChat) {
+						Main.cursorOverride = CursorOverrideID.Magnifiers;
+
+						if (Main.mouseLeft && Main.mouseLeftRelease) {
+							// Copied from Terraria.UI.ItemSlot
+							if (ChatManager.AddChatText(FontAssets.MouseText.Value, ItemTagHandler.GenerateTag(StoredItem), Vector2.One))
+								SoundEngine.PlaySound(SoundID.MenuTick);
+						}
+					} else if (Main.cursorOverride == CursorOverrideID.Magnifiers)
+						Main.cursorOverride = CursorOverrideID.FavoriteStar;
 				}
 			}
 
