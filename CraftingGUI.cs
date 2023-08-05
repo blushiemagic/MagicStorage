@@ -1214,140 +1214,73 @@ namespace MagicStorage
 
 			NetHelper.Report(true, "Checking if recipe passes \"blocked ingredients\" check...");
 
-			if (GetCraftingTree(recipe) is OrderedRecipeTree craftingTree) {
-				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
-				craftingTree.TrimBranches(IsAvailable_GetItemCount);
-				isAvailable_ItemCountsDictionary = null;
+			bool success;
+			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				var simulation = new CraftingSimulation();
+				simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true));
 
-				// Data list will need to be modified.  Cache the old value
-				List<ItemInfo> oldInfo = new List<ItemInfo>(storageItemInfo);
+				success = PassesBlock_CheckSimulation(simulation);
+			} else
+				success = PassesBlock_CheckRecipe(recipe);
 
-				Stack<OrderedRecipeContext> recipeStack = craftingTree.GetProcessingOrder();
-
-				foreach (OrderedRecipeContext context in recipeStack) {
-					// Trimmed branch?  Ignore
-					if (context.amountToCraft <= 0)
-						continue;
-
-					Recipe contextRecipe = context.recipe;
-
-					if (!PassesBlock_CheckRecipe(contextRecipe, consumeStoredItems: true)) {
-						storageItemInfo = oldInfo;
-						NetHelper.Report(true, "Recipe failed the ingredients check");
-						return false;
-					}
-
-					// Add the result items to the list
-					Item resultItem = contextRecipe.createItem.Clone();
-					resultItem.stack = context.amountToCraft;
-					resultItem.Prefix(-1);
-
-					int resultStack = resultItem.stack;
-
-					for (int i = 0; i < storageItemInfo.Count; i++) {
-						ItemInfo info = storageItemInfo[i];
-
-						if (info.type == resultItem.type && info.prefix == resultItem.prefix && info.stack < resultItem.maxStack) {
-							// Consume from the list
-							if (info.stack + resultStack <= resultItem.maxStack) {
-								info = new ItemInfo(info.type, resultStack + info.stack, info.prefix);
-								resultStack = 0;
-							} else {
-								info = new ItemInfo(info.type, resultItem.maxStack, info.prefix);
-								resultStack -= resultItem.maxStack - info.stack;
-							}
-
-							storageItemInfo[i] = info;
-						}
-
-						if (resultStack <= 0)
-							break;
-					}
-
-					if (resultStack > 0)
-						storageItemInfo.Add(new ItemInfo(resultItem));
-				}
-
-				storageItemInfo = oldInfo;
-
-				NetHelper.Report(true, "Recipe passed the ingredients check");
-				return true;
-			} else {
-				bool success = PassesBlock_CheckRecipe(recipe);
-				NetHelper.Report(true, $"Recipe {(success ? "passed" : "failed")} the ingredients check");
-				return success;
-			}
+			NetHelper.Report(true, $"Recipe {(success ? "passed" : "failed")} the ingredients check");
+			return success;
 		}
 
-		private static bool PassesBlock_CheckRecipe(Recipe recipe, bool consumeStoredItems = false) {
+		private static bool PassesBlock_CheckRecipe(Recipe recipe) {
 			foreach (Item ingredient in recipe.requiredItem) {
 				int stack = ingredient.stack;
 				bool useRecipeGroup = false;
 
-				int storageIndex = -1;
-				List<int> updatedStorageStacks = new();
 				foreach (ItemInfo item in storageItemInfo) {
-					storageIndex++;
-					updatedStorageStacks.Add(item.stack);
-
-					if (stack <= 0)
-						continue;
-
 					if (!blockStorageItems.Contains(new ItemData(item)) && RecipeGroupMatch(recipe, item.type, ingredient.type)) {
-						if (consumeStoredItems) {
-							if (item.stack >= stack)
-								updatedStorageStacks[storageIndex] -= stack;
-							else
-								updatedStorageStacks[storageIndex] = 0;
-						}
-
 						stack -= item.stack;
 						useRecipeGroup = true;
+
+						if (stack <= 0)
+							goto nextIngredient;
 					}
 				}
 
 				if (!useRecipeGroup) {
-					storageIndex = -1;
 					foreach (ItemInfo item in storageItemInfo) {
-						storageIndex++;
-
 						if (!blockStorageItems.Contains(new ItemData(item)) && item.type == ingredient.type) {
-							if (consumeStoredItems) {
-								if (item.stack >= stack)
-									updatedStorageStacks[storageIndex] -= stack;
-								else
-									updatedStorageStacks[storageIndex] = 0;
-							}
-
 							stack -= item.stack;
 
 							if (stack <= 0)
-								break;
+								goto nextIngredient;
 						}
 					}
-				}
-
-				// Update the list with the new stacks
-				if (consumeStoredItems) {
-					Stack<int> toRemove = new();
-
-					for (int i = 0; i < updatedStorageStacks.Count; i++) {
-						int updatedStack = updatedStorageStacks[i];
-						if (updatedStack <= 0) {
-							toRemove.Push(i);
-							continue;
-						}
-
-						ItemInfo info = storageItemInfo[i];
-						storageItemInfo[i] = new ItemInfo(info.type, updatedStack, info.prefix);
-					}
-
-					foreach (int index in toRemove)
-						storageItemInfo.RemoveAt(index);
 				}
 
 				if (stack > 0)
 					return false;
+
+				nextIngredient: ;
+			}
+
+			return true;
+		}
+
+		private static bool PassesBlock_CheckSimulation(CraftingSimulation simulation) {
+			foreach (RequiredMaterialInfo material in simulation.RequiredMaterials) {
+				int stack = material.stack;
+
+				foreach (int type in material.GetValidItems()) {
+					foreach (ItemInfo item in storageItemInfo) {
+						if (!blockStorageItems.Contains(new ItemData(item)) && item.type == type) {
+							stack -= item.stack;
+
+							if (stack <= 0)
+								goto nextMaterial;
+						}
+					}
+				}
+
+				if (stack > 0)
+					return false;
+
+				nextMaterial: ;
 			}
 
 			return true;
