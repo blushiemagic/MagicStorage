@@ -269,6 +269,7 @@ namespace MagicStorage
 				ClampCraftAmount();
 
 			if (craftAmountTarget != oldTarget) {
+				ResetCachedBlockedIngredientsCheck();
 				ResetCachedCraftingSimulation();
 
 				if (MagicStorageConfig.IsRecursionEnabled) {
@@ -298,6 +299,7 @@ namespace MagicStorage
 			}
 
 			if (clampCraftAmountAllowCacheReset && oldTarget != craftAmountTarget) {
+				ResetCachedBlockedIngredientsCheck();
 				ResetCachedCraftingSimulation();
 
 				if (MagicStorageConfig.IsRecursionEnabled) {
@@ -913,7 +915,9 @@ namespace MagicStorage
 		/// <summary>
 		/// Returns <see langword="true"/> if the current recipe is available and passes the "blocked ingredients" filter
 		/// </summary>
-		public static bool IsCurrentRecipeFullyAvailable() {
+		public static bool IsCurrentRecipeFullyAvailable() => IsCurrentRecipeAvailable() && DoesCurrentRecipePassIngredientBlock();
+
+		public static bool IsCurrentRecipeAvailable() {
 			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
 				return false;  // Delay logic until threading stops
 
@@ -926,9 +930,32 @@ namespace MagicStorage
 			return available;
 		}
 
+		private static bool? currentRecipePassesBlock;
+		private static Recipe recentRecipeBlock;
+
+		public static bool DoesCurrentRecipePassIngredientBlock() {
+			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
+				return false;  // Delay logic until threading stops
+
+			if (object.ReferenceEquals(recentRecipeBlock, selectedRecipe) && currentRecipePassesBlock is { } available)
+				return available;
+
+			// Calculate the value
+			recentRecipeBlock = selectedRecipe;
+			currentRecipePassesBlock = available = PassesBlock(selectedRecipe);
+			return available;
+		}
+
+		public static void ResetCachedBlockedIngredientsCheck() {
+			recentRecipeBlock = null;
+			currentRecipePassesBlock = null;
+		}
+
 		public static void ResetRecentRecipeCache() {
 			recentRecipeAvailable = null;
 			currentRecipeIsAvailable = null;
+			recentRecipeBlock = null;
+			currentRecipePassesBlock = null;
 			recentRecipeAmountCraftable = null;
 			amountCraftableForCurrentRecipe = null;
 			recentRecipeSimulation = null;
