@@ -223,6 +223,10 @@ namespace MagicStorage
 				case MessageType.ComponentDestruction:
 					ServerReceiveComponentDestruction(reader, sender);
 					break;
+				case MessageType.ClientLockStorageHeart:
+				case MessageType.ClientUnlockStorageHeart:
+					ReceiveStorageHeartUsage(reader, sender, type == MessageType.ClientLockStorageHeart);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -1388,6 +1392,8 @@ namespace MagicStorage
 			packet.Write((byte)MessageType.ComponentPlacement);
 			packet.Write(position);
 			packet.Send();
+
+			Report(true, MessageType.ComponentPlacement + " packet sent to the server");
 		}
 
 		public static void ServerReceiveComponentPlacement(BinaryReader reader, int sender) {
@@ -1397,6 +1403,7 @@ namespace MagicStorage
 				return;
 
 			PrintClientRequest(sender, "Component Placement", position);
+			Report(false, MessageType.ComponentPlacement + " packet received by server from client " + sender);
 		}
 
 		public static void SendComponentDestruction(Point16 position) {
@@ -1407,6 +1414,8 @@ namespace MagicStorage
 			packet.Write((byte)MessageType.ComponentDestruction);
 			packet.Write(position);
 			packet.Send();
+
+			Report(true, MessageType.ComponentDestruction + " packet sent to the server");
 		}
 
 		public static void ServerReceiveComponentDestruction(BinaryReader reader, int sender) {
@@ -1416,6 +1425,47 @@ namespace MagicStorage
 				return;
 
 			PrintClientRequest(sender, "Component Destruction", position);
+			Report(false, MessageType.ComponentDestruction + " packet received by server from client " + sender);
+		}
+
+		public static void ClientInformStorageHeartUsage(TEStorageHeart heart) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			var msg = heart.clientUsingHeart[Main.myPlayer] ? MessageType.ClientLockStorageHeart : MessageType.ClientUnlockStorageHeart;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)msg);
+			packet.Write((byte)Main.myPlayer);
+			packet.Write(heart.Position);
+			packet.Send(ignoreClient: Main.myPlayer);
+			packet.Send();
+
+			Report(true, msg + " packet sent to the server");
+		}
+
+		public static void ReceiveStorageHeartUsage(BinaryReader reader, int sender, bool inUse) {
+			byte player = reader.ReadByte();
+			Point16 position = reader.ReadPoint16();
+
+			var msg = inUse ? MessageType.ClientLockStorageHeart : MessageType.ClientUnlockStorageHeart;
+
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
+				return;
+
+			heart.clientUsingHeart[player] = inUse;
+
+			if (Main.netMode == NetmodeID.Server) {
+				// Forward to other clients
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)msg);
+				packet.Write(player);
+				packet.Write(position);
+				packet.Send(ignoreClient: sender);
+
+				Report(true, msg + " packet sent from server from client " + sender);
+			} else
+				Report(true, msg + " packet received by client " + Main.myPlayer);
 		}
 	}
 
@@ -1451,6 +1501,8 @@ namespace MagicStorage
 		ClientRequestPlayerBankDeposit,
 		PlayerBankDepositResult,
 		ComponentPlacement,
-		ComponentDestruction
+		ComponentDestruction,
+		ClientLockStorageHeart,
+		ClientUnlockStorageHeart
 	}
 }

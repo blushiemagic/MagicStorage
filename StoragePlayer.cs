@@ -73,6 +73,10 @@ namespace MagicStorage
 			}
 		}
 
+		public override void PlayerDisconnect() {
+			GetStorageHeart()?.UnlockOnCurrentClient();
+		}
+
 		public override void UpdateDead()
 		{
 			if (Player.whoAmI == Main.myPlayer)
@@ -149,6 +153,8 @@ namespace MagicStorage
 			}
 
 			StorageGUI.SetRefresh(forceFullRefresh: true);
+
+			GetStorageHeart()?.LockOnCurrentClient();
 		}
 
 		//Intended to only be used with StorageHeartAccessWrapper
@@ -161,6 +167,8 @@ namespace MagicStorage
 
 		public void CloseStorage()
 		{
+			GetStorageHeart()?.UnlockOnCurrentClient();
+
 			CloseStorageUnsafely();
 
 			remoteAccess = false;
