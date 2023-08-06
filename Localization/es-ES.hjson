@@ -427,7 +427,7 @@ Mods: {
 					DislikeNPC: "Esta unidad lamenta haber mencionado Bluemagic a {NPCName}."
 					HateNPC: "{NPCName} necesita aprender que Bluemagic no puede ser utilizado para obtener ganancias."
 					LikeNPC_Princess: "{NPCName} es la mejor amiga de mi creador."
-					Princess_LovesNPC: "{NPCName} Es una máquina tan interesante, ¿cómo se mueve?"
+					Princess_LovesNPC: "{NPCName} Es una máquina muy interesante, ¿cómo logra moverse?"
 				}
 			}
 		}
