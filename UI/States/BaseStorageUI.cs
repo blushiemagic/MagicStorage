@@ -297,7 +297,7 @@ namespace MagicStorage.UI.States {
 
 			SetPage(DefaultPage);
 
-			panel.UIDelay = 15;
+			panel.UIDelay = 30;
 		}
 
 		protected virtual void OnOpen() { }
