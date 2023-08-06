@@ -129,8 +129,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// An optional dictionary indicating which item types are available and their quantities.<br/>
 		/// This dictionary is used to trim the crafting tree before getting its required materials.
 		/// </param>
-		public void GetCraftingInformation(int amountToCraft, out CraftResult result, Dictionary<int, int> availableInventory = null) {
-			var craftingTree = GetCraftingTree(amountToCraft, availableInventory);
+		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
+		public void GetCraftingInformation(int amountToCraft, out CraftResult result, Dictionary<int, int> availableInventory = null, int blockedSubrecipeIngredient = 0) {
+			var craftingTree = GetCraftingTree(amountToCraft, availableInventory, blockedSubrecipeIngredient);
 
 			if (availableInventory is not null) {
 				// Local capturing
