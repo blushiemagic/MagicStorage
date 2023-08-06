@@ -1138,6 +1138,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
+			int origType = item.type;
 			bool playSound = false;
 			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
 
@@ -1149,6 +1150,8 @@ namespace MagicStorage
 
 			if (!item.IsAir)
 				ItemIO.Send(item, packet, true, false);
+			else
+				packet.Write(origType);
 
 			packet.Send(toClient: sender);
 		}
@@ -1158,7 +1161,15 @@ namespace MagicStorage
 			bool playSound = false, fullyQuickStacked = false;
 			bb.Retrieve(ref playSound, ref fullyQuickStacked);
 
-			Item item = !fullyQuickStacked ? ItemIO.Receive(reader, true, false) : new Item();
+			Item item;
+			int origType;
+			if (fullyQuickStacked) {
+				item = new();
+				origType = reader.ReadInt32();
+			} else {
+				item = ItemIO.Receive(reader, true, false);
+				origType = item.type;
+			}
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
@@ -1171,10 +1182,12 @@ namespace MagicStorage
 			if (playSound)
 				SoundEngine.PlaySound(SoundID.Grab);
 			*/
-			StorageGUI.SetRefresh();
+			if (origType > 0) {
+				StorageGUI.SetRefresh();
 
-			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(item.type);
-			StorageGUI.SetNextItemTypeToRefresh(item.type);
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(origType);
+				StorageGUI.SetNextItemTypeToRefresh(origType);
+			}
 		}
 
 		public static void SendGolemTextUpdate() {
