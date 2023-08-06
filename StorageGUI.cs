@@ -178,6 +178,7 @@ namespace MagicStorage
 					return;
 
 				Running = false;
+				CurrentThreadingDuration = 0;
 				tokenSource.Cancel();
 				cancelWait.WaitOne();
 
