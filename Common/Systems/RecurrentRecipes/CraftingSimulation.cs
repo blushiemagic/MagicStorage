@@ -32,11 +32,13 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			int iterations = 0;
 			NetHelper.Report(true, "Requesting crafting simulation for max craftable...");
 
+			int mainResultItem = recipe.original.createItem.type;
+
 			while (sum < craftingTarget) {
 				// Get the materials required, then "craft" it and continue checking until no more materials can be used
 				CraftResult craftResult;
 				using (FlagSwitch.Create(ref CraftingGUI.disableNetPrintingForIsAvailable, true))
-					recipe.GetCraftingInformation(1, out craftResult, availableInventory);
+					recipe.GetCraftingInformation(1, out craftResult, availableInventory, mainResultItem);
 
 				// Update the counts dictionary with the consumed materials
 				bool notEnoughItems = false;
