@@ -63,15 +63,10 @@ namespace MagicStorage.UI {
 			Main.inventoryScale = Scale;
 			Rectangle rectangle = GetDimensions().ToRectangle();
 
-			//Lazy hardcoding lol
-			bool parentWasClicked = Parent is UIDragablePanel panel && panel.UIDelay > 0;
 			if (!IgnoreNextHandleAction && ContainsPoint(Main.MouseScreen) && !PlayerInput.IgnoreMouseInterface) {
 				Main.LocalPlayer.mouseInterface = true;
 
-				if (Parent is UIDragablePanel panel2)
-					panel2.Dragging = false;
-
-				if (!parentWasClicked && (ValidItemFunc == null || ValidItemFunc(Main.mouseItem))) {
+				if (ValidItemFunc == null || ValidItemFunc(Main.mouseItem)) {
 					bool oldLeft = Main.mouseLeft;
 					bool oldLeftRelease = Main.mouseLeftRelease;
 					bool oldRight = Main.mouseRight;

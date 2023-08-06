@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -297,7 +299,7 @@ namespace MagicStorage.UI.States {
 
 			SetPage(DefaultPage);
 
-			panel.UIDelay = 15;
+			timeSpentOpen = 0;
 		}
 
 		protected virtual void OnOpen() { }
@@ -319,6 +321,8 @@ namespace MagicStorage.UI.States {
 		protected virtual void OnClose() { }
 
 		public bool pendingUIChange;
+
+		private int timeSpentOpen;
 
 		public override void Update(GameTime gameTime) {
 			if (needsRecalculate) {
@@ -352,12 +356,19 @@ namespace MagicStorage.UI.States {
 			if (StorageGUI.CurrentlyRefreshing)
 				resize.Dragging = false;
 
-			base.Update(gameTime);
+			// Prevent item slot interactions immediately after opening the UI
+			if (timeSpentOpen < 15) {
+				using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, true))
+					base.Update(gameTime);
+			} else
+				base.Update(gameTime);
 
 			if (needsRecalculate) {
 				Refresh();
 				Recalculate();
 			}
+
+			timeSpentOpen++;
 		}
 
 		public override void Recalculate() {
