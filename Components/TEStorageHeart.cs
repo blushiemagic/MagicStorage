@@ -303,8 +303,6 @@ namespace MagicStorage.Components
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client) { state = origin });
 
-				Chest.VisualizeChestTransfer(origin, Position.ToWorldCoordinates(16, 16), item, item.stack);
-
 				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 			else if (op == Operation.DepositAll)
