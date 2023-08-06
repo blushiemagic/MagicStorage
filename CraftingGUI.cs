@@ -331,7 +331,7 @@ namespace MagicStorage
 		}
 
 		private static bool currentlyThreading;
-		private static Recipe[] recipesToRefresh;
+		internal static Recipe[] recipesToRefresh;
 
 		/// <summary>
 		/// Adds <paramref name="recipes"/> to the collection of recipes to refresh when calling <see cref="RefreshItems"/>

@@ -190,8 +190,11 @@ namespace MagicStorage
 				case MessageType.RequestStorageUnitStyle:
 					ReceiveStorageUnitStyle(reader, sender);
 					break;
-				case MessageType.InformQuickStackToStorage:
-					ClientReceiveQuickStackToStorage(reader);
+				case MessageType.ClientRequestQuickStackToStorage:
+					ServerReceiveQuickStackToNearbyStorage(reader, sender);
+					break;
+				case MessageType.ServerQuickStackToStorageResult:
+					ClientReceiveQuickStackToNearbyStorageResult(reader);
 					break;
 				case MessageType.GolemHelpTextUpdate:
 					ClientReceiveGolemTextUpdate();
@@ -366,11 +369,6 @@ namespace MagicStorage
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
-				else if (op == TEStorageHeart.Operation.DepositFromFarAway)
-				{
-					_ = reader.ReadVector2();
-					_ = ItemIO.Receive(reader, true, true);
-				}
 				else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory)
 				{
 					_ = reader.ReadBoolean();
@@ -406,7 +404,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
+				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
@@ -424,7 +422,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.DepositFromFarAway)
+			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
@@ -1106,30 +1104,77 @@ namespace MagicStorage
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
 
-		public static void SendQuickStackToStorage(int player, int itemType) {
-			if (Main.netMode != NetmodeID.Server)
+		public static void RequestQuickStackToNearbyStorage(Vector2 depositOrigin, Item item, IEnumerable<TEStorageCenter> nearbyCenters) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.InformQuickStackToStorage);
-			packet.Write(itemType);
-			packet.Send(toClient: player);
+			packet.Write((byte)MessageType.ClientRequestQuickStackToStorage);
+			packet.WriteVector2(depositOrigin);
+			ItemIO.Send(item, packet, true, false);
+
+			List<TEStorageCenter> centers = nearbyCenters.ToList();
+			packet.Write((ushort)centers.Count);
+
+			foreach (TEStorageCenter center in centers)
+				packet.Write(center.Position);
+
+			packet.Send();
 		}
 
-		public static void ClientReceiveQuickStackToStorage(BinaryReader reader) {
-			int itemType = reader.ReadInt32();
+		public static void ServerReceiveQuickStackToNearbyStorage(BinaryReader reader, int sender) {
+			Vector2 depositOrigin = reader.ReadVector2();
+			Item item = ItemIO.Receive(reader, true, false);
+
+			ushort count = reader.ReadUInt16();
+			List<TEStorageCenter> centers = new();
+			for (int i = 0; i < count; i++) {
+				Point16 point = reader.ReadPoint16();
+
+				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) && entity is TEStorageCenter center)
+					centers.Add(center);
+			}
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			bool playSound = false;
+			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
+
+			BitsByte bb = new(playSound, item.IsAir);
+			packet.Write(bb);
+
+			if (!item.IsAir)
+				ItemIO.Send(item, packet, true, false);
+
+			packet.Send(toClient: sender);
+		}
+
+		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
+			BitsByte bb = reader.ReadByte();
+			bool playSound = false, fullyQuickStacked = false;
+			bb.Retrieve(ref playSound, ref fullyQuickStacked);
+
+			Item item = !fullyQuickStacked ? ItemIO.Receive(reader, true, false) : new Item();
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
+			if (!item.IsAir)
+				StoragePlayer.GetItem(new EntitySource_Misc("QuickStack return"), item, false);
+
 			// NOTE: 1.4.4 does not play a sound
-			// SoundEngine.PlaySound(SoundID.Grab);
+			/*
+			if (playSound)
+				SoundEngine.PlaySound(SoundID.Grab);
+			*/
 			StorageGUI.SetRefresh();
 
-			if (MagicUI.IsCraftingUIOpen())
-				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
-			else
-				StorageGUI.SetNextItemTypeToRefresh(itemType);
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(item.type);
+			StorageGUI.SetNextItemTypeToRefresh(item.type);
 		}
 
 		public static void SendGolemTextUpdate() {
@@ -1497,7 +1542,8 @@ namespace MagicStorage
 		MassDuplicateSellRequest,
 		MassDuplicateSellResult,
 		RequestStorageUnitStyle,
-		InformQuickStackToStorage,
+		ClientRequestQuickStackToStorage,
+		ServerQuickStackToStorageResult,
 		GolemHelpTextUpdate,
 		ClientRequestServerOp,
 		ServerOpResponse,

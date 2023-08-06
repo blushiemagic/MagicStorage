@@ -76,10 +76,10 @@ namespace MagicStorage.Edits {
 
 		private static void TryStorageQuickStack(Player player) {
 			// Guaranteed to run only in singleplayer or on a multiplayer client due to QuickStackAllChests only being invoked from the inventory UI button
-			IEnumerable<TEStorageHeart> hearts = player.GetNearbyNetworkHearts();
+			IEnumerable<TEStorageCenter> centers = player.GetNearbyCenters();
 
 			for (int i = 10; i < 50; i++) {
-				if (TryItemTransfer(player, player.inventory[i], hearts) && Main.netMode == NetmodeID.MultiplayerClient) {
+				if (TryItemTransfer(player, player.inventory[i], centers) && Main.netMode == NetmodeID.MultiplayerClient) {
 					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, player.inventory[i].prefix);
 					player.inventoryChestStack[i] = true;
 				}
@@ -87,7 +87,7 @@ namespace MagicStorage.Edits {
 
 			if (player.useVoidBag()) {
 				for (int i = 0; i < 40; i++) {
-					if (TryItemTransfer(player, player.bank4.item[i], hearts) && Main.netMode == NetmodeID.MultiplayerClient) {
+					if (TryItemTransfer(player, player.bank4.item[i], centers) && Main.netMode == NetmodeID.MultiplayerClient) {
 						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, player.bank4.item[i].prefix);
 						player.disableVoidBag = i;
 					}
@@ -95,12 +95,12 @@ namespace MagicStorage.Edits {
 			}
 		}
 
-		private static bool TryItemTransfer(Player player, Item item, IEnumerable<TEStorageHeart> hearts) {
+		private static bool TryItemTransfer(Player player, Item item, IEnumerable<TEStorageCenter> centers) {
 			if (!item.IsAir && !item.favorited && !item.IsACoin) {
 				// NOTE: in 1.4.4, sounds aren't played from quick stacking due to the new particle system being used instead
 				bool playSound = false;
 				int type = item.type;
-				bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref playSound);
+				bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player.Center, centers, item, ref playSound);
 
 				if (success && Main.netMode != NetmodeID.Server && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0) {
 					StorageGUI.SetRefresh();

@@ -162,42 +162,30 @@ namespace MagicStorage {
 				&& recipe1.requiredTile.SequenceEqual(recipe2.requiredTile, EqualityComparer<int>.Default);
 		}
 
-		private static List<(StorageAccess access, Point16 position)> GetNearbyAccesses(Player self) {
+		public static IEnumerable<TEStorageCenter> GetNearbyCenters(this Player self) {
 			Point16 centerTile = self.Center.ToTileCoordinates16();
 
-			List<(StorageAccess access, Point16 position)> storageAccesses = new();
+			HashSet<Point16> foundAccesses = new();
 
 			const int range = 39;
-			for (int x = centerTile.X - range; x <= centerTile.X + range; x++) {
-				if (x < 0 || x >= Main.maxTilesX)
-					continue;
+			int startX = centerTile.X - range, startY = centerTile.Y - range;
+			int endX = centerTile.X + range, endY = centerTile.Y + range;
 
-				for (int y = centerTile.Y - range; y <= centerTile.Y + range; y++) {
-					if (y < 0 || y >= Main.maxTilesY)
-						continue;
+			startX = Utils.Clamp(startX, 0, Main.maxTilesX - 1);
+			startY = Utils.Clamp(startY, 0, Main.maxTilesY - 1);
+			endX = Utils.Clamp(endX, 0, Main.maxTilesX - 1);
+			endY = Utils.Clamp(endY, 0, Main.maxTilesY - 1);
 
-					if (TileLoader.GetTile(Main.tile[x, y].TileType) is StorageAccess access)
-						storageAccesses.Add((access, new Point16(x, y)));
+			for (int x = startX; x <= endX; x++) {
+				for (int y = startY; y <= endY; y++) {
+					Tile tile = Main.tile[x, y];
+					if (TileLoader.GetTile(tile.TileType) is StorageAccess access)
+						foundAccesses.Add(new Point16(x - tile.TileFrameX / 18, y - tile.TileFrameY / 18));
 				}
 			}
 
-			static Point16 AccessTopLeft(Point16 position) {
-				//Assumes that all accesses are only 2x2, which they should be anyway
-				Tile tile = Main.tile[position.X, position.Y];
-
-				return position - new Point16(tile.TileFrameX / 18, tile.TileFrameY / 18);
-			}
-
-			//Avoid lazy evaluation making the List local possibly invalid
-			return storageAccesses.DistinctBy(t => AccessTopLeft(t.position)).ToList();
+			return foundAccesses.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null).OfType<TEStorageCenter>();
 		}
-
-		public static IEnumerable<TEStorageHeart> GetNearbyNetworkHearts(this Player self)
-			=> GetNearbyAccesses(self)
-				.Select(t => (heart: t.access.GetHeart(t.position.X, t.position.Y), heartPosition: t.position))
-				.Where(t => t.heart is not null)
-				.DistinctBy(t => t.heartPosition)
-				.Select(t => t.heart);
 
 		public static TEStorageHeart GetHeartFromAccess(Point16 access) {
 			if (access.X < 0 || access.Y < 0)

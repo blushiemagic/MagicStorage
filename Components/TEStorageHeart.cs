@@ -23,8 +23,7 @@ namespace MagicStorage.Components
 			Deposit,
 			DepositAll,
 			WithdrawAllAndDestroy,  //Withdraws without actually putting the items in the player's inventory, effectively destroying the items
-			DeleteUnloadedGlobalItemData,
-			DepositFromFarAway  //Facilitates Chest.VisualizeChestTransfer() logic on success
+			DeleteUnloadedGlobalItemData
 		}
 
 		private class NetOperation
@@ -56,7 +55,6 @@ namespace MagicStorage.Components
 			public List<Item> items { get; }
 			public bool keepOneInFavorite { get; }
 			public int client { get; }
-			public object state { get; init; }
 		}
 
 		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
@@ -211,18 +209,6 @@ namespace MagicStorage.Components
 							packet.Send(op.client);
 						}
 					}
-					else if (op.type == Operation.DepositFromFarAway)
-					{
-						typesToRefresh.Add(op.item.type);
-						// TryDepositItemFromFarAway will just redirect to DepositItem in this context
-						TryDepositFromFarAway(op.item, (Vector2)op.state);
-						if (!op.item.IsAir)
-						{
-							ModPacket packet = PrepareServerResult(op.type);
-							ItemIO.Send(op.item, packet, true, true);
-							packet.Send(op.client);
-						}
-					}
 					else if (op.type == Operation.DepositAll)
 					{
 						NetHelper.StartUpdateQueue();
@@ -294,14 +280,6 @@ namespace MagicStorage.Components
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
-
-				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
-			}
-			else if (op == Operation.DepositFromFarAway)
-			{
-				Vector2 origin = reader.ReadVector2();
-				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new NetOperation(op, item, client) { state = origin });
 
 				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
@@ -591,27 +569,6 @@ namespace MagicStorage.Components
 			else
 			{
 				DepositItem(item);
-			}
-		}
-
-		public void TryDepositFromFarAway(Item item, Vector2 depositOrigin) {
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareClientRequest(Operation.DepositFromFarAway);
-				packet.WriteVector2(depositOrigin);
-				ItemIO.Send(item, packet, true, true);
-				packet.Send();
-				item.SetDefaults(0, true);
-			}
-			else
-			{
-				int oldType = item.type;
-				int oldStack = item.stack;
-				
-				DepositItem(item);
-
-				if (oldType != item.type || oldStack != item.stack)
-					Chest.VisualizeChestTransfer(depositOrigin, Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
 			}
 		}
 

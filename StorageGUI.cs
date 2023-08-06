@@ -87,7 +87,7 @@ namespace MagicStorage
 		/// </summary>
 		public static void SetRefresh(bool forceFullRefresh = false) {
 			RefreshUI = true;
-			StorageGUI.forceFullRefresh = forceFullRefresh;
+			ForceNextRefreshToBeFull = forceFullRefresh;
 		}
 
 		public static int CurrentThreadingDuration { get; private set; }
