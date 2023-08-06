@@ -81,7 +81,6 @@ namespace MagicStorage.Edits {
 			for (int i = 10; i < 50; i++) {
 				if (TryItemTransfer(player, player.inventory[i], hearts) && Main.netMode == NetmodeID.MultiplayerClient) {
 					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, player.inventory[i].prefix);
-					NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
 					player.inventoryChestStack[i] = true;
 				}
 			}
@@ -90,7 +89,6 @@ namespace MagicStorage.Edits {
 				for (int i = 0; i < 40; i++) {
 					if (TryItemTransfer(player, player.bank4.item[i], hearts) && Main.netMode == NetmodeID.MultiplayerClient) {
 						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, player.bank4.item[i].prefix);
-						NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Bank4_0 + i);
 						player.disableVoidBag = i;
 					}
 				}

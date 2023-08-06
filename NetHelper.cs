@@ -1122,7 +1122,8 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			SoundEngine.PlaySound(SoundID.Grab);
+			// NOTE: 1.4.4 does not play a sound
+			// SoundEngine.PlaySound(SoundID.Grab);
 			StorageGUI.SetRefresh();
 
 			if (MagicUI.IsCraftingUIOpen())
