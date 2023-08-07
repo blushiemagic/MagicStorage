@@ -92,6 +92,9 @@ namespace MagicStorage
 
 		public static int CurrentThreadingDuration { get; private set; }
 
+		internal static bool itemDeletionMode;
+		internal static int itemDeletionSlotFocus = -1;
+
 		internal static void CheckRefresh() {
 			if (RefreshUI)
 				RefreshItems();
@@ -206,7 +209,8 @@ namespace MagicStorage
 			_refreshUI = false;
 			Obsolete_needRefresh() = false;
 
-			if (forceFullRefresh)
+			// Force full refresh if item deletion mode is active
+			if (forceFullRefresh || itemDeletionMode)
 				itemTypesToUpdate = null;
 
 			// No refreshing required
@@ -222,6 +226,9 @@ namespace MagicStorage
 				forceFullRefresh = false;
 				return;
 			}
+
+			// Prevent inconsistencies after refreshing items
+			itemDeletionSlotFocus = -1;
 
 			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
 
@@ -304,6 +311,10 @@ namespace MagicStorage
 
 			int sortMode = MagicUI.storageUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.storageUI.GetPage<FilteringPage>("Filtering").option;
+
+			// Force filtering to specific value to make deleting the bad item stacks easier
+			if (itemDeletionMode)
+				filterMode = FilteringOptionLoader.Definitions.All.Type;
 
 			string searchText = storagePage.searchBar.Text;
 			bool onlyFavorites = storagePage.filterFavorites.Value;
@@ -393,11 +404,11 @@ namespace MagicStorage
 
 					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					thread.context.items = ItemSorter.SortAndFilter(thread, 100);
+					thread.context.items = ItemSorter.SortAndFilter(thread, 100, aggregate: !itemDeletionMode);
 				}
 				else
 				{
-					thread.context.items = ItemSorter.SortAndFilter(thread);
+					thread.context.items = ItemSorter.SortAndFilter(thread, aggregate: !itemDeletionMode);
 				}
 
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {

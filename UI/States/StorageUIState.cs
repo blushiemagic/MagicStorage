@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,6 +19,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
@@ -48,6 +50,9 @@ namespace MagicStorage.UI.States {
 			StorageGUI.OnRefresh -= Refresh;
 
 			GetPage<StoragePage>("Storage").scrollBar.ViewPosition = 0f;
+
+			StorageGUI.itemDeletionMode = false;
+			GetPage<ControlsPage>("Controls").setItemDeletionMode.SetState(false);
 		}
 
 		public override void Refresh() {
@@ -265,6 +270,9 @@ namespace MagicStorage.UI.States {
 			}
 
 			internal Item GetItem(int slot, ref int context) {
+				if (StorageGUI.itemDeletionMode)
+					context = ItemSlot.Context.BankItem;
+
 				if (StorageGUI.CurrentlyRefreshing)
 					return new Item();
 
@@ -275,6 +283,9 @@ namespace MagicStorage.UI.States {
 					// Item.checkMat() no longer exists in 1.4.4
 					item.material = ItemID.Sets.IsAMaterial[item.type];
 					StorageGUI.didMatCheck[index] = true;
+
+					if (StorageGUI.itemDeletionMode && StorageGUI.itemDeletionSlotFocus == index)
+						context = ItemSlot.Context.TrashItem;
 				}
 
 				return item;
@@ -320,7 +331,8 @@ namespace MagicStorage.UI.States {
 							canRefresh = true;
 						}
 					} else if (Main.mouseItem.IsAir && objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir) {
-						type = StorageGUI.items[objSlot].type;
+						Item item = StorageGUI.items[objSlot];
+						type = item.type;
 						if (MagicStorageConfig.CraftingFavoritingEnabled && Main.keyState.IsKeyDown(Main.FavoriteKey)) {
 							// Skip favoriting logic if the item would be shared to the chat instead
 							if (!Main.drawingPlayerChat) {
@@ -337,18 +349,38 @@ namespace MagicStorage.UI.States {
 								// but it still might look ugly for the player that initiates operation
 							}
 						} else {
-							Item toWithdraw = StorageGUI.items[objSlot].Clone();
+							if (!StorageGUI.itemDeletionMode) {
+								Item toWithdraw = item.Clone();
 
-							if (toWithdraw.stack > toWithdraw.maxStack)
-								toWithdraw.stack = toWithdraw.maxStack;
+								if (toWithdraw.stack > toWithdraw.maxStack)
+									toWithdraw.stack = toWithdraw.maxStack;
 								
-							Main.mouseItem = StorageGUI.DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
+								Main.mouseItem = StorageGUI.DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
 								
-							if (ItemSlot.ShiftInUse)
-								Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
+								if (ItemSlot.ShiftInUse)
+									Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
 								
-							changed = true;
-							canRefresh = true;
+								changed = true;
+								canRefresh = true;
+							} else {
+								// Items have to be selected, then selected again in order to be deleted
+								if (StorageGUI.itemDeletionSlotFocus != objSlot) {
+									StorageGUI.itemDeletionSlotFocus = objSlot;
+									obj.Context = ItemSlot.Context.TrashItem;
+									for (int i = 0; i < StorageGUI.didMatCheck.Count; i++)
+										StorageGUI.didMatCheck[i] = false;
+									Refresh();
+								} else if (StorageGUI.itemDeletionSlotFocus > -1) {
+									var heart = StorageGUI.GetHeart();
+
+									if (Main.netMode != NetmodeID.SinglePlayer)
+										NetHelper.ClientRequestExactItemDeletion(heart, item);
+									else
+										heart.TryDeleteExactItem(Utility.ToBase64NoCompression(item));
+
+									StorageGUI.itemDeletionSlotFocus = -1;
+								}
+							}
 						}
 					}
 
@@ -407,6 +439,8 @@ namespace MagicStorage.UI.States {
 			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
 			public UIStorageControlDepositPlayerInventoryButton depositFromPiggyBank, depositFromSafe, depositFromForge, depositFromVault;
+
+			public UIToggleLabel setItemDeletionMode;
 
 			private NewUIList list;
 			private NewUIScrollbar scroll;
@@ -490,6 +524,24 @@ namespace MagicStorage.UI.States {
 						for (int i = 0; i < inv.Length && i < p.bank4.item.Length; i++)
 							p.bank4.item[i] = inv[i];
 					});
+
+				setItemDeletionMode = new UIToggleLabel("Item Deletion Mode", false);
+				setItemDeletionMode.SetPadding(0);
+				setItemDeletionMode.Width.Set(setItemDeletionMode.Text.MinWidth.Pixels + 30, 0);
+				setItemDeletionMode.OnLeftClick += static (evt, e) => {
+					UIToggleLabel label = e as UIToggleLabel;
+					if (Main.netMode == NetmodeID.MultiplayerClient && !Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp) {
+						Main.NewText("This control requires the Server Operator status", Color.Red);
+						label.SetState(false);
+						StorageGUI.itemDeletionMode = false;
+						return;
+					}
+
+					Main.NewText($"Item Deletion mode is now {(label.IsOn ? "[c/00ff00:enabled].  Double click an item to delete it." : "[c/ff0000:disabled].")}");
+
+					StorageGUI.itemDeletionMode = label.IsOn;
+				};
+				list.Add(setItemDeletionMode);
 
 				if (Debugger.IsAttached)
 					InitDebugButtons();

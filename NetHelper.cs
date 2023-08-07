@@ -230,6 +230,9 @@ namespace MagicStorage
 				case MessageType.ClientUnlockStorageHeart:
 					ReceiveStorageHeartUsage(reader, sender, type == MessageType.ClientLockStorageHeart);
 					break;
+				case MessageType.DeleteSpecificItem:
+					ServerReceiveExactItemDeletionRequest(reader);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -1531,6 +1534,30 @@ namespace MagicStorage
 			} else
 				Report(true, msg + " packet received by client " + Main.myPlayer);
 		}
+
+		public static void ClientRequestExactItemDeletion(TEStorageHeart heart, Item item) {
+			if (Main.netMode != NetmodeID.MultiplayerClient || !Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.DeleteSpecificItem);
+			packet.Write(heart.Position);
+			packet.Write(Utility.ToBase64NoCompression(item));
+			packet.Send();
+		}
+
+		public static void ServerReceiveExactItemDeletionRequest(BinaryReader reader) {
+			Point16 point = reader.ReadPoint16();
+			string item = reader.ReadString();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			if (!TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) || entity is not TEStorageHeart heart)
+				return;
+
+			heart.TryDeleteExactItem(item);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1568,6 +1595,7 @@ namespace MagicStorage
 		ComponentPlacement,
 		ComponentDestruction,
 		ClientLockStorageHeart,
-		ClientUnlockStorageHeart
+		ClientUnlockStorageHeart,
+		DeleteSpecificItem
 	}
 }

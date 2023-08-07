@@ -745,6 +745,35 @@ namespace MagicStorage.Components
 			}
 		}
 
+		internal void TryDeleteExactItem(string itemData) {
+			Item clone = Utility.FromBase64NoCompression(itemData);
+
+			foreach (TEStorageUnit unit in GetStorageUnits().OfType<TEStorageUnit>()) {
+				if (unit.IsEmpty || !unit.HasItem(clone, ignorePrefix: true))
+					continue;
+
+				for (int i = 0; i < unit.items.Count; i++) {
+					Item storage = unit.items[i];
+					string storageData = Utility.ToBase64NoCompression(storage);
+
+					// Must be an exact match
+					if (itemData == storageData) {
+						unit.items.RemoveAt(i);
+						ResetCompactStage();
+
+						unit.PostChangeContents();
+
+						if (Main.netMode == NetmodeID.SinglePlayer)
+							StorageGUI.SetRefresh(forceFullRefresh: true);
+						else
+							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
+
+						break;
+					}
+				}
+			}
+		}
+
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
 		{
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())

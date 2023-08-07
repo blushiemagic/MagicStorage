@@ -128,6 +128,10 @@ namespace MagicStorage.Sorting
 
 							lastItem.stack += item.stack;
 						}
+						else
+						{
+							aggregate.Add(item);
+						}
 
 						context.enumeratedSource[sourceIndex].Add(item);
 					}
