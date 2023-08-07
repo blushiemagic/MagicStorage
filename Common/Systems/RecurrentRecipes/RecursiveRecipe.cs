@@ -90,7 +90,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
-				ingredient.FindBestMatchAndSetRecipe(availableInventory);
+				ingredient.FindBestMatchAndSetRecipe(availableInventory, ignoreItem);
 
 				Recipe recipe = ingredient.SelectedRecipe;
 				

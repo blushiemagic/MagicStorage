@@ -73,7 +73,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int result = recipe.createItem.type;
 				ref int remaining = ref branch.context.amountToCraft;
 
-				int count = getItemCountForIngredient(recipe, result);
+				int count = getItemCountForIngredient(branch.Root.context.recipe, result);
 
 				if (count >= branch.Root.context.recipe.requiredItem[branch.parentLeafIndex].stack) {
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
