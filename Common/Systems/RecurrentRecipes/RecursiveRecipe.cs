@@ -90,17 +90,28 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (ingredient.RecipeCount == 0)
 					continue;  // Cannot recurse further, go to next ingredient
 
-				// Block recursion that would require the blocked item type
-				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
-				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
-				if (ignoreItem > 0 && (ignoreItem == requiredItem.type || CraftingGUI.RecipeGroupMatch(sourceRecipe, ignoreItem, requiredItem.type)))
-					continue;
-
-				int requiredPerCraft = requiredItem.stack;
-
 				ingredient.FindBestMatchAndSetRecipe(availableInventory);
 
 				Recipe recipe = ingredient.SelectedRecipe;
+				
+				// Block recursion that would require the blocked item type
+				if (ignoreItem > 0) {
+					bool nextIngredient = false;
+					foreach (Item item in recipe.requiredItem) {
+						if (ignoreItem == item.type || CraftingGUI.RecipeGroupMatch(recipe, ignoreItem, item.type)) {
+							nextIngredient = true;
+							break;
+						}
+					}
+
+					if (nextIngredient)
+						continue;
+				}
+
+				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
+				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
+				
+				int requiredPerCraft = requiredItem.stack;
 
 				int batchSize = recipe.createItem.stack;
 				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
