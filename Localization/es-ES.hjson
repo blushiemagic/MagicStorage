@@ -115,10 +115,10 @@ Mods: {
 			StorageDeactivator: {
 				DisplayName: Varita de Unidad de Almacenamiento
 				Tooltip:
-				'''
-				Habilita/deshabilita una unidad de almacenamiento.
-				Las unidades de almacenamiento deshabilitadas intentarán transferir sus objetos a unidades de almacenamiento habilitadas en un sistema de almacenamiento.
-				'''
+					'''
+					Habilita/deshabilita una unidad de almacenamiento.
+					Las unidades de almacenamiento deshabilitadas intentarán transferir sus objetos a unidades de almacenamiento habilitadas en un sistema de almacenamiento.
+					'''
 			}
 
 			StorageHeart: {
@@ -420,11 +420,11 @@ Mods: {
 					HateCrowded: Esta unidad prefiere estar más solitaria.
 					LikeBiome: "{BiomeName} armoniza con Bluemagic."
 					LoveBiome: "{BiomeName} conduce Bluemagic perfectamente."
-					DislikeBiome: "La eficiencia de Bluemagic se ha reducido en {BiomeName}."
-					HateBiome: "Bluemagic se vuelve inestable en {BiomeName}."
+					DislikeBiome: La eficiencia de Bluemagic se ha reducido en {BiomeName}.
+					HateBiome: Bluemagic se vuelve inestable en {BiomeName}.
 					LikeNPC: "{NPCName} aprecia el poder de Bluemagic."
-					LoveNPC: "A esta unidad no le importaría que {NPCName} examinara sus engranajes."
-					DislikeNPC: "Esta unidad lamenta haber mencionado Bluemagic a {NPCName}."
+					LoveNPC: A esta unidad no le importaría que {NPCName} examinara sus engranajes.
+					DislikeNPC: Esta unidad lamenta haber mencionado Bluemagic a {NPCName}.
 					HateNPC: "{NPCName} necesita aprender que Bluemagic no puede ser utilizado para obtener ganancias."
 					LikeNPC_Princess: "{NPCName} es la mejor amiga de mi creador."
 					Princess_LovesNPC: "{NPCName} Es una máquina muy interesante, ¿cómo logra moverse?"
@@ -476,153 +476,141 @@ Mods: {
 
 		Dialogue: {
 			Golem: {
-				Greeting: "Hola {0}. ¿Te gustaría que esta unidad te enseñe algo?"
-				Wizard: "A pesar de tener conocimientos en magia, {0} no puede comprender cómo funciona Bluemagic. Para ser justos, no es realmente magia."
-				NotLihzahrd: "Esta unidad no está construida con Lihzahrd Bricks. Por favor, deja de preguntar."
-				Bluemagic: "Bluemagic es una fuente asombrosa de poder. Sería sabio no subestimar sus capacidades."
-				Violence: "Hola {0}. Mi creador olvidó instalar mi chi... quiero decir, mi chip de autodefensa. He sido mejorado y ahora estoy listo para el combate."
-				NoPlant: "Esta unidad no posee ninguna materia orgánica de origen vegetal. Debes estar pensando en otra persona."
-				NeedPlant: "c/ff0000:DAME LA PLANTA.] beep Disculpas, {0}. Parece que esta unidad ha ejecutado una rutina no autorizada."
-				NewTextAvailable: "Hola {0}. Esta unidad ha preparado nueva información sobre los Accesos Remotos Portátiles para ti."
-				Help1: 
-				'''
-				Para empezar, necesitarás crear algunos Componentes de Almacenamiento. Este objeto es la base para todos los componentes del sistema de almacenamiento. Dale uno al Guía para ver para qué se puede usar.
-				Receta: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
-				'''
+				Greeting: Hola {0}. ¿Te gustaría que esta unidad te enseñe algo?
+				Wizard: A pesar de tener conocimientos en magia, {0} no puede comprender cómo funciona Bluemagic. Para ser justos, no es realmente magia.
+				NotLihzahrd: Esta unidad no está construida con Lihzahrd Bricks. Por favor, deja de preguntar.
+				Bluemagic: Bluemagic es una fuente asombrosa de poder. Sería sabio no subestimar sus capacidades.
+				Violence: Hola {0}. Mi creador olvidó instalar mi chi... quiero decir, mi chip de autodefensa. He sido mejorado y ahora estoy listo para el combate.
+				NoPlant: Esta unidad no posee ninguna materia orgánica de origen vegetal. Debes estar pensando en otra persona.
+				NeedPlant: c/ff0000:DAME LA PLANTA.] beep Disculpas, {0}. Parece que esta unidad ha ejecutado una rutina no autorizada.
+				NewTextAvailable: Hola {0}. Esta unidad ha preparado nueva información sobre los Accesos Remotos Portátiles para ti.
+				Help1:
+					'''
+					Para empezar, necesitarás crear algunos Componentes de Almacenamiento. Este objeto es la base para todos los componentes del sistema de almacenamiento. Dale uno al Guía para ver para qué se puede usar.
+					Receta: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
+					'''
 				Help2:
-				'''
-				Una vez que tengas un [i:MagicStorage/StorageComponent], necesitarás crear un Corazón de Almacenamiento. El Corazón de Almacenamiento es donde puedes acceder a los objetos almacenados y es necesario para que el sistema de almacenamiento funcione.
-				Receta: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
-				'''
+					'''
+					Una vez que tengas un [i:MagicStorage/StorageComponent], necesitarás crear un Corazón de Almacenamiento. El Corazón de Almacenamiento es donde puedes acceder a los objetos almacenados y es necesario para que el sistema de almacenamiento funcione.
+					Receta: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
+					'''
 				Help3:
-				'''
-				Después de colocar el [i:MagicStorage/StorageHeart], necesitarás crear Unidades de Almacenamiento para almacenar los objetos del Corazón de Almacenamiento.
-				Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
-				'''
+					'''
+					Después de colocar el [i:MagicStorage/StorageHeart], necesitarás crear Unidades de Almacenamiento para almacenar los objetos del Corazón de Almacenamiento.
+					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
+					'''
 				Help4:
-				'''
-				Para fabricar objetos en el sistema de almacenamiento, necesitarás hacer un Acceso de Creación.
-				Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
-				'''
+					'''
+					Para fabricar objetos en el sistema de almacenamiento, necesitarás hacer un Acceso de Creación.
+					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
+					'''
 				Help5:
-				'''
-				Los espacios de estación del Acceso de Creación son más poderosos de lo que parecen. ¡Algunos objetos pueden heredar múltiples requisitos de fabricación a la vez!
-				[i:GlassKiln] funciona como un [i:Furnace]
-				[i:BewitchingTable] funciona como una [i:WoodenTable]
-				[rg:MagicStorage:AnyTombstone] habilita las recetas del bioma del Cementerio
-				[i:AlchemyTable] funciona como una [i:WoodenTable] y un [i:Bottle]
-				[rg:MagicStorage:AnyTable] funciona como una [i:WoodenChair]
-				'''
+					'''
+					Los espacios de estación del Acceso de Creación son más poderosos de lo que parecen. ¡Algunos objetos pueden heredar múltiples requisitos de fabricación a la vez!
+					[i:GlassKiln] funciona como un [i:Furnace]
+					[i:BewitchingTable] funciona como una [i:WoodenTable]
+					[rg:MagicStorage:AnyTombstone] habilita las recetas del bioma del Cementerio
+					[i:AlchemyTable] funciona como una [i:WoodenTable] y un [i:Bottle]
+					[rg:MagicStorage:AnyTable] funciona como una [i:WoodenChair]
+					'''
 				Help6:
-				'''
-				El [i:AlchemyTable] conserva su 33% de probabilidad de no consumir ingredientes de pociones.
-				[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] y cualquier otro objeto que coloque un bloque que cuente como fuente de agua habilita recetas de Agua.
-				[i:LavaBucket] habilita recetas de Lava.
-				[i:HoneyBucket] habilita recetas de Miel.
-				[i:MagicStorage/DemonAltar] y [i:MagicStorage/CrimsonAltar] habilitan recetas de Altar Demoníaco/Carmesí.
-				[i:MagicStorage/SnowBiomeEmulator] habilita recetas del bioma de Nieve.
-				'''
+					'''
+					El [i:AlchemyTable] conserva su 33% de probabilidad de no consumir ingredientes de pociones.
+					[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] y cualquier otro objeto que coloque un bloque que cuente como fuente de agua habilita recetas de Agua.
+					[i:LavaBucket] habilita recetas de Lava.
+					[i:HoneyBucket] habilita recetas de Miel.
+					[i:MagicStorage/DemonAltar] y [i:MagicStorage/CrimsonAltar] habilitan recetas de Altar Demoníaco/Carmesí.
+					[i:MagicStorage/SnowBiomeEmulator] habilita recetas del bioma de Nieve.
+					'''
 				Help7:
-				'''
-				Todos los componentes de un sistema de almacenamiento deben estar conectados entre sí. Si quieres separar tus [i:MagicStorage/StorageUnit] de tu
-				[i:MagicStorage/StorageHeart], puedes usar Conectores para conectarlos.
-				Receta: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
-				'''
-				Help8:
-				'''
-				Oculto en el núcleo de todos los jefes se encuentra un Diamante Sombrío. Esta joya maldita se puede utilizar como alternativa a un [i:Diamond] para todas las recetas de Magic Storage. Una vez que obtienes un Diamante Sombrío de un jefe, ¡no puedes obtener más de él! Por otro lado, algunos jefes sueltan más de uno.
-				'''
+					'''
+					Todos los componentes de un sistema de almacenamiento deben estar conectados entre sí. Si quieres separar tus [i:MagicStorage/StorageUnit] de tu
+					[i:MagicStorage/StorageHeart], puedes usar Conectores para conectarlos.
+					Receta: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
+					'''
+				Help8: Oculto en el núcleo de todos los jefes se encuentra un Diamante Sombrío. Esta joya maldita se puede utilizar como alternativa a un [i:Diamond] para todas las recetas de Magic Storage. Una vez que obtienes un Diamante Sombrío de un jefe, ¡no puedes obtener más de él! Por otro lado, algunos jefes sueltan más de uno.
 				Help9:
-				'''
-				¿Te quedaste sin espacio de almacenamiento? ¡Mejora tus Unidades de Almacenamiento con Mejoras de Almacenamiento! Una Mejora de Almacenamiento para un cierto nivel solo se puede aplicar a una Unidad de Almacenamiento de un nivel anterior.
-				[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
-				[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
-				[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
-				[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
-				'''
+					'''
+					¿Te quedaste sin espacio de almacenamiento? ¡Mejora tus Unidades de Almacenamiento con Mejoras de Almacenamiento! Una Mejora de Almacenamiento para un cierto nivel solo se puede aplicar a una Unidad de Almacenamiento de un nivel anterior.
+					[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
+					[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
+					[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+					[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
+					'''
 				Help10:
-				'''
-				Si no quieres mover tu Corazón de Almacenamiento usa un Acceso de Remoto en su lugar! Este componente se puede usar al igual que el Corazón de Almacenamiento para ver los objetos en tu almacenamiento.
-				Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
-				'''
+					'''
+					Si no quieres mover tu Corazón de Almacenamiento usa un Acceso de Remoto en su lugar! Este componente se puede usar al igual que el Corazón de Almacenamiento para ver los objetos en tu almacenamiento.
+					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
+					'''
 				Help11:
-				'''
-				Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona el objeto Globo de Bioma. Este objeto habilita recetas para el bioma de Nieve, Niebla de Ecto, la Hoguera, Agua, Lava, Miel y los Altares Demoníaco/Carmesí. ¡Incluso puedes llevarlo en tu inventario y cocinar Malvaviscos sin necesidad de estar junto a una Hoguera!
-				Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
-				'''
+					'''
+					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona el objeto Globo de Bioma. Este objeto habilita recetas para el bioma de Nieve, Niebla de Ecto, la Hoguera, Agua, Lava, Miel y los Altares Demoníaco/Carmesí. ¡Incluso puedes llevarlo en tu inventario y cocinar Malvaviscos sin necesidad de estar junto a una Hoguera!
+					Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
+					'''
 				Help12:
-				'''
-				A veces quieres poder acceder a tu almacenamiento en otras ubicaciones del mundo, pero tener que conectar el almacenamiento con Conectores es molesto y costoso. ¿La solución? Crea un Acceso Remoto y enlázalo al Corazón de Almacenamiento con un [i:MagicStorage/Locator] o [i:MagicStorage/LocatorDisk].
-				Recetas:
-				[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
-				[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
-				[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
-				'''
-				Help13:
-				'''
-				Puedes adjuntar componentes de almacenamiento a un Acceso de Creación y aún así poder acceder al sistema de almacenamiento principal. Es muy útil para tener un Acceso de Creación lejos del Corazón de Almacenamiento.
-				'''
+					'''
+					A veces quieres poder acceder a tu almacenamiento en otras ubicaciones del mundo, pero tener que conectar el almacenamiento con Conectores es molesto y costoso. ¿La solución? Crea un Acceso Remoto y enlázalo al Corazón de Almacenamiento con un [i:MagicStorage/Locator] o [i:MagicStorage/LocatorDisk].
+					Recetas:
+					[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
+					[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
+					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
+					'''
+				Help13: Puedes adjuntar componentes de almacenamiento a un Acceso de Creación y aún así poder acceder al sistema de almacenamiento principal. Es muy útil para tener un Acceso de Creación lejos del Corazón de Almacenamiento.
 				Help14:
-				'''
-				El Desactivador de Almacenamiento te permite desactivar una [i:MagicStorage/StorageUnit]. Una [i:MagicStorage/StorageUnit] desactivada no puede almacenar objetos y rápidamente intentará mover sus objetos a las [i:MagicStorage/StorageUnit] conectadas. Si no puede mover sus objetos, los objetos permanecen en la [i:MagicStorage/UnidadAlmacenamiento] desactivada.
-				H
-				'''
+					'''
+					El Desactivador de Almacenamiento te permite desactivar una [i:MagicStorage/StorageUnit]. Una [i:MagicStorage/StorageUnit] desactivada no puede almacenar objetos y rápidamente intentará mover sus objetos a las [i:MagicStorage/StorageUnit] conectadas. Si no puede mover sus objetos, los objetos permanecen en la [i:MagicStorage/UnidadAlmacenamiento] desactivada.
+					H
+					'''
 				Help15:
-				'''
-				Por conveniencia del usuario, Magic Storage agrega recetas para Altares Demoníaco/Carmesí coloquiales. Aunque extraerlos no te da menas, aún puedes usarlos como estaciones de creación.
-				Recetas:
-				[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
-				[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
-				'''
+					'''
+					Por conveniencia del usuario, Magic Storage agrega recetas para Altares Demoníaco/Carmesí coloquiales. Aunque extraerlos no te da menas, aún puedes usarlos como estaciones de creación.
+					Recetas:
+					[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
+					[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
+					'''
 				Help16:
-				'''
-				Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de creación de materiales.
-				Recetas:
-				[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
-				[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
-				[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
-				'''
+					'''
+					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de creación de materiales.
+					Recetas:
+					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
+					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
+					'''
 				Help17:
-				'''
-				Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de Creación de materiales.
-				Recetas:
-				[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
-				[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
-				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-				'''
-				Help18:
-				'''
-				El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
-				'''
-				Help19:
-				'''
-				El [i:MagicStorage/EnvironmentAccess] es un componente bastante extraño. Se rumorea que permite la manipulación externa de los sistemas de almacenamiento de Magic Storage, pero solo un desarrollador de mods sería capaz de usar sus trabajos.
-				'''
+					'''
+					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de Creación de materiales.
+					Recetas:
+					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					'''
+				Help18: El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
+				Help19: El [i:MagicStorage/EnvironmentAccess] es un componente bastante extraño. Se rumorea que permite la manipulación externa de los sistemas de almacenamiento de Magic Storage, pero solo un desarrollador de mods sería capaz de usar sus trabajos.
 				Help20:
-				'''
-				Aunque el [i:MagicStorage/RemoteAccess] es muy útil, a veces necesitas poder acceder a tu almacenamiento mientras estás lejos de casa.
-				Para hacerlo, fabrica un Acceso Remoto Portátil.
-				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
-				'''
+					'''
+					Aunque el [i:MagicStorage/RemoteAccess] es muy útil, a veces necesitas poder acceder a tu almacenamiento mientras estás lejos de casa.
+					Para hacerlo, fabrica un Acceso Remoto Portátil.
+					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+					'''
 				Help20_Mechs:
-				'''
-				{$Mods.MagicStorage.Dialogue.Golem.Help20}
-				[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
-				'''
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help20}
+					[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+					'''
 				Help20_Moon:
-				'''
-				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
-				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
-				'''
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
+					[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+					[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
+					'''
 				Help21:
-				'''
-				También puedes mejorar una Unidad de Almacenamiento a la siguiente categoría haciendo clic derecho con el objeto de mejora correspondiente.
-				[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
-				[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
-				[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
-				[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
-				'''
+					'''
+					También puedes mejorar una Unidad de Almacenamiento a la siguiente categoría haciendo clic derecho con el objeto de mejora correspondiente.
+					[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
+					[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
+					[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
+					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
+					'''
 			}
 
 			ChatOptions: {
