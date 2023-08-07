@@ -56,7 +56,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// If no recipe was found as a "best match", <see cref="SelectedRecipe"/> is not updated
 		/// </summary>
 		/// <param name="availableInventory">A collection of item quantities, indexed by type.  If <see langword="null"/>, <see cref="SelectedRecipe"/> is not updated</param>
-		public void FindBestMatchAndSetRecipe(Dictionary<int, int> availableInventory) {
+		/// <param name="blockedRecipeIngredient">
+		/// An optional item ID representing a recipe ingredient that should not be used when finding the best match.<br/>
+		/// If this parameter is greater than 0, then any recipes using the blocked item ID as a possible ingredient will be skipped.
+		/// </param>
+		public void FindBestMatchAndSetRecipe(Dictionary<int, int> availableInventory, int blockedRecipeIngredient = 0) {
 			if (availableInventory is null)
 				return;
 
@@ -85,6 +89,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						// Attempt to use items that are valid in the group
 						if (group.ContainsItem(item.type)) {
 							foreach (int groupItem in group.ValidItems) {
+								if (blockedRecipeIngredient > 0 && groupItem == blockedRecipeIngredient)
+									goto checkNextTree;
+
 								if (availableInventory.TryGetValue(item.type, out count)) {
 									usedRecipeGroup = true;
 									stack -= count;
@@ -98,8 +105,13 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 					checkNonRecipeGroup:
 
-					if (!usedRecipeGroup && availableInventory.TryGetValue(item.type, out count))
-						stack -= count;
+					if (!usedRecipeGroup) {
+						if (blockedRecipeIngredient > 0 && item.type == blockedRecipeIngredient)
+							goto checkNextTree;
+
+						if (availableInventory.TryGetValue(item.type, out count))
+							stack -= count;
+					}
 
 					if (stack < 0)
 						stack = 0;
@@ -112,6 +124,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					bestMatch = i;
 					bestPercent = percent;
 				}
+
+				checkNextTree: ;
 			}
 
 			// Update the initially selected recipe
