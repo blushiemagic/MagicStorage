@@ -66,9 +66,9 @@ namespace MagicStorage
 					c: Color.LightBlue);
 			} else {
 				Main.NewTextMultiline("Thank you for using Magic Storage!\n" +
-					"Do note that the new \"recursion crafting\" feature is experimental and may not be functional.\n" +
-					"Its config entry, \"Recursion Depth\", will default to 0 in the meantime.\n" +
-					"This message will be removed in a future update once the feature becomes stable enough.",
+					"If your storage was clobbered with empty slots and/or garbage items in a previous update, use the [c/ff0000:Item Deletion Mode] control\n" +
+					"in the Controls tab of the Storage GUI.\n" +
+					"When Item Deletion Mode is active, double click an item stack to forcibly remove it from storage.",
 					c: Color.LightBlue);
 			}
 		}
