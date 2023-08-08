@@ -282,12 +282,7 @@ namespace MagicStorage.UI.States {
 							resultZone.SetItemsAndContexts(1, CraftingGUI.GetResult);
 							StorageGUI.SetRefresh();
 						} else {
-							Item toWithdraw = result.Clone();
-							
-							if (toWithdraw.stack > toWithdraw.maxStack)
-								toWithdraw.stack = toWithdraw.maxStack;
-
-							Main.mouseItem = CraftingGUI.DoWithdrawResult(toWithdraw, ItemSlot.ShiftInUse);
+							Main.mouseItem = CraftingGUI.DoWithdrawResult(result.stack, ItemSlot.ShiftInUse);
 							
 							if (ItemSlot.ShiftInUse)
 								Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);

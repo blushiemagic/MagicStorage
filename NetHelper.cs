@@ -407,7 +407,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
+				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
 				{
 					_ = ItemIO.Receive(reader, true, true);
 				}
@@ -454,6 +454,17 @@ namespace MagicStorage
 				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 
 				heart.DestroyUnloadedGlobalItemData(net: true);
+			}
+			else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
+			{
+				Item item  = ItemIO.Receive(reader, true, true);
+				int amountToWithdraw = reader.ReadInt32();
+				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+
+				if (item.IsAir)
+					item = CraftingGUI.TryToWithdrawFromModuleItems(amountToWithdraw);
+
+				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory);
 			}
 
 			Report(true, MessageType.ServerStorageResult + " packet received by client " + Main.myPlayer);
