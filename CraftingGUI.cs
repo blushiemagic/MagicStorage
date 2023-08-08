@@ -19,6 +19,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace MagicStorage
@@ -52,6 +53,8 @@ namespace MagicStorage
 		internal static readonly List<bool> storageItemsFromModules = new();
 		internal static readonly List<ItemData> blockStorageItems = new();
 		internal static readonly List<List<Item>> sourceItems = new();
+		// Only used by DoWithdrawResult to check items from modules
+		private static readonly List<Item> sourceItemsFromModules = new();
 
 		public static int craftAmountTarget;
 
@@ -415,6 +418,7 @@ namespace MagicStorage
 
 			items.Clear();
 			sourceItems.Clear();
+			sourceItemsFromModules.Clear();
 			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
@@ -553,7 +557,10 @@ namespace MagicStorage
 
 				numItemsWithoutSimulators = items.Count - numSimulatorItems;
 
-				sourceItems.AddRange(clone.context.sourceItems.Concat(simulatorItems));
+				var moduleItems = simulatorItems.ToList();
+
+				sourceItems.AddRange(clone.context.sourceItems.Concat(moduleItems));
+				sourceItemsFromModules.AddRange(moduleItems.SelectMany(static list => list));
 
 				// Context no longer needed
 				thread.context = null;
@@ -568,6 +575,7 @@ namespace MagicStorage
 				items.Clear();
 				numItemsWithoutSimulators = 0;
 				sourceItems.Clear();
+				sourceItemsFromModules.Clear();
 				itemCounts.Clear();
 				throw;
 			}
@@ -2190,11 +2198,17 @@ namespace MagicStorage
 			if (heart is null)
 				return new Item();
 
-			Item withdrawn = heart.TryWithdrawFromCraftingResult(amountToWithdraw, false, toInventory);
+			Item clone = result.Clone();
+			clone.stack = Math.Min(amountToWithdraw, clone.maxStack);
 
-			// TryWithdrawFromCraftingResult will handle sending the packet then requesting module item withdrawing
-			if (Main.netMode == NetmodeID.MultiplayerClient)
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = heart.PrepareClientRequest(toInventory ? TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory : TEStorageHeart.Operation.WithdrawThenTryModuleInventory);
+				ItemIO.Send(clone, packet, true, true);
+				packet.Send();
 				return new Item();
+			}
+
+			Item withdrawn = heart.Withdraw(clone, false);
 
 			if (withdrawn.IsAir)
 				withdrawn = TryToWithdrawFromModuleItems(amountToWithdraw);
@@ -2206,42 +2220,20 @@ namespace MagicStorage
 			Item withdrawn;
 			if (items.Count != numItemsWithoutSimulators) {
 				//Heart did not contain the item; try to withdraw from the module items
-				List<Item> moduleItems = items.GetRange(numItemsWithoutSimulators, items.Count - numItemsWithoutSimulators);
-
 				Item item = result.Clone();
 				item.stack = Math.Min(amountToWithdraw, item.maxStack);
 
-				TEStorageUnit.WithdrawFromItemCollection(moduleItems, item, out withdrawn,
+				TEStorageUnit.WithdrawFromItemCollection(sourceItemsFromModules, item, out withdrawn,
 					onItemRemoved: k => {
 						int index = k + numItemsWithoutSimulators;
-
-						foreach (var item in sourceItems[index])
-							item.TurnToAir();
-
+						
 						items.RemoveAt(index);
-						sourceItems.RemoveAt(index);
 					},
 					onItemStackReduced: (k, stack) => {
 						int index = k + numItemsWithoutSimulators;
 
-						int itemsRemoved = 0;
-						foreach (var item in Enumerable.Reverse(sourceItems[index])) {
-							if (item.stack > stack) {
-								item.stack -= stack;
-								break;
-							} else {
-								stack -= item.stack;
-								item.TurnToAir();
-
-								itemsRemoved++;
-
-								if (stack <= 0)
-									break;
-							}
-						}
-
-						if (itemsRemoved > 0)
-							sourceItems[index].RemoveRange(sourceItems[index].Count - itemsRemoved, itemsRemoved);
+						Item item = items[index];
+						itemCounts[item.type] -= stack;
 					});
 
 				if (!withdrawn.IsAir) {

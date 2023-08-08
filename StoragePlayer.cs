@@ -210,6 +210,10 @@ namespace MagicStorage
 				if (total > Main.mouseItem.maxStack)
 					total = Main.mouseItem.maxStack;
 				int difference = total - Main.mouseItem.stack;
+
+				if (difference > 0)
+					Utility.CallOnStackHooks(Main.mouseItem, item, difference);
+
 				Main.mouseItem.stack = total;
 				item.stack -= difference;
 			}

@@ -130,7 +130,8 @@ namespace MagicStorage.Sorting
 						}
 						else
 						{
-							aggregate.Add(item);
+							aggregate.Add(lastItem);
+							lastItem = item.Clone();
 						}
 
 						context.enumeratedSource[sourceIndex].Add(item);
