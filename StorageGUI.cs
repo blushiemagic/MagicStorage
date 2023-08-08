@@ -352,6 +352,8 @@ namespace MagicStorage
 		}
 
 		private static void SortAndFilter(ThreadContext thread) {
+			// Immediately evaluate
+
 			DoFiltering(thread);
 			
 			bool didDefault = false;
@@ -659,6 +661,7 @@ namespace MagicStorage
 			if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 				return;
 
+			// NOTE: this method will always fail, but i can't be bothered to update it since users can't use it anyway
 			if (TEStorageHeart.Item_globalItems.GetValue(item) is not Ref<GlobalItem>[] globalItems || globalItems.Length == 0)
 				return;
 
