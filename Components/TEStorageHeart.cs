@@ -264,7 +264,7 @@ namespace MagicStorage.Components
 					{
 						typesToRefresh.Add(op.item.type);
 						int stack = op.item.stack;
-						Item item = Withdraw(op.item, op.keepOneInFavorite);
+						Item item = Withdraw(op.item, false);
 						ModPacket packet = PrepareServerResult(op.type);
 						ItemIO.Send(item, packet, true, true);
 						packet.Send(stack);
@@ -281,7 +281,7 @@ namespace MagicStorage.Components
 
 		public void QClientOperation(BinaryReader reader, Operation op, int client)
 		{
-			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory || op == Operation.WithdrawThenTryModuleInventory || op == Operation.WithdrawToInventoryThenTryModuleInventory)
+			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
 			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
@@ -322,9 +322,16 @@ namespace MagicStorage.Components
 
 				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Data", Position);
 			}
+			else if (op == Operation.WithdrawThenTryModuleInventory || op == Operation.WithdrawToInventoryThenTryModuleInventory)
+			{
+				Item item = ItemIO.Receive(reader, true, true);
+				clientOpQ.Enqueue(new NetOperation(op, item, false, client));
+
+				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
+			}
 		}
 
-		private static ModPacket PrepareServerResult(Operation op)
+		internal static ModPacket PrepareServerResult(Operation op)
 		{
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerStorageResult);
@@ -332,7 +339,7 @@ namespace MagicStorage.Components
 			return packet;
 		}
 
-		private ModPacket PrepareClientRequest(Operation op)
+		internal ModPacket PrepareClientRequest(Operation op)
 		{
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClinetStorageOperation);
@@ -669,27 +676,6 @@ namespace MagicStorage.Components
 			}
 
 			var item = Withdraw(lookFor, keepOneIfFavorite);
-
-			return item;
-		}
-
-		internal Item TryWithdrawFromCraftingResult(int amountToWithdraw, bool keepOneIfFavorite, bool toInventory = false) {
-			Item clone = CraftingGUI.result.Clone();
-			clone.stack = Math.Min(amountToWithdraw, clone.maxStack);
-
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventoryThenTryModuleInventory : Operation.WithdrawThenTryModuleInventory);
-				packet.Write(keepOneIfFavorite);
-				ItemIO.Send(clone, packet, true, true);
-				packet.Send();
-
-				return new Item();
-			}
-
-			Item item = Withdraw(clone, keepOneIfFavorite);
-
-			if (item.IsAir)
-				item = CraftingGUI.TryToWithdrawFromModuleItems(amountToWithdraw);
 
 			return item;
 		}

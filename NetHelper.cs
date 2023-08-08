@@ -418,6 +418,11 @@ namespace MagicStorage
 				{
 					_ = reader.ReadInt32();
 				}
+				else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
+				{
+					_ = ItemIO.Receive(reader, true, true);
+					_ = reader.ReadInt32();
+				}
 
 				return;
 			}
