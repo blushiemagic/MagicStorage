@@ -11,6 +11,7 @@ using System.Reflection;
 using Terraria.ModLoader.Default;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace MagicStorage.Components
 {
@@ -23,7 +24,9 @@ namespace MagicStorage.Components
 			Deposit,
 			DepositAll,
 			WithdrawAllAndDestroy,  //Withdraws without actually putting the items in the player's inventory, effectively destroying the items
-			DeleteUnloadedGlobalItemData
+			DeleteUnloadedGlobalItemData,
+			WithdrawThenTryModuleInventory,
+			WithdrawToInventoryThenTryModuleInventory
 		}
 
 		private class NetOperation
@@ -257,6 +260,16 @@ namespace MagicStorage.Components
 
 						forcedRefresh = true;
 					}
+					else if (op.type == Operation.WithdrawThenTryModuleInventory || op.type == Operation.WithdrawToInventoryThenTryModuleInventory)
+					{
+						typesToRefresh.Add(op.item.type);
+						int stack = op.item.stack;
+						Item item = Withdraw(op.item, op.keepOneInFavorite);
+						ModPacket packet = PrepareServerResult(op.type);
+						ItemIO.Send(item, packet, true, true);
+						packet.Send(stack);
+						packet.Send(op.client);
+					}
 				}
 			}
 
@@ -268,7 +281,7 @@ namespace MagicStorage.Components
 
 		public void QClientOperation(BinaryReader reader, Operation op, int client)
 		{
-			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
+			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory || op == Operation.WithdrawThenTryModuleInventory || op == Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
@@ -656,6 +669,27 @@ namespace MagicStorage.Components
 			}
 
 			var item = Withdraw(lookFor, keepOneIfFavorite);
+
+			return item;
+		}
+
+		internal Item TryWithdrawFromCraftingResult(int amountToWithdraw, bool keepOneIfFavorite, bool toInventory = false) {
+			Item clone = CraftingGUI.result.Clone();
+			clone.stack = Math.Min(amountToWithdraw, clone.maxStack);
+
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventoryThenTryModuleInventory : Operation.WithdrawThenTryModuleInventory);
+				packet.Write(keepOneIfFavorite);
+				ItemIO.Send(clone, packet, true, true);
+				packet.Send();
+
+				return new Item();
+			}
+
+			Item item = Withdraw(clone, keepOneIfFavorite);
+
+			if (item.IsAir)
+				item = CraftingGUI.TryToWithdrawFromModuleItems(amountToWithdraw);
 
 			return item;
 		}
