@@ -67,7 +67,8 @@ namespace MagicStorage.Common.Systems {
 				NetHelper.RequestQuickStackToNearbyStorage(depositOrigin, item, nearbyCenters);
 				item.SetDefaults(0, false);
 				playSound = false;
-				return false;
+				// Return true to make the netcode message for deleting the item sync the player inventory
+				return true;
 			}
 
 			int startStack = item.stack;
