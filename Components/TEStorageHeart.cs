@@ -265,9 +265,10 @@ namespace MagicStorage.Components
 						typesToRefresh.Add(op.item.type);
 						int stack = op.item.stack;
 						Item item = Withdraw(op.item, false);
+
 						ModPacket packet = PrepareServerResult(op.type);
 						ItemIO.Send(item, packet, true, true);
-						packet.Send(stack);
+						packet.Write(stack);
 						packet.Send(op.client);
 					}
 				}
