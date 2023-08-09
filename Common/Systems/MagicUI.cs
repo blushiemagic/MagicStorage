@@ -23,6 +23,18 @@ public class MagicUI : ModSystem
 
 	public static bool IsCraftingUIOpen() => craftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, craftingUI);
 
+	public static void SetNextCollectionsToRefresh(int itemType) {
+		StorageGUI.SetRefresh();
+		StorageGUI.SetNextItemTypeToRefresh(itemType);
+		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
+	}
+
+	public static void SetNextCollectionsToRefresh(IEnumerable<int> itemTypes) {
+		StorageGUI.SetRefresh();
+		StorageGUI.SetNextItemTypesToRefresh(itemTypes);
+		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemTypes);
+	}
+
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;
 

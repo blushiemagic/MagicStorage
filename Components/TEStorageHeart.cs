@@ -12,6 +12,7 @@ using Terraria.ModLoader.Default;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
 using System;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage.Components
 {
@@ -413,7 +414,7 @@ namespace MagicStorage.Components
 				if (abstractStorageUnit is TEStorageUnit { Inactive: false, IsEmpty: true } storageUnit && inactiveUnit.NumItems <= storageUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(inactiveUnit, storageUnit);
-					NetHelper.SendRefreshNetworkItems(Position);
+					NetHelper.SendRefreshNetworkItems(Position, false, storageUnit.items.Select(static i => i.type));
 					return true;
 				}
 
@@ -463,7 +464,7 @@ namespace MagicStorage.Components
 				else if (emptyUnit is not null && !storageUnit.IsEmpty && storageUnit.NumItems <= emptyUnit.Capacity)
 				{
 					TEStorageUnit.SwapItems(emptyUnit, storageUnit);
-					NetHelper.SendRefreshNetworkItems(Position);
+					NetHelper.SendRefreshNetworkItems(Position, false, storageUnit.items.Select(static i => i.type));
 					return true;
 				}
 			}
@@ -530,7 +531,7 @@ namespace MagicStorage.Components
 			}
 
 			NetHelper.ProcessUpdateQueue();
-			NetHelper.SendRefreshNetworkItems(Position);
+			NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 
 			compactStage++;
 			return false;
@@ -544,10 +545,8 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
-			if (!toDeposit.IsAir) {
-				StorageGUI.SetNextItemTypeToRefresh(toDeposit.type);
-				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(toDeposit.type);
-			}
+			if (!toDeposit.IsAir)
+				MagicUI.SetNextCollectionsToRefresh(toDeposit.type);
 
 			int oldStack = toDeposit.stack;
 			int remember = toDeposit.type;
@@ -647,8 +646,7 @@ namespace MagicStorage.Components
 						else
 							result.stack += withdrawn.stack;
 
-						StorageGUI.SetNextItemTypeToRefresh(withdrawn.type);
-						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(withdrawn.type);
+						MagicUI.SetNextCollectionsToRefresh(withdrawn.type);
 
 						if (lookFor.stack <= 0)
 						{
@@ -710,9 +708,9 @@ namespace MagicStorage.Components
 
 					if (result.stack > 0) {
 						ResetCompactStage();
-						StorageGUI.SetRefresh();
-						StorageGUI.SetNextItemTypeToRefresh(type);
-						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(type);
+
+						if (Main.netMode == NetmodeID.SinglePlayer)
+							MagicUI.SetNextCollectionsToRefresh(type);
 					}
 				}
 			} catch {
@@ -756,8 +754,9 @@ namespace MagicStorage.Components
 
 				if (didSomething) {
 					ResetCompactStage();
-					StorageGUI.SetRefresh();
-					StorageGUI.SetNextItemTypesToRefresh(typesToRefresh);
+					
+					if (Main.netMode != NetmodeID.Server)
+						MagicUI.SetNextCollectionsToRefresh(typesToRefresh);
 				}
 			} catch {
 				// Swallow exception and let the user know that something went wrong

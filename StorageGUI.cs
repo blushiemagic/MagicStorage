@@ -227,6 +227,8 @@ namespace MagicStorage
 				return;
 			}
 
+			CraftingGUI.recipesToRefresh = null;
+
 			// Prevent inconsistencies after refreshing items
 			itemDeletionSlotFocus = -1;
 
@@ -352,7 +354,7 @@ namespace MagicStorage
 		}
 
 		private static void SortAndFilter(ThreadContext thread) {
-			// Immediately evaluate
+			// Immediately evaluate the source collection
 
 			DoFiltering(thread);
 			
