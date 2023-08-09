@@ -519,9 +519,8 @@ namespace MagicStorage
 				return;
 
 			if (TileEntity.ByPosition.ContainsKey(position)) {
-				StorageGUI.SetNextItemTypesToRefresh(types);
 				StorageGUI.ForceNextRefreshToBeFull = forceFullRefresh;
-				StorageGUI.RefreshItems();
+				MagicUI.SetNextCollectionsToRefresh(types);
 			}
 
 			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
@@ -1140,13 +1139,14 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			SoundEngine.PlaySound(SoundID.Grab);
-			StorageGUI.SetRefresh();
+			if (!item.IsAir)
+				StoragePlayer.GetItem(new EntitySource_Misc("QuickStack return"), item, false);
 
-			if (MagicUI.IsCraftingUIOpen())
-				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
-			else
-				StorageGUI.SetNextItemTypeToRefresh(itemType);
+			if (playSound)
+				SoundEngine.PlaySound(SoundID.Grab);
+			
+			if (origType > 0)
+				MagicUI.SetNextCollectionsToRefresh(origType);
 		}
 
 		public static void SendGolemTextUpdate() {

@@ -227,6 +227,8 @@ namespace MagicStorage
 				return;
 			}
 
+			CraftingGUI.recipesToRefresh = null;
+
 			// Prevent inconsistencies after refreshing items
 			itemDeletionSlotFocus = -1;
 

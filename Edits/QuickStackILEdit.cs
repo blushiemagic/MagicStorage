@@ -52,10 +52,8 @@ namespace MagicStorage.Edits {
 							NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, self.whoAmI, PlayerItemSlotID.Inventory0 + i, self.inventory[i].prefix);
 							NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
 							self.inventoryChestStack[i] = true;
-
-							StorageGUI.SetRefresh();
-							StorageGUI.SetNextItemTypeToRefresh(type);
-							CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(type);
+							
+							MagicUI.SetNextCollectionsToRefresh(type);
 						}
 					}
 				}
