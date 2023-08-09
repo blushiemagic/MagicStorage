@@ -1126,14 +1126,15 @@ namespace MagicStorage
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
 
-		public static void RequestQuickStackToNearbyStorage(Vector2 depositOrigin, Item item, IEnumerable<TEStorageCenter> nearbyCenters) {
+		public static void RequestQuickStackToNearbyStorage(Vector2 depositOrigin, int slot, IEnumerable<TEStorageCenter> nearbyCenters) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientRequestQuickStackToStorage);
 			packet.WriteVector2(depositOrigin);
-			ItemIO.Send(item, packet, true, false);
+			packet.Write((byte)Main.myPlayer);
+			packet.Write((ushort)slot);
 
 			List<TEStorageCenter> centers = nearbyCenters.ToList();
 			packet.Write((ushort)centers.Count);
@@ -1146,7 +1147,8 @@ namespace MagicStorage
 
 		public static void ServerReceiveQuickStackToNearbyStorage(BinaryReader reader, int sender) {
 			Vector2 depositOrigin = reader.ReadVector2();
-			Item item = ItemIO.Receive(reader, true, false);
+			byte plr = reader.ReadByte();
+			int slot = reader.ReadUInt16();
 
 			ushort count = reader.ReadUInt16();
 			List<TEStorageCenter> centers = new();
@@ -1160,50 +1162,39 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
+			Player client = Main.player[plr];
+			// Expected indices: 10 to 49, bank4Index + (0 to 39)
+			Item item = slot < 50 ? client.inventory[slot] : client.bank4.item[slot - PlayerItemSlotID.Bank4_0];
+
 			int origType = item.type;
 			bool playSound = false;
 			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
-
-			BitsByte bb = new(playSound, item.IsAir);
-			packet.Write(bb);
-
-			if (!item.IsAir)
-				ItemIO.Send(item, packet, true, false);
-			else
-				packet.Write(origType);
+			packet.Write(playSound);
+			packet.Write(origType);
 
 			packet.Send(toClient: sender);
+
+			// Important: player inventory slot needs to be synced after the quick stacking happens
+			NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
 		}
 
 		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
 			BitsByte bb = reader.ReadByte();
-			bool playSound = false, fullyQuickStacked = false;
-			bb.Retrieve(ref playSound, ref fullyQuickStacked);
-
-			Item item;
-			int origType;
-			if (fullyQuickStacked) {
-				item = new();
-				origType = reader.ReadInt32();
-			} else {
-				item = ItemIO.Receive(reader, true, false);
-				origType = item.type;
-			}
+			bool playSound = reader.ReadBoolean();
+			int origType = reader.ReadInt32();
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-
-			if (!item.IsAir)
-				StoragePlayer.GetItem(new EntitySource_Misc("QuickStack return"), item, false);
 
 			// NOTE: 1.4.4 does not play a sound
 			/*
 			if (playSound)
 				SoundEngine.PlaySound(SoundID.Grab);
 			*/
+
 			if (origType > 0)
 				MagicUI.SetNextCollectionsToRefresh(origType);
 		}

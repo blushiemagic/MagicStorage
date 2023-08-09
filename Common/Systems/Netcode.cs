@@ -59,17 +59,8 @@ namespace MagicStorage.Common.Systems {
 			=> TryQuickStackItemIntoNearbyStorageSystems(self.Center, self.GetNearbyCenters(), item, ref playSound);
 
 		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Vector2 depositOrigin, IEnumerable<TEStorageCenter> nearbyCenters, Item item, ref bool playSound) {
-			if (item.IsAir || !nearbyCenters.Any())
+			if (Main.netMode == NetmodeID.MultiplayerClient || item.IsAir || !nearbyCenters.Any())
 				return false;
-
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				// "Consume" the item and ask the server to do the depositing
-				NetHelper.RequestQuickStackToNearbyStorage(depositOrigin, item, nearbyCenters);
-				item.SetDefaults(0, false);
-				playSound = false;
-				// Return true to make the netcode message for deleting the item sync the player inventory
-				return true;
-			}
 
 			int startStack = item.stack;
 

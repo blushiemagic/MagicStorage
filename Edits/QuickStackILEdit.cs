@@ -79,36 +79,44 @@ namespace MagicStorage.Edits {
 			IEnumerable<TEStorageCenter> centers = player.GetNearbyCenters();
 
 			for (int i = 10; i < 50; i++) {
-				if (TryItemTransfer(player, player.inventory[i], centers) && Main.netMode == NetmodeID.MultiplayerClient) {
-					NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, player.inventory[i].prefix);
-					player.inventoryChestStack[i] = true;
+				Item item = player.inventory[i];
+
+				if (!item.IsAir && !item.favorited && !item.IsACoin) {
+					if (Main.netMode == NetmodeID.MultiplayerClient) {
+						// Important: inventory slot needs to be synced first when sending the request
+						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, item.prefix);
+						NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Inventory0 + i, centers);
+						player.inventoryChestStack[i] = true;
+					} else
+						TryItemTransfer(player, item, centers);
 				}
 			}
 
 			if (player.useVoidBag()) {
 				for (int i = 0; i < 40; i++) {
-					if (TryItemTransfer(player, player.bank4.item[i], centers) && Main.netMode == NetmodeID.MultiplayerClient) {
-						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, player.bank4.item[i].prefix);
-						player.disableVoidBag = i;
+					Item item = player.bank4.item[i];
+
+					if (!item.IsAir && !item.favorited && !item.IsACoin) {
+						if (Main.netMode == NetmodeID.MultiplayerClient) {
+							// Important: inventory slot needs to be synced first when sending the request
+							NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, item.prefix);
+							NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Bank4_0 + i, centers);
+							player.disableVoidBag = i;
+						} else
+							TryItemTransfer(player, item, centers);
 					}
 				}
 			}
 		}
 
-		private static bool TryItemTransfer(Player player, Item item, IEnumerable<TEStorageCenter> centers) {
-			if (!item.IsAir && !item.favorited && !item.IsACoin) {
-				// NOTE: in 1.4.4, sounds aren't played from quick stacking due to the new particle system being used instead
-				bool playSound = false;
-				int type = item.type;
-				bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player.Center, centers, item, ref playSound);
+		private static void TryItemTransfer(Player player, Item item, IEnumerable<TEStorageCenter> centers) {
+			// NOTE: in 1.4.4, sounds aren't played from quick stacking due to the new particle system being used instead
+			bool playSound = false;
+			int type = item.type;
+			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player.Center, centers, item, ref playSound);
 
-				if (success && Main.netMode != NetmodeID.Server && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0)
-					MagicUI.SetNextCollectionsToRefresh(type);
-
-				return success;
-			}
-
-			return false;
+			if (success && Main.netMode != NetmodeID.Server && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0)
+				MagicUI.SetNextCollectionsToRefresh(type);
 		}
 	}
 }
