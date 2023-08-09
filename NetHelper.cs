@@ -1170,6 +1170,12 @@ namespace MagicStorage
 			bool playSound = false;
 			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
 
+			// Overwrite the inventory entry to ensure that the following SendData call properly informs the client of the change
+			if (slot < 50)
+				client.inventory[slot] = item;
+			else
+				client.bank4.item[slot - PlayerItemSlotID.Bank4_0] = item;
+
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
 			packet.Write(playSound);
