@@ -1,4 +1,5 @@
-﻿using MagicStorage.NPCs;
+﻿using MagicStorage.Components;
+using MagicStorage.NPCs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -136,6 +137,13 @@ namespace MagicStorage.Common.Systems
 						unloadedModdedDiamonds.Add(identifier);
 				}
 			}
+		}
+
+		public override void PostUpdateEverything() {
+			// Tile Entity logic does not run on clients
+			// Hence, the delayed sound playing on storage hearts has to be handled here
+			foreach (TEStorageCenter center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>())
+				center.UpdateItemEatingTime();
 		}
 
 		public override void NetSend(BinaryWriter writer)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
@@ -11,6 +12,24 @@ namespace MagicStorage.Components
 	public abstract class TEStorageCenter : TEStorageComponent
 	{
 		public List<Point16> storageUnits = new();
+
+		private int eatingWaitDuration = -1;
+
+		public void AskToEatItem(int duration) {
+			duration += 10;
+
+			if (eatingWaitDuration < duration)
+				eatingWaitDuration = 10;
+		}
+
+		internal void UpdateItemEatingTime() {
+			if (eatingWaitDuration >= 0) {
+				if (eatingWaitDuration == 0)
+					SoundEngine.PlaySound(SoundID.Grab, Position.ToWorldCoordinates(16, 16));
+
+				eatingWaitDuration--;
+			}
+		}
 
 		protected virtual void CheckMapSections() {
 			//Force a map section send for each unique map section that has one of this storage center's storage units
