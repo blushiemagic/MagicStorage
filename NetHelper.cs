@@ -1281,7 +1281,7 @@ namespace MagicStorage
 			byte plr = reader.ReadByte();
 			BitsByte opFlags = reader.ReadByte();
 
-			var mp = Main.LocalPlayer.GetModPlayer<OperatorPlayer>();
+			var mp = Main.player[plr].GetModPlayer<OperatorPlayer>();
 
 			opFlags.Retrieve(ref mp.hasOp, ref mp.manualOp);
 
