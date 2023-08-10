@@ -87,8 +87,10 @@ namespace MagicStorage.Edits {
 						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, item.prefix);
 						NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Inventory0 + i, centers);
 						player.inventoryChestStack[i] = true;
-					} else
+					} else {
 						TryItemTransfer(player, item, centers);
+						player.inventory[i] = item;
+					}
 				}
 			}
 
@@ -102,8 +104,10 @@ namespace MagicStorage.Edits {
 							NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, item.prefix);
 							NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Bank4_0 + i, centers);
 							player.disableVoidBag = i;
-						} else
+						} else {
 							TryItemTransfer(player, item, centers);
+							player.bank4.item[i] = item;
+						}
 					}
 				}
 			}
@@ -115,7 +119,7 @@ namespace MagicStorage.Edits {
 			int type = item.type;
 			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player.Center, centers, item, ref playSound);
 
-			if (success && Main.netMode != NetmodeID.Server && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0)
+			if (success && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0)
 				MagicUI.SetNextCollectionsToRefresh(type);
 		}
 	}

@@ -1188,7 +1188,6 @@ namespace MagicStorage
 		}
 
 		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
-			BitsByte bb = reader.ReadByte();
 			bool playSound = reader.ReadBoolean();
 			int origType = reader.ReadInt32();
 
