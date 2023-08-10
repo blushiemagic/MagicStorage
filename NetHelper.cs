@@ -1170,7 +1170,7 @@ namespace MagicStorage
 			bool playSound = false;
 			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
 
-			// Overwrite the inventory entry to ensure that the following SendData call properly informs the client of the change
+			// Overwrite the inventory entry on this end
 			if (slot < 50)
 				client.inventory[slot] = item;
 			else
@@ -1180,19 +1180,31 @@ namespace MagicStorage
 			packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
 			packet.Write(playSound);
 			packet.Write(origType);
-
+			packet.Write(plr);
+			packet.Write((ushort)slot);
+			ItemIO.Send(item, packet, true, true);
 			packet.Send(toClient: sender);
 
-			// Important: player inventory slot needs to be synced after the quick stacking happens
-			NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
+			// NOTE: client can ignore SyncEquipment messages, which it will in this context
+			// NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
 		}
 
 		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
 			bool playSound = reader.ReadBoolean();
 			int origType = reader.ReadInt32();
+			byte plr = reader.ReadByte();
+			int slot = reader.ReadUInt16();
+			Item item = ItemIO.Receive(reader, true, true);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
+
+			Player client = Main.player[plr];
+			// Overwrite the inventory entry on this end
+			if (slot < 50)
+				client.inventory[slot] = item;
+			else
+				client.bank4.item[slot - PlayerItemSlotID.Bank4_0] = item;
 
 			// NOTE: 1.4.4 does not play a sound
 			/*
