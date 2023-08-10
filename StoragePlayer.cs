@@ -73,7 +73,7 @@ namespace MagicStorage
 			}
 		}
 
-		public override void PlayerDisconnect() {
+		public override void PlayerDisconnect(Player player) {
 			GetStorageHeart()?.UnlockOnCurrentClient();
 		}
 

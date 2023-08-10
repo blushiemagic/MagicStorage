@@ -42,6 +42,8 @@ namespace MagicStorage.Edits {
 				for (int i = 10; i < 50; i++) {
 					Item item = self.inventory[i];
 
+					// TODO: update this method with the new netcode from 1.4.4
+
 					if (item.type > ItemID.None && item.stack > 0 && !item.favorited && !item.IsACoin) {
 						int type = item.type;
 						bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(hearts, item, ref flag);
