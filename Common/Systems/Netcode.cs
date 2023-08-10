@@ -55,21 +55,23 @@ namespace MagicStorage.Common.Systems {
 		}
 
 		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound)
-			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyNetworkHearts(), item, ref playSound);
+			=> TryQuickStackItemIntoNearbyStorageSystems(self.GetNearbyCenters(), item, ref playSound);
 
-		internal static bool TryQuickStackItemIntoNearbyStorageSystems(IEnumerable<TEStorageHeart> hearts, Item item, ref bool playSound) {
-			if (item.IsAir)
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(IEnumerable<TEStorageCenter> nearbyCenters, Item item, ref bool playSound) {
+			if (Main.netMode == NetmodeID.MultiplayerClient || item.IsAir || !nearbyCenters.Any())
 				return false;
 
+			int startStack = item.stack;
+
 			//Quick stack to nearby chests failed or was only partially completed.  Try to do the same for nearby storage systems
-			foreach (TEStorageHeart heart in hearts) {
-				if (!heart.HasItem(item, ignorePrefix: true))
+			foreach (TEStorageCenter center in nearbyCenters) {
+				if (center.GetHeart() is not TEStorageHeart heart || !heart.HasItem(item, ignorePrefix: true))
 					continue;
 
 				int oldType = item.type;
 				int oldStack = item.stack;
 
-				heart.TryDeposit(item);
+				heart.DepositItem(item);
 
 				if (oldType != item.type || oldStack != item.stack)
 					playSound = true;
@@ -81,7 +83,7 @@ namespace MagicStorage.Common.Systems {
 					return true;
 			}
 
-			return false;
+			return item.stack < startStack;
 		}
 
 		public override void PreSaveAndQuit() {

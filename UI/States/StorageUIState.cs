@@ -528,7 +528,7 @@ namespace MagicStorage.UI.States {
 				setItemDeletionMode = new UIToggleLabel("Item Deletion Mode", false);
 				setItemDeletionMode.SetPadding(0);
 				setItemDeletionMode.Width.Set(setItemDeletionMode.Text.MinWidth.Pixels + 30, 0);
-				setItemDeletionMode.OnLeftClick += static (evt, e) => {
+				setItemDeletionMode.OnClick += static (evt, e) => {
 					UIToggleLabel label = e as UIToggleLabel;
 					if (Main.netMode == NetmodeID.MultiplayerClient && !Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp) {
 						Main.NewText("This control requires the Server Operator status", Color.Red);
