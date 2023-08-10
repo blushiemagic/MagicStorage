@@ -19,7 +19,7 @@ namespace MagicStorage.Components
 			duration += 10;
 
 			if (eatingWaitDuration < duration)
-				eatingWaitDuration = 10;
+				eatingWaitDuration = duration;
 		}
 
 		internal void UpdateItemEatingTime() {
