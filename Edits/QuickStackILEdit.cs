@@ -9,15 +9,20 @@ using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using ILPlayer = Terraria.IL_Player;
+using ILChest = Terraria.IL_Chest;
+using System;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {
 	internal class QuickStackILEdit : Edit {
 		public override void LoadEdits() {
 			ILPlayer.QuickStackAllChests += Player_QuickStackAllChests;
+			ILChest.ServerPlaceItem += Chest_ServerPlaceItem;
 		}
 
 		public override void UnloadEdits() {
 			ILPlayer.QuickStackAllChests -= Player_QuickStackAllChests;
+			ILChest.ServerPlaceItem -= Chest_ServerPlaceItem;
 		}
 
 		private static void Player_QuickStackAllChests(ILContext il) {
@@ -37,11 +42,14 @@ namespace MagicStorage.Edits {
 			while (c.TryGotoNext(MoveType.After, i => i.MatchLdarg(0),
 				i => i.MatchCall(Player_useVoidBag),
 				i => i.MatchBrtrue(out _))) {
+				// NOTE: searchCount = 0 should refer to the netcode portion of the logic... avoid it and hook into the Chest quick stacking netcode instead further down in the file
 				foundAny = true;
 
 				// Emit the logic
-				c.Emit(OpCodes.Ldarg_0);
-				c.EmitDelegate(TryStorageQuickStack);
+				if (searchCount > 0) {
+					c.Emit(OpCodes.Ldarg_0);
+					c.EmitDelegate(TryStorageQuickStack);
+				}
 
 				// Go to the second "ret" after the one for this if block, then emit the logic again
 				int retFound = 0;
@@ -54,10 +62,12 @@ namespace MagicStorage.Edits {
 				}
 
 				// Move behind the second ret
-				c.Index--;
+				if (searchCount > 0) {
+					c.Index--;
 
-				c.Emit(OpCodes.Ldarg_0);
-				c.EmitDelegate(TryStorageQuickStack);
+					c.Emit(OpCodes.Ldarg_0);
+					c.EmitDelegate(TryStorageQuickStack);
+				}
 
 				searchCount++;
 			}
@@ -76,7 +86,7 @@ namespace MagicStorage.Edits {
 		}
 
 		private static void TryStorageQuickStack(Player player) {
-			// Guaranteed to run only in singleplayer or on a multiplayer client due to QuickStackAllChests only being invoked from the inventory UI button
+			// Guaranteed to run only in singleplayer due to the multiplayer logic being skipped
 			IEnumerable<TEStorageCenter> centers = player.GetNearbyCenters();
 
 			// No centers nearby?  Bail immediately since nothing would happen anyway
@@ -87,15 +97,8 @@ namespace MagicStorage.Edits {
 				Item item = player.inventory[i];
 
 				if (!item.IsAir && !item.favorited && !item.IsACoin) {
-					if (Main.netMode == NetmodeID.MultiplayerClient) {
-						// Important: inventory slot needs to be synced first when sending the request
-						NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0 + i, item.prefix);
-						NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Inventory0 + i, centers);
-						player.inventoryChestStack[i] = true;
-					} else {
-						TryItemTransfer(player, item, centers);
-						player.inventory[i] = item;
-					}
+					TryItemTransfer(player, item, centers);
+					player.inventory[i] = item;
 				}
 			}
 
@@ -104,28 +107,62 @@ namespace MagicStorage.Edits {
 					Item item = player.bank4.item[i];
 
 					if (!item.IsAir && !item.favorited && !item.IsACoin) {
-						if (Main.netMode == NetmodeID.MultiplayerClient) {
-							// Important: inventory slot needs to be synced first when sending the request
-							NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Bank4_0 + i, item.prefix);
-							NetHelper.RequestQuickStackToNearbyStorage(player.Center, PlayerItemSlotID.Bank4_0 + i, centers);
-							player.disableVoidBag = i;
-						} else {
-							TryItemTransfer(player, item, centers);
-							player.bank4.item[i] = item;
-						}
+						TryItemTransfer(player, item, centers);
+						player.bank4.item[i] = item;
 					}
 				}
 			}
 		}
 
-		private static void TryItemTransfer(Player player, Item item, IEnumerable<TEStorageCenter> centers) {
+		private static readonly MethodInfo Chest_PutItemInNearbyChest = typeof(Chest).GetMethod(nameof(Chest.PutItemInNearbyChest), BindingFlags.Public | BindingFlags.Static);
+
+		private static void Chest_ServerPlaceItem(ILContext il) {
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, throwOnFail: false, Patch_Chest_ServerPlaceItem);
+		}
+
+		private static bool Patch_Chest_ServerPlaceItem(ILCursor c, ref string badReturnReason) {
+			bool foundAny = false;
+			while (c.TryGotoNext(MoveType.After, i => i.MatchCall(Chest_PutItemInNearbyChest))) {
+				// Inject an item transfer call
+				c.Emit(OpCodes.Ldarg_0);
+				c.EmitDelegate(CheckStorageQuickStacking);
+			}
+
+			if (!foundAny) {
+				badReturnReason = "Could not find any references to Chest.PutItemInNearbyChest()";
+				return false;
+			}
+
+			return true;
+		}
+
+		private static Item CheckStorageQuickStacking(Item item, byte plr) {
+			Player player = Main.player[plr];
+			TryItemTransfer(player, item, player.GetNearbyCenters());
+			return item;
+		}
+
+		private static bool TryItemTransfer(Player player, Item item, IEnumerable<TEStorageCenter> centers) {
 			// NOTE: in 1.4.4, sounds aren't played from quick stacking due to the new particle system being used instead
 			bool playSound = false;
 			int type = item.type;
 			bool success = Netcode.TryQuickStackItemIntoNearbyStorageSystems(player.Center, centers, item, ref playSound);
 
-			if (success && player.GetModPlayer<StoragePlayer>().ViewingStorage().X >= 0)
-				MagicUI.SetNextCollectionsToRefresh(type);
+			if (success) {
+				if (Main.netMode == NetmodeID.SinglePlayer) {
+					// Refresh the UI since the item was quick stacked
+					MagicUI.SetNextCollectionsToRefresh(type);
+				} else if (Main.netMode == NetmodeID.Server) {
+					// Inform the client of the quick stack result so that their UI can be refreshed
+					ModPacket packet = MagicStorageMod.Instance.GetPacket();
+					packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
+					packet.Write(playSound);
+					packet.Write(type);
+					packet.Send(toClient: player.whoAmI);
+				}
+			}
+
+			return success;
 		}
 	}
 }
