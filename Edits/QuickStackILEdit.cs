@@ -123,6 +123,7 @@ namespace MagicStorage.Edits {
 		private static bool Patch_Chest_ServerPlaceItem(ILCursor c, ref string badReturnReason) {
 			bool foundAny = false;
 			while (c.TryGotoNext(MoveType.After, i => i.MatchCall(Chest_PutItemInNearbyChest))) {
+				foundAny = true;
 				// Inject an item transfer call
 				c.Emit(OpCodes.Ldarg_0);
 				c.EmitDelegate(CheckStorageQuickStacking);
