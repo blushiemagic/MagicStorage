@@ -13,6 +13,7 @@ using Terraria.Localization;
 using Microsoft.Xna.Framework;
 using System;
 using MagicStorage.Common.Systems;
+using System.Collections;
 
 namespace MagicStorage.Components
 {
@@ -862,6 +863,14 @@ namespace MagicStorage.Components
 				writer.Write(environmentAccess.Y);
 			}
 
+			// Ensure that the "in use" array stays in sync
+			BitArray bits = new BitArray(clientUsingHeart);
+			byte[] arr = new byte[(Main.maxPlayers >> 3) + 1];
+			bits.CopyTo(arr, 0);
+
+			writer.Write((byte)arr.Length);
+			writer.Write(arr);
+
 			NetHelper.Report(true, "Sent tile entity data for TEStorageHeart");
 		}
 
@@ -875,6 +884,12 @@ namespace MagicStorage.Components
 			count = reader.ReadInt16();
 			for (int k = 0; k < count; k++)
 				environmentAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
+
+			byte clientUsageLength = reader.ReadByte();
+			byte[] clientUsage = reader.ReadBytes(clientUsageLength);
+			BitArray bits = new BitArray(clientUsage);
+			bits.Length -= 1;  // Need 255 entries, not 256
+			bits.CopyTo(clientUsingHeart, 0);
 
 			NetHelper.Report(true, "Received tile entity data for TEStorageHeart");
 		}
