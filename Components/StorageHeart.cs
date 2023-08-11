@@ -54,8 +54,13 @@ namespace MagicStorage.Components
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) || te is not TEStorageHeart heart)
 				return;
 
-			if (heart.AnyClientUsingThis())
+			NetHelper.Report(true, $"Checking if heart entity at location X={i}, Y={j} is used by any clients...");
+
+			if (heart.AnyClientUsingThis()) {
+				NetHelper.Report(false, "Heart entity is currently in use, preventing destruction");
 				fail = true;
+			} else
+				NetHelper.Report(false, "Heart entity is currently not in use, allowing destruction");
 		}
 	}
 }
