@@ -1159,6 +1159,9 @@ namespace MagicStorage
 					centers.Add(center);
 			}
 
+			if (centers.Count == 0)
+				return;  // Nothing would happen, do not try to force it
+
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
@@ -1167,8 +1170,13 @@ namespace MagicStorage
 			Item item = slot < 50 ? client.inventory[slot] : client.bank4.item[slot - PlayerItemSlotID.Bank4_0];
 
 			int origType = item.type;
+			int origStack = item.stack;
 			bool playSound = false;
 			Netcode.TryQuickStackItemIntoNearbyStorageSystems(depositOrigin, centers, item, ref playSound);
+
+			// No change?  Don't update the inventory nor send a packet
+			if (item.type == origType && item.stack == origStack)
+				return;
 
 			// Overwrite the inventory entry on this end
 			if (slot < 50)

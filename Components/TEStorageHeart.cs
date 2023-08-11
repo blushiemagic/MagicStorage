@@ -99,17 +99,13 @@ namespace MagicStorage.Components
 		}
 
 		public void LockOnCurrentClient() {
-			if (!clientUsingHeart[Main.myPlayer]) {
-				clientUsingHeart[Main.myPlayer] = true;
-				NetHelper.ClientInformStorageHeartUsage(this);
-			}
+			clientUsingHeart[Main.myPlayer] = true;
+			NetHelper.ClientInformStorageHeartUsage(this);
 		}
 
 		public void UnlockOnCurrentClient() {
-			if (clientUsingHeart[Main.myPlayer]) {
-				clientUsingHeart[Main.myPlayer] = false;
-				NetHelper.ClientInformStorageHeartUsage(this);
-			}
+			clientUsingHeart[Main.myPlayer] = false;
+			NetHelper.ClientInformStorageHeartUsage(this);
 		}
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()

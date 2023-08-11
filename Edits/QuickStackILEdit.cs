@@ -4,6 +4,7 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using SerousCommonLib.API;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.ID;
@@ -77,6 +78,10 @@ namespace MagicStorage.Edits {
 		private static void TryStorageQuickStack(Player player) {
 			// Guaranteed to run only in singleplayer or on a multiplayer client due to QuickStackAllChests only being invoked from the inventory UI button
 			IEnumerable<TEStorageCenter> centers = player.GetNearbyCenters();
+
+			// No centers nearby?  Bail immediately since nothing would happen anyway
+			if (!centers.Any())
+				return;
 
 			for (int i = 10; i < 50; i++) {
 				Item item = player.inventory[i];
