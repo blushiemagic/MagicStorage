@@ -91,25 +91,27 @@ namespace MagicStorage.Components
 					continue;
 				}
 
-				if (clientUsingHeart[i])
+				if (clientUsingHeart[i]) {
+					NetHelper.Report(false, $"Client {i} is currently using this Storage Heart entity");
 					return true;
+				}
 			}
 
 			return false;
 		}
 
 		public void LockOnCurrentClient() {
-			if (!clientUsingHeart[Main.myPlayer]) {
-				clientUsingHeart[Main.myPlayer] = true;
-				NetHelper.ClientInformStorageHeartUsage(this);
-			}
+			NetHelper.Report(true, $"Locking storage heart at X={Position.X}, Y={Position.Y}");
+
+			clientUsingHeart[Main.myPlayer] = true;
+			NetHelper.ClientInformStorageHeartUsage(this);
 		}
 
 		public void UnlockOnCurrentClient() {
-			if (clientUsingHeart[Main.myPlayer]) {
-				clientUsingHeart[Main.myPlayer] = false;
-				NetHelper.ClientInformStorageHeartUsage(this);
-			}
+			NetHelper.Report(true, $"Unlocking storage heart at X={Position.X}, Y={Position.Y}");
+
+			clientUsingHeart[Main.myPlayer] = false;
+			NetHelper.ClientInformStorageHeartUsage(this);
 		}
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
