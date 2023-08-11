@@ -172,7 +172,7 @@ namespace MagicStorage {
 
 			HashSet<Point16> foundAccesses = new();
 
-			const int range = 39;
+			const int range = 17;
 			int startX = centerTile.X - range, startY = centerTile.Y - range;
 			int endX = centerTile.X + range, endY = centerTile.Y + range;
 
