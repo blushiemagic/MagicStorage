@@ -1,29 +1,4 @@
-﻿[h1]v0.6.0.2[/h1]
+﻿[h1]v0.6.0.3[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-- Made the Recursion Crafting feature significantly more stable
-- The "server audit log" is now an opt-in feature in the Server Config
-- The "right click ingredient to view recipe" feature is no longer disabled while recursion crafting is active
-- Improved the netcode for Quick Stacking to no longer necessitate an inventory reorganization when an item wasn't fully quick-stacked
-- The [i]Loading...[/i] prompt now waits for 45 game ticks before displaying itself
-- Placing storage components will now properly update the frames of adjacent Connectors
-- Added support for sharing items from the Storage UI and recipes from the Crafting UI (Alt+Click when chat bar is open)
-- Added a safeguard to the rendering logic for the Required Objects text to prevent an edge case that could print an error to the chat
-- Added safeguards to prevent lag and crashes when using the "right click stack splitting" logic when withdrawing items from storage or the Crafting UI's result slot
-- Added a brief delay when opening the Storage and Crafting UIs before their item slots can be interacted with
-- Added a new control to the Controls tab of the Storage UI — [b]Item Deletion Mode[/b] — to allow easy deletion of item stacks from storage
-- Fixed a bug where trying to craft a recipe whose ingredients were all fully researched would cause a crash
-- Fixed a bug in recipe refreshing logic where it would sometimes ignore active filters
-- Fixed an oversight where recipes wouldn't show their Required Objects unless the recipe's ingredient requirements were fulfilled
-- Fixed an oversight where only a few "recipe conditions" would appear in the Required Objects list
-- Fixed a bug where the hover text for the Reset button in the Storage/Crafting UIs would linger until hovering over something else in the UI
-- Fixed an oversight where favoriting items/recipes wouldn't refresh the UI
-- Fixed a bug which caused the crafting "Amount: X" target to always be reset to 1 after performing any craft
-- Fixed a bug which caused the Configuration Interface's modules to end up in an invalid state when entering a world
-- Fixed a bug where withdrawing/depositing items wouldn't properly refresh the UI in multiplayer
-- Fixed a bug where the server was never able to properly detect if a client has the Server Operator status
-- Fixed a bug where materials for recipes were not being consumed
-- Fixed a bug where trying to withdraw items from the Crafting UI's result slot — when a module had added items — would result in a crash, duplicate items or unrelated item stacks being deleted
-- Fixed an ancient bug where items in storage could temporarily disappear for multiplayer clients
-- Added improved Spanish localizations
-- Updated the localization files
+- TODO
