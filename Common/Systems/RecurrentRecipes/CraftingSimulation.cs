@@ -23,7 +23,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return simulationResult.usedRecipes.Any(r => object.ReferenceEquals(r.recipe, recipe));
 		}
 
-		public void SimulateCrafts(RecursiveRecipe recipe, int amountToCraft, Dictionary<int, int> availableInventory) {
+		public void SimulateCrafts(RecursiveRecipe recipe, int amountToCraft, AvailableRecipeObjects available) {
 			simulationResult = CraftResult.Default;
 
 			int sum = 0;
@@ -38,7 +38,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				// Get the materials required, then "craft" it and continue checking until no more materials can be used
 				CraftResult craftResult;
 				using (FlagSwitch.Create(ref CraftingGUI.disableNetPrintingForIsAvailable, true))
-					recipe.GetCraftingInformation(1, out craftResult, availableInventory, mainResultItem);
+					recipe.GetCraftingInformation(1, out craftResult, available, mainResultItem);
+
+				// If there's no possible recursion tree left, bail immediately
+				if (!craftResult.WasAvailable)
+					break;
 
 				// Update the counts dictionary with the consumed materials
 				bool notEnoughItems = false;
@@ -46,20 +50,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					int stack = material.stack;
 					if (stack > 0) {
 						foreach (int item in material.GetValidItems()) {
-							if (availableInventory.TryGetValue(item, out int quantity)) {
-								if (quantity > stack) {
-									// Reduce the available quantity
-									availableInventory[item] = quantity - stack;
-									stack = 0;
-								} else {
-									// Material was completely consumed
-									availableInventory.Remove(item);
-									stack -= quantity;
-								}
+							stack = available.UpdateIngredient(item, -stack);
 
-								if (stack <= 0)
-									break;
-							}
+							if (stack <= 0)
+								break;
 						}
 
 						if (stack > 0) {
@@ -76,7 +70,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				// Update the counts dictionary with the generated excess items
 				foreach (ItemInfo info in craftResult.excessResults) {
 					if (info.stack > 0)
-						availableInventory.AddOrSumCount(info.type, info.stack);
+						available.UpdateIngredient(info.type, info.stack);
 				}
 
 				simulationResult = simulationResult.CombineWith(craftResult);

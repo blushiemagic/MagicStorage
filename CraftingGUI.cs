@@ -196,7 +196,7 @@ namespace MagicStorage
 				NetHelper.Report(false, "Recipe had a recursion tree");
 
 				using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-					return recursiveRecipe.GetMaxCraftable(GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true));
+					return recursiveRecipe.GetMaxCraftable(GetCurrentInventory(cloneIfBlockEmpty: true));
 			}
 
 			NetHelper.Report(false, "Recipe did not hae a recursion tree or recursion was disabled");
@@ -531,6 +531,9 @@ namespace MagicStorage
 
 		private static void LoadStoredItems(StorageGUI.ThreadContext thread, ThreadState state) {
 			try {
+				// Task count: loading simulator items, 5 tasks from SortAndFilter, adding full item list, adding module items to source, updating source items list, updating counts dictionary
+				thread.InitTaskSchedule(10, "Loading items");
+
 				var clone = thread.Clone(
 					newSortMode: SortingOptionLoader.Definitions.ID.Type,
 					newFilterMode: FilteringOptionLoader.Definitions.All.Type,
@@ -540,6 +543,8 @@ namespace MagicStorage
 				thread.context = clone.context = new(state.simulatorItems);
 
 				items.AddRange(ItemSorter.SortAndFilter(clone, aggregate: false));
+
+				thread.CompleteOneTask();
 
 				numSimulatorItems = items.Count;
 
@@ -555,12 +560,19 @@ namespace MagicStorage
 				items.Clear();
 				items.AddRange(prependedItems);
 
+				thread.CompleteOneTask();
+
 				numItemsWithoutSimulators = items.Count - numSimulatorItems;
 
 				var moduleItems = simulatorItems.ToList();
 
 				sourceItems.AddRange(clone.context.sourceItems.Concat(moduleItems));
+
+				thread.CompleteOneTask();
+
 				sourceItemsFromModules.AddRange(moduleItems.SelectMany(static list => list));
+
+				thread.CompleteOneTask();
 
 				// Context no longer needed
 				thread.context = null;
@@ -571,6 +583,8 @@ namespace MagicStorage
 				itemCounts.Clear();
 				foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.ConstrainedSum())))
 					itemCounts[type] = amount;
+
+				thread.CompleteOneTask();
 			} catch when (thread.token.IsCancellationRequested) {
 				items.Clear();
 				numItemsWithoutSimulators = 0;
@@ -595,13 +609,19 @@ namespace MagicStorage
 
 				NetHelper.Report(true, "Recipe refreshing finished");
 			} catch (Exception e) {
-				Main.NewTextMultiline(e.ToString(), c: Color.White);
+				Main.QueueMainThreadAction(() => Main.NewTextMultiline(e.ToString(), c: Color.White));
 			}
 		}
 
 		private static void RefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state)
 		{
 			NetHelper.Report(true, "Refreshing all recipes");
+
+			// Each DoFiltering does: GetRecipes, SortRecipes, adding recipes, adding recipe availability
+			// Each GetRecipes does: loading base recipes, applying text/mod filters
+			// Each SortRecipes does: DoSorting, blacklist filtering, favorite checks
+
+			thread.InitTaskSchedule(9, "Refreshing recipes");
 
 			DoFiltering(thread, state);
 
@@ -619,6 +639,8 @@ namespace MagicStorage
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist");
 					didDefault = true;
+
+					thread.ResetTaskCompletion();
 
 					DoFiltering(thread, state);
 				}
@@ -642,6 +664,8 @@ namespace MagicStorage
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingDefaultToAllMods");
 					didDefault = true;
 
+					thread.ResetTaskCompletion();
+
 					DoFiltering(thread, state);
 				}
 			}
@@ -657,9 +681,13 @@ namespace MagicStorage
 
 				var filteredRecipes = ItemSorter.GetRecipes(thread);
 
+				thread.CompleteOneTask();
+
 				NetHelper.Report(true, "Sorting recipes...");
 
 				IEnumerable<Recipe> sortedRecipes = SortRecipes(thread, state, filteredRecipes);
+
+				thread.CompleteOneTask();
 
 				recipes.Clear();
 				recipeAvailable.Clear();
@@ -673,12 +701,22 @@ namespace MagicStorage
 						NetHelper.Report(true, "Filtering out only available recipes...");
 
 						recipes.AddRange(sortedRecipes.Where(r => IsAvailable(r)));
+
+						thread.CompleteOneTask();
+
 						recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
+
+						thread.CompleteOneTask();
 					}
 					else
 					{
 						recipes.AddRange(sortedRecipes);
+
+						thread.CompleteOneTask();
+
 						recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
+
+						thread.CompleteOneTask();
 					}
 				}
 
@@ -695,15 +733,22 @@ namespace MagicStorage
 		private static void RefreshSpecificRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
 			NetHelper.Report(true, "Refreshing " + state.recipesToRefresh.Length + " recipes");
 
+			// Task count: N recipes, 3 tasks from SortRecipes, adding recipes, adding recipe availability
+			thread.InitTaskSchedule(state.recipesToRefresh.Length + 5, $"Refreshing {state.recipesToRefresh.Length} recipes");
+
 			//Assumes that the recipes are visible in the GUI
 			bool needsResort = forceSpecificRecipeResort;
 
 			foreach (Recipe recipe in state.recipesToRefresh) {
-				if (recipe is null)
+				if (recipe is null) {
+					thread.CompleteOneTask();
 					continue;
+				}
 
-				if (!ItemSorter.RecipePassesFilter(recipe, thread))
+				if (!ItemSorter.RecipePassesFilter(recipe, thread)) {
+					thread.CompleteOneTask();
 					continue;
+				}
 
 				int index = recipes.IndexOf(recipe);
 
@@ -734,6 +779,8 @@ namespace MagicStorage
 						}
 					}
 				}
+
+				thread.CompleteOneTask();
 			}
 
 			if (needsResort) {
@@ -747,7 +794,12 @@ namespace MagicStorage
 				recipeAvailable.Clear();
 
 				recipes.AddRange(sortedRecipes);
+
+				thread.CompleteOneTask();
+
 				recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
+
+				thread.CompleteOneTask();
 			}
 		}
 
@@ -761,9 +813,13 @@ namespace MagicStorage
 		private static IEnumerable<Recipe> SortRecipes(StorageGUI.ThreadContext thread, ThreadState state, IEnumerable<Recipe> source) {
 			IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(thread, source, r => r.createItem);
 
+			thread.CompleteOneTask();
+
 			// show only blacklisted recipes only if choice = 2, otherwise show all other
 			if (MagicStorageConfig.RecipeBlacklistEnabled)
 				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice == RecipeButtonsBlacklistChoice == state.hiddenRecipes.Contains(x.createItem));
+
+			thread.CompleteOneTask();
 
 			// favorites first
 			if (MagicStorageConfig.CraftingFavoritingEnabled) {
@@ -771,6 +827,8 @@ namespace MagicStorage
 					
 				sortedRecipes = sortedRecipes.OrderByDescending(r => state.favoritedRecipes.Contains(r.createItem) ? 1 : 0);
 			}
+
+			thread.CompleteOneTask();
 
 			return sortedRecipes;
 		}
@@ -980,7 +1038,7 @@ namespace MagicStorage
 			if (!MagicStorageConfig.IsRecursionEnabled || !recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
 				return null;
 
-			return recursiveRecipe.GetCraftingTree(toCraft, availableInventory: GetItemCountsWithBlockedItemsRemoved(), blockedSubrecipeIngredient);
+			return recursiveRecipe.GetCraftingTree(toCraft, available: GetCurrentInventory(), blockedSubrecipeIngredient);
 		}
 
 		internal static bool disableNetPrintingForIsAvailable;
@@ -999,76 +1057,17 @@ namespace MagicStorage
 					NetHelper.Report(false, "Calculating recursion tree for recipe...");
 			}
 
-			bool available;
-			if (checkRecursive && GetCraftingTree(recipe, blockedSubrecipeIngredient: ignoreItem) is OrderedRecipeTree craftingTree) {
-				// NOTE: [ThreadStatic] only runs the field initializer on one thread
-				DroppedItems ??= new();
-
-				// Clone the item counts so that the inventory can be faked
-				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true);
-
-				if (ignoreItem > 0)
-					isAvailable_ItemCountsDictionary.Remove(ignoreItem);
-
-				craftingTree.TrimBranches(IsAvailable_GetItemCount);
-
-				// Put all remaining recipes on a stack, and then process them in that order
-				// If any recipe ends up not being fulfilled, the original recipe will not be available
-				Stack<OrderedRecipeContext> recipeStack = craftingTree.GetProcessingOrder();
-
-				// Check each recipe, then update item count dictionary with its ingredients and result
-				var heart = GetHeart();
-				EnvironmentSandbox sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
-				IEnumerable<EnvironmentModule> modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>();
-
-				if (!disableNetPrintingForIsAvailable)
-					NetHelper.Report(true, "Processing recipe order...");
-
-				available = true;
-				foreach (OrderedRecipeContext context in recipeStack) {
-					// Trimmed branch?  Ignore, assume available
-					if (context.amountToCraft <= 0)
-						continue;
-
-					int batches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
-
-					if (!IsAvailable_CheckRecipe(context.recipe, batches)) {
-						available = false;
-						break;
-					}
-
-					// Remove the required items from the inventory
-					IsAvailable_ConsumeFakeCounts(context, batches, out Dictionary<int, int> consumedItemCounts);
-
-					// Fake the crafts
-					CatchDroppedItems = true;
-					DroppedItems.Clear();
-
-					List<Item> consumedItems = consumedItemCounts.Select(kvp => new Item(kvp.Key, kvp.Value)).ToList();
-
-					Item createItem = context.recipe.createItem;
-					Item clonedItem = createItem.Clone();
-
-					for (int i = 0; i < batches; i++) {
-						RecipeLoader.OnCraft(clonedItem, context.recipe, consumedItems);
-
-						foreach (EnvironmentModule module in modules)
-							module.OnConsumeItemsForRecipe(sandbox, context.recipe, consumedItems);
-					}
-
-					CatchDroppedItems = false;
-
-					// Add the "results" and extra items to the inventory
-					isAvailable_ItemCountsDictionary.AddOrSumCount(createItem.type, createItem.stack * batches);
-
-					foreach (Item droppedItem in DroppedItems)
-						isAvailable_ItemCountsDictionary.AddOrSumCount(droppedItem.type, droppedItem.stack);
+			bool available = false;
+			if (checkRecursive && MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				if (currentlyThreading)
+					available = IsAvailable_CheckRecursiveRecipe(recursiveRecipe, ignoreItem);
+				else {
+					ExecuteInCraftingGuiEnvironment(() => {
+						available = IsAvailable_CheckRecursiveRecipe(recursiveRecipe, ignoreItem);
+					});
 				}
-			} else {
-				isAvailable_ItemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
-				available = IsAvailable_CheckRecipe(recipe);
-				isAvailable_ItemCountsDictionary = null;
-			}
+			} else
+				available = IsAvailable_CheckNormalRecipe(recipe);
 
 			if (!disableNetPrintingForIsAvailable)
 				NetHelper.Report(true, $"Recipe {(available ? "was" : "was not")} available");
@@ -1076,62 +1075,30 @@ namespace MagicStorage
 			return available;
 		}
 
-		private static void IsAvailable_ConsumeFakeCounts(OrderedRecipeContext context, int batches, out Dictionary<int, int> consumedItemCounts) {
-			consumedItemCounts = new();
+		private static bool IsAvailable_CheckRecursiveRecipe(RecursiveRecipe recipe, int ignoreItem) {
+			var availableObjects = GetCurrentInventory(cloneIfBlockEmpty: true);
+			if (ignoreItem > 0)
+				availableObjects.RemoveIngredient(ignoreItem);
 
-			foreach (Item item in context.recipe.requiredItem) {
-				int count = isAvailable_ItemCountsDictionary.TryGetValue(item.type, out int c) ? c : 0;
-				int consume = item.stack * batches;
-
-				if (count >= consume) {
-					isAvailable_ItemCountsDictionary[item.type] = count - consume;
-					consumedItemCounts.AddOrSumCount(item.type, consume);
-				} else {
-					// Item would be wholly consumed
-					if (count > 0) {
-						consume -= count;
-						isAvailable_ItemCountsDictionary.Remove(item.type);
-						consumedItemCounts.AddOrSumCount(item.type, count);
-					}
-
-					// Check for recipe groups
-					foreach (int groupID in context.recipe.acceptedGroups) {
-						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
-						if (group.ContainsItem(item.type)) {
-							// Check each valid item in the group
-							foreach (int groupItem in group.ValidItems) {
-								count = isAvailable_ItemCountsDictionary.TryGetValue(groupItem, out c) ? c : 0;
-
-								if (count >= consume) {
-									// Nothing left to consume
-									isAvailable_ItemCountsDictionary[groupItem] = count - consume;
-									consumedItemCounts.AddOrSumCount(groupItem, consume);
-									goto afterGroupCheck;
-								} else if (count > 0) {
-									// Item would be wholly consumed
-									consume -= count;
-									isAvailable_ItemCountsDictionary.Remove(groupItem);
-									consumedItemCounts.AddOrSumCount(groupItem, count);
-								}
-							}
-						}
-					}
-
-					afterGroupCheck: ;
-				}
+			using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI)) {
+				CraftingSimulation simulation = new CraftingSimulation();
+				simulation.SimulateCrafts(recipe, 1, availableObjects);  // Recipe is available if at least one craft is possible
+				return simulation.AmountCrafted > 0;
 			}
 		}
 
-		private static bool IsAvailable_CheckRecipe(Recipe recipe, int batches = 1) {
+		private static bool IsAvailable_CheckNormalRecipe(Recipe recipe, int batches = 1) {
 			if (recipe is null)
 				return false;
 
 			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
 
+			var itemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
+
 			foreach (Item ingredient in recipe.requiredItem)
 			{
-				if (ingredient.stack * batches - IsAvailable_GetItemCount(recipe, ingredient.type) > 0)
+				if (ingredient.stack * batches - IsAvailable_GetItemCount(recipe, ingredient.type, itemCountsDictionary) > 0)
 					return false;
 			}
 
@@ -1148,21 +1115,17 @@ namespace MagicStorage
 			return retValue;
 		}
 
-		// Prevents multiple threads from trying to manipulate the same object
-		[ThreadStatic]
-		private static Dictionary<int, int> isAvailable_ItemCountsDictionary;
-
-		private static int IsAvailable_GetItemCount(Recipe recipe, int type) {
+		private static int IsAvailable_GetItemCount(Recipe recipe, int type, Dictionary<int, int> itemCountsDictionary) {
 			ClampedArithmetic count = 0;
 			bool useRecipeGroup = false;
-			foreach (var (item, quantity) in isAvailable_ItemCountsDictionary) {
+			foreach (var (item, quantity) in itemCountsDictionary) {
 				if (RecipeGroupMatch(recipe, item, type)) {
 					count += quantity;
 					useRecipeGroup = true;
 				}
 			}
 
-			if (!useRecipeGroup && isAvailable_ItemCountsDictionary.TryGetValue(type, out int amount))
+			if (!useRecipeGroup && itemCountsDictionary.TryGetValue(type, out int amount))
 				count += amount;
 
 			return count;
@@ -1252,7 +1215,7 @@ namespace MagicStorage
 			bool success;
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				var simulation = new CraftingSimulation();
-				simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true));
+				simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetCurrentInventory(cloneIfBlockEmpty: true));
 
 				success = PassesBlock_CheckSimulation(simulation);
 			} else
@@ -1321,7 +1284,7 @@ namespace MagicStorage
 			return true;
 		}
 
-		private static void RefreshStorageItems()
+		private static void RefreshStorageItems(StorageGUI.ThreadContext thread = null)
 		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
@@ -1330,6 +1293,7 @@ namespace MagicStorage
 			storageItemsFromModules.Clear();
 			result = null;
 			if (selectedRecipe is null) {
+				thread?.InitAsCompleted("Populating stored ingredients");
 				NetHelper.Report(true, "Failed.  No recipe is selected.");
 				return;
 			}
@@ -1339,9 +1303,13 @@ namespace MagicStorage
 			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe()) {
 				NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
+				thread?.InitTaskSchedule(sourceItems.Count, "Populating stored ingredients");
+
 				foreach (List<Item> itemsFromSource in sourceItems) {
 					CheckStorageItemsForRecipe(selectedRecipe, itemsFromSource, null, checkResultItem: true, index, ref hasItemFromStorage);
 					index++;
+
+					thread?.CompleteOneTask();
 				}
 			} else {
 				NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
@@ -1356,9 +1324,14 @@ namespace MagicStorage
 				} else
 					recipes = simulation.UsedRecipes;
 
+				// Evaluate now so the total task count can be used
+				List<Recipe> usedRecipes = recipes.ToList();
+
+				thread?.InitTaskSchedule(usedRecipes.Count * sourceItems.Count, "Populating stored ingredients");
+
 				bool checkedHighestRecipe = false;
 				List<bool[]> wasItemAdded = new List<bool[]>();
-				foreach (Recipe recipe in recipes) {
+				foreach (Recipe recipe in usedRecipes) {
 					index = 0;
 
 					foreach (List<Item> itemsFromSource in sourceItems) {
@@ -1369,13 +1342,15 @@ namespace MagicStorage
 						CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded[index], checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
 
 						index++;
+
+						thread?.CompleteOneTask();
 					}
 
 					checkedHighestRecipe = true;
 				}
 			}
 
-			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList);
+			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList, thread);
 			if (resultItemList.Count != storageItems.Count) {
 				//Update the lists since items were compacted
 				storageItems.Clear();
@@ -1534,15 +1509,19 @@ namespace MagicStorage
 			return compacted;
 		}
 
-		private static List<Item> CompactItemListWithModuleData(List<Item> items, List<bool> moduleItems, out List<bool> moduleItemsResult) {
+		private static List<Item> CompactItemListWithModuleData(List<Item> items, List<bool> moduleItems, out List<bool> moduleItemsResult, StorageGUI.ThreadContext thread = null) {
 			List<Item> compacted = new();
 			List<int> compactedSource = new();
+
+			thread?.InitTaskSchedule(items.Count, "Aggregating stored ingredients (1/2)");
 
 			for (int i = 0; i < items.Count; i++) {
 				Item item = items[i];
 
-				if (item.IsAir)
+				if (item.IsAir) {
+					thread?.CompleteOneTask();
 					continue;
+				}
 
 				bool fullyCompacted = false;
 				for (int j = 0; j < compacted.Count; j++) {
@@ -1566,16 +1545,24 @@ namespace MagicStorage
 					}
 				}
 
-				if (item.IsAir)
+				if (item.IsAir) {
+					thread?.CompleteOneTask();
 					continue;
+				}
 
 				if (!fullyCompacted) {
 					compacted.Add(item);
 					compactedSource.Add(i);
 				}
+
+				thread?.CompleteOneTask();
 			}
 
+			thread?.InitTaskSchedule(1, "Aggregating stored ingredients (2/2)");
+
 			moduleItemsResult = compactedSource.Select(m => moduleItems[m]).ToList();
+
+			thread?.CompleteOneTask();
 
 			return compacted;
 		}
@@ -1725,6 +1712,11 @@ namespace MagicStorage
 			return counts;
 		}
 
+		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
+			bool[] availableRecipes = currentlyThreading && StorageGUI.activeThread.state is ThreadState { recipeConditionsMetSnapshot: bool[] snapshot } ? snapshot : null;
+			return new AvailableRecipeObjects(adjTiles, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty), availableRecipes);
+		}
+
 		private static Recipe recentRecipeSimulation;
 		private static CraftingSimulation simulatedCraftForCurrentRecipe;
 
@@ -1738,7 +1730,7 @@ namespace MagicStorage
 			// Calculate the value
 			recentRecipeSimulation = selectedRecipe;
 			CraftingSimulation simulation = new CraftingSimulation();
-			simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty: true));
+			simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetCurrentInventory(cloneIfBlockEmpty: true));
 			simulatedCraftForCurrentRecipe = simulation;
 			return simulation;
 		}
