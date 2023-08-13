@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -13,6 +14,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public IReadOnlyList<OrderedRecipeTree> Leaves => leaves;
 
 		public OrderedRecipeTree Root { get; private set; }
+
+		[MemberNotNullWhen(true, nameof(context))]
+		public bool Invalid => context is null;
 
 		public OrderedRecipeTree(OrderedRecipeContext context, int parentLeafIndex) {
 			this.context = context;
@@ -32,16 +36,23 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public void Clear() {
-			context.amountToCraft = 0;
+			if (!Invalid)
+				context.amountToCraft = 0;
 			leaves.Clear();
 		}
 
 		public Stack<OrderedRecipeContext> GetProcessingOrder() {
+			if (Invalid)
+				return new();
+
 			Stack<OrderedRecipeContext> recipeStack = new();
 			Queue<OrderedRecipeTree> treeQueue = new();
 			treeQueue.Enqueue(this);
 
 			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
+				if (branch.Invalid)
+					continue;  // Invalid branch
+
 				recipeStack.Push(branch.context);
 
 				foreach (var leaf in branch.Leaves)
@@ -52,11 +63,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		/// <summary>
-		/// Trims the branches of any trees whose ingredient requirement is met.<br/>
+		/// Trims the branches of any trees whose ingredient requirement is met or does not have its crafting station and recipe condition requirements met.<br/>
 		/// Use <see cref="GetProcessingOrder"/> to get the updated order of the recipe contexts.
 		/// </summary>
-		/// <param name="getItemCountForIngredient">A function taking the recipe, the ingredient type and returning how many items can satisfy that ingredient requirement</param>
-		public void TrimBranches(Func<Recipe, int, int> getItemCountForIngredient) {
+		/// <param name="available"></param>
+		public void TrimBranches(AvailableRecipeObjects available) {
 			if (!CraftingGUI.disableNetPrintingForIsAvailable)
 				NetHelper.Report(true, "Trimming branches of recipe tree...");
 
@@ -66,6 +77,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				queue.Enqueue(leaf);
 
 			while (queue.TryDequeue(out OrderedRecipeTree branch)) {
+				if (branch.Invalid)
+					continue;  // Invalid branch, ignore
+
 				// Check if the amount needed has been satisfied
 				// If it is, this recipe and its children are not needed
 				Recipe recipe = branch.context.recipe;
@@ -73,9 +87,14 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int result = recipe.createItem.type;
 				ref int remaining = ref branch.context.amountToCraft;
 
-				int count = getItemCountForIngredient(branch.Root.context.recipe, result);
+				Recipe parentRecipe = branch.Root.context.recipe;
 
-				if (count >= branch.Root.context.recipe.requiredItem[branch.parentLeafIndex].stack) {
+				int count = available.GetTotalIngredientQuantity(parentRecipe, result);
+				bool trimBranch = count >= parentRecipe.requiredItem[branch.parentLeafIndex].stack;
+				if (!trimBranch)
+					trimBranch = !available.CanUseRecipe(recipe);
+
+				if (trimBranch) {
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
 						NetHelper.Report(false, $"Branch trimmed: Depth = {branch.context.depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
 
@@ -97,12 +116,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// Returns an enumeration of every recipe used in this recursion tree
 		/// </summary>
 		public IEnumerable<Recipe> GetAllRecipes() {
+			if (Invalid)
+				yield break;
+
 			Queue<OrderedRecipeTree> treeQueue = new();
 			HashSet<Recipe> usedRecipes = new HashSet<Recipe>(ReferenceEqualityComparer.Instance);
 			treeQueue.Enqueue(this);
 
 			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
-				if (branch.context.amountToCraft <= 0)
+				if (branch.Invalid || branch.context.amountToCraft <= 0)
 					continue;
 
 				Recipe recipe = branch.context.recipe;
@@ -124,8 +146,21 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public void GetCraftingInformation(out CraftResult result) {
+			if (Invalid) {
+				result = default;
+				return;
+			}
+
 			// Get the info for one craft, then multiply the contents by how many batches would be needed
 			var recipeStack = GetProcessingOrder();
+
+			// Check each context in the stack and bail immediately if any were invalid
+			foreach (OrderedRecipeContext context in recipeStack) {
+				if (context is null) {
+					result = default;
+					return;
+				}
+			}
 
 			Dictionary<int, int> itemIndices = new();
 			Dictionary<int, int> groupIndices = new();

@@ -10,6 +10,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public readonly HashSet<int> requiredTiles;
 		public readonly HashSet<Condition> requiredConditions;
 
+		public bool WasAvailable { get; }
+
 		public static CraftResult Default => new CraftResult(new(), new(), new(), new(), new(ReferenceEqualityComparer.Instance));
 
 		public CraftResult(List<RecursedRecipe> recipes, List<RequiredMaterialInfo> materials, List<ItemInfo> excess, HashSet<int> tiles, HashSet<Condition> conditions) {
@@ -18,9 +20,18 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			excessResults = excess;
 			requiredTiles = tiles;
 			requiredConditions = conditions;
+
+			WasAvailable = true;
 		}
 
 		public CraftResult CombineWith(in CraftResult other) {
+			if (!WasAvailable && other.WasAvailable)
+				return other;
+			else if (WasAvailable && !other.WasAvailable)
+				return this;
+			else if (!WasAvailable && !other.WasAvailable)
+				return default;
+
 			var recipes = new List<RecursedRecipe>();
 			var materials = new List<RequiredMaterialInfo>(requiredMaterials);
 			var excess = new List<ItemInfo>(excessResults);

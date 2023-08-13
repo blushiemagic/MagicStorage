@@ -121,6 +121,18 @@ namespace MagicStorage
 			public object state;
 			private readonly ManualResetEvent cancelWait = new(false);
 
+			private int totalTasks;
+			private int currentTasksCompleted;
+
+			public string CurrentTask { get; private set; }
+
+			public float Progress {
+				get {
+					int current = currentTasksCompleted;  // One read to preserve atomic operations
+					return totalTasks <= 0 ? 0 : current >= totalTasks ? 1 : current / (float)totalTasks;
+				}
+			}
+
 			public ThreadContext(CancellationTokenSource tokenSource, Action<ThreadContext> work, Action<ThreadContext> afterWork) {
 				ArgumentNullException.ThrowIfNull(tokenSource);
 				ArgumentNullException.ThrowIfNull(work);
@@ -142,6 +154,26 @@ namespace MagicStorage
 					modSearch = newModSearch ?? modSearch,
 					state = state
 				};
+			}
+
+			public void InitTaskSchedule(int totalTasks, string taskName) {
+				this.totalTasks = totalTasks;
+				currentTasksCompleted = 0;
+				CurrentTask = taskName;
+			}
+
+			public void ResetTaskCompletion() {
+				currentTasksCompleted = 0;
+			}
+
+			public void InitAsCompleted(string taskName) {
+				totalTasks = 1;
+				currentTasksCompleted = 1;
+				CurrentTask = taskName;
+			}
+
+			public void CompleteOneTask() {
+				Interlocked.Increment(ref currentTasksCompleted);
 			}
 
 			public bool Running { get; private set; }
@@ -354,7 +386,9 @@ namespace MagicStorage
 		}
 
 		private static void SortAndFilter(ThreadContext thread) {
-			// Immediately evaluate the source collection
+			// Each DoFiltering does: SortAndFilter, favorite checks, adding items, adding source items
+			// Each SortAndFilter does: DoFiltering for items, Aggregate, DoFiltering for source items, DoSorting for source items, DoSorting for items
+			thread.InitTaskSchedule(9, "Loading items");
 
 			DoFiltering(thread);
 			
@@ -373,6 +407,8 @@ namespace MagicStorage
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllItems");
 					didDefault = true;
 
+					thread.ResetTaskCompletion();
+
 					DoFiltering(thread);
 				}
 
@@ -385,6 +421,8 @@ namespace MagicStorage
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.StorageDefaultToAllMods");
 					didDefault = true;
+
+					thread.ResetTaskCompletion();
 
 					DoFiltering(thread);
 				}
@@ -415,10 +453,14 @@ namespace MagicStorage
 					thread.context.items = ItemSorter.SortAndFilter(thread, aggregate: !itemDeletionMode);
 				}
 
+				thread.CompleteOneTask();
+
 				if (MagicStorageConfig.CraftingFavoritingEnabled) {
 					thread.context.items = thread.context.items.OrderByDescending(static x => x.favorited ? 1 : 0);
 					thread.context.sourceItems = thread.context.sourceItems.OrderByDescending(static x => x[0].favorited ? 1 : 0);
 				}
+
+				thread.CompleteOneTask();
 
 				filterOutFavorites = thread.onlyFavorites;
 
@@ -431,7 +473,11 @@ namespace MagicStorage
 
 				items.AddRange(thread.context.items.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x.favorited));
 
+				thread.CompleteOneTask();
+
 				sourceItems.AddRange(thread.context.sourceItems.Where(static x => !MagicStorageConfig.CraftingFavoritingEnabled || !filterOutFavorites || x[0].favorited));
+
+				thread.CompleteOneTask();
 
 				NetHelper.Report(true, "Filtering applied.  Item count: " + items.Count);
 			} catch when (thread.token.IsCancellationRequested) {

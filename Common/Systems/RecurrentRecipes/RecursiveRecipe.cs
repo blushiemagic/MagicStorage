@@ -45,9 +45,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// Returns a tree representing the recipes this recursive recipe will use and their expected crafted quantities
 		/// </summary>
 		/// <param name="amountToCraft">How many items are expected to be crafted.  Defaults to 1</param>
-		/// <param name="availableInventory">An optional dictionary indicating which item types are available and their quantities</param>
+		/// <param name="available">An optional object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met</param>
 		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
-		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, Dictionary<int, int> availableInventory = null, int blockedSubrecipeIngredient = 0) {
+		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, AvailableRecipeObjects available = null, int blockedSubrecipeIngredient = 0) {
 			int batchSize = original.createItem.stack;
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 
@@ -59,12 +59,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			int depth = 0, maxDepth = 0;
 
 			if (MagicStorageConfig.IsRecursionEnabled)
-				ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
+				ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
 
 			return orderedTree;
 		}
 
-		private void ModifyCraftingTree(Dictionary<int, int> availableInventory, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches, int ignoreItem) {
+		private void ModifyCraftingTree(AvailableRecipeObjects available, HashSet<int> recursionStack, OrderedRecipeTree root, ref int depth, ref int maxDepth, int parentBatches, int ignoreItem) {
 			if (!MagicStorageConfig.IsRecursionInfinite && depth >= MagicStorageConfig.RecipeRecursionDepth)
 				return;
 
@@ -87,10 +87,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				maxDepth = depth;
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
-				if (ingredient.RecipeCount == 0)
-					continue;  // Cannot recurse further, go to next ingredient
-
-				ingredient.FindBestMatchAndSetRecipe(availableInventory, ignoreItem);
+				if (!ingredient.FindBestMatchAndSetRecipe(available, ignoreItem)) {
+					// Cannot recurse further, go to next ingredient
+					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
+					continue;
+				}
 
 				Recipe recipe = ingredient.SelectedRecipe;
 				
@@ -123,7 +124,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				root.Add(orderedTree);
 
 				if (recipe.TryGetRecursiveRecipe(out var recursive))
-					recursive.ModifyCraftingTree(availableInventory, recursionStack, orderedTree, ref depth, ref maxDepth, batches, ignoreItem);
+					recursive.ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, ignoreItem);
 			}
 
 			recursionStack.Remove(createItem);
@@ -136,53 +137,34 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// </summary>
 		/// <param name="amountToCraft">How many items are expected to be crafted</param>
 		/// <param name="result">A structure containing information about the recipes used</param>
-		/// <param name="availableInventory">
-		/// An optional dictionary indicating which item types are available and their quantities.<br/>
+		/// <param name="available">
+		/// An optional object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met.<br/>
 		/// This dictionary is used to trim the crafting tree before getting its required materials.
 		/// </param>
 		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
-		public void GetCraftingInformation(int amountToCraft, out CraftResult result, Dictionary<int, int> availableInventory = null, int blockedSubrecipeIngredient = 0) {
-			var craftingTree = GetCraftingTree(amountToCraft, availableInventory, blockedSubrecipeIngredient);
+		public void GetCraftingInformation(int amountToCraft, out CraftResult result, AvailableRecipeObjects available = null, int blockedSubrecipeIngredient = 0) {
+			var craftingTree = GetCraftingTree(amountToCraft, available, blockedSubrecipeIngredient);
 
-			if (availableInventory is not null) {
-				// Local capturing
-				var inv = availableInventory;
-				craftingTree.TrimBranches((recipe, result) => GetItemCount(recipe, result, inv));
-			}
+			if (available is not null)
+				craftingTree.TrimBranches(available);
 
 			craftingTree.GetCraftingInformation(out result);
-		}
-
-		private static int GetItemCount(Recipe recipe, int result, Dictionary<int, int> availableInventory) {
-			ClampedArithmetic count = 0;
-			bool useRecipeGroup = false;
-			foreach (var (item, quantity) in availableInventory) {
-				if (CraftingGUI.RecipeGroupMatch(recipe, item, result)) {
-					count += quantity;
-					useRecipeGroup = true;
-				}
-			}
-
-			if (!useRecipeGroup && availableInventory.TryGetValue(result, out int amount))
-				count += amount;
-
-			return count;
 		}
 
 		/// <summary>
 		/// Iterate's through this recursive recipe's crafting tree and calculates the maximum amount of this recipe that can be crafted
 		/// </summary>
-		/// <param name="availableInventory">
-		/// A dictionary indicating which item types are available and their quantities.<br/>
-		/// <b>NOTE:</b> the contents of this dictionary may be modified by the time this method call returns
+		/// <param name="available">
+		/// An object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met.<br/>
+		/// <b>NOTE:</b> the contents of this object may be modified by the time this method call returns
 		/// </param>
-		/// <returns>The maximum amount of this recipe that can be crafted, or 0 if <paramref name="availableInventory"/> does not have enough ingredients</returns>
+		/// <returns>The maximum amount of this recipe that can be crafted, or 0 if the information in <paramref name="available"/> could not satisfy any recipes</returns>
 		/// <exception cref="ArgumentNullException"/>
-		public int GetMaxCraftable(Dictionary<int, int> availableInventory) {
-			ArgumentNullException.ThrowIfNull(availableInventory);
+		public int GetMaxCraftable(AvailableRecipeObjects available) {
+			ArgumentNullException.ThrowIfNull(available);
 
 			var simulation = new CraftingSimulation();
-			simulation.SimulateCrafts(this, 9999, availableInventory);
+			simulation.SimulateCrafts(this, 9999, available);
 			return simulation.AmountCrafted;
 		}
 	}

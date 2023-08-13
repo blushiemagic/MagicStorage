@@ -25,6 +25,7 @@ namespace MagicStorage.UI.States {
 
 		private UIPanel waitPanel;
 		private UIText waitText;
+		private UILoadingProgress waitProgress;
 		protected bool isWaitPanelWaitingToOpen;
 
 		protected bool IsWaitTextVisible => waitPanel.Parent is null;
@@ -158,14 +159,23 @@ namespace MagicStorage.UI.States {
 			waitPanel.Left.Set(0f, 0.1f);
 			waitPanel.Top.Set(20f, 0f);
 			waitPanel.Width.Set(0f, 0.8f);
-			waitPanel.Height.Set(80f, 0f);
+			waitPanel.Height.Set(160f, 0f);
 
 			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true) {
 				HAlign = 0.5f,
-				VAlign = 0.5f
+				VAlign = 0.25f
 			};
 
 			waitPanel.Append(waitText);
+
+			waitProgress = new UILoadingProgress() {
+				HAlign = 0.5f,
+				VAlign = 0.9f
+			};
+			waitProgress.Width.Set(0, 0.8f);
+			waitProgress.Height.Set(80, 0f);
+
+			waitPanel.Append(waitProgress);
 
 			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
@@ -475,6 +485,14 @@ namespace MagicStorage.UI.States {
 				//Use the current config just in case "pendingConfiguration" is modified where it's not intended to be
 				ReformatPage(MagicStorageConfig.ButtonUIMode);
 				pendingConfiguration = false;
+			}
+
+			if (StorageGUI.CurrentlyRefreshing) {
+				waitProgress.DisplayText = StorageGUI.activeThread.CurrentTask;
+				waitProgress.UpdateProgress(StorageGUI.activeThread.Progress);
+			} else {
+				waitProgress.DisplayText = "";
+				waitProgress.UpdateProgress(0);
 			}
 
 			bool block = MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering);

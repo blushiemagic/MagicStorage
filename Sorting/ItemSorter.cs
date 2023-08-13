@@ -32,19 +32,31 @@ namespace MagicStorage.Sorting
 			try {
 				thread.context.items = DoFiltering(thread, thread.context.items, i => i);
 
+				thread.CompleteOneTask();
+
 				if (takeCount is int take)
 					thread.context.items = thread.context.items.Take(take);
 
 				thread.context.items = Aggregate(thread.context, thread.token, aggregate);
 
+				thread.CompleteOneTask();
+
 				thread.context.sourceItems = DoFiltering(thread, thread.context.sourceItems, i => i[0]);
+
+				thread.CompleteOneTask();
 
 				if (takeCount is int take2)
 					thread.context.sourceItems = thread.context.sourceItems.Take(take2);
 
 				thread.context.sourceItems = DoSorting(thread, thread.context.sourceItems, i => i[0]);
 
-				return DoSorting(thread, thread.context.items, i => i);
+				thread.CompleteOneTask();
+
+				var items = DoSorting(thread, thread.context.items, i => i);
+
+				thread.CompleteOneTask();
+
+				return items;
 			} catch when (thread.token.IsCancellationRequested) {
 				thread.context.items = Array.Empty<Item>();
 				return Array.Empty<Item>();
@@ -191,10 +203,16 @@ namespace MagicStorage.Sorting
 					recipes = MagicCache.EnabledRecipes.Where(r => filter(r.createItem));
 				}
 
-				return recipes
+				thread.CompleteOneTask();
+
+				var filteredRecipes = recipes
 					.AsParallel()
 					.AsOrdered()
 					.Where(recipe => FilterBySearchText(recipe.createItem, thread.searchText, thread.modSearch));
+
+				thread.CompleteOneTask();
+
+				return filteredRecipes;
 			} catch when (thread.token.IsCancellationRequested) {
 				return Array.Empty<Recipe>().AsParallel();
 			}

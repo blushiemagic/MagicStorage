@@ -55,18 +55,22 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// Attempts to update <see cref="SelectedRecipe"/> depending on which possible recipe's ingredients requirement was satisfied the most.<br/>
 		/// If no recipe was found as a "best match", <see cref="SelectedRecipe"/> is not updated
 		/// </summary>
-		/// <param name="availableInventory">A collection of item quantities, indexed by type.  If <see langword="null"/>, <see cref="SelectedRecipe"/> is not updated</param>
+		/// <param name="available">
+		/// An optional object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met.<br/>
+		/// If <see langword="null"/>, <see cref="SelectedRecipe"/> is not updated.
+		/// </param>
 		/// <param name="blockedRecipeIngredient">
 		/// An optional item ID representing a recipe ingredient that should not be used when finding the best match.<br/>
 		/// If this parameter is greater than 0, then any recipes using the blocked item ID as a possible ingredient will be skipped.
 		/// </param>
-		public void FindBestMatchAndSetRecipe(Dictionary<int, int> availableInventory, int blockedRecipeIngredient = 0) {
-			if (availableInventory is null)
-				return;
+		/// <returns>Whether any recipe was able to be used</returns>
+		public bool FindBestMatchAndSetRecipe(AvailableRecipeObjects available, int blockedRecipeIngredient = 0) {
+			if (available is null)
+				return true;  // Assume that the caller handles null inventory
 
 			if (trees.Count < 2) {
 				_selectedRecipe = 0;
-				return;
+				return trees.Count > 0 && available.CanUseRecipe(SelectedRecipe);
 			}
 
 			// Attempt to find the recipe with the best "availability", i.e. the recipe that has the most ingredients partially or fully satisfied
@@ -76,6 +80,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			for (int i = 0; i < trees.Count; i++) {
 				Recipe subrecipe = trees[i].originalRecipe;
+
+				// Not enough stations or conditions met?  Skip this recipe
+				if (!available.CanUseRecipe(subrecipe))
+					goto checkNextTree;
 
 				float percent = 0;
 				foreach (Item item in subrecipe.requiredItem) {
@@ -92,7 +100,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 								if (blockedRecipeIngredient > 0 && groupItem == blockedRecipeIngredient)
 									goto checkNextTree;
 
-								if (availableInventory.TryGetValue(item.type, out count)) {
+								if (available.TryGetIngredientQuantity(item.type, out count)) {
 									usedRecipeGroup = true;
 									stack -= count;
 
@@ -109,7 +117,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 						if (blockedRecipeIngredient > 0 && item.type == blockedRecipeIngredient)
 							goto checkNextTree;
 
-						if (availableInventory.TryGetValue(item.type, out count))
+						if (available.TryGetIngredientQuantity(item.type, out count))
 							stack -= count;
 					}
 
@@ -131,6 +139,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			// Update the initially selected recipe
 			if (bestMatch >= 0)
 				_selectedRecipe = bestMatch;
+
+			return bestMatch >= 0;
 		}
 	}
 }
