@@ -184,7 +184,11 @@ namespace MagicStorage {
 				}
 			}
 
-			return foundAccesses.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null).OfType<TEStorageCenter>();
+			return foundAccesses
+				.Select(TEStorageComponent.FindStorageCenter)
+				.Where(static p => p != Point16.NegativeOne)
+				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null)
+				.OfType<TEStorageCenter>();
 		}
 
 		public static TEStorageHeart GetHeartFromAccess(Point16 access) {
