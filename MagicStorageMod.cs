@@ -27,9 +27,6 @@ namespace MagicStorage {
 
 		public static readonly Condition HasCampfire = new(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
 
-		public static readonly Condition EctoMistOverride = new(Language.GetText("Mods.MagicStorage.RecipeConditions.EctoMistOverride"),
-			() => Condition.InGraveyard.IsMet() || Main.LocalPlayer.adjTile[ModContent.TileType<CombinedStations4Tile>()]);
-
 		public UIOptionConfigurationManager optionsConfig;
 
 		public MagicStorageMod() {
