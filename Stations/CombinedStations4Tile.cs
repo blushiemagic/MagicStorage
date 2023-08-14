@@ -19,7 +19,7 @@ namespace MagicStorage.Stations
 		//(Furniture Tier 2)
 		//Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
 		//(Final Tier)
-		//Autohammer, Ancient Manipulator, All Liquids, Tombstone (Ecto Mist), Campfire, Demon/Crimson Altar
+		//Autohammer, Ancient Manipulator, All Liquids
 		public override int[] GetAdjTiles() =>
 			new int[]
 			{
@@ -67,9 +67,7 @@ namespace MagicStorage.Stations
 				//Final Tier
 				TileID.CrystalBall,
 				TileID.Autohammer,
-				TileID.LunarCraftingStation,
-				TileID.Campfire,
-				TileID.DemonAltar
+				TileID.LunarCraftingStation
 			};
 
 		public override void SafeSetStaticDefaults()
