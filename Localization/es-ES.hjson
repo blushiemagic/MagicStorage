@@ -582,7 +582,7 @@ Mods: {
 					Recetas:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
 					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
 				Help19: El [i:MagicStorage/EnvironmentAccess] es un componente bastante extraño. Se rumorea que permite la manipulación externa de los sistemas de almacenamiento de Magic Storage, pero solo un desarrollador de mods sería capaz de usar sus trabajos.

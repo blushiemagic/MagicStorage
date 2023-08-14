@@ -567,7 +567,7 @@ Mods: {
 					Recipes:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
 					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. You can use it to craft Portable Remote Accesses with unlimited access range!
 				Help19: The [i:MagicStorage/EnvironmentAccess] is quite the bizarre component. Rumor states that it allows outside tampering of Magic Storage storage systems, but only a mod developer would be able to use its inner workings.

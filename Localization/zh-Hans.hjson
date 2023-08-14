@@ -564,7 +564,7 @@ Mods: {
 					制作配方:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 空手 = [i:MagicStorage/CombinedFurnitureStations1Item]
 					[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				Help19: "[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。"
