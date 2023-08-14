@@ -271,6 +271,7 @@ namespace MagicStorage.NPCs {
 		public override void DrawTownAttackSwing(ref Texture2D item, ref int itemSize, ref float scale, ref Vector2 offset) {
 			item = TextureAssets.Item[ModContent.ItemType<StorageDeactivator>()].Value;
 			scale = 1f;
+			itemSize = item.Bounds.Width;
 		}
 
 		public override void TownNPCAttackSwing(ref int itemWidth, ref int itemHeight) {
