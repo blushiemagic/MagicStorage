@@ -186,7 +186,7 @@ namespace MagicStorage {
 			}
 
 			return foundAccesses
-				.Select(TEStorageComponent.FindStorageCenter)
+				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) && entity is TEStorageCenter ? p : TEStorageComponent.FindStorageCenter(p))
 				.Where(static p => p != Point16.NegativeOne)
 				.Distinct()
 				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null)
