@@ -31,8 +31,8 @@ namespace MagicStorage.Stations
 				.AddIngredient<CombinedFurnitureStations2Item>()
 				.AddIngredient(ItemID.Autohammer)
 				.AddIngredient(ItemID.LunarCraftingStation)
-				.AddIngredient(ItemID.LavaBucket, 30)
-				.AddIngredient(ItemID.HoneyBucket, 30)
+				.AddIngredient(ItemID.LavaBucket, 10)
+				.AddIngredient(ItemID.HoneyBucket, 10)
 				.Register();
 		}
 	}
