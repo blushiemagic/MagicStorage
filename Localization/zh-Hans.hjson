@@ -436,7 +436,7 @@ Mods: {
 				制作配方:
 				[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 空手 = [i:MagicStorage/CombinedFurnitureStations1Item]
 				[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
-				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s30:LavaBucket] [i/s30:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
+				[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 				'''
 				Help18:
 				'''
