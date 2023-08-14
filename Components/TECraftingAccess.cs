@@ -83,11 +83,13 @@ namespace MagicStorage.Components
 						}
 						else
 						{
+							int oldType = op.item.createTile;
 							Item item = DepositStation(op.item);
 							if (item.stack > 0)
 							{
 								ModPacket packet = PrepareServerResult(op.type);
 								ItemIO.Send(item, packet, true, true);
+								packet.Write((ushort)oldType);
 								packet.Send(op.client);
 							}
 						}
@@ -163,7 +165,8 @@ namespace MagicStorage.Components
 					if (item.stack <= 0)
 						item.SetDefaults();
 
-					UpdateRecipesFromStationAction(nItem.createTile);
+					if (Main.netMode != NetmodeID.Server)
+						UpdateRecipesFromStationAction(nItem.createTile);
 				}
 			}
 
@@ -195,16 +198,18 @@ namespace MagicStorage.Components
 			var item = stations[slot];
 			stations.RemoveAt(slot);
 
-			UpdateRecipesFromStationAction(item.createTile);
+			if (Main.netMode != NetmodeID.Server)
+				UpdateRecipesFromStationAction(item.createTile);
 
 			return item;
 		}
 
-		private static void UpdateRecipesFromStationAction(int stationTile) {
+		internal static void UpdateRecipesFromStationAction(int stationTile) {
 			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
 
-			TileLoader.AdjTiles(Main.LocalPlayer, stationTile);
+			Utility.SetVanillaAdjTiles(stationTile);
 
+			StorageGUI.SetRefresh();
 			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0).Prepend(stationTile));
 
 			Main.LocalPlayer.adjTile = adjTiles;

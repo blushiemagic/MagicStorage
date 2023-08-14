@@ -48,6 +48,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// <param name="available">An optional object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met</param>
 		/// <param name="blockedSubrecipeIngredient">An optional item ID representing ingredient trees that should be ignored</param>
 		public OrderedRecipeTree GetCraftingTree(int amountToCraft = 1, AvailableRecipeObjects available = null, int blockedSubrecipeIngredient = 0) {
+			// Is the main recipe not available?  If so, return an "empty tree"
+			if (!available.CanUseRecipe(original))
+				return new OrderedRecipeTree(null, 0);
+
 			int batchSize = original.createItem.stack;
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 

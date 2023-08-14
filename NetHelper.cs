@@ -695,20 +695,29 @@ namespace MagicStorage
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 			Item item = ItemIO.Receive(reader, true, true);
 
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
-				{
-					var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
-				}
-				else // deposit operation
-				{
-					Main.mouseItem = item;
-				}
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				if (op == TECraftingAccess.Operation.Deposit)
+					_ = reader.ReadUInt16();
 
-				Report(true, "Station operation " + op + " packet received by client " + Main.myPlayer);
+				return;
 			}
+
+			if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
+			{
+				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
+					
+				TECraftingAccess.UpdateRecipesFromStationAction(item.createTile);
+			}
+			else // deposit operation
+			{
+				Main.mouseItem = item;
+
+				int oldType = reader.ReadUInt16();
+				TECraftingAccess.UpdateRecipesFromStationAction(oldType);
+			}
+
+			Report(true, "Station operation " + op + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void SendResetCompactStage(Point16 heart)
