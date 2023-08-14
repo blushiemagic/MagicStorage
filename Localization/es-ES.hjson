@@ -420,7 +420,7 @@ Mods: {
 				Help11:
 				'''
 				Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona el objeto Globo de Bioma. Este objeto habilita recetas para el bioma de Nieve, Niebla de Ecto, la Hoguera, Agua, Lava, Miel y los Altares Demoníaco/Carmesí. ¡Incluso puedes llevarlo en tu inventario y cocinar Malvaviscos sin necesidad de estar junto a una Hoguera!
-				Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
+				Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
 				'''
 				Help12:
 				'''

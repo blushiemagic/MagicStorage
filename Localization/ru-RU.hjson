@@ -419,8 +419,8 @@ Mods: {
 				'''
 				Help11:
 				'''
-				В качестве одной из многих функций, позволяющих сократить количество станций создания, которые вам приходится размещать в модуле создания предметов, MagicStorage предоставляет предмет Биом в шаре. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
-				Рецепт: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
+				В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет предмет Биом в шаре. Этот предмет позволяет создавать рецепты требующих снежный биом, экто-туман, костра, воды, лавы, меда и алтарей Демонический/Багровый. Вы даже можете держать его в своем инвентаре и готовить зефир, не стоя рядом с костром!
+				Рецепт: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
 				'''
 				Help12:
 				'''

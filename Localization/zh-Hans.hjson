@@ -397,7 +397,7 @@ Mods: {
 				Help11:
 				'''
 				以防面临制作单元里存了太多制作站的问题，魔法存储提供了生态球。这个物品可以为雪地生物群落、灵雾、篝火、水、熔岩、蜂蜜、恶魔/猩红祭坛提供配方。如果把它放在物品栏内，还可以直接制作烤棉花糖，而不需要站在篝火旁边等它烤熟。
-				制作配方: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i:WaterBucket] [i:LavaBucket] [i:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] = [i:MagicStorage/BiomeGlobe] (无合成条件需求)
+				制作配方: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] = [i:MagicStorage/BiomeGlobe] (无合成条件需求)
 				'''
 				Help12:
 				'''
