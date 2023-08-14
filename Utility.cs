@@ -14,6 +14,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.Creative;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -187,6 +188,7 @@ namespace MagicStorage {
 			return foundAccesses
 				.Select(TEStorageComponent.FindStorageCenter)
 				.Where(static p => p != Point16.NegativeOne)
+				.Distinct()
 				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null)
 				.OfType<TEStorageCenter>();
 		}
@@ -476,6 +478,36 @@ namespace MagicStorage {
 		public static Item FromBase64NoCompression(string base64) {
 			MemoryStream ms = new MemoryStream(Convert.FromBase64String(base64));
 			return ItemIO.Load(TagIO.FromStream(ms, false));
+		}
+
+		public static void SetVanillaAdjTiles(int createTile) {
+			bool[] adjTiles = Main.LocalPlayer.adjTile;
+
+			adjTiles[createTile] = true;
+			switch (createTile)
+			{
+				case TileID.GlassKiln:
+				case TileID.Hellforge:
+					adjTiles[TileID.Furnaces] = true;
+					break;
+				case TileID.AdamantiteForge:
+					adjTiles[TileID.Furnaces] = true;
+					adjTiles[TileID.Hellforge] = true;
+					break;
+				case TileID.MythrilAnvil:
+					adjTiles[TileID.Anvils] = true;
+					break;
+				case TileID.BewitchingTable:
+				case TileID.Tables2:
+					adjTiles[TileID.Tables] = true;
+					break;
+				case TileID.AlchemyTable:
+					adjTiles[TileID.Bottles] = true;
+					adjTiles[TileID.Tables] = true;
+					break;
+			}
+
+			TileLoader.AdjTiles(Main.LocalPlayer, createTile);
 		}
 	}
 }

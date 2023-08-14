@@ -71,6 +71,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (!CraftingGUI.disableNetPrintingForIsAvailable)
 				NetHelper.Report(true, "Trimming branches of recipe tree...");
 
+			if (Invalid)
+				return;
+
 			// Go from the top of the tree down, cutting off any branches when necessary
 			Queue<OrderedRecipeTree> queue = new();
 			foreach (var leaf in leaves)

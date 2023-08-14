@@ -72,7 +72,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			amount = -amount;
 
-			int existing = GetIngredientQuantity(item);
+			if (!TryGetIngredientQuantity(item, out int existing))
+				return amount;
+
 			if (existing > amount) {
 				inventory[item] = existing - amount;
 				amount = 0;
