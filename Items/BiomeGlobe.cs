@@ -40,9 +40,9 @@ namespace MagicStorage.Items
 			CreateRecipe()
 				.AddRecipeGroup("MagicStorage:AnyTombstone", 5)
 				.AddIngredient<SnowBiomeEmulator>()
-				.AddIngredient(ItemID.WaterBucket)
-				.AddIngredient(ItemID.LavaBucket)
-				.AddIngredient(ItemID.HoneyBucket)
+				.AddIngredient(ItemID.WaterBucket, 5)
+				.AddIngredient(ItemID.LavaBucket, 5)
+				.AddIngredient(ItemID.HoneyBucket, 5)
 				.AddRecipeGroup("MagicStorage:AnyCampfire", 3)
 				.AddRecipeGroup("MagicStorage:AnyDemonAltar")
 				.Register();
