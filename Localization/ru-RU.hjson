@@ -471,20 +471,22 @@ Mods: {
 				'''
 				Help20:
 				'''
-				[i:MagicStorage/RemoteAccess ] Очень удобен, когда вам нужно иметь доступ к своему хранилищу, находясь вдали от дома.
+				[i:MagicStorage/RemoteAccess] Очень удобнен, иногда вам нужно иметь доступ к своему хранилищу, находясь вдали от дома.
 				Также, вы можете создать портативный удаленный доступ к хранилищу!
 				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
+				[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableCraftingAccessPreHM]
 				'''
 				Help20_Mechs:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20}
-				[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+				[i:MagicStorage/PortableAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableAccessHM]
+				[i:MagicStorage/PortableCraftingAccessPreHM] [i/s20:Pearlwood] [rg/s15:MagicStorage:AnyMythrilBar] [i/s10:ChlorophyteBar] @ [rg:MagicStorage:AnyHmAnvil] = [i:MagicStorage/PortableCraftingAccessHM]
 				'''
 				Help20_Moon:
 				'''
 				{$Mods.MagicStorage.Dialogue.Golem.Help20_Mechs}
-				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s2:LunarBar] [i:MagicStorage/RadiantJewel] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
-				[i:MagicStorage/LocatorDisk] [i/s15:LunarBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
+				[i:MagicStorage/PortableAccessHM] [i/s15:MartianConduitPlating] [i/s8:LunarBar] [i:MagicStorage/RadiantJewel] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableAccess]
+				[i:MagicStorage/PortableCraftingAccessHM] [i/s20:MartianConduitPlating] [i/s15:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/PortableCraftingAccess]
 				'''
 				Help21:
 				'''
