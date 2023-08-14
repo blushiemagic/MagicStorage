@@ -20,28 +20,6 @@ namespace MagicStorage.Common.Systems {
 				.Register();
 		}
 
-		public override void PostAddRecipes()
-		{
-			//Make a copy of every recipe that requires Ecto Mist, but let it be crafted at the appropriate combined station(s) as well
-			for (int i = 0; i < Recipe.numRecipes; i++)
-			{
-				Recipe recipe = Main.recipe[i];
-
-				if (recipe.Disabled)
-					continue;
-
-				if (recipe.HasCondition(Recipe.Condition.InGraveyardBiome))
-				{
-					Recipe copy = recipe.Clone();
-
-					copy.RemoveCondition(Recipe.Condition.InGraveyardBiome);
-					copy.AddCondition(MagicStorageMod.EctoMistOverride);
-
-					copy.Register();
-				}
-			}
-		}
-
 		//Regexes for filtering vanilla item types
 		public static readonly Regex chestItemRegex = new(@"\b(?!Fake_)(.*Chest)\b", RegexOptions.Compiled);
 		public static readonly Regex workBenchItemRegex = new(@"\b(.*WorkBench)\b", RegexOptions.Compiled);
