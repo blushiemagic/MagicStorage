@@ -599,10 +599,17 @@ namespace MagicStorage
 			try {
 				if (state.recipesToRefresh is null)
 					RefreshRecipes(thread, state);  //Refresh all recipes
-				else
+				else {
 					RefreshSpecificRecipes(thread, state);
 
-				forceSpecificRecipeResort = false;
+					forceSpecificRecipeResort = false;
+
+					// Do a second pass when recursion crafting is enabled
+					if (MagicStorageConfig.IsRecursionEnabled) {
+						state.recipesToRefresh = recipes.ToArray();
+						RefreshSpecificRecipes(thread, state);
+					}
+				}
 
 				NetHelper.Report(false, "Visible recipes: " + recipes.Count);
 				NetHelper.Report(false, "Available recipes: " + recipeAvailable.Count(static b => b));
