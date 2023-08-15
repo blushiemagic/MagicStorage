@@ -86,6 +86,8 @@ public class MagicCache : ModSystem
 
 	public static Recipe[] RecipesUsingEctoMist { get; private set; } = null!;
 
+	public static Dictionary<int, List<Node>> RecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
+
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
 	/// Also forces the active crafting UI to refresh if applicable.
@@ -209,6 +211,8 @@ public class MagicCache : ModSystem
 		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::InitRecursiveTrees");
+
+		RecursiveRecipesUsingRecipeByIndex = new();
 
 		foreach (Recipe recipe in EnabledRecipes) {
 			RecursiveRecipe recursive = new RecursiveRecipe(recipe);

@@ -342,8 +342,11 @@ namespace MagicStorage
 		/// <param name="recipes">An array of recipes to update.  If <see langword="null"/>, then nothing happens</param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(Recipe[] recipes) {
 			if (recipesToRefresh is null) {
-				if (recipes is not null)
+				if (recipes is not null) {
+					recipes = ExpandRecipeCollectionWithPossibleRecursionDependents(recipes).ToArray();
+
 					NetHelper.Report(true, $"Setting next refresh to check {recipes.Length} recipes");
+				}
 
 				recipesToRefresh = recipes;
 				return;
@@ -352,9 +355,21 @@ namespace MagicStorage
 			if (recipes is null)
 				return;
 
-			recipesToRefresh = recipesToRefresh.Concat(recipes).DistinctBy(static r => r, ReferenceEqualityComparer.Instance).ToArray();
+			var updatedList = recipesToRefresh.Concat(recipes);
+			updatedList = ExpandRecipeCollectionWithPossibleRecursionDependents(updatedList);
+
+			recipesToRefresh = updatedList.DistinctBy(static r => r, ReferenceEqualityComparer.Instance).ToArray();
 
 			NetHelper.Report(true, $"Setting next refresh to check {recipesToRefresh.Length} recipes");
+		}
+
+		private static IEnumerable<Recipe> ExpandRecipeCollectionWithPossibleRecursionDependents(IEnumerable<Recipe> toRefresh) {
+			if (!MagicStorageConfig.IsRecursionEnabled)
+				return toRefresh;
+
+			return toRefresh.Concat(toRefresh.SelectMany(static r => MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(r.RecipeIndex, out var recipes)
+				? recipes.Select(static node => node.info.sourceRecipe)
+				: Array.Empty<Recipe>()));
 		}
 
 		/// <summary>
@@ -1308,7 +1323,7 @@ namespace MagicStorage
 
 			int index = 0;
 			bool hasItemFromStorage = false;
-			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe()) {
+			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation { AmountCrafted: >0 } simulation) {
 				NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
 				thread?.InitTaskSchedule(sourceItems.Count, "Populating stored ingredients");
@@ -1323,14 +1338,7 @@ namespace MagicStorage
 				NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
 				// Check each recipe in the tree
-				var simulation = GetCraftingSimulationForCurrentRecipe();
-
-				IEnumerable<Recipe> recipes;
-				if (simulation.AmountCrafted <= 0) {
-					// Default to using the recipes for the "current crafting tree" since the simulation couldn't craft anything
-					recipes = GetCraftingTree(selectedRecipe).GetAllRecipes();
-				} else
-					recipes = simulation.UsedRecipes;
+				IEnumerable<Recipe> recipes = simulation.UsedRecipes;
 
 				// Evaluate now so the total task count can be used
 				List<Recipe> usedRecipes = recipes.ToList();
