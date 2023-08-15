@@ -76,6 +76,16 @@ public class MagicCache : ModSystem
 
 	public static Dictionary<int, LazyRecipeTile> RecipesUsingTileType { get; private set; } = null!;
 
+	public static Recipe[] RecipesUsingWater { get; private set; } = null!;
+
+	public static Recipe[] RecipesUsingLava { get; private set; } = null!;
+
+	public static Recipe[] RecipesUsingHoney { get; private set; } = null!;
+
+	public static Recipe[] RecipesUsingSnow { get; private set; } = null!;
+
+	public static Recipe[] RecipesUsingEctoMist { get; private set; } = null!;
+
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
 	/// Also forces the active crafting UI to refresh if applicable.
@@ -186,6 +196,17 @@ public class MagicCache : ModSystem
 
 		RecipesUsingTileType = Enumerable.Range(TileID.Dirt, TileLoader.TileCount)
 			.ToDictionary(type => type, type => new LazyRecipeTile(type));
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingLiquids");
+
+		RecipesUsingWater = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearWater)).ToArray();
+		RecipesUsingLava = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearLava)).ToArray();
+		RecipesUsingHoney = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearHoney)).ToArray();
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingBiomes");
+
+		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Condition.InSnow)).ToArray();
+		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::InitRecursiveTrees");
 

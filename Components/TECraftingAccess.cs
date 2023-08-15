@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using Terraria.DataStructures;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage.Components
 {
@@ -166,7 +167,7 @@ namespace MagicStorage.Components
 						item.SetDefaults();
 
 					if (Main.netMode != NetmodeID.Server)
-						UpdateRecipesFromStationAction(nItem.createTile);
+						UpdateRecipesFromStationAction(nItem);
 				}
 			}
 
@@ -199,18 +200,38 @@ namespace MagicStorage.Components
 			stations.RemoveAt(slot);
 
 			if (Main.netMode != NetmodeID.Server)
-				UpdateRecipesFromStationAction(item.createTile);
+				UpdateRecipesFromStationAction(item);
 
 			return item;
 		}
 
-		internal static void UpdateRecipesFromStationAction(int stationTile) {
+		internal static void UpdateRecipesFromStationAction(Item station) {
 			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
 
-			Utility.SetVanillaAdjTiles(stationTile);
+			Utility.SetVanillaAdjTiles(station, out bool waterChanged, out bool lavaChanged, out bool honeyChanged, out bool hasSnow, out bool hasGraveyard);
 
 			StorageGUI.SetRefresh();
-			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0).Prepend(stationTile));
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0));
+
+			if (waterChanged)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingWater);
+			if (lavaChanged)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingLava);
+			if (honeyChanged)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingHoney);
+			if (hasSnow)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingSnow);
+			if (hasGraveyard)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingEctoMist);
+
+			if (CraftingGUI.GetHeart() is TEStorageHeart heart) {
+				foreach (EnvironmentModule module in heart.GetModules()) {
+					Recipe[] recipes = module.GetRecipesToRefresh(station)?.ToArray();
+
+					if (recipes is not null)
+						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(recipes);
+				}
+			}
 
 			Main.LocalPlayer.adjTile = adjTiles;
 		}

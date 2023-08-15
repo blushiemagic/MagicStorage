@@ -1,4 +1,5 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -49,6 +50,12 @@ namespace MagicStorage {
 		/// Allows you to specify what additional items are used in the Crafting GUI
 		/// </summary>
 		public virtual IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => null;
+
+		/// <summary>
+		/// Allows you to specify which additional recipes should be refreshed when depositing or withdrawing <paramref name="stationItem"/> from the Station Slots in the Crafting UI.<br/>
+		/// Use of the various collections in <see cref="MagicCache"/> or your own cached recipe collections is recommended.
+		/// </summary>
+		public virtual IEnumerable<Recipe> GetRecipesToRefresh(Item stationItem) => null;
 
 		/// <summary>
 		/// Allows you to modify the crafting information for the Crafting GUI<br/>
