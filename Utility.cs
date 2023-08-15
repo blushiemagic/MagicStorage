@@ -480,34 +480,77 @@ namespace MagicStorage {
 			return ItemIO.Load(TagIO.FromStream(ms, false));
 		}
 
-		public static void SetVanillaAdjTiles(int createTile) {
-			bool[] adjTiles = Main.LocalPlayer.adjTile;
+		public static void SetVanillaAdjTiles(Item item, out bool waterChanged, out bool lavaChanged, out bool honeyChanged, out bool hasSnow, out bool hasGraveyard) {
+			waterChanged = false;
+			lavaChanged = false;
+			honeyChanged = false;
+			hasSnow = false;
+			hasGraveyard = false;
+			
+			Player player = Main.LocalPlayer;
+			bool[] adjTiles = player.adjTile;
+			if (item.createTile >= 0) {
+				adjTiles[item.createTile] = true;
+				switch (item.createTile) {
+					case TileID.GlassKiln:
+					case TileID.Hellforge:
+						adjTiles[TileID.Furnaces] = true;
+						break;
+					case TileID.AdamantiteForge:
+						adjTiles[TileID.Furnaces] = true;
+						adjTiles[TileID.Hellforge] = true;
+						break;
+					case TileID.MythrilAnvil:
+						adjTiles[TileID.Anvils] = true;
+						break;
+					case TileID.BewitchingTable:
+					case TileID.Tables2:
+						adjTiles[TileID.Tables] = true;
+						break;
+					case TileID.AlchemyTable:
+						adjTiles[TileID.Bottles] = true;
+						adjTiles[TileID.Tables] = true;
+						break;
+					case TileID.Tombstones:
+						hasGraveyard = true;
+						break;
+				}
 
-			adjTiles[createTile] = true;
-			switch (createTile)
-			{
-				case TileID.GlassKiln:
-				case TileID.Hellforge:
-					adjTiles[TileID.Furnaces] = true;
-					break;
-				case TileID.AdamantiteForge:
-					adjTiles[TileID.Furnaces] = true;
-					adjTiles[TileID.Hellforge] = true;
-					break;
-				case TileID.MythrilAnvil:
-					adjTiles[TileID.Anvils] = true;
-					break;
-				case TileID.BewitchingTable:
-				case TileID.Tables2:
-					adjTiles[TileID.Tables] = true;
-					break;
-				case TileID.AlchemyTable:
-					adjTiles[TileID.Bottles] = true;
-					adjTiles[TileID.Tables] = true;
-					break;
+				switch (item.createTile) {
+					case TileID.WorkBenches:
+					case TileID.Tables:
+					case TileID.Tables2:
+						adjTiles[TileID.Chairs] = true;
+						break;
+				}
+
+				TileLoader.AdjTiles(Main.LocalPlayer, item.createTile);
+
+				if (player.adjWater != TileID.Sets.CountsAsWaterSource[item.createTile])
+					waterChanged = true;
+				if (player.adjLava != TileID.Sets.CountsAsLavaSource[item.createTile])
+					lavaChanged = true;
+				if (player.adjHoney != TileID.Sets.CountsAsHoneySource[item.createTile])
+					honeyChanged = true;
+				if (player.adjTile[TileID.Tombstones])
+					honeyChanged = true;
 			}
 
-			TileLoader.AdjTiles(Main.LocalPlayer, createTile);
+			int globeItem = ModContent.ItemType<Items.BiomeGlobe>();
+
+			if (!waterChanged && player.adjWater != (item.type == ItemID.WaterBucket || item.type == ItemID.BottomlessBucket || item.type == globeItem))
+				waterChanged = true;
+			if (!lavaChanged && player.adjLava != (item.type == ItemID.LavaBucket || item.type == ItemID.BottomlessLavaBucket || item.type == globeItem))
+				lavaChanged = true;
+			if (!honeyChanged && player.adjHoney != (item.type == ItemID.HoneyBucket || item.type == ItemID.BottomlessHoneyBucket || item.type == globeItem))
+				honeyChanged = true;
+			if (item.type == ModContent.ItemType<Items.SnowBiomeEmulator>() || item.type == globeItem)
+				hasSnow = true;
+			if (item.type == globeItem) {
+				adjTiles[TileID.Campfire] = true;
+				adjTiles[TileID.DemonAltar] = true;
+				hasGraveyard = true;
+			}
 		}
 	}
 }
