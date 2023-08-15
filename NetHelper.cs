@@ -190,9 +190,6 @@ namespace MagicStorage
 				case MessageType.RequestStorageUnitStyle:
 					ReceiveStorageUnitStyle(reader, sender);
 					break;
-				case MessageType.ClientRequestQuickStackToStorage:
-					ServerReceiveQuickStackToNearbyStorage(reader, sender);
-					break;
 				case MessageType.ServerQuickStackToStorageResult:
 					ClientReceiveQuickStackToNearbyStorageResult(reader);
 					break;
@@ -1126,88 +1123,12 @@ namespace MagicStorage
 			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
 		}
 
-		public static void RequestQuickStackToNearbyStorage(Vector2 depositOrigin, int slot, IEnumerable<TEStorageCenter> nearbyCenters) {
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-				return;
-
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.ClientRequestQuickStackToStorage);
-			packet.WriteVector2(depositOrigin);
-			packet.Write((byte)Main.myPlayer);
-			packet.Write((ushort)slot);
-
-			List<TEStorageCenter> centers = nearbyCenters.ToList();
-			packet.Write((ushort)centers.Count);
-
-			foreach (TEStorageCenter center in centers)
-				packet.Write(center.Position);
-
-			packet.Send();
-		}
-
-		public static void ServerReceiveQuickStackToNearbyStorage(BinaryReader reader, int sender) {
-			Vector2 depositOrigin = reader.ReadVector2();
-			byte plr = reader.ReadByte();
-			int slot = reader.ReadUInt16();
-
-			ushort count = reader.ReadUInt16();
-			List<TEStorageCenter> centers = new();
-			for (int i = 0; i < count; i++) {
-				Point16 point = reader.ReadPoint16();
-
-				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) && entity is TEStorageCenter center)
-					centers.Add(center);
-			}
-
-			if (Main.netMode != NetmodeID.Server)
-				return;
-
-			if (slot < 0 || slot >= 50)
-				return;  // Invalid slot
-
-			Player client = Main.player[plr];
-			// Expected indices: 10 to 49
-			Item item = client.inventory[slot];
-
-			int origType = item.type;
-			bool playSound = false;
-			Netcode.TryQuickStackItemIntoNearbyStorageSystems(centers, item, ref playSound);
-
-			// Overwrite the inventory entry on this end
-			if (slot < 50)
-				client.inventory[slot] = item;
-			else
-				client.bank4.item[slot - PlayerItemSlotID.Bank4_0] = item;
-
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
-			packet.Write(playSound);
-			packet.Write(origType);
-			packet.Write(plr);
-			packet.Write((ushort)slot);
-			ItemIO.Send(item, packet, true, true);
-			packet.Send(toClient: sender);
-
-			// NOTE: client can ignore SyncEquipment messages, which it will in this context
-			// NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, slot, item.prefix);
-		}
-
 		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
 			bool playSound = reader.ReadBoolean();
 			int origType = reader.ReadInt32();
-			byte plr = reader.ReadByte();
-			int slot = reader.ReadUInt16();
-			Item item = ItemIO.Receive(reader, true, true);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-
-			if (slot < 0 || slot >= 50)
-				return;  // Invalid slot
-
-			Player client = Main.player[plr];
-			// Overwrite the inventory entry on this end
-			client.inventory[slot] = item;
 
 			if (playSound)
 				SoundEngine.PlaySound(SoundID.Grab);
@@ -1605,7 +1526,6 @@ namespace MagicStorage
 		MassDuplicateSellRequest,
 		MassDuplicateSellResult,
 		RequestStorageUnitStyle,
-		ClientRequestQuickStackToStorage,
 		ServerQuickStackToStorageResult,
 		GolemHelpTextUpdate,
 		ClientRequestServerOp,
