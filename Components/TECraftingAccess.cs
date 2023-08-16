@@ -208,6 +208,10 @@ namespace MagicStorage.Components
 		internal static void UpdateRecipesFromStationAction(Item station) {
 			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
 
+			// Prevent environment from influencing which recipes get refreshed
+			for (int i = 0 ; i < adjTiles.Length; i++)
+				Main.LocalPlayer.adjTile[i] = false;
+
 			Utility.SetVanillaAdjTiles(station, out bool waterChanged, out bool lavaChanged, out bool honeyChanged, out bool hasSnow, out bool hasGraveyard);
 
 			StorageGUI.SetRefresh();
