@@ -702,23 +702,20 @@ namespace MagicStorage
 				return;
 			}
 
-			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => {
-				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
-				{
-					var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
+			if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
+			{
+				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
 					
-					TECraftingAccess.UpdateRecipesFromStationAction(item);
-				}
-				else // deposit operation
-				{
-					Main.mouseItem = item;
+				TECraftingAccess.UpdateRecipesFromStationAction(item);
+			}
+			else // deposit operation
+			{
+				Main.mouseItem = item;
 
-					int oldType = reader.ReadUInt16();
-					TECraftingAccess.UpdateRecipesFromStationAction(new Item(oldType));
-				}
-			});
-			CraftingGUI.PlayerZoneCache.FreeCache(destroy: true);
+				int oldType = reader.ReadUInt16();
+				TECraftingAccess.UpdateRecipesFromStationAction(new Item(oldType));
+			}
 
 			Report(true, "Station operation " + op + " packet received by client " + Main.myPlayer);
 		}
