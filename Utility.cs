@@ -548,7 +548,7 @@ namespace MagicStorage {
 				waterChanged = true;
 			if (!lavaChanged && player.adjLava != (item.type == ItemID.LavaBucket || item.type == ItemID.BottomlessLavaBucket || item.type == globeItem))
 				lavaChanged = true;
-			if (!honeyChanged && player.adjHoney != (item.type == ItemID.HoneyBucket || item.type == ItemID.BottomlessHoneyBucket || item.type == globeItem))
+			if (!honeyChanged && player.adjHoney != (item.type == ItemID.HoneyBucket || item.type == globeItem))
 				honeyChanged = true;
 			if (item.type == ModContent.ItemType<Items.SnowBiomeEmulator>() || item.type == globeItem)
 				hasSnow = true;

@@ -954,7 +954,6 @@ namespace MagicStorage
 						adjLava = true;
 						break;
 					case ItemID.HoneyBucket:
-					case ItemID.BottomlessHoneyBucket:
 						adjHoney = true;
 						break;
 				}

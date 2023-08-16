@@ -201,14 +201,14 @@ public class MagicCache : ModSystem
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingLiquids");
 
-		RecipesUsingWater = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearWater)).ToArray();
-		RecipesUsingLava = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearLava)).ToArray();
-		RecipesUsingHoney = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearHoney)).ToArray();
+		RecipesUsingWater = EnabledRecipes.Where(static r => r.HasCondition(Recipe.Condition.NearWater)).ToArray();
+		RecipesUsingLava = EnabledRecipes.Where(static r => r.HasCondition(Recipe.Condition.NearLava)).ToArray();
+		RecipesUsingHoney = EnabledRecipes.Where(static r => r.HasCondition(Recipe.Condition.NearHoney)).ToArray();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingBiomes");
 
-		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Condition.InSnow)).ToArray();
-		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
+		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Recipe.Condition.InSnow)).ToArray();
+		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Recipe.Condition.InGraveyardBiome)).ToArray();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::InitRecursiveTrees");
 
