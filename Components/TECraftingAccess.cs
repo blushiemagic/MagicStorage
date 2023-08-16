@@ -8,6 +8,7 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using Terraria.DataStructures;
 using MagicStorage.Common.Systems;
+using static System.Collections.Specialized.BitVector32;
 
 namespace MagicStorage.Components
 {
@@ -206,22 +207,34 @@ namespace MagicStorage.Components
 		}
 
 		internal static void UpdateRecipesFromStationAction(Item station) {
-			bool[] adjTiles = (bool[])Main.LocalPlayer.adjTile.Clone();
+			CraftingGUI.PlayerZoneCache.Cache();
 
-			// Prevent environment from influencing which recipes get refreshed
-			for (int i = 0 ; i < adjTiles.Length; i++)
-				Main.LocalPlayer.adjTile[i] = false;
+			Player player = Main.LocalPlayer;
 
-			Utility.SetVanillaAdjTiles(station, out bool waterChanged, out bool lavaChanged, out bool honeyChanged, out bool hasSnow, out bool hasGraveyard);
+			for (int i = 0; i < player.adjTile.Length; i++)
+				player.adjTile[i] = false;
+
+			player.adjWater = false;
+			player.adjLava = false;
+			player.adjHoney = false;
+
+			UpdateRecipes(station);
+
+			CraftingGUI.PlayerZoneCache.FreeCache(destroy: true);
+		}
+
+		private static void UpdateRecipes(Item station) {
+			Utility.SetVanillaAdjTiles(station, out bool hasSnow, out bool hasGraveyard);
 
 			StorageGUI.SetRefresh();
 			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0));
 
-			if (waterChanged)
+			Player player = Main.LocalPlayer;
+			if (player.adjWater)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingWater);
-			if (lavaChanged)
+			if (player.adjLava)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingLava);
-			if (honeyChanged)
+			if (player.adjHoney)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingHoney);
 			if (hasSnow)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingSnow);
@@ -236,8 +249,6 @@ namespace MagicStorage.Components
 						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(recipes);
 				}
 			}
-
-			Main.LocalPlayer.adjTile = adjTiles;
 		}
 
 		public Item TryWithdrawStation(int slot, bool toInventory = false)

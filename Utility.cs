@@ -480,16 +480,13 @@ namespace MagicStorage {
 			return ItemIO.Load(TagIO.FromStream(ms, false));
 		}
 
-		public static void SetVanillaAdjTiles(Item item, out bool waterChanged, out bool lavaChanged, out bool honeyChanged, out bool hasSnow, out bool hasGraveyard) {
-			waterChanged = false;
-			lavaChanged = false;
-			honeyChanged = false;
+		public static void SetVanillaAdjTiles(Item item, out bool hasSnow, out bool hasGraveyard) {
 			hasSnow = false;
 			hasGraveyard = false;
 			
 			Player player = Main.LocalPlayer;
 			bool[] adjTiles = player.adjTile;
-			if (item.createTile >= 0) {
+			if (item.createTile >= TileID.Dirt) {
 				adjTiles[item.createTile] = true;
 				switch (item.createTile) {
 					case TileID.GlassKiln:
@@ -526,24 +523,24 @@ namespace MagicStorage {
 
 				TileLoader.AdjTiles(Main.LocalPlayer, item.createTile);
 
-				if (player.adjWater != TileID.Sets.CountsAsWaterSource[item.createTile])
-					waterChanged = true;
-				if (player.adjLava != TileID.Sets.CountsAsLavaSource[item.createTile])
-					lavaChanged = true;
-				if (player.adjHoney != TileID.Sets.CountsAsHoneySource[item.createTile])
-					honeyChanged = true;
+				if (TileID.Sets.CountsAsWaterSource[item.createTile])
+					player.adjWater = true;
+				if (TileID.Sets.CountsAsLavaSource[item.createTile])
+					player.adjLava = true;
+				if (TileID.Sets.CountsAsHoneySource[item.createTile])
+					player.adjHoney = true;
 				if (player.adjTile[TileID.Tombstones])
-					honeyChanged = true;
+					hasGraveyard = true;
 			}
 
 			int globeItem = ModContent.ItemType<Items.BiomeGlobe>();
 
-			if (!waterChanged && player.adjWater != (item.type == ItemID.WaterBucket || item.type == ItemID.BottomlessBucket || item.type == globeItem))
-				waterChanged = true;
-			if (!lavaChanged && player.adjLava != (item.type == ItemID.LavaBucket || item.type == ItemID.BottomlessLavaBucket || item.type == globeItem))
-				lavaChanged = true;
-			if (!honeyChanged && player.adjHoney != (item.type == ItemID.HoneyBucket || item.type == ItemID.BottomlessHoneyBucket || item.type == globeItem))
-				honeyChanged = true;
+			if (item.type == ItemID.WaterBucket || item.type == ItemID.BottomlessBucket || item.type == globeItem)
+				player.adjWater = true;
+			if (item.type == ItemID.LavaBucket || item.type == ItemID.BottomlessLavaBucket || item.type == globeItem)
+				player.adjLava = true;
+			if (item.type == ItemID.HoneyBucket || item.type == ItemID.BottomlessHoneyBucket || item.type == globeItem)
+				player.adjHoney = true;
 			if (item.type == ModContent.ItemType<Items.SnowBiomeEmulator>() || item.type == globeItem)
 				hasSnow = true;
 			if (item.type == globeItem) {
