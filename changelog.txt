@@ -1,4 +1,4 @@
-﻿[h1]v0.6.0.3[/h1]
+﻿[h1]v0.6.0.4[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
-Change log can be found at: https://gist.github.com/absoluteAquarian/60cd48ca8f810c7f943a3a7c1adc8b55
+TODO
