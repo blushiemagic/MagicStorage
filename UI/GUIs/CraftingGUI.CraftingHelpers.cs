@@ -10,6 +10,13 @@ namespace MagicStorage {
 	partial class CraftingGUI {
 		internal static readonly List<ItemData> blockStorageItems = new();
 
+		[ThreadStatic]
+		internal static bool _simulatingCrafts;
+		/// <summary>
+		/// Whether crafting simulations are currently being performed.  Use of this property is encouraged if a recipe does more than spawn items on the player.
+		/// </summary>
+		public static bool SimulatingCrafts => _simulatingCrafts;
+
 		private static CraftingContext InitCraftingContext(int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();

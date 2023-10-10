@@ -24,6 +24,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public void SimulateCrafts(RecursiveRecipe recipe, int amountToCraft, AvailableRecipeObjects available) {
+			using (FlagSwitch.ToggleTrue(ref CraftingGUI._simulatingCrafts))
+				SimulateCrafts_Inner(recipe, amountToCraft, available);
+		}
+
+		private void SimulateCrafts_Inner(RecursiveRecipe recipe, int amountToCraft, AvailableRecipeObjects available) {
 			simulationResult = CraftResult.Default;
 
 			int sum = 0;
