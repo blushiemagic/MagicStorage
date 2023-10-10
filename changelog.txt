@@ -1,4 +1,4 @@
-﻿[h1]v0.6.0.4[/h1]
+﻿[h1]v0.6.1[/h1]
 See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
 
 TODO
