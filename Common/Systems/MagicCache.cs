@@ -214,10 +214,26 @@ public class MagicCache : ModSystem
 
 		RecursiveRecipesUsingRecipeByIndex = new();
 
+		#if NETPLAY
+		System.Diagnostics.Stopwatch watch = new();
+		#endif
 		foreach (Recipe recipe in EnabledRecipes) {
+			#if NETPLAY
+			int stack = recipe.createItem.stack;
+			string recipeName = $"{Lang.GetItemNameValue(recipe.createItem.type)}{(stack == 0 ? "" : $" ({stack})")}";
+			ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - \"{recipeName}\"");
+			watch.Restart();
+			#endif
+
 			RecursiveRecipe recursive = new RecursiveRecipe(recipe);
 			RecursiveRecipe.recipeToRecursiveRecipe.Add(recipe, recursive);
 			recursive.tree.CalculateTree();
+
+			#if NETPLAY
+			// Report how long it took to calculate the tree
+			watch.Stop();
+			Mod.Logger.Debug($"Generating recursion tree for \"{recipeName}\" took {watch.ElapsedTicks} ticks");
+			#endif
 		}
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
