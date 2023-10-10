@@ -2,9 +2,11 @@
 using MagicStorage.Common;
 using Terraria;
 using System.Linq;
+using System;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
+		[ThreadStatic]
 		internal static bool requestingAmountFromUI;
 
 		// Calculates how many times a recipe can be crafted using available items

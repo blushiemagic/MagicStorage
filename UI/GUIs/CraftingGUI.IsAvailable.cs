@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -7,6 +8,7 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
+		[ThreadStatic]
 		internal static bool disableNetPrintingForIsAvailable;
 
 		/// <summary>
