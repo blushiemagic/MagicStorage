@@ -210,30 +210,19 @@ public class MagicCache : ModSystem
 		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Condition.InSnow)).ToArray();
 		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
 
-		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::InitRecursiveTrees");
-
 		RecursiveRecipesUsingRecipeByIndex = new();
 
-		#if NETPLAY
-		System.Diagnostics.Stopwatch watch = new();
-		#endif
+		int current = 1;
+		int total = EnabledRecipes.Length;
 		foreach (Recipe recipe in EnabledRecipes) {
-			#if NETPLAY
-			int stack = recipe.createItem.stack;
-			string recipeName = $"{Lang.GetItemNameValue(recipe.createItem.type)}{(stack == 0 ? "" : $" ({stack})")}";
-			ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - \"{recipeName}\"");
-			watch.Restart();
-			#endif
+			// Report the progres
+			ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - {current} / {total}");
 
 			RecursiveRecipe recursive = new RecursiveRecipe(recipe);
 			RecursiveRecipe.recipeToRecursiveRecipe.Add(recipe, recursive);
 			recursive.tree.CalculateTree();
 
-			#if NETPLAY
-			// Report how long it took to calculate the tree
-			watch.Stop();
-			Mod.Logger.Debug($"Generating recursion tree for \"{recipeName}\" took {watch.ElapsedTicks} ticks");
-			#endif
+			current++;
 		}
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
