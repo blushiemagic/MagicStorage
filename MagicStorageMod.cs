@@ -157,8 +157,14 @@ namespace MagicStorage {
 
 					return ShadowDiamondDrop.DropDiamond(dropNormal, dropExpert);
 				case "Get Campfire Condition":
+					if (args.Length != 1)
+						ThrowWithMessage("Expected 1 argument");
+
 					return HasCampfire;
 				case "Simulating Crafts":
+					if (args.Length != 1)
+						ThrowWithMessage("Expected 1 argument");
+
 					return CraftingGUI._simulatingCrafts;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
