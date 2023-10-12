@@ -21,7 +21,7 @@ namespace MagicStorage {
 			get => _simulatingCrafts;
 		}
 
-		private static CraftingContext InitCraftingContext(int toCraft) {
+		private static CraftingContext InitCraftingContext(Recipe recipe, int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
@@ -41,7 +41,8 @@ namespace MagicStorage {
 				consumedItemsFromModules = new(),
 				fromModule = fromModule,
 				modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>(),
-				toCraft = toCraft
+				toCraft = toCraft,
+				recipe = recipe
 			};
 		}
 

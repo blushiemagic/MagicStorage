@@ -27,6 +27,8 @@ namespace MagicStorage {
 
 			public bool simulation;
 
+			public Recipe recipe;
+
 			public IEnumerable<Item> ConsumedItems => toWithdraw.Concat(consumedItemsFromModules);
 		}
 
@@ -61,7 +63,7 @@ namespace MagicStorage {
 				if (context is null)
 					return;  // Bail
 			} else {
-				context = InitCraftingContext(toCraft);
+				context = InitCraftingContext(selectedRecipe, toCraft);
 
 				int target = toCraft;
 
@@ -114,7 +116,7 @@ namespace MagicStorage {
 			if (toCraft <= 0)
 				return null;  // Bail
 
-			CraftingContext context = InitCraftingContext(toCraft);
+			CraftingContext context = InitCraftingContext(recursiveRecipe.original, toCraft);
 
 			NetHelper.Report(true, "Attempting recurrent crafting...");
 
@@ -206,6 +208,16 @@ namespace MagicStorage {
 				int stack = item.stack;
 				AttemptToConsumeItem(ctx, item.type, ref stack, checkRecipeGroup: false);
 			}
+
+			// Run the "on craft" logic for the final result, but with the SimulatingCrafts flag disabled this time
+			// (It should be false by this point, but it's forced back to false as a sanity check)
+			_simulatingCrafts = false;
+
+			CatchDroppedItems = true;
+			RecipeLoader.OnCraft(ctx.recipe.createItem, ctx.recipe, consumedItems, new Item());
+			// Dropped items were caught during the simulation; destroy them here
+			DroppedItems.Clear();
+			CatchDroppedItems = false;
 
 			NetHelper.Report(true, $"Success! Crafted {simulation.AmountCrafted} items and {simulation.ExcessResults.Count - 1} extra item types");
 		}
