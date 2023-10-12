@@ -724,6 +724,7 @@ namespace MagicStorage.Components
 		}
 
 		internal static readonly FieldInfo Item_globalItems = typeof(Item).GetField("_globals", BindingFlags.NonPublic | BindingFlags.Instance);
+		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		internal void DestroyUnloadedGlobalItemData(bool net = false) {
 			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
@@ -745,13 +746,12 @@ namespace MagicStorage.Components
 					if (Item_globalItems.GetValue(item) is not GlobalItem[] globalItems || globalItems.Length == 0)
 						continue;
 
-					GlobalItem[] array = globalItems.Where(i => i is not UnloadedGlobalItem).ToArray();
+					// NOTE: items should only have one UnloadedGlobalItem, but the class is not "sealed", so having multiple is possible
+					foreach (UnloadedGlobalItem unloaded in globalItems.OfType<UnloadedGlobalItem>()) {
+						var data = UnloadedGlobalItem_data.GetValue(unloaded) as IList<TagCompound>;
 
-					if (array.Length != globalItems.Length) {
-						Item_globalItems.SetValue(item, array);
-						didSomething = true;
-
-						typesToRefresh.Add(item.type);
+						// Clear the data
+						data?.Clear();
 					}
 				}
 

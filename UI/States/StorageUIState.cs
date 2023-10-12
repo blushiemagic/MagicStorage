@@ -634,12 +634,6 @@ namespace MagicStorage.UI.States {
 			}
 
 			private void InitDebugButtons() {
-				UITextPanel<LocalizedText> initShowcase = null;
-				InitButton(ref initShowcase, "StorageGUI.InitShowcaseButton", (evt, e) => StorageGUI.DepositShowcaseItemsToCurrentStorage());
-
-				UITextPanel<LocalizedText> resetShowcase = null;
-				InitButton(ref resetShowcase, "StorageGUI.ResetShowcaseButton", (evt, e) => StorageGUI.showcaseItems = null);
-
 				UITextPanel<LocalizedText> clearItems = null;
 				InitButton(ref clearItems, "StorageGUI.ClearItemsButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
