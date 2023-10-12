@@ -418,6 +418,9 @@ Mods: {
 					LikeNPC_Princess: "{NPCName} - лучший друг моего создателя."
 					Princess_LovesNPC: "{NPCName} - такой классный робот, интересно , как он двигается?"
 				}
+
+				# Census support
+				// Census.SpawnCondition: "\"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}\" config in the \"{$$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}\" set to On"
 			}
 		}
 

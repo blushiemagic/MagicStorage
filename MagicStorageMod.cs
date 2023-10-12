@@ -44,11 +44,6 @@ namespace MagicStorage {
 
 			InterfaceHelper.Initialize();
 
-			//Census mod support
-			if (ModLoader.TryGetMod("Census", out var census)) {
-				census.Call("TownNPCCondition", ModContent.NPCType<Golem>(), "No requirements");
-			}
-
 			//Sorting options
 			SortingOptionLoader.Load();
 
