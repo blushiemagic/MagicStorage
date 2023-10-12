@@ -13,12 +13,10 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using Terraria.UI;
 
 namespace MagicStorage {
 	public static partial class Utility {
@@ -132,22 +130,6 @@ namespace MagicStorage {
 		}
 
 		public static SafeOrdering<T> AsSafe<T>(this IComparer<T> comparer, Func<T, string> reportObjectFunc) => new(comparer, reportObjectFunc);
-
-		public static Vector2 TopLeft(CalculatedStyle dims) => new(dims.X, dims.Y);
-
-		public static Vector2 Top(CalculatedStyle dims) => new(dims.X + dims.Width / 2f, dims.Y);
-
-		public static Vector2 TopRight(CalculatedStyle dims) => new(dims.X + dims.Width, dims.Y);
-
-		public static Vector2 Left(CalculatedStyle dims) => new(dims.X, dims.Y + dims.Height / 2f);
-
-		public static Vector2 Right(CalculatedStyle dims) => new(dims.X + dims.Width, dims.Y + dims.Height / 2f);
-
-		public static Vector2 BottomLeft(CalculatedStyle dims) => new(dims.X, dims.Y + dims.Height);
-
-		public static Vector2 Bottom(CalculatedStyle dims) => new(dims.X + dims.Width / 2f, dims.Y + dims.Height);
-
-		public static Vector2 BottomRight(CalculatedStyle dims) => new(dims.X + dims.Width, dims.Y + dims.Height);
 
 		private class ItemTypeComparer : IEqualityComparer<Item> {
 			public static ItemTypeComparer Instance { get; } = new();
