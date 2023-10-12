@@ -420,10 +420,7 @@ Mods: {
 				}
 
 				# Census support
-				Census.SpawnCondition:
-					'''
-					"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On
-					'''
+				Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
 			}
 		}
 
