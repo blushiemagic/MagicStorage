@@ -27,10 +27,6 @@ namespace MagicStorage
 		public static bool MouseClicked => curMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released;
 		public static bool RightMouseClicked => curMouse.RightButton == ButtonState.Pressed && oldMouse.RightButton == ButtonState.Released;
 
-		internal static void Unload() {
-			showcaseItems = null;
-		}
-
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
 		internal static void CheckRefresh() {
