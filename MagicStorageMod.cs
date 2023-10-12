@@ -165,7 +165,7 @@ namespace MagicStorage {
 					if (args.Length != 1)
 						ThrowWithMessage("Expected 1 argument");
 
-					return CraftingGUI._simulatingCrafts;
+					return CraftingGUI.SimulatingCrafts;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
 			}

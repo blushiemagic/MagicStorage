@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using Terraria;
 using System.Linq;
 using MagicStorage.Components;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -15,7 +16,10 @@ namespace MagicStorage {
 		/// <summary>
 		/// Whether crafting simulations are currently being performed.  Use of this property is encouraged if a recipe does more than spawn items on the player.
 		/// </summary>
-		public static bool SimulatingCrafts => _simulatingCrafts;
+		public static bool SimulatingCrafts {
+			[MethodImpl(MethodImplOptions.NoInlining)]
+			get => _simulatingCrafts;
+		}
 
 		private static CraftingContext InitCraftingContext(int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
