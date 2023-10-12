@@ -53,8 +53,12 @@ namespace MagicStorage.UI {
 		}
 
 		public void AddHistory(Recipe recipe) {
-			if (history.Take(Current + 1).Select(h => h.Recipe).Any(r => Utility.RecipesMatchForHistory(recipe, r)))
+			// If the entry is already present, just jump to it
+			int existingEntry = history.FindIndex(h => Utility.RecipesMatchForHistory(recipe, h.Recipe));
+			if (existingEntry >= 0) {
+				Current = existingEntry;
 				return;
+			}
 
 			RecipeHistoryEntry entry = new(Current + 1, this);
 			entry.Left.Set(2, 0f);
