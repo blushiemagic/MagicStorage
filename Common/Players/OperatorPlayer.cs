@@ -11,12 +11,18 @@ namespace MagicStorage.Common.Players {
 
 		public override void OnEnterWorld() {
 			Netcode.RequestingOperatorKey = false;
+		}
 
-			// Grant "Server Admin" to the local host
-			if (Main.netMode != NetmodeID.SinglePlayer && NetMessage.DoesPlayerSlotCountAsAHost(Player.whoAmI)) {
+		public override void PreUpdate() {
+			// Normally, this code would go in OnEnterWorld, but the client doesn't have the necessary info
+			int whoAmI = Player.whoAmI;
+			if (Main.netMode != NetmodeID.SinglePlayer && !hasOp && Main.countsAsHostForGameplay[whoAmI]) {
+				// Grant "Server Admin" to the local host
 				hasOp = true;
 				manualOp = true;
-				NetHelper.ClientSendPlayerHasOp(Player.whoAmI);
+
+				if (whoAmI == Main.myPlayer)
+					NetHelper.ClientSendPlayerHasOp(whoAmI);
 			}
 		}
 	}
