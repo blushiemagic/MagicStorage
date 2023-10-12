@@ -36,6 +36,7 @@ namespace MagicStorage {
 				availableItems = availableItems,
 				toWithdraw = toWithdraw,
 				results = results,
+				itemCounts = GetItemCountsWithBlockedItemsRemoved(),
 				sandbox = sandbox,
 				consumedItemsFromModules = new(),
 				fromModule = fromModule,

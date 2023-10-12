@@ -13,6 +13,8 @@ namespace MagicStorage {
 		private class CraftingContext {
 			public List<Item> sourceItems, availableItems, toWithdraw, results;
 
+			public Dictionary<int, int> itemCounts;
+
 			public List<bool> fromModule;
 
 			public EnvironmentSandbox sandbox;
@@ -150,15 +152,23 @@ namespace MagicStorage {
 				List<Item> origResults = new(ctx.results);
 				List<Item> origFromModule = new(ctx.consumedItemsFromModules);
 
-				bool notEnoughItems = true;
+				bool skipItemConsumption = false;
 
 				foreach (int type in material.GetValidItems()) {
-					Item item = new Item(type, material.stack);
+					// Bug fix: only consume up to the amount of materials needed
+					if (!ctx.itemCounts.TryGetValue(type, out int quantity) || quantity <= 0) {
+						// Item was not present
+						continue;
+					}
+
+					int possibleStack = Math.Min(material.stack, quantity);
+
+					Item item = new Item(type, possibleStack);
 
 					if (!CanConsumeItem(ctx, item, origWithdraw, origResults, origFromModule, out bool wasAvailable, out int stackConsumed, checkRecipeGroup: false)) {
 						if (wasAvailable) {
 							NetHelper.Report(false, $"Skipping consumption of item \"{Lang.GetItemNameValue(item.type)}\"");
-							notEnoughItems = false;
+							skipItemConsumption = true;
 							break;
 						}
 					} else {
@@ -167,14 +177,14 @@ namespace MagicStorage {
 						item.stack = stackConsumed;
 						consumedItems.Add(item);
 
-						notEnoughItems = false;
+						ctx.itemCounts[type] -= stackConsumed;
 
 						if (material.stack <= 0)
 							break;
 					}
 				}
 
-				if (notEnoughItems) {
+				if (!skipItemConsumption && material.stack > 0) {
 					NetHelper.Report(false, $"Material requirement \"{Lang.GetItemNameValue(material.GetValidItems().First())}\" could not be met, aborting");
 					return;
 				}
