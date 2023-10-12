@@ -8,7 +8,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		private readonly Dictionary<int, int> inventory;
 		private readonly bool[] recipeToConditionsAvailableCache;
 
-		public AvailableRecipeObjects(bool[] tiles, Dictionary<int, int> inventory, bool[] recipeToConditionsAvailableCache = null) {
+		internal AvailableRecipeObjects(bool[] tiles, Dictionary<int, int> inventory, bool[] recipeToConditionsAvailableCache = null) {
 			this.tiles = tiles;
 			this.inventory = inventory;
 			this.recipeToConditionsAvailableCache = recipeToConditionsAvailableCache;
@@ -20,7 +20,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (recipeToConditionsAvailableCache is not null)
 				return recipeToConditionsAvailableCache[recipe.RecipeIndex];
 
-			return RecipeLoader.RecipeAvailable(recipe);
+			// Cache is not present; use the Crafting Interface's context to check if the recipe is available
+			bool retVal = false;
+			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => retVal = RecipeLoader.RecipeAvailable(recipe));
+			return retVal;
 		}
 
 		public bool CanUseRecipe(Recipe recipe) {
