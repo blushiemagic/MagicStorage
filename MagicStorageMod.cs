@@ -34,7 +34,7 @@ namespace MagicStorage {
 			CheckModBuildVersionBeforeJIT.Mod = this;
 		}
 
-		internal const string build144Version = "2023.6";
+		internal const string build144Version = "2023.8";
 
 		public override void Load()
 		{
