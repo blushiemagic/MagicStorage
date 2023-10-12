@@ -74,17 +74,9 @@ namespace MagicStorage.Common.Global {
 				} else
 					gItem.SaveData(item, tag);
 
-				if (tag.Count > 0) {
-					yield return (gItem.Mod.Name + "/" + gItem.Name, ToBase64(tag));
-				}
+				if (tag.Count > 0)
+					yield return (gItem.Mod.Name + "/" + gItem.Name, Utility.ToBase64NoCompression(tag));
 			}
-		}
-
-
-		private static string ToBase64(TagCompound tag) {
-			MemoryStream ms = new();
-			TagIO.ToStream(tag, ms, true);
-			return Convert.ToBase64String(ms.ToArray());
 		}
 	}
 }
