@@ -126,7 +126,7 @@ namespace MagicStorage.UI.States {
 			modSearchBox.Width.Set(190, 0f);
 			modSearchBox.Height.Set(21, 0f);
 			modSearchBox.OverflowHidden = true;
-			modSearchBox.PaddingTop = 3;
+			modSearchBox.PaddingTop = 5;
 			modSearchBox.PaddingBottom = 2;
 
 			topBar3 = new UIElement();
