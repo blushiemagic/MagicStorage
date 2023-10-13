@@ -15,6 +15,9 @@ namespace MagicStorage.UI {
 		public RecipeHistoryPanel(bool stopItemUse, RecipeHistory history, IEnumerable<(string key, LocalizedText text)> menuOptions) : base(stopItemUse, menuOptions) {
 			this.history = history;
 
+			// Same color as vanilla, but without the transparency
+			BackgroundColor = new Color(63, 82, 151);
+
 			viewArea.SetPadding(0);
 
 			viewArea.Append(history.list);
