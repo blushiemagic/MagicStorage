@@ -182,7 +182,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				var heart = CraftingGUI.GetHeart();
 
 				sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
-				modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>();
+				modules = heart?.GetModules().ToArray() ?? Array.Empty<EnvironmentModule>();
 			} else {
 				sandbox = default;
 				modules = Array.Empty<EnvironmentModule>();

@@ -40,7 +40,7 @@ namespace MagicStorage {
 				sandbox = sandbox,
 				consumedItemsFromModules = new(),
 				fromModule = fromModule,
-				modules = heart?.GetModules() ?? Array.Empty<EnvironmentModule>(),
+				modules = heart?.GetModules().ToArray() ?? Array.Empty<EnvironmentModule>(),
 				toCraft = toCraft,
 				recipe = recipe
 			};
