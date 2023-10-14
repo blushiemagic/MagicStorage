@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using MagicStorage.Common.Players;
@@ -33,6 +34,7 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool recipeBlacklist;
 
+		[JsonProperty(ItemConverterType = typeof(ItemDefinitionToFromStringJsonConverter))]
 		[Expand(false)]
 		public HashSet<ItemDefinition> globalRecipeBlacklist = new();
 
@@ -135,6 +137,16 @@ namespace MagicStorage {
 		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
+
+		private sealed class ItemDefinitionToFromStringJsonConverter : JsonConverter<ItemDefinition> {
+			public override ItemDefinition ReadJson(JsonReader reader, Type objectType, ItemDefinition existingValue, bool hasExistingValue, JsonSerializer serializer) {
+				return ItemDefinition.FromString((string)reader.Value);
+			}
+
+			public override void WriteJson(JsonWriter writer, ItemDefinition value, JsonSerializer serializer) {
+				writer.WriteValue(value.ToString());
+			}
+		}
 	}
 
 	public class MagicStorageServerConfig : ModConfig {
