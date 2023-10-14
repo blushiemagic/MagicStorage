@@ -690,6 +690,8 @@ Mods: {
 
 		RecipeHidden: 隐藏物品 "{0}" 的制作配方
 		RecipeRevealed: 显示物品 "{0}" 的制作配方
+		RecipeHiddenGlobal: 全局隐藏物品 "{0}" 的制作配方
+		RecipeRevealedGlobal: 全局显示物品 "{0}" 的制作配方
 
 		RecipeConditions: {
 			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
@@ -845,6 +847,11 @@ Mods: {
 				recipeBlacklist: {
 					Label: 制作配方黑白名单
 					Tooltip: 开启后，可将制作配方加入白名单或黑名单
+				}
+
+				globalRecipeBlacklist: {
+					Label: 全局制作配方黑白名单
+					Tooltip: 按住左 Ctrl 和左 Shift 点击配方来将配方加入全局名单
 				}
 
 				clearHistory: {

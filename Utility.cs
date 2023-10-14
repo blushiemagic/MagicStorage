@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.DataStructures;
@@ -16,6 +17,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
@@ -536,6 +538,12 @@ namespace MagicStorage {
 				adjTiles[TileID.DemonAltar] = true;
 				hasGraveyard = true;
 			}
+		}
+
+		public static void SaveModConfig(ModConfig config) {
+			MethodInfo configManagerSaveMethod = typeof(ConfigManager).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic, new[] { typeof(ModConfig) }) 
+				?? throw new InvalidOperationException("Get Terraria.ModLoader.Config.ConfigManager.Save method failed.");
+			configManagerSaveMethod.Invoke(null, new object[1] { config });
 		}
 	}
 }

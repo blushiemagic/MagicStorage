@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.UI.States;
@@ -30,6 +32,9 @@ namespace MagicStorage {
 
 		[DefaultValue(false)]
 		public bool recipeBlacklist;
+
+		[Expand(false)]
+		public HashSet<ItemDefinition> globalRecipeBlacklist = new();
 
 		[DefaultValue(false)]
 		public bool clearHistory;
@@ -104,6 +109,9 @@ namespace MagicStorage {
 
 		[JsonIgnore]
 		public static bool RecipeBlacklistEnabled => Instance.recipeBlacklist;
+
+		[JsonIgnore]
+		public static HashSet<ItemDefinition> GlobalRecipeBlacklist => Instance.globalRecipeBlacklist;
 
 		[JsonIgnore]
 		public static ButtonConfigurationMode ButtonUIMode => Instance.buttonLayout;

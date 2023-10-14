@@ -689,6 +689,8 @@ Mods: {
 
 		RecipeHidden: '''"{0}" рецептов были скрыты.'''
 		RecipeRevealed: '''"{0}" рецептов были показаны.'''
+		// RecipeHiddenGlobal: Recipe for item "{0}" was global blacklisted.
+		// RecipeRevealedGlobal: Recipe for item "{0}" was global whitelisted.
 
 		RecipeConditions: {
 			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
@@ -840,6 +842,11 @@ Mods: {
 				recipeBlacklist: {
 					Label: Белый/черный список рецептов
 					Tooltip: Включите, чтобы разрешить добавление исключений в рецептах в интерфейсе создания
+				}
+
+				globalRecipeBlacklist: {
+					// Label: Global Recipe Blacklist
+					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
 
 				clearHistory: {
