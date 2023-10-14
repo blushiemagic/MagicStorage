@@ -1206,11 +1206,17 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.forceSpecificRecipeResort = true;
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
-							Action<StoragePlayer, Item> revealRecipe = Main.keyState.IsKeyDown(Keys.LeftShift) ? RevealGlobalRecipe : RevealPlayerRecipe;
-							revealRecipe(storagePlayer, obj.StoredItem);
+							if (Main.keyState.IsKeyDown(Keys.LeftShift)) {
+								RevealGlobalRecipe(obj.StoredItem);
+							} else {
+								RevealPlayerRecipe(storagePlayer, obj.StoredItem);
+							}
 						} else {
-							Action<StoragePlayer, Item> hideRecipe = Main.keyState.IsKeyDown(Keys.LeftShift) ? HideGlobalRecipe : HidePlayerRecipe;
-							hideRecipe(storagePlayer, obj.StoredItem);
+							if (Main.keyState.IsKeyDown(Keys.LeftShift)) {
+								HideGlobalRecipe(obj.StoredItem);
+							} else {
+								HidePlayerRecipe(storagePlayer, obj.StoredItem);
+							}
 						}
 
 						StorageGUI.SetRefresh();
@@ -1239,7 +1245,7 @@ namespace MagicStorage.UI.States {
 						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 					}
 				}
-				void RevealGlobalRecipe(StoragePlayer _, Item item) {
+				void RevealGlobalRecipe(Item item) {
 					if (MagicStorageConfig.GlobalRecipeBlacklist.Remove(new(item.type))) {
 						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealedGlobal", Lang.GetItemNameValue(item.type)));
 
@@ -1248,7 +1254,7 @@ namespace MagicStorage.UI.States {
 						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 					}
 				}
-				void HideGlobalRecipe(StoragePlayer _, Item item) {
+				void HideGlobalRecipe(Item item) {
 					if (MagicStorageConfig.GlobalRecipeBlacklist.Add(new(item.type))) {
 						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHiddenGlobal", Lang.GetItemNameValue(item.type)));
 
