@@ -1205,38 +1205,12 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(obj.StoredItem.type);
 						CraftingGUI.forceSpecificRecipeResort = true;
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
-						if (Main.keyState.IsKeyDown(Keys.LeftShift)) {
-							if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
-								if (MagicStorageConfig.GlobalRecipeBlacklist.Remove(new(obj.StoredItem.type))) {
-									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealedGlobal", Lang.GetItemNameValue(obj.StoredItem.type)));
-
-									Utility.SaveModConfig(MagicStorageConfig.Instance);
-
-									slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
-								}
-							} else {
-								if (MagicStorageConfig.GlobalRecipeBlacklist.Add(new(obj.StoredItem.type))) {
-									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHiddenGlobal", Lang.GetItemNameValue(obj.StoredItem.type)));
-
-									Utility.SaveModConfig(MagicStorageConfig.Instance);
-
-									slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
-								}
-							}
+						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
+							Action<StoragePlayer, Item> revealRecipe = Main.keyState.IsKeyDown(Keys.LeftShift) ? RevealGlobalRecipe : RevealPlayerRecipe;
+							revealRecipe(storagePlayer, obj.StoredItem);
 						} else {
-							if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
-								if (storagePlayer.HiddenRecipes.Remove(obj.StoredItem)) {
-									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(obj.StoredItem.type)));
-
-									slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
-								}
-							} else {
-								if (storagePlayer.HiddenRecipes.Add(obj.StoredItem)) {
-									Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(obj.StoredItem.type)));
-
-									slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
-								}
-							}
+							Action<StoragePlayer, Item> hideRecipe = Main.keyState.IsKeyDown(Keys.LeftShift) ? HideGlobalRecipe : HidePlayerRecipe;
+							hideRecipe(storagePlayer, obj.StoredItem);
 						}
 
 						StorageGUI.SetRefresh();
@@ -1250,6 +1224,39 @@ namespace MagicStorage.UI.States {
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}
 				};
+
+				void RevealPlayerRecipe(StoragePlayer storagePlayer, Item item) {
+					if (storagePlayer.HiddenRecipes.Remove(item)) {
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(item.type)));
+
+						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+					}
+				}
+				void HidePlayerRecipe(StoragePlayer storagePlayer, Item item) {
+					if (storagePlayer.HiddenRecipes.Add(item)) {
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHidden", Lang.GetItemNameValue(item.type)));
+
+						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+					}
+				}
+				void RevealGlobalRecipe(StoragePlayer _, Item item) {
+					if (MagicStorageConfig.GlobalRecipeBlacklist.Remove(new(item.type))) {
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealedGlobal", Lang.GetItemNameValue(item.type)));
+
+						Utility.SaveModConfig(MagicStorageConfig.Instance);
+
+						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+					}
+				}
+				void HideGlobalRecipe(StoragePlayer _, Item item) {
+					if (MagicStorageConfig.GlobalRecipeBlacklist.Add(new(item.type))) {
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeHiddenGlobal", Lang.GetItemNameValue(item.type)));
+
+						Utility.SaveModConfig(MagicStorageConfig.Instance);
+
+						slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+					}
+				}
 			}
 
 			protected override bool ShouldHideItemIcons() {
