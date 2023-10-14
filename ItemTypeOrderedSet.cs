@@ -15,6 +15,7 @@ namespace MagicStorage
 		private const string Suffix3 = "~v3";
 		private readonly string _name;
 		private List<Item> _items = new();
+		private List<ItemDefinition> _unloadedItems = new();
 		private HashSet<int> _set = new();
 
 		public int Count => _items.Count;
@@ -78,7 +79,7 @@ namespace MagicStorage
 
 		public void Save(TagCompound c)
 		{
-			c.Add(_name + Suffix3, _items.Select(x => new ItemDefinition(x.type)).ToList());
+			c.Add(_name + Suffix3, _items.Select(x => new ItemDefinition(x.type)).Concat(_unloadedItems).ToList());
 		}
 
 		public void Load(TagCompound tag)
@@ -89,21 +90,16 @@ namespace MagicStorage
 			}
 			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2) 
 			{
-				_items = listV2.Select(x =>
-				{
-					if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
-						return null;
-					Item item = new();
-					item.SetDefaults(x);
-					item.type = x;
-					return item;
-				})
-				.Where(x => x is not null)
-				.ToList();
+				_items = listV2
+					.Where(x => x < ItemLoader.ItemCount) // Unable to reliably restore invalid IDs; just ignore them
+					.Select(x => new Item(x))
+					.Where(x => !x.IsAir) // Filters out deprecated items
+					.ToList();
 			}
 			else if (tag.GetList<ItemDefinition>(_name + Suffix3) is { Count: > 0 } listV3) 
 			{
 				_items = listV3.Where(x => !x.IsUnloaded).Select(x => new Item(x.Type)).ToList();
+				_unloadedItems = listV3.Where(x => x.IsUnloaded).ToList();
 			} 
 			else 
 			{
