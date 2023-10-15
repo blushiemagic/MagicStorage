@@ -541,8 +541,7 @@ namespace MagicStorage {
 			}
 		}
 
-		private static readonly Type ConfigManagerType = typeof(ConfigManager);
-		private static readonly MethodInfo ConfigManagerSaveMethod = ConfigManagerType.GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic, new[] { typeof(ModConfig) }) ?? throw new InvalidOperationException("Cannot get 'Terraria.ModLoader.Config.ConfigManager.Save' method.");
+		private static readonly MethodInfo ConfigManagerSaveMethod = typeof(ConfigManager).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic, new[] { typeof(ModConfig) }) ?? throw new InvalidOperationException("Cannot get 'Terraria.ModLoader.Config.ConfigManager.Save' method.");
 		private static readonly ParameterExpression ModConfigParameter = Expression.Parameter(typeof(ModConfig));
 		private static readonly Action<ModConfig> ConfigManagerSave = Expression.Lambda<Action<ModConfig>>(Expression.Call(ConfigManagerSaveMethod, ModConfigParameter), ModConfigParameter).Compile();
 
