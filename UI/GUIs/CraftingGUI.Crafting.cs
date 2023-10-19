@@ -7,6 +7,8 @@ using Terraria;
 using MagicStorage.Components;
 using Terraria.DataStructures;
 using Terraria.ID;
+using MagicStorage.CrossMod;
+using MagicStorage.Common;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -226,6 +228,8 @@ namespace MagicStorage {
 			// NOTE: [ThreadStatic] only runs the field initializer on one thread
 			DroppedItems ??= new();
 
+			List<Item> consumedItems = new();
+
 			while (context.toCraft > 0) {
 				if (!func(context))
 					break;  // Could not craft any more items
@@ -236,19 +240,19 @@ namespace MagicStorage {
 				resultItem.Prefix(-1);
 				context.results.Add(resultItem);
 
-				CatchDroppedItems = true;
-				DroppedItems.Clear();
-
-				var consumed = context.ConsumedItems.ToList();
-
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed, new Item());
+				consumedItems = context.ConsumedItems.ToList();
 
 				foreach (EnvironmentModule module in context.modules)
-					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumedItems);
 
-				CatchDroppedItems = false;
+				context.results.AddRange(ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe));
+			}
 
-				context.results.AddRange(DroppedItems);
+			// Run OnCraft once since that's all the user will see anyway
+			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+				DroppedItems.Clear();
+				Item resultItem = selectedRecipe.createItem.Clone();
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
 			}
 		}
 
@@ -331,6 +335,8 @@ namespace MagicStorage {
 			DroppedItems ??= new();
 
 			//Create the resulting items
+			List<Item> consumedItems = context.ConsumedItems.ToList();
+
 			for (int i = 0; i < crafts; i++) {
 				Item resultItem = selectedRecipe.createItem.Clone();
 				context.toCraft -= resultItem.stack;
@@ -338,19 +344,17 @@ namespace MagicStorage {
 				resultItem.Prefix(-1);
 				context.results.Add(resultItem);
 
-				CatchDroppedItems = true;
-				DroppedItems.Clear();
-
-				var consumed = context.ConsumedItems.ToList();
-
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumed, new Item());
-
 				foreach (EnvironmentModule module in context.modules)
-					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumed);
+					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumedItems);
 
-				CatchDroppedItems = false;
+				context.results.AddRange(ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe));
+			}
 
-				context.results.AddRange(DroppedItems);
+			// Run OnCraft once since that's all the user will see anyway
+			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+				DroppedItems.Clear();
+				Item resultItem = selectedRecipe.createItem.Clone();
+				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
 			}
 
 			NetHelper.Report(false, $"Batch craft operation succeeded ({crafts} crafts batched)");

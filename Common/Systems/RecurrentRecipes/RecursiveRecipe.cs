@@ -87,44 +87,50 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				maxDepth = depth;
 
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
-				if (!ingredient.FindBestMatchAndSetRecipe(available, ignoreItem)) {
-					// Cannot recurse further, go to next ingredient
-					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
-					continue;
-				}
-
-				Recipe recipe = ingredient.SelectedRecipe;
-				
-				// Block recursion that would require the blocked item type
-				if (ignoreItem > 0) {
-					bool nextIngredient = false;
-					foreach (Item item in recipe.requiredItem) {
-						if (ignoreItem == item.type || CraftingGUI.RecipeGroupMatch(recipe, ignoreItem, item.type)) {
-							nextIngredient = true;
-							break;
-						}
-					}
-
-					if (nextIngredient)
-						continue;
-				}
-
 				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
 				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
 				
 				int requiredPerCraft = requiredItem.stack;
 
-				int batchSize = recipe.createItem.stack;
-				int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
+				var possibleRecipes = ingredient.EnumerateValidRecipes(available, ignoreItem);
+				
+				// TODO: new object containing the possible recipes in only one tree node
+				bool anyRecipes = false;
+				foreach (Recipe recipe in possibleRecipes) {
+					// Block recursion that would require the blocked item type
+					if (ignoreItem > 0) {
+						bool nextIngredient = false;
+						foreach (Item item in recipe.requiredItem) {
+							if (ignoreItem == item.type || CraftingGUI.RecipeGroupMatch(recipe, ignoreItem, item.type)) {
+								nextIngredient = true;
+								break;
+							}
+						}
 
-				// Any extras above the required amount will either end up recycled by other subrecipes or be extra results
-				int amountToCraft = Math.Max(requiredPerCraft, batches * batchSize);
+						if (nextIngredient)
+							break;
+					}
 
-				OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft), ingredient.recipeIngredientIndex);
-				root.Add(orderedTree);
+					anyRecipes = true;
 
-				if (recipe.TryGetRecursiveRecipe(out var recursive))
-					recursive.ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, ignoreItem);
+					int batchSize = recipe.createItem.stack;
+					int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
+
+					// Any extras above the required amount will either end up recycled by other subrecipes or be extra results
+					int amountToCraft = Math.Max(requiredPerCraft, batches * batchSize);
+
+					OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft), ingredient.recipeIngredientIndex);
+					root.Add(orderedTree);
+
+					if (recipe.TryGetRecursiveRecipe(out var recursive))
+						recursive.ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, ignoreItem);
+				}
+
+				if (!anyRecipes) {
+					// Cannot recurse further, go to next ingredient
+					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
+					continue;
+				}
 			}
 
 			recursionStack.Remove(createItem);

@@ -148,7 +148,7 @@ namespace MagicStorage {
 						TryParseAs(2, out dropExpert);
 
 					if (dropNormal < 1)
-						ThrowWithMessage("Normal mode drop stack must be positive");
+						ThrowWithMessage("Normal mode drop stack must be positive", 1);
 
 					return ShadowDiamondDrop.DropDiamond(dropNormal, dropExpert);
 				case "Get Campfire Condition":
@@ -161,6 +161,20 @@ namespace MagicStorage {
 						ThrowWithMessage("Expected 1 argument");
 
 					return CraftingGUI.SimulatingCrafts;
+				case "Add Extra Craft Drop":
+					if (args.Length != 3)
+						ThrowWithMessage("Expected 3 arguments");
+
+					TryParseAs(2, out IItemDropRule extraDropRule);
+
+					if (args[1] is Recipe recipe)
+						ExtraCraftItemsSystem.RegisterDrop(recipe, extraDropRule);
+					else if (args[1] is Func<Recipe, bool> condition)
+						ExtraCraftItemsSystem.RegisterDrop(condition, extraDropRule);
+					else
+						ThrowWithMessage("First argument must be a \"Recipe\" or \"Func<Recipe, bool>\" object", 1);
+
+					return true;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
 			}

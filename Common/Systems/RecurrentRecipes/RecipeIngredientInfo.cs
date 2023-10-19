@@ -11,17 +11,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		internal readonly List<RecursionTree> trees;
 
-		private int _selectedRecipe;
-		/// <summary>
-		/// Which recipe should be used to craft this ingredient
-		/// </summary>
-		public Recipe SelectedRecipe => trees[_selectedRecipe].originalRecipe;
-
-		/// <summary>
-		/// Which recursion tree should be used when crafting this ingredient
-		/// </summary>
-		public RecursionTree SelectedTree => trees[_selectedRecipe];
-
 		/// <summary>
 		/// How many recipes can create this ingredient
 		/// </summary>
@@ -47,36 +36,32 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				.ToList();
 		}
 
-		public void SetRecipe(int index = -1) {
-			_selectedRecipe = index < 0 || index >= trees.Count ? 0 : index;
-		}
-
 		/// <summary>
-		/// Attempts to update <see cref="SelectedRecipe"/> depending on which possible recipe's ingredients requirement was satisfied the most.<br/>
-		/// If no recipe was found as a "best match", <see cref="SelectedRecipe"/> is not updated
+		/// Returns all possible recipes that can craft this ingredient, given the available inventory
 		/// </summary>
 		/// <param name="available">
 		/// An optional object indicating which item types are available and their quantities, which crafting stations are available and which recipe conditions have been met.<br/>
-		/// If <see langword="null"/>, <see cref="SelectedRecipe"/> is not updated.
+		/// If <see langword="null"/>, all recipes are returned.
 		/// </param>
 		/// <param name="blockedRecipeIngredient">
 		/// An optional item ID representing a recipe ingredient that should not be used when finding the best match.<br/>
 		/// If this parameter is greater than 0, then any recipes using the blocked item ID as a possible ingredient will be skipped.
 		/// </param>
-		/// <returns>Whether any recipe was able to be used</returns>
-		public bool FindBestMatchAndSetRecipe(AvailableRecipeObjects available, int blockedRecipeIngredient = 0) {
-			if (available is null)
-				return true;  // Assume that the caller handles null inventory
+		public IEnumerable<Recipe> EnumerateValidRecipes(AvailableRecipeObjects available, int blockedRecipeIngredient = 0) {
+			if (available is null) {
+				// Assume that the caller handles null inventory and use all recipes
+				foreach (var tree in trees)
+					yield return tree.originalRecipe;
 
-			if (trees.Count < 2) {
-				_selectedRecipe = 0;
-				return trees.Count > 0 && available.CanUseRecipe(SelectedRecipe);
+				yield break;
 			}
 
-			// Attempt to find the recipe with the best "availability", i.e. the recipe that has the most ingredients partially or fully satisfied
-			// If one exists, modify the "_selectedRecipe" index to that recipe.  Otherwise, don't modify it
-			int bestMatch = -1;
-			float bestPercent = 0;
+			if (trees.Count < 2) {
+				if (trees.Count > 0 && available.CanUseRecipe(trees[0].originalRecipe))
+					yield return trees[0].originalRecipe;
+
+				yield break;
+			}
 
 			for (int i = 0; i < trees.Count; i++) {
 				Recipe subrecipe = trees[i].originalRecipe;
@@ -85,7 +70,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (!available.CanUseRecipe(subrecipe))
 					goto checkNextTree;
 
-				float percent = 0;
 				foreach (Item item in subrecipe.requiredItem) {
 					bool usedRecipeGroup = false;
 					ClampedArithmetic stack = item.stack;
@@ -121,26 +105,20 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 							stack -= count;
 					}
 
+					if (stack > 0) {
+						// Recipe ingredient requirement could not be met
+						goto checkNextTree;
+					}
+
 					if (stack < 0)
 						stack = 0;
-
-					float stackConsumedFactor = (float)(item.stack - stack) / item.stack;
-					percent += stackConsumedFactor / subrecipe.requiredItem.Count;
 				}
 
-				if (percent > bestPercent) {
-					bestMatch = i;
-					bestPercent = percent;
-				}
+				// Recipe was fully available
+				yield return subrecipe;
 
 				checkNextTree: ;
 			}
-
-			// Update the initially selected recipe
-			if (bestMatch >= 0)
-				_selectedRecipe = bestMatch;
-
-			return bestMatch >= 0;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MagicStorage.CrossMod;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -165,6 +166,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				}
 			}
 
+			// TODO: OrderedRecipeContext inheritance?  "int AttemptCraft()" method?  Need to somehow allow all possible recipes for an ingredient to be processed...
+
 			Dictionary<int, int> itemIndices = new();
 			Dictionary<int, int> groupIndices = new();
 			Dictionary<int, int> excessIndicies = new();
@@ -265,26 +268,23 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				}
 
 				// Fake a craft
-				CraftingGUI.CatchDroppedItems = true;
-				CraftingGUI.DroppedItems.Clear();
-
 				Item createItem = recipe.createItem.Clone();
 
+				List<Item> droppedItems = new();
+
 				for (int i = 0; i < ingredientBatches; i++) {
-					RecipeLoader.OnCraft(createItem, recipe, recipe.requiredItem, new Item());
+					droppedItems.AddRange(ExtraCraftItemsSystem.GetSimulatedItemDrops(recipe));
 
 					foreach (EnvironmentModule module in modules)
 						module.OnConsumeItemsForRecipe(sandbox, recipe, recipe.requiredItem);
 				}
 
-				CraftingGUI.CatchDroppedItems = false;
-
 				// Add the result item and any dropped items to the excess list
 				createItem.stack *= ingredientBatches;
 
-				CraftingGUI.DroppedItems.Insert(0, createItem);
+				droppedItems.Insert(0, createItem);
 
-				foreach (Item item in CraftingGUI.DroppedItems) {
+				foreach (Item item in droppedItems) {
 					if (!excessIndicies.TryGetValue(item.type, out int itemIndex)) {
 						excessIndicies[item.type] = excessResults.Count;
 						excessResults.Add(new ItemInfo(item));

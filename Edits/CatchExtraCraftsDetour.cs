@@ -27,6 +27,6 @@ public class CatchExtraCraftsDetour : Edit
 		Item item = new(type, stack);
 		CraftingGUI.DroppedItems ??= new();
 		CraftingGUI.DroppedItems.Add(item);
-		return -1; // return invalid value since this should never be used
+		return Main.maxItems; // return invalid value since this should never be used
 	}
 }
