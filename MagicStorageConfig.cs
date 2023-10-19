@@ -34,6 +34,7 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool recipeBlacklist;
 
+		// TODO: remove custom json converter when tml fix ItemDefinition format error
 		[JsonProperty(ItemConverterType = typeof(ItemDefinitionToFromStringJsonConverter))]
 		[Expand(false)]
 		public HashSet<ItemDefinition> globalRecipeBlacklist = new();
@@ -138,6 +139,7 @@ namespace MagicStorage {
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 
+		// TODO: remove custom json converter when tml fix ItemDefinition format error
 		private sealed class ItemDefinitionToFromStringJsonConverter : JsonConverter<ItemDefinition> {
 			public override ItemDefinition ReadJson(JsonReader reader, Type objectType, ItemDefinition existingValue, bool hasExistingValue, JsonSerializer serializer) {
 				return ItemDefinition.FromString((string)reader.Value);
