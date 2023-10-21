@@ -13,16 +13,14 @@ The 1.4 version of Magic Storage merges the Magic Storage and Magic Storage - Ex
 
 Want to support the mod's development?  Donate to absoluteAquarian's Patreon [url=www.patreon.com/absoluteAquarian][img]https://i.imgur.com/xII2DwJ.png[/img][/url]
 
-[h1]MAGIC STORAGE TEAM[/h1]
+[h1]SPECIAL THANKS[/h1]
 [b]blushiemagic[/b]
-- Mod Author
-[b]absoluteAquarian[/b]
-- Official maintainer for Magic Storage
+- For creating this mod in the first place and giving me permission to continue its development
 [b]wvlad[/b]
-- Responsible for important fixes that were integrated into Magic Storage - Extra
+- For implementing important bug fixes that were integrated into the 1.4 port for this mod
 [b]Exterminator[/b]
-- Developer for Magic Storage - Extra
+- For developing [i]Magic Storage - Extra[/i] fork of this mod for 1.3 tModLoader
 [b]AdipemDragon[/b]
-- Created most of the sprites used in the mod
+- For crating most of the sprites used in the mod
 [b]Yowave[/b]
-- Created bug fixes and optimizations for the mod during absoluteAquarian's hiatus from 20Oct2021-15Dec2021
+- For implementing bug fixes and optimizations for the mod during my hiatus in Fall 2021
