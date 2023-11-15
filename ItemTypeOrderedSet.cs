@@ -2,6 +2,7 @@
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage
@@ -11,8 +12,10 @@ namespace MagicStorage
 		public static ItemTypeOrderedSet Empty => new("Empty");
 
 		private const string Suffix = "~v2";
+		private const string Suffix3 = "~v3";
 		private readonly string _name;
 		private List<Item> _items = new();
+		private List<ItemDefinition> _unloadedItems = new();
 		private HashSet<int> _set = new();
 
 		public int Count => _items.Count;
@@ -76,33 +79,31 @@ namespace MagicStorage
 
 		public void Save(TagCompound c)
 		{
-			c.Add(_name + Suffix, _items.Select(x => x.type).ToList());
+			c.Add(_name + Suffix3, _items.Select(x => new ItemDefinition(x.type)).Concat(_unloadedItems).ToList());
 		}
 
 		public void Load(TagCompound tag)
 		{
-			IList<TagCompound> list = tag.GetList<TagCompound>(_name);
-			if (list is not null && list.Count > 0)
+			if (tag.GetList<TagCompound>(_name) is { Count: > 0 } listV1) 
 			{
-				_items = list.Select(ItemIO.Load).ToList();
+				_items = listV1.Select(ItemIO.Load).ToList();
 			}
-			else
+			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2) 
 			{
-				IList<int> listV2 = tag.GetList<int>(_name + Suffix);
-				if (listV2 is not null)
-					_items = listV2.Select(x =>
-						{
-							if (x >= ItemLoader.ItemCount && ItemLoader.GetItem(x) == null)
-								return null;
-							Item item = new();
-							item.SetDefaults(x);
-							item.type = x;
-							return item;
-						})
-						.Where(x => x is not null)
-						.ToList();
-				else
-					_items = new List<Item>();
+				_items = listV2
+					.Where(x => x < ItemLoader.ItemCount) // Unable to reliably restore invalid IDs; just ignore them
+					.Select(x => new Item(x))
+					.Where(x => !x.IsAir) // Filters out deprecated items
+					.ToList();
+			}
+			else if (tag.GetList<ItemDefinition>(_name + Suffix3) is { Count: > 0 } listV3) 
+			{
+				_items = listV3.Where(x => !x.IsUnloaded).Select(x => new Item(x.Type)).ToList();
+				_unloadedItems = listV3.Where(x => x.IsUnloaded).ToList();
+			} 
+			else 
+			{
+				_items = new List<Item>();
 			}
 
 			_set = new HashSet<int>(_items.Select(x => x.type));
