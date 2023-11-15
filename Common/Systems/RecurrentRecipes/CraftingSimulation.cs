@@ -9,7 +9,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public IEnumerable<Recipe> UsedRecipes => simulationResult.usedRecipes.OrderBy(static r => r.recursionDepth).Select(static r => r.recipe).DistinctBy(static r => r, ReferenceEqualityComparer.Instance);
 		public IReadOnlyList<RequiredMaterialInfo> RequiredMaterials => simulationResult.requiredMaterials;
-		public IReadOnlyList<ItemInfo> ExcessResults => simulationResult.excessResults;
+		public IReadOnlyList<ExcessItemInfo> ExcessResults => simulationResult.excessResults;
 		public IEnumerable<int> RequiredTiles => simulationResult.requiredTiles;
 		public IEnumerable<Condition> RequiredConditions => simulationResult.requiredConditions;
 
@@ -52,7 +52,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				// Update the counts dictionary with the consumed materials
 				bool notEnoughItems = false;
 				foreach (RequiredMaterialInfo material in craftResult.requiredMaterials) {
-					int stack = material.stack;
+					int stack = material.Stack;
 					if (stack > 0) {
 						foreach (int item in material.GetValidItems()) {
 							stack = available.UpdateIngredient(item, -stack);
@@ -73,9 +73,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					break;
 
 				// Update the counts dictionary with the generated excess items
-				foreach (ItemInfo info in craftResult.excessResults) {
-					if (info.stack > 0)
-						available.UpdateIngredient(info.type, info.stack);
+				foreach (ExcessItemInfo info in craftResult.excessResults) {
+					if (info.Stack > 0)
+						available.UpdateIngredient(info.type, info.Stack);
 				}
 
 				simulationResult = simulationResult.CombineWith(craftResult);

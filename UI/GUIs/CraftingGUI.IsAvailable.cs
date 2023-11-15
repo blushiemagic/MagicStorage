@@ -161,7 +161,7 @@ namespace MagicStorage {
 
 		private static bool PassesBlock_CheckSimulation(CraftingSimulation simulation) {
 			foreach (RequiredMaterialInfo material in simulation.RequiredMaterials) {
-				int stack = material.stack;
+				int stack = material.Stack;
 
 				foreach (int type in material.GetValidItems()) {
 					foreach (ItemInfo item in storageItemInfo) {

@@ -58,7 +58,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			int batches = (int)Math.Ceiling(amountToCraft / (double)batchSize);
 
 			HashSet<int> recursionStack = new();
-			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, batches * batchSize), 0);
+			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, new SharedCounter(batches * batchSize)), 0);
 			int depth = 0, maxDepth = 0;
 
 			if (MagicStorageConfig.IsRecursionEnabled)
@@ -92,9 +92,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				
 				int requiredPerCraft = requiredItem.stack;
 
+				SharedCounter counter = new SharedCounter(requiredPerCraft * parentBatches);
+
 				var possibleRecipes = ingredient.EnumerateValidRecipes(available, ignoreItem);
 				
-				// TODO: new object containing the possible recipes in only one tree node
 				bool anyRecipes = false;
 				foreach (Recipe recipe in possibleRecipes) {
 					// Block recursion that would require the blocked item type
@@ -116,10 +117,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					int batchSize = recipe.createItem.stack;
 					int batches = (int)Math.Ceiling(requiredPerCraft / (double)batchSize * parentBatches);
 
-					// Any extras above the required amount will either end up recycled by other subrecipes or be extra results
-					int amountToCraft = Math.Max(requiredPerCraft, batches * batchSize);
-
-					OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, amountToCraft), ingredient.recipeIngredientIndex);
+					OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(recipe, depth, counter), ingredient.recipeIngredientIndex);
 					root.Add(orderedTree);
 
 					if (recipe.TryGetRecursiveRecipe(out var recursive))

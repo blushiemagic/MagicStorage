@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public sealed class OrderedRecipeTree {
@@ -22,6 +21,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public OrderedRecipeTree(OrderedRecipeContext context, int parentLeafIndex) {
 			this.context = context;
 			this.parentLeafIndex = parentLeafIndex;
+			context?.LinkTo(this);
 		}
 
 		public void Add(OrderedRecipeTree tree) {
@@ -38,7 +38,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public void Clear() {
 			if (!Invalid)
-				context.amountToCraft = 0;
+				context.amountToCraft.Reset();
 			leaves.Clear();
 		}
 
@@ -89,7 +89,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				Recipe recipe = branch.context.recipe;
 
 				int result = recipe.createItem.type;
-				ref int remaining = ref branch.context.amountToCraft;
+				SharedCounter remaining = branch.context.amountToCraft;
 
 				Recipe parentRecipe = branch.Root.context.recipe;
 
@@ -106,8 +106,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				} else {
 					remaining -= count;
 
-					if (remaining < 0)
-						remaining = 0;
+					remaining.EnsureNotNegative();
 
 					// Check the leaves
 					foreach (var leaf in branch.Leaves)
@@ -166,8 +165,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				}
 			}
 
-			// TODO: OrderedRecipeContext inheritance?  "int AttemptCraft()" method?  Need to somehow allow all possible recipes for an ingredient to be processed...
-
 			Dictionary<int, int> itemIndices = new();
 			Dictionary<int, int> groupIndices = new();
 			Dictionary<int, int> excessIndicies = new();
@@ -202,19 +199,21 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int ingredientBatches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
 
 				Recipe recipe = context.recipe;
+				int ingredientIndex = 0;
 				foreach (Item item in recipe.requiredItem) {
 					// Consume from the excess results first
-					int stack = item.stack * ingredientBatches;
+					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack);
+					ingredientIndex++;
 
 					if (excessIndicies.TryGetValue(item.type, out int excessIndex)) {
-						ItemInfo info = excessResults[excessIndex];
+						ExcessItemInfo info = excessResults[excessIndex];
 
-						if (info.stack >= stack) {
-							excessResults[excessIndex] = info.UpdateStack(-stack);
+						if (info.Stack >= stack) {
+							info.UpdateStack(-stack);
 							continue;
 						} else {
-							stack -= info.stack;
-							excessResults[excessIndex] = info.SetStack(0);
+							stack -= info.Stack;
+							info.ClearStack();
 						}
 					}
 
@@ -225,15 +224,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 							// Consume from the excess results first
 							foreach (int groupItem in group.ValidItems) {
 								if (excessIndicies.TryGetValue(groupItem, out excessIndex)) {
-									ItemInfo info = excessResults[excessIndex];
+									ExcessItemInfo info = excessResults[excessIndex];
 
-									if (info.stack >= stack) {
-										excessResults[excessIndex] = info.UpdateStack(-stack);
-										stack = 0;
+									if (info.Stack >= stack) {
+										info.UpdateStack(-stack);
+										stack.Reset();
 										continue;
 									} else {
-										stack -= info.stack;
-										excessResults[excessIndex] = info.SetStack(0);
+										stack -= info.Stack;
+										info.ClearStack();
 									}
 
 									usedRecipeGroup = true;
@@ -250,7 +249,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 								groupIndices[groupID] = materials.Count;
 								materials.Add(RequiredMaterialInfo.FromGroup(group, stack));
 							} else
-								materials[index] = materials[index].UpdateStack(stack);
+								materials[index].UpdateStack(stack);
 
 							break;
 						}
@@ -263,12 +262,13 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 							itemIndices[item.type] = materials.Count;
 							materials.Add(RequiredMaterialInfo.FromItem(item.type, stack));
 						} else
-							materials[index] = materials[index].UpdateStack(stack);
+							materials[index].UpdateStack(stack);
 					}
 				}
 
 				// Fake a craft
 				Item createItem = recipe.createItem.Clone();
+				createItem.Prefix(-1);
 
 				List<Item> droppedItems = new();
 
@@ -282,14 +282,18 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				// Add the result item and any dropped items to the excess list
 				createItem.stack *= ingredientBatches;
 
-				droppedItems.Insert(0, createItem);
+				if (!excessIndicies.TryGetValue(createItem.type, out int itemIndex)) {
+					excessIndicies[createItem.type] = excessResults.Count;
+					excessResults.Add(new ExcessItemInfo(createItem.type, context.RentCounterFromParent(createItem.stack), createItem.prefix));
+				} else
+					excessResults[itemIndex].UpdateStack(createItem.stack);
 
 				foreach (Item item in droppedItems) {
-					if (!excessIndicies.TryGetValue(item.type, out int itemIndex)) {
+					if (!excessIndicies.TryGetValue(item.type, out itemIndex)) {
 						excessIndicies[item.type] = excessResults.Count;
-						excessResults.Add(new ItemInfo(item));
+						excessResults.Add(new ExcessItemInfo(item.type, new SharedCounter(item.stack), item.prefix));
 					} else
-						excessResults[itemIndex] = excessResults[itemIndex].UpdateStack(item.stack);
+						excessResults[itemIndex].UpdateStack(item.stack);
 				}
 
 				recipes.Add(new RecursedRecipe(context.depth, recipe));

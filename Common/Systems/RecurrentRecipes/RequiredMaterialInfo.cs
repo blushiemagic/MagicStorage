@@ -5,24 +5,23 @@ using System.Linq;
 using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
-	public readonly struct RequiredMaterialInfo {
+	public struct RequiredMaterialInfo {
 		public readonly int itemOrGroupID;
-		public readonly int stack;
+		private SharedCounter _stack;
+		public int Stack => _stack;
 		public readonly bool recipeGroup;
 
-		private RequiredMaterialInfo(int itemOrGroupID, int stack, bool recipeGroup) {
+		private RequiredMaterialInfo(int itemOrGroupID, SharedCounter stack, bool recipeGroup) {
 			this.itemOrGroupID = itemOrGroupID;
-			this.stack = stack;
+			this._stack = stack;
 			this.recipeGroup = recipeGroup;
 		}
 
-		public static RequiredMaterialInfo FromItem(int type, int stack) => new RequiredMaterialInfo(type, stack, false);
+		public static RequiredMaterialInfo FromItem(int type, SharedCounter stack) => new RequiredMaterialInfo(type, stack, false);
 
-		public static RequiredMaterialInfo FromItem(Item item) => new RequiredMaterialInfo(item.type, item.stack, false);
+		public static RequiredMaterialInfo FromGroup(int groupID, SharedCounter stack) => new RequiredMaterialInfo(groupID, stack, true);
 
-		public static RequiredMaterialInfo FromGroup(int groupID, int stack) => new RequiredMaterialInfo(groupID, stack, true);
-
-		public static RequiredMaterialInfo FromGroup(RecipeGroup group, int stack) => new RequiredMaterialInfo(group.RegisteredId, stack, true);
+		public static RequiredMaterialInfo FromGroup(RecipeGroup group, SharedCounter stack) => new RequiredMaterialInfo(group.RegisteredId, stack, true);
 
 		public IEnumerable<int> GetValidItems() {
 			if (!recipeGroup) {
@@ -34,16 +33,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			}
 		}
 
-		public RequiredMaterialInfo UpdateStack(int add) {
-			return new RequiredMaterialInfo(itemOrGroupID, stack + add, recipeGroup);
-		}
+		public void UpdateStack(int add) => _stack += add;
 
-		public RequiredMaterialInfo SetStack(int newStack) {
-			return new RequiredMaterialInfo(itemOrGroupID, newStack, recipeGroup);
-		}
+		public void ClearStack() => _stack.Reset();
 
 		public override bool Equals([NotNullWhen(true)] object obj) {
-			return obj is RequiredMaterialInfo other && itemOrGroupID == other.itemOrGroupID && stack == other.stack && recipeGroup == other.recipeGroup;
+			return obj is RequiredMaterialInfo other && object.ReferenceEquals(_stack, other._stack) && itemOrGroupID == other.itemOrGroupID && Stack == other.Stack && recipeGroup == other.recipeGroup;
 		}
 
 		public bool EqualsIgnoreStack(RequiredMaterialInfo other) {
@@ -51,11 +46,11 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public override int GetHashCode() {
-			return HashCode.Combine(itemOrGroupID, stack, recipeGroup);
+			return HashCode.Combine(itemOrGroupID, Stack, recipeGroup);
 		}
 
 		public static bool operator ==(RequiredMaterialInfo left, RequiredMaterialInfo right) {
-			return left.itemOrGroupID == right.itemOrGroupID && left.stack == right.stack && left.recipeGroup == right.recipeGroup;
+			return left.itemOrGroupID == right.itemOrGroupID && object.ReferenceEquals(left._stack, right._stack) && left.Stack == right.Stack && left.recipeGroup == right.recipeGroup;
 		}
 
 		public static bool operator !=(RequiredMaterialInfo left, RequiredMaterialInfo right) {

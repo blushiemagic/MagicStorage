@@ -147,7 +147,7 @@ namespace MagicStorage {
 			ctx.simulation = true;
 
 			foreach (var m in simulation.RequiredMaterials) {
-				if (m.stack <= 0)
+				if (m.Stack <= 0)
 					continue;  // Safeguard: material was already "used up" by higher up recipes
 
 				var material = m;
@@ -165,7 +165,7 @@ namespace MagicStorage {
 						continue;
 					}
 
-					int possibleStack = Math.Min(material.stack, quantity);
+					int possibleStack = Math.Min(material.Stack, quantity);
 
 					Item item = new Item(type, possibleStack);
 
@@ -177,25 +177,22 @@ namespace MagicStorage {
 						}
 					} else {
 						// Consume the item
-						material = material.UpdateStack(-stackConsumed);
+						material.UpdateStack(-stackConsumed);
 						item.stack = stackConsumed;
 						consumedItems.Add(item);
 
 						ctx.itemCounts[type] -= stackConsumed;
 
-						if (material.stack <= 0)
+						if (material.Stack <= 0)
 							break;
 					}
 				}
 
-				if (!skipItemConsumption && material.stack > 0) {
+				if (!skipItemConsumption && material.Stack > 0) {
 					NetHelper.Report(false, $"Material requirement \"{Lang.GetItemNameValue(material.GetValidItems().First())}\" could not be met, aborting");
 					return;
 				}
 			}
-
-			// Immediately add the excess to the context's results
-			ctx.results.AddRange(simulation.ExcessResults.Where(static i => i.stack > 0).Select(static i => new Item(i.type, i.stack, i.prefix)));
 
 			ctx.simulation = false;
 
@@ -215,11 +212,14 @@ namespace MagicStorage {
 			// (It should be false by this point, but it's forced back to false as a sanity check)
 			_simulatingCrafts = false;
 
-			CatchDroppedItems = true;
-			RecipeLoader.OnCraft(ctx.recipe.createItem, ctx.recipe, consumedItems, new Item());
-			// Dropped items were caught during the simulation; destroy them here
-			DroppedItems.Clear();
-			CatchDroppedItems = false;
+			// Inform other mods that the items were crafted
+			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+				DroppedItems.Clear();
+				foreach (Item item in simulation.ExcessResults.Where(static i => i.Stack > 0).Select(static i => new Item(i.type, i.Stack, i.prefix))) {
+					ctx.results.Add(item);
+					RecipeLoader.OnCraft(item, ctx.recipe, consumedItems, new Item());
+				}
+			}
 
 			NetHelper.Report(true, $"Success! Crafted {simulation.AmountCrafted} items and {simulation.ExcessResults.Count - 1} extra item types");
 		}
@@ -245,14 +245,16 @@ namespace MagicStorage {
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumedItems);
 
-				context.results.AddRange(ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe));
-			}
+				// Inform other mods that the items were crafted
+				using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+					foreach (Item item in ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe)) {
+						context.results.Add(item);
+						RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+					}
 
-			// Run OnCraft once since that's all the user will see anyway
-			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
-				DroppedItems.Clear();
-				Item resultItem = selectedRecipe.createItem.Clone();
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+					DroppedItems.Clear();
+					RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+				}
 			}
 		}
 
@@ -347,14 +349,16 @@ namespace MagicStorage {
 				foreach (EnvironmentModule module in context.modules)
 					module.OnConsumeItemsForRecipe(context.sandbox, selectedRecipe, consumedItems);
 
-				context.results.AddRange(ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe));
-			}
+				// Inform other mods that the items were crafted
+				using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+					foreach (Item item in ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe)) {
+						context.results.Add(item);
+						RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+					}
 
-			// Run OnCraft once since that's all the user will see anyway
-			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
-				DroppedItems.Clear();
-				Item resultItem = selectedRecipe.createItem.Clone();
-				RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+					DroppedItems.Clear();
+					RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+				}
 			}
 
 			NetHelper.Report(false, $"Batch craft operation succeeded ({crafts} crafts batched)");
