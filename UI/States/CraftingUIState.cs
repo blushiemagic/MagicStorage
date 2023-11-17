@@ -1206,10 +1206,10 @@ namespace MagicStorage.UI.States {
 						CraftingGUI.forceSpecificRecipeResort = true;
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						if (recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice) {
-							if (Main.keyState.IsKeyDown(Keys.LeftShift)) {
-								RevealGlobalRecipe(obj.StoredItem);
-							} else {
-								RevealPlayerRecipe(obj.StoredItem);
+							var revealedGlobal = RevealGlobalRecipe(obj.StoredItem);
+							var revealedPlayer = RevealPlayerRecipe(obj.StoredItem);
+							if (revealedGlobal || revealedPlayer) {
+								slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 							}
 						} else {
 							if (Main.keyState.IsKeyDown(Keys.LeftShift)) {
@@ -1230,12 +1230,13 @@ namespace MagicStorage.UI.States {
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 					}
 
-					void RevealPlayerRecipe(Item item) {
+					bool RevealPlayerRecipe(Item item) {
 						if (storagePlayer.HiddenRecipes.Remove(item)) {
 							Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealed", Lang.GetItemNameValue(item.type)));
 
-							slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+							return true;
 						}
+						return false;
 					}
 					void HidePlayerRecipe(Item item) {
 						if (storagePlayer.HiddenRecipes.Add(item)) {
@@ -1244,14 +1245,15 @@ namespace MagicStorage.UI.States {
 							slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
 						}
 					}
-					void RevealGlobalRecipe(Item item) {
+					bool RevealGlobalRecipe(Item item) {
 						if (MagicStorageConfig.GlobalRecipeBlacklist.Remove(new(item.type))) {
 							Main.NewText(Language.GetTextValue("Mods.MagicStorage.RecipeRevealedGlobal", Lang.GetItemNameValue(item.type)));
 
 							Utility.SaveModConfig(MagicStorageConfig.Instance);
 
-							slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+							return true;
 						}
+						return false;
 					}
 					void HideGlobalRecipe(Item item) {
 						if (MagicStorageConfig.GlobalRecipeBlacklist.Add(new(item.type))) {
