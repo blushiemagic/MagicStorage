@@ -60,11 +60,12 @@ namespace MagicStorage {
 			// now if nothing found we disable filters one by one
 			if (thread.searchText.Length > 0)
 			{
-				if (recipes.Count == 0 && state.hiddenRecipes.Count > 0)
+				if (recipes.Count == 0 && (state.globalHiddenRecipes.Count > 0 || state.hiddenRecipes.Count > 0))
 				{
 					NetHelper.Report(true, "No recipes passed the filter.  Attempting filter with no hidden recipes");
 
 					// search hidden recipes too
+					state.globalHiddenRecipes = ThreadState.EmptyGlobalHiddenRecipes;
 					state.hiddenRecipes = ItemTypeOrderedSet.Empty;
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist");
@@ -236,7 +237,7 @@ namespace MagicStorage {
 		private static bool CanBeAdded(StorageGUI.ThreadContext thread, ThreadState state, Recipe r) => Array.IndexOf(MagicCache.FilteredRecipesCache[thread.filterMode], r) >= 0
 			&& ItemSorter.FilterBySearchText(r.createItem, thread.searchText, thread.modSearch)
 			// show only blacklisted recipes only if choice = 2, otherwise show all other
-			&& (!MagicStorageConfig.RecipeBlacklistEnabled || state.recipeFilterChoice == RecipeButtonsBlacklistChoice == state.hiddenRecipes.Contains(r.createItem))
+			&& (!MagicStorageConfig.RecipeBlacklistEnabled || state.recipeFilterChoice == RecipeButtonsBlacklistChoice == (state.globalHiddenRecipes.Contains(r.createItem.type) || state.hiddenRecipes.Contains(r.createItem)))
 			// show only favorited items if selected
 			&& (!MagicStorageConfig.CraftingFavoritingEnabled || state.recipeFilterChoice != RecipeButtonsFavoritesChoice || state.favoritedRecipes.Contains(r.createItem));
 
@@ -247,7 +248,7 @@ namespace MagicStorage {
 
 			// show only blacklisted recipes only if choice = 2, otherwise show all other
 			if (MagicStorageConfig.RecipeBlacklistEnabled)
-				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice == RecipeButtonsBlacklistChoice == state.hiddenRecipes.Contains(x.createItem));
+				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice == RecipeButtonsBlacklistChoice == (state.globalHiddenRecipes.Contains(x.createItem.type) || state.hiddenRecipes.Contains(x.createItem)));
 
 			thread.CompleteOneTask();
 

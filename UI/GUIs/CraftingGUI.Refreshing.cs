@@ -15,10 +15,13 @@ using Terraria.ID;
 namespace MagicStorage {
 	partial class CraftingGUI {
 		private class ThreadState {
+			public static readonly HashSet<int> EmptyGlobalHiddenRecipes = new();
+
 			public EnvironmentSandbox sandbox;
 			public Recipe[] recipesToRefresh;
 			public IEnumerable<Item> heartItems;
 			public IEnumerable<Item> simulatorItems;
+			public HashSet<int> globalHiddenRecipes;
 			public ItemTypeOrderedSet hiddenRecipes, favoritedRecipes;
 			public int recipeFilterChoice;
 			public bool[] recipeConditionsMetSnapshot;
@@ -92,6 +95,7 @@ namespace MagicStorage {
 			var recipesPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
 			string searchText = recipesPage.searchBar.Text;
 
+			var globalHiddenRecipes = MagicStorageConfig.GlobalRecipeBlacklist.Where(x => !x.IsUnloaded).Select(x => x.Type).ToHashSet();
 			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
 			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
 
@@ -111,6 +115,7 @@ namespace MagicStorage {
 					recipesToRefresh = toRefresh,
 					heartItems = heartItems,
 					simulatorItems = simulatorItems,
+					globalHiddenRecipes = globalHiddenRecipes,
 					hiddenRecipes = hiddenRecipes,
 					favoritedRecipes = favorited,
 					recipeFilterChoice = recipeChoice

@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.UI.States;
@@ -30,6 +33,11 @@ namespace MagicStorage {
 
 		[DefaultValue(false)]
 		public bool recipeBlacklist;
+
+		// TODO: remove custom json converter when tml fix ItemDefinition format error
+		[JsonProperty(ItemConverterType = typeof(ItemDefinitionToFromStringJsonConverter))]
+		[Expand(false)]
+		public HashSet<ItemDefinition> globalRecipeBlacklist = new();
 
 		[DefaultValue(false)]
 		public bool clearHistory;
@@ -106,6 +114,9 @@ namespace MagicStorage {
 		public static bool RecipeBlacklistEnabled => Instance.recipeBlacklist;
 
 		[JsonIgnore]
+		public static HashSet<ItemDefinition> GlobalRecipeBlacklist => Instance.globalRecipeBlacklist;
+
+		[JsonIgnore]
 		public static ButtonConfigurationMode ButtonUIMode => Instance.buttonLayout;
 
 		[JsonIgnore]
@@ -127,6 +138,17 @@ namespace MagicStorage {
 		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
+
+		// TODO: remove custom json converter when tml fix ItemDefinition format error
+		private sealed class ItemDefinitionToFromStringJsonConverter : JsonConverter<ItemDefinition> {
+			public override ItemDefinition ReadJson(JsonReader reader, Type objectType, ItemDefinition existingValue, bool hasExistingValue, JsonSerializer serializer) {
+				return ItemDefinition.FromString((string)reader.Value);
+			}
+
+			public override void WriteJson(JsonWriter writer, ItemDefinition value, JsonSerializer serializer) {
+				writer.WriteValue(value.ToString());
+			}
+		}
 	}
 
 	public class MagicStorageServerConfig : ModConfig {

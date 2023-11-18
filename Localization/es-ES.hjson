@@ -708,6 +708,8 @@ Mods: {
 
 		RecipeHidden: La receta para el objeto "{0}" ha sido añadida a la lista negra.
 		RecipeRevealed: La receta para el objeto "{0}" ha sido añadida a la lista blanca.
+		// RecipeHiddenGlobal: Recipe for item "{0}" was global blacklisted.
+		// RecipeRevealedGlobal: Recipe for item "{0}" was global whitelisted.
 
 		RecipeConditions: {
 			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
@@ -859,6 +861,11 @@ Mods: {
 				recipeBlacklist: {
 					Label: Lista blanca/negra de recetas
 					Tooltip: Activa para permitir agregar recetas a una lista blanca o negra en la interfaz de crafteo
+				}
+
+				globalRecipeBlacklist: {
+					// Label: Global Recipe Blacklist
+					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
 
 				clearHistory: {
