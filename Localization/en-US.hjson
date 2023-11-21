@@ -578,6 +578,7 @@ Mods: {
 					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
 					These modules can be toggled on and off in UI for the Configuration Interface.
 					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					[rg/s2:MagicStorage:AnyDiamond] [i/s50:DirtBlock] [i/s50:StoneBlock] [i/s50:MudBlock] [i/s50:SnowBlock] [i/s50:SandBlock] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/EnvironmentAccess]
 					'''
 				Help20:
 					'''
