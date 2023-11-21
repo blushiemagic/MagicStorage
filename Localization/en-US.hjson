@@ -573,7 +573,12 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. You can use it to craft Portable Remote Accesses with unlimited access range!
-				Help19: The [i:MagicStorage/EnvironmentAccess] is quite the bizarre component. Rumor states that it allows outside tampering of Magic Storage storage systems, but only a mod developer would be able to use its inner workings.
+				Help19:
+					'''
+					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
+					These modules can be toggled on and off in UI for the Configuration Interface.
+					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					'''
 				Help20:
 					'''
 					While the [i:MagicStorage/RemoteAccess] is very handy, sometimes you need to be able to access your storage while you're away from home.

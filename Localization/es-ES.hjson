@@ -588,7 +588,12 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
-				Help19: El [i:MagicStorage/EnvironmentAccess] es un componente bastante extraño. Se rumorea que permite la manipulación externa de los sistemas de almacenamiento de Magic Storage, pero solo un desarrollador de mods sería capaz de usar sus trabajos.
+				/* Help19:
+					'''
+					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
+					These modules can be toggled on and off in UI for the Configuration Interface.
+					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					''' */
 				Help20:
 					'''
 					Aunque el [i:MagicStorage/RemoteAccess] es muy útil, a veces necesitas poder acceder a tu almacenamiento mientras estás lejos de casa.

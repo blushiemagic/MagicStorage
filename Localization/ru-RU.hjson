@@ -569,7 +569,12 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: Лунный лорд охраняет Сияющую драгоценность, драгоценный камень невероятной силы. Вы можете использовать его для создания портативных средств удаленного доступа с неограниченным диапазоном доступа!
-				Help19: "[i:MagicStorage/EnvironmentAccess] является довольно причудливым компонентом. Ходят слухи, что он допускает внешнее вмешательство в системы хранения Magic Storage, но только разработчик мода сможет использовать его."
+				/* Help19:
+					'''
+					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
+					These modules can be toggled on and off in UI for the Configuration Interface.
+					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					''' */
 				Help20:
 					'''
 					[i:MagicStorage/RemoteAccess] Очень удобнен, иногда вам нужно иметь доступ к своему хранилищу, находясь вдали от дома.

@@ -570,7 +570,12 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
-				Help19: "[i:MagicStorage/EnvironmentAccess] 是一个相当奇怪的组件。有传言说，它允许外界篡改魔法存储系统，但只有模组开发者才能理解其内部工作原理并加以运用。"
+				/* Help19:
+					'''
+					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
+					These modules can be toggled on and off in UI for the Configuration Interface.
+					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					''' */
 				Help20:
 					'''
 					尽管 [i:MagicStorage/RemoteAccess] 非常方便，但你要是离家远了可就不能方便地访问存储网络了
