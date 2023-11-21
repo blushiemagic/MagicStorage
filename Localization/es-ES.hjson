@@ -343,8 +343,8 @@ Mods: {
 					<right> al Corazón de Almacenamiento para registrar su ubicación
 					Actualmente no configurado en ninguna ubicación
 					Usa el objeto para acceder a tu almacenamiento
-					El Corazón enlazado debe estar a un máximo de 100 bloques de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 1000 bloques del Corazón enlazado o pilar para acceder al almacenamiento
+					El Corazón enlazado debe estar a un máximo de 100 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
+					El jugador debe estar a un máximo de 1000 pies del Corazón enlazado o pilar para acceder al almacenamiento
 					'''
 			}
 
@@ -355,8 +355,8 @@ Mods: {
 					<right> al Corazón de Almacenamiento para registrar su ubicación
 					Actualmente no está configurado en ninguna ubicación
 					Usa el objeto para acceder a tu almacenamiento
-					El Corazón enlazado debe estar a un máximo de 200 bloques de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 3000 bloques del Corazón enlazado o pilar para acceder al almacenamiento
+					El Corazón enlazado debe estar a un máximo de 200 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
+					El jugador debe estar a un máximo de 3000 pies del Corazón enlazado o pilar para acceder al almacenamiento
 					'''
 			}
 
@@ -387,8 +387,8 @@ Mods: {
 					<right> al Corazón de Almacenamiento para registrar su ubicación
 					Actualmente no está configurado en ninguna ubicación
 					Usa el objeto para acceder a tu almacenamiento de creación
-					El Corazón enlazado debe estar a un máximo de 100 bloques de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 1000 bloques del Corazón enlazado o pilar para acceder al almacenamiento de creación
+					El Corazón enlazado debe estar a un máximo de 100 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
+					El jugador debe estar a un máximo de 1000 pies del Corazón enlazado o pilar para acceder al almacenamiento de creación
 					'''
 			}
 
@@ -399,8 +399,8 @@ Mods: {
 					<right> al Corazón de Almacenamiento para registrar su ubicación
 					Actualmente no está configurado en ninguna ubicación
 					Usa el objeto para acceder a tu almacenamiento de creación
-					El Corazón enlazado debe estar a un máximo de 200 bloques de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 3000 bloques del Corazón enlazado o pilar para acceder al almacenamiento de creación
+					El Corazón enlazado debe estar a un máximo de 200 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
+					El jugador debe estar a un máximo de 3000 pies del Corazón enlazado o pilar para acceder al almacenamiento de creación
 					'''
 			}
 		}

@@ -384,8 +384,8 @@ Mods: {
 					<right> Crafting Interface to store location
 					Currently not set to any location
 					Use item to access your crafting
-					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 1000' away from the linked Interface or pylon to access crafting
+					Linked Interface must be at most 200' from any valid pylon to gain extended reach on each pylon
+					Player must be at most 3000' away from the linked Interface or pylon to access crafting
 					''' */
 			}
 		}
