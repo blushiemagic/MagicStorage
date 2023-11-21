@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -170,10 +171,12 @@ namespace MagicStorage.NPCs {
 
 		public override void SetChatButtons(ref string button, ref string button2) {
 			// Sanity check
+			int max = Main.netMode == NetmodeID.SinglePlayer ? HelpOptionID.Count : HelpOptionID.CountMP;
+
 			if (helpOption < 0)
 				helpOption = 0;
-			else if (helpOption > maxHelp)
-				helpOption = maxHelp;
+			else if (helpOption > max)
+				helpOption = max;
 
 			button = helpOption == 0
 				? Language.GetTextValue("LegacyInterface.51")
@@ -182,15 +185,104 @@ namespace MagicStorage.NPCs {
 					: "";
 
 
-			button2 = helpOption > 0 && helpOption < maxHelp
+			button2 = helpOption > 0 && helpOption < max
 				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
 				: "";
 		}
 
-		public int helpOption;
-		public const int maxHelp = 21;
+		public static class HelpOptionID {
+			public const int StorageComponent = 1;
+			public const int StorageHeart = 2;
+			public const int StorageUnit = 3;
+			public const int CraftingInterface = 4;
+			public const int CraftingStationMoreFunctionality = 5;
+			public const int CraftingStationMoreFunctionality2 = 6;
+			public const int StorageConnector = 7;
+			public const int ShadowDiamond = 8;
+			public const int StorageUnitUpgrades = 9;
+			public const int StorageAccess = 10;
+			public const int BiomeGlobe = 11;
+			public const int RemoteAccess = 12;
+			public const int RemoteAccess2 = 13;
+			public const int StorageUnitWand = 14;
+			public const int EvilAltar = 15;
+			public const int CombinedStations = 16;
+			public const int CombinedStations2 = 17;
+			public const int RadiantJewel = 18;
+			public const int ConfigurationInterface = 19;
+			public const int PortableAccesses = 20;
+			public const int StorageUnitUpgrades2 = 21;
+			public const int ServerOperator = 22;
 
-		public static readonly int[] helpOptionsByIndex = new int[maxHelp] { 1, 2, 3, 4, 5, 6, 7, 8, 18, 9, 21, 10, 11, 12, 13, 20, 14, 15, 16, 17, 19 };
+			public const int Count = 21;
+			public const int CountMP = Count + 1;
+
+			public static string GetHelpKey(int id) {
+				string key = "Mods.MagicStorage.Dialogue.Golem.Help";
+
+				return key + id + id switch {
+					PortableAccesses => NPC.downedMoonlord ? "_Moon" : Utility.DownedAllMechs ? "_Mechs" : "",
+					_ => ""
+				};
+			}
+
+			public static string GetHelpText(int id) => Language.GetTextValue(GetHelpKey(id));
+
+			public static int GetHelpItem(int id) {
+				return id switch {
+					StorageComponent => ModContent.ItemType<StorageComponent>(),
+					StorageHeart => ModContent.ItemType<StorageHeart>(),
+					StorageUnit or
+					StorageUnitUpgrades or
+					StorageUnitUpgrades2 => ModContent.ItemType<StorageUnit>(),
+					CraftingInterface or
+					CraftingStationMoreFunctionality or
+					CraftingStationMoreFunctionality2 or
+					CombinedStations or
+					CombinedStations2 => ModContent.ItemType<CraftingAccess>(),
+					StorageConnector => ModContent.ItemType<StorageConnector>(),
+					ShadowDiamond => ModContent.ItemType<ShadowDiamond>(),
+					StorageAccess => ModContent.ItemType<StorageAccess>(),
+					BiomeGlobe => ModContent.ItemType<BiomeGlobe>(),
+					RemoteAccess or
+					RemoteAccess2 or
+					PortableAccesses => ModContent.ItemType<RemoteAccess>(),
+					StorageUnitWand => ModContent.ItemType<StorageDeactivator>(),
+					EvilAltar => ModContent.ItemType<DemonAltar>(),
+					RadiantJewel => ModContent.ItemType<RadiantJewel>(),
+					ConfigurationInterface => ModContent.ItemType<EnvironmentAccess>(),
+					_ => 0
+				};
+			}
+		}
+
+		public int helpOption;
+
+		public static readonly int[] helpOptionsByIndex = new int[HelpOptionID.Count] {
+			HelpOptionID.StorageComponent,
+			HelpOptionID.StorageHeart,
+			HelpOptionID.StorageUnit,
+			HelpOptionID.CraftingInterface,
+			HelpOptionID.CraftingStationMoreFunctionality,
+			HelpOptionID.CraftingStationMoreFunctionality2,
+			HelpOptionID.StorageConnector,
+			HelpOptionID.ShadowDiamond,
+			HelpOptionID.RadiantJewel,
+			HelpOptionID.StorageUnitUpgrades,
+			HelpOptionID.StorageUnitUpgrades2,
+			HelpOptionID.StorageAccess,
+			HelpOptionID.BiomeGlobe,
+			HelpOptionID.RemoteAccess,
+			HelpOptionID.RemoteAccess2,
+			HelpOptionID.PortableAccesses,
+			HelpOptionID.StorageUnitWand,
+			HelpOptionID.EvilAltar,
+			HelpOptionID.CombinedStations,
+			HelpOptionID.CombinedStations2,
+			HelpOptionID.ConfigurationInterface
+		};
+
+		public static readonly int[] mpHelpOptionsByIndex = helpOptionsByIndex.Prepend(HelpOptionID.ServerOperator).ToArray();
 
 		public override void OnChatButtonClicked(bool firstButton, ref string shopName) {
 			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
@@ -211,48 +303,20 @@ namespace MagicStorage.NPCs {
 					helpOption++;
 			}
 
-			if (helpOption > maxHelp)
-				helpOption = maxHelp;
+			int max = Main.netMode == NetmodeID.SinglePlayer ? HelpOptionID.Count : HelpOptionID.CountMP;
+			int[] helpOptionsArray = Main.netMode == NetmodeID.SinglePlayer ? helpOptionsByIndex : mpHelpOptionsByIndex;
+
+			if (helpOption > max)
+				helpOption = max;
 			else if (helpOption < 1)
 				helpOption = 1;
 
 			savedTip = helpOption;
 
-			int option = helpOptionsByIndex[helpOption - 1];
+			int option = helpOptionsArray[helpOption - 1];
 
-			//string alt = option != 20 ? "" : NPC.downedMoonlord ? "_Moon" : NPC.downedMechBossAny ? "_Mechs" : "";
-
-			string alt = option switch {
-				20 => NPC.downedMoonlord ? "_Moon" : Utility.DownedAllMechs ? "_Mechs" : "",
-				_ => ""
-			};
-
-			Main.npcChatText = Language.GetTextValue("Mods.MagicStorage.Dialogue.Golem.Help" + option + alt);
-
-			Main.npcChatCornerItem = option switch {
-				1 => ModContent.ItemType<StorageComponent>(),
-				2 => ModContent.ItemType<StorageHeart>(),
-				3 or
-				9 or
-				21 => ModContent.ItemType<StorageUnit>(),
-				4 or
-				5 or
-				6 or
-				16 or
-				17 => ModContent.ItemType<CraftingAccess>(),
-				7 => ModContent.ItemType<StorageConnector>(),
-				8 => ModContent.ItemType<ShadowDiamond>(),
-				10 => ModContent.ItemType<StorageAccess>(),
-				11 => ModContent.ItemType<BiomeGlobe>(),
-				12 or
-				13 or
-				20 => ModContent.ItemType<RemoteAccess>(),
-				14 => ModContent.ItemType<StorageDeactivator>(),
-				15 => ModContent.ItemType<DemonAltar>(),
-				18 => ModContent.ItemType<RadiantJewel>(),
-				19 => ModContent.ItemType<EnvironmentAccess>(),
-				_ => 0
-			};
+			Main.npcChatText = HelpOptionID.GetHelpText(option);
+			Main.npcChatCornerItem = HelpOptionID.GetHelpItem(option);
 		}
 
 		// Make this Town NPC teleport to the King and/or Queen statue when triggered.

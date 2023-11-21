@@ -15,7 +15,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => "[c/ff6a00:Usage: /reqop]";
 
-		public override string Description => "Requests the Server Admin status from the server";
+		public override string Description => "Requests the Server Admin status (for Magic Storage) from the server";
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 0) {
@@ -44,7 +44,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => $"[c/ff6a00:Usage: /{Command} <number>]";
 
-		public override string Description => GivesOperatorStatus ? "Gives the Server Operator status to client <number>" : "Removes the Server Operator status from client <number>";
+		public override string Description => GivesOperatorStatus ? "Gives the Server Operator status (for Magic Storage) to client <number>" : "Removes the Server Operator status (for Magic Storage) from client <number>";
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 1) {
