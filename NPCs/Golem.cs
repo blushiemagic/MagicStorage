@@ -60,7 +60,7 @@ namespace MagicStorage.NPCs {
 		public override void SetDefaults() {
 			NPC.townNPC = true; // Sets NPC to be a Town NPC
 			NPC.friendly = true; // NPC Will not attack player
-			NPC.width = 36;
+			NPC.width = 24;
 			NPC.height = 40;
 			NPC.aiStyle = 7;
 			NPC.damage = 10;
