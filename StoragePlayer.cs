@@ -64,12 +64,6 @@ namespace MagicStorage
 				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
 					"Do note that using this private beta build will cause a ton of text to be printed to the chat (when the config is enabled) and to your log files.",
 					c: Color.LightBlue);
-			} else {
-				Main.NewTextMultiline("Thank you for using Magic Storage!\n" +
-					"If your storage was clobbered with empty slots and/or garbage items in a previous update, use the [c/ff0000:Item Deletion Mode] control\n" +
-					"in the Controls tab of the Storage GUI.\n" +
-					"When Item Deletion Mode is active, double click an item stack to forcibly remove it from storage.",
-					c: Color.LightBlue);
 			}
 		}
 
