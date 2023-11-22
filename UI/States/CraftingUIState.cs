@@ -1149,7 +1149,7 @@ namespace MagicStorage.UI.States {
 						if (!available)
 							context = selected ? 4 : 3;
 					
-						if (StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
+						if (MagicStorageConfig.CraftingFavoritingEnabled && StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
 							item = item.Clone();
 							item.favorited = true;
 						}
