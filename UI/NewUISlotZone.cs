@@ -76,7 +76,7 @@ namespace MagicStorage.UI {
 				int column = oneDimIndex % NumColumns;
 				int row = oneDimIndex / NumColumns;
 
-				Slots[row, column].SetItem(item);
+				Slots[row, column].SetBoundItem(item);
 
 				oneDimIndex++;
 
@@ -88,7 +88,7 @@ namespace MagicStorage.UI {
 				int column = oneDimIndex % NumColumns;
 				int row = oneDimIndex / NumColumns;
 
-				Slots[row, column].SetItem(new Item() { stack = 0 });
+				Slots[row, column].SetBoundItem(new Item() { stack = 0 });
 
 				oneDimIndex++;
 			}
@@ -110,7 +110,7 @@ namespace MagicStorage.UI {
 				int row = i / NumColumns;
 
 				var slot = Slots[row, column];
-				slot.SetItem(item);
+				slot.SetBoundItem(item);
 				slot.Context = context;
 			}
 
@@ -119,7 +119,7 @@ namespace MagicStorage.UI {
 				int row = i / NumColumns;
 
 				var slot = Slots[row, column];
-				slot.SetItem(new Item() { stack = 0 });
+				slot.SetBoundItem(new Item() { stack = 0 });
 				slot.Context = ItemSlot.Context.InventoryItem;
 
 				i++;
@@ -128,7 +128,7 @@ namespace MagicStorage.UI {
 
 		public void ClearItems() {
 			foreach (var slot in Slots)
-				slot.SetItem(new Item());
+				slot.SetBoundItem(new Item() { stack = 0 });
 		}
 
 		public override void Update(GameTime gameTime) {

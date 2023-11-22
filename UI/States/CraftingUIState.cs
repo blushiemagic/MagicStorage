@@ -134,11 +134,11 @@ namespace MagicStorage.UI.States {
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
-					if (obj.slot >= CraftingGUI.selectedRecipe.requiredItem.Count)
+					if (obj.id >= CraftingGUI.selectedRecipe.requiredItem.Count)
 						return;
 
 					// select ingredient recipe by right clicking
-					Item item = CraftingGUI.selectedRecipe.requiredItem[obj.slot];
+					Item item = CraftingGUI.selectedRecipe.requiredItem[obj.id];
 					if (MagicCache.ResultToRecipe.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0) {
 						Recipe selected = itemRecipes[0];
 
@@ -199,7 +199,7 @@ namespace MagicStorage.UI.States {
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
-					int index = obj.slot + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
+					int index = obj.id + CraftingGUI.IngredientColumns * (int)Math.Round(storageScrollBar.ViewPosition);
 
 					if (index >= CraftingGUI.storageItems.Count)
 						return;
@@ -956,18 +956,18 @@ namespace MagicStorage.UI.States {
 						MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
 						TECraftingAccess access = CraftingGUI.GetCraftingEntity();
-						if (access == null || obj.slot >= TECraftingAccess.ItemsTotal)
+						if (access == null || obj.id >= TECraftingAccess.ItemsTotal)
 							return;
 
 						Player player = Main.LocalPlayer;
 
 						bool changed = false;
-						if (obj.slot < access.stations.Count && ItemSlot.ShiftInUse) {
-							access.TryWithdrawStation(obj.slot, true);
+						if (obj.id < access.stations.Count && ItemSlot.ShiftInUse) {
+							access.TryWithdrawStation(obj.id, true);
 							changed = true;
 						} else if (player.itemAnimation == 0 && player.itemTime == 0) {
 							if (Main.mouseItem.IsAir) {
-								if (!access.TryWithdrawStation(obj.slot).IsAir)
+								if (!access.TryWithdrawStation(obj.id).IsAir)
 									changed = true;
 							} else {
 								int oldType = Main.mouseItem.type;
@@ -1190,7 +1190,7 @@ namespace MagicStorage.UI.States {
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
 
-					int objSlot = obj.slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
+					int objSlot = obj.id + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 					if (objSlot >= CraftingGUI.recipes.Count)
 						return;

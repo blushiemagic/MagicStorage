@@ -320,7 +320,7 @@ namespace MagicStorage.UI.States {
 					Player player = Main.LocalPlayer;
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
-					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
+					int objSlot = obj.id + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 					bool changed = false, canRefresh = false;
 					int type = 0;
@@ -401,7 +401,7 @@ namespace MagicStorage.UI.States {
 						return;
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
-					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
+					int objSlot = obj.id + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 					if (objSlot < StorageGUI.items.Count && !StorageGUI.items[objSlot].IsAir)
 						StorageGUI.items[objSlot].newAndShiny = false;
@@ -416,7 +416,7 @@ namespace MagicStorage.UI.States {
 						return;  //Not right clicking
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
-					int objSlot = obj.slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
+					int objSlot = obj.id + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 
 					if (StorageGUI.slotFocus >= 0 && StorageGUI.slotFocus != objSlot) {
 						//Held down right click and moved to another slot

@@ -142,7 +142,7 @@ namespace MagicStorage.UI {
 		internal void SetRecipe(Recipe recipe) {
 			Recipe = recipe;
 
-			resultSlot.SetItem(recipe.createItem, clone: true);
+			resultSlot.SetBoundItem(recipe.createItem.Clone());
 
 			ingredientZone.SetDimensions(7, Math.Max((recipe.requiredItem.Count - 1) / 7 + 1, 1));
 
