@@ -1,4 +1,7 @@
-﻿using Terraria;
+﻿using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -10,23 +13,29 @@ namespace MagicStorage {
 		// We don't need the "nearby player" checks for limited-range portable accesses, hence why they aren't included
 		private static SceneMetrics _sceneMetrics;
 
+		private static Func<TeleportPylonInfo, int> _HowManyNPCsDoesPylonNeed;
 		public static int HowManyNPCsDoesPylonNeed(TeleportPylonInfo info) {
-			if (info.TypeOfPylon != TeleportPylonType.Victory)
-				return 2;
+			return (_HowManyNPCsDoesPylonNeed ??= CreateMethodCall())(info);
 
-			return 0;
+			static Func<TeleportPylonInfo, int> CreateMethodCall() {
+				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("HowManyNPCsDoesPylonNeed", BindingFlags.Instance | BindingFlags.NonPublic)
+					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.HowManyNPCsDoesPylonNeed' method");
+				ParameterExpression parameter = Expression.Parameter(typeof(TeleportPylonInfo), "info");
+				return Expression.Lambda<Func<TeleportPylonInfo, int>>(Expression.Call(parameter, method), parameter).Compile();
+			}
 		}
 
+		private static Func<TeleportPylonInfo, int, bool> _DoesPylonHaveEnoughNPCsAroundIt;
 		private static bool DoesPylonHaveEnoughNPCsAroundIt(TeleportPylonInfo info, int necessaryNPCCount) {
-			if (PylonLoader.ValidTeleportCheck_PreNPCCount(info, ref necessaryNPCCount) is bool value)
-				return value;
-			if (info.ModPylon is ModPylon pylon)
-				return pylon.ValidTeleportCheck_NPCCount(info, necessaryNPCCount);
-			if (necessaryNPCCount <= 0)
-				return true;
+			return (_DoesPylonHaveEnoughNPCsAroundIt ??= CreateMethodCall())(info, necessaryNPCCount);
 
-			Point16 positionInTiles = info.PositionInTiles;
-			return TeleportPylonsSystem.DoesPositionHaveEnoughNPCs(necessaryNPCCount, positionInTiles);
+			static Func<TeleportPylonInfo, int, bool> CreateMethodCall() {
+				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("DoesPylonHaveEnoughNPCsAroundIt", BindingFlags.Instance | BindingFlags.NonPublic)
+					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.DoesPylonHaveEnoughNPCsAroundIt' method");
+				ParameterExpression parameter1 = Expression.Parameter(typeof(TeleportPylonInfo), "info");
+				ParameterExpression parameter2 = Expression.Parameter(typeof(int), "necessaryNPCCount");
+				return Expression.Lambda<Func<TeleportPylonInfo, int, bool>>(Expression.Call(parameter1, method, parameter2), parameter1, parameter2).Compile();
+			}
 		}
 
 		private static void CheckNPCDanger(TeleportPylonInfo info, ref bool flag) {
@@ -60,43 +69,23 @@ namespace MagicStorage {
 			}
 		}
 
+		private static Func<TeleportPylonInfo, bool> _DoesPylonAcceptTeleportation;
 		private static bool DoesPylonAcceptTeleportation(TeleportPylonInfo info) {
-			if (PylonLoader.ValidTeleportCheck_PreBiomeRequirements(info, _sceneMetrics) is bool value)
-				return value;
-			if (info.ModPylon is ModPylon pylon) 
-				return pylon.ValidTeleportCheck_BiomeRequirements(info, _sceneMetrics);
-			switch (info.TypeOfPylon) {
-				case TeleportPylonType.SurfacePurity: {
-						bool num = info.PositionInTiles.Y <= Main.worldSurface;
-						bool flag2 = info.PositionInTiles.X >= Main.maxTilesX - 380 || info.PositionInTiles.X <= 380;
-						if (!num || flag2)
-							return false;
+			// Force the drone tracker to be ignored
+			var old = Main.DroneCameraTracker;
+			Main.DroneCameraTracker = null;
 
-						if (_sceneMetrics.EnoughTilesForJungle || _sceneMetrics.EnoughTilesForSnow || _sceneMetrics.EnoughTilesForDesert || _sceneMetrics.EnoughTilesForGlowingMushroom || _sceneMetrics.EnoughTilesForHallow || _sceneMetrics.EnoughTilesForCrimson || _sceneMetrics.EnoughTilesForCorruption)
-							return false;
+			bool accepted = (_DoesPylonAcceptTeleportation ??= CreateMethodCall())(info);
 
-						return true;
-					}
-				case TeleportPylonType.Jungle:
-					return _sceneMetrics.EnoughTilesForJungle;
-				case TeleportPylonType.Snow:
-					return _sceneMetrics.EnoughTilesForSnow;
-				case TeleportPylonType.Desert:
-					return _sceneMetrics.EnoughTilesForDesert;
-				case TeleportPylonType.Beach: {
-						bool flag = info.PositionInTiles.Y <= Main.worldSurface && info.PositionInTiles.Y > Main.worldSurface * 0.3499999940395355;
-						return (info.PositionInTiles.X >= Main.maxTilesX - 380 || info.PositionInTiles.X <= 380) && flag;
-					}
-				case TeleportPylonType.GlowingMushroom:
-					return _sceneMetrics.EnoughTilesForGlowingMushroom;
-				case TeleportPylonType.Hallow:
-					return _sceneMetrics.EnoughTilesForHallow;
-				case TeleportPylonType.Underground:
-					return info.PositionInTiles.Y >= Main.worldSurface;
-				case TeleportPylonType.Victory:
-					return true;
-				default:
-					return true;
+			Main.DroneCameraTracker = old;
+
+			return accepted;
+
+			static Func<TeleportPylonInfo, bool> CreateMethodCall() {
+				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("DoesPylonAcceptTeleportation", BindingFlags.Instance | BindingFlags.NonPublic)
+					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.DoesPylonAcceptTeleportation' method");
+				ParameterExpression parameter = Expression.Parameter(typeof(TeleportPylonInfo), "info");
+				return Expression.Lambda<Func<TeleportPylonInfo, bool>>(Expression.Call(parameter, method), parameter).Compile();
 			}
 		}
 	}
