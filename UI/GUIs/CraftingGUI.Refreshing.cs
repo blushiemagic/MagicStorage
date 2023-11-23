@@ -11,6 +11,7 @@ using Terraria;
 using Terraria.ModLoader;
 using System;
 using Terraria.ID;
+using MagicStorage.Common;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -31,6 +32,7 @@ namespace MagicStorage {
 
 		internal static readonly List<Item> items = new();
 		private static readonly Dictionary<int, int> itemCounts = new();
+		private static readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = new();
 
 		// Only used by DoWithdrawResult to check items from modules
 		private static readonly List<Item> sourceItemsFromModules = new();
@@ -230,8 +232,27 @@ namespace MagicStorage {
 				NetHelper.Report(false, "Items from modules: " + numSimulatorItems);
 
 				itemCounts.Clear();
+				itemCountsByPrefix.Clear();
+				/*
 				foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.ConstrainedSum())))
 					itemCounts[type] = amount;
+				*/
+
+				// Previously just used GroupBy, but that doesn't play nice for multiple element data
+				foreach (Item item in items) {
+					if (itemCounts.TryGetValue(item.type, out int quantity))
+						itemCounts[item.type] = new ClampedArithmetic(quantity) + item.stack;
+					else
+						itemCounts[item.type] = item.stack;
+
+					if (itemCountsByPrefix.TryGetValue(item.type, out var prefixCounts)) {
+						if (prefixCounts.TryGetValue(item.prefix, out quantity))
+							prefixCounts[item.prefix] = new ClampedArithmetic(quantity) + item.stack;
+						else
+							prefixCounts[item.prefix] = item.stack;
+					} else
+						itemCountsByPrefix[item.type] = new Dictionary<int, int>() { [item.prefix] = item.stack };
+				}
 
 				thread.CompleteOneTask();
 			} catch when (thread.token.IsCancellationRequested) {
@@ -240,6 +261,7 @@ namespace MagicStorage {
 				sourceItems.Clear();
 				sourceItemsFromModules.Clear();
 				itemCounts.Clear();
+				itemCountsByPrefix.Clear();
 				throw;
 			}
 		}

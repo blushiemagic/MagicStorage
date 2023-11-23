@@ -113,8 +113,15 @@ namespace MagicStorage
 
 			Dictionary<int, int> counts = new(itemCounts);
 
-			foreach (var data in blockStorageItems)
-				counts.Remove(data.Type);
+			foreach (var data in blockStorageItems) {
+				if (counts.TryGetValue(data.Type, out int quantity) && itemCountsByPrefix.TryGetValue(data.Type, out var prefixCounts) && prefixCounts.TryGetValue(data.Prefix, out int prefixQuantity) && prefixQuantity > 0) {
+					quantity -= prefixQuantity;
+					if (quantity <= 0)
+						counts.Remove(data.Type);
+					else
+						counts[data.Type] = quantity;
+				}
+			}
 
 			return counts;
 		}
@@ -221,6 +228,7 @@ namespace MagicStorage
 
 						Item item = items[index];
 						itemCounts[item.type] -= stack;
+						itemCountsByPrefix[item.type][item.prefix] -= stack;
 					});
 
 				if (!withdrawn.IsAir) {
