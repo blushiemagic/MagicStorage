@@ -604,6 +604,13 @@ Mods: {
 					[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
 					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
 					'''
+				/* Help22:
+					'''
+					This unit has noticed that you are currently playing in a multiplayer world.  Hence, some features within the [i:MagicStorage/StorageHeart] are locked behind the [c/cccc00:Server Operator] status.
+					To become a [c/cccc00:Server Operator], you must either be the host of the world via Host&Play, or you must use the [c/ff6a00:/reqop] command.  Using this command successfully will grant you the [c/cc0000:Server Admin] status.
+					Once you have the [c/cc0000:Server Admin] status, you can use the [c/ff6a00:/op] command to grant other players the [c/cccc00:Server Operator] status or [c/ff6a00:/deop] to remove it.
+					Either status will stay active until you disconnect from the server.
+					''' */
 			}
 
 			ChatOptions: {
