@@ -797,7 +797,27 @@ namespace MagicStorage.UI.States {
 
 			history.RefreshEntries();
 
-			GetPage<RecipesPage>("Crafting").Refresh();
+			GetPage("Crafting").Refresh();
+		}
+
+		public override void OnRefreshStart() {
+			// Clear out the contexts and items
+			ingredientZone.SetItemsAndContexts(int.MaxValue, NullItem);
+
+			storageZone.SetItemsAndContexts(int.MaxValue, NullItem);
+
+			recipeHeaderZone.SetItemsAndContexts(1, NullItem);
+
+			resultZone.SetItemsAndContexts(1, NullItem);
+
+			GetPage("Crafting").OnRefreshStart();
+		}
+
+		private static readonly Item _nullItem = new Item();
+
+		private static Item NullItem(int slot, ref int context) {
+			context = ItemSlot.Context.InventoryItem;
+			return _nullItem;
 		}
 
 		internal Item GetStorage(int slot, ref int context) {
@@ -1114,13 +1134,19 @@ namespace MagicStorage.UI.States {
 				return true;
 			}
 
-			public void Refresh() {
+			public override void Refresh() {
 				if (!UpdateZones())
 					return;
 
 				stationZone.SetItemsAndContexts(int.MaxValue, CraftingGUI.GetStation);
 
 				slotZone.SetItemsAndContexts(int.MaxValue, GetRecipe);
+			}
+
+			public override void OnRefreshStart() {
+				stationZone.ClearContexts();
+
+				slotZone.ClearContexts();
 			}
 
 			internal Item GetRecipe(int slot, ref int context) {

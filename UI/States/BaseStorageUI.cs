@@ -379,6 +379,8 @@ namespace MagicStorage.UI.States {
 
 		public virtual void Refresh() { }
 
+		public virtual void OnRefreshStart() { }
+
 		protected virtual void OnButtonConfigChanged(ButtonConfigurationMode current) { }
 
 		internal void ModernPanelButtonClicked(string page, NewUIButtonChoice buttons) {

@@ -22,5 +22,9 @@ namespace MagicStorage.UI.States {
 		public void InvokeOnPageSelected() => OnPageSelected?.Invoke();
 
 		public void InvokeOnPageDeselected() => OnPageDeselected?.Invoke();
+
+		public virtual void Refresh() { }
+
+		public virtual void OnRefreshStart() { }
 	}
 }

@@ -162,6 +162,7 @@ namespace MagicStorage.Components
 				{
 					Item nItem = item.Clone();
 					nItem.stack = 1;
+					nItem.favorited = false;
 					stations.Add(nItem);
 					item.stack--;
 					if (item.stack <= 0)

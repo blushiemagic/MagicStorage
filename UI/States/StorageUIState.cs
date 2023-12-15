@@ -59,7 +59,11 @@ namespace MagicStorage.UI.States {
 			if (Main.gameMenu)
 				return;
 
-			GetPage<StoragePage>("Storage").Refresh();
+			GetPage("Storage").Refresh();
+		}
+
+		public override void OnRefreshStart() {
+			GetPage("Storage").OnRefreshStart();
 		}
 
 		protected override void OnButtonConfigChanged(ButtonConfigurationMode current) {
@@ -262,11 +266,15 @@ namespace MagicStorage.UI.States {
 				return true;
 			}
 
-			public void Refresh() {
+			public override void Refresh() {
 				if (!UpdateZone())
 					return;
 
 				slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
+			}
+
+			public override void OnRefreshStart() {
+				slotZone.ClearContexts();
 			}
 
 			internal Item GetItem(int slot, ref int context) {

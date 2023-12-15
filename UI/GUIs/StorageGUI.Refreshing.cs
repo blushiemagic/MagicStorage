@@ -81,6 +81,9 @@ namespace MagicStorage {
 			if (CurrentlyRefreshing) {
 				activeThread?.Stop();
 				activeThread = null;
+			} else {
+				// Inform the UI that a new refresh is about to start so that it can go into a proper "empty" state
+				MagicUI.storageUI.OnRefreshStart();
 			}
 
 			if (itemTypesToUpdate is null)

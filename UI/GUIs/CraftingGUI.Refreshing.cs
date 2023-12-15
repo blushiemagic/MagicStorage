@@ -60,6 +60,9 @@ namespace MagicStorage {
 			if (StorageGUI.CurrentlyRefreshing) {
 				StorageGUI.activeThread?.Stop();
 				StorageGUI.activeThread = null;
+			} else {
+				// Inform the UI that a new refresh is about to start so that it can go into a proper "empty" state
+				MagicUI.craftingUI.OnRefreshStart();
 			}
 
 			// Always reset the cached values

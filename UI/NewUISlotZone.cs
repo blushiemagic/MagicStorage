@@ -126,6 +126,13 @@ namespace MagicStorage.UI {
 			}
 		}
 
+		public void ClearContexts() {
+			for (int r = 0; r < NumRows; r++) {
+				for (int c = 0; c < NumColumns; c++)
+					Slots[r, c].Context = ItemSlot.Context.InventoryItem;
+			}
+		}
+
 		public void ClearItems() {
 			foreach (var slot in Slots)
 				slot.SetBoundItem(new Item() { stack = 0 });
