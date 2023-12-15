@@ -11,7 +11,7 @@ using MagicStorage.Common.Systems;
 
 namespace MagicStorage.Components
 {
-	public class TECraftingAccess : TEStorageComponent
+	public class TECraftingAccess : TEStorageAccess
 	{
 		public enum Operation : byte
 		{
@@ -270,11 +270,15 @@ namespace MagicStorage.Components
 
 		public override void SaveData(TagCompound tag)
 		{
+			base.SaveData(tag);
+
 			tag["Stations"] = stations.Select(ItemIO.Save).ToList();
 		}
 
 		public override void LoadData(TagCompound tag)
 		{
+			base.LoadData(tag);
+
 			IList<TagCompound> listStations = tag.GetList<TagCompound>("Stations");
 			if (listStations is not null && listStations.Count > 0)
 			{
@@ -291,6 +295,7 @@ namespace MagicStorage.Components
 
 		public override void NetSend(BinaryWriter writer)
 		{
+			base.NetSend(writer);
 			writer.Write(stations.Count);
 			foreach (Item item in stations)
 				ItemIO.Send(item, writer, true, true);
@@ -298,6 +303,7 @@ namespace MagicStorage.Components
 
 		public override void NetReceive(BinaryReader reader)
 		{
+			base.NetReceive(reader);
 			int stationsCount = reader.ReadInt32();
 			stations = new List<Item>();
 			for (int k = 0; k < stationsCount; k++)

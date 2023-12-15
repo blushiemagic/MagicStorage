@@ -14,9 +14,9 @@ namespace MagicStorage.Components
 
 		public override TEStorageHeart GetHeart(int i, int j)
 		{
-			//return (TEStorageHeart) TileEntity.ByPosition[new Point16(i, j)];
-			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity))
-				return (TEStorageHeart) tileEntity;
+			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity tileEntity) && tileEntity is TEStorageHeart heart)
+				return heart;
+
 			return null;
 		}
 

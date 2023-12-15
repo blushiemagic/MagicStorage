@@ -13,18 +13,16 @@ namespace MagicStorage.Components
 {
 	public class StorageAccess : StorageComponent
 	{
+		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TEStorageAccess>();
+
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.StorageAccess>();
 
 		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
 
 		public virtual TEStorageHeart GetHeart(int i, int j)
 		{
-			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point.X < 0 || point.Y < 0)
-				return null;
-
-			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
-				return center.GetHeart();
+			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) && te is TEStorageComponent component)
+				return component.GetHeart();
 
 			return null;
 		}

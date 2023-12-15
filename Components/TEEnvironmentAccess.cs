@@ -41,11 +41,6 @@ namespace MagicStorage.Components {
 
 		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<EnvironmentAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
-		public override void Update() {
-			TEStorageHeart heart = GetHeart();
-			heart?.environmentAccesses.Add(Position);
-		}
-
 		public override void SaveData(TagCompound tag) {
 			base.SaveData(tag);
 

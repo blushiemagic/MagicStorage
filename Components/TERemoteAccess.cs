@@ -18,6 +18,12 @@ namespace MagicStorage.Components
 			private set => _loaded = value;
 		}
 
+		public override Point16 StorageCenter
+		{
+			get => locator;
+			set => locator = value;
+		}
+
 		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<RemoteAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override TEStorageHeart GetHeart()
@@ -59,12 +65,6 @@ namespace MagicStorage.Components
 			locator = toLocate;
 			NetHelper.ClientSendTEUpdate(Position);
 			return true;
-		}
-
-		public override void Update()
-		{
-			TEStorageHeart heart = GetHeart();
-			heart?.remoteAccesses.Add(Position);
 		}
 
 		public override void SaveData(TagCompound tag)

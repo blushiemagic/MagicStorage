@@ -9,6 +9,11 @@ namespace MagicStorage.Components
 	{
 		internal Point16 center;
 
+		public override Point16 StorageCenter {
+			get => center;
+			set => center = value;
+		}
+
 		public void ResetAndSearch()
 		{
 			Point16 oldCenter = center;
@@ -47,18 +52,6 @@ namespace MagicStorage.Components
 		{
 			ResetAndSearch();
 		}
-
-		public bool Link(Point16 pos)
-		{
-			bool changed = pos != center;
-			center = pos;
-			return changed;
-		}
-
-		public bool Unlink() => Link(Point16.NegativeOne);
-
-		public TEStorageHeart GetHeart() =>
-			center != Point16.NegativeOne && ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter centerEnt ? centerEnt.GetHeart() : null;
 
 		public static bool IsStoragePoint(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStoragePoint;
 

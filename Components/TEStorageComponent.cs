@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.IO;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
 {
@@ -28,11 +30,40 @@ namespace MagicStorage.Components
 			new Point16(0, 1)
 		};
 
+		protected Point16 _storageCenter;
+
+		public virtual Point16 StorageCenter
+		{
+			get => _storageCenter;
+			set => _storageCenter = value;
+		}
+
+		public virtual TEStorageHeart GetHeart() {
+			Point16 center = StorageCenter;
+
+			if (center.X < 0 || center.Y < 0)
+				return null;
+
+			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageHeart heart)
+				return heart;
+
+			return null;
+		}
+
 		public override bool IsTileValidForEntity(int x, int y)
 		{
 			Tile tile = Main.tile[x, y];
 			return tile.HasTile && ValidTile(tile);
 		}
+
+		public bool Link(Point16 center)
+		{
+			Point16 oldCenter = StorageCenter;
+			StorageCenter = center;
+			return oldCenter != center;
+		}
+
+		public bool Unlink() => Link(Point16.NegativeOne);
 
 		public abstract bool ValidTile(in Tile tile);
 
@@ -89,6 +120,10 @@ namespace MagicStorage.Components
 					WorldGen.TileFrame(tx, ty, resetFrame: true, noBreak: true);
 				}
 			}
+		}
+
+		public override void Update() {
+			GetHeart()?.ComponentManager.LinkIfNotExists(this);
 		}
 
 		public virtual void OnPlace()
@@ -181,6 +216,25 @@ namespace MagicStorage.Components
 				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && centerEnt.GetHeart()?.Position == StoragePlayer.LocalPlayer.GetStorageHeart().Position)
 					StorageGUI.SetRefresh(forceFullRefresh: false);
 			}
+		}
+
+		public override void NetSend(BinaryWriter writer) {
+			writer.Write(_storageCenter);
+		}
+
+		public override void NetReceive(BinaryReader reader) {
+			_storageCenter = reader.ReadPoint16();
+		}
+
+		public override void SaveData(TagCompound tag) {
+			tag["center"] = _storageCenter;
+		}
+
+		public override void LoadData(TagCompound tag) {
+			if (tag.TryGet("center", out Point16 center))
+				_storageCenter = center;
+			else
+				_storageCenter = Point16.NegativeOne;
 		}
 	}
 }

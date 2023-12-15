@@ -14,14 +14,11 @@ namespace MagicStorage.Components
 
 		public abstract bool IsFull { get; }
 
-		public bool Link(Point16 pos)
+		public override Point16 StorageCenter
 		{
-			bool changed = pos != center;
-			center = pos;
-			return changed;
+			get => center;
+			set => center = value;
 		}
-
-		public bool Unlink() => Link(Point16.NegativeOne);
 
 		public TEStorageHeart GetHeart()
 		{

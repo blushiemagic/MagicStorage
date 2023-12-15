@@ -66,8 +66,17 @@ namespace MagicStorage.Components
 		internal bool compactCoins = false;
 		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private int compactStage;
+
+		[Obsolete("Use ComponentManager.GetRemoteAccesses() instead", true)]
 		public HashSet<Point16> remoteAccesses = new();
+		[Obsolete]
+		internal List<Point16> Obsolete_remoteAccesses() => storageUnits;
+
+		[Obsolete("Use ComponentManager.GetEnvironmentAccesses() instead", true)]
 		public HashSet<Point16> environmentAccesses = new();
+		[Obsolete]
+		internal List<Point16> Obsolete_environmentAccesses() => storageUnits;
+		
 		private int updateTimer = 60;
 
 		internal bool[] clientUsingHeart = new bool[Main.maxPlayers];
@@ -117,18 +126,14 @@ namespace MagicStorage.Components
 
 		public IEnumerable<TEAbstractStorageUnit> GetStorageUnits()
 		{
-			IEnumerable<Point16> remoteStorageUnits = remoteAccesses.Select(remoteAccess => ByPosition.TryGetValue(remoteAccess, out TileEntity te) ? te : null)
-				.OfType<TERemoteAccess>()
-				.SelectMany(remoteAccess => remoteAccess.storageUnits);
+			ConnectedComponentManager manager = ComponentManager;
 
-			return storageUnits.Concat(remoteStorageUnits)
-				.Select(storageUnit => ByPosition.TryGetValue(storageUnit, out TileEntity te) ? te : null)
-				.OfType<TEAbstractStorageUnit>();
+			IEnumerable<TEAbstractStorageUnit> remoteStorageUnits = manager.GetRemoteAccessEntities().SelectMany(remoteAccess => remoteAccess.ComponentManager.GetStorageUnitEntities());
+
+			return manager.GetStorageUnitEntities().Concat(remoteStorageUnits);
 		}
 
-		public IEnumerable<TEEnvironmentAccess> GetEnvironmentSimulators()
-			=> environmentAccesses.Select(p => TileEntity.ByPosition.TryGetValue(p, out TileEntity te) ? te : null)
-				.OfType<TEEnvironmentAccess>();
+		public IEnumerable<TEEnvironmentAccess> GetEnvironmentSimulators() => ComponentManager.GetEnvironmentAccessEntities();
 
 		public IEnumerable<EnvironmentModule> GetModules()
 			=> GetEnvironmentSimulators()
@@ -140,27 +145,16 @@ namespace MagicStorage.Components
 			return GetStorageUnits().SelectMany(storageUnit => storageUnit.GetItems());
 		}
 
-		protected override void CheckMapSections() {
-			base.CheckMapSections();
-
-			// Check for remote and environment accesses as well
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				foreach (Point16 remote in remoteAccesses.Concat(environmentAccesses).DistinctBy(p => new Point16(Netplay.GetSectionX(p.X), Netplay.GetSectionY(p.Y))))
-					NetHelper.ClientRequestSection(remote);
-			}
+		protected override void OnConnectComponent(TEStorageComponent component) {
+			if (component is TERemoteAccess)
+				Obsolete_remoteAccesses().Add(component.Position);
+			else if (component is TEEnvironmentAccess)
+				Obsolete_environmentAccesses().Add(component.Position);
 		}
 
 		public override void Update()
 		{
-			foreach (Point16 remoteAccess in remoteAccesses) {
-				if (!ByPosition.TryGetValue(remoteAccess, out TileEntity te) || te is not TERemoteAccess)
-					remoteAccesses.Remove(remoteAccess);
-			}
-
-			foreach (Point16 environmentAccess in environmentAccesses) {
-				if (!TileEntity.ByPosition.TryGetValue(environmentAccess, out TileEntity te) || te is not TEEnvironmentAccess)
-					environmentAccesses.Remove(environmentAccess);
-			}
+			base.Update();
 
 			if (Main.netMode == NetmodeID.Server && processClientOperations(out bool forcedRefresh, out HashSet<int> typesToRefresh))
 			{
@@ -809,7 +803,7 @@ namespace MagicStorage.Components
 		{
 			base.SaveData(tag);
 			List<TagCompound> tagRemotes = new();
-			foreach (Point16 remoteAccess in remoteAccesses)
+			foreach (Point16 remoteAccess in Obsolete_remoteAccesses())
 			{
 				TagCompound tagRemote = new();
 				tagRemote.Set("X", remoteAccess.X);
@@ -820,7 +814,7 @@ namespace MagicStorage.Components
 			tag.Set("RemoteAccesses", tagRemotes);
 
 			List<TagCompound> tagEnvironments = new();
-			foreach (Point16 environmentAccess in environmentAccesses) {
+			foreach (Point16 environmentAccess in Obsolete_environmentAccesses()) {
 				tagEnvironments.Add(new TagCompound() {
 					["X"] = environmentAccess.X,
 					["Y"] = environmentAccess.Y
@@ -835,11 +829,15 @@ namespace MagicStorage.Components
 		public override void LoadData(TagCompound tag)
 		{
 			base.LoadData(tag);
+
+			ConnectedComponentManager manager = ComponentManager;
+
+			// Legacy data
 			foreach (TagCompound tagRemote in tag.GetList<TagCompound>("RemoteAccesses"))
-				remoteAccesses.Add(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
+				manager.LinkRemoteAccess(new Point16(tagRemote.GetShort("X"), tagRemote.GetShort("Y")));
 
 			foreach (TagCompound tagEnvironment in tag.GetList<TagCompound>("EnvironmentAccesses"))
-				environmentAccesses.Add(new Point16(tagEnvironment.GetShort("X"), tagEnvironment.GetShort("Y")));
+				manager.LinkEnvironmentAccess(new Point16(tagEnvironment.GetShort("X"), tagEnvironment.GetShort("Y")));
 
 			_uniqueItemsPutHistory.Load(tag);
 
@@ -849,19 +847,6 @@ namespace MagicStorage.Components
 		public override void NetSend(BinaryWriter writer)
 		{
 			base.NetSend(writer);
-			writer.Write((short)remoteAccesses.Count);
-			foreach (Point16 remoteAccess in remoteAccesses)
-			{
-				writer.Write(remoteAccess.X);
-				writer.Write(remoteAccess.Y);
-			}
-
-			writer.Write((short)environmentAccesses.Count);
-			foreach (Point16 environmentAccess in environmentAccesses)
-			{
-				writer.Write(environmentAccess.X);
-				writer.Write(environmentAccess.Y);
-			}
 
 			// Ensure that the "in use" array stays in sync
 			BitArray bits = new BitArray(clientUsingHeart);
@@ -877,13 +862,6 @@ namespace MagicStorage.Components
 		public override void NetReceive(BinaryReader reader)
 		{
 			base.NetReceive(reader);
-			int count = reader.ReadInt16();
-			for (int k = 0; k < count; k++)
-				remoteAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
-
-			count = reader.ReadInt16();
-			for (int k = 0; k < count; k++)
-				environmentAccesses.Add(new Point16(reader.ReadInt16(), reader.ReadInt16()));
 
 			byte clientUsageLength = reader.ReadByte();
 			byte[] clientUsage = reader.ReadBytes(clientUsageLength);

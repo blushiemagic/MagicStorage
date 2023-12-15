@@ -2,6 +2,7 @@ using MagicStorage.Items;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent.ObjectInteractions;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -13,17 +14,7 @@ namespace MagicStorage.Components
 
 		public override int ItemType(int frameX, int frameY) => ModContent.ItemType<Items.CraftingAccess>();
 
-		public override TEStorageHeart GetHeart(int i, int j)
-		{
-			Point16 point = TEStorageComponent.FindStorageCenter(new Point16(i, j));
-			if (point == Point16.NegativeOne)
-				return null;
-
-			if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center)
-				return center.GetHeart();
-
-			return null;
-		}
+		public override bool HasSmartInteract(int i, int j, SmartInteractScanSettings settings) => true;
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
