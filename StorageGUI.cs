@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
@@ -51,8 +52,7 @@ namespace MagicStorage
 			foreach (var item in sourceItems[slot])
 				item.favorited = doFavorite;
 
-			SetRefresh();
-			SetNextItemTypeToRefresh(sourceItems[slot][0].type);
+			MagicUI.SetNextCollectionsToRefresh(sourceItems[slot][0].type);
 		}
 
 		/// <summary>
@@ -75,7 +75,7 @@ namespace MagicStorage
 
 				if (oldStack != item.stack) {
 					if (GetHeart()?.Position == heart.Position)
-						SetNextItemTypeToRefresh(oldType);
+						MagicUI.SetNextCollectionsToRefresh(oldType);
 
 					return true;
 				}
@@ -97,7 +97,7 @@ namespace MagicStorage
 			heart.TryDeposit(item);
 
 			if (oldStack != item.stack) {
-				SetNextItemTypeToRefresh(oldType);
+				MagicUI.SetNextCollectionsToRefresh(oldType);
 				return true;
 			}
 
@@ -123,7 +123,7 @@ namespace MagicStorage
 
 				if (heart.TryDeposit(items)) {
 					if (GetHeart()?.Position == heart.Position)
-						SetNextItemTypesToRefresh(types);
+						MagicUI.SetNextCollectionsToRefresh(types);
 					return true;
 				}
 
@@ -157,7 +157,7 @@ namespace MagicStorage
 
 				if (heart.TryDeposit(items)) {
 					if (GetHeart()?.Position == heart.Position)
-						SetNextItemTypesToRefresh(types);
+						MagicUI.SetNextCollectionsToRefresh(types);
 					return true;
 				}
 
@@ -174,11 +174,13 @@ namespace MagicStorage
 		/// <returns>Whether the deposit was successful</returns>
 		public static bool TryDeposit(List<Item> items)
 		{
-			TEStorageHeart heart = GetHeart();
+			if (GetHeart() is not TEStorageHeart heart)
+				return false;
+
 			int[] types = items.Select(static i => i.type).ToArray();
 			
 			if (heart.TryDeposit(items)) {
-				SetNextItemTypesToRefresh(types);
+				MagicUI.SetNextCollectionsToRefresh(types);
 				return true;
 			}
 
