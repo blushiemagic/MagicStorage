@@ -8,7 +8,6 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using Terraria.DataStructures;
 using MagicStorage.Common.Systems;
-using static System.Collections.Specialized.BitVector32;
 
 namespace MagicStorage.Components
 {
