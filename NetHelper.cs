@@ -1193,10 +1193,14 @@ namespace MagicStorage
 				Console.ForegroundColor = ConsoleColor.Yellow;
 				Console.BackgroundColor = ConsoleColor.Black;
 
-				Console.WriteLine("=====\n" +
+				string keyMsg = "=====\n" +
 					"THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!\n" +
 					"Server Operator Key: " + key + "\n" +
-					"=====");
+					"=====";
+
+				Console.WriteLine(keyMsg);
+				// Send the text to the client log as well
+				MagicStorageMod.Instance.Logger.Info("\n" + keyMsg);
 
 				Console.ForegroundColor = fg;
 				Console.BackgroundColor = bg;
