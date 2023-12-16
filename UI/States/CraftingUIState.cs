@@ -44,6 +44,8 @@ namespace MagicStorage.UI.States {
 		private NewUIScrollbar storageScrollBar;
 		private float storageScrollBarMaxViewSize = 2f;
 
+		private UIToggleLabel recursionButton;
+
 		private UICraftButton craftButton;
 		private UICraftAmountAdjustment craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
 		private UIText craftAmount;
@@ -166,6 +168,27 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(ingredientZone);
 
 			reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+
+			reqObjText.OnUpdate += static e => {
+				UIText text = e as UIText;
+				if (CraftingGUI.lastKnownRecursionErrorForObjects is { Length: >0 }) {
+					// Error color
+					text.TextColor = Color.Red;
+				} else {
+					// Default color
+					text.TextColor = Color.White;
+				}
+			};
+
+			reqObjText.OnMouseOver += static (evt, e) => {
+				if (CraftingGUI.lastKnownRecursionErrorForObjects is { Length: >0 } error)
+					MagicUI.mouseText = error;
+			};
+
+			reqObjText.OnMouseOut += static (evt, e) => {
+				MagicUI.mouseText = "";
+			};
+
 			reqObjText2 = new UIText("");
 			recipePanel.Append(reqObjText);
 			recipePanel.Append(reqObjText2);
@@ -225,7 +248,39 @@ namespace MagicStorage.UI.States {
 			};
 
 			storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+
+			storedItemsText.OnUpdate += static e => {
+				UIText text = e as UIText;
+				if (CraftingGUI.lastKnownRecursionErrorForStoredItems is { Length: >0 }) {
+					// Error color
+					text.TextColor = Color.Red;
+				} else {
+					// Default color
+					text.TextColor = Color.White;
+				}
+			};
+
+			storedItemsText.OnMouseOver += static (evt, e) => {
+				if (CraftingGUI.lastKnownRecursionErrorForStoredItems is { Length: >0 } error)
+					MagicUI.mouseText = error;
+			};
+
+			storedItemsText.OnMouseOut += static (evt, e) => {
+				MagicUI.mouseText = "";
+			};
+
 			recipePanel.Append(storedItemsText);
+
+			recursionButton = new(Language.GetText("Mods.MagicStorage.CraftingGUI.ShowAllIngredients"));
+			recursionButton.mouseOver = Color.White;
+			recursionButton.Left.Set(18, 0f);
+			recursionButton.Width.Set(recursionButton.Text.MinWidth.Pixels + 30, 0f);
+			recursionButton.OnLeftClick += static (evt, e) => {
+				UIToggleLabel label = e as UIToggleLabel;
+				CraftingGUI.showAllPossibleIngredients = label.IsOn;
+
+				StorageGUI.SetRefresh(forceFullRefresh: true);
+			};
 
 			storageZone.Width.Set(0f, 1f);
 			
@@ -516,8 +571,11 @@ namespace MagicStorage.UI.States {
 				if (totalRows < 1)
 					totalRows = 1;
 
-				if (totalRows != lastKnownIngredientRows || storageScrollBar.ViewPosition != lastKnownScrollBarViewPosition)
-					RecalculateRecipePanelElements(itemsNeeded, totalRows);
+				if ((totalRows != lastKnownIngredientRows || storageScrollBar.ViewPosition != lastKnownScrollBarViewPosition) && RecalculateRecipePanelElements(itemsNeeded, totalRows)) {
+					ingredientZone.SetItemsAndContexts(int.MaxValue, CraftingGUI.GetIngredient);
+
+					storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
+				}
 
 				UpdateRecipeText();
 			} catch (Exception e) {
@@ -564,9 +622,25 @@ namespace MagicStorage.UI.States {
 			int reqObjText2Rows = reqObjText2.Text.Count(c => c == '\n') + 1;
 			float storedItemsTextTop = reqObjText2Top + 30 * reqObjText2Rows;
 			float storageZoneTop = storedItemsTextTop + 24;
+
 			storedItemsText.Top.Set(storedItemsTextTop, 0f);
 
 			storedItemsText.Recalculate();
+
+			if (MagicStorageConfig.IsRecursionEnabled) {
+				storedItemsTextTop += recursionButton.Height.Pixels + 10;
+				storageZoneTop += recursionButton.Height.Pixels + 10;
+
+				recursionButton.Top.Set(storedItemsTextTop + 2, 0f);
+
+				if (recursionButton.Parent is null)
+					recipePanel.Append(recursionButton);
+
+				recursionButton.Recalculate();
+			} else {
+				if (recursionButton.Parent is not null)
+					recursionButton.Remove();
+			}
 
 			storageZone.Top.Set(storageZoneTop, 0f);
 
@@ -711,6 +785,10 @@ namespace MagicStorage.UI.States {
 					// Use the original recipe as a fallback
 					requiredTiles = CraftingGUI.selectedRecipe.requiredTile;
 					conditions = CraftingGUI.selectedRecipe.Conditions;
+
+					CraftingGUI.lastKnownRecursionErrorForObjects = MagicStorageConfig.IsRecursionEnabled
+						? Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoObjects")
+						: null;
 				}
 
 				foreach (int tile in requiredTiles)
@@ -769,6 +847,12 @@ namespace MagicStorage.UI.States {
 
 			CraftingGUI.Reset();
 			CraftingGUI.ResetSlotFocus();
+
+			CraftingGUI.lastKnownRecursionErrorForStoredItems = null;
+			CraftingGUI.lastKnownRecursionErrorForObjects = null;
+
+			CraftingGUI.showAllPossibleIngredients = false;
+			recursionButton.SetState(false);
 		}
 
 		public override void Refresh() {
@@ -1064,7 +1148,7 @@ namespace MagicStorage.UI.States {
 				StorageGUI.CheckRefresh();
 
 				if (CraftingGUI.GetCraftingStations().Count != lastKnownStationsCount || PendingZoneRefresh)
-					(parentUI as CraftingUIState).Refresh();
+					parentUI.Refresh();
 
 				if (lastKnownConfigFavorites != MagicStorageConfig.CraftingFavoritingEnabled || lastKnownConfigBlacklist != MagicStorageConfig.RecipeBlacklistEnabled)
 					InitFilterButtons();

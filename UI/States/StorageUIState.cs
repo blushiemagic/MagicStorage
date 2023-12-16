@@ -19,7 +19,6 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
-using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
@@ -228,7 +227,7 @@ namespace MagicStorage.UI.States {
 				}
 
 				if (PendingZoneRefresh)
-					(parentUI as StorageUIState).Refresh();
+					parentUI.Refresh();
 			}
 
 			private bool UpdateZone() {
@@ -533,19 +532,19 @@ namespace MagicStorage.UI.States {
 							p.bank4.item[i] = inv[i];
 					});
 
-				setItemDeletionMode = new UIToggleLabel("Item Deletion Mode", false);
+				setItemDeletionMode = new UIToggleLabel(Language.GetText("Mods.MagicStorage.StorageGUI.ItemDeletionMode.Label"), false);
 				setItemDeletionMode.SetPadding(0);
 				setItemDeletionMode.Width.Set(setItemDeletionMode.Text.MinWidth.Pixels + 30, 0);
 				setItemDeletionMode.OnLeftClick += static (evt, e) => {
 					UIToggleLabel label = e as UIToggleLabel;
 					if (Main.netMode == NetmodeID.MultiplayerClient && !Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp) {
-						Main.NewText("This control requires the Server Operator status", Color.Red);
+						Main.NewText(Language.GetTextValue("Mods.MagicStorage.ServerOperator.ControlRequirement"), Color.Red);
 						label.SetState(false);
 						StorageGUI.itemDeletionMode = false;
 						return;
 					}
 
-					Main.NewText($"Item Deletion mode is now {(label.IsOn ? "[c/00ff00:enabled].  Double click an item to delete it." : "[c/ff0000:disabled].")}");
+					Main.NewText(Language.GetTextValue("Mods.MagicStorage.StorageGUI.ItemDeletionMode." + (label.IsOn ? "Enabled" : "Disabled")));
 
 					StorageGUI.itemDeletionMode = label.IsOn;
 				};

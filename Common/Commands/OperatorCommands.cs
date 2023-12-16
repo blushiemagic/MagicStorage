@@ -15,21 +15,21 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => "[c/ff6a00:Usage: /reqop]";
 
-		public override string Description => "Requests the Server Admin status (for Magic Storage) from the server";
+		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.reqop").Value;
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 0) {
-				caller.Reply("Expected no arguments", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.NoArguments").Value, Color.Red);
 				return;
 			}
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				caller.Reply("This command can only be used by multiplayer clients", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerOnly").Value, Color.Red);
 				return;
 			}
 
 			if (caller.Player.GetModPlayer<OperatorPlayer>().manualOp) {
-				caller.Reply("This player already has the Server Admin status", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.AlreadyAdmin").Value, Color.Red);
 				return;
 			}
 
@@ -44,40 +44,40 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => $"[c/ff6a00:Usage: /{Command} <number>]";
 
-		public override string Description => GivesOperatorStatus ? "Gives the Server Operator status (for Magic Storage) to client <number>" : "Removes the Server Operator status (for Magic Storage) from client <number>";
+		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions." + (GivesOperatorStatus ? "op" : "deop")).Value;
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 1) {
-				caller.Reply("Expected one integer argument", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.OneIntArgument").Value, Color.Red);
 				return;
 			}
 
 			if (!int.TryParse(args[0], out int client) || client < 0 || client > 255) {
-				caller.Reply("Argument was not a positive integer between 0 and 255", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.ArgumentNotByte").Value, Color.Red);
 				return;
 			}
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				caller.Reply("This command can only be used by multiplayer clients", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerOnly").Value, Color.Red);
 				return;
 			}
 
 			if (!caller.Player.GetModPlayer<OperatorPlayer>().manualOp) {
-				caller.Reply("This command can only be used by multiplayer clients with the Server Admin status", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerAdminOnly").Value, Color.Red);
 				return;
 			}
 
 			Player plr = Main.player[client];
 
 			if (!plr.active) {
-				caller.Reply("Client " + client + " is not connected to the server", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.NotConnected").WithFormatArgs(client).Value, Color.Red);
 				return;
 			}
 
 			var mp = plr.GetModPlayer<OperatorPlayer>();
 
 			if (mp.hasOp == GivesOperatorStatus) {
-				caller.Reply("Client " + client + " already " + (GivesOperatorStatus ? "has" : "lacks") + " the Server Operator status", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.ClientAlready" + (GivesOperatorStatus ? "Op" : "Deop")).WithFormatArgs(client).Value, Color.Red);
 				return;
 			}
 
@@ -109,21 +109,21 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => "[c/ff6a00:Usage: /whois]";
 
-		public override string Description => "Prints what each player's client index is";
+		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.whois").Value;
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 0) {
-				caller.Reply("Expected no arguments", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.NoArguments").Value, Color.Red);
 				return;
 			}
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				caller.Reply("This command can only be used by multiplayer clients", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerOnly").Value, Color.Red);
 				return;
 			}
 
 			if (!caller.Player.GetModPlayer<OperatorPlayer>().hasOp) {
-				caller.Reply("This command can only be used by multiplayer clients with the Server Operator status", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerOperatorOnly").Value, Color.Red);
 				return;
 			}
 
@@ -131,7 +131,7 @@ namespace MagicStorage.Common.Commands {
 				.Select((p, i) => (player: p, whoAmI: i))
 				.Where(t => t.player.active)
 				.Select(t => $"[{t.whoAmI}]: {t.player.name}")
-				.Prepend("Players:");
+				.Prepend(Mod.GetLocalization("ServerOperator.CommandInfo.Players").Value);
 
 			caller.Reply(string.Join("\n  ", print), Color.LightGray);
 		}
@@ -144,20 +144,20 @@ namespace MagicStorage.Common.Commands {
 
 		public override string Usage => "[c/ff6a00:Usage: /whoami]";
 
-		public override string Description => "Prints this player's client index";
+		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.whoami").Value;
 
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			if (args.Length != 0) {
-				caller.Reply("Expected no arguments", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.NoArguments").Value, Color.Red);
 				return;
 			}
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				caller.Reply("This command can only be used by multiplayer clients", Color.Red);
+				caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.MultiplayerOnly").Value, Color.Red);
 				return;
 			}
 
-			caller.Reply("You are client " + caller.Player.whoAmI, Color.LightGray);
+			caller.Reply(Mod.GetLocalization("ServerOperator.CommandInfo.YouAreClient").WithFormatArgs(caller.Player.whoAmI).Value, Color.LightGray);
 		}
 	}
 }

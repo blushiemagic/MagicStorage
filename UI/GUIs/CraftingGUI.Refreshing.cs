@@ -26,6 +26,7 @@ namespace MagicStorage {
 			public ItemTypeOrderedSet hiddenRecipes, favoritedRecipes;
 			public int recipeFilterChoice;
 			public bool[] recipeConditionsMetSnapshot;
+			public string recursionFailReason;
 		}
 
 		private static bool currentlyThreading;
@@ -67,6 +68,8 @@ namespace MagicStorage {
 
 			// Always reset the cached values
 			ResetRecentRecipeCache();
+
+			lastKnownRecursionErrorForStoredItems = null;
 
 			items.Clear();
 			sourceItems.Clear();
@@ -149,7 +152,7 @@ namespace MagicStorage {
 
 			if (thread.state is ThreadState state) {
 				LoadStoredItems(thread, state);
-				RefreshStorageItems();
+				RefreshStorageItems(thread);
 				
 				try {
 					SafelyRefreshRecipes(thread, state);
@@ -177,6 +180,9 @@ namespace MagicStorage {
 
 			foreach (var module in thread.heart.GetModules())
 				module.PostRefreshRecipes(sandbox);
+
+			if (thread.state is ThreadState state)
+				lastKnownRecursionErrorForStoredItems = state.recursionFailReason;
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
 

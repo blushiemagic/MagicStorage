@@ -714,6 +714,33 @@ Mods: {
 		DepositTooltip: 快速堆叠 - 左键 | 存放全部 - Ctrl+左键 | 补货 - 右键
 		DepositTooltipAlt: 快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键
 
+		ServerOperator: {
+			// ControlRequirement: This control requires the Server Operator status.
+
+			CommandInfo: {
+				Descriptions: {
+					// reqop: Requests the Server Admin status (for Magic Storage) from the server
+					// op: Gives the Server Operator status (for Magic Storage) to client <number>
+					// deop: Removes the Server Operator status (for Magic Storage) from client <number>
+					// whois: Prints what each player's client index is
+					// whoami: Prints this client's player index
+				}
+
+				// NoArguments: Expected no arguments
+				// MultiplayerOnly: This command can only be used by multiplayer clients
+				// AlreadyAdmin: This player already has the Server Admin status
+				// OneIntArgument: Expected one integer argument
+				// ArgumentNotByte: Argument was not a positive integer between 0 and 255
+				// MultiplayerAdminOnly: This command can only be used by multiplayer clients with the Server Admin status
+				// NotConnected: Client {0} is not connected to the server
+				// ClientAlreadyOp: Client {0} already has the Server Operator status
+				// ClientAlreadyDeop: Client {0} already lacks the Server Operator status
+				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
+				// Players: Players:
+				// YouAreClient: You are client {0}
+			}
+		}
+
 		StorageGUI: {
 			ForceRefreshButton: 强制刷新UI
 			CompactCoinsButton: 合并钱币
@@ -729,10 +756,26 @@ Mods: {
 			SellDuplicatesHeader: 出售同种物品
 			SellDuplicatesButton: 出售
 
+			ItemDeletionMode: {
+				// Label: Item Deletion Mode
+				// Enabled: Item Deletion mode is now [c/00ff00:enabled].  Double click an item to delete it.
+				// Disabled: Item Deletion mode is now [c/ff0000:disabled].
+			}
+
 			SellDuplicatesMenu: {
 				NoPrefix: 出售所有同种无词缀物品
 				KeepMostValue: 保留最值钱的物品
 				KeepLeastValue: 保留最不值钱的物品
+			}
+		}
+
+		CraftingGUI: {
+			// ShowAllIngredients: Show all possible ingredients
+
+			RecursionErrors: {
+				// NoRecipe: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe]"
+				// NoObjects: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's required objects]"
+				// NoIngredients: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's ingredients]"
 			}
 		}
 

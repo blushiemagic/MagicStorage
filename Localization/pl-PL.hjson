@@ -713,6 +713,33 @@ Mods: {
 		// DepositTooltip: Quick Stack - click, Deposit All - ctrl+click, Restock - right click
 		// DepositTooltipAlt: Quick Stack - ctrl+click, Deposit All - click, Restock - right click
 
+		ServerOperator: {
+			// ControlRequirement: This control requires the Server Operator status.
+
+			CommandInfo: {
+				Descriptions: {
+					// reqop: Requests the Server Admin status (for Magic Storage) from the server
+					// op: Gives the Server Operator status (for Magic Storage) to client <number>
+					// deop: Removes the Server Operator status (for Magic Storage) from client <number>
+					// whois: Prints what each player's client index is
+					// whoami: Prints this client's player index
+				}
+
+				// NoArguments: Expected no arguments
+				// MultiplayerOnly: This command can only be used by multiplayer clients
+				// AlreadyAdmin: This player already has the Server Admin status
+				// OneIntArgument: Expected one integer argument
+				// ArgumentNotByte: Argument was not a positive integer between 0 and 255
+				// MultiplayerAdminOnly: This command can only be used by multiplayer clients with the Server Admin status
+				// NotConnected: Client {0} is not connected to the server
+				// ClientAlreadyOp: Client {0} already has the Server Operator status
+				// ClientAlreadyDeop: Client {0} already lacks the Server Operator status
+				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
+				// Players: Players:
+				// YouAreClient: You are client {0}
+			}
+		}
+
 		StorageGUI: {
 			// ForceRefreshButton: Force UI refresh
 			// CompactCoinsButton: Compact Coins
@@ -728,10 +755,26 @@ Mods: {
 			// SellDuplicatesHeader: Sell Duplicates
 			// SellDuplicatesButton: Sell
 
+			ItemDeletionMode: {
+				// Label: Item Deletion Mode
+				// Enabled: Item Deletion mode is now [c/00ff00:enabled].  Double click an item to delete it.
+				// Disabled: Item Deletion mode is now [c/ff0000:disabled].
+			}
+
 			SellDuplicatesMenu: {
 				// NoPrefix: Sell Duplicates with No Prefix
 				// KeepMostValue: Keep Most Expensive
 				// KeepLeastValue: Keep Least Expensive
+			}
+		}
+
+		CraftingGUI: {
+			// ShowAllIngredients: Show all possible ingredients
+
+			RecursionErrors: {
+				// NoRecipe: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe]"
+				// NoObjects: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's required objects]"
+				// NoIngredients: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's ingredients]"
 			}
 		}
 

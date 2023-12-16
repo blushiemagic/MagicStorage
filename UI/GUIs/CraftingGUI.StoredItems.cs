@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.Localization;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -9,6 +10,10 @@ namespace MagicStorage {
 		internal static readonly List<bool> storageItemsFromModules = new();
 		private static List<ItemInfo> storageItemInfo;
 		internal static readonly List<List<Item>> sourceItems = new();
+
+		internal static bool showAllPossibleIngredients;
+		internal static string lastKnownRecursionErrorForStoredItems;
+		internal static string lastKnownRecursionErrorForObjects;
 
 		internal static Item result;
 
@@ -26,48 +31,37 @@ namespace MagicStorage {
 				return;
 			}
 
-			int index = 0;
-			bool hasItemFromStorage = false;
-			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation { AmountCrafted: >0 } simulation) {
-				NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
-
-				thread?.InitTaskSchedule(sourceItems.Count, "Populating stored ingredients");
-
-				foreach (List<Item> itemsFromSource in sourceItems) {
-					CheckStorageItemsForRecipe(selectedRecipe, itemsFromSource, null, checkResultItem: true, index, ref hasItemFromStorage);
-					index++;
-
-					thread?.CompleteOneTask();
+			ref string error = ref lastKnownRecursionErrorForStoredItems;
+			if (thread is not null) {
+				if (thread.state is not ThreadState state) {
+					thread?.InitAsCompleted("Populating stored ingredients");
+					NetHelper.Report(true, "Failed.  Thread state is not valid.");
+					return;
 				}
+
+				error = ref state.recursionFailReason;
+			}
+
+			error = null;
+
+			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation simulation) {
+				// Show the information for the recipe that was selected
+				RefreshStorageItems_CheckNormalRecipe(thread);
+
+				if (MagicStorageConfig.IsRecursionEnabled)
+					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoRecipe");
 			} else {
-				NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
+				if (showAllPossibleIngredients) {
+					// Show the information for ALL possible recipes in the tree
+					RefreshStorageItems_CheckRecursionRecipes(thread, selectedRecipe.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
+				} else if (simulation.AmountCrafted > 0) {
+					// Show the information for the recipes that were used by the simulation
+					RefreshStorageItems_CheckRecursionRecipes(thread, simulation.UsedRecipes);
+				} else {
+					// Show the information for the highest recipe in the tree, since the simulation failed
+					RefreshStorageItems_CheckNormalRecipe(thread);
 
-				// Check each recipe in the tree
-				IEnumerable<Recipe> recipes = simulation.UsedRecipes;
-
-				// Evaluate now so the total task count can be used
-				List<Recipe> usedRecipes = recipes.ToList();
-
-				thread?.InitTaskSchedule(usedRecipes.Count * sourceItems.Count, "Populating stored ingredients");
-
-				bool checkedHighestRecipe = false;
-				List<bool[]> wasItemAdded = new List<bool[]>();
-				foreach (Recipe recipe in usedRecipes) {
-					index = 0;
-
-					foreach (List<Item> itemsFromSource in sourceItems) {
-						if (wasItemAdded.Count <= index)
-							wasItemAdded.Add(new bool[itemsFromSource.Count]);
-
-						// Only allow the "final recipe" (i.e. the first in the list) to affect the result item
-						CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded[index], checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
-
-						index++;
-
-						thread?.CompleteOneTask();
-					}
-
-					checkedHighestRecipe = true;
+					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoIngredients");
 				}
 			}
 
@@ -85,6 +79,53 @@ namespace MagicStorage {
 			result ??= new Item(selectedRecipe.createItem.type, 0);
 
 			NetHelper.Report(true, $"Success! Found {storageItems.Count} items and {(result.IsAir ? "no result items" : "a result item")}");
+		}
+
+		private static void RefreshStorageItems_CheckNormalRecipe(StorageGUI.ThreadContext thread) {
+			NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
+
+			thread?.InitTaskSchedule(sourceItems.Count, "Populating stored ingredients");
+
+			int index = 0;
+			bool hasItemFromStorage = false;
+			foreach (List<Item> itemsFromSource in sourceItems) {
+				CheckStorageItemsForRecipe(selectedRecipe, itemsFromSource, null, checkResultItem: true, index, ref hasItemFromStorage);
+				index++;
+
+				thread?.CompleteOneTask();
+			}
+		}
+
+		private static void RefreshStorageItems_CheckRecursionRecipes(StorageGUI.ThreadContext thread, IEnumerable<Recipe> recipes) {
+			NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
+
+			// Check each recipe in the tree
+			// Evaluate now so the total task count can be used
+			List<Recipe> usedRecipes = recipes.ToList();
+
+			thread?.InitTaskSchedule(usedRecipes.Count * sourceItems.Count, "Populating stored ingredients");
+
+			int index;
+			bool hasItemFromStorage = false;
+			bool checkedHighestRecipe = false;
+			List<bool[]> wasItemAdded = new List<bool[]>();
+			foreach (Recipe recipe in usedRecipes) {
+				index = 0;
+
+				foreach (List<Item> itemsFromSource in sourceItems) {
+					if (wasItemAdded.Count <= index)
+						wasItemAdded.Add(new bool[itemsFromSource.Count]);
+
+					// Only allow the "final recipe" (i.e. the first in the list) to affect the result item
+					CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded[index], checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
+
+					index++;
+
+					thread?.CompleteOneTask();
+				}
+
+				checkedHighestRecipe = true;
+			}
 		}
 
 		private static void CheckStorageItemsForRecipe(Recipe recipe, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem, int index, ref bool hasItemFromStorage) {
