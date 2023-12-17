@@ -35,12 +35,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public static void RecalculateAllRecursiveRecipes() {
 			MagicCache.RecursiveRecipesUsingRecipeByIndex.Clear();
 
+			NodePool.ClearNodes();
+
 			foreach (var (_, recursive) in recipeToRecursiveRecipe) {
 				recursive.tree.Reset();
 				recursive.tree.CalculateTree();
 			}
-
-			NodePool.ClearNodes();
 		}
 
 		/// <summary>

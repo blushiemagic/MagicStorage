@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria;
+using MagicStorage.Common.Threading;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
 	public static class NodePool {
@@ -13,12 +16,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			}
 		}
 
-		private static readonly List<Node> pool = new();
-		private static readonly Dictionary<int, List<Node>> resultToNodes = new();
+		private static readonly ConcurrentDictionary<int, Node> pool = new();
+		private static readonly ConcurrentDictionary<int, List<Node>> resultToNodes = new();
 
 		internal static Node Get(int index) => pool[index];
-
-		internal static List<Node> ResultToNodes(int type) => resultToNodes[type];
 
 		public static Node FindOrCreate(Recipe recipe) {
 			if (recipe.Disabled)
@@ -26,18 +27,19 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			int type = recipe.createItem.type;
 
-			if (!resultToNodes.TryGetValue(type, out var list))
-				resultToNodes[type] = list = new();
+			var list = resultToNodes.GetOrAdd(type, static _ => new());
 
-			Node node = list.Find(n => Utility.RecipesMatchForHistory(recipe, n.info.sourceRecipe));
+			lock (list) {
+				Node node = list.FirstOrDefault(n => Utility.RecipesMatchForHistory(recipe, n.info.sourceRecipe));
 
-			if (node is null) {
-				int index = pool.Count;
-				pool.Add(node = new Node(recipe, index));
-				resultToNodes[type].Add(node);
+				if (node is null) {
+					int index = pool.Count;
+					pool.TryAdd(index, node = new Node(recipe, index));
+					resultToNodes[type].Add(node);
+				}
+
+				return node;
 			}
-
-			return node;
 		}
 
 		internal static void ClearNodes() {

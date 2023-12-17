@@ -1,8 +1,10 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Threading;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using SerousCommonLib.API.Helpers;
@@ -87,6 +89,8 @@ public class MagicCache : ModSystem
 	public static Recipe[] RecipesUsingEctoMist { get; private set; } = null!;
 
 	public static Dictionary<int, List<Node>> RecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
+
+	internal static ConcurrentDictionary<int, List<Node>> concurrentRecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
@@ -210,22 +214,25 @@ public class MagicCache : ModSystem
 		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Condition.InSnow)).ToArray();
 		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
 
-		RecursiveRecipesUsingRecipeByIndex = new();
+		concurrentRecursiveRecipesUsingRecipeByIndex = new();
+		ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - 0 / {EnabledRecipes.Length}");
+		WorkManager.ForEach(EnabledRecipes, InitRecursiveTree, ReportRecursiveTreeInitProgress);
 
-		int current = 1;
-		int total = EnabledRecipes.Length;
-		foreach (Recipe recipe in EnabledRecipes) {
-			// Report the progres
-			ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - {current} / {total}");
-
-			RecursiveRecipe recursive = new RecursiveRecipe(recipe);
-			RecursiveRecipe.recipeToRecursiveRecipe.Add(recipe, recursive);
-			recursive.tree.CalculateTree();
-
-			current++;
-		}
+		RecursiveRecipesUsingRecipeByIndex = new(concurrentRecursiveRecipesUsingRecipeByIndex);
+		concurrentRecursiveRecipesUsingRecipeByIndex = null!;
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
+	}
+
+	private static void InitRecursiveTree(Recipe recipe) {
+		RecursiveRecipe recursive = new RecursiveRecipe(recipe);
+		RecursiveRecipe.recipeToRecursiveRecipe.Add(recipe, recursive);
+		recursive.tree.CalculateTree();
+	}
+
+	private static void ReportRecursiveTreeInitProgress(int currentDone, int total) {
+		// Report the progres
+		ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - {currentDone} / {total}");
 	}
 
 	private static void SetupSortFilterRecipeCache()

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MagicStorage.Common.Threading;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 
@@ -41,15 +42,24 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				foreach (var ingredientRecipe in ingredientInfo.trees) {
 					ingredientRecipe.CalculateTree(processedNodes, nodeStack);
 
-					if (!MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(ingredientRecipe.originalRecipe.RecipeIndex, out var list))
-						MagicCache.RecursiveRecipesUsingRecipeByIndex[ingredientRecipe.originalRecipe.RecipeIndex] = list = new();
+					int recipeIndex = ingredientRecipe.originalRecipe.RecipeIndex;
 
-					// Work up the current tree
-					foreach (int index in nodeStack) {
-						// Local capturing
-						int rootIndex = index;
-						if (!list.Any(node => rootIndex == node.poolIndex))
-							list.Add(NodePool.Get(index));
+					List<Node> list;
+					if (WorkManager.IsWorking) {
+						list = MagicCache.concurrentRecursiveRecipesUsingRecipeByIndex.GetOrAdd(recipeIndex, static _ => new());
+					} else {
+						if (!MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(recipeIndex, out list))
+							MagicCache.RecursiveRecipesUsingRecipeByIndex[recipeIndex] = list = new();
+					}
+
+					lock (list) {
+						// Work up the current tree
+						foreach (int index in nodeStack) {
+							// Local capturing
+							int rootIndex = index;
+							if (!list.Any(node => rootIndex == node.poolIndex))
+								list.Add(NodePool.Get(index));
+						}
 					}
 				}
 			}
