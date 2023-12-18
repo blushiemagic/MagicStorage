@@ -926,7 +926,7 @@ Mods: {
 
 				glowNewItems: {
 					Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Display new items/recipes"
-					Tooltip: Enable to use the filter below, disable to remember last filter selected in game(filter is still used on first open after mod load)
+					Tooltip: Toggles whether new items in the storage will glow to indicate they're new
 				}
 
 				clearSearchText: {
