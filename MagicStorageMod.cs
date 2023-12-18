@@ -175,6 +175,15 @@ namespace MagicStorage {
 						ThrowWithMessage("First argument must be a \"Recipe\" or \"Func<Recipe, bool>\" object", 1);
 
 					return true;
+				case "Block Recursion":
+					if (args.Length != 2)
+						ThrowWithMessage("Expected 2 arguments");
+
+					TryParseAs(1, out Recipe recipeToBlock);
+
+					MagicCache.BlockRecipeRecursionFor(recipeToBlock);
+
+					return true;
 				default:
 					throw new ArgumentException("Call does not support the function \"" + function + "\"");
 			}

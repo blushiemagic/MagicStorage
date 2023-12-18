@@ -35,6 +35,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (!processedNodes.Add(Root.poolIndex))
 				return;
 
+			// Block recipes that should be blocked
+			if (MagicCache.IsRecipeBlocked(originalRecipe))
+				return;
+
 			nodeStack.Push(Root.poolIndex);
 
 			// Process the nodes for each child

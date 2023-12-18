@@ -92,6 +92,18 @@ public class MagicCache : ModSystem
 
 	internal static ConcurrentDictionary<int, List<Node>> concurrentRecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
+	internal static List<Recipe> blockedRecipeRecursion = new();
+
+	public static void BlockRecipeRecursionFor(Recipe recipe) {
+		if (!IsRecipeBlocked(recipe))
+			blockedRecipeRecursion.Add(recipe);
+	}
+
+	internal static bool IsRecipeBlocked(Recipe recipe) {
+		var comparer = ReferenceEqualityComparer.Instance;
+		return blockedRecipeRecursion.Any(r => comparer.Equals(r, recipe));
+	}
+
 	/// <summary>
 	/// Clears the dictionaries, arrays and lists for recipes and repopulates them with the current state of the <see cref="Main.recipe"/> array.<br/>
 	/// Also forces the active crafting UI to refresh if applicable.
