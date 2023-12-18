@@ -92,7 +92,7 @@ public class MagicCache : ModSystem
 
 	internal static ConcurrentDictionary<int, List<Node>> concurrentRecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
-	internal static List<Recipe> blockedRecipeRecursion = new();
+	private static List<Recipe> blockedRecipeRecursion = null!;
 
 	public static void BlockRecipeRecursionFor(Recipe recipe) {
 		if (!IsRecipeBlocked(recipe))
@@ -130,6 +130,19 @@ public class MagicCache : ModSystem
 		VanillaRecipes = null!;
 
 		RecipesUsingItemType = null!;
+		RecipesUsingTileType = null!;
+		RecipesUsingWater = null!;
+		RecipesUsingLava = null!;
+		RecipesUsingHoney = null!;
+		RecipesUsingSnow = null!;
+		RecipesUsingEctoMist = null!;
+		RecursiveRecipesUsingRecipeByIndex = null!;
+		concurrentRecursiveRecipesUsingRecipeByIndex = null!;
+		blockedRecipeRecursion = null!;
+	}
+
+	public override void PostSetupContent() {
+		blockedRecipeRecursion = new();
 	}
 
 	public override void PostSetupRecipes()
