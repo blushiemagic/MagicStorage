@@ -20,17 +20,6 @@ namespace MagicStorage.Components
 			set => center = value;
 		}
 
-		public TEStorageHeart GetHeart()
-		{
-			if (center == Point16.NegativeOne)
-				return null;
-
-			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter entity)
-				return entity.GetHeart();
-
-			return null;
-		}
-
 		public abstract bool HasSpaceInStackFor(Item check);
 
 		public abstract bool HasItem(Item check, bool ignorePrefix = false);

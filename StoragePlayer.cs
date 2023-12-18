@@ -165,6 +165,8 @@ namespace MagicStorage
 
 			CloseStorageUnsafely();
 
+			Main.LocalPlayer.tileEntityAnchor.Clear();
+
 			remoteAccess = false;
 			remoteCrafting = false;
 			portableAccessRangePlayerToPylons = 0;

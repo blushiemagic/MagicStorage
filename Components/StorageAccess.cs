@@ -113,7 +113,11 @@ namespace MagicStorage.Components
 				modPlayer.timeSinceOpen = 0;
 				if (PlayerInput.GrappleAndInteractAreShared)
 					PlayerInput.Triggers.JustPressed.Grapple = false;
+				Main.playerInventory = true;
 				Main.recBigList = false;
+				Main.CreativeMenu.CloseMenu();
+				if (TileEntity.ByPosition.TryGetValue(toOpen, out TileEntity te) && te is TEStorageComponent)
+					player.tileEntityAnchor.Set(te.ID, i, j);
 				SoundEngine.PlaySound(hadChestOpen || hadOtherOpen ? SoundID.MenuTick : SoundID.MenuOpen);
 				Recipe.FindRecipes();
 			}
