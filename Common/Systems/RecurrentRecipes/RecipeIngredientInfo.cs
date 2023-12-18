@@ -31,7 +31,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			}
 
 			trees = types.SelectMany(static type => MagicCache.ResultToRecipe.TryGetValue(type, out Recipe[] recipes) ? recipes : Array.Empty<Recipe>())
-				.Where(static r => !r.Disabled)
+				.Where(static r => !r.Disabled && !MagicCache.IsRecipeBlocked(r))
 				.Select(static r => new RecursionTree(r))
 				.ToList();
 		}
