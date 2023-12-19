@@ -18,13 +18,13 @@ namespace MagicStorage.Edits {
 		}
 
 		private static void ItemSlot_OverrideHover(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, Patch_ItemSlot_OverrideHover);
+			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_ItemSlot_OverrideHover);
 		}
 
-		private static bool Patch_ItemSlot_OverrideHover(ILCursor c, ref string badReturnReason) {
-			FieldInfo ItemSlot_Options_DisableQuickTrash = typeof(ItemSlot.Options).GetField(nameof(ItemSlot.Options.DisableQuickTrash), BindingFlags.Public | BindingFlags.Static);
-			FieldInfo Main_cursorOverride = typeof(Main).GetField(nameof(Main.cursorOverride), BindingFlags.Public | BindingFlags.Static);
+		private static readonly FieldInfo ItemSlot_Options_DisableQuickTrash = typeof(ItemSlot.Options).GetField(nameof(ItemSlot.Options.DisableQuickTrash), BindingFlags.Public | BindingFlags.Static);
+		private static readonly FieldInfo Main_cursorOverride = typeof(Main).GetField(nameof(Main.cursorOverride), BindingFlags.Public | BindingFlags.Static);
 
+		private static bool Patch_ItemSlot_OverrideHover(ILCursor c, ref string badReturnReason) {
 			ILLabel afterSwitchBlock = null;
 			if (!c.TryGotoNext(MoveType.Before, i => i.MatchLdsfld(ItemSlot_Options_DisableQuickTrash),
 				i => i.MatchBrtrue(out afterSwitchBlock),
