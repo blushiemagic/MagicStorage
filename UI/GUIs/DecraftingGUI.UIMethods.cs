@@ -24,10 +24,7 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
-			if (slotFocus == -1)
-				return;
-
-			if (!hasSlotFocus || slotFocus >= resultItems.Count || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, resultItems[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
+			if (!hasSlotFocus || slotFocus == -1 || slotFocus >= resultItems.Count || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, resultItems[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
 				ResetSlotFocus();
 			} else {
 				if (rightClickTimer <= 0) {
