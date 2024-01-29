@@ -250,7 +250,7 @@ namespace MagicStorage {
 				using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
 					foreach (Item item in ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe)) {
 						context.results.Add(item);
-						RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+						RecipeLoader.OnCraft(item, selectedRecipe, consumedItems, new Item());
 					}
 
 					DroppedItems.Clear();
@@ -354,7 +354,7 @@ namespace MagicStorage {
 				using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
 					foreach (Item item in ExtraCraftItemsSystem.GetSimulatedItemDrops(selectedRecipe)) {
 						context.results.Add(item);
-						RecipeLoader.OnCraft(resultItem, selectedRecipe, consumedItems, new Item());
+						RecipeLoader.OnCraft(item, selectedRecipe, consumedItems, new Item());
 					}
 
 					DroppedItems.Clear();
