@@ -104,6 +104,8 @@ namespace MagicStorage {
 			while (!shimmeringItem.IsAir) {
 				var result = ShimmerMetrics.AttemptItemTransmutation(shimmeringItem, context.storage);
 
+				context.toShimmer = shimmeringItem.stack;
+
 				if (result is null) {
 					// No more results, bail
 					break;
