@@ -81,11 +81,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			return ItemID.Sets.ShimmerTransformToItem[item];
 		}
 
-		public static IShimmerResult AttemptItemTransmutation(Item item, List<Item> itemOutputs) {
+		public static IShimmerResult AttemptItemTransmutation(Item item, StorageIntermediary storage) {
 			var info = MagicCache.ShimmerInfos[item.type];
 			var result = info.GetResult();
 
-			result?.OnShimmer(item, info.iconicItem, itemOutputs);
+			result?.OnShimmer(item, info.iconicItem, storage);
 
 			if (item.stack <= 0)
 				item.TurnToAir();

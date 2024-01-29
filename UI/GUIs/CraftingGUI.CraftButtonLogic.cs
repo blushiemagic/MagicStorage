@@ -33,7 +33,7 @@ namespace MagicStorage {
 
 				IEnumerable<int> allItemTypes = selectedRecipe.requiredItem.Select(i => i.type).Prepend(selectedRecipe.createItem.type);
 
-				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calulated Recipe array being empty
+				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calculated Recipe array being empty
 				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
 				MagicUI.SetRefresh();
 				SoundEngine.PlaySound(SoundID.Grab);

@@ -7,8 +7,6 @@ namespace MagicStorage.UI {
 
 		protected override bool DisplayHoverText() => DecraftingGUI.selectedItem > ItemID.None;
 
-		protected override void HandleCraft(ref bool stillCrafting) {
-			
-		}
+		protected override void HandleCraft(ref bool stillCrafting) => DecraftingGUI.ClickShimmerButton(ref stillCrafting);
 	}
 }

@@ -36,7 +36,7 @@ namespace MagicStorage {
 		}
 
 		/// <summary>
-		/// Attempts to craft a certain amount of items from the currently assigned Crafting Access.
+		/// Attempts to craft a certain amount of items from the currently assigned Crafting Interface.
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(int toCraft) {

@@ -9,9 +9,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			yield return new ItemReport(ShimmerMetrics.TransformItem(iconicType));
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, List<Item> itemSpawnOutput) {
+		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage) {
 			int result = ShimmerMetrics.TransformItem(iconicType);
-			itemSpawnOutput.Add(new Item(result, item.stack));
+			storage.Deposit(new Item(result, item.stack));
+
+			storage.Withdraw(item.type, item.stack);
 			item.stack = 0;
 		}
 	}
@@ -21,13 +23,14 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			yield return new CoinLuckReport(item.stack * ItemID.Sets.CoinLuckValue[iconicType]);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, List<Item> itemSpawnOutput) {
+		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage) {
 			Player player = Main.LocalPlayer;
 			
 			int coinValue = item.stack * ItemID.Sets.CoinLuckValue[iconicType];
 			player.AddCoinLuck(player.Center, coinValue);
 			NetMessage.SendData(MessageID.ShimmerActions, number: 1, number2: (int)player.Center.X, number3: (int)player.Center.Y, number4: coinValue);
 
+			storage.Withdraw(item.type, item.stack);
 			item.stack = 0;
 		}
 	}
@@ -40,7 +43,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				yield return new NPCSpawnReport(item);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, List<Item> itemSpawnOutput) {
+		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage) {
 			Player player = Main.LocalPlayer;
 
 			if (iconicType == ItemID.GelBalloon) {
@@ -60,14 +63,17 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				}
 
 				WorldGen.CheckAchievement_RealEstateAndTownSlimes();
+				storage.Withdraw(item.type);
 				item.stack--;
 			} else if (item.makeNPC > NPCID.None) {
 				int num10 = 50;
 				int num11 = NPC.GetAvailableAmountOfNPCsToSpawnUpToSlot(item.stack, Main.maxNPCs);
+				int count = 0;
 				while (num10 > 0 && num11 > 0 && item.stack > 0) {
 					num10--;
 					num11--;
 					item.stack--;
+					count++;
 
 					int shimmerTransform = NPCID.Sets.ShimmerTransformToNPC[item.makeNPC];
 
@@ -80,6 +86,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 						NetMessage.SendData(MessageID.ShimmerActions, number: 2, number2: spawnedNPC);
 					}
 				}
+
+				storage.Withdraw(item.type, count);
 			}
 		}
 	}
@@ -100,9 +108,12 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				yield return new ItemReport(reqItem.type);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, List<Item> itemSpawnOutput) {
-			foreach (var result in ShimmerMetrics.AttemptDecraft(Main.recipe[decraftingRecipeIndex], iconicType, ref item.stack))
-				itemSpawnOutput.Add(new Item(result.type, result.stack));
+		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage) {
+			int oldStack = item.stack;
+			foreach (var result in ShimmerMetrics.AttemptDecraft(Main.recipe[decraftingRecipeIndex], iconicType, ref item.stack)) {
+				storage.Withdraw(item.type, oldStack - item.stack);
+				storage.Deposit(new Item(result.type, result.stack));
+			}
 		}
 	}
 }

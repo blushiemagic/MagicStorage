@@ -105,9 +105,9 @@ namespace MagicStorage
 		}
 
 		/// <summary>
-		/// Attempts to craft a certain amount of items from a Crafting Access
+		/// Attempts to craft a certain amount of items from a Crafting Interface
 		/// </summary>
-		/// <param name="craftingAccess">The tile entity for the Crafting Access to craft items from</param>
+		/// <param name="craftingAccess">The tile entity for the Crafting Interface to craft items from</param>
 		/// <param name="toCraft">How many items should be crafted</param>
 		public static void Craft(TECraftingAccess craftingAccess, int toCraft) {
 			if (craftingAccess is null)

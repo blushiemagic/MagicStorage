@@ -161,7 +161,7 @@ namespace MagicStorage {
 				module.OnConsumeItemForRecipe(context.sandbox, tryItem, stackToConsume);
 		}
 
-		private static List<Item> CompactItemList(List<Item> items) {
+		internal static List<Item> CompactItemList(List<Item> items) {
 			List<Item> compacted = new();
 
 			for (int i = 0; i < items.Count; i++) {

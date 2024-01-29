@@ -8,6 +8,6 @@ namespace MagicStorage.Common.Systems.Shimmering {
 	public interface IShimmerResult {
 		IEnumerable<IShimmerResultReport> GetShimmerReports(Item item, int iconicType);
 
-		void OnShimmer(Item item, int iconicType, List<Item> itemSpawnOutput);
+		void OnShimmer(Item item, int iconicType, StorageIntermediary storage);
 	}
 }
