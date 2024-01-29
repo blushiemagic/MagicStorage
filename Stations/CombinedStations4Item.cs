@@ -1,4 +1,5 @@
-﻿using Terraria.ID;
+﻿using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
@@ -26,12 +27,17 @@ namespace MagicStorage.Stations
 
 		public override void AddRecipes()
 		{
-			CreateRecipe()
+			Recipe recipe = CreateRecipe()
 				.AddIngredient<CombinedStations3Item>()
 				.AddIngredient<CombinedFurnitureStations2Item>()
 				.AddIngredient(ItemID.Autohammer)
-				.AddIngredient(ItemID.LunarCraftingStation)
-				.AddIngredient(ItemID.LavaBucket, 10)
+				.AddIngredient(ItemID.LunarCraftingStation);
+
+			if (ModLoader.TryGetMod("Fargowiltas", out Mod Fargowiltas)) {
+				recipe.AddIngredient(Fargowiltas.Find<ModItem>("GoldenDippingVat").Type);
+			}
+
+			recipe.AddIngredient(ItemID.LavaBucket, 10)
 				.AddIngredient(ItemID.HoneyBucket, 10)
 				.Register();
 		}

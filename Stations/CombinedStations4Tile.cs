@@ -1,5 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace MagicStorage.Stations
 {
@@ -20,8 +23,25 @@ namespace MagicStorage.Stations
 		//Meat Grinder, Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
 		//(Final Tier)
 		//Autohammer, Ancient Manipulator, All Liquids
-		public override int[] GetAdjTiles() =>
-			new int[]
+		public override int[] GetAdjTiles() {
+			var tiles = GetStandardTiles();
+
+			if (ModLoader.TryGetMod("Fargowiltas", out Mod Fargowiltas)) {
+				// Cross mod compatibility: Golden Dipping Vat and Crucible of the Cosmos
+				var vat = Fargowiltas.Find<ModTile>("GoldenDippingVatSheet");
+				tiles.Add(vat.Type);
+				tiles.AddRange(vat.AdjTiles);
+
+				var crucible = Fargowiltas.Find<ModTile>("CrucibleCosmosSheet");
+				tiles.Add(crucible.Type);
+				tiles.AddRange(crucible.AdjTiles);
+			}
+
+			return tiles.Distinct().ToArray();
+		}
+
+		private List<int> GetStandardTiles() {
+			return new ()
 			{
 				Type,
 				//Tier 1 (Standard)
@@ -68,6 +88,7 @@ namespace MagicStorage.Stations
 				TileID.Autohammer,
 				TileID.LunarCraftingStation
 			};
+		}
 
 		public override void SafeSetStaticDefaults()
 		{
