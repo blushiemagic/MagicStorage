@@ -10,7 +10,7 @@ namespace MagicStorage.UI {
 			base.MouseOver(evt);
 
 			if (Parent is NewUISlotZone zone && zone.HoverSlot != id)
-				zone.HoverSlot = id;
+				zone.SetHoverSlot(id);
 
 			StoredItem.newAndShiny = false;
 		}
@@ -19,7 +19,7 @@ namespace MagicStorage.UI {
 			base.MouseOut(evt);
 
 			if (Parent is NewUISlotZone zone && zone.HoverSlot == id)
-				zone.HoverSlot = -1;
+				zone.SetHoverSlot(-1);
 		}
 	}
 }

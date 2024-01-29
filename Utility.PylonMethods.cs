@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MagicStorage.Common;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -72,14 +72,8 @@ namespace MagicStorage {
 		private static Func<TeleportPylonInfo, bool> _DoesPylonAcceptTeleportation;
 		private static bool DoesPylonAcceptTeleportation(TeleportPylonInfo info) {
 			// Force the drone tracker to be ignored
-			var old = Main.DroneCameraTracker;
-			Main.DroneCameraTracker = null;
-
-			bool accepted = (_DoesPylonAcceptTeleportation ??= CreateMethodCall())(info);
-
-			Main.DroneCameraTracker = old;
-
-			return accepted;
+			using (ObjectSwitch.SwapNull(ref Main.DroneCameraTracker))
+				return (_DoesPylonAcceptTeleportation ??= CreateMethodCall())(info);
 
 			static Func<TeleportPylonInfo, bool> CreateMethodCall() {
 				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("DoesPylonAcceptTeleportation", BindingFlags.Instance | BindingFlags.NonPublic)

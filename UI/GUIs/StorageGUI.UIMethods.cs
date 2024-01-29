@@ -1,6 +1,7 @@
 ﻿using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class StorageGUI {
@@ -21,11 +22,13 @@ namespace MagicStorage {
 
 		internal static void SlotFocusLogic()
 		{
-			if (CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
-			if (slotFocus >= items.Count ||
-				!Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			if (slotFocus == -1)
+				return;
+
+			if (slotFocus >= items.Count || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, items[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}
@@ -48,7 +51,7 @@ namespace MagicStorage {
 						Main.mouseItem.stack += result.stack;
 					}
 
-					SetRefresh();
+					MagicUI.SetRefresh();
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 

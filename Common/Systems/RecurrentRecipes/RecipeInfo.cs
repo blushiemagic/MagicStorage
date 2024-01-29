@@ -14,5 +14,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			for (int i = 0; i < recipe.requiredItem.Count; i++)
 				ingredientTrees.Add(new RecipeIngredientInfo(this, i));
 		}
+
+		internal void ClearTrees() {
+			foreach (var tree in ingredientTrees)
+				tree?.ClearTrees();
+
+			ingredientTrees.Clear();
+		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Components;
 using Terraria;
@@ -35,7 +36,21 @@ namespace MagicStorage
 
 		internal static void Unload()
 		{
+			ResetRecentRecipeCache();
+			ResetRefreshCache();
+			recipes.Clear();
+			recipeAvailable.Clear();
+			storageItems.Clear();
+			storageItemsFromModules.Clear();
+			sourceItems.Clear();
+			storageItemInfo.Clear();
+			items.Clear();
+			itemCounts.Clear();
+			itemCountsByPrefix.Clear();
+			sourceItemsFromModules.Clear();
+			blockStorageItems.Clear();
 			selectedRecipe = null;
+			PlayerZoneCache.FreeCache(true);
 		}
 
 		internal static void Reset() {
@@ -127,7 +142,7 @@ namespace MagicStorage
 		}
 
 		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
-			bool[] availableRecipes = currentlyThreading && StorageGUI.activeThread.state is ThreadState { recipeConditionsMetSnapshot: bool[] snapshot } ? snapshot : null;
+			bool[] availableRecipes = currentlyThreading && MagicUI.activeThread.state is ThreadState { recipeConditionsMetSnapshot: bool[] snapshot } ? snapshot : null;
 			return new AvailableRecipeObjects(adjTiles, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty), availableRecipes);
 		}
 
@@ -169,7 +184,6 @@ namespace MagicStorage
 		internal static bool TryDepositResult(Item item)
 		{
 			int oldStack = item.stack;
-			int oldType = item.type;
 			TEStorageHeart heart = GetHeart();
 
 			if (heart is null)
@@ -177,13 +191,7 @@ namespace MagicStorage
 
 			heart.TryDeposit(item);
 
-			if (oldStack != item.stack) {
-				SetNextDefaultRecipeCollectionToRefresh(oldType);
-
-				return true;
-			}
-
-			return false;
+			return oldStack != item.stack;
 		}
 
 		internal static Item DoWithdrawResult(int amountToWithdraw, bool toInventory = false)
@@ -205,17 +213,16 @@ namespace MagicStorage
 			Item withdrawn = heart.Withdraw(clone, false);
 
 			if (withdrawn.IsAir)
-				withdrawn = TryToWithdrawFromModuleItems(amountToWithdraw);
+				withdrawn = TryToWithdrawFromModuleItems(clone, true);
 
 			return withdrawn;
 		}
 
-		internal static Item TryToWithdrawFromModuleItems(int amountToWithdraw) {
+		internal static Item TryToWithdrawFromModuleItems(Item toWithdraw, bool wasAlreadyCloned) {
 			Item withdrawn;
 			if (items.Count != numItemsWithoutSimulators) {
 				//Heart did not contain the item; try to withdraw from the module items
-				Item item = result.Clone();
-				item.stack = Math.Min(amountToWithdraw, item.maxStack);
+				Item item = wasAlreadyCloned ? toWithdraw : toWithdraw.Clone();
 
 				TEStorageUnit.WithdrawFromItemCollection(sourceItemsFromModules, item, out withdrawn,
 					onItemRemoved: k => {
@@ -232,7 +239,7 @@ namespace MagicStorage
 					});
 
 				if (!withdrawn.IsAir) {
-					StorageGUI.SetRefresh();
+					MagicUI.SetRefresh();
 					SetNextDefaultRecipeCollectionToRefresh(withdrawn.type);
 				}
 			} else

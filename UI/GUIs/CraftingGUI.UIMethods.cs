@@ -1,6 +1,7 @@
 ﻿using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -11,7 +12,7 @@ namespace MagicStorage {
 
 		internal static void SlotFocusLogic()
 		{
-			if (StorageGUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
 			if (result == null || result.IsAir || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
@@ -37,7 +38,7 @@ namespace MagicStorage {
 
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
-					StorageGUI.SetRefresh();
+					MagicUI.SetRefresh();
 				}
 
 				rightClickTimer--;

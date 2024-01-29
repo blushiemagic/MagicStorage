@@ -15,16 +15,21 @@ using MagicStorage.Common;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		private class ThreadState {
-			public static readonly HashSet<int> EmptyGlobalHiddenRecipes = new();
+		internal abstract class CommonCraftingState {
+			public static readonly HashSet<int> EmptyGlobalHiddenTypes = new();
 
 			public EnvironmentSandbox sandbox;
-			public Recipe[] recipesToRefresh;
 			public IEnumerable<Item> heartItems;
 			public IEnumerable<Item> simulatorItems;
-			public HashSet<int> globalHiddenRecipes;
-			public ItemTypeOrderedSet hiddenRecipes, favoritedRecipes;
+			public HashSet<int> globalHiddenTypes;
+			public ItemTypeOrderedSet hiddenTypes, favoritedTypes;
 			public int recipeFilterChoice;
+
+			public bool IsHidden(int item) => globalHiddenTypes.Contains(item) || hiddenTypes.Contains(item);
+		}
+
+		private class ThreadState : CommonCraftingState {
+			public Recipe[] recipesToRefresh;
 			public bool[] recipeConditionsMetSnapshot;
 			public string recursionFailReason;
 		}
@@ -32,21 +37,26 @@ namespace MagicStorage {
 		private static bool currentlyThreading;
 
 		internal static readonly List<Item> items = new();
-		private static readonly Dictionary<int, int> itemCounts = new();
-		private static readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = new();
+		internal static readonly Dictionary<int, int> itemCounts = new();
+		internal static readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = new();
 
 		// Only used by DoWithdrawResult to check items from modules
-		private static readonly List<Item> sourceItemsFromModules = new();
+		internal static readonly List<Item> sourceItemsFromModules = new();
 
-		private static int numItemsWithoutSimulators;
-		private static int numSimulatorItems;
+		internal static int numItemsWithoutSimulators;
+		internal static int numSimulatorItems;
 		
-		public static void RefreshItems() => RefreshItemsAndSpecificRecipes(null);
+		[Obsolete("Use MagicUI.RefreshItems() instead", error: true)]
+		public static void RefreshItems() => MagicUI.RefreshItems();
 
-		private static void RefreshItemsAndSpecificRecipes(Recipe[] toRefresh) {
-			if (!StorageGUI.ForceNextRefreshToBeFull) {
-				// Custom array provided?  Refresh the default array anyway
-				SetNextDefaultRecipeCollectionToRefresh(toRefresh);
+		internal static void ResetRefreshCache() {
+			recipesToRefresh = null;
+		}
+		
+		internal static void RefreshItems_Inner() {
+			Recipe[] toRefresh;
+			if (!MagicUI.ForceNextRefreshToBeFull) {
+				// Refresh the provided array
 				toRefresh = recipesToRefresh;
 			} else {
 				// Force all recipes to be recalculated
@@ -58,12 +68,11 @@ namespace MagicStorage {
 
 			craftingPage?.RequestThreadWait(waiting: true);
 
-			if (StorageGUI.CurrentlyRefreshing) {
-				StorageGUI.activeThread?.Stop();
-				StorageGUI.activeThread = null;
-			} else {
+			MagicUI.StopCurrentThread();
+
+			if (!MagicUI.CurrentlyRefreshing) {
 				// Inform the UI that a new refresh is about to start so that it can go into a proper "empty" state
-				MagicUI.craftingUI.OnRefreshStart();
+				MagicUI.craftingUI?.OnRefreshStart();
 			}
 
 			// Always reset the cached values
@@ -79,18 +88,18 @@ namespace MagicStorage {
 			if (heart == null) {
 				craftingPage?.RequestThreadWait(waiting: false);
 
-				StorageGUI.InvokeOnRefresh();
+				MagicUI.InvokeOnRefresh();
 				return;
 			}
 
-			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes invoked");
+			NetHelper.Report(true, "CraftingGUI: RefreshItems invoked");
 
 			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
 
 			foreach (var module in heart.GetModules())
 				module.PreRefreshRecipes(sandbox);
 
-			StorageGUI.CurrentlyRefreshing = true;
+			MagicUI.CurrentlyRefreshing = true;
 
 			IEnumerable<Item> heartItems = heart.GetStoredItems();
 			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
@@ -100,15 +109,14 @@ namespace MagicStorage {
 			int sortMode = MagicUI.craftingUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.craftingUI.GetPage<FilteringPage>("Filtering").option;
 
-			var recipesPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
-			string searchText = recipesPage.searchBar.Text;
+			string searchText = craftingPage.searchBar.Text;
 
 			var globalHiddenRecipes = MagicStorageConfig.GlobalRecipeBlacklist.Where(x => !x.IsUnloaded).Select(x => x.Type).ToHashSet();
 			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
 			var favorited = StoragePlayer.LocalPlayer.FavoritedRecipes;
 
-			int recipeChoice = recipesPage.recipeButtons.Choice;
-			int modSearchIndex = recipesPage.modSearchBox.ModIndex;
+			int recipeChoice = craftingPage.recipeButtons.Choice;
+			int modSearchIndex = craftingPage.modSearchBox.ModIndex;
 
 			ThreadState state;
 			StorageGUI.ThreadContext thread = new(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
@@ -123,9 +131,9 @@ namespace MagicStorage {
 					recipesToRefresh = toRefresh,
 					heartItems = heartItems,
 					simulatorItems = simulatorItems,
-					globalHiddenRecipes = globalHiddenRecipes,
-					hiddenRecipes = hiddenRecipes,
-					favoritedRecipes = favorited,
+					globalHiddenTypes = globalHiddenRecipes,
+					hiddenTypes = hiddenRecipes,
+					favoritedTypes = favorited,
 					recipeFilterChoice = recipeChoice
 				}
 			};
@@ -148,10 +156,8 @@ namespace MagicStorage {
 		private static void SortAndFilter(StorageGUI.ThreadContext thread) {
 			currentlyThreading = true;
 
-			currentRecipeIsAvailable = null;
-
 			if (thread.state is ThreadState state) {
-				LoadStoredItems(thread, state);
+				LoadItemsAndSetDictionaryInfo(thread, state);
 				RefreshStorageItems(thread);
 				
 				try {
@@ -164,17 +170,17 @@ namespace MagicStorage {
 			}
 
 			currentlyThreading = false;
-			recipesToRefresh = null;
+			ResetRefreshCache();
 		}
 
 		private static void AfterSorting(StorageGUI.ThreadContext thread) {
 			// Refresh logic in the UIs will only run when this is false
 			if (!thread.token.IsCancellationRequested)
-				StorageGUI.CurrentlyRefreshing = false;
+				MagicUI.CurrentlyRefreshing = false;
 
 			// Ensure that race conditions with the UI can't occur
 			// QueueMainThreadAction will execute the logic in a very specific place
-			Main.QueueMainThreadAction(StorageGUI.InvokeOnRefresh);
+			Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
 
 			var sandbox = (thread.state as ThreadState).sandbox;
 
@@ -184,12 +190,13 @@ namespace MagicStorage {
 			if (thread.state is ThreadState state)
 				lastKnownRecursionErrorForStoredItems = state.recursionFailReason;
 
-			NetHelper.Report(true, "CraftingGUI: RefreshItemsAndSpecificRecipes finished");
+			NetHelper.Report(true, "CraftingGUI: RefreshItems finished");
 
 			MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: false);
 		}
 
-		private static void LoadStoredItems(StorageGUI.ThreadContext thread, ThreadState state) {
+		// Moved to internal method for use by DecraftingGUI
+		internal static void LoadItemsAndSetDictionaryInfo(StorageGUI.ThreadContext thread, CommonCraftingState state) {
 			try {
 				// Task count: loading simulator items, 5 tasks from SortAndFilter, adding full item list, adding module items to source, updating source items list, updating counts dictionary
 				thread.InitTaskSchedule(10, "Loading items");
@@ -208,7 +215,7 @@ namespace MagicStorage {
 
 				numSimulatorItems = items.Count;
 
-				var simulatorItems = thread.context.sourceItems;
+				var evaluatedSimulatorItems = thread.context.sourceItems;
 
 				// Prepend the heart items before the module items
 				NetHelper.Report(true, "Loading stored items from storage system...");
@@ -224,7 +231,7 @@ namespace MagicStorage {
 
 				numItemsWithoutSimulators = items.Count - numSimulatorItems;
 
-				var moduleItems = simulatorItems.ToList();
+				var moduleItems = evaluatedSimulatorItems.ToList();
 
 				sourceItems.AddRange(clone.context.sourceItems.Concat(moduleItems));
 
@@ -240,28 +247,7 @@ namespace MagicStorage {
 				NetHelper.Report(false, "Total items: " + items.Count);
 				NetHelper.Report(false, "Items from modules: " + numSimulatorItems);
 
-				itemCounts.Clear();
-				itemCountsByPrefix.Clear();
-				/*
-				foreach ((int type, int amount) in items.GroupBy(item => item.type, item => item.stack, (type, stacks) => (type, stacks.ConstrainedSum())))
-					itemCounts[type] = amount;
-				*/
-
-				// Previously just used GroupBy, but that doesn't play nice for multiple element data
-				foreach (Item item in items) {
-					if (itemCounts.TryGetValue(item.type, out int quantity))
-						itemCounts[item.type] = new ClampedArithmetic(quantity) + item.stack;
-					else
-						itemCounts[item.type] = item.stack;
-
-					if (itemCountsByPrefix.TryGetValue(item.type, out var prefixCounts)) {
-						if (prefixCounts.TryGetValue(item.prefix, out quantity))
-							prefixCounts[item.prefix] = new ClampedArithmetic(quantity) + item.stack;
-						else
-							prefixCounts[item.prefix] = item.stack;
-					} else
-						itemCountsByPrefix[item.type] = new Dictionary<int, int>() { [item.prefix] = item.stack };
-				}
+				SetCountsDictionaries();
 
 				thread.CompleteOneTask();
 			} catch when (thread.token.IsCancellationRequested) {
@@ -272,6 +258,27 @@ namespace MagicStorage {
 				itemCounts.Clear();
 				itemCountsByPrefix.Clear();
 				throw;
+			}
+		}
+
+		internal static void SetCountsDictionaries() {
+			itemCounts.Clear();
+			itemCountsByPrefix.Clear();
+
+			// Previously just used GroupBy, but that doesn't play nice for multiple element data
+			foreach (Item item in items) {
+				if (itemCounts.TryGetValue(item.type, out int quantity))
+					itemCounts[item.type] = new ClampedArithmetic(quantity) + item.stack;
+				else
+					itemCounts[item.type] = item.stack;
+
+				if (itemCountsByPrefix.TryGetValue(item.type, out var prefixCounts)) {
+					if (prefixCounts.TryGetValue(item.prefix, out quantity))
+						prefixCounts[item.prefix] = new ClampedArithmetic(quantity) + item.stack;
+					else
+						prefixCounts[item.prefix] = item.stack;
+				} else
+					itemCountsByPrefix[item.type] = new Dictionary<int, int>() { [item.prefix] = item.stack };
 			}
 		}
 	}

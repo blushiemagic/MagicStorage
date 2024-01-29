@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.UI.History;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -9,10 +10,10 @@ using Terraria.ID;
 using Terraria.Localization;
 
 namespace MagicStorage.UI {
-	internal class RecipeHistoryPanel : UIDragablePanel {
-		public readonly RecipeHistory history;
+	public class RecipeHistoryPanel : UIDragablePanel {
+		public readonly IHistoryCollection history;
 
-		public RecipeHistoryPanel(bool stopItemUse, RecipeHistory history, IEnumerable<(string key, LocalizedText text)> menuOptions) : base(stopItemUse, menuOptions) {
+		public RecipeHistoryPanel(bool stopItemUse, IHistoryCollection history, IEnumerable<(string key, LocalizedText text)> menuOptions) : base(stopItemUse, menuOptions) {
 			this.history = history;
 
 			// Same color as vanilla, but without the transparency
@@ -20,7 +21,7 @@ namespace MagicStorage.UI {
 
 			viewArea.SetPadding(0);
 
-			viewArea.Append(history.list);
+			viewArea.Append(history.List);
 
 			var clearButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.ClearHistory"));
 			clearButton.SetPadding(7);
@@ -36,7 +37,7 @@ namespace MagicStorage.UI {
 					this.history.RefreshEntries();
 				}
 
-				this.history.scroll.ViewPosition = 0f;
+				this.history.Scrollbar.ViewPosition = 0f;
 			};
 			header.Append(clearButton);
 		}

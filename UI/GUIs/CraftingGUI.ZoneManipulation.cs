@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -13,6 +14,7 @@ namespace MagicStorage {
 			public readonly bool oldAlchemyTable;
 			public readonly bool oldSnow;
 			public readonly bool oldGraveyard;
+			public readonly bool adjShimmer;
 
 			private PlayerZoneCache() {
 				Player player = Main.LocalPlayer;
@@ -23,6 +25,7 @@ namespace MagicStorage {
 				oldAlchemyTable = player.alchemyTable;
 				oldSnow = player.ZoneSnow;
 				oldGraveyard = player.ZoneGraveyard;
+				adjShimmer = player.adjShimmer;
 			}
 
 			private static PlayerZoneCache cache;
@@ -50,6 +53,7 @@ namespace MagicStorage {
 				player.alchemyTable = c.oldAlchemyTable;
 				player.ZoneSnow = c.oldSnow;
 				player.ZoneGraveyard = c.oldGraveyard;
+				player.adjShimmer = c.adjShimmer;
 			}
 		}
 
@@ -60,11 +64,40 @@ namespace MagicStorage {
 		private static bool zoneSnow;
 		private static bool alchemyTable;
 		private static bool graveyard;
+		private static bool adjShimmer;
 		public static bool Campfire { get; private set; }
+
+		public static CraftingInformation ReadCraftingEnvironment() => new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjShimmer, adjTiles);
+
+		private static int _executingInGuiEnvironment;
+		private static bool _zoneInformationReady;
 
 		internal static void ExecuteInCraftingGuiEnvironment(Action action)
 		{
 			ArgumentNullException.ThrowIfNull(action);
+
+			int level = Interlocked.Increment(ref _executingInGuiEnvironment);
+			if (level > 1)
+			{
+				// Local capturing
+				int l = level;
+				Main.QueueMainThreadAction(() => Main.NewText($"ExecuteInCraftingGuiEnvironment concurrency level: {l}"));
+
+				try {
+					while (!_zoneInformationReady)
+						Thread.Yield();
+
+					// Zone flags are already set, so we can just execute the action
+					action();
+				} finally {
+					if (Interlocked.Decrement(ref _executingInGuiEnvironment) <= 0) {
+						PlayerZoneCache.FreeCache(false);
+						_zoneInformationReady = false;
+					}
+				}
+
+				return;
+			}
 
 			PlayerZoneCache.Cache();
 
@@ -79,10 +112,16 @@ namespace MagicStorage {
 				player.alchemyTable = alchemyTable;
 				player.ZoneSnow = zoneSnow;
 				player.ZoneGraveyard = graveyard;
+				player.adjShimmer = adjShimmer;
+
+				_zoneInformationReady = true;
 
 				action();
 			} finally {
-				PlayerZoneCache.FreeCache(false);
+				if (Interlocked.Decrement(ref _executingInGuiEnvironment) <= 0) {
+					PlayerZoneCache.FreeCache(false);
+					_zoneInformationReady = false;
+				}
 			}
 		}
 	}

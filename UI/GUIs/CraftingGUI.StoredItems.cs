@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems.RecurrentRecipes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -6,9 +7,21 @@ using Terraria.Localization;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
+		public class StoredItemAggregator {
+			public List<Item> items;
+			public List<bool> itemsFromModules;
+			public List<ItemInfo> itemInfo;
+
+			public StoredItemAggregator(List<Item> items, List<bool> itemsFromModules, List<ItemInfo> itemInfo) {
+				this.items = items;
+				this.itemsFromModules = itemsFromModules;
+				this.itemInfo = itemInfo;
+			}
+		}
+
 		internal static readonly List<Item> storageItems = new();
 		internal static readonly List<bool> storageItemsFromModules = new();
-		private static List<ItemInfo> storageItemInfo;
+		internal static readonly List<ItemInfo> storageItemInfo = new();
 		internal static readonly List<List<Item>> sourceItems = new();
 
 		internal static bool showAllPossibleIngredients;
@@ -22,7 +35,7 @@ namespace MagicStorage {
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
 			storageItems.Clear();
-			storageItemInfo = new();
+			storageItemInfo.Clear();
 			storageItemsFromModules.Clear();
 			result = null;
 			if (selectedRecipe is null) {
@@ -65,16 +78,7 @@ namespace MagicStorage {
 				}
 			}
 
-			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList, thread);
-			if (resultItemList.Count != storageItems.Count) {
-				//Update the lists since items were compacted
-				storageItems.Clear();
-				storageItems.AddRange(resultItemList);
-				storageItemInfo.Clear();
-				storageItemInfo.AddRange(storageItems.Select(static i => new ItemInfo(i)));
-				storageItemsFromModules.Clear();
-				storageItemsFromModules.AddRange(moduleItemsList);
-			}
+			AttemptListCompact();
 
 			result ??= new Item(selectedRecipe.createItem.type, 0);
 
@@ -132,20 +136,9 @@ namespace MagicStorage {
 			int addedIndex = 0;
 
 			foreach (Item item in itemsFromSource) {
-				if (item.type != selectedRecipe.createItem.type && wasItemAdded?[addedIndex] is not true) {
-					foreach (Item reqItem in recipe.requiredItem) {
-						if (item.type == reqItem.type || RecipeGroupMatch(recipe, item.type, reqItem.type)) {
-							//Module items must refer to the original item instances
-							Item clone = index >= numItemsWithoutSimulators ? item : item.Clone();
-							storageItems.Add(clone);
-							storageItemInfo.Add(new(clone));
-							storageItemsFromModules.Add(index >= numItemsWithoutSimulators);
-
-							if (wasItemAdded is not null)
-								wasItemAdded[addedIndex] = true;
-						}
-					}
-				}
+				bool b = false;
+				ref bool added = ref wasItemAdded is null ? ref b : ref wasItemAdded[addedIndex];
+				CheckItemFromSource(null, item, recipe, index, ref added, IsItemValidForRecipe);
 
 				addedIndex++;
 
@@ -158,6 +151,71 @@ namespace MagicStorage {
 					} else if (!hasItemFromStorage)
 						result = source;
 				}
+			}
+		}
+
+		private static bool IsItemValidForRecipe(Item item, Recipe recipe) {
+			if (item.type == selectedRecipe.createItem.type)
+				return false;
+
+			foreach (Item reqItem in recipe.requiredItem) {
+				if (item.type == reqItem.type || RecipeGroupMatch(recipe, item.type, reqItem.type))
+					return true;
+			}
+
+			return false;
+		}
+
+		internal static void CheckItemFromSource(StoredItemAggregator aggregator, Item item, int itemIndexInSource, ref bool wasItemAdded, Func<Item, bool> isItemValid) {
+			if (wasItemAdded || !isItemValid(item))
+				return;
+
+			AddItemToAggregateCollections(aggregator, item, itemIndexInSource);
+
+			wasItemAdded = true;
+		}
+
+		internal static void CheckItemFromSource<T>(StoredItemAggregator aggregator, Item item, T state, int itemIndexInSource, ref bool wasItemAdded, Func<Item, T, bool> isItemValid) {
+			if (wasItemAdded || !isItemValid(item, state))
+				return;
+
+			AddItemToAggregateCollections(aggregator, item, itemIndexInSource);
+
+			wasItemAdded = true;
+		}
+
+		private static void AddItemToAggregateCollections(StoredItemAggregator aggregator, Item item, int itemIndexInSource) {
+			List<Item> items;
+			List<bool> itemsFromModules;
+			List<ItemInfo> itemInfo;
+
+			if (aggregator is null) {
+				items = storageItems;
+				itemsFromModules = storageItemsFromModules;
+				itemInfo = storageItemInfo;
+			} else {
+				items = aggregator.items;
+				itemsFromModules = aggregator.itemsFromModules;
+				itemInfo = aggregator.itemInfo;
+			}
+
+			// Module items must refer to the original item instances
+			Item clone = itemIndexInSource >= numItemsWithoutSimulators ? item : item.Clone();
+			items.Add(clone);
+			itemInfo.Add(new(clone));
+			itemsFromModules.Add(itemIndexInSource >= numItemsWithoutSimulators);
+		}
+
+		internal static void AttemptListCompact(StorageGUI.ThreadContext thread = null) {
+			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList, thread);
+			if (resultItemList.Count != storageItems.Count) {
+				//Update the lists since items were compacted
+				storageItems.Clear();
+				storageItems.AddRange(resultItemList);
+				storageItemInfo.Clear();
+				storageItemInfo.AddRange(storageItems.Select(static i => new ItemInfo(i)));
+				storageItemsFromModules.Clear();
+				storageItemsFromModules.AddRange(moduleItemsList);
 			}
 		}
 

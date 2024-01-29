@@ -11,5 +11,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			info = new RecipeInfo(recipe);
 		}
+
+		internal void ClearTrees() {
+			info.ClearTrees();
+		}
 	}
 }

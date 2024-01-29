@@ -71,6 +71,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			nodeStack.Pop();
 		}
 
-		internal void Reset() => Root = null;
+		internal void Reset() {
+			Root?.ClearTrees();
+			Root = null;
+		}
 	}
 }

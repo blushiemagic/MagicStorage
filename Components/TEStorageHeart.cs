@@ -542,9 +542,7 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
-			if (!toDeposit.IsAir)
-				MagicUI.SetNextCollectionsToRefresh(toDeposit.type);
-
+			bool actualItem = !toDeposit.IsAir;
 			int oldStack = toDeposit.stack;
 			int remember = toDeposit.type;
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -570,8 +568,12 @@ namespace MagicStorage.Components
 
 			toDeposit.newAndShiny = prevNewAndShiny;
 
-			if (oldStack != toDeposit.stack)
+			if (oldStack != toDeposit.stack) {
+				if (actualItem)
+					MagicUI.SetNextCollectionsToRefresh(toDeposit.type);
+
 				ResetCompactStage();
+			}
 		}
 
 		public void TryDeposit(Item item)
@@ -781,7 +783,7 @@ namespace MagicStorage.Components
 						unit.PostChangeContents();
 
 						if (Main.netMode == NetmodeID.SinglePlayer)
-							StorageGUI.SetRefresh(forceFullRefresh: true);
+							MagicUI.SetRefresh(forceFullRefresh: true);
 						else
 							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 

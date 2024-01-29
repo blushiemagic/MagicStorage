@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using Microsoft.Xna.Framework;
+using SerousCommonLib.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.UI.States {
-	public sealed class EnvironmentUIState : BaseStorageUI {
+	public class EnvironmentUIState : BaseStorageUI {
 		public override string DefaultPage => "Modules";
 
 		public override int GetFilteringOption() => throw new NotImplementedException();
@@ -40,6 +41,10 @@ namespace MagicStorage.UI.States {
 			base.Recalculate();
 
 			if (!Main.gameMenu && PanelHeight < GetMinimumResizeHeight()) {
+				// Attempt to force the UI layout to one that takes up less vertical space
+				if (MagicUI.AttemptForcedLayoutChange(this))
+					return;
+
 				MagicUI.CloseUIDueToHeightLimit();
 				pendingUIChange = true;
 			}

@@ -5,10 +5,10 @@ using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using SerousCommonLib.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
@@ -57,13 +57,13 @@ namespace MagicStorage.UI.States {
 				modSearchBox.Reset(false);
 
 				// Ensure that the UI is refreshed completely
-				StorageGUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.SetRefresh(forceFullRefresh: true);
 			};
 
 			OnPageDeselected += () => {
 				lastKnownScrollBarViewPosition = -1;
 				
-				slotZone.HoverSlot = -1;
+				slotZone.SetHoverSlot(-1);
 
 				slotZone.ClearItems();
 
@@ -107,7 +107,7 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), static () => StorageGUI.SetRefresh(forceFullRefresh: true)) {
+			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), static () => MagicUI.SetRefresh(forceFullRefresh: true)) {
 				GetHoverText = () => {
 					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
 						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
@@ -136,7 +136,7 @@ namespace MagicStorage.UI.States {
 
 			slotZone = new(CraftingGUI.InventoryScale);
 
-			slotZone.InitializeSlot += (slot, scale) => {
+			slotZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
 					IgnoreClicks = true  // Purely visual
 				};
@@ -210,7 +210,7 @@ namespace MagicStorage.UI.States {
 			if (oldNeedsMod != needsMod)
 				searchBar.SetDefaultText(GetRandomSearchText(needsMod));
 
-			StorageGUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		private static readonly LocalizedText[] searchTextDefaults = new[] {
@@ -472,7 +472,7 @@ namespace MagicStorage.UI.States {
 			}
 
 			// Wait for at least 10 game ticks to display the prompt
-			if (isWaitPanelWaitingToOpen && StorageGUI.CurrentThreadingDuration >= StorageGUI.WAIT_PANEL_MINIMUM_TICKS) {
+			if (isWaitPanelWaitingToOpen && MagicUI.CurrentThreadingDuration >= StorageGUI.WAIT_PANEL_MINIMUM_TICKS) {
 				isWaitPanelWaitingToOpen = false;
 
 				if (waitPanel.Parent is null) {
@@ -487,9 +487,9 @@ namespace MagicStorage.UI.States {
 				pendingConfiguration = false;
 			}
 
-			if (StorageGUI.CurrentlyRefreshing) {
-				waitProgress.DisplayText = StorageGUI.activeThread.CurrentTask;
-				waitProgress.UpdateProgress(StorageGUI.activeThread.Progress);
+			if (MagicUI.CurrentlyRefreshing) {
+				waitProgress.DisplayText = MagicUI.activeThread.CurrentTask;
+				waitProgress.UpdateProgress(MagicUI.activeThread.Progress);
 			} else {
 				waitProgress.DisplayText = "";
 				waitProgress.UpdateProgress(0);
@@ -534,6 +534,6 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
-		protected abstract bool ShouldHideItemIcons();
+		protected virtual bool ShouldHideItemIcons() => Main.mouseX > parentUI.PanelLeft && Main.mouseX < parentUI.PanelRight && Main.mouseY > parentUI.PanelTop && Main.mouseY < parentUI.PanelBottom;
 	}
 }

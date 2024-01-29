@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terraria.ModLoader;
 using Terraria;
-using MagicStorage.Common.Threading;
 using System.Collections.Concurrent;
 using System.Linq;
 
@@ -10,10 +9,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		private class Loadable : ILoadable {
 			public void Load(Mod mod) { }
 
-			public void Unload() {
-				pool.Clear();
-				resultToNodes.Clear();
-			}
+			public void Unload() => ClearNodes();
 		}
 
 		private static readonly ConcurrentDictionary<int, Node> pool = new();
@@ -43,6 +39,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		internal static void ClearNodes() {
+			foreach (var node in pool.Values)
+				node.ClearTrees();
+
 			pool.Clear();
 			resultToNodes.Clear();
 		}

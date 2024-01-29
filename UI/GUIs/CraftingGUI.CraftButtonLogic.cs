@@ -5,6 +5,7 @@ using System.Linq;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -34,7 +35,7 @@ namespace MagicStorage {
 
 				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calulated Recipe array being empty
 				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
-				StorageGUI.SetRefresh();
+				MagicUI.SetRefresh();
 				SoundEngine.PlaySound(SoundID.Grab);
 			}
 
@@ -43,7 +44,7 @@ namespace MagicStorage {
 		}
 
 		internal static void ClickAmountButton(int amount, bool offset) {
-			if (StorageGUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return;  // Do not read anything until refreshing is completed
 
 			int oldTarget = craftAmountTarget;
@@ -61,7 +62,7 @@ namespace MagicStorage {
 
 				if (MagicStorageConfig.IsRecursionEnabled) {
 					RefreshStorageItems();
-					StorageGUI.SetRefresh();
+					MagicUI.SetRefresh();
 				}
 			}
 
@@ -69,7 +70,7 @@ namespace MagicStorage {
 		}
 
 		internal static void ClampCraftAmount() {
-			if (StorageGUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return;  // Recipe/ingredient information may not be available
 
 			int oldTarget = craftAmountTarget;
@@ -90,7 +91,7 @@ namespace MagicStorage {
 
 				if (MagicStorageConfig.IsRecursionEnabled) {
 					RefreshStorageItems();
-					StorageGUI.SetRefresh();
+					MagicUI.SetRefresh();
 				}
 			}
 		}

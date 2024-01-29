@@ -10,6 +10,9 @@ namespace MagicStorage.Items
 		public override void SetStaticDefaults()
 		{
 			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
+
+			// Crafting Interface -> Decrafting Interface
+			ItemID.Sets.ShimmerTransformToItem[Type] = ModContent.ItemType<DecraftingAccess>();
 		}
 
 		public override void SetDefaults()
@@ -35,6 +38,9 @@ namespace MagicStorage.Items
 			recipe.AddRecipeGroup("MagicStorage:AnyDiamond");
 			recipe.AddIngredient(ItemID.Sapphire, 3);
 			recipe.AddTile(TileID.WorkBenches);
+			// Mechs must be defeated in order to shimmer this item
+			// While the item can't be decrafted, this condition is still checked for item transformations
+			recipe.AddDecraftCondition(Condition.DownedMechBossAll);
 			recipe.Register();
 		}
 	}

@@ -10,66 +10,81 @@ using System;
 
 namespace MagicStorage {
 	partial class StorageGUI {
+		#region Obsolete stuff
+
 		// Field included for backwards compatibility, but made Obsolete to encourage modders to use the new API
-		[Obsolete("Use the SetRefresh() method or RefreshUI property instead", error: true)]
+		[Obsolete("Use the SetRefresh() method or RefreshUI property in MagicUI instead", error: true)]
 		public static bool needRefresh;
 
 		[Obsolete]
-		private static ref bool Obsolete_needRefresh() => ref needRefresh;
+		internal static ref bool Obsolete_needRefresh() => ref needRefresh;
 
-		private static bool _refreshUI;
+		[Obsolete("Use MagicUI.RefreshUI instead", error: true)]
 		public static bool RefreshUI {
-			get => _refreshUI;
-			set => _refreshUI |= value;
+			get => MagicUI.RefreshUI;
+			set => MagicUI.RefreshUI = value;
 		}
 
+		[Obsolete("Use MagicUI.CurrentlyRefreshing instead", error: true)]
 		public static bool CurrentlyRefreshing { get; internal set; }
 
+		[Obsolete("Use MagicUI.OnRefresh instead", error: true)]
 		public static event Action OnRefresh;
 		
-		private static bool forceFullRefresh;
+		[Obsolete("Use MagicUI.ForceNextRefreshToBeFull instead", error: true)]
 		public static bool ForceNextRefreshToBeFull {
-			get => forceFullRefresh || Obsolete_needRefresh();
-			set => forceFullRefresh |= value;
+			get => MagicUI.ForceNextRefreshToBeFull;
+			set => MagicUI.ForceNextRefreshToBeFull = value;
 		}
 
-		/// <summary>
-		/// Shorthand for setting <see cref="RefreshUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
-		/// </summary>
-		public static void SetRefresh(bool forceFullRefresh = false) {
-			RefreshUI = true;
-			ForceNextRefreshToBeFull = forceFullRefresh;
-		}
+		/// <inheritdoc cref="MagicUI.SetRefresh"/>
+		[Obsolete("Use MagicUI.SetRefresh() instead", error: true)]
+		public static void SetRefresh(bool forceFullRefresh = false) => MagicUI.SetRefresh(forceFullRefresh);
 
 		internal static readonly List<Item> items = new();
 		internal static readonly List<List<Item>> sourceItems = new();
 		internal static readonly List<bool> didMatCheck = new();
 
-		public static void RefreshItems()
-		{
+		[Obsolete("Use MagicUI.RefreshItems() instead", error: true)]
+		public static void RefreshItems() {
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
-			_refreshUI = false;
+			MagicUI.RefreshUI = false;
 			Obsolete_needRefresh() = false;
-
-			// Force full refresh if item deletion mode is active
-			if (forceFullRefresh || itemDeletionMode)
-				itemTypesToUpdate = null;
 
 			// No refreshing required
 			if (StoragePlayer.IsStorageEnvironment()) {
-				itemTypesToUpdate = null;
-				forceFullRefresh = false;
+				ResetRefreshCache();
 				return;
 			}
 
 			if (StoragePlayer.IsStorageCrafting()) {
 				CraftingGUI.RefreshItems();
-				itemTypesToUpdate = null;
-				forceFullRefresh = false;
+				ResetRefreshCache();
 				return;
 			}
 
-			CraftingGUI.recipesToRefresh = null;
+			if (StoragePlayer.IsStorageDecrafting()) {
+				DecraftingGUI.RefreshItems();
+				ResetRefreshCache();
+				return;
+			}
+
+			CraftingGUI.ResetRefreshCache();
+
+			RefreshItems_Inner();
+		}
+
+		#endregion
+
+		internal static void ResetRefreshCache() {
+			itemTypesToUpdate = null;
+		}
+
+		internal static void RefreshItems_Inner()
+		{
+			// Force full refresh if item deletion mode is active
+			if (MagicUI.ForceNextRefreshToBeFull || itemDeletionMode)
+				itemTypesToUpdate = null;
 
 			// Prevent inconsistencies after refreshing items
 			itemDeletionSlotFocus = -1;
@@ -78,12 +93,11 @@ namespace MagicStorage {
 
 			storagePage?.RequestThreadWait(waiting: true);
 
-			if (CurrentlyRefreshing) {
-				activeThread?.Stop();
-				activeThread = null;
-			} else {
+			MagicUI.StopCurrentThread();
+
+			if (!MagicUI.CurrentlyRefreshing) {
 				// Inform the UI that a new refresh is about to start so that it can go into a proper "empty" state
-				MagicUI.storageUI.OnRefreshStart();
+				MagicUI.storageUI?.OnRefreshStart();
 			}
 
 			if (itemTypesToUpdate is null)
@@ -91,8 +105,7 @@ namespace MagicStorage {
 			else
 				RefreshSpecificItems(storagePage);
 
-			itemTypesToUpdate = null;
-			forceFullRefresh = false;
+			ResetRefreshCache();
 		}
 
 		private static void RefreshAllItems(StorageUIState.StoragePage storagePage) {
@@ -137,7 +150,7 @@ namespace MagicStorage {
 		}
 
 		private static bool ShouldItemUpdate(Item item) {
-			if (activeThread?.state is not HashSet<int> toUpdate)
+			if (MagicUI.activeThread?.state is not HashSet<int> toUpdate)
 				return true;
 
 			return toUpdate.Contains(item.type);
@@ -262,14 +275,14 @@ namespace MagicStorage {
 		private static void AfterSorting(ThreadContext thread) {
 			// Refresh logic in the UIs will only run when this is false
 			if (!thread.token.IsCancellationRequested)
-				CurrentlyRefreshing = false;
+				MagicUI.CurrentlyRefreshing = false;
 
 			for (int k = 0; k < items.Count; k++)
 				didMatCheck.Add(false);
 
 			// Ensure that race conditions with the UI can't occur
 			// QueueMainThreadAction will execute the logic in a very specific place
-			Main.QueueMainThreadAction(InvokeOnRefresh);
+			Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
 
 			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage")?.RequestThreadWait(waiting: false);
 		}

@@ -4,11 +4,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Common.Threading;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
+using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -63,8 +66,10 @@ public class MagicCache : ModSystem
 	}
 
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;
+	public static Item[] ItemSamples { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> ResultToRecipe { get; private set; } = null!;
 	public static Dictionary<int, Recipe[]> FilteredRecipesCache { get; private set; } = null!;
+	public static Dictionary<int, Item[]> FilteredItemsCache { get; private set; } = null!;
 
 	public static Dictionary<int, List<Recipe>> hasIngredient { get; private set; } = null!;
 	public static Dictionary<int, List<Recipe>> hasTile { get; private set; } = null!;
@@ -84,9 +89,13 @@ public class MagicCache : ModSystem
 
 	public static Recipe[] RecipesUsingHoney { get; private set; } = null!;
 
+	public static Recipe[] RecipesUsingShimmer { get; private set; } = null!;
+
 	public static Recipe[] RecipesUsingSnow { get; private set; } = null!;
 
 	public static Recipe[] RecipesUsingEctoMist { get; private set; } = null!;
+
+	public static ShimmerInfo[] ShimmerInfos { get; private set; } = null!;
 
 	public static Dictionary<int, List<Node>> RecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
@@ -111,33 +120,47 @@ public class MagicCache : ModSystem
 	public static void RecalculateRecipeCaches() {
 		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
 
-		if (!Main.gameMenu && MagicUI.IsCraftingUIOpen())
-			StorageGUI.SetRefresh(forceFullRefresh: true);
+		if (!Main.gameMenu && (MagicUI.IsCraftingUIOpen() || MagicUI.IsDecraftingUIOpen()))
+			MagicUI.SetRefresh(forceFullRefresh: true);
 	}
 
 	public override void Unload()
 	{
 		EnabledRecipes = null!;
+		ItemSamples = null!;
+		ResultToRecipe?.Clear();
 		ResultToRecipe = null!;
 		FilteredRecipesCache = null!;
+		FilteredItemsCache = null!;
 
+		hasIngredient?.Clear();
 		hasIngredient = null!;
+		hasTile?.Clear();
 		hasTile = null!;
 
 		AllMods = null!;
+		IndexByMod?.Clear();
 		IndexByMod = null!;
+		RecipesByMod?.Clear();
 		RecipesByMod = null!;
 		VanillaRecipes = null!;
 
+		RecipesUsingItemType?.Clear();
 		RecipesUsingItemType = null!;
+		RecipesUsingTileType?.Clear();
 		RecipesUsingTileType = null!;
 		RecipesUsingWater = null!;
 		RecipesUsingLava = null!;
 		RecipesUsingHoney = null!;
+		RecipesUsingShimmer = null!;
 		RecipesUsingSnow = null!;
 		RecipesUsingEctoMist = null!;
+		ShimmerInfos = null!;
+		RecursiveRecipesUsingRecipeByIndex?.Clear();
 		RecursiveRecipesUsingRecipeByIndex = null!;
+		concurrentRecursiveRecipesUsingRecipeByIndex?.Clear();
 		concurrentRecursiveRecipesUsingRecipeByIndex = null!;
+		blockedRecipeRecursion?.Clear();
 		blockedRecipeRecursion = null!;
 	}
 
@@ -152,8 +175,17 @@ public class MagicCache : ModSystem
 		// PostSetupContent() is too early for name sorting, which causes the fuzzy sorting to fail
 		SortingCache.dictionary.Fill();
 
-		EnabledRecipes = Main.recipe.Take(Recipe.numRecipes).Where(r => !r.Disabled).ToArray();
-		ResultToRecipe = EnabledRecipes.GroupBy(r => r.createItem.type).ToDictionary(x => x.Key, x => x.ToArray());
+		EnabledRecipes = Main.recipe.Take(Recipe.numRecipes)
+			.Where(r => !r.Disabled)
+			.ToArray();
+
+		ItemSamples = Enumerable.Range(1, ItemLoader.ItemCount - 1)
+			.Select(static t => ContentSamples.ItemsByType[t])
+			.Where(static i => !i.IsAir)
+			.ToArray();
+		
+		ResultToRecipe = EnabledRecipes.GroupBy(r => r.createItem.type)
+			.ToDictionary(x => x.Key, x => x.ToArray());
 
 		hasIngredient = new();
 		hasTile = new();
@@ -220,8 +252,7 @@ public class MagicCache : ModSystem
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
 
-		RecipesUsingItemType = ContentSamples.ItemsByType.Where(kvp => !kvp.Value.IsAir)
-			.ToDictionary(kvp => kvp.Key, kvp => new LazyRecipe(kvp.Key));
+		RecipesUsingItemType = ItemSamples.ToDictionary(i => i.type, i => new LazyRecipe(i.type));
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingTileType");
 
@@ -233,11 +264,16 @@ public class MagicCache : ModSystem
 		RecipesUsingWater = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearWater)).ToArray();
 		RecipesUsingLava = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearLava)).ToArray();
 		RecipesUsingHoney = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearHoney)).ToArray();
+		RecipesUsingShimmer = EnabledRecipes.Where(static r => r.HasCondition(Condition.NearShimmer)).ToArray();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingBiomes");
 
 		RecipesUsingSnow = EnabledRecipes.Where(static r => r.HasCondition(Condition.InSnow)).ToArray();
 		RecipesUsingEctoMist = EnabledRecipes.Where(static r => r.HasCondition(Condition.InGraveyard)).ToArray();
+
+		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::ShimmerRecipesInfo");
+
+		SetupShimmerCaches();
 
 		concurrentRecursiveRecipesUsingRecipeByIndex = new();
 		ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - 0 / {EnabledRecipes.Length}");
@@ -273,6 +309,16 @@ public class MagicCache : ModSystem
 			var recipes = EnabledRecipes.Where(r => filter(r.createItem));
 
 			FilteredRecipesCache[option.Type] = recipes.ToArray();
+
+			var items = ItemSamples.Where(t => filter(t));
+
+			FilteredItemsCache[option.Type] = items.ToArray();
 		}
+	}
+
+	private static void SetupShimmerCaches() {
+		ShimmerInfos = Enumerable.Range(ItemID.None, ItemLoader.ItemCount)
+			.Select(ShimmerInfo.Create)
+			.ToArray();
 	}
 }

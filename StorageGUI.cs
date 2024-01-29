@@ -30,17 +30,12 @@ namespace MagicStorage
 
 		public static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
 
-		internal static void CheckRefresh() {
-			if (RefreshUI)
-				RefreshItems();
-
-			if (activeThread?.Running is true)
-				CurrentThreadingDuration++;
-			else
-				CurrentThreadingDuration = 0;
-		}
-
 		internal static void InvokeOnRefresh() => OnRefresh?.Invoke();
+
+		internal static void Unload() {
+			itemTypesToUpdate.Clear();
+			itemTypesToUpdate = null;
+		}
 
 		internal static void FavoriteItem(int slot) {
 			if (slot < 0 || slot >= items.Count)

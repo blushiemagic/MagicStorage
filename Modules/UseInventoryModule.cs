@@ -33,9 +33,14 @@ namespace MagicStorage.Modules {
 				}
 			}
 
-			if (needRefresh && MagicUI.IsCraftingUIOpen()) {
-				StorageGUI.SetRefresh();
-				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(typesToUpdate);
+			if (needRefresh) {
+				if (MagicUI.IsCraftingUIOpen()) {
+					MagicUI.SetRefresh();
+					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(typesToUpdate);
+				} else if (MagicUI.IsDecraftingUIOpen()) {
+					MagicUI.SetRefresh();
+					DecraftingGUI.SetNextDefaultItemCollectionToRefresh(typesToUpdate);
+				}
 			}
 		}
 	}

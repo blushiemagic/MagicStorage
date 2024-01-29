@@ -464,11 +464,10 @@ namespace MagicStorage
 			else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
-				int amountToWithdraw = reader.ReadInt32();
 				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 
 				if (item.IsAir)
-					item = CraftingGUI.TryToWithdrawFromModuleItems(amountToWithdraw);
+					item = CraftingGUI.TryToWithdrawFromModuleItems(item, wasAlreadyCloned: true);
 
 				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory);
 			}
@@ -519,7 +518,7 @@ namespace MagicStorage
 				return;
 
 			if (TileEntity.ByPosition.ContainsKey(position)) {
-				StorageGUI.ForceNextRefreshToBeFull = forceFullRefresh;
+				MagicUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
 
@@ -911,7 +910,7 @@ namespace MagicStorage
 				PrintClientRequest(sender, "Refresh UI", storage);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
-					CraftingGUI.RefreshItems();
+					MagicUI.RefreshItems();
 
 					Report(true, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
 				}

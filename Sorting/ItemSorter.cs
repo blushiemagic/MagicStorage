@@ -218,13 +218,50 @@ namespace MagicStorage.Sorting
 			}
 		}
 
-		public static bool RecipePassesFilter(Recipe recipe, StorageGUI.ThreadContext thread) {
+		public static ParallelQuery<int> GetShimmerItems(StorageGUI.ThreadContext thread) {
+			try {
+				IEnumerable<Item> items;
+
+				FilteringOption filterOption = FilteringOptionLoader.Get(thread.filterMode);
+
+				if (filterOption is null)
+					items = Array.Empty<Item>();  // Failsafe
+				else if (filterOption.UsesFilterCache)
+					items = MagicCache.FilteredItemsCache[thread.filterMode];
+				else {
+					var filter = filterOption.Filter;
+
+					items = MagicCache.ItemSamples.Where(i => filter(i));
+				}
+
+				thread.CompleteOneTask();
+
+				var filteredItems = items
+					.AsParallel()
+					.AsOrdered()
+					.Where(item => FilterBySearchText(item, thread.searchText, thread.modSearch));
+
+				thread.CompleteOneTask();
+
+				return filteredItems.Select(item => item.type);
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<int>().AsParallel();
+			}
+		}
+
+		public static bool RecipePassesFilter(Recipe recipe, StorageGUI.ThreadContext thread) => PassesFilter(recipe, thread, static r => r.createItem);
+
+		public static bool ItemPassesFilter(int item, StorageGUI.ThreadContext thread) => PassesFilter(item, thread, Utility.GetItemSample);
+
+		public static bool PassesFilter<T>(T value, StorageGUI.ThreadContext thread, Func<T, Item> objToItem) {
 			FilteringOption filterOption = FilteringOptionLoader.Get(thread.filterMode);
 
 			if (filterOption is null)
 				return true;  // Failsafe
 
-			return filterOption.Filter(recipe.createItem) && FilterBySearchText(recipe.createItem, thread.searchText, thread.modSearch);
+			var item = objToItem(value);
+
+			return filterOption.Filter(item) && FilterBySearchText(item, thread.searchText, thread.modSearch);
 		}
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {

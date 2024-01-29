@@ -80,7 +80,7 @@ namespace MagicStorage.UI
 			if (!MagicUI.CanUpdateSearchBars || !active) {
 				if (active) {
 					if (mouseOver && GetHoverText?.Invoke() is string s) {
-						if (MagicUI.lastKnownSearchBarErrorReason is not null && !StorageGUI.CurrentlyRefreshing)
+						if (MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
 							s += $"\n[c/ff0000:{MagicUI.lastKnownSearchBarErrorReason}]";
 
 						if (!string.IsNullOrWhiteSpace(s))
@@ -115,7 +115,7 @@ namespace MagicStorage.UI
 			{
 				hasFocus = true;
 				CheckBlockInput();
-				LeftClick(new UIMouseEvent(this, UserInterface.ActiveInstance.MousePosition));
+				LeftClick(new UIMouseEvent(this, Main.MouseScreen));
 			}
 			else if (hasFocus && !mouseOver)
 			{
@@ -138,7 +138,7 @@ namespace MagicStorage.UI
 					_clearedEvent?.Invoke();
 				}
 
-				base.RightClick(new(this, UserInterface.ActiveInstance.MousePosition));
+				base.RightClick(new(this, Main.MouseScreen));
 			}
 		}
 
@@ -152,7 +152,7 @@ namespace MagicStorage.UI
 			cursorPosition = Text.Length;
 
 			if (forced || !MagicStorageConfig.SearchBarRefreshOnKey)
-				StorageGUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		private void HandleTextInput()
@@ -176,7 +176,7 @@ namespace MagicStorage.UI
 				cursorPosition = newStringLength;
 
 				if (MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.SetRefresh(forceFullRefresh: true);
+					MagicUI.SetRefresh(forceFullRefresh: true);
 			}
 
 			if (KeyTyped(Keys.Delete) && Text.Length > 0 && cursorPosition < Text.Length)
@@ -184,7 +184,7 @@ namespace MagicStorage.UI
 				Text = Text.Remove(cursorPosition, 1);
 
 				if (MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.SetRefresh(forceFullRefresh: true);
+					MagicUI.SetRefresh(forceFullRefresh: true);
 			}
 
 			if (KeyTyped(Keys.Left) && cursorPosition > 0)
@@ -201,7 +201,7 @@ namespace MagicStorage.UI
 				CheckBlockInput();
 
 				if (!MagicStorageConfig.SearchBarRefreshOnKey)
-					StorageGUI.SetRefresh(forceFullRefresh: true);
+					MagicUI.SetRefresh(forceFullRefresh: true);
 			}
 		}
 
@@ -246,7 +246,7 @@ namespace MagicStorage.UI
 			Color color = Color.Black;
 			if (isEmpty)
 				color *= 0.75f;
-			if (MagicUI.lastKnownSearchBarErrorReason is not null && !StorageGUI.CurrentlyRefreshing)
+			if (MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
 				color = Color.Red;
 			spriteBatch.DrawString(font, drawText, new Vector2(dim.X + Padding, dim.Y + Padding), color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
 			if (!isEmpty && hasFocus && cursorTimer < 30)

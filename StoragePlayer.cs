@@ -39,10 +39,16 @@ namespace MagicStorage
 
 		public ItemTypeOrderedSet FavoritedRecipes { get; } = new("FavoritedRecipes");
 
+		public ItemTypeOrderedSet HiddenShimmerItems { get; } = new("HiddenShimmerItems");
+
+		public ItemTypeOrderedSet FavoritedShimmerItems { get; } = new("FavoritedShimmerItems");
+
 		public override void SaveData(TagCompound tag)
 		{
 			HiddenRecipes.Save(tag);
 			FavoritedRecipes.Save(tag);
+			HiddenShimmerItems.Save(tag);
+			FavoritedShimmerItems.Save(tag);
 			tag["automaton"] = automatonHelpTip;
 
 			BitsByte unlocked = new(unlockedTip_Mechs, unlockedTip_MoonLord);
@@ -53,6 +59,8 @@ namespace MagicStorage
 		{
 			HiddenRecipes.Load(tag);
 			FavoritedRecipes.Load(tag);
+			HiddenShimmerItems.Load(tag);
+			FavoritedShimmerItems.Load(tag);
 			automatonHelpTip = tag.GetInt("automaton");
 
 			BitsByte unlocked = tag.GetByte("unlocked");
@@ -146,7 +154,7 @@ namespace MagicStorage
 				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting")?.searchBar?.Reset();
 			}
 
-			StorageGUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.SetRefresh(forceFullRefresh: true);
 
 			GetStorageHeart()?.LockOnCurrentClient();
 		}
@@ -156,7 +164,7 @@ namespace MagicStorage
 			storageAccess = point;
 			remoteAccess = true;
 
-			StorageGUI.RefreshItems();
+			MagicUI.RefreshItems();
 		}
 
 		public void CloseStorage()
@@ -288,6 +296,17 @@ namespace MagicStorage
 			return null;
 		}
 
+		public TEDecraftingAccess GetDecraftingAccess()
+		{
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return null;
+
+			if (TileEntity.ByPosition.TryGetValue(storageAccess, out TileEntity te))
+				return te as TEDecraftingAccess;
+
+			return null;
+		}
+
 		public bool StorageCrafting()
 		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
@@ -306,6 +325,15 @@ namespace MagicStorage
 		}
 
 		public static bool IsStorageEnvironment() => StoragePlayer.LocalPlayer.StorageEnvironment();
+
+		public bool StorageDecrafting() {
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return false;
+			Tile tile = Main.tile[storageAccess.X, storageAccess.Y];
+			return tile.HasTile && tile.TileType == ModContent.TileType<DecraftingAccess>();
+		}
+
+		public static bool IsStorageDecrafting() => StoragePlayer.LocalPlayer.StorageDecrafting();
 
 		public class StorageHeartAccessWrapper {
 			public Point16 Storage { get; private set; }

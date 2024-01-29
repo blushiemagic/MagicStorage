@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using Microsoft.Xna.Framework;
@@ -532,6 +533,8 @@ namespace MagicStorage {
 				player.adjLava = true;
 			if (item.type == ItemID.HoneyBucket || item.type == ItemID.BottomlessHoneyBucket || item.type == globeItem)
 				player.adjHoney = true;
+			if (item.type == ItemID.BottomlessShimmerBucket)
+				player.adjShimmer = true;
 			if (item.type == ModContent.ItemType<Items.SnowBiomeEmulator>() || item.type == globeItem)
 				hasSnow = true;
 			if (item.type == globeItem) {
@@ -553,5 +556,13 @@ namespace MagicStorage {
 				return Expression.Lambda<Action<ModConfig>>(Expression.Call(configManagerSaveMethod, modConfigParameter), modConfigParameter).Compile();
 			}
 		}
+
+		public static Item GetItemSample(int item) => ContentSamples.ItemsByType[item];
+
+		public static bool IsSuccessful(this ShimmerInfo.ShimmerAttemptResult result) => result != ShimmerInfo.ShimmerAttemptResult.None;
+
+		public static bool IsSuccessfulButNotDecraftable(this ShimmerInfo.ShimmerAttemptResult result) => result != ShimmerInfo.ShimmerAttemptResult.None && result != ShimmerInfo.ShimmerAttemptResult.DecraftedItem;
+
+		public static IEnumerable<IShimmerResultReport> GetShimmerReports(this IShimmerResult result, int item) => result.GetShimmerReports(ContentSamples.ItemsByType[item], item);
 	}
 }

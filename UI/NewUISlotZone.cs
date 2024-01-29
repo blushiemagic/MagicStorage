@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
@@ -9,7 +10,7 @@ using Terraria.UI;
 
 namespace MagicStorage.UI {
 	public class NewUISlotZone : UIElement {
-		private const int Padding = 4;
+		public const int Padding = 4;
 
 		private static readonly Asset<Texture2D> InventoryBack = TextureAssets.InventoryBack;
 
@@ -23,9 +24,12 @@ namespace MagicStorage.UI {
 		public int ZoneHeight { get; private set; }
 
 		public delegate MagicStorageItemSlot GetNewItemSlot(int slot, float zoneScale);
-		public event GetNewItemSlot InitializeSlot;
+		public GetNewItemSlot InitializeSlot;
 
-		public int HoverSlot { get; internal set; } = -1;
+		public delegate void HoverSlotChanged(NewUISlotZone zone, int oldSlot, int newSlot);
+		public event HoverSlotChanged OnHoverSlotChanged;
+
+		public int HoverSlot { get; private set; } = -1;
 
 		public NewUISlotZone(float scale) {
 			inventoryScale = scale;
@@ -73,15 +77,15 @@ namespace MagicStorage.UI {
 			int oneDimIndex = 0;
 
 			foreach (Item item in source) {
+				if (oneDimIndex >= NumColumns * NumRows)
+					return;
+
 				int column = oneDimIndex % NumColumns;
 				int row = oneDimIndex / NumColumns;
 
 				Slots[row, column].SetBoundItem(item);
 
 				oneDimIndex++;
-
-				if (oneDimIndex >= NumColumns * NumRows)
-					return;
 			}
 
 			while (oneDimIndex < NumColumns * NumRows) {
@@ -141,7 +145,7 @@ namespace MagicStorage.UI {
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 
-			if (NumColumns < 0 || NumRows < 0)
+			if (NumColumns <= 0 || NumRows <= 0)
 				return;
 
 			if (HoverSlot >= 0) {
@@ -155,8 +159,18 @@ namespace MagicStorage.UI {
 					}
 				} else {
 					//Failsafe
-					HoverSlot = -1;
+					SetHoverSlot(-1);
 				}
+			}
+		}
+
+		public void SetHoverSlot(int slot) {
+			if (HoverSlot != slot) {
+				int oldSlot = HoverSlot;
+				HoverSlot = slot;
+
+				if (slot >= 0 && slot < NumColumns * NumRows)
+					OnHoverSlotChanged?.Invoke(this, oldSlot, slot);
 			}
 		}
 	}

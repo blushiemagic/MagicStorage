@@ -36,6 +36,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				.ToList();
 		}
 
+		internal void ClearTrees() {
+			trees.Clear();
+		}
+
 		/// <summary>
 		/// Returns all possible recipes that can craft this ingredient, given the available inventory
 		/// </summary>

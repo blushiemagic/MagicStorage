@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -214,7 +215,7 @@ namespace MagicStorage.Components
 				centerEnt.ResetAndSearch();
 
 				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && centerEnt.GetHeart()?.Position == StoragePlayer.LocalPlayer.GetStorageHeart().Position)
-					StorageGUI.SetRefresh(forceFullRefresh: false);
+					MagicUI.SetRefresh(forceFullRefresh: false);
 			}
 		}
 

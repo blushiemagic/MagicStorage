@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
+using SerousCommonLib.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +23,7 @@ using Terraria.ModLoader.Default;
 using Terraria.UI;
 
 namespace MagicStorage.UI.States {
-	public sealed class StorageUIState : BaseStorageUI {
+	public class StorageUIState : BaseStorageUI {
 		public override string DefaultPage => "Storage";
 
 		protected override IEnumerable<string> GetMenuOptions() {
@@ -42,11 +43,11 @@ namespace MagicStorage.UI.States {
 			};
 
 		protected override void OnOpen() {
-			StorageGUI.OnRefresh += Refresh;
+			MagicUI.OnRefresh += Refresh;
 		}
 
 		protected override void OnClose() {
-			StorageGUI.OnRefresh -= Refresh;
+			MagicUI.OnRefresh -= Refresh;
 
 			GetPage<StoragePage>("Storage").scrollBar.ViewPosition = 0f;
 
@@ -141,7 +142,7 @@ namespace MagicStorage.UI.States {
 			public override void OnInitialize() {
 				base.OnInitialize();
 				
-				filterFavorites = new(() => StorageGUI.SetRefresh(forceFullRefresh: true),
+				filterFavorites = new(() => MagicUI.SetRefresh(forceFullRefresh: true),
 					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
 					32);
@@ -156,14 +157,14 @@ namespace MagicStorage.UI.States {
 				depositButton.OnLeftClick += (evt, e) => {
 					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl);
 					if (StorageGUI.TryDepositAll(ctrlDown == MagicStorageConfig.QuickStackDepositMode)) {
-						StorageGUI.SetRefresh();
+						MagicUI.SetRefresh();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				};
 
 				depositButton.OnRightClick += (evt, e) => {
 					if (StorageGUI.TryRestock()) {
-						StorageGUI.SetRefresh();
+						MagicUI.SetRefresh();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				};
@@ -213,7 +214,7 @@ namespace MagicStorage.UI.States {
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
-				StorageGUI.CheckRefresh();
+				MagicUI.CheckRefresh();
 
 				if (!Main.mouseRight)
 					StorageGUI.ResetSlotFocus();
@@ -231,20 +232,24 @@ namespace MagicStorage.UI.States {
 			}
 
 			private bool UpdateZone() {
-				if (Main.gameMenu || StorageGUI.CurrentlyRefreshing)
+				if (Main.gameMenu || MagicUI.CurrentlyRefreshing)
 					return false;
 
 				AdjustCommonElements();
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * StorageGUI.inventoryScale;
 
-				int count = StorageGUI.CurrentlyRefreshing ? 0 : StorageGUI.items.Count;
+				int count = MagicUI.CurrentlyRefreshing ? 0 : StorageGUI.items.Count;
 
 				int numRows = (count + StorageGUI.numColumns - 1) / StorageGUI.numColumns;
 				int displayRows = (int)slotZone.GetDimensions().Height / ((int)itemSlotHeight + StorageGUI.padding);
 
 				if (numRows > 0 && displayRows <= 0) {
 					lastKnownScrollBarViewPosition = -1;
+
+					// Attempt to force the UI layout to one that takes up less vertical space
+					if (MagicUI.AttemptForcedLayoutChange(parentUI))
+						return false;
 
 					MagicUI.CloseUIDueToHeightLimit();
 					parentUI.pendingUIChange = true;  //Failsafe
@@ -280,7 +285,7 @@ namespace MagicStorage.UI.States {
 				if (StorageGUI.itemDeletionMode)
 					context = ItemSlot.Context.BankItem;
 
-				if (StorageGUI.CurrentlyRefreshing)
+				if (MagicUI.CurrentlyRefreshing)
 					return new Item();
 
 				int index = slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
@@ -321,7 +326,7 @@ namespace MagicStorage.UI.States {
 
 				itemSlot.OnLeftClick += (evt, e) => {
 					// Prevent actions while refreshing the items
-					if (StorageGUI.CurrentlyRefreshing)
+					if (MagicUI.CurrentlyRefreshing)
 						return;
 
 					Player player = Main.LocalPlayer;
@@ -392,7 +397,7 @@ namespace MagicStorage.UI.States {
 					}
 
 					if (canRefresh) {
-						StorageGUI.SetRefresh();
+						MagicUI.SetRefresh();
 						StorageGUI.SetNextItemTypeToRefresh(type);
 
 						obj.IgnoreNextHandleAction = true;
@@ -404,7 +409,7 @@ namespace MagicStorage.UI.States {
 
 				itemSlot.OnMouseOver += (evt, e) => {
 					// Prevent actions while refreshing the items
-					if (StorageGUI.CurrentlyRefreshing)
+					if (MagicUI.CurrentlyRefreshing)
 						return;
 
 					MagicStorageItemSlot obj = e as MagicStorageItemSlot;
@@ -416,7 +421,7 @@ namespace MagicStorage.UI.States {
 
 				itemSlot.OnUpdate += e => {
 					// Prevent actions while refreshing the items
-					if (StorageGUI.CurrentlyRefreshing)
+					if (MagicUI.CurrentlyRefreshing)
 						return;
 
 					if (!e.IsMouseHovering || !Main.mouseRight)
@@ -434,8 +439,6 @@ namespace MagicStorage.UI.States {
 						StorageGUI.slotFocus = objSlot;
 				};
 			}
-
-			protected override bool ShouldHideItemIcons() => Main.mouseX > parentUI.PanelLeft && Main.mouseX < parentUI.PanelRight && Main.mouseY > parentUI.PanelTop && Main.mouseY < parentUI.PanelBottom;
 		}
 
 		public class ControlsPage : BaseStorageUIPage {
@@ -461,7 +464,7 @@ namespace MagicStorage.UI.States {
 			public ControlsPage(BaseStorageUI parent) : base(parent, "Controls") {
 				OnPageSelected += () => {
 					SellMenuChoice = 0;
-					sellMenuLabels[0].LeftClick(new(sellMenuLabels[0], UserInterface.ActiveInstance.MousePosition));
+					sellMenuLabels[0].LeftClick(new(sellMenuLabels[0], Main.MouseScreen));
 				};
 			}
 
@@ -484,7 +487,7 @@ namespace MagicStorage.UI.States {
 				list.ListPadding = 10;
 				Append(list);
 
-				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => StorageGUI.SetRefresh());
+				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
 
 				InitButton(ref compactCoins, "StorageGUI.CompactCoinsButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
@@ -492,7 +495,7 @@ namespace MagicStorage.UI.States {
 
 					if (Main.netMode == NetmodeID.SinglePlayer) {
 						heart.CompactCoins();
-						StorageGUI.SetRefresh();
+						MagicUI.SetRefresh();
 					} else
 						NetHelper.SendCoinCompactRequest(heart.Position);
 				});
@@ -651,7 +654,7 @@ namespace MagicStorage.UI.States {
 						unit.PostChangeContents();
 					}
 
-					StorageGUI.SetRefresh(forceFullRefresh: true);
+					MagicUI.SetRefresh(forceFullRefresh: true);
 					heart.ResetCompactStage();
 				});
 			}
@@ -804,7 +807,7 @@ namespace MagicStorage.UI.States {
 				if (coppersEarned > 0)
 					StorageGUI.SetNextItemTypesToRefresh(new int[] { ItemID.CopperCoin, ItemID.SilverCoin, ItemID.GoldCoin, ItemID.PlatinumCoin });
 
-				StorageGUI.SetRefresh();
+				MagicUI.SetRefresh();
 			}
 
 			internal static void DuplicateSellingResult(TEStorageHeart heart, int sold, long coppersEarned, bool reportText = true, bool depositCoins = true) {

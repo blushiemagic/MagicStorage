@@ -53,8 +53,10 @@ namespace MagicStorage {
 
 		public override void Unload()
 		{
+			StorageGUI.Unload();
 			CraftingGUI.Unload();
 			EnvironmentGUI.Unload();
+			DecraftingGUI.Unload();
 
 			EnvironmentModuleLoader.Unload();
 

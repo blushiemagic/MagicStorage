@@ -217,6 +217,7 @@ namespace MagicStorage.Components
 			player.adjWater = false;
 			player.adjLava = false;
 			player.adjHoney = false;
+			player.adjShimmer = false;
 
 			UpdateRecipes(station);
 
@@ -226,7 +227,7 @@ namespace MagicStorage.Components
 		private static void UpdateRecipes(Item station) {
 			Utility.SetVanillaAdjTiles(station, out bool hasSnow, out bool hasGraveyard);
 
-			StorageGUI.SetRefresh();
+			MagicUI.SetRefresh();
 			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0));
 
 			Player player = Main.LocalPlayer;
@@ -236,6 +237,8 @@ namespace MagicStorage.Components
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingLava);
 			if (player.adjHoney)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingHoney);
+			if (player.adjShimmer)
+				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingShimmer);
 			if (hasSnow)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingSnow);
 			if (hasGraveyard)

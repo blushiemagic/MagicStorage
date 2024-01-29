@@ -9,6 +9,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using MagicStorage.CrossMod;
 using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -91,7 +92,7 @@ namespace MagicStorage {
 				foreach (Item item in HandleCraftWithdrawAndDeposit(heart, context.toWithdraw, context.results))
 					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 
-				StorageGUI.SetRefresh();
+				MagicUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending craft results to server...");
 

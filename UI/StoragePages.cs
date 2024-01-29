@@ -1,4 +1,5 @@
-﻿using MagicStorage.CrossMod;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
@@ -107,14 +108,14 @@ namespace MagicStorage.UI {
 		internal void ClickOption(UIMouseEvent evt, UIElement e) {
 			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable) {
 				OnConfigurationClicked(e as TElement);
-				StorageGUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.SetRefresh(forceFullRefresh: true);
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				return;
 			}
 
 			option = GetOptionType(e as TElement);
 
-			StorageGUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.SetRefresh(forceFullRefresh: true);
 			SoundEngine.PlaySound(SoundID.MenuTick);
 
 			SetLoaderSelection(option);

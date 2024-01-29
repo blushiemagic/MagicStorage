@@ -3,7 +3,6 @@ using MagicStorage.Common;
 using MagicStorage.Components;
 using MagicStorage.Items;
 using MagicStorage.Sorting;
-using MagicStorage.UI.States;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -12,11 +11,28 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
+using static MagicStorage.CraftingGUI;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		internal static List<Recipe> recipes = new();
-		internal static List<bool> recipeAvailable = new();
+		private class RecipeWatchTarget : IRefreshUIWatchTarget {
+			private readonly Recipe _recipe;
+
+			public RecipeWatchTarget(Recipe recipe) {
+				_recipe = recipe;
+			}
+
+			public bool GetCurrentState() => IsAvailable(_recipe);
+
+			public void OnStateChange(out bool forceFullRefresh) {
+				SetNextDefaultRecipeCollectionToRefresh(new Recipe[] { _recipe });
+				forceFullRefresh = false;
+			}
+		}
+
+		internal static readonly List<Recipe> recipes = new();
+		internal static readonly List<bool> recipeAvailable = new();
 
 		private static void SafelyRefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
 			try {
@@ -43,7 +59,7 @@ namespace MagicStorage {
 			}
 		}
 
-		private static void RefreshRecipes(StorageGUI.ThreadContext thread, ThreadState state)
+		private static void RefreshRecipes(StorageGUI.ThreadContext thread, CommonCraftingState state)
 		{
 			NetHelper.Report(true, "Refreshing all recipes");
 
@@ -53,27 +69,34 @@ namespace MagicStorage {
 
 			thread.InitTaskSchedule(9, "Refreshing recipes");
 
-			DoFiltering(thread, state);
+			var query = new Query<Recipe>(new QueryResults<Recipe>(recipes, recipeAvailable),
+				ItemSorter.GetRecipes,
+				SortRecipes,
+				RefreshRecipes_IsAvailable_AlwaysCheckRecursion);
+
+			using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
+				DoFiltering(thread, state, query);
 
 			bool didDefault = false;
 
 			// now if nothing found we disable filters one by one
 			if (thread.searchText.Length > 0)
 			{
-				if (recipes.Count == 0 && (state.globalHiddenRecipes.Count > 0 || state.hiddenRecipes.Count > 0))
+				if (recipes.Count == 0 && (state.globalHiddenTypes.Count > 0 || state.hiddenTypes.Count > 0))
 				{
 					NetHelper.Report(true, "No recipes passed the filter.  Attempting filter with no hidden recipes");
 
 					// search hidden recipes too
-					state.globalHiddenRecipes = ThreadState.EmptyGlobalHiddenRecipes;
-					state.hiddenRecipes = ItemTypeOrderedSet.Empty;
+					state.globalHiddenTypes = CommonCraftingState.EmptyGlobalHiddenTypes;
+					state.hiddenTypes = ItemTypeOrderedSet.Empty;
 
 					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.CraftingNoBlacklist");
 					didDefault = true;
 
 					thread.ResetTaskCompletion();
 
-					DoFiltering(thread, state);
+					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
+						DoFiltering(thread, state, query);
 				}
 
 				/*
@@ -97,166 +120,60 @@ namespace MagicStorage {
 
 					thread.ResetTaskCompletion();
 
-					DoFiltering(thread, state);
+					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
+						DoFiltering(thread, state, query);
 				}
+			}
+
+			for (int i = 0; i < recipes.Count; i++) {
+				Recipe recipe = recipes[i];
+				bool available = recipeAvailable[i];
+
+				if (recipe?.Conditions.Count > 0)
+					MagicUI.AddRefreshWatchdog(new RecipeWatchTarget(recipe), available);
 			}
 
 			if (!didDefault)
 				MagicUI.lastKnownSearchBarErrorReason = null;
 		}
 
-		private static void DoFiltering(StorageGUI.ThreadContext thread, ThreadState state)
-		{
-			try {
-				NetHelper.Report(true, "Retrieving recipes...");
-
-				var filteredRecipes = ItemSorter.GetRecipes(thread);
-
-				thread.CompleteOneTask();
-
-				NetHelper.Report(true, "Sorting recipes...");
-
-				IEnumerable<Recipe> sortedRecipes = SortRecipes(thread, state, filteredRecipes);
-
-				thread.CompleteOneTask();
-
-				recipes.Clear();
-				recipeAvailable.Clear();
-				
-				// For some reason, the loading text likes to hide itself here...
-				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: true);
-
-				using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
-					if (state.recipeFilterChoice == RecipeButtonsAvailableChoice)
-					{
-						NetHelper.Report(true, "Filtering out only available recipes...");
-
-						recipes.AddRange(sortedRecipes.Where(r => IsAvailable(r)));
-
-						thread.CompleteOneTask();
-
-						recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
-
-						thread.CompleteOneTask();
-					}
-					else
-					{
-						recipes.AddRange(sortedRecipes);
-
-						thread.CompleteOneTask();
-
-						recipeAvailable.AddRange(recipes.AsParallel().AsOrdered().Select(r => IsAvailable(r)));
-
-						thread.CompleteOneTask();
-					}
-				}
-
-				// For some reason, the loading text likes to hide itself here...
-				MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: true);
-			} catch when (thread.token.IsCancellationRequested) {
-				recipes.Clear();
-				recipeAvailable.Clear();
-			}
-		}
+		private static bool RefreshRecipes_IsAvailable_AlwaysCheckRecursion(Recipe recipe) => IsAvailable(recipe);
 
 		internal static bool forceSpecificRecipeResort;
 
 		private static void RefreshSpecificRecipes(StorageGUI.ThreadContext thread, ThreadState state) {
-			NetHelper.Report(true, "Refreshing " + state.recipesToRefresh.Length + " recipes");
+			var query = new SpecificQuery<Recipe>(new QueryResults<Recipe>(recipes, recipeAvailable),
+				SortRecipes,
+				RefreshRecipes_IsAvailable_AlwaysCheckRecursion,
+				IsRecipeValidForQuery,
+				CanBeAdded);
 
-			// Task count: N recipes, 3 tasks from SortRecipes, adding recipes, adding recipe availability
-			thread.InitTaskSchedule(state.recipesToRefresh.Length + 5, $"Refreshing {state.recipesToRefresh.Length} recipes");
+			RefreshSpecificQueryItems(thread, state, state.recipesToRefresh, query, forceSpecificRecipeResort, "recipes");
 
-			//Assumes that the recipes are visible in the GUI
-			bool needsResort = forceSpecificRecipeResort;
-
-			foreach (Recipe recipe in state.recipesToRefresh) {
-				if (recipe is null) {
-					thread.CompleteOneTask();
-					continue;
-				}
-
-				if (!ItemSorter.RecipePassesFilter(recipe, thread)) {
-					thread.CompleteOneTask();
-					continue;
-				}
-
-				int index = recipes.IndexOf(recipe);
-
-				using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
-					if (!IsAvailable(recipe)) {
-						if (index >= 0) {
-							if (state.recipeFilterChoice == RecipeButtonsAvailableChoice) {
-								//Remove the recipe
-								recipes.RemoveAt(index);
-								recipeAvailable.RemoveAt(index);
-							} else {
-								//Simply mark the recipe as unavailable
-								recipeAvailable[index] = false;
-							}
-						}
-					} else {
-						if (state.recipeFilterChoice == RecipeButtonsAvailableChoice) {
-							if (index < 0 && CanBeAdded(thread, state, recipe)) {
-								//Add the recipe
-								recipes.Add(recipe);
-								needsResort = true;
-							}
-						} else {
-							if (index >= 0) {
-								//Simply mark the recipe as available
-								recipeAvailable[index] = true;
-							}
-						}
-					}
-				}
-
-				thread.CompleteOneTask();
-			}
-
-			if (needsResort) {
-				var sorted = new List<Recipe>(recipes)
-					.AsParallel()
-					.AsOrdered();
-
-				IEnumerable<Recipe> sortedRecipes = SortRecipes(thread, state, sorted);
-
-				recipes.Clear();
-				recipeAvailable.Clear();
-
-				recipes.AddRange(sortedRecipes);
-
-				thread.CompleteOneTask();
-
-				recipeAvailable.AddRange(Enumerable.Repeat(true, recipes.Count));
-
-				thread.CompleteOneTask();
-			}
+			forceSpecificRecipeResort = false;
 		}
 
-		private static bool CanBeAdded(StorageGUI.ThreadContext thread, ThreadState state, Recipe r) => Array.IndexOf(MagicCache.FilteredRecipesCache[thread.filterMode], r) >= 0
-			&& ItemSorter.FilterBySearchText(r.createItem, thread.searchText, thread.modSearch)
-			// show only blacklisted recipes only if choice = 2, otherwise show all other
-			&& (!MagicStorageConfig.RecipeBlacklistEnabled || state.recipeFilterChoice == RecipeButtonsBlacklistChoice == (state.globalHiddenRecipes.Contains(r.createItem.type) || state.hiddenRecipes.Contains(r.createItem)))
-			// show only favorited items if selected
-			&& (!MagicStorageConfig.CraftingFavoritingEnabled || state.recipeFilterChoice != RecipeButtonsFavoritesChoice || state.favoritedRecipes.Contains(r.createItem));
+		private static bool IsRecipeValidForQuery(StorageGUI.ThreadContext thread, Recipe recipe) => recipe is not null && ItemSorter.RecipePassesFilter(recipe, thread);
 
-		private static IEnumerable<Recipe> SortRecipes(StorageGUI.ThreadContext thread, ThreadState state, IEnumerable<Recipe> source) {
+		private static bool CanBeAdded(StorageGUI.ThreadContext thread, CommonCraftingState state, Recipe r)
+			=> FilteringOptionLoader.Get(thread.filterMode).Filter(r.createItem) && DoesItemPassFilters(thread, state, r.createItem);
+
+		private static IEnumerable<Recipe> SortRecipes(StorageGUI.ThreadContext thread, CommonCraftingState state, IEnumerable<Recipe> source) {
 			IEnumerable<Recipe> sortedRecipes = ItemSorter.DoSorting(thread, source, r => r.createItem);
 
 			thread.CompleteOneTask();
 
 			// show only blacklisted recipes only if choice = 2, otherwise show all other
 			if (MagicStorageConfig.RecipeBlacklistEnabled)
-				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice == RecipeButtonsBlacklistChoice == (state.globalHiddenRecipes.Contains(x.createItem.type) || state.hiddenRecipes.Contains(x.createItem)));
+				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice == RecipeButtonsBlacklistChoice == state.IsHidden(x.createItem.type));
 
 			thread.CompleteOneTask();
 
 			// favorites first
 			if (MagicStorageConfig.CraftingFavoritingEnabled) {
-				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice != RecipeButtonsFavoritesChoice || state.favoritedRecipes.Contains(x.createItem));
+				sortedRecipes = sortedRecipes.Where(x => state.recipeFilterChoice != RecipeButtonsFavoritesChoice || state.favoritedTypes.Contains(x.createItem));
 					
-				sortedRecipes = sortedRecipes.OrderByDescending(r => state.favoritedRecipes.Contains(r.createItem) ? 1 : 0);
+				sortedRecipes = sortedRecipes.OrderByDescending(r => state.favoritedTypes.Contains(r.createItem) ? 1 : 0);
 			}
 
 			thread.CompleteOneTask();
@@ -268,18 +185,9 @@ namespace MagicStorage {
 		{
 			NetHelper.Report(true, "Analyzing crafting stations and environment requirements...");
 
-			Player player = Main.LocalPlayer;
-			if (adjTiles.Length != player.adjTile.Length)
-				Array.Resize(ref adjTiles, player.adjTile.Length);
+			ResetZoneInfo();
 
-			Array.Clear(adjTiles, 0, adjTiles.Length);
-			adjWater = false;
-			adjLava = false;
-			adjHoney = false;
-			zoneSnow = false;
-			alchemyTable = false;
-			graveyard = false;
-			Campfire = false;
+			Player player = Main.LocalPlayer;
 
 			foreach (Item item in GetCraftingStations())
 			{
@@ -319,17 +227,6 @@ namespace MagicStorage {
 						graveyard = true;
 					}
 
-					bool[] oldAdjTile = (bool[])player.adjTile.Clone();
-					bool oldAdjWater = adjWater;
-					bool oldAdjLava = adjLava;
-					bool oldAdjHoney = adjHoney;
-					bool oldAlchemyTable = alchemyTable;
-					player.adjTile = adjTiles;
-					player.adjWater = false;
-					player.adjLava = false;
-					player.adjHoney = false;
-					player.alchemyTable = false;
-
 					TileLoader.AdjTiles(player, item.createTile);
 
 					if (player.adjTile[TileID.WorkBenches] || player.adjTile[TileID.Tables] || player.adjTile[TileID.Tables2])
@@ -340,16 +237,12 @@ namespace MagicStorage {
 						adjLava = true;
 					if (player.adjHoney || TileID.Sets.CountsAsHoneySource[item.createTile])
 						adjHoney = true;
+					if (player.adjShimmer || TileID.Sets.CountsAsShimmerSource[item.createTile])
+						adjShimmer = true;
 					if (player.alchemyTable || player.adjTile[TileID.AlchemyTable])
 						alchemyTable = true;
 					if (player.adjTile[TileID.Tombstones])
 						graveyard = true;
-
-					player.adjTile = oldAdjTile;
-					player.adjWater = oldAdjWater;
-					player.adjLava = oldAdjLava;
-					player.adjHoney = oldAdjHoney;
-					player.alchemyTable = oldAlchemyTable;
 				}
 
 				switch (item.type)
@@ -388,9 +281,40 @@ namespace MagicStorage {
 
 			adjTiles[ModContent.TileType<Components.CraftingAccess>()] = true;
 
+			AdjustAndAssignZoneInfo();
+		}
+
+		internal static void ResetZoneInfo() {
+			Player player = Main.LocalPlayer;
+			if (adjTiles.Length != player.adjTile.Length)
+				Array.Resize(ref adjTiles, player.adjTile.Length);
+
+			Array.Clear(adjTiles, 0, adjTiles.Length);
+			adjWater = false;
+			adjLava = false;
+			adjHoney = false;
+			zoneSnow = false;
+			alchemyTable = false;
+			graveyard = false;
+			Campfire = false;
+
+			PlayerZoneCache.Cache();
+
+			player.adjTile = adjTiles;
+			player.adjWater = false;
+			player.adjLava = false;
+			player.adjHoney = false;
+			player.alchemyTable = false;
+		}
+
+		internal static void AdjustAndAssignZoneInfo() {
+			PlayerZoneCache.FreeCache(false);
+
+			Player player = Main.LocalPlayer;
+
 			TEStorageHeart heart = GetHeart();
 			EnvironmentSandbox sandbox = new(player, heart);
-			CraftingInformation information = new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjTiles);
+			CraftingInformation information = ReadCraftingEnvironment();
 
 			if (heart is not null) {
 				foreach (EnvironmentModule module in heart.GetModules())
@@ -404,6 +328,7 @@ namespace MagicStorage {
 			adjLava = information.lava;
 			adjHoney = information.honey;
 			alchemyTable = information.alchemyTable;
+			adjShimmer = information.shimmer;
 			adjTiles = information.adjTiles;
 		}
 	}

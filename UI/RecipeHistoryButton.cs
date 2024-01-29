@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class RecipeHistoryButton : UIElement, IColorable {
+	public class RecipeHistoryButton : UIElement, IColorable {
 		private static readonly Asset<Texture2D> sourceAsset = ModContent.Request<Texture2D>("MagicStorage/Assets/RecipeHistory", AssetRequestMode.ImmediateLoad);
 
 		private Rectangle _frame;

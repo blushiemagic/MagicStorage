@@ -20,7 +20,7 @@ namespace MagicStorage.UI {
 
 			ingredientZone = new(CraftingGUI.InventoryScale * 0.55f);
 
-			ingredientZone.InitializeSlot += (slot, scale) => {
+			ingredientZone.InitializeSlot = (slot, scale) => {
 				return new(slot, scale: scale) {
 					IgnoreClicks = true
 				};

@@ -39,6 +39,10 @@ namespace MagicStorage {
 		[Expand(false)]
 		public HashSet<ItemDefinition> globalRecipeBlacklist = new();
 
+		[JsonProperty(ItemConverterType = typeof(ItemDefinitionToFromStringJsonConverter))]
+		[Expand(false)]
+		public HashSet<ItemDefinition> globalShimmerItemBlacklist = new();
+
 		[DefaultValue(false)]
 		public bool clearHistory;
 
@@ -117,6 +121,9 @@ namespace MagicStorage {
 		public static HashSet<ItemDefinition> GlobalRecipeBlacklist => Instance.globalRecipeBlacklist;
 
 		[JsonIgnore]
+		public static HashSet<ItemDefinition> GlobalShimmerItemBlacklist => Instance.globalShimmerItemBlacklist;
+
+		[JsonIgnore]
 		public static ButtonConfigurationMode ButtonUIMode => Instance.buttonLayout;
 
 		[JsonIgnore]
@@ -168,11 +175,12 @@ namespace MagicStorage {
 		[JsonIgnore]
 		public static bool ReportClientStorageUsage => Instance.auditLog;
 
-		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref string message) {
+		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref NetworkText message) {
 			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)
 				return true;
 
-			message = "Only users with the Server Operator status or higher can modify this config";
+			message = Mod.GetLocalization("ServerOperator.ConfigChangeDenied").ToNetworkText();
+
 			return false;
 		}
 	}

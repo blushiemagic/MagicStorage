@@ -82,13 +82,13 @@ namespace MagicStorage {
 			public bool Running { get; private set; }
 
 			public static void Begin(ThreadContext incoming) {
-				activeThread?.Stop();
+				MagicUI.activeThread?.Stop();
 
 				if (incoming.Running)
 					throw new ArgumentException("Incoming thread state was already running");
 
-				activeThread = incoming;
-				activeThread.Running = true;
+				MagicUI.activeThread = incoming;
+				MagicUI.activeThread.Running = true;
 
 				// Variable capturing
 				ThreadContext ctx = incoming;
@@ -116,7 +116,7 @@ namespace MagicStorage {
 					return;
 
 				Running = false;
-				CurrentThreadingDuration = 0;
+				MagicUI.CurrentThreadingDuration = 0;
 				tokenSource.Cancel();
 				cancelWait.WaitOne();
 
@@ -124,8 +124,7 @@ namespace MagicStorage {
 			}
 		}
 
-		internal static ThreadContext activeThread;
-
+		[Obsolete("Use MagicUI.CurrentThreadingDuration instead", error: true)]
 		public static int CurrentThreadingDuration { get; private set; }
 
 		private static ThreadContext InitializeThreadContext(StorageUIState.StoragePage storagePage, bool clearItemLists) {
@@ -140,13 +139,13 @@ namespace MagicStorage {
 				itemTypesToUpdate = null;
 				storagePage?.RequestThreadWait(waiting: false);
 
-				InvokeOnRefresh();
+				MagicUI.InvokeOnRefresh();
 				return null;
 			}
 
 			NetHelper.Report(true, $"Refreshing {(itemTypesToUpdate is null ? "all" : $"{itemTypesToUpdate.Count}")} storage items");
 
-			CurrentlyRefreshing = true;
+			MagicUI.CurrentlyRefreshing = true;
 
 			int sortMode = MagicUI.storageUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.storageUI.GetPage<FilteringPage>("Filtering").option;

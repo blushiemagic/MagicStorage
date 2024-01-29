@@ -6,7 +6,7 @@ using Terraria;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		internal static Recipe[] recipesToRefresh;
+		private static Recipe[] recipesToRefresh;
 
 		/// <summary>
 		/// Adds <paramref name="recipes"/> to the collection of recipes to refresh when calling <see cref="RefreshItems"/>

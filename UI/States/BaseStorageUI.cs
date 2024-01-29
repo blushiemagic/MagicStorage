@@ -229,7 +229,7 @@ namespace MagicStorage.UI.States {
 				else if (obj.Name == "Filtering")
 					defPage.filteringButtons.Choice = -1;
 				
-				StorageGUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.SetRefresh(forceFullRefresh: true);
 			};
 
 			configPage.Width = StyleDimension.Fill;
@@ -347,13 +347,13 @@ namespace MagicStorage.UI.States {
 				panel.Recalculate();
 
 				//RefreshItems will conveniently update the zone heights
-				StorageGUI.RefreshItems();
+				MagicUI.RefreshItems();
 
 				pendingUIChange = false;
 			}
 
 			// Refreshing slots?  prevent resizing
-			if (StorageGUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				resize.Dragging = false;
 
 			// Prevent item slot interactions immediately after opening the UI
@@ -381,6 +381,18 @@ namespace MagicStorage.UI.States {
 
 		public virtual void OnRefreshStart() { }
 
+		internal void ForceLayoutTo(ButtonConfigurationMode mode) {
+			var old = MagicStorageConfig.Instance.buttonLayout;
+
+			if (old == mode)
+				return;
+
+			MagicStorageConfig.Instance.buttonLayout = mode;
+			Utility.SaveModConfig(MagicStorageConfig.Instance);
+
+			OnButtonConfigChanged(mode);
+		}
+
 		protected virtual void OnButtonConfigChanged(ButtonConfigurationMode current) { }
 
 		internal void ModernPanelButtonClicked(string page, NewUIButtonChoice buttons) {
@@ -391,7 +403,7 @@ namespace MagicStorage.UI.States {
 			optionPage.option = buttons.SelectionType;
 			optionPage.SetLoaderSelection(optionPage.option);
 			
-			StorageGUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		internal void OpenModernConfigPanel(string page) {

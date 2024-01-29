@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 using MagicStorage.Components;
 using MagicStorage.Edits;
@@ -19,20 +21,141 @@ public class MagicUI : ModSystem
 {
 	public static UserInterface uiInterface;
 
-	public static BaseStorageUI craftingUI, storageUI, environmentUI;
+	public static BaseStorageUI craftingUI, storageUI, environmentUI, decraftingUI;
+
+	public static bool IsStorageUIOpen() => storageUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, storageUI);
 
 	public static bool IsCraftingUIOpen() => craftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, craftingUI);
 
+	public static bool IsEnvironmentUIOpen() => environmentUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, environmentUI);
+
+	public static bool IsDecraftingUIOpen() => decraftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, decraftingUI);
+
+	private static bool _refreshUI;
+	public static bool RefreshUI {
+		get => _refreshUI;
+		set => _refreshUI |= value;
+	}
+
+	public static bool CurrentlyRefreshing { get; internal set; }
+
+	public static event Action OnRefresh;
+		
+	private static bool forceFullRefresh;
+	public static bool ForceNextRefreshToBeFull {
+		get => forceFullRefresh || StorageGUI.Obsolete_needRefresh();
+		set => forceFullRefresh |= value;
+	}
+
+	internal static StorageGUI.ThreadContext activeThread;
+
+	public static int CurrentThreadingDuration { get; internal set; }
+
+	/// <summary>
+	/// Shorthand for setting <see cref="RefreshUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
+	/// </summary>
+	public static void SetRefresh(bool forceFullRefresh = false) {
+		RefreshUI = true;
+		ForceNextRefreshToBeFull = forceFullRefresh;
+	}
+
+	private static bool _pendingWatchdogPulse;
+
+	public static void PulseWatchdogs() => _pendingWatchdogPulse = true;
+
+	internal static void CheckRefresh() {
+		if (!CurrentlyRefreshing && _pendingWatchdogPulse) {
+			if (IsCraftingUIOpen())
+				CraftingGUI.ExecuteInCraftingGuiEnvironment(HandleWatchdogs);
+			else
+				HandleWatchdogs();
+
+			_pendingWatchdogPulse = false;
+		}
+
+		if (RefreshUI)
+			RefreshItems();
+
+		if (activeThread?.Running is true)
+			CurrentThreadingDuration++;
+		else
+			CurrentThreadingDuration = 0;
+	}
+
+	private static void HandleWatchdogs() {
+		// Check the watchdogs
+		foreach (var watchdog in _watchdogs) {
+			if (watchdog.Observe()) {
+				watchdog.OnStateChange(out bool forceFullRefresh);
+				SetRefresh(forceFullRefresh);
+			}
+		}
+	}
+
+	internal static void InvokeOnRefresh() {
+		OnRefresh?.Invoke();
+		StorageGUI.InvokeOnRefresh();
+	}
+
 	public static void SetNextCollectionsToRefresh(int itemType) {
-		StorageGUI.SetRefresh();
+		SetRefresh();
 		StorageGUI.SetNextItemTypeToRefresh(itemType);
 		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
+		DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemType);
 	}
 
 	public static void SetNextCollectionsToRefresh(IEnumerable<int> itemTypes) {
-		StorageGUI.SetRefresh();
+		SetRefresh();
 		StorageGUI.SetNextItemTypesToRefresh(itemTypes);
 		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemTypes);
+		DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemTypes);
+	}
+
+	internal static void StopCurrentThread() {
+		_watchdogs.Clear();
+
+		if (activeThread is not null) {
+			activeThread.Stop();
+			activeThread = null;
+		}
+	}
+
+	public static void RefreshItems() {
+		_refreshUI = false;
+		StorageGUI.Obsolete_needRefresh() = false;
+
+		if (IsStorageUIOpen()) {
+			CraftingGUI.ResetRefreshCache();
+			DecraftingGUI.ResetRefreshCache();
+
+			StorageGUI.RefreshItems_Inner();
+		} else if (IsCraftingUIOpen()) {
+			StorageGUI.ResetRefreshCache();
+			DecraftingGUI.ResetRefreshCache();
+
+			CraftingGUI.RefreshItems_Inner();
+		} else if (IsDecraftingUIOpen()) {
+			StorageGUI.ResetRefreshCache();
+			CraftingGUI.ResetRefreshCache();
+
+			DecraftingGUI.RefreshItems();
+		} else {
+			StorageGUI.ResetRefreshCache();
+			CraftingGUI.ResetRefreshCache();
+			DecraftingGUI.ResetRefreshCache();
+		}
+
+		forceFullRefresh = false;
+	}
+
+	internal static IEntitySource GetShimmeringSpawnSource() => new EntitySource_Parent(Main.LocalPlayer);
+
+	private static readonly ConcurrentBag<RefreshUIWatchdog> _watchdogs = new();
+
+	public static void AddRefreshWatchdog(IRefreshUIWatchTarget target, bool? initialStateOverride = null) {
+		ArgumentNullException.ThrowIfNull(target);
+
+		_watchdogs.Add(new RefreshUIWatchdog(target, initialStateOverride ?? target.GetCurrentState()));
 	}
 
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
@@ -194,6 +317,7 @@ public class MagicUI : ModSystem
 	private static float lastKnownUIScale = -1;
 
 	private static bool pendingClose;
+	private static bool layoutWasForciblyChanged;
 
 	public override void UpdateUI(GameTime gameTime) {
 		if (lastKnownUIScale != Main.UIScale) {
@@ -234,19 +358,18 @@ public class MagicUI : ModSystem
 				module.PreUpdateUI();
 		}
 
-		UserInterface old = UserInterface.ActiveInstance;
-
-		uiInterface?.Use();
 		uiInterface?.Update(gameTime);
-
-		UserInterface.ActiveInstance = old;
 
 		if (viewingStorage) {
 			foreach (var module in heart.GetModules())
 				module.PostUpdateUI();
 		}
 
-		if (pendingClose) {
+		if (layoutWasForciblyChanged) {
+			Main.NewTextMultiline(Language.GetTextValue("Mods.Magicstorage.ForcedLayoutChange"), c: Color.Red);
+			layoutWasForciblyChanged = false;
+			pendingClose = false;
+		} else if (pendingClose) {
 			Main.NewTextMultiline(Language.GetTextValue("Mods.MagicStorage.PanelTooSmol"), c: Color.Red);
 			StoragePlayer.LocalPlayer.CloseStorage();
 			pendingClose = false;
@@ -300,5 +423,18 @@ public class MagicUI : ModSystem
 		mouseText = "";
 	}
 
-	internal static void CloseUIDueToHeightLimit() => pendingClose = true;
+	internal static void CloseUIDueToHeightLimit() {
+		pendingClose = true;
+		layoutWasForciblyChanged = false;
+	}
+
+	internal static bool AttemptForcedLayoutChange(BaseStorageUI ui) {
+		if (MagicStorageConfig.ButtonUIMode is ButtonConfigurationMode.ModernPaged)
+			return false;
+
+		layoutWasForciblyChanged = true;
+		pendingClose = false;
+		ui.ForceLayoutTo(ButtonConfigurationMode.ModernPaged);
+		return true;
+	}
 }

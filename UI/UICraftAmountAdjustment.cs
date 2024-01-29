@@ -1,11 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class UICraftAmountAdjustment : UICraftingStateButtonBase {
+	public class UICraftAmountAdjustment : UICraftingStateButtonBase {
 		public int Amount { get; private set; }
 
 		public bool AmountIsOffset { get; private set; }
@@ -21,7 +22,7 @@ namespace MagicStorage.UI {
 			if (StorageGUI.MouseClicked) {
 				SoundEngine.PlaySound(SoundID.MenuTick);
 
-				LeftClick(new(this, UserInterface.ActiveInstance.MousePosition));
+				LeftClick(new(this, Main.MouseScreen));
 				CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
 			}
 		}

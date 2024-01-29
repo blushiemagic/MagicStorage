@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,7 @@ namespace MagicStorage {
 			}
 
 			if (currentlyThreading)
-				return StorageGUI.activeThread.state is ThreadState state && state.recipeConditionsMetSnapshot[recipe.RecipeIndex];
+				return MagicUI.activeThread.state is ThreadState state && state.recipeConditionsMetSnapshot[recipe.RecipeIndex];
 
 			bool retValue = true;
 
@@ -106,7 +107,7 @@ namespace MagicStorage {
 
 		internal static bool PassesBlock(Recipe recipe)
 		{
-			if (recipe is null || storageItemInfo is null)
+			if (recipe is null)
 				return false;
 
 			NetHelper.Report(true, "Checking if recipe passes \"blocked ingredients\" check...");

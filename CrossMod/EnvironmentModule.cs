@@ -114,10 +114,10 @@ namespace MagicStorage {
 	}
 
 	public struct CraftingInformation {
-		public bool campfire, snow, graveyard, water, lava, honey, alchemyTable;
+		public bool campfire, snow, graveyard, water, lava, honey, alchemyTable, shimmer;
 		public bool[] adjTiles;
 
-		internal CraftingInformation(bool campfire, bool snow, bool graveyard, bool water, bool lava, bool honey, bool alchemyTable, bool[] adjTiles) {
+		internal CraftingInformation(bool campfire, bool snow, bool graveyard, bool water, bool lava, bool honey, bool alchemyTable, bool shimmer, bool[] adjTiles) {
 			this.campfire = campfire;
 			this.snow = snow;
 			this.graveyard = graveyard;
@@ -125,6 +125,7 @@ namespace MagicStorage {
 			this.lava = lava;
 			this.honey = honey;
 			this.alchemyTable = alchemyTable;
+			this.shimmer = shimmer;
 			this.adjTiles = adjTiles;
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using MagicStorage.Common.Systems.RecurrentRecipes;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using Terraria;
 
 namespace MagicStorage {
@@ -37,7 +38,7 @@ namespace MagicStorage {
 		}
 
 		public static int AmountCraftableForCurrentRecipe() {
-			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
+			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
 				return 0;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAmountCraftable, selectedRecipe) && amountCraftableForCurrentRecipe is { } amount)
@@ -50,7 +51,7 @@ namespace MagicStorage {
 		}
 
 		public static bool IsCurrentRecipeAvailable() {
-			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
+			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAvailable, selectedRecipe) && currentRecipeIsAvailable is { } available)
@@ -63,7 +64,7 @@ namespace MagicStorage {
 		}
 
 		public static bool DoesCurrentRecipePassIngredientBlock() {
-			if (currentlyThreading || StorageGUI.CurrentlyRefreshing)
+			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeBlock, selectedRecipe) && currentRecipePassesBlock is { } available)

@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.UI.History;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria.Audio;
@@ -8,14 +9,14 @@ using Terraria.Localization;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal class RecipePanelHistoryArrangement : UIElement {
+	public class RecipePanelHistoryArrangement : UIElement {
 		public class HistoryAdjustmentButton : UITextPanel<char> {
 			public readonly LocalizedText localization;
 			public readonly bool forward;
 
-			public readonly RecipeHistory history;
+			public readonly IHistoryCollection history;
 
-			public HistoryAdjustmentButton(RecipeHistory history, bool forward, string hoverKey, float scale = 1f) : base(forward ? '>' : '<', scale) {
+			public HistoryAdjustmentButton(IHistoryCollection history, bool forward, string hoverKey, float scale = 1f) : base(forward ? '>' : '<', scale) {
 				this.history = history;
 				this.forward = forward;
 				localization = Language.GetText(hoverKey);
@@ -45,14 +46,14 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		public readonly RecipeHistory history;
+		public readonly IHistoryCollection history;
 
 		public RecipeHistoryButton button;
 		public HistoryAdjustmentButton prev, next;
 
 		public event Action OnButtonClicked;
 
-		public RecipePanelHistoryArrangement(RecipeHistory history, float scale) {
+		public RecipePanelHistoryArrangement(IHistoryCollection history, float scale) {
 			this.history = history;
 
 			button = new(scale);
