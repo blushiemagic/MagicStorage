@@ -79,6 +79,8 @@ namespace MagicStorage.Common.Systems
 
 		public override void PreWorldGen() => OnWorldLoad();
 
+		public override void ClearWorld() => OnWorldLoad();
+
 		private const int MIGRATION_VERSION_0_6_1 = 1;
 
 		public override void SaveWorldData(TagCompound tag)
