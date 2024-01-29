@@ -77,6 +77,20 @@ namespace MagicStorage.UI.States {
 			zoneLayout.Append(resultZone);
 
 			// Result zone is expanded to a slot zone for transformed items and results from decrafting
+			resultZone.InitializeSlot = (slot, scale) => {
+				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					CanShareItemToChat = true
+				};
+
+				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, int.MaxValue, GetResult);
+
+				itemSlot.OnRightMouseDown += (evt, e) => HandleResultSlotRightHold((MagicStorageItemSlot)e);
+
+				itemSlot.OnUpdate += e => HandleResultFocus((MagicStorageItemSlot)e);
+
+				return itemSlot;
+			};
+
 			resultZone.SetDimensions(CraftingGUI.IngredientColumns, 3);
 
 			resultZone.Recalculate();
@@ -94,6 +108,27 @@ namespace MagicStorage.UI.States {
 			shimmerReportList.Height.Set(32 * 3 + 10, 1f);  // 3 rows
 
 			recipePanel.Append(shimmerReportList);
+		}
+
+		private void HandleResultFocus(MagicStorageItemSlot slot) {
+			// Prevent actions while refreshing the items
+			if (MagicUI.CurrentlyRefreshing)
+				return;
+
+			if (!slot.IsMouseHovering || !Main.mouseRight)
+				return;  //Not right clicking
+
+			int objSlot = slot.id + CraftingGUI.IngredientColumns * (int)Math.Round(resultScrollBar.ViewPosition);
+
+			if (DecraftingGUI.slotFocus >= 0 && DecraftingGUI.slotFocus != objSlot) {
+				// Held down right click and moved to another slot
+				DecraftingGUI.ResetSlotFocus();
+			}
+
+			if (objSlot < DecraftingGUI.resultItems.Count && (Main.mouseItem.IsAir || ItemCombining.CanCombineItems(Main.mouseItem, DecraftingGUI.resultItems[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack)) {
+				DecraftingGUI.hasSlotFocus = true;
+				DecraftingGUI.slotFocus = objSlot;
+			}
 		}
 
 		public override int GetSortingOption() => GetPage<SortingPage>("Sorting").option;

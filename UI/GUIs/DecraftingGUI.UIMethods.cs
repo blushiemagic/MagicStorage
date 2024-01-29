@@ -13,6 +13,7 @@ namespace MagicStorage {
 
 		internal static void ResetSlotFocus()
 		{
+			hasSlotFocus = false;
 			slotFocus = -1;
 			rightClickTimer = 0;
 			maxRightClickTimer = CraftingGUI.StartMaxRightClickTimer;

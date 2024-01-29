@@ -422,7 +422,7 @@ namespace MagicStorage.UI.States {
 						pendingPanelChange = null;
 					}
 
-					// Wait for at least 10 game ticks to display the prompt
+					// Wait for at least 45 game ticks to display the prompt
 					if (isWaitPanelWaitingToOpen && MagicUI.CurrentThreadingDuration >= StorageGUI.WAIT_PANEL_MINIMUM_TICKS) {
 						isWaitPanelWaitingToOpen = false;
 
