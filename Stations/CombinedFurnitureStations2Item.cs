@@ -10,6 +10,7 @@ namespace MagicStorage.Stations
 		public override void SafeSetDefaults()
 		{
 			Item.value = BasePriceFromItems((ModContent.ItemType<CombinedFurnitureStations1Item>(), 1),
+				(ItemID.MeatGrinder, 1),
 				(ItemID.LesionStation, 1),
 				(ItemID.FleshCloningVaat, 1),
 				(ItemID.SteampunkBoiler, 1),

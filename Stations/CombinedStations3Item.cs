@@ -16,8 +16,7 @@ namespace MagicStorage.Stations
 				(ItemID.AdamantiteForge, 1),
 				(ItemID.Bookcase, 1),
 				(ItemID.CrystalBall, 1),
-				(ItemID.BlendOMatic, 1),
-				(ItemID.MeatGrinder, 1));
+				(ItemID.BlendOMatic, 1));
 		}
 
 		public override void GetItemDimensions(out int width, out int height)

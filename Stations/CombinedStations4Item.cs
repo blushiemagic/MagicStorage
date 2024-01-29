@@ -14,8 +14,8 @@ namespace MagicStorage.Stations
 				(ModContent.ItemType<CombinedFurnitureStations2Item>(), 1),
 				(ItemID.Autohammer, 1),
 				(ItemID.LunarCraftingStation, 1),
-				(ItemID.LavaBucket, 30),
-				(ItemID.HoneyBucket, 30));
+				(ItemID.LavaBucket, 10),
+				(ItemID.HoneyBucket, 10));
 		}
 
 		public override void GetItemDimensions(out int width, out int height)

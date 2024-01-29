@@ -11,11 +11,13 @@ namespace MagicStorage.Stations
 		{
 			Item.value = BasePriceFromItems(
 				(ModContent.ItemType<CombinedFurnitureStations1Item>(), 1),
+				(ItemID.Hellforge, 1),
 				(ItemID.AlchemyTable, 1),
 				(ItemID.CookingPot, 1),
 				(ItemID.TinkerersWorkshop, 1),
 				(ItemID.DyeVat, 1),
 				(ItemID.HeavyWorkBench, 1),
+				(ItemID.Keg, 1),
 				(ItemID.TeaKettle, 1));
 		}
 

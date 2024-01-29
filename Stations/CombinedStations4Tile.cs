@@ -13,11 +13,11 @@ namespace MagicStorage.Stations
 		//(Tier 2)
 		//Hellforge, Alchemy Table, Cooking Pot, Tinkerer's Workshop, Dye Vat, Heavy Work Bench, Keg, Teapot
 		//(Tier 3)
-		//Imbuing Station, Mythril Anvil, Adamantite Forge, Bookcase, Crystal Ball, Blend-O-Matic, Meat Grinder
+		//Imbuing Station, Mythril Anvil, Adamantite Forge, Bookcase, Crystal Ball, Blend-O-Matic
 		//(Furniture Tier 1)
 		//Bone Welder, Glass Kiln, Honey Dispenser, Ice Machine, Living Loom, Sky Mill, Solidifier
 		//(Furniture Tier 2)
-		//Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
+		//Meat Grinder, Decay Chamber, Flesh Cloning Vault, Steampunk Boiler, Lihzahrd Furnace
 		//(Final Tier)
 		//Autohammer, Ancient Manipulator, All Liquids
 		public override int[] GetAdjTiles() =>
@@ -50,7 +50,6 @@ namespace MagicStorage.Stations
 				TileID.Bookcases,
 				TileID.CrystalBall,
 				TileID.Blendomatic,
-				TileID.MeatGrinder,
 				//Tier 1 (Furniture)
 				TileID.BoneWelder,
 				TileID.GlassKiln,
@@ -60,12 +59,12 @@ namespace MagicStorage.Stations
 				TileID.SkyMill,
 				TileID.Solidifier,
 				//Tier 2 (Furniture)
+				TileID.MeatGrinder,
 				TileID.LesionStation,
 				TileID.FleshCloningVat,
 				TileID.SteampunkBoiler,
 				TileID.LihzahrdFurnace,
 				//Final Tier
-				TileID.CrystalBall,
 				TileID.Autohammer,
 				TileID.LunarCraftingStation
 			};
