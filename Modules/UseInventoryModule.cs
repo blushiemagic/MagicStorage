@@ -1,45 +1,44 @@
 ﻿using MagicStorage.Common.Systems;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Terraria;
 
 namespace MagicStorage.Modules {
 	internal class UseInventoryModule : EnvironmentModule {
-		private int[] types = new int[58];
-		private int[] stacks = new int[58];
+		private int[] types = new int[58 + 40];
+		private int[] stacks = new int[58 + 40];
 
-		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => sandbox.player.inventory.Take(58);
+		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => sandbox.player.inventory.Take(58).Concat(sandbox.player.bank4.item);
 
 		public override void PreUpdateUI() {
-			Item[] inv = Main.LocalPlayer.inventory;
+			Player player = Main.LocalPlayer;
 
 			bool needRefresh = false;
 			HashSet<int> typesToUpdate = new();
 
-			for (int i = 0; i < 58; i++) {
-				Item item = inv[i];
-
-				if (types[i] != item.type) {
-					typesToUpdate.Add(types[i]);
-					types[i] = item.type;
-					needRefresh = true;
-					typesToUpdate.Add(item.type);
-				}
-
-				if (stacks[i] != item.stack) {
-					stacks[i] = item.stack;
-					needRefresh = true;
-					typesToUpdate.Add(item.stack);
-				}
-			}
+			CheckInventory(player.inventory, 58, 0, typesToUpdate, ref needRefresh);
+			CheckInventory(player.bank4.item, 40, 58, typesToUpdate, ref needRefresh);
 
 			if (needRefresh) {
-				if (MagicUI.IsCraftingUIOpen()) {
-					MagicUI.SetRefresh();
-					CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(typesToUpdate);
-				} else if (MagicUI.IsDecraftingUIOpen()) {
-					MagicUI.SetRefresh();
-					DecraftingGUI.SetNextDefaultItemCollectionToRefresh(typesToUpdate);
+				MagicUI.SetRefresh();
+				MagicUI.SetNextCollectionsToRefresh(typesToUpdate);
+			}
+		}
+
+		private void CheckInventory(Item[] inventory, int inventoryMaxIndex, int arrayOffset, HashSet<int> typesToUpdate, ref bool needRefresh) {
+			for (int i = 0; i < inventoryMaxIndex; i++) {
+				Item item = inventory[i];
+				int n = i + arrayOffset;
+
+				if (Interlocked.Exchange(ref types[n], item.type) != item.type) {
+					typesToUpdate.Add(item.type);
+					needRefresh = true;
+				}
+
+				if (Interlocked.Exchange(ref stacks[n], item.stack) != item.stack) {
+					typesToUpdate.Add(item.type);
+					needRefresh = true;
 				}
 			}
 		}
