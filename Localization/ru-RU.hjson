@@ -392,6 +392,16 @@ Mods: {
 					Player must be at most 3000' away from the linked Interface or pylon to access crafting
 					''' */
 			}
+
+			DecraftingAccess: {
+				// DisplayName: Storage Aether Interface
+				// Tooltip: Enables shimmering with the items in a storage system
+			}
+
+			Shimmer_CoinLuck: {
+				// DisplayName: Meta//Shimmer/Coin_Luck
+				// Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: Биом в шаре
@@ -458,6 +468,7 @@ Mods: {
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
 			// EvilAltarTile.MapEntry: Evil Altar
+			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		Bestiary.Golem: Робот, который расскажет вам о системе хранения.
@@ -558,16 +569,27 @@ Mods: {
 					Рецепты:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
-					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] @ hand = [i:MagicStorage/CombinedStations3Item]
 					'''
 				Help17:
 					'''
 					В качестве одной из многих функций, позволяющих сократить количество крафтовых станций, которые вам приходится размещать в модуле создания предметов, Magic Storage предоставляет несколько комбинированных крафтовых станций. Каждая комбинированная станция крафта наследует свойства своих станций крафта материалов.
 					Рецепты:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
-					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
+				Help17_NoFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					'''
+				/* Help17_WithFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
+					''' */
 				Help18: Лунный лорд охраняет Сияющую драгоценность, драгоценный камень невероятной силы. Вы можете использовать его для создания портативных средств удаленного доступа с неограниченным диапазоном доступа!
 				/* Help19:
 					'''
@@ -690,6 +712,11 @@ Mods: {
 			Не удается открыть пользовательский интерфейс Magic Storage.Причина: Высота панели была слишком мала для правильного отображения элементов пользовательского интерфейса.
 			Пожалуйста, уменьшите масштаб вашего пользовательского интерфейса в настройках или увеличьте разрешение игры в настройках видео.
 			'''
+		/* ForcedLayoutChange:
+			'''
+			Current UI layout resulted in a panel that was too short to properly display the UI elements.
+			Forcing the UI layout to "Modern Paged" to allocate more vertical space.
+			''' */
 
 		Warnings: {
 			StorageDefaultToAllItems: Предметы не отображаются, даже если они есть в хранилище. По умолчанию используется режим фильтрации "Все".
@@ -698,6 +725,8 @@ Mods: {
 			CraftingDefaultToAllMods: Рецепты не отображаются, даже если есть рецепты из других модов.  По умолчанию используется режим фильтрации "{$Mods.MagicStorage.FilterAllMods}".
 			DeleteItemsFailed: Операция удаления не удалась по неизвестным причинам. Пожалуйста, попробуйте еще раз или при необходимости удалите предметы вручную.
 			DeleteDataFailed: Операция удаления не удалась по неизвестным причинам. Некоторые предметы могут по-прежнему содержать незагруженные данные мода.
+			// DecraftingNoBlacklist: No items displayed even though blacklisted items exist.  Ignoring item blacklisting.
+			// DecraftingDefaultToAllMods: No items displayed even though items exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
 		}
 
 		RecipeHidden: '''"{0}" рецептов были скрыты.'''
@@ -714,6 +743,7 @@ Mods: {
 		DepositTooltipAlt: Положить - ctrl+клик, Положить все - клик, Пополнить запасы - ПКМ
 
 		ServerOperator: {
+			// ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
 			// ControlRequirement: This control requires the Server Operator status.
 
 			CommandInfo: {
@@ -789,6 +819,29 @@ Mods: {
 				'''
 		}
 
+		DecraftingGUI: {
+			// StoredResults: Stored Result Items
+			// ShimmeringReports: Shimmering Results
+			// ItemHidden: Item "{0}" was blacklisted.
+			// ItemRevealed: Item "{0}" was whitelisted.
+			// ItemHiddenGlobal: Item "{0}" was global blacklisted.
+			// ItemRevealedGlobal: Item "{0}" was global whitelisted.
+			// ShimmerButton: Shimmer
+			// ShimmerButtonTooltip: Left click to Shimmer item
+			// ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
+			// ShimmerAmount: Shimmering: {0}
+
+			ShimmerReports: {
+				// DoesNotShimmer: No shimmer results found
+				// CoinLuck: +{0}% Luck (+{1:0.##} value)
+
+				NPCSpawn: {
+					// DirectTransform: "{0}"
+					// IndirectTransform: "{0} (style #{1})"
+				}
+			}
+		}
+
 		FilteringOption: {
 			All.Tooltip: Фильтр (Всё)
 			Weapons.Tooltip: Фильтр (Оружия)
@@ -833,10 +886,11 @@ Mods: {
 			Filtering: Фильтрация
 			Crafting: Создание
 			Storage: Хранилище
-			Controls: Настройки
+			// Shimmering: Shimmering
 			# StorageGUI page for the extra controls
-			Modules: Модули
+			Controls: Настройки
 			# EnvironmentGUI page for the modules
+			Modules: Модули
 			History: История
 		}
 
@@ -982,6 +1036,11 @@ Mods: {
 				automatonRemembers: {
 					Label: Робот запоминает последнюю подсказку
 					Tooltip: Робот запомнит, какую подсказку он в последний раз показывал пользователю, и отобразит эту подсказку при взаимодействии с ней.
+				}
+
+				globalShimmerItemBlacklist: {
+					// Label: Global Item Shimmering Blacklist
+					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
 			}
 

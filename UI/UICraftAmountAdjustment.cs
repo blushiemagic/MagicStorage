@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -23,7 +24,11 @@ namespace MagicStorage.UI {
 				SoundEngine.PlaySound(SoundID.MenuTick);
 
 				LeftClick(new(this, Main.MouseScreen));
-				CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
+
+				if (MagicUI.IsCraftingUIOpen())
+					CraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
+				else if (MagicUI.IsDecraftingUIOpen())
+					DecraftingGUI.ClickAmountButton(Amount, AmountIsOffset);
 			}
 		}
 	}

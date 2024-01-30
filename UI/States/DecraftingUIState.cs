@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
@@ -64,25 +65,32 @@ namespace MagicStorage.UI.States {
 			storageZone.Remove();
 			resultZone.Remove();
 			
+			storageZone.Left.Set(0, 0f);
 			storageZone.Top.Set(0, 0f);
 			storageZone.Width.Set(0, 1f);
 			storageZone.Height.Set(-10, 0.5f);
 			
 			zoneLayout.Append(storageZone);
 
-			resultZone.Top.Set(resultText.MinHeight.Pixels + 24, 0.5f);
-			resultZone.Width.Set(0, 1f);
-			resultZone.Height.Set(-resultText.MinHeight.Pixels - 24, 0.5f);
-			
-			zoneLayout.Append(resultZone);
-
 			// Result zone is expanded to a slot zone for transformed items and results from decrafting
+			resultZone = new NewUISlotZone(CraftingGUI.SmallScale);
+
+			resultZone.OnScrollWheel += (evt, e) => {
+				if (resultScrollBar is not null)
+					resultScrollBar.ViewPosition -= evt.ScrollWheelValue / resultScrollBar.ScrollDividend;
+			};
+
+			resultZone.Left.Set(0, 0f);
+			resultZone.Top.Set(resultText.MinHeight.Pixels + 10, 0.5f);
+			resultZone.Width.Set(0, 1f);
+			resultZone.Height.Set(-resultText.MinHeight.Pixels - 10, 0.5f);
+
 			resultZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
 					CanShareItemToChat = true
 				};
 
-				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, int.MaxValue, GetResult);
+				itemSlot.OnLeftClick += (evt, e) => HandleStorageInteraction((MagicStorageItemSlot)e);
 
 				itemSlot.OnRightMouseDown += (evt, e) => HandleResultSlotRightHold((MagicStorageItemSlot)e);
 
@@ -93,21 +101,74 @@ namespace MagicStorage.UI.States {
 
 			resultZone.SetDimensions(CraftingGUI.IngredientColumns, 3);
 
-			resultZone.Recalculate();
-
 			InitializeScrollBar(resultZone, ref resultScrollBar, resultScrollBarMaxViewPosition);
+			
+			zoneLayout.Append(resultZone);
 
 			// Ingredient zone is replaced by the shimmer report list
+			ingredientZone.SetDimensions(0, 0);
 			ingredientZone.Remove();
 			ingredientScrollBar.Remove();
 
 			ingredientText.SetText(Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmeringReports"));
+			ingredientText.Left.Pixels -= 14f;
 
 			shimmerReportList = new ShimmerReportList();
+			shimmerReportList.Left.Set(0, 0f);
 			shimmerReportList.Width.Set(0, 1f);
-			shimmerReportList.Height.Set(32 * 3 + 10, 1f);  // 3 rows
+			shimmerReportList.Height.Set(ShimmerReportList.ENTRY_HEIGHT * 3 + 10, 0f);  // 3 rows
+			
+			shimmerReportList._innerList.Width.Set(-20, 1f);
+
+			reportListScrollBar = new();
+			reportListScrollBar.Width.Set(20, 0);
+			reportListScrollBar.Height.Set(0, 0.825f);
+			reportListScrollBar.Left.Set(-20, 1f);
+			reportListScrollBar.Top.Set(0, 0.1f);
+
+			shimmerReportList._innerList.SetScrollbar(reportListScrollBar);
+			shimmerReportList.Append(reportListScrollBar);
 
 			recipePanel.Append(shimmerReportList);
+		}
+
+		private void HandleStorageInteraction(MagicStorageItemSlot slot) {
+			// Prevent actions while refreshing the items
+			if (MagicUI.CurrentlyRefreshing)
+				return;
+
+			Player player = Main.LocalPlayer;
+
+			int objSlot = slot.id + CraftingGUI.IngredientColumns * (int)Math.Round(resultScrollBar.ViewPosition);
+
+			bool changed;
+			int type = 0;
+			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
+				type = Main.mouseItem.type;
+				changed = StorageGUI.TryDeposit(Main.mouseItem);
+			} else {
+				Item toWithdraw = slot.StoredItem.Clone();
+				type = toWithdraw.type;
+
+				if (toWithdraw.stack > toWithdraw.maxStack)
+					toWithdraw.stack = toWithdraw.maxStack;
+								
+				Main.mouseItem = StorageGUI.DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
+								
+				if (ItemSlot.ShiftInUse)
+					Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
+								
+				changed = true;
+			}
+
+			if (changed) {
+				MagicUI.SetRefresh();
+				DecraftingGUI.SetNextDefaultItemCollectionToRefresh(type);
+
+				slot.IgnoreNextHandleAction = true;
+
+				SoundEngine.PlaySound(SoundID.Grab);
+			}
 		}
 
 		private void HandleResultFocus(MagicStorageItemSlot slot) {
@@ -141,11 +202,15 @@ namespace MagicStorage.UI.States {
 
 		protected override bool CanShowAllIngredientsToggle() => false;
 
+		protected override void ClampCraftAmount() => DecraftingGUI.ClampShimmerAmount();
+
 		protected override UICraftButton CreateCraftButton() => new UIShimmerButton(Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerButton"), "DecraftingGUI.ShimmerButtonTooltip");
 
 		protected override IHistoryCollection CreateHistory() => new ShimmerHistory();
 
 		// DepositItem not overridden since the implementation would be the same here
+
+		protected override string GetCraftAmountLocalizationKey() => "Mods.MagicStorage.DecraftingGUI.ShimmerAmount";
 
 		protected override Item GetHeader(int slot, ref int context) => DecraftingGUI.GetHeader(slot, ref context);
 
@@ -164,7 +229,7 @@ namespace MagicStorage.UI.States {
 			float storedItemsTextTop = reqObjText2Top + 30 * reqObjTextLines.Count;
 			float storageZoneTop = storedItemsTextTop + 24;
 
-			float zoneHeight = smallSlotHeight + 10 + resultText.MinHeight.Pixels + 24 + smallSlotHeight;
+			float zoneHeight = smallSlotHeight + 10 + resultText.MinHeight.Pixels + 10 + smallSlotHeight;
 
 			return storageZoneTop + zoneHeight + 60 + AMOUNT_BUTTON_HEIGHT;
 		}
@@ -218,11 +283,15 @@ namespace MagicStorage.UI.States {
 		}
 
 		protected override void RecalculateScrollBars() {
+			// This is the best place to put the adjustment without making even more hooks
+			craftAmount.Left.Set(0, 0f);
+			craftAmount.Recalculate();
+
 			base.RecalculateScrollBars();
 
 			GetResultZoneRows(out int totalRows, out int displayRows);
 
-			UpdateZoneAndScroll(resultZone, resultScrollBar, totalRows, displayRows, ref resultScrollBarMaxViewPosition);
+			UpdateZoneAndScroll(resultZone, resultScrollBar, totalRows, displayRows, CraftingGUI.ScrollBar2ViewSize, ref resultScrollBarMaxViewPosition);
 
 			lastKnownResultScrollBarViewPosition = resultScrollBar.ViewPosition;
 		}

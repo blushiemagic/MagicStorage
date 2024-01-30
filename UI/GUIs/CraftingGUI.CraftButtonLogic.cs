@@ -9,7 +9,7 @@ using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		private static bool clampCraftAmountAllowCacheReset;
+		internal static bool clampCraftAmountAllowCacheReset;
 
 		public static int craftAmountTarget;
 

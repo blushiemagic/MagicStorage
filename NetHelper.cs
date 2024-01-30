@@ -20,6 +20,7 @@ using MagicStorage.Common.Players;
 using MagicStorage.UI;
 using System.Threading;
 using ReLogic.Content;
+using MagicStorage.Common.Systems.Shimmering;
 
 namespace MagicStorage
 {
@@ -229,6 +230,9 @@ namespace MagicStorage
 					break;
 				case MessageType.DeleteSpecificItem:
 					ServerReceiveExactItemDeletionRequest(reader);
+					break;
+				case MessageType.RequestShimmerItemInStorage:
+					ServerReceiveItemShimmeringRequest(reader, sender);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
@@ -1517,6 +1521,56 @@ namespace MagicStorage
 
 			heart.TryDeleteExactItem(item);
 		}
+
+		public static void RequestItemShimmering(int itemType, int toShimmer, StorageIntermediary storage, List<IShimmerResult> results) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.RequestShimmerItemInStorage);
+			packet.Write(itemType);
+			packet.Write(toShimmer);
+			storage.Send(packet);
+			ShimmerMetrics.SendShimmerResults(packet, results);
+			packet.Send();
+
+			Report(true, MessageType.RequestShimmerItemInStorage + " packet sent to the server");
+		}
+
+		public static void ServerReceiveItemShimmeringRequest(BinaryReader reader, int sender) {
+			int itemType = reader.ReadInt32();
+			int toShimmer = reader.ReadInt32();
+
+			var storage = StorageIntermediary.Receive(reader);
+
+			var results = ShimmerMetrics.ReceiveShimmerResults(reader);
+
+			if (Main.netMode != NetmodeID.Server || storage is null)
+				return;
+
+			Item shimmeringItem = new Item(itemType, toShimmer);
+			int iconicItem = MagicCache.ShimmerInfos[itemType].iconicItem;
+
+			foreach (var result in results)
+				result?.OnShimmer(shimmeringItem, iconicItem, storage, false);
+
+			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
+
+			Report(true, MessageType.RequestShimmerItemInStorage + " packet received by server from client " + sender);
+
+			if (items.Count > 0) {
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.CraftResult);
+				packet.Write(items.Count);
+				foreach (Item item in items)
+					ItemIO.Send(item, packet, true, true);
+				packet.Send(sender);
+
+				Report(false, MessageType.CraftResult + " packet sent to all clients");
+			}
+
+			SendRefreshNetworkItems(storage.heart.Position, false);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1554,6 +1608,7 @@ namespace MagicStorage
 		ComponentDestruction,
 		ClientLockStorageHeart,
 		ClientUnlockStorageHeart,
-		DeleteSpecificItem
+		DeleteSpecificItem,
+		RequestShimmerItemInStorage
 	}
 }

@@ -1,42 +1,18 @@
 ﻿using MagicStorage.Common.Systems;
-using Microsoft.Xna.Framework.Input;
-using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
 using System;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
 using Terraria.DataStructures;
+using System.Collections.Generic;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
 		private class ShimmerContext {
 			public int toShimmer;
 			public StorageIntermediary storage;
-		}
-
-		internal static void ClickShimmerButton(ref bool stillCrafting) {
-			if (CraftingGUI.craftTimer <= 0)
-			{
-				CraftingGUI.craftTimer = CraftingGUI.maxCraftTimer;
-				CraftingGUI.maxCraftTimer = CraftingGUI.maxCraftTimer * 3 / 4;
-				if (CraftingGUI.maxCraftTimer <= 0)
-					CraftingGUI.maxCraftTimer = 1;
-
-				int amount = CraftingGUI.craftAmountTarget;
-
-				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
-					amount = 9999;
-
-				Shimmer(amount);
-
-				SetNextDefaultItemCollectionToRefresh(selectedItem);
-				MagicUI.SetRefresh();
-				SoundEngine.PlaySound(SoundID.Grab);
-			}
-
-			CraftingGUI.craftTimer--;
-			stillCrafting = true;
+			public List<IShimmerResult> results;
 		}
 
 		/// <summary>
@@ -64,16 +40,17 @@ namespace MagicStorage {
 
 			ShimmerContext context = new() {
 				toShimmer = toShimmer,
-				storage = new StorageIntermediary()
+				storage = new StorageIntermediary(heart),
+				results = new List<IShimmerResult>()
 			};
 
 			int target = toShimmer;
 
 			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => Shimmer_DoShimmering(context));
 
-			NetHelper.Report(true, $"Shimmered {target - toShimmer} items");
+			NetHelper.Report(true, $"Shimmered {target - context.toShimmer} items");
 
-			if (target == toShimmer) {
+			if (target == context.toShimmer) {
 				//Could not shimmer anything, bail
 				return;
 			}
@@ -92,17 +69,18 @@ namespace MagicStorage {
 
 				MagicUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				NetHelper.Report(true, "Sending shimmer item results to server...");
+				NetHelper.Report(true, "Sending shimmer request to server...");
 
-				NetHelper.SendCraftRequest(heart.Position, toWithdraw, toDeposit);
+				NetHelper.RequestItemShimmering(selectedItem, toShimmer, context.storage, context.results);
 			}
 		}
 
 		private static void Shimmer_DoShimmering(ShimmerContext context) {
 			Item shimmeringItem = new Item(selectedItem, context.toShimmer);
+			bool net = Main.netMode == NetmodeID.MultiplayerClient;
 
 			while (!shimmeringItem.IsAir) {
-				var result = ShimmerMetrics.AttemptItemTransmutation(shimmeringItem, context.storage);
+				var result = ShimmerMetrics.AttemptItemTransmutation(shimmeringItem, context.storage, net);
 
 				context.toShimmer = shimmeringItem.stack;
 
@@ -110,6 +88,8 @@ namespace MagicStorage {
 					// No more results, bail
 					break;
 				}
+
+				context.results.Add(result);
 			}
 		}
 	}

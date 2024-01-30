@@ -109,7 +109,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		public NPCSpawnReport(int npcType) {
 			this.npcType = npcType;
-			Label = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.Direct").WithFormatArgs(Lang.GetNPCNameValue(npcType));
+			Label = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType));
 		}
 
 		public NPCSpawnReport(Item item) {
@@ -119,8 +119,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			npcType = shimmerTransform < 0 ? npc : shimmerTransform;
 
 			Label = shimmerTransform < 0
-				? Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.IndirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npc), item.placeStyle + 1)
-				: Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npc));
+				? Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.IndirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType), item.placeStyle + 1)
+				: Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType));
 		}
 
 		// Unused, icon is drawn manually

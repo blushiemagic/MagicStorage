@@ -25,18 +25,14 @@ namespace MagicStorage.UI.Shimmer {
 
 				Width.Set(TextureAssets.InventoryBack9.Value.Width * scale, 0f);
 				Height.Set(TextureAssets.InventoryBack9.Value.Height * scale, 0f);
-			}
 
-			public override void OnInitialize() {
-				base.OnInitialize();
-
+				// Icon needs to be created here; OnInitialize runs too late
 				_icon = new ShimmerReportIcon() {
 					HAlign = 0.5f,
 					VAlign = 0.5f
 				};
 				_icon.Width.Set(0, 1f);
 				_icon.Height.Set(0, 1f);
-
 				Append(_icon);
 			}
 
@@ -88,8 +84,6 @@ namespace MagicStorage.UI.Shimmer {
 		public int ZoneHeight { get; private set; }
 
 		public int HoverSlot { get; internal set; } = -1;
-
-		private int _directTypeReports = -1;
 
 		public ShimmerReportZone(float scale) {
 			inventoryScale = scale;

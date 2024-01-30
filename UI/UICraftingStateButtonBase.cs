@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 
 namespace MagicStorage.UI {
@@ -13,7 +14,6 @@ namespace MagicStorage.UI {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Do not read anything until refreshing is completed
 
-			// TODO: cache this calculation?
 			if (IsValid()) {
 				if (IsMouseHovering) {
 					OnHoveringAndValidRecipe(gameTime);
@@ -24,7 +24,13 @@ namespace MagicStorage.UI {
 				BackgroundColor = new Color(30, 40, 100) * 0.7f;
 		}
 
-		protected virtual bool IsValid() => CraftingGUI.IsCurrentRecipeFullyAvailable();
+		private static bool IsValid() {
+			if (MagicUI.IsCraftingUIOpen())
+				return CraftingGUI.IsCurrentRecipeFullyAvailable();
+			else if (MagicUI.IsDecraftingUIOpen())
+				return DecraftingGUI.selectedItem > ItemID.None && DecraftingGUI.IsAvailable(DecraftingGUI.selectedItem);
+			return false;
+		}
 
 		protected abstract void OnHoveringAndValidRecipe(GameTime gameTime);
 	}

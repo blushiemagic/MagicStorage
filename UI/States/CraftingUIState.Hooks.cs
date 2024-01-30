@@ -17,11 +17,15 @@ namespace MagicStorage.UI.States {
 	partial class CraftingUIState {
 		protected virtual bool CanShowAllIngredientsToggle() => true;
 
+		protected virtual void ClampCraftAmount() => CraftingGUI.ClampCraftAmount();
+
 		protected virtual UICraftButton CreateCraftButton() => new UICraftButton(Language.GetText("LegacyMisc.72"), "CraftTooltip");
 
 		protected virtual IHistoryCollection CreateHistory() => new RecipeHistory();
 
 		protected virtual bool DepositItem(Item item) => CraftingGUI.TryDepositResult(item);
+
+		protected virtual string GetCraftAmountLocalizationKey() => "Mods.MagicStorage.Crafting.Amount";
 
 		protected virtual Item GetHeader(int slot, ref int context) => CraftingGUI.GetHeader(slot, ref context);
 
@@ -67,17 +71,13 @@ namespace MagicStorage.UI.States {
 			int ingredientDisplayRows = GetIngredientDisplayRows(ingredientRows);
 			float ingredientZoneHeight = 30f * ingredientDisplayRows;
 
-			ingredientZone.SetDimensions(CraftingGUI.IngredientColumns, ingredientDisplayRows);
 			ingredientZone.Top.Set(ingredientZoneTop, 0f);
-			ingredientZone.Height.Set(ingredientZoneHeight, 0f);
+
+			UpdateZoneAndScroll(ingredientZone, ingredientScrollBar, ingredientRows, ingredientDisplayRows, CraftingGUI.ScrollBar2ViewSize, ref ingredientScrollBarMaxViewSize);
+
+			ingredientZone.Height.Set(ingredientZone.ZoneHeight, 0f);
 			
 			ingredientZone.Recalculate();
-
-			ingredientScrollBarMaxViewSize = 1 + ingredientDisplayRows;
-			ingredientScrollBar.Height.Set(ingredientZoneHeight, 0f);
-			ingredientScrollBar.SetView(CraftingGUI.ScrollBar2ViewSize, ingredientScrollBarMaxViewSize);
-
-			ingredientScrollBar.Recalculate();
 
 			reqObjTextTop += ingredientZoneHeight + 11 * ingredientDisplayRows;
 		}
@@ -85,7 +85,7 @@ namespace MagicStorage.UI.States {
 		protected virtual void RecalculateScrollBars() {
 			GetStorageZoneRows(out int numRows2, out int displayRows2);
 
-			UpdateZoneAndScroll(storageZone, storageScrollBar, numRows2, displayRows2, ref storageScrollBarMaxViewSize);
+			UpdateZoneAndScroll(storageZone, storageScrollBar, numRows2, displayRows2, CraftingGUI.ScrollBar2ViewSize, ref storageScrollBarMaxViewSize);
 
 			lastKnownScrollBarViewPosition = storageScrollBar.ViewPosition;
 			lastKnownIngredientScrollBarViewPosition = ingredientScrollBar.ViewPosition;
@@ -187,6 +187,11 @@ namespace MagicStorage.UI.States {
 				}
 
 			//	reqObjText2.SetText(text);
+			} else {
+				// Recipe isn't available
+				reqObjTextLines.Add(new UIText(Language.GetTextValue("LegacyInterface.23")) {
+					DynamicallyScaleDownToWidth = true
+				});
 			}
 		}
 

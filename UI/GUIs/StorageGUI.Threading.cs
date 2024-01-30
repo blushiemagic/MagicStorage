@@ -82,13 +82,14 @@ namespace MagicStorage {
 			public bool Running { get; private set; }
 
 			public static void Begin(ThreadContext incoming) {
-				MagicUI.activeThread?.Stop();
+				MagicUI.StopCurrentThread();
 
 				if (incoming.Running)
 					throw new ArgumentException("Incoming thread state was already running");
 
 				MagicUI.activeThread = incoming;
 				MagicUI.activeThread.Running = true;
+				MagicUI.CurrentlyRefreshing = true;
 
 				// Variable capturing
 				ThreadContext ctx = incoming;
@@ -144,8 +145,6 @@ namespace MagicStorage {
 			}
 
 			NetHelper.Report(true, $"Refreshing {(itemTypesToUpdate is null ? "all" : $"{itemTypesToUpdate.Count}")} storage items");
-
-			MagicUI.CurrentlyRefreshing = true;
 
 			int sortMode = MagicUI.storageUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.storageUI.GetPage<FilteringPage>("Filtering").option;

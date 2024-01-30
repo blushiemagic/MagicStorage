@@ -216,7 +216,7 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
-		protected static void UpdateZoneAndScroll(NewUISlotZone zone, NewUIScrollbar scroll, int totalRows, int displayRows, ref float maxViewSize) {
+		protected static void UpdateZoneAndScroll(NewUISlotZone zone, NewUIScrollbar scroll, int totalRows, int displayRows, float viewSize, ref float maxViewSize) {
 			float smallSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.SmallScale;
 
 			zone.SetDimensions(CraftingGUI.IngredientColumns, displayRows);
@@ -227,7 +227,7 @@ namespace MagicStorage.UI.States {
 
 			maxViewSize = 1 + noDisplayRows2;
 			scroll.Height.Set(displayRows * (smallSlotHeight + CraftingGUI.Padding), 0f);
-			scroll.SetView(CraftingGUI.ScrollBar2ViewSize, maxViewSize);
+			scroll.SetView(viewSize, maxViewSize);
 
 			scroll.Recalculate();
 		}

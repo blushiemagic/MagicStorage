@@ -124,6 +124,7 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(recipeHeaderZone);
 
 			ingredientZone = new(CraftingGUI.SmallScale);
+			ingredientZone.Width.Set(0, 1f);
 
 			ingredientZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
@@ -294,7 +295,7 @@ namespace MagicStorage.UI.States {
 			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallerScale);
 			craftReset.SetAmountInformation(1, false);
 
-			craftAmount = new UIText(Language.GetText("Mods.MagicStorage.Crafting.Amount"), CraftingGUI.SmallScale);
+			craftAmount = new UIText(Language.GetTextValue(GetCraftAmountLocalizationKey(), 1), CraftingGUI.SmallScale);
 
 			InitCraftButtonDimensions();
 
@@ -439,14 +440,14 @@ namespace MagicStorage.UI.States {
 				if (flag.Value)
 					updateFocus();
 
-				CraftingGUI.ClampCraftAmount();
+				ClampCraftAmount();
 
 				bool config = MagicStorageConfig.UseOldCraftMenu;
 
 				if (config)
 					CraftingGUI.craftAmountTarget = 1;
 				else
-					craftAmount.SetText(Language.GetTextValue("Mods.MagicStorage.Crafting.Amount", CraftingGUI.craftAmountTarget));
+					craftAmount.SetText(Language.GetTextValue(GetCraftAmountLocalizationKey(), CraftingGUI.craftAmountTarget));
 
 				if (lastKnownUseOldCraftButtons != config) {
 					ToggleCraftButtons(hide: config);
@@ -631,7 +632,7 @@ namespace MagicStorage.UI.States {
 			MagicUI.OnRefresh += Refresh;
 
 			if (MagicStorageConfig.UseConfigFilter) {
-				var page = GetPage<RecipesPage>("Crafting");
+				var page = GetPage<RecipesPage>(DefaultPage);
 
 				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 				page.recipeButtons.OnChanged();

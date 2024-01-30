@@ -1,5 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent.Bestiary;
 using Terraria.ModLoader;
@@ -15,28 +18,21 @@ namespace MagicStorage.Common {
 		}
 
 		private class PoolEntry {
-			public readonly NPC dummy;
 			public UnlockableNPCEntryIcon icon;
 
 			public PoolEntry(int npcType) {
-				dummy = new NPC();
-				dummy.SetDefaults(npcType);
-				dummy.IsABestiaryIconDummy = true;
-
 				icon = new UnlockableNPCEntryIcon(npcType);
 			}
 		}
 
 		private static readonly Dictionary<int, PoolEntry> entries = new();
 
-		private static void GetOrReserve(int npcType, out NPC npc, out UnlockableNPCEntryIcon icon) {
+		private static void GetOrReserve(int npcType, out UnlockableNPCEntryIcon icon) {
 			if (!entries.TryGetValue(npcType, out var poolEntry)) {
 				poolEntry = new PoolEntry(npcType);
 				entries.Add(npcType, poolEntry);
 			}
 
-			npc = poolEntry.dummy;
-			npc.IsABestiaryIconDummy = true;
 			icon = poolEntry.icon;
 		}
 
@@ -46,7 +42,7 @@ namespace MagicStorage.Common {
 		}
 
 		public static void UpdateEntry(int npcType, Rectangle renderArea) {
-			GetOrReserve(npcType, out _, out var icon);
+			GetOrReserve(npcType, out var icon);
 
 			var info = new BestiaryUICollectionInfo() {
 				UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1
@@ -61,10 +57,12 @@ namespace MagicStorage.Common {
 		}
 
 		public static void RenderEntry(int npcType, Rectangle renderArea) {
-			GetOrReserve(npcType, out var npc, out var icon);
+			GetOrReserve(npcType, out var icon);
 
 			if (icon is null)
 				return;
+
+			NPC npc = GetNPC(icon);
 
 			var info = new BestiaryUICollectionInfo() {
 				UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1
@@ -94,7 +92,7 @@ namespace MagicStorage.Common {
 
 			try {
 				// Shrink the NPC
-				npc.scale *= Main.UIScale * (24f / 32f);
+				npc.scale *= Main.UIScale * 0.4f;
 				icon.Draw(info, Main.spriteBatch, settings);
 			} catch {
 				DestroyIcon(npcType);
@@ -104,6 +102,22 @@ namespace MagicStorage.Common {
 			npc.scale = oldScale;
 
 			Main.spriteBatch.GraphicsDevice.ScissorRectangle = oldRect;
+		}
+
+		private static Func<UnlockableNPCEntryIcon, NPC> _getCachedNPC;
+
+		private static NPC GetNPC(UnlockableNPCEntryIcon icon) {
+			static Func<UnlockableNPCEntryIcon, NPC> MakeFunction() {
+				// Generate a System.Linq.Expression delegate that takes an UnlockableNPCEntryIcon as a parameter and returns its _npcCache field
+				// This is done to avoid using reflection, which is slow
+				var param = Expression.Parameter(typeof(UnlockableNPCEntryIcon));
+				var field = typeof(UnlockableNPCEntryIcon).GetField("_npcCache", BindingFlags.NonPublic | BindingFlags.Instance);
+				var body = Expression.Field(param, field);
+				var lambda = Expression.Lambda<Func<UnlockableNPCEntryIcon, NPC>>(body, param);
+				return lambda.Compile();
+			}
+
+			return (_getCachedNPC ??= MakeFunction())(icon);
 		}
 	}
 }

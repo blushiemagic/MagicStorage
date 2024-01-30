@@ -363,6 +363,7 @@ namespace MagicStorage.UI.States {
 						} else {
 							if (!StorageGUI.itemDeletionMode) {
 								Item toWithdraw = item.Clone();
+								type = toWithdraw.type;
 
 								if (toWithdraw.stack > toWithdraw.maxStack)
 									toWithdraw.stack = toWithdraw.maxStack;

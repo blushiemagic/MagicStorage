@@ -390,6 +390,16 @@ Mods: {
 					Player must be at most 3000' away from the linked Interface or pylon to access crafting
 					''' */
 			}
+
+			DecraftingAccess: {
+				// DisplayName: Storage Aether Interface
+				// Tooltip: Enables shimmering with the items in a storage system
+			}
+
+			Shimmer_CoinLuck: {
+				// DisplayName: Meta//Shimmer/Coin_Luck
+				// Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: 生态球
@@ -456,6 +466,7 @@ Mods: {
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
 			// EvilAltarTile.MapEntry: Evil Altar
+			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		Bestiary.Golem:
@@ -559,16 +570,27 @@ Mods: {
 					制作配方:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ 空手 = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 空手 = [i:MagicStorage/CombinedStations2Item]
-					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ 空手 = [i:MagicStorage/CombinedStations3Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:MeatGrinder] @ 空手 = [i:MagicStorage/CombinedStations3Item]
 					'''
 				Help17:
 					'''
 					以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合家具制作站。每个组合家具制作站都继承其制作材料满足的制作条件。
 					制作配方:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 空手 = [i:MagicStorage/CombinedFurnitureStations1Item]
-					[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] [i:BlendOMatic] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
+				Help17_NoFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
+					'''
+				/* Help17_WithFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
+					''' */
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				/* Help19:
 					'''
@@ -691,6 +713,11 @@ Mods: {
 			无法打开魔法存储UI，因为游戏面板高度太小了，无法正常显示UI界面
 			请在设置中拉低UI缩放比例或在视频设置中提高游戏分辨率
 			'''
+		/* ForcedLayoutChange:
+			'''
+			Current UI layout resulted in a panel that was too short to properly display the UI elements.
+			Forcing the UI layout to "Modern Paged" to allocate more vertical space.
+			''' */
 
 		Warnings: {
 			StorageDefaultToAllItems: 当前筛选模式下搜索不到任何物品，即使存储中有相应物品。目前显示的是搜索所有物品的结果
@@ -699,6 +726,8 @@ Mods: {
 			CraftingDefaultToAllMods: 此模组中搜索不到任何配方。目前显示的是搜索所有配方的结果
 			// DeleteItemsFailed: Deletion operation failed for unknown reasons.  Please try again, or delete the items manually if necessary.
 			// DeleteDataFailed: Deletion operation failed for unknown reasons.  Some items may still contain unloaded mod data.
+			// DecraftingNoBlacklist: No items displayed even though blacklisted items exist.  Ignoring item blacklisting.
+			// DecraftingDefaultToAllMods: No items displayed even though items exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
 		}
 
 		RecipeHidden: 隐藏物品 "{0}" 的制作配方
@@ -715,6 +744,7 @@ Mods: {
 		DepositTooltipAlt: 快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键
 
 		ServerOperator: {
+			// ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
 			// ControlRequirement: This control requires the Server Operator status.
 
 			CommandInfo: {
@@ -790,6 +820,29 @@ Mods: {
 				'''
 		}
 
+		DecraftingGUI: {
+			// StoredResults: Stored Result Items
+			// ShimmeringReports: Shimmering Results
+			// ItemHidden: Item "{0}" was blacklisted.
+			// ItemRevealed: Item "{0}" was whitelisted.
+			// ItemHiddenGlobal: Item "{0}" was global blacklisted.
+			// ItemRevealedGlobal: Item "{0}" was global whitelisted.
+			// ShimmerButton: Shimmer
+			// ShimmerButtonTooltip: Left click to Shimmer item
+			// ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
+			// ShimmerAmount: Shimmering: {0}
+
+			ShimmerReports: {
+				// DoesNotShimmer: No shimmer results found
+				// CoinLuck: +{0}% Luck (+{1:0.##} value)
+
+				NPCSpawn: {
+					// DirectTransform: "{0}"
+					// IndirectTransform: "{0} (style #{1})"
+				}
+			}
+		}
+
 		FilteringOption: {
 			All.Tooltip: 全部
 			Weapons.Tooltip: 武器
@@ -834,10 +887,11 @@ Mods: {
 			Filtering: 筛选
 			Crafting: 合成
 			Storage: 存储
-			Controls: 控件
+			// Shimmering: Shimmering
 			# StorageGUI page for the extra controls
-			Modules: 模块
+			Controls: 控件
 			# EnvironmentGUI page for the modules
+			Modules: 模块
 			History: 历史
 		}
 
@@ -987,6 +1041,11 @@ Mods: {
 				automatonRemembers: {
 					// Label: Automaton remembers last help tip
 					// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
+				}
+
+				globalShimmerItemBlacklist: {
+					// Label: Global Item Shimmering Blacklist
+					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
 			}
 

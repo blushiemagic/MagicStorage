@@ -73,8 +73,6 @@ namespace MagicStorage {
 			foreach (var module in heart.GetModules())
 				module.PreRefreshRecipes(sandbox);
 
-			MagicUI.CurrentlyRefreshing = true;
-
 			IEnumerable<Item> heartItems = heart.GetStoredItems();
 			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
 				.Where(i => i.type > ItemID.None && i.stack > 0)
@@ -121,7 +119,7 @@ namespace MagicStorage {
 			AnalyzeIngredients();
 
 			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => {
-				state.decraftingRecipeAvailableSnapshot = Main.recipe.Take(Recipe.maxRecipes).Select(ShimmerMetrics.IsDecraftAvailable).ToArray();
+				state.decraftingRecipeAvailableSnapshot = Main.recipe.Take(Recipe.numRecipes).Select(ShimmerMetrics.IsDecraftAvailable).ToArray();
 				state.itemTypeToDecraftRecipeIndexSnapshot = ItemID.Sets.Factory.CreateIntSet(-1);
 				state.itemTransmuteAvailableSnapshot = ItemID.Sets.Factory.CreateBoolSet(false);
 

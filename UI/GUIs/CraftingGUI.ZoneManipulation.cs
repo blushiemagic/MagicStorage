@@ -80,8 +80,8 @@ namespace MagicStorage {
 			if (level > 1)
 			{
 				// Local capturing
-				int l = level;
-				Main.QueueMainThreadAction(() => Main.NewText($"ExecuteInCraftingGuiEnvironment concurrency level: {l}"));
+			//	int l = level;
+			//	Main.QueueMainThreadAction(() => Main.NewText($"ExecuteInCraftingGuiEnvironment concurrency level: {l}"));
 
 				try {
 					while (!_zoneInformationReady)

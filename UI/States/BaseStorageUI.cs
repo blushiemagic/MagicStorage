@@ -299,6 +299,8 @@ namespace MagicStorage.UI.States {
 
 			SetPage(DefaultPage);
 
+			pendingUIChange = true;
+
 			timeSpentOpen = 0;
 		}
 

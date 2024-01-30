@@ -99,8 +99,6 @@ namespace MagicStorage {
 			foreach (var module in heart.GetModules())
 				module.PreRefreshRecipes(sandbox);
 
-			MagicUI.CurrentlyRefreshing = true;
-
 			IEnumerable<Item> heartItems = heart.GetStoredItems();
 			IEnumerable<Item> simulatorItems = heart.GetModules().SelectMany(m => m.GetAdditionalItems(sandbox) ?? Array.Empty<Item>())
 				.Where(i => i.type > ItemID.None && i.stack > 0)
@@ -142,7 +140,7 @@ namespace MagicStorage {
 			AnalyzeIngredients();
 
 			ExecuteInCraftingGuiEnvironment(() => {
-				state.recipeConditionsMetSnapshot = Main.recipe.Take(Recipe.maxRecipes).Select(static r => !r.Disabled && RecipeLoader.RecipeAvailable(r)).ToArray();
+				state.recipeConditionsMetSnapshot = Main.recipe.Take(Recipe.numRecipes).Select(static r => !r.Disabled && RecipeLoader.RecipeAvailable(r)).ToArray();
 			});
 
 			if (heart is not null) {

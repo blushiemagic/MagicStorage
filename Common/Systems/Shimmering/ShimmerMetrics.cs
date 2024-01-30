@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
 using Terraria;
@@ -81,11 +82,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			return ItemID.Sets.ShimmerTransformToItem[item];
 		}
 
-		public static IShimmerResult AttemptItemTransmutation(Item item, StorageIntermediary storage) {
+		public static IShimmerResult AttemptItemTransmutation(Item item, StorageIntermediary storage, bool net) {
 			var info = MagicCache.ShimmerInfos[item.type];
 			var result = info.GetResult();
 
-			result?.OnShimmer(item, info.iconicItem, storage);
+			result?.OnShimmer(item, info.iconicItem, storage, net);
 
 			if (item.stack <= 0)
 				item.TurnToAir();
@@ -152,6 +153,42 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			}
 
 			stack -= amount * recipe.createItem.stack;
+
+			return results;
+		}
+
+		internal static void SendShimmerResults(BinaryWriter writer, List<IShimmerResult> results) {
+			writer.Write((short)results.Count);
+			foreach (var result in results) {
+				byte type = result switch {
+					TransformItem _ => 0,
+					CoinLuck _ => 1,
+					NPCSpawn _ => 2,
+					Decraft _ => 3,
+					_ => throw new ArgumentException($"Invalid shimmer result type \"{result?.GetType().ToString() ?? "null"}\"")
+				};
+
+				writer.Write(type);
+				result.Send(writer);
+			}
+		}
+
+		internal static List<IShimmerResult> ReceiveShimmerResults(BinaryReader reader) {
+			int count = reader.ReadInt16();
+			List<IShimmerResult> results = new(count);
+
+			for (int i = 0; i < count; i++) {
+				byte type = reader.ReadByte();
+				IShimmerResult result = type switch {
+					0 => default(TransformItem),
+					1 => default(CoinLuck),
+					2 => default(NPCSpawn),
+					3 => default(Decraft),
+					_ => throw new ArgumentException($"Invalid shimmer result net type \"{type}\"")
+				};
+
+				results.Add(result.Receive(reader));
+			}
 
 			return results;
 		}
@@ -230,6 +267,20 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 			using (ObjectSwitch.Create(ref player.coinLuck, forcedCoinLuckValue))
 				return (_calculateCoinLuck ??= MakeFunction())(player);
+		}
+
+		private static Action<NPC> _getShimmered;
+		public static void GetShimmered(this NPC npc) {
+			static Action<NPC> MakeFunction() {
+				// Generate a System.Linq.Expression delegate that takes an NPC as a parameter, calls Terraria.NPC.GetShimmered(), and returns the result
+				// This is done to avoid using reflection, which is slow
+				var npcParameter = Expression.Parameter(typeof(NPC), "npc");
+				var call = Expression.Call(npcParameter, typeof(NPC).GetMethod("GetShimmered", BindingFlags.NonPublic | BindingFlags.Instance));
+				var lambda = Expression.Lambda<Action<NPC>>(call, npcParameter);
+				return lambda.Compile();
+			}
+
+			(_getShimmered ??= MakeFunction())(npc);
 		}
 	}
 }

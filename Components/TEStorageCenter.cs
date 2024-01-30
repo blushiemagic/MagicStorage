@@ -19,6 +19,7 @@ namespace MagicStorage.Components
 				CraftingAccess,
 				EnvironmentAccess,
 				RemoteAccess,
+				DecraftingAccess,
 				Unknown
 			}
 
@@ -147,6 +148,10 @@ namespace MagicStorage.Components
 			public IEnumerable<Point16> GetRemoteAccesses() => _components.Where(static c => c.type == ComponentType.RemoteAccess).Select(static c => c.location);
 
 			public IEnumerable<TERemoteAccess> GetRemoteAccessEntities() => GetRemoteAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TERemoteAccess>();
+
+			public IEnumerable<Point16> GetDecraftingAccesses() => _components.Where(static c => c.type == ComponentType.DecraftingAccess).Select(static c => c.location);
+
+			public IEnumerable<TEDecraftingAccess> GetDecraftingAccessEntities() => GetDecraftingAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEDecraftingAccess>();
 
 			public IEnumerable<Point16> GetMiscellaneousComponents() => _components.Where(static c => c.type == ComponentType.Unknown).Select(static c => c.location);
 

@@ -9,7 +9,7 @@ namespace MagicStorage {
 	public static partial class DecraftingGUI {
 		internal static readonly List<int> viewingItems = new();
 		internal static readonly List<bool> itemAvailable = new();
-		internal static int selectedItem;
+		internal static int selectedItem = -1;
 
 		internal static void Unload() {
 			ResetRefreshCache();

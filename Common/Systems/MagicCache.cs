@@ -182,6 +182,7 @@ public class MagicCache : ModSystem
 		ItemSamples = Enumerable.Range(1, ItemLoader.ItemCount - 1)
 			.Select(static t => ContentSamples.ItemsByType[t])
 			.Where(static i => !i.IsAir)
+			.DistinctBy(static i => i.type)
 			.ToArray();
 		
 		ResultToRecipe = EnabledRecipes.GroupBy(r => r.createItem.type)
@@ -252,7 +253,8 @@ public class MagicCache : ModSystem
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
 
-		RecipesUsingItemType = ItemSamples.ToDictionary(i => i.type, i => new LazyRecipe(i.type));
+		// Using ItemSamples here would remove type information, since some samples don't have the same ID as their index into the dictionary
+		RecipesUsingItemType = ContentSamples.ItemsByType.Keys.ToDictionary(key => key, key => new LazyRecipe(key));
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingTileType");
 
@@ -299,6 +301,7 @@ public class MagicCache : ModSystem
 	private static void SetupSortFilterRecipeCache()
 	{
 		FilteredRecipesCache = new();
+		FilteredItemsCache = new();
 
 		foreach (var option in FilteringOptionLoader.Options) {
 			if (option == FilteringOptionLoader.Definitions.Recent)

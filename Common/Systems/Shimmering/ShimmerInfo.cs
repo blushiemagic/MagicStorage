@@ -76,6 +76,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			};
 		}
 
-		public IEnumerable<IShimmerResultReport> GetShimmerReports() => GetResult()?.GetShimmerReports(ContentSamples.ItemsByType[actualItem], iconicItem) ?? Array.Empty<IShimmerResultReport>();
+		public IEnumerable<IShimmerResultReport> GetShimmerReports() {
+			if (_isNullItem || GetResult() is not IShimmerResult result)
+				return new IShimmerResultReport[] { new NoResultReport() };
+
+			return result.GetShimmerReports(ContentSamples.ItemsByType[actualItem], iconicItem);
+		}
 	}
 }

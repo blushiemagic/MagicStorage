@@ -115,6 +115,7 @@ public class MagicUI : ModSystem
 		_watchdogs.Clear();
 
 		if (activeThread is not null) {
+			CurrentlyRefreshing = false;
 			activeThread.Stop();
 			activeThread = null;
 		}
@@ -173,6 +174,7 @@ public class MagicUI : ModSystem
 		craftingUI = new CraftingUIState();
 		storageUI = new StorageUIState();
 		environmentUI = new EnvironmentUIState();
+		decraftingUI = new DecraftingUIState();
 
 		Main.OnResolutionChanged += PendingResolutionChange;
 	}
@@ -188,6 +190,7 @@ public class MagicUI : ModSystem
 		craftingUI = null;
 		storageUI = null;
 		environmentUI = null;
+		decraftingUI = null;
 
 		UISearchBar.ClearList();
 	}
@@ -413,6 +416,8 @@ public class MagicUI : ModSystem
 			uiInterface.SetState(environmentUI);
 		else if (access is CraftingAccess)
 			uiInterface.SetState(craftingUI);
+		else if (access is DecraftingAccess)
+			uiInterface.SetState(decraftingUI);
 		else
 			uiInterface.SetState(storageUI);
 	}

@@ -392,6 +392,16 @@ Mods: {
 					Player must be at most 3000' away from the linked Interface or pylon to access crafting
 					'''
 			}
+
+			DecraftingAccess: {
+				DisplayName: Storage Aether Interface
+				Tooltip: Enables shimmering with the items in a storage system
+			}
+
+			Shimmer_CoinLuck: {
+				DisplayName: Meta//Shimmer/Coin_Luck
+				Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: Biome Globe
@@ -458,6 +468,7 @@ Mods: {
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
 			EvilAltarTile.MapEntry: Evil Altar
+			DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		Bestiary.Golem:
@@ -562,15 +573,25 @@ Mods: {
 					Recipes:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
-					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] @ hand = [i:MagicStorage/CombinedStations3Item]
 					'''
 				Help17:
 					'''
 					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
 					Recipes:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
-					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
+					'''
+				Help17_NoFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					'''
+				Help17_WithFargo:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help17}
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
 					'''
 				Help18: The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. You can use it to craft Portable Remote Accesses with unlimited access range!
 				Help19:
@@ -726,7 +747,6 @@ Mods: {
 
 		ServerOperator: {
 			ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
-			
 			ControlRequirement: This control requires the Server Operator status.
 
 			CommandInfo: {
@@ -805,19 +825,19 @@ Mods: {
 		DecraftingGUI: {
 			StoredResults: Stored Result Items
 			ShimmeringReports: Shimmering Results
-
 			ItemHidden: Item "{0}" was blacklisted.
 			ItemRevealed: Item "{0}" was whitelisted.
 			ItemHiddenGlobal: Item "{0}" was global blacklisted.
 			ItemRevealedGlobal: Item "{0}" was global whitelisted.
-
 			ShimmerButton: Shimmer
 			ShimmerButtonTooltip: Left click to Shimmer item
 			ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
-			
+			ShimmerAmount: Shimmering: {0}
+
 			ShimmerReports: {
 				DoesNotShimmer: No shimmer results found
-				CoinLuck: "+{0}% Luck (+{1:0.##} value)"
+				CoinLuck: +{0}% Luck (+{1:0.##} value)
+
 				NPCSpawn: {
 					DirectTransform: "{0}"
 					IndirectTransform: "{0} (style #{1})"
@@ -869,10 +889,11 @@ Mods: {
 			Filtering: Filtering
 			Crafting: Crafting
 			Storage: Storage
-			Controls: Controls
+			Shimmering: Shimmering
 			# StorageGUI page for the extra controls
-			Modules: Modules
+			Controls: Controls
 			# EnvironmentGUI page for the modules
+			Modules: Modules
 			History: History
 		}
 
@@ -881,7 +902,7 @@ Mods: {
 
 			Headers: {
 				Storage: "[i:MagicStorage/StorageHeart]  Storage GUI Config"
-				Crafting: "[i:MagicStorage/CraftingAccess]  Crafting GUI Config"
+				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess]  Crafting and Aether GUIs Config"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
 				General: General Configs
 			}
@@ -1018,6 +1039,11 @@ Mods: {
 				automatonRemembers: {
 					Label: Automaton remembers last help tip
 					Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
+				}
+
+				globalShimmerItemBlacklist: {
+					Label: Global Item Shimmering Blacklist
+					Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
 			}
 
