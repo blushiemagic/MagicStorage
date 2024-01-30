@@ -19,7 +19,8 @@ namespace MagicStorage.Modules {
 			HashSet<int> typesToUpdate = new();
 
 			CheckInventory(player.inventory, 58, 0, typesToUpdate, ref needRefresh);
-			CheckInventory(player.bank4.item, 40, 58, typesToUpdate, ref needRefresh);
+			if (player.useVoidBag())
+				CheckInventory(player.bank4.item, 40, 58, typesToUpdate, ref needRefresh);
 
 			if (needRefresh) {
 				MagicUI.SetRefresh();
