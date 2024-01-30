@@ -9,57 +9,59 @@ namespace MagicStorage.Common {
 		public static readonly ClampedArithmetic Min = new ClampedArithmetic(int.MinValue);
 		public static readonly ClampedArithmetic Max = new ClampedArithmetic(int.MaxValue);
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		private static int AddWithOverflowCheck(int a, int b, out bool overflowFlag) {
+			unchecked {
+				int c = a + b;
+				overflowFlag = ((a ^ b) >= 0) & ((a ^ c) < 0);
+				return c;
+			}
+		}
+
 		public int CompareTo(ClampedArithmetic other) {
 			return Value.CompareTo(other.Value);
 		}
 
 		public static ClampedArithmetic operator+(ClampedArithmetic a, ClampedArithmetic b) {
-			return ProcessWithPotentialOverflow(a.Value, b.Value, true);
+			int newValue = AddWithOverflowCheck(a.Value, b.Value, out bool overflowFlag);
+			if (overflowFlag)
+				return a.Value < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static ClampedArithmetic operator+(ClampedArithmetic a, int b) {
-			return ProcessWithPotentialOverflow(a.Value, b, true);
+			int newValue = AddWithOverflowCheck(a.Value, b, out bool overflowFlag);
+			if (overflowFlag)
+				return a.Value < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static ClampedArithmetic operator+(int a, ClampedArithmetic b) {
-			return ProcessWithPotentialOverflow(a, b.Value, true);
+			int newValue = AddWithOverflowCheck(a, b.Value, out bool overflowFlag);
+			if (overflowFlag)
+				return a < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static ClampedArithmetic operator-(ClampedArithmetic a, ClampedArithmetic b) {
-			return ProcessWithPotentialOverflow(a.Value, b.Value, false);
+			int newValue = AddWithOverflowCheck(a.Value, -b.Value, out bool overflowFlag);
+			if (overflowFlag)
+				return a.Value < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static ClampedArithmetic operator-(ClampedArithmetic a, int b) {
-			return ProcessWithPotentialOverflow(a.Value, b, false);
+			int newValue = AddWithOverflowCheck(a.Value, -b, out bool overflowFlag);
+			if (overflowFlag)
+				return a.Value < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static ClampedArithmetic operator-(int a, ClampedArithmetic b) {
-			return ProcessWithPotentialOverflow(a, b.Value, false);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		private static ClampedArithmetic ProcessWithPotentialOverflow(int a, int b, bool add) {
-			if (add) {
-				// Overflow from positive to negative
-				if (a > 0 && b > 0 && a + b < 0)
-					return Max;
-
-				// Underflow from negative to positive
-				if (a < 0 && b < 0 && a + b > 0)
-					return Min;
-
-				return a + b;
-			} else {
-				// Underflow from negative to positive
-				if (a < 0 && b > 0 && a - b > 0)
-					return Min;
-
-				// Overflow from positive to negative
-				if (a > 0 && b < 0 && a - b < 0)
-					return Max;
-
-				return a - b;
-			}
+			int newValue = AddWithOverflowCheck(a, -b.Value, out bool overflowFlag);
+			if (overflowFlag)
+				return a < 0 ? Min : Max;
+			return new ClampedArithmetic(newValue);
 		}
 
 		public static implicit operator ClampedArithmetic(int value) => new ClampedArithmetic(value);
