@@ -13,25 +13,13 @@ namespace MagicStorage.Sorting
 
 		public static readonly Filter All = item => true;
 
-		public static readonly Filter Weapon = item =>
-			!(item.consumable && item.CountsAsClass(DamageClass.Throwing)) &&
-			(item.damage > 0 || (item.CountsAsClass(DamageClass.Magic) && item.healLife > 0 && item.mana > 0)) &&
-			item.pick == 0 &&
-			item.axe == 0 &&
-			item.hammer == 0;
+		public static readonly Filter Weapon = item => item.DamageType != DamageClass.Default && item.damage > 0 && !Ammo(item) && !Tool(item);
 
-		public static readonly Filter WeaponMelee = item =>
-			(item.CountsAsClass(DamageClass.Melee) || (item.CountsAsClass(DamageClass.Throwing) && !item.consumable)) &&
-			item.pick == 0 &&
-			item.axe == 0 &&
-			item.hammer == 0 &&
-			item.damage > 0;
+		public static readonly Filter WeaponMelee = item => item.DamageType.CountsAsClass(DamageClass.Melee) && Weapon(item);
 
-		public static readonly Filter WeaponRanged = item =>
-			item.CountsAsClass(DamageClass.Ranged) && item.damage > 0 && item.ammo <= 0 && !WeaponThrown(item);
+		public static readonly Filter WeaponRanged = item => item.DamageType.CountsAsClass(DamageClass.Ranged) && Weapon(item);
 
-		public static readonly Filter WeaponMagic = item =>
-			(item.CountsAsClass(DamageClass.Magic) || item.mana > 0) && !item.CountsAsClass(DamageClass.Summon) && !item.consumable;
+		public static readonly Filter WeaponMagic = item => item.DamageType.CountsAsClass(DamageClass.Magic) && Weapon(item);
 
 		public static readonly Filter WeaponSummon = item => item.type switch
 		{
@@ -53,10 +41,10 @@ namespace MagicStorage.Sorting
 			ItemID.Bomb           => true,
 			ItemID.StickyBomb     => true,
 			ItemID.BouncyBomb     => true,
-			_                     => (item.CountsAsClass(DamageClass.Throwing) && item.damage > 0) || (item.consumable && item.Name.ToLowerInvariant().EndsWith(" coating")),
+			_                     => item.CountsAsClass(DamageClass.Throwing) && Weapon(item),
 		};
 
-		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => !object.ReferenceEquals(o, FilteringOptionLoader.Definitions.Weapon) && o.FiltersDamageClass).Any(o => o.Filter(item)) && item.damage > 0 && !Tool(item);
+		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => !object.ReferenceEquals(o, FilteringOptionLoader.Definitions.Weapon) && o.FiltersDamageClass).Any(o => o.Filter(item)) && Weapon(item);
 
 		public static readonly Filter Ammo = item =>
 			item.ammo > 0 && item.damage > 0 && item.ammo != AmmoID.Coin;
