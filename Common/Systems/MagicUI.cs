@@ -5,6 +5,7 @@ using System.Reflection;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using MagicStorage.UI;
+using MagicStorage.UI.Input;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -192,6 +193,12 @@ public class MagicUI : ModSystem
 		environmentUI = null;
 		decraftingUI = null;
 
+		Obsolete_ClearSearchBars();
+		TextInputTracker.Unload();
+	}
+
+	[Obsolete]
+	private static void Obsolete_ClearSearchBars() {
 		UISearchBar.ClearList();
 	}
 
@@ -390,6 +397,12 @@ public class MagicUI : ModSystem
 		if (Main.dedServ)
 			return;
 
+		Obsolete_UpdateSearchBars();
+		TextInputTracker.Update(lastGameTime);
+	}
+
+	[Obsolete]
+	private static void Obsolete_UpdateSearchBars() {
 		foreach (var searchBar in UISearchBar.SearchBars)
 			searchBar.Update(lastGameTime);
 	}

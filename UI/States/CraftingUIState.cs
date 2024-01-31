@@ -632,7 +632,7 @@ namespace MagicStorage.UI.States {
 			MagicUI.OnRefresh += Refresh;
 
 			if (MagicStorageConfig.UseConfigFilter) {
-				var page = GetPage<RecipesPage>(DefaultPage);
+				var page = GetDefaultPage<RecipesPage>();
 
 				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes ? 1 : 0;
 				page.recipeButtons.OnChanged();
@@ -648,7 +648,7 @@ namespace MagicStorage.UI.States {
 		protected override void OnClose() {
 			MagicUI.OnRefresh -= Refresh;
 
-			GetPage<BaseStorageUIAccessPage>(DefaultPage).scrollBar.ViewPosition = 0f;
+			GetDefaultPage<BaseStorageUIAccessPage>().scrollBar.ViewPosition = 0f;
 			storageScrollBar.ViewPosition = 0f;
 			ingredientScrollBar.ViewPosition = 0f;
 
@@ -698,13 +698,13 @@ namespace MagicStorage.UI.States {
 
 			history.RefreshEntries();
 
-			GetPage(DefaultPage).Refresh();
+			GetDefaultPage().Refresh();
 		}
 
 		public sealed override void OnRefreshStart() {
 			RefreshZonesFromThreadStart();
 
-			GetPage(DefaultPage).OnRefreshStart();
+			GetDefaultPage().OnRefreshStart();
 		}
 
 		protected override void OnButtonConfigChanged(ButtonConfigurationMode current) {
@@ -730,14 +730,14 @@ namespace MagicStorage.UI.States {
 					throw new ArgumentOutOfRangeException();
 			}
 
-			GetPage<BaseStorageUIAccessPage>(DefaultPage).ReformatPage(current);
+			GetDefaultPage<BaseStorageUIAccessPage>().ReformatPage(current);
 		}
 
 		public override int GetSortingOption() => GetPage<SortingPage>("Sorting").option;
 
 		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
 
-		public override string GetSearchText() => GetPage<BaseStorageUIAccessPage>(DefaultPage).searchBar.Text;
+		public override string GetSearchText() => GetDefaultPage<BaseStorageUIAccessPage>().searchBar.State.InputText;
 
 		protected override void GetConfigPanelLocation(out float left, out float top) {
 			base.GetConfigPanelLocation(out left, out top);
@@ -765,7 +765,7 @@ namespace MagicStorage.UI.States {
 
 		public override float GetMinimumResizeHeight() {
 			//Main page height
-			GetMainPanelMinimumHeights(GetPage<BaseStorageUIAccessPage>(DefaultPage), out float mainPageMinimumHeight, out float dropdownHeight);
+			GetMainPanelMinimumHeights(GetDefaultPage<BaseStorageUIAccessPage>(), out float mainPageMinimumHeight, out float dropdownHeight);
 
 			//Recipe panel height
 			float recipePanelMinimumHeight = GetRecipePanelMinimumHeight();

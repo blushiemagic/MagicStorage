@@ -3,6 +3,7 @@ using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
@@ -116,11 +117,28 @@ namespace MagicStorage.UI.States {
 
 		public abstract string DefaultPage { get; }
 
-		public BaseStorageUIPage GetPage(string page) => pages[page];
+		public BaseStorageUIPage GetPage(string page) => pages is null ? null : pages[page];
 
-		public T GetPage<T>(string page) where T : BaseStorageUIPage => pages is null
-			? null
-			: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
+		public BaseStorageUIPage GetDefaultPage() => GetPage(DefaultPage);
+
+		public T GetPage<T>(string page) where T : BaseStorageUIPage
+			=> pages is null
+				? null
+				: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
+
+		public bool TryGetPage<T>(string page, [NotNullWhen(true)] out T result) where T : BaseStorageUIPage {
+			if (!pages.TryGetValue(page, out var pageValue) || pageValue is not T typedPageValue) {
+				result = null;
+				return false;
+			}
+
+			result = typedPageValue;
+			return true;
+		}
+
+		public T GetDefaultPage<T>() where T : BaseStorageUIPage => GetPage<T>(DefaultPage);
+
+		public bool TryGetDefaultPage<T>([NotNullWhen(true)] out T result) where T : BaseStorageUIPage => TryGetPage(DefaultPage, out result);
 
 		public override void OnInitialize() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
@@ -223,7 +241,7 @@ namespace MagicStorage.UI.States {
 				optionPage.SetLoaderSelection(option);
 
 				//Deselect the option in the main UI
-				var defPage = obj.parentUI.GetPage<BaseStorageUIAccessPage>(obj.parentUI.DefaultPage);
+				var defPage = obj.parentUI.GetDefaultPage<BaseStorageUIAccessPage>();
 				if (obj.Name == "Sorting")
 					defPage.sortingButtons.Choice = -1;
 				else if (obj.Name == "Filtering")
@@ -321,6 +339,11 @@ namespace MagicStorage.UI.States {
 		}
 
 		protected virtual void OnClose() { }
+
+		public virtual void ResetSearchBars() {
+			if (GetDefaultPage() is BaseStorageUIAccessPage page)
+				page.searchBar.State.Reset();
+		}
 
 		public bool pendingUIChange;
 

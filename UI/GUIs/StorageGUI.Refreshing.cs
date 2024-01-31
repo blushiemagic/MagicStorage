@@ -89,7 +89,7 @@ namespace MagicStorage {
 			// Prevent inconsistencies after refreshing items
 			itemDeletionSlotFocus = -1;
 
-			var storagePage = MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage");
+			var storagePage = MagicUI.storageUI.GetDefaultPage<StorageUIState.StoragePage>();
 
 			storagePage?.RequestThreadWait(waiting: true);
 
@@ -284,7 +284,7 @@ namespace MagicStorage {
 			// QueueMainThreadAction will execute the logic in a very specific place
 			Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
 
-			MagicUI.storageUI.GetPage<StorageUIState.StoragePage>("Storage")?.RequestThreadWait(waiting: false);
+			MagicUI.storageUI.GetDefaultPage<StorageUIState.StoragePage>()?.RequestThreadWait(waiting: false);
 		}
 	}
 }

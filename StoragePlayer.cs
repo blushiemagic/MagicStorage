@@ -139,19 +139,29 @@ namespace MagicStorage
 
 			MagicUI.OpenUI();
 
-			if (MagicStorageConfig.UseConfigFilter && MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting") is CraftingUIState.RecipesPage page)
-			{
-				page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
-					? 1   //Show all recipes
-					: 0;  //Show available recipes
+			if (MagicStorageConfig.UseConfigFilter) {
+				if (MagicUI.craftingUI.GetDefaultPage() is CraftingUIState.RecipesPage page) {
+					page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
+						? 1   //Show all recipes
+						: 0;  //Show available recipes
 
-				page.recipeButtons.OnChanged();
+					page.recipeButtons.OnChanged();
+				}
+
+				if (MagicUI.decraftingUI.GetDefaultPage() is DecraftingUIState.ShimmeringPage decraftingPage) {
+					decraftingPage.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
+						? 1   //Show all recipes
+						: 0;  //Show available recipes
+
+					decraftingPage.recipeButtons.OnChanged();
+				}
 			}
 
 			if (MagicStorageConfig.ClearSearchText)
 			{
-				MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage")?.searchBar?.Reset();
-				MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting")?.searchBar?.Reset();
+				MagicUI.storageUI.ResetSearchBars();
+				MagicUI.craftingUI.ResetSearchBars();
+				MagicUI.decraftingUI.ResetSearchBars();
 			}
 
 			MagicUI.SetRefresh(forceFullRefresh: true);

@@ -83,6 +83,8 @@ namespace MagicStorage.Components
 
 		public bool IsAlive { get; private set; } = true;
 
+		public string storageName;
+
 		public IEnumerable<Item> UniqueItemsPutHistory => _uniqueItemsPutHistory.Items;
 
 		public override void OnKill()
@@ -826,6 +828,8 @@ namespace MagicStorage.Components
 			tag["EnvironmentAccesses"] = tagEnvironments;
 
 			_uniqueItemsPutHistory.Save(tag);
+
+			tag["name"] = storageName;
 		}
 
 		public override void LoadData(TagCompound tag)
@@ -842,6 +846,8 @@ namespace MagicStorage.Components
 				manager.LinkEnvironmentAccess(new Point16(tagEnvironment.GetShort("X"), tagEnvironment.GetShort("Y")));
 
 			_uniqueItemsPutHistory.Load(tag);
+
+			storageName = tag.TryGet("name", out string nameValue) ? nameValue : string.Empty;
 
 			compactCoins = true;
 		}

@@ -34,6 +34,8 @@ namespace MagicStorage.Components
 			player.cursorItemIconEnabled = true;
 			player.cursorItemIconID = ItemType(tile.TileFrameX, tile.TileFrameY);
 			player.noThrow = 2;
+
+			base.MouseOver(i, j);
 		}
 
 		public override bool RightClick(int i, int j)

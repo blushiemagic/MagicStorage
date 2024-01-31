@@ -25,6 +25,8 @@ namespace MagicStorage.Components
 		public override void MouseOver(int i, int j)
 		{
 			Main.LocalPlayer.noThrow = 2;
+
+			base.MouseOver(i, j);
 		}
 
 		public override int ItemType(int frameX, int frameY)

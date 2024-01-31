@@ -27,14 +27,16 @@ namespace MagicStorage.Stations
 			var tiles = GetStandardTiles();
 
 			if (ModLoader.TryGetMod("Fargowiltas", out Mod Fargowiltas)) {
-				// Cross mod compatibility: Golden Dipping Vat and Crucible of the Cosmos
+				// Cross mod compatibility: Golden Dipping Vat
 				var vat = Fargowiltas.Find<ModTile>("GoldenDippingVatSheet");
 				tiles.Add(vat.Type);
 				tiles.AddRange(vat.AdjTiles);
 
+				/*
 				var crucible = Fargowiltas.Find<ModTile>("CrucibleCosmosSheet");
 				tiles.Add(crucible.Type);
 				tiles.AddRange(crucible.AdjTiles);
+				*/
 			}
 
 			return tiles.Distinct().ToArray();

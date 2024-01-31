@@ -64,7 +64,7 @@ namespace MagicStorage {
 				toRefresh = null;
 			}
 
-			var craftingPage = MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting");
+			var craftingPage = MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>();
 
 			craftingPage?.RequestThreadWait(waiting: true);
 
@@ -107,7 +107,7 @@ namespace MagicStorage {
 			int sortMode = MagicUI.craftingUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.craftingUI.GetPage<FilteringPage>("Filtering").option;
 
-			string searchText = craftingPage.searchBar.Text;
+			string searchText = craftingPage.searchBar.State.InputText;
 
 			var globalHiddenRecipes = MagicStorageConfig.GlobalRecipeBlacklist.Where(x => !x.IsUnloaded).Select(x => x.Type).ToHashSet();
 			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenRecipes;
@@ -190,7 +190,7 @@ namespace MagicStorage {
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItems finished");
 
-			MagicUI.craftingUI.GetPage<CraftingUIState.RecipesPage>("Crafting")?.RequestThreadWait(waiting: false);
+			MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>()?.RequestThreadWait(waiting: false);
 		}
 
 		// Moved to internal method for use by DecraftingGUI

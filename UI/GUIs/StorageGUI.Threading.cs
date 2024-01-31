@@ -153,7 +153,7 @@ namespace MagicStorage {
 			if (itemDeletionMode)
 				filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-			string searchText = storagePage.searchBar.Text;
+			string searchText = storagePage.searchBar.State.InputText;
 			bool onlyFavorites = storagePage.filterFavorites.Value;
 			int modSearch = storagePage.modSearchBox.ModIndex;
 

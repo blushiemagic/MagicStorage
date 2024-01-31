@@ -15,6 +15,7 @@ using Terraria.UI;
 
 namespace MagicStorage.UI
 {
+	[Obsolete("Use NewUISearchBar instead", error: true)]
 	public class UISearchBar : UIElement
 	{
 		private const int Padding = 4;

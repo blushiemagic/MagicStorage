@@ -13,7 +13,7 @@ namespace MagicStorage {
 		}
 
 		public static void LoadModules(TEEnvironmentAccess access) {
-			MagicUI.environmentUI.GetPage<EnvironmentUIState.ModulesPage>("Modules").LoadModules(access);
+			MagicUI.environmentUI.GetDefaultPage<EnvironmentUIState.ModulesPage>().LoadModules(access);
 
 			currentAccess = access;
 		}

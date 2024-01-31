@@ -2,6 +2,7 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
+using MagicStorage.UI.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -16,7 +17,7 @@ using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	public abstract class BaseStorageUIAccessPage : BaseStorageUIPage {
-		public UISearchBar searchBar;
+		public NewUISearchBar searchBar;
 		public UIText capacityText;
 		public NewUIScrollbar scrollBar;
 		public ModSearchBox modSearchBox;
@@ -51,7 +52,7 @@ namespace MagicStorage.UI.States {
 
 		public BaseStorageUIAccessPage(BaseStorageUI parent, string name) : base(parent, name) {
 			OnPageSelected += () => {
-				searchBar.active = true;
+				searchBar.State.Activate();
 
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
@@ -67,9 +68,10 @@ namespace MagicStorage.UI.States {
 
 				slotZone.ClearItems();
 
-				searchBar.LoseFocus(forced: true);
+				searchBar.State.Unfocus();
+				MagicUI.SetRefresh(forceFullRefresh: true);
 
-				searchBar.active = false;
+				searchBar.State.Deactivate();
 
 				sortingDropdown.Reset();
 				filteringDropdown.Reset();
@@ -107,7 +109,7 @@ namespace MagicStorage.UI.States {
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new UISearchBar(Language.GetText("Mods.MagicStorage.SearchName"), static () => MagicUI.SetRefresh(forceFullRefresh: true)) {
+			searchBar = new NewUISearchBar(Language.GetText("Mods.MagicStorage.SearchName")) {
 				GetHoverText = () => {
 					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
 						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
@@ -208,7 +210,7 @@ namespace MagicStorage.UI.States {
 			bool needsMod = index == ModSearchBox.ModIndexAll;
 
 			if (oldNeedsMod != needsMod)
-				searchBar.SetDefaultText(GetRandomSearchText(needsMod));
+				searchBar.HintText = GetRandomSearchText(needsMod);
 
 			MagicUI.SetRefresh(forceFullRefresh: true);
 		}

@@ -73,10 +73,10 @@ namespace MagicStorage.CrossMod.Control {
 		public void SetEnabled(SortingOption option, bool enabled) {
 			sortingOptions[option.Type] = enabled ? new(option) : null;
 
-			if (MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting") is CraftingUIState.RecipesPage recipesPage)
+			if (MagicUI.craftingUI?.TryGetDefaultPage(out CraftingUIState.RecipesPage recipesPage) is true)
 				recipesPage.pendingConfiguration = true;
 
-			if (MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage") is StorageUIState.StoragePage storagePage)
+			if (MagicUI.storageUI?.TryGetDefaultPage(out StorageUIState.StoragePage storagePage) is true)
 				storagePage.pendingConfiguration = true;
 
 			//Default to the first available option if this option was removed and it's selected
@@ -93,10 +93,10 @@ namespace MagicStorage.CrossMod.Control {
 		public void SetEnabled(FilteringOption option, bool enabled) {
 			filteringOptions[option.Type] = enabled ? new(option) : null;
 
-			if (MagicUI.craftingUI?.GetPage<CraftingUIState.RecipesPage>("Crafting") is CraftingUIState.RecipesPage recipesPage)
+			if (MagicUI.craftingUI?.TryGetDefaultPage(out CraftingUIState.RecipesPage recipesPage) is true)
 				recipesPage.pendingConfiguration = true;
 
-			if (MagicUI.storageUI?.GetPage<StorageUIState.StoragePage>("Storage") is StorageUIState.StoragePage storagePage)
+			if (MagicUI.storageUI?.TryGetDefaultPage(out StorageUIState.StoragePage storagePage) is true)
 				storagePage.pendingConfiguration = true;
 
 			//Default to the first available option if this option was removed and it's selected

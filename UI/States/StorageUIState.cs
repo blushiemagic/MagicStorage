@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
+using MagicStorage.UI.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -49,7 +50,7 @@ namespace MagicStorage.UI.States {
 		protected override void OnClose() {
 			MagicUI.OnRefresh -= Refresh;
 
-			GetPage<StoragePage>("Storage").scrollBar.ViewPosition = 0f;
+			GetDefaultPage<StoragePage>().scrollBar.ViewPosition = 0f;
 
 			StorageGUI.itemDeletionMode = false;
 			GetPage<ControlsPage>("Controls").setItemDeletionMode.SetState(false);
@@ -59,11 +60,11 @@ namespace MagicStorage.UI.States {
 			if (Main.gameMenu)
 				return;
 
-			GetPage("Storage").Refresh();
+			GetDefaultPage().Refresh();
 		}
 
 		public override void OnRefreshStart() {
-			GetPage("Storage").OnRefreshStart();
+			GetDefaultPage().OnRefreshStart();
 		}
 
 		protected override void OnButtonConfigChanged(ButtonConfigurationMode current) {
@@ -89,7 +90,7 @@ namespace MagicStorage.UI.States {
 					throw new ArgumentOutOfRangeException();
 			}
 
-			GetPage<StoragePage>("Storage").ReformatPage(current);
+			GetDefaultPage<StoragePage>().ReformatPage(current);
 
 			bool pagesFilterBaseOptions = current == ButtonConfigurationMode.LegacyBasicWithPaged;
 
@@ -101,10 +102,10 @@ namespace MagicStorage.UI.States {
 
 		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
 
-		public override string GetSearchText() => GetPage<StoragePage>("Storage").searchBar.Text;
+		public override string GetSearchText() => GetDefaultPage<StoragePage>().searchBar.State.InputText;
 
 		public override float GetMinimumResizeHeight() {
-			var page = GetPage<StoragePage>("Storage");
+			var page = GetDefaultPage<StoragePage>();
 
 			page.GetZoneDimensions(out float zoneTop, out float bottomMargin);
 
@@ -447,6 +448,8 @@ namespace MagicStorage.UI.States {
 			public const int SellAllExceptMostExpensive = 1;
 			public const int SellAllExceptLeastExpensive = 2;
 
+			public StorageNamingTextInputBar setStorageName;
+
 			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
 			public UIStorageControlDepositPlayerInventoryButton depositFromPiggyBank, depositFromSafe, depositFromForge, depositFromVault;
@@ -466,27 +469,40 @@ namespace MagicStorage.UI.States {
 				OnPageSelected += () => {
 					SellMenuChoice = 0;
 					sellMenuLabels[0].LeftClick(new(sellMenuLabels[0], Main.MouseScreen));
+
+					setStorageName.State.Activate();
+				};
+
+				OnPageDeselected += () => {
+					setStorageName.State.Unfocus();
+					setStorageName.State.Deactivate();
 				};
 			}
 
 			public override void OnInitialize() {
+				base.OnInitialize();
+
 				list = new();
 				list.SetPadding(0);
 				list.Width.Set(-20, 1f);
-				list.Height.Set(0, 0.9f);
-				list.Left.Set(20, 0);
-				list.Top.Set(0, 0.05f);
+				list.Height.Set(-20, 1f);
+				list.Left.Set(10, 0f);
+				list.Top.Set(10, 0f);
 
 				scroll = new();
-				scroll.Width.Set(20, 0);
-				scroll.Height.Set(0, 0.825f);
-				scroll.Left.Set(0, 0.95f);
-				scroll.Top.Set(0, 0.1f);
+				scroll.Height.Set(-30, 1f);
+				scroll.Left.Set(-20, 1f);
+				scroll.Top.Set(10, 0f);
 
 				list.SetScrollbar(scroll);
 				list.Append(scroll);
 				list.ListPadding = 10;
 				Append(list);
+
+				setStorageName = new StorageNamingTextInputBar(Language.GetText("Mods.MagicStorage.StorageGUI.SetAStorageName"));
+				setStorageName.Width.Set(0, 0.7f);
+				setStorageName.Height.Set(32, 0f);
+				list.Add(setStorageName);
 
 				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
 

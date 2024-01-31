@@ -113,5 +113,21 @@ namespace MagicStorage.Components
 			}
 			killTile = Point16.NegativeOne;
 		}
+
+		public override void MouseOver(int i, int j) {
+			if (Main.tile[i, j].TileFrameX % 36 == 18)
+				i--;
+			if (Main.tile[i, j].TileFrameY % 36 == 18)
+				j--;
+
+			if (TileEntity.ByPosition.TryGetValue(new Point16(i, j), out TileEntity te) && te is TEStorageComponent component && component.GetHeart().storageName is { Length: >0 } heartName) {
+				// Extra space added when an icon is present
+				string text = heartName;
+				if (Main.LocalPlayer.cursorItemIconID > ItemID.None)
+					text = "    " + text;
+
+				Main.instance.MouseText(text);
+			}
+		}
 	}
 }

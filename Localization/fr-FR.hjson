@@ -587,7 +587,6 @@ Mods: {
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
 					''' */
 				// Help18: The Moon Lord guards the Radiant Jewel, a gemstone of incredible power. You can use it to craft Portable Remote Accesses with unlimited access range!
 				/* Help19:
@@ -783,6 +782,9 @@ Mods: {
 			// ClearItemsButton: Clear All Items
 			// SellDuplicatesHeader: Sell Duplicates
 			// SellDuplicatesButton: Sell
+			// SetAStorageName: Enter a name here...
+			// NameWasCleared: Name was cleared
+			// NameWasSetTo: Name was set to: {0}
 
 			ItemDeletionMode: {
 				// Label: Item Deletion Mode

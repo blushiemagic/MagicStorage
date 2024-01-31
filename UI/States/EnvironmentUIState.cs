@@ -66,15 +66,14 @@ namespace MagicStorage.UI.States {
 				list = new();
 				list.SetPadding(0);
 				list.Width.Set(-20, 1f);
-				list.Height.Set(0, 0.9f);
-				list.Left.Set(20, 0);
-				list.Top.Set(0, 0.05f);
+				list.Height.Set(-20, 1f);
+				list.Left.Set(10, 0f);
+				list.Top.Set(10, 0f);
 
 				scroll = new();
-				scroll.Width.Set(20, 0);
-				scroll.Height.Set(0, 0.825f);
-				scroll.Left.Set(0, 0.95f);
-				scroll.Top.Set(0, 0.1f);
+				scroll.Height.Set(-30, 1f);
+				scroll.Left.Set(-20, 1f);
+				scroll.Top.Set(10, 0f);
 
 				list.SetScrollbar(scroll);
 				list.Append(scroll);

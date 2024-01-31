@@ -81,7 +81,7 @@ namespace MagicStorage {
 			int sortMode = MagicUI.decraftingUI.GetPage<SortingPage>("Sorting").option;
 			int filterMode = MagicUI.decraftingUI.GetPage<FilteringPage>("Filtering").option;
 
-			string searchText = page.searchBar.Text;
+			string searchText = page.searchBar.State.InputText;
 
 			var globalHiddenRecipes = MagicStorageConfig.GlobalShimmerItemBlacklist.Where(x => !x.IsUnloaded).Select(x => x.Type).ToHashSet();
 			var hiddenRecipes = StoragePlayer.LocalPlayer.HiddenShimmerItems;

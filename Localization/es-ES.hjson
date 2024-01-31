@@ -603,12 +603,11 @@ Mods: {
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
-				/* Help17_WithFargo:
+				Help17_WithFargo:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
-					''' */
+					'''
 				Help18: El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
 				/* Help19:
 					'''
@@ -803,6 +802,9 @@ Mods: {
 			ClearItemsButton: Borrar Todos los Ítems
 			SellDuplicatesHeader: Vender Duplicados
 			SellDuplicatesButton: Vender
+			// SetAStorageName: Enter a name here...
+			// NameWasCleared: Name was cleared
+			// NameWasSetTo: Name was set to: {0}
 
 			ItemDeletionMode: {
 				// Label: Item Deletion Mode

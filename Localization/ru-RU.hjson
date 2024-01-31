@@ -584,12 +584,11 @@ Mods: {
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
 					'''
-				/* Help17_WithFargo:
+				Help17_WithFargo:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
-					''' */
+					'''
 				Help18: Лунный лорд охраняет Сияющую драгоценность, драгоценный камень невероятной силы. Вы можете использовать его для создания портативных средств удаленного доступа с неограниченным диапазоном доступа!
 				/* Help19:
 					'''
@@ -784,6 +783,9 @@ Mods: {
 			ClearItemsButton: Очистить все предметы
 			SellDuplicatesHeader: Продажа дубликатов
 			SellDuplicatesButton: Продать
+			// SetAStorageName: Enter a name here...
+			// NameWasCleared: Name was cleared
+			// NameWasSetTo: Name was set to: {0}
 
 			ItemDeletionMode: {
 				// Label: Item Deletion Mode

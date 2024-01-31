@@ -585,12 +585,11 @@ Mods: {
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
-				/* Help17_WithFargo:
+				Help17_WithFargo:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
-					The [i:MagicStorage/CombinedStations4Item] will also count as a [i:Fargowiltas/CrucibleCosmos] for crafting purposes.
-					''' */
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
+					'''
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				/* Help19:
 					'''
@@ -785,6 +784,9 @@ Mods: {
 			// ClearItemsButton: Clear All Items
 			SellDuplicatesHeader: 出售同种物品
 			SellDuplicatesButton: 出售
+			// SetAStorageName: Enter a name here...
+			// NameWasCleared: Name was cleared
+			// NameWasSetTo: Name was set to: {0}
 
 			ItemDeletionMode: {
 				// Label: Item Deletion Mode

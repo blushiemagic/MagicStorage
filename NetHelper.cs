@@ -234,6 +234,9 @@ namespace MagicStorage
 				case MessageType.RequestShimmerItemInStorage:
 					ServerReceiveItemShimmeringRequest(reader, sender);
 					break;
+				case MessageType.RenameStorageHeart:
+					ReceiveStorageHeartName(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -1571,6 +1574,43 @@ namespace MagicStorage
 
 			SendRefreshNetworkItems(storage.heart.Position, false);
 		}
+
+		public static void SendStorageHeartName(TEStorageHeart heart) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.RenameStorageHeart);
+			packet.Write(heart.Position);
+			packet.Write(heart.storageName);
+			packet.Send();
+
+			Report(true, MessageType.RenameStorageHeart + " packet sent to the server");
+		}
+
+		public static void ReceiveStorageHeartName(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+			string name = reader.ReadString();
+
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
+				return;
+
+			heart.storageName = name;
+
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				Report(true, MessageType.RenameStorageHeart + " packet received by client " + Main.myPlayer);
+				return;
+			}
+
+			// Forward the rename to other clients
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.RenameStorageHeart);
+			packet.Write(position);
+			packet.Write(name);
+			packet.Send(ignoreClient: sender);
+
+			Report(true, MessageType.RenameStorageHeart + " packet sent from server from client " + sender);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1609,6 +1649,7 @@ namespace MagicStorage
 		ClientLockStorageHeart,
 		ClientUnlockStorageHeart,
 		DeleteSpecificItem,
-		RequestShimmerItemInStorage
+		RequestShimmerItemInStorage,
+		RenameStorageHeart
 	}
 }

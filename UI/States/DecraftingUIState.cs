@@ -192,11 +192,11 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
-		public override int GetSortingOption() => GetPage<SortingPage>("Sorting").option;
-		
-		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
+		// GetSortingOption not overridden since the implementation would be the same here
 
-		public override string GetSearchText() => GetPage<ShimmeringPage>("Shimmering").searchBar.Text;
+		// GetFilteringOption not overridden since the implementation would be the same here
+
+		// GetSearchText not overridden since the implementation would be the same here
 
 		// Crafting UI overrides
 
