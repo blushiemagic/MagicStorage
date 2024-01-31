@@ -1,4 +1,6 @@
-﻿using Terraria.Localization;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework;
+using Terraria.Localization;
 
 namespace MagicStorage.UI.Input {
 	/// <summary>
@@ -14,6 +16,11 @@ namespace MagicStorage.UI.Input {
 		/// The text to display when the text input element is empty
 		/// </summary>
 		LocalizedText HintText { get; }
+
+		/// <summary>
+		/// This method executes whenever <see cref="MagicUI.CanUpdateSearchBars"/> is <see langword="true"/> and the text input element is active
+		/// </summary>
+		void Update(GameTime gameTime);
 
 		/// <summary>
 		/// This method executes whenever the text input element is activated

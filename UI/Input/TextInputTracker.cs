@@ -13,7 +13,7 @@ namespace MagicStorage.UI.Input {
 			Main.blockInput = false;
 		}
 
-		public static TextInputState ReserveState<T>(T element) where T : UIElement, ITextInputElement {
+		public static TextInputState ReserveState(ITextInputElement element) {
 			var state = new TextInputState(element);
 			_inputs.Add(state);
 			return state;
@@ -32,8 +32,10 @@ namespace MagicStorage.UI.Input {
 		}
 
 		internal static void Update(GameTime gameTime) {
-			foreach (var input in _inputs)
-				((UIElement)input.Actor).Update(gameTime);
+			foreach (var input in _inputs) {
+				if (input.IsActive)
+					input.Actor.Update(gameTime);
+			}
 		}
 	}
 }

@@ -41,6 +41,8 @@ namespace MagicStorage.UI.Input {
 		/// <inheritdoc/>
 		public virtual void OnInputFocusLost() { }
 
+		void ITextInputElement.Update(GameTime gameTime) => HandleState();
+
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 
@@ -49,6 +51,10 @@ namespace MagicStorage.UI.Input {
 				return;
 			}
 
+			HandleState();
+		}
+
+		private void HandleState() {
 			PreStateTick();
 
 			State.Tick(IsMouseHovering);
