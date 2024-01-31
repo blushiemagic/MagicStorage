@@ -422,10 +422,6 @@ public class MagicUI : ModSystem
 		if (modTile is not StorageAccess access)
 			return;
 
-		TEStorageHeart heart = access.GetHeart(storageAccess.X, storageAccess.Y);
-		if (heart is null)
-			return;
-
 		if (access is EnvironmentAccess)
 			uiInterface.SetState(environmentUI);
 		else if (access is CraftingAccess)

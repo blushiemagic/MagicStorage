@@ -137,7 +137,8 @@ namespace MagicStorage {
 
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
-				itemTypesToUpdate = null;
+				ClearAllCollections();
+
 				storagePage?.RequestThreadWait(waiting: false);
 
 				MagicUI.InvokeOnRefresh();

@@ -32,9 +32,14 @@ namespace MagicStorage
 
 		internal static void InvokeOnRefresh() => OnRefresh?.Invoke();
 
-		internal static void Unload() {
+		internal static void Unload() => ClearAllCollections();
+
+		private static void ClearAllCollections() {
 			itemTypesToUpdate.Clear();
-			itemTypesToUpdate = null;
+			items.Clear();
+			sourceItems.Clear();
+			didMatCheck.Clear();
+			ResetRefreshCache();
 		}
 
 		internal static void FavoriteItem(int slot) {

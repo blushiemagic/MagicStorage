@@ -161,6 +161,7 @@ namespace MagicStorage
 			{
 				MagicUI.storageUI.ResetSearchBars();
 				MagicUI.craftingUI.ResetSearchBars();
+				MagicUI.environmentUI.ResetSearchBars();
 				MagicUI.decraftingUI.ResetSearchBars();
 			}
 

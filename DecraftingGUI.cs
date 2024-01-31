@@ -11,10 +11,18 @@ namespace MagicStorage {
 		internal static readonly List<bool> itemAvailable = new();
 		internal static int selectedItem = -1;
 
-		internal static void Unload() {
+		internal static void Unload() => ClearAllCollections(unloading: true);
+
+		private static void ClearAllCollections(bool unloading) {
+			if (!unloading)
+				CraftingGUI.ClearAllCollections();
+
 			ResetRefreshCache();
 			viewingItems.Clear();
 			itemAvailable.Clear();
+			resultItems.Clear();
+			resultItemsFromModules.Clear();
+			resultItemInfo.Clear();
 			selectedItem = -1;
 		}
 

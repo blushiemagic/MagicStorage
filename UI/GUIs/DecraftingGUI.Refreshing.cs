@@ -60,6 +60,8 @@ namespace MagicStorage {
 			CraftingGUI.numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
 			if (heart == null) {
+				ClearAllCollections(unloading: false);
+
 				page?.RequestThreadWait(waiting: false);
 
 				MagicUI.InvokeOnRefresh();

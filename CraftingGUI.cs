@@ -36,8 +36,11 @@ namespace MagicStorage
 
 		internal static void Unload()
 		{
-			ResetRecentRecipeCache();
-			ResetRefreshCache();
+			ClearAllCollections();
+			PlayerZoneCache.FreeCache(true);
+		}
+
+		internal static void ClearAllCollections() {
 			recipes.Clear();
 			recipeAvailable.Clear();
 			storageItems.Clear();
@@ -50,7 +53,8 @@ namespace MagicStorage
 			sourceItemsFromModules.Clear();
 			blockStorageItems.Clear();
 			selectedRecipe = null;
-			PlayerZoneCache.FreeCache(true);
+			ResetRecentRecipeCache();
+			ResetRefreshCache();
 		}
 
 		internal static void Reset() {
