@@ -63,7 +63,7 @@ namespace MagicStorage.Sorting
 			classes.Add(new DefaultSortClass(MeleeWeapon, CompareDamage));
 			classes.Add(new DefaultSortClass(RangedWeapon, CompareDamage));
 			classes.Add(new DefaultSortClass(MagicWeapon, CompareDamage));
-			classes.Add(new DefaultSortClass(SummonWeapon, CompareValue));
+			classes.Add(new DefaultSortClass(SummonWeapon, CompareDamage));
 			classes.Add(new DefaultSortClass(ThrownWeapon, CompareDamage));
 			classes.Add(new DefaultSortClass(Weapon, CompareDamage));
 			classes.Add(new DefaultSortClass(Ammo, CompareValue));
