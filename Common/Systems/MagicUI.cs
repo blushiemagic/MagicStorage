@@ -183,6 +183,7 @@ public class MagicUI : ModSystem
 	public override void Unload() {
 		if (!Main.dedServ) {
 			(craftingUI as CraftingUIState)?.history?.Clear();
+			(decraftingUI as DecraftingUIState)?.history?.Clear();
 
 			Main.OnResolutionChanged -= PendingResolutionChange;
 		}
