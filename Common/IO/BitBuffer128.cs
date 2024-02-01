@@ -10,12 +10,12 @@ namespace MagicStorage.Common.IO {
 			public byte b0, b1, b2, b3, b4, b5, b6, b7;
 		}
 
-		private struct _Shorts {
-			public ushort s0, s1, s2, s3;
+		private struct _Words {
+			public ushort w0, w1, w2, w3;
 		}
 
-		private struct _Words {
-			public uint w0, w1;
+		private struct _Dwords {
+			public uint dw0, dw1;
 		}
 
 		public const int MAX_BYTE = 8;
@@ -24,13 +24,13 @@ namespace MagicStorage.Common.IO {
 		public const int MAX_LONG = 64;
 
 		[FieldOffset(0)] private _Bytes b;
-		[FieldOffset(0)] private _Shorts s;
 		[FieldOffset(0)] private _Words w;
+		[FieldOffset(0)] private _Dwords d;
 		[FieldOffset(0)] private ulong _data;
 
 		[FieldOffset(8)] private _Bytes b2;
-		[FieldOffset(8)] private _Shorts s2;
-		[FieldOffset(8)] private _Words w2;
+		[FieldOffset(8)] private _Words s2;
+		[FieldOffset(8)] private _Dwords w2;
 		[FieldOffset(8)] private ulong _data2;
 
 		public void Clear() {
@@ -128,8 +128,8 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			ushort mask = (ushort)((1u << numBits) - 1);
-			ushort shiftOut = (ushort)(s.s0 & mask);
-			_data = (_data >> numBits) | ((ulong)s2.s0 & mask);
+			ushort shiftOut = (ushort)(w.w0 & mask);
+			_data = (_data >> numBits) | ((ulong)s2.w0 & mask);
 			_data2 >>= numBits;
 			head -= numBits;
 			return shiftOut;
@@ -160,8 +160,8 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			uint mask = (1u << numBits) - 1;
-			uint shiftOut = w.w0 & mask;
-			_data = (_data >> numBits) | (w2.w0 & mask);
+			uint shiftOut = d.dw0 & mask;
+			_data = (_data >> numBits) | (w2.dw0 & mask);
 			_data2 >>= numBits;
 			head -= numBits;
 			return shiftOut;
