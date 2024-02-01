@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -130,116 +131,20 @@ namespace MagicStorage.Common.IO {
 			return decompressed.ToArray();
 		}
 
-		public static int GetBitSize(byte value) {
-			if (value == 0)
-				return 0;
+		public static int GetBitSize(byte value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount(value);
 
-			int bits = value;
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
+		public static int GetBitSize(sbyte value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount((byte)value);
 
-			return size;
-		}
+		public static int GetBitSize(ushort value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount(value);
 
-		public static int GetBitSize(sbyte value) {
-			if (value == 0 || value == sbyte.MinValue)
-				return 0;
+		public static int GetBitSize(short value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount((ushort)value);
 
-			int bits = Math.Abs(value);
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
+		public static int GetBitSize(uint value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount(value);
 
-			return size;
-		}
+		public static int GetBitSize(int value) => BitBuffer128.MAX_INT - BitOperations.LeadingZeroCount((uint)value);
 
-		public static int GetBitSize(ushort value) {
-			if (value == 0)
-				return 0;
+		public static int GetBitSize(ulong value) => BitBuffer128.MAX_LONG - BitOperations.LeadingZeroCount(value);
 
-			int bits = value;
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
-
-		public static int GetBitSize(short value) {
-			if (value == 0 || value == short.MinValue)
-				return 0;
-
-			int bits = Math.Abs(value);
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
-
-		public static int GetBitSize(uint value) {
-			if (value == 0)
-				return 0;
-
-			uint bits = value;
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
-
-		public static int GetBitSize(int value) {
-			if (value == 0 || value == int.MinValue)
-				return 0;
-
-			int bits = Math.Abs(value);
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
-
-		public static int GetBitSize(ulong value) {
-			if (value == 0)
-				return 0;
-
-			ulong bits = value;
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
-
-		public static int GetBitSize(long value) {
-			if (value == 0 || value == long.MinValue)
-				return 0;
-
-			long bits = Math.Abs(value);
-			int size = 1;
-			while (bits != 0) {
-				bits >>= 1;
-				size++;
-			}
-
-			return size;
-		}
+		public static int GetBitSize(long value) => BitBuffer128.MAX_LONG - BitOperations.LeadingZeroCount((ulong)value);
 	}
 }
