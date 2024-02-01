@@ -1,7 +1,8 @@
+using Ionic.Zlib;
+using MagicStorage.Common.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
@@ -482,29 +483,28 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
 
-			writer.Write((ushort)items.Count);
-			writer.Write((ushort)netOpQueue.Count);
+			ValueWriter bitWriter = new ValueWriter(writer);
+
+			int capacityBits = NetCompression.GetBitSize(Capacity);
+			bitWriter.Write((ushort)items.Count, capacityBits);
+			bitWriter.Write((ushort)netOpQueue.Count, capacityBits - 1);  // GetBitSize(Capacity / 2)
 			while (netOpQueue.Count > 0)
 			{
 				NetOperation netOp = netOpQueue.Dequeue();
-				writer.Write((byte)netOp.netOperation);
+				bitWriter.Write((byte)netOp.netOperation, numBits: 3);
 				switch (netOp.netOperation)
 				{
 					case NetOperations.FullySync:
-						writer.Write(items.Count);
-						foreach (Item item in items)
-						{
-							ItemIO.Send(item, writer, true, true);
-						}
+						NetCompression.SendItems(items, bitWriter, true, true, listCountBitSizeOverride: capacityBits);
 						break;
 					case NetOperations.Withdraw:
-						writer.Write(netOp.keepOneInFavorite);
-						ItemIO.Send(netOp.item, writer, true, true);
+						bitWriter.Write(netOp.keepOneInFavorite);
+						NetCompression.SendItem(netOp.item, bitWriter, true, true);
 						break;
 					case NetOperations.WithdrawStack:
 						break;
 					case NetOperations.Deposit:
-						ItemIO.Send(netOp.item, writer, true, true);
+						NetCompression.SendItem(netOp.item, bitWriter, true, true);
 						break;
 					case NetOperations.PackItems:
 						break;
@@ -514,18 +514,10 @@ namespace MagicStorage.Components
 			}
 
 			/* Forces data to be flushed into the buffer */
+			bitWriter.Flush();
 			writer.Flush();
 
-			byte[] data = null;
-			/* compress buffer data */
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				using (DeflateStream deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress))
-				{
-					deflateStream.Write(buffer.GetBuffer(), 0, (int)buffer.Length);
-				}
-				data = memoryStream.ToArray();
-			}
+			byte[] data = NetCompression.Compress(buffer.GetBuffer(), CompressionLevel.BestCompression);
 
 			/* Sends the buffer through the network */
 			trueWriter.Write((ushort)data.Length);
@@ -550,8 +542,11 @@ namespace MagicStorage.Components
 
 			base.NetReceive(reader);
 
-			int serverItemsCount = reader.ReadUInt16();
-			int opCount = reader.ReadUInt16();
+			ValueReader bitReader = new ValueReader(reader);
+
+			int capacityBits = NetCompression.GetBitSize(Capacity);
+			int serverItemsCount = bitReader.ReadUInt16(capacityBits);
+			int opCount = bitReader.ReadUInt16(capacityBits - 1);  // GetBitSize(Capacity / 2)
 			if (opCount > 0)
 			{
 				if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
@@ -568,7 +563,7 @@ namespace MagicStorage.Components
 				bool repairMetaData = true;
 				for (int i = 0; i < opCount; i++)
 				{
-					byte netOp = reader.ReadByte();
+					byte netOp = bitReader.ReadByte(numBits: 3);
 					if (Enum.IsDefined(typeof(NetOperations), netOp))
 					{
 						switch ((NetOperations)netOp)
@@ -576,10 +571,10 @@ namespace MagicStorage.Components
 							case NetOperations.FullySync:
 								repairMetaData = false;
 								ClearItemsData();
-								int itemsCount = reader.ReadInt32();
-								for (int j = 0; j < itemsCount; j++)
+								List<Item> netItems = NetCompression.ReceiveItems(bitReader, true, true, listCountBitSizeOverride: capacityBits);
+								for (int j = 0; j < netItems.Count; j++)
 								{
-									Item item = ItemIO.Receive(reader, true, true);
+									Item item = netItems[j];
 									items.Add(item);
 									ItemData data = new(item);
 									if (item.stack < item.maxStack)
@@ -589,14 +584,14 @@ namespace MagicStorage.Components
 								}
 								break;
 							case NetOperations.Withdraw:
-								bool keepOneIfFavorite = reader.ReadBoolean();
-								TryWithdraw(ItemIO.Receive(reader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+								bool keepOneIfFavorite = bitReader.ReadBoolean();
+								TryWithdraw(NetCompression.ReceiveItem(bitReader, true, true), keepOneIfFavorite: keepOneIfFavorite);
 								break;
 							case NetOperations.WithdrawStack:
 								WithdrawStack();
 								break;
 							case NetOperations.Deposit:
-								DepositItem(ItemIO.Receive(reader, true, true));
+								DepositItem(NetCompression.ReceiveItem(bitReader, true, true));
 								break;
 							case NetOperations.PackItems:
 								PackItems();
