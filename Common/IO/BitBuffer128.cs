@@ -14,16 +14,16 @@ namespace MagicStorage.Common.IO {
 		[FieldOffset(0)] private byte _byte0;
 		[FieldOffset(0)] private ushort _word0;
 		[FieldOffset(0)] private uint _dword0;
-		[FieldOffset(0)] private ulong _data0;
+		[FieldOffset(0)] private ulong _qword0;
 
 		[FieldOffset(8)] private byte _byte8;
 		[FieldOffset(8)] private ushort _word4;
 		[FieldOffset(8)] private uint _dword2;
-		[FieldOffset(8)] private ulong _data1;
+		[FieldOffset(8)] private ulong _qword1;
 
 		public void Clear() {
-			_data0 = 0;
-			_data1 = 0;
+			_qword0 = 0;
+			_qword1 = 0;
 		}
 
 		private void GetDataAndHead(out RefContainer<ulong> data, ref int head, int numBits) {
@@ -35,13 +35,13 @@ namespace MagicStorage.Common.IO {
 			data = default;
 
 			if (head >= 64) {
-				data.Assign(ref _data1);
+				data.Assign(ref _qword1);
 				head -= 64;
 			} else if (head > 0) {
-				data.Assign(ref Unsafe.AddByteOffset(ref _data0, (nint)head >> 3));
+				data.Assign(ref Unsafe.AddByteOffset(ref _qword0, (nint)head >> 3));
 				head &= 7;
 			} else
-				data.Assign(ref _data0);
+				data.Assign(ref _qword0);
 		}
 
 		public void FlushBytes(BinaryWriter writer, ref int head, bool writeLastBits = true) {
@@ -56,9 +56,9 @@ namespace MagicStorage.Common.IO {
 			if (head == 0)
 				throw new InvalidOperationException("No more bits to read");
 
-			bool shiftOut = (_data0 & 1) == 1;
-			_data0 = (_data0 >> 1) | (_data1 & 1) << 63;
-			_data1 >>= 1;
+			bool shiftOut = (_qword0 & 1) == 1;
+			_qword0 = (_qword0 >> 1) | (_qword1 & 1) << 63;
+			_qword1 >>= 1;
 			head--;
 			return shiftOut;
 		}
@@ -85,8 +85,8 @@ namespace MagicStorage.Common.IO {
 
 			byte mask = (byte)((1u << numBits) - 1);
 			byte shiftOut = (byte)(_byte0 & mask);
-			_data0 = (_data0 >> numBits) | ((ulong)_byte8 & mask);
-			_data1 >>= numBits;
+			_qword0 = (_qword0 >> numBits) | ((ulong)_byte8 & mask);
+			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -117,8 +117,8 @@ namespace MagicStorage.Common.IO {
 
 			ushort mask = (ushort)((1u << numBits) - 1);
 			ushort shiftOut = (ushort)(_word0 & mask);
-			_data0 = (_data0 >> numBits) | ((ulong)_word4 & mask);
-			_data1 >>= numBits;
+			_qword0 = (_qword0 >> numBits) | ((ulong)_word4 & mask);
+			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -149,8 +149,8 @@ namespace MagicStorage.Common.IO {
 
 			uint mask = (1u << numBits) - 1;
 			uint shiftOut = _dword0 & mask;
-			_data0 = (_data0 >> numBits) | (_dword2 & mask);
-			_data1 >>= numBits;
+			_qword0 = (_qword0 >> numBits) | (_dword2 & mask);
+			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -180,9 +180,9 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			ulong mask = (1uL << numBits) - 1;
-			ulong shiftOut = _data0 & mask;
-			_data0 = (_data0 >> numBits) | (_data1 & mask);
-			_data1 >>= numBits;
+			ulong shiftOut = _qword0 & mask;
+			_qword0 = (_qword0 >> numBits) | (_qword1 & mask);
+			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
