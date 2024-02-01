@@ -288,14 +288,14 @@ namespace MagicStorage.Components
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, keepOneIfFavorite, client));
 
-				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
+			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, client));
 
-				NetHelper.PrintClientRequest(client, "Item Deposit", Position);
+			//	NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 			else if (op == Operation.DepositAll)
 			{
@@ -328,7 +328,7 @@ namespace MagicStorage.Components
 				Item item = ItemIO.Receive(reader, true, true);
 				clientOpQ.Enqueue(new NetOperation(op, item, false, client));
 
-				NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
+			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 		}
 

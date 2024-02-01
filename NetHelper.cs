@@ -567,7 +567,7 @@ namespace MagicStorage
 
 				Report(true, MessageType.ClientSendDeactivate + " packet received by server from client " + sender);
 
-				PrintClientRequest(sender, $"{(inActive ? "Deactivate" : "Activate")} Unit", position);
+			//	PrintClientRequest(sender, $"{(inActive ? "Deactivate" : "Activate")} Unit", position);
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
@@ -798,7 +798,7 @@ namespace MagicStorage
 				return;
 			}
 
-			PrintClientRequest(sender, "Craft", position);
+		//	PrintClientRequest(sender, "Craft", position);
 
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				return;
@@ -914,7 +914,7 @@ namespace MagicStorage
 
 				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
 
-				PrintClientRequest(sender, "Refresh UI", storage);
+			//	PrintClientRequest(sender, "Refresh UI", storage);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
 					MagicUI.RefreshItems();
@@ -1126,7 +1126,7 @@ namespace MagicStorage
 			//Safeguard:  Ensure that the map section exists before sending data
 			RemoteClient.CheckSection(sender, unit.ToWorldCoordinates());
 
-			PrintClientRequest(sender, "Update Unit Type", unit);
+		//	PrintClientRequest(sender, "Update Unit Type", unit);
 
 			if (!TileEntity.ByPosition.TryGetValue(unit, out TileEntity entity) || entity is not TEStorageUnit storageUnit) {
 				Report(true, MessageType.RequestStorageUnitStyle + " packet was malformed: Storage Unit location did not have a Storage Unit");
@@ -1392,7 +1392,7 @@ namespace MagicStorage
 
 			Report(false, MessageType.PlayerBankDepositResult + " packet sent to client " + sender);
 
-			PrintClientRequest(sender, "Deposit Items from Bank/Safe/Forge", heart);
+		//	PrintClientRequest(sender, "Deposit Items from Bank/Safe/Forge", heart);
 		}
 
 		public static void ClientReceiveDepositFromBankResult(BinaryReader reader) {
@@ -1435,7 +1435,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			PrintClientRequest(sender, "Component Placement", position);
+		//	PrintClientRequest(sender, "Component Placement", position);
 			Report(false, MessageType.ComponentPlacement + " packet received by server from client " + sender);
 		}
 
@@ -1457,7 +1457,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			PrintClientRequest(sender, "Component Destruction", position);
+		//	PrintClientRequest(sender, "Component Destruction", position);
 			Report(false, MessageType.ComponentDestruction + " packet received by server from client " + sender);
 		}
 
