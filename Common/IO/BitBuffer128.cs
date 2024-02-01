@@ -6,36 +6,24 @@ using System.Runtime.InteropServices;
 namespace MagicStorage.Common.IO {
 	[StructLayout(LayoutKind.Explicit, Pack = 16, Size = 16)]
 	public struct BitBuffer128 {
-		private struct _Bytes {
-			public byte b0, b1, b2, b3, b4, b5, b6, b7;
-		}
-
-		private struct _Words {
-			public ushort w0, w1, w2, w3;
-		}
-
-		private struct _Dwords {
-			public uint dw0, dw1;
-		}
-
 		public const int MAX_BYTE = 8;
 		public const int MAX_SHORT = 16;
 		public const int MAX_INT = 32;
 		public const int MAX_LONG = 64;
 
-		[FieldOffset(0)] private _Bytes b;
-		[FieldOffset(0)] private _Words w;
-		[FieldOffset(0)] private _Dwords d;
-		[FieldOffset(0)] private ulong _data;
+		[FieldOffset(0)] private byte _byte0;
+		[FieldOffset(0)] private ushort _word0;
+		[FieldOffset(0)] private uint _dword0;
+		[FieldOffset(0)] private ulong _data0;
 
-		[FieldOffset(8)] private _Bytes b2;
-		[FieldOffset(8)] private _Words s2;
-		[FieldOffset(8)] private _Dwords w2;
-		[FieldOffset(8)] private ulong _data2;
+		[FieldOffset(8)] private byte _byte8;
+		[FieldOffset(8)] private ushort _word4;
+		[FieldOffset(8)] private uint _dword2;
+		[FieldOffset(8)] private ulong _data1;
 
 		public void Clear() {
-			_data = 0;
-			_data2 = 0;
+			_data0 = 0;
+			_data1 = 0;
 		}
 
 		private void GetDataAndHead(out RefContainer<ulong> data, ref int head, int numBits) {
@@ -47,13 +35,13 @@ namespace MagicStorage.Common.IO {
 			data = default;
 
 			if (head >= 64) {
-				data.Assign(ref _data2);
+				data.Assign(ref _data1);
 				head -= 64;
 			} else if (head > 0) {
-				data.Assign(ref Unsafe.AddByteOffset(ref _data, (nint)head / 8));
-				head %= 8;
+				data.Assign(ref Unsafe.AddByteOffset(ref _data0, (nint)head >> 3));
+				head &= 7;
 			} else
-				data.Assign(ref _data);
+				data.Assign(ref _data0);
 		}
 
 		public void FlushBytes(BinaryWriter writer, ref int head, bool writeLastBits = true) {
@@ -68,9 +56,9 @@ namespace MagicStorage.Common.IO {
 			if (head == 0)
 				throw new InvalidOperationException("No more bits to read");
 
-			bool shiftOut = (_data & 1) == 1;
-			_data = (_data >> 1) | (_data2 & 1) << 63;
-			_data2 >>= 1;
+			bool shiftOut = (_data0 & 1) == 1;
+			_data0 = (_data0 >> 1) | (_data1 & 1) << 63;
+			_data1 >>= 1;
 			head--;
 			return shiftOut;
 		}
@@ -96,9 +84,9 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			byte mask = (byte)((1u << numBits) - 1);
-			byte shiftOut = (byte)(b.b0 & mask);
-			_data = (_data >> numBits) | ((ulong)b2.b0 & mask);
-			_data2 >>= numBits;
+			byte shiftOut = (byte)(_byte0 & mask);
+			_data0 = (_data0 >> numBits) | ((ulong)_byte8 & mask);
+			_data1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -128,9 +116,9 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			ushort mask = (ushort)((1u << numBits) - 1);
-			ushort shiftOut = (ushort)(w.w0 & mask);
-			_data = (_data >> numBits) | ((ulong)s2.w0 & mask);
-			_data2 >>= numBits;
+			ushort shiftOut = (ushort)(_word0 & mask);
+			_data0 = (_data0 >> numBits) | ((ulong)_word4 & mask);
+			_data1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -160,9 +148,9 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			uint mask = (1u << numBits) - 1;
-			uint shiftOut = d.dw0 & mask;
-			_data = (_data >> numBits) | (w2.dw0 & mask);
-			_data2 >>= numBits;
+			uint shiftOut = _dword0 & mask;
+			_data0 = (_data0 >> numBits) | (_dword2 & mask);
+			_data1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
@@ -192,9 +180,9 @@ namespace MagicStorage.Common.IO {
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
 			ulong mask = (1uL << numBits) - 1;
-			ulong shiftOut = _data & mask;
-			_data = (_data >> numBits) | (_data2 & mask);
-			_data2 >>= numBits;
+			ulong shiftOut = _data0 & mask;
+			_data0 = (_data0 >> numBits) | (_data1 & mask);
+			_data1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
 		}
