@@ -21,7 +21,7 @@ namespace MagicStorage.Common.IO {
 	public interface IDataSizeTracker<T> : IDataSizeTracker {
 		void IDataSizeTracker.Receive(ref object value, ValueReader reader) {
 			if (value is not T)
-				throw new ArgumentException($"Expected value of type {typeof(T).Name}, but got {value.GetType().Name}", nameof(value));
+				throw new ArgumentException($"Expected value of type {typeof(T).Name}, but got {value?.GetType().Name ?? "null"}", nameof(value));
 
 			Receive(ref Unsafe.As<object, T>(ref value), reader);
 		}
