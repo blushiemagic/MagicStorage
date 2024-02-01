@@ -530,15 +530,9 @@ namespace MagicStorage.Components
 		public override void NetReceive(BinaryReader trueReader)
 		{
 			/* Reads the buffer off the network */
-			using MemoryStream buffer = new();
-
 			ushort bufferLen = trueReader.ReadUInt16();
-			buffer.Write(trueReader.ReadBytes(bufferLen));
-			buffer.Position = 0;
-
-			/* Recreate the BinaryReader reader */
-			using DeflateStream decompressor = new(buffer, CompressionMode.Decompress, true);
-			using BinaryReader reader = new(decompressor);
+			using MemoryStream decompressedStream = new MemoryStream(NetCompression.Decompress(trueReader.ReadBytes(bufferLen), CompressionLevel.BestCompression));
+			using BinaryReader reader = new(decompressedStream);
 
 			base.NetReceive(reader);
 
