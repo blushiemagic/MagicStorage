@@ -99,6 +99,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 	public struct NPCSpawnReport : IShimmerResultReport {
 		public readonly int npcType;
+		public float renderScale = 1f;
 
 		public LocalizedText Label { get; }
 		
@@ -132,7 +133,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			if (Parent is not ShimmerReportIcon icon)
 				return false;
 
-			DummyNPCPool.RenderEntry(npcType, icon.GetDimensions().ToRectangle());
+			DummyNPCPool.RenderEntry(npcType, icon.GetDimensions().ToRectangle(), renderScale);
 			return false;
 		}
 

@@ -26,6 +26,7 @@ namespace MagicStorage.UI.States {
 		protected UIText ingredientText;
 		protected UIText reqObjText;
 	//	private UIText reqObjText2;
+		protected UIElement reqObjTextHolder;
 		protected List<UIText> reqObjTextLines;
 		protected UIText storedItemsText;
 
@@ -163,6 +164,11 @@ namespace MagicStorage.UI.States {
 			};
 
 			reqObjTextLines = new();
+
+			reqObjTextHolder = new();
+			reqObjTextHolder.Width.Set(0, 1f);
+			reqObjTextHolder.MinHeight.Set(10, 0f);
+			recipePanel.Append(reqObjTextHolder);
 
 		//	reqObjText2 = new UIText("");
 			recipePanel.Append(reqObjText);
@@ -496,17 +502,20 @@ namespace MagicStorage.UI.States {
 
 			float reqObjText2Top = reqObjTextTop + 24;
 
-			foreach (var line in reqObjTextLines) {
-				if (line.Parent is null)
-					recipePanel.Append(line);
+			reqObjTextHolder.Top.Set(reqObjText2Top, 0f);
 
-				line.Top.Set(reqObjText2Top, 0f);
-				line.Recalculate();
-				reqObjText2Top += 30;
+			float lineTop = 0f;
+			foreach (var line in reqObjTextLines) {
+				line.Top.Set(lineTop, 0f);
+				lineTop += 30;
 			}
 
+			reqObjTextHolder.Height.Pixels = lineTop;
+
+			reqObjTextHolder.Recalculate();
+
 		//	int reqObjText2Rows = reqObjText2.Text.Count(c => c == '\n') + 1;
-			float storedItemsTextTop = reqObjText2Top;
+			float storedItemsTextTop = reqObjText2Top + lineTop;
 			float storageZoneTop = storedItemsTextTop + 24;
 
 			storedItemsText.Top.Set(storedItemsTextTop, 0f);

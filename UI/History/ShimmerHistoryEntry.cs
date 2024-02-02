@@ -15,8 +15,12 @@ namespace MagicStorage.UI.History {
 		public override void OnInitialize() {
 			base.OnInitialize();
 
-			resultZone = new(CraftingGUI.InventoryScale * 0.55f);
+			resultZone = new(CraftingGUI.InventoryScale * 0.8f);
 			resultZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
+
+			resultZone.SetDimensions(1, 1);
+
+			UpdateZoneDimensions();
 
 			Append(resultZone);
 		}
@@ -57,6 +61,7 @@ namespace MagicStorage.UI.History {
 		protected override void OnValueSet(int value) {
 			resultZone.SetReportsFrom(value);
 			UpdateZoneDimensions();
+			Recalculate();
 		}
 
 		// TODO: set context based on whether the "result" is present in storage

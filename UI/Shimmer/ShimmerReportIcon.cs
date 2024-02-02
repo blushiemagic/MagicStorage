@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria.UI;
+using Terraria;
 
 namespace MagicStorage.UI.Shimmer {
 	public class ShimmerReportIcon : UIElement {
@@ -18,7 +19,6 @@ namespace MagicStorage.UI.Shimmer {
 		}
 
 		public void SetReport(IShimmerResultReport report) {
-			ArgumentNullException.ThrowIfNull(report);
 			_report = report;
 			if (_report is not null)
 				_report.Parent = this;
@@ -31,8 +31,19 @@ namespace MagicStorage.UI.Shimmer {
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			bool permitDrawing = _report?.Render(spriteBatch) ?? false;
-			if (permitDrawing)
-				spriteBatch.Draw(_report.Texture.Value, GetDimensions().ToRectangle(), _report.GetAnimationFrame(), Color.White);
+			if (permitDrawing) {
+				var dims = GetDimensions();
+
+				Rectangle frame = _report.GetAnimationFrame();
+
+				Vector2 scale = Vector2.One;
+				if (frame.Width > dims.Width - 4)
+					scale.X = (dims.Width - 4) / frame.Width;
+				if (frame.Height > dims.Height - 4)
+					scale.Y = (dims.Height - 4) / frame.Height;
+
+				spriteBatch.Draw(_report.Texture.Value, dims.Center(), frame, Color.White, 0, frame.Size() / 2f, scale, SpriteEffects.None, 0);
+			}
 		}
 	}
 }

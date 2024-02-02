@@ -20,8 +20,12 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		};
 
 		private static int GetMoonLordGatekeptItem(int type) {
+			// TransformItem is only used to show the item in the UI, so we don't need this check
+			// The actual transmutation attempt will properly check this condition
+			/*
 			if (!NPC.downedMoonlord)
 				return ItemID.None;
+			*/
 
 			return type switch {
 				ItemID.RodofDiscord => ItemID.RodOfHarmony,

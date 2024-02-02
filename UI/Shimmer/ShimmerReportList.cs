@@ -1,18 +1,14 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.Shimmering;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using SerousCommonLib.UI;
 using System.Collections.Generic;
-using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.ID;
 using Terraria.UI;
 
 namespace MagicStorage.UI.Shimmer {
 	public class ShimmerReportList : UIElement {
 		private class Entry : BaseShimmerReportElement {
-			private readonly UIPanel _panel;
 			private readonly UIText _label;
 
 			public Entry() {
@@ -20,12 +16,6 @@ namespace MagicStorage.UI.Shimmer {
 				Height.Set(ENTRY_HEIGHT, 0f);
 
 				// The members need to be created here; OnInitialize runs too late
-				_panel = new UIPanel();
-				_panel.Width.Set(0, 1f);
-				_panel.Height.Set(0, 1f);
-				_panel.SetPadding(0);
-				Append(_panel);
-
 				_icon = new ShimmerReportIcon() {
 					VAlign = 0.5f
 				};
@@ -71,13 +61,6 @@ namespace MagicStorage.UI.Shimmer {
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 				SetLabelFromReport();
-			}
-
-			protected override void DrawSelf(SpriteBatch spriteBatch) {
-				base.DrawSelf(spriteBatch);
-
-				if (_icon.IsMouseHovering && _report is ItemReport itemReport)
-					Main.HoverItem = ContentSamples.ItemsByType[itemReport.itemType].Clone();
 			}
 		}
 

@@ -46,7 +46,7 @@ namespace MagicStorage.UI.States {
 			float reqObjText2Top = reqObjTextTop + 24;
 
 		//	int reqObjText2Rows = reqObjText2.Text.Count(c => c == '\n') + 1;
-			float storedItemsTextTop = reqObjText2Top + 30 * reqObjTextLines.Count;
+			float storedItemsTextTop = reqObjText2Top + reqObjTextHolder.Height.Pixels;
 			float storageZoneTop = storedItemsTextTop + 24;
 
 			if (MagicStorageConfig.IsRecursionEnabled)
@@ -146,9 +146,7 @@ namespace MagicStorage.UI.States {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Do not read anything until refreshing is completed
 
-			foreach (var line in reqObjTextLines)
-				line.Remove();
-			reqObjTextLines.Clear();
+			ClearObjectText();
 
 			if (CraftingGUI.selectedRecipe is not null) {
 				bool isEmpty = true;
@@ -177,25 +175,13 @@ namespace MagicStorage.UI.States {
 				foreach (Condition condition in conditions)
 					AddObjectTextToBuilder(text, condition.Description.Value, ref isEmpty);
 
-				if (isEmpty) {
-				//	text = Language.GetTextValue("LegacyInterface.23");
-					var line = new UIText(Language.GetTextValue("LegacyInterface.23")) {
-						DynamicallyScaleDownToWidth = true
-					};
-
-					reqObjTextLines.Add(line);
-				} else {
-					reqObjTextLines.Add(new UIText(text.ToString()) {
-						DynamicallyScaleDownToWidth = true
-					});
-				}
-
-			//	reqObjText2.SetText(text);
+				if (isEmpty)
+					AppendNoneObjectText();
+				else
+					AppendObjectText(text.ToString());
 			} else {
 				// Recipe isn't available
-				reqObjTextLines.Add(new UIText(Language.GetTextValue("LegacyInterface.23")) {
-					DynamicallyScaleDownToWidth = true
-				});
+				AppendNoneObjectText();
 			}
 		}
 

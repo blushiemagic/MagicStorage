@@ -7,9 +7,7 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.UI;
 
 namespace MagicStorage.UI.Shimmer {
@@ -31,26 +29,23 @@ namespace MagicStorage.UI.Shimmer {
 					HAlign = 0.5f,
 					VAlign = 0.5f
 				};
-				_icon.Width.Set(0, 1f);
-				_icon.Height.Set(0, 1f);
-				Append(_icon);
+				_icon.Width.Set(-6, 1f);
+				_icon.Height.Set(-6, 1f);
+				_panel.Append(_icon);
+			}
+
+			protected override void OnReportSet() {
+				if (_report is NPCSpawnReport spawnReport) {
+					spawnReport.renderScale = 0.7f;
+					_report = spawnReport;
+				}
 			}
 
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
-				if (IsMouseHovering && _report?.Label?.Value is { } report)
+				if (IsMouseHovering && _report is not ItemReport && _report?.Label?.Value is { } report)
 					MagicUI.mouseText = report;
-			}
-
-			private readonly Item[] _dummyItemCollection = new Item[11];
-
-			protected override void DrawSelf(SpriteBatch spriteBatch) {
-				// Draw a standard item slot
-				using (ObjectSwitch.Create(ref Main.inventoryScale, Scale)) {
-					_dummyItemCollection[10] = new Item();
-					ItemSlot.Draw(spriteBatch, _dummyItemCollection, ItemSlot.Context.InventoryItem, 10, GetDimensions().Position());
-				}
 			}
 
 			public override void MouseOver(UIMouseEvent evt) {
@@ -137,7 +132,11 @@ namespace MagicStorage.UI.Shimmer {
 				int column = oneDimIndex % NumColumns;
 				int row = oneDimIndex / NumColumns;
 
-				Slots[row, column].SetReport(report);
+				var slot = Slots[row, column];
+				slot.SetReport(report);
+
+				if (slot.Parent is null)
+					Append(slot);
 
 				oneDimIndex++;
 			}
@@ -146,7 +145,9 @@ namespace MagicStorage.UI.Shimmer {
 				int column = oneDimIndex % NumColumns;
 				int row = oneDimIndex / NumColumns;
 
-				Slots[row, column].SetReport(null);
+				var slot = Slots[row, column];
+				slot.SetReport(null);
+				slot.Remove();
 
 				oneDimIndex++;
 			}
@@ -158,8 +159,9 @@ namespace MagicStorage.UI.Shimmer {
 
 			// Update the row count to match the number of reports
 			// Creating new reports from a type is efficient enough that we can do it every frame
+			const int MAX_PER_ROW = 5;
 			var reports = MagicCache.ShimmerInfos[itemType].GetShimmerReports().ToList();
-			SetDimensions(NumColumns, Math.Max((reports.Count - 1) / 7 + 1, 1));
+			SetDimensions(MAX_PER_ROW, Math.Max((reports.Count - 1) / MAX_PER_ROW + 1, 1));
 
 			// Set the reports
 			SetReports(reports);

@@ -226,7 +226,7 @@ namespace MagicStorage.UI.States {
 			float reqObjTextTop = ingredientZoneTop + reportListHeight + 20;
 			float reqObjText2Top = reqObjTextTop + 24;
 
-			float storedItemsTextTop = reqObjText2Top + 30 * reqObjTextLines.Count;
+			float storedItemsTextTop = reqObjText2Top + reqObjTextHolder.Height.Pixels;
 			float storageZoneTop = storedItemsTextTop + 24;
 
 			float zoneHeight = smallSlotHeight + 10 + resultText.MinHeight.Pixels + 10 + smallSlotHeight;
@@ -344,9 +344,7 @@ namespace MagicStorage.UI.States {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Do not read anything until refreshing is completed
 
-			foreach (var line in reqObjTextLines)
-				line.Remove();
-			reqObjTextLines.Clear();
+			ClearObjectText();
 
 			if (DecraftingGUI.selectedItem > ItemID.None) {
 				bool isEmpty = true;
@@ -360,22 +358,13 @@ namespace MagicStorage.UI.States {
 						AddObjectTextToBuilder(text, decraftCondition.Description.Value, ref isEmpty);
 				}
 
-				if (isEmpty) {
-					var line = new UIText(Language.GetTextValue("LegacyInterface.23")) {
-						DynamicallyScaleDownToWidth = true
-					};
-
-					reqObjTextLines.Add(line);
-				} else {
-					reqObjTextLines.Add(new UIText(text.ToString()) {
-						DynamicallyScaleDownToWidth = true
-					});
-				}
+				if (isEmpty)
+					AppendNoneObjectText();
+				else
+					AppendObjectText(text.ToString());
 			} else {
 				// Nothing to display
-				reqObjTextLines.Add(new UIText(Language.GetTextValue("LegacyInterface.23")) {
-					DynamicallyScaleDownToWidth = true
-				});
+				AppendNoneObjectText();
 			}
 		}
 

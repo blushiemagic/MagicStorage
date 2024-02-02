@@ -36,7 +36,7 @@ namespace MagicStorage {
 			int[] toRefresh;
 			if (!MagicUI.ForceNextRefreshToBeFull) {
 				// Refresh the provided set
-				toRefresh = itemsToRefresh.ToArray();
+				toRefresh = itemsToRefresh?.ToArray();
 			} else {
 				// Force all items to be recalculated
 				itemsToRefresh = null;

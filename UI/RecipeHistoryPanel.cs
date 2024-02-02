@@ -31,12 +31,6 @@ namespace MagicStorage.UI {
 			clearButton.OnLeftClick += (evt, element) => {
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				this.history.Clear();
-
-				if (CraftingGUI.selectedRecipe is not null) {
-					this.history.AddHistory(CraftingGUI.selectedRecipe);
-					this.history.RefreshEntries();
-				}
-
 				this.history.Scrollbar.ViewPosition = 0f;
 			};
 			header.Append(clearButton);

@@ -86,10 +86,13 @@ namespace MagicStorage.UI.History {
 				entry.Refresh();
 		}
 
-		public void Clear() {
+		void IHistoryCollection.Clear() {
 			Current = -1;
 			List.Clear();
 			history.Clear();
+			Clear();
 		}
+
+		protected abstract void Clear();
 	}
 }

@@ -19,6 +19,7 @@ namespace MagicStorage.Common {
 
 		private class PoolEntry {
 			public UnlockableNPCEntryIcon icon;
+			public bool hasUpdated;
 
 			public PoolEntry(int npcType) {
 				icon = new UnlockableNPCEntryIcon(npcType);
@@ -27,13 +28,11 @@ namespace MagicStorage.Common {
 
 		private static readonly Dictionary<int, PoolEntry> entries = new();
 
-		private static void GetOrReserve(int npcType, out UnlockableNPCEntryIcon icon) {
-			if (!entries.TryGetValue(npcType, out var poolEntry)) {
-				poolEntry = new PoolEntry(npcType);
-				entries.Add(npcType, poolEntry);
+		private static void GetOrReserve(int npcType, out PoolEntry entry) {
+			if (!entries.TryGetValue(npcType, out entry)) {
+				entry = new PoolEntry(npcType);
+				entries.Add(npcType, entry);
 			}
-
-			icon = poolEntry.icon;
 		}
 
 		private static void DestroyIcon(int npcType) {
@@ -41,8 +40,18 @@ namespace MagicStorage.Common {
 				poolEntry.icon = null;
 		}
 
+		internal static void ResetUpdates() {
+			foreach (var entry in entries.Values)
+				entry.hasUpdated = false;
+		}
+
 		public static void UpdateEntry(int npcType, Rectangle renderArea) {
-			GetOrReserve(npcType, out var icon);
+			GetOrReserve(npcType, out var entry);
+
+			if (entry.hasUpdated)
+				return;
+
+			entry.hasUpdated = true;
 
 			var info = new BestiaryUICollectionInfo() {
 				UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1
@@ -53,16 +62,16 @@ namespace MagicStorage.Common {
 				IsPortrait = true
 			};
 
-			icon?.Update(info, renderArea, settings);
+			entry.icon?.Update(info, renderArea, settings);
 		}
 
-		public static void RenderEntry(int npcType, Rectangle renderArea) {
-			GetOrReserve(npcType, out var icon);
+		public static void RenderEntry(int npcType, Rectangle renderArea, float additionalScale = 1f) {
+			GetOrReserve(npcType, out var entry);
 
-			if (icon is null)
+			if (entry.icon is null)
 				return;
 
-			NPC npc = GetNPC(icon);
+			NPC npc = GetNPC(entry.icon);
 
 			var info = new BestiaryUICollectionInfo() {
 				UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1
@@ -92,8 +101,8 @@ namespace MagicStorage.Common {
 
 			try {
 				// Shrink the NPC
-				npc.scale *= Main.UIScale * 0.4f;
-				icon.Draw(info, Main.spriteBatch, settings);
+				npc.scale *= Main.UIScale * 0.4f * additionalScale;
+				entry.icon.Draw(info, Main.spriteBatch, settings);
 			} catch {
 				DestroyIcon(npcType);
 				MagicStorageMod.Instance.Logger.Error($"Failed to render NPC icon for \"{Lang.GetNPCNameValue(npcType)}\" (ID {npcType})");

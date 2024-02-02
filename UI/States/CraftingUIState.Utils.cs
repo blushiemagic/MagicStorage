@@ -12,6 +12,7 @@ using Terraria.GameContent;
 using Terraria.UI.Chat;
 using Microsoft.Xna.Framework;
 using System;
+using Terraria.Localization;
 
 namespace MagicStorage.UI.States {
 	partial class CraftingUIState {
@@ -23,11 +24,7 @@ namespace MagicStorage.UI.States {
 
 			if (size.X > recipeWidth) {
 				// Line has exceeded the width of the recipe panel.  Add a new text object and reset the string builder
-				UIText line = new(text.ToString()) {
-					DynamicallyScaleDownToWidth = true
-				};
-
-				reqObjTextLines.Add(line);
+				AppendObjectText(text.ToString());
 
 				text.Clear().Append(s);
 			} else {
@@ -39,6 +36,22 @@ namespace MagicStorage.UI.States {
 			}
 
 			isEmpty = false;
+		}
+
+		protected void AppendNoneObjectText() => AppendObjectText(Language.GetTextValue("LegacyInterface.23"));
+
+		protected void AppendObjectText(string objText) {
+			UIText text = new UIText(objText) { DynamicallyScaleDownToWidth = true };
+
+			reqObjTextLines.Add(text);
+			reqObjTextHolder.Append(text);
+		}
+
+		protected void ClearObjectText() {
+			foreach (UIText text in reqObjTextLines)
+				text.Remove();
+			reqObjTextLines.Clear();
+			reqObjTextHolder.Height.Set(0, 0f);
 		}
 
 		private static int GetIngredientRows(int itemsNeeded) {

@@ -369,6 +369,8 @@ public class MagicUI : ModSystem
 				module.PreUpdateUI();
 		}
 
+		DummyNPCPool.ResetUpdates();  // Need to enforce at most one update, otherwise the NPCs start ZOOMING
+
 		uiInterface?.Update(gameTime);
 
 		if (viewingStorage) {

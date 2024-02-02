@@ -14,6 +14,13 @@ namespace MagicStorage.UI.History {
 			RefreshEntries();
 		}
 
+		protected override void Clear() {
+			if (CraftingGUI.selectedRecipe is not null) {
+				AddHistory(CraftingGUI.selectedRecipe);
+				RefreshEntries();
+			}
+		}
+
 		protected override RecipeHistoryEntry CreateEntry(int index) => new RecipeHistoryEntry(index, this);
 
 		protected override bool Matches(Recipe entry, Recipe existing) => Utility.RecipesMatchForHistory(entry, existing);

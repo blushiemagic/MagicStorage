@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using Terraria.ID;
 
 namespace MagicStorage.UI.History {
 	public class ShimmerHistory : HistoryCollection<ShimmerHistoryEntry, int> {
@@ -11,6 +12,13 @@ namespace MagicStorage.UI.History {
 
 			Current = index;
 			RefreshEntries();
+		}
+
+		protected override void Clear() {
+			if (DecraftingGUI.selectedItem > ItemID.None) {
+				AddHistory(DecraftingGUI.selectedItem);
+				RefreshEntries();
+			}
 		}
 
 		protected override ShimmerHistoryEntry CreateEntry(int index) => new ShimmerHistoryEntry(index, this);
