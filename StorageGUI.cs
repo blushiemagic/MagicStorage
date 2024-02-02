@@ -35,7 +35,8 @@ namespace MagicStorage
 		internal static void Unload() => ClearAllCollections();
 
 		private static void ClearAllCollections() {
-			itemTypesToUpdate.Clear();
+			itemTypesToUpdate?.Clear();
+			itemTypesToUpdate = null;
 			items.Clear();
 			sourceItems.Clear();
 			didMatCheck.Clear();

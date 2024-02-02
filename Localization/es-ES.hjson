@@ -871,7 +871,7 @@ Mods: {
 			WeaponsMelee.Tooltip: Filtrar Armas Cuerpo a Cuerpo
 			WeaponsRanged.Tooltip: Filtrar Armas a Distancia
 			WeaponsMagic.Tooltip: Filtrar Armas Mágicas
-			WeaponsSummon.Tooltip: Filtrar Invocaciones
+			WeaponsSummon.Tooltip: Filtrar Armas Invocaciones
 			WeaponsThrown.Tooltip: Filtrar Armas Arrojadizas
 			Ammo.Tooltip: Filtrar Munición
 			Armor.Tooltip: Filtrar Armaduras
@@ -887,6 +887,9 @@ Mods: {
 			NotFullyResearched.Tooltip: Filtrar Ítems No Completamente Investigados
 			FullyResearched.Tooltip: Filtrar Ítems Completamente Investigados
 			Materials.Tooltip: Filtrar Materiales
+			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
+			// Fishing.Tooltip: Filter Fishing Items
+			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
 		}
 
 		SortingOption: {

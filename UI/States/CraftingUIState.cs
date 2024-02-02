@@ -497,6 +497,9 @@ namespace MagicStorage.UI.States {
 			float reqObjText2Top = reqObjTextTop + 24;
 
 			foreach (var line in reqObjTextLines) {
+				if (line.Parent is null)
+					recipePanel.Append(line);
+
 				line.Top.Set(reqObjText2Top, 0f);
 				line.Recalculate();
 				reqObjText2Top += 30;

@@ -366,7 +366,16 @@ namespace MagicStorage.UI.States {
 					};
 
 					reqObjTextLines.Add(line);
+				} else {
+					reqObjTextLines.Add(new UIText(text.ToString()) {
+						DynamicallyScaleDownToWidth = true
+					});
 				}
+			} else {
+				// Nothing to display
+				reqObjTextLines.Add(new UIText(Language.GetTextValue("LegacyInterface.23")) {
+					DynamicallyScaleDownToWidth = true
+				});
 			}
 		}
 

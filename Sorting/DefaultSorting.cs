@@ -49,11 +49,14 @@ namespace MagicStorage.Sorting
 
 			if (class1 != class2) {
 				exceptionTracking_class = null;
-				return class1 - class2;
+				return class1.CompareTo(class2);
 			}
 
 			exceptionTracking_class = classes[class1].passName;
-			return classes[class1].Compare(item1, item2);
+			// Most sorting has the "best" things first
+			// The "best" things have higher values, thus they need to be sorted first
+			// Any exceptions can just swap the item order again
+			return classes[class1].Compare(item2, item1);
 		}
 
 		public static void Initialize()
@@ -73,6 +76,8 @@ namespace MagicStorage.Sorting
 			classes.Add(new DefaultSortClass(Axe, CompareAxe));
 			classes.Add(new DefaultSortClass(Hammer, CompareHammer));
 			classes.Add(new DefaultSortClass(TerraformingTool, CompareTerraformingPriority));
+			classes.Add(new DefaultSortClass(FishingPole, CompareFishingPole));
+			classes.Add(new DefaultSortClass(FishingBait, CompareFishingBait));
 			classes.Add(new DefaultSortClass(AmmoTool, CompareRarity));
 			classes.Add(new DefaultSortClass(Armor, CompareRarity));
 			classes.Add(new DefaultSortClass(VanityArmor, CompareRarity));
@@ -101,21 +106,21 @@ namespace MagicStorage.Sorting
 			initialized = true;
 		}
 
-		private static bool MeleeWeapon(Item item) =>
-			item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Melee) && item.pick < 1 && item.hammer < 1 && item.axe < 1;
+		private static bool MeleeWeapon(Item item) => item.CountsAsClass(DamageClass.Melee) && Weapon(item);
 
-		private static bool RangedWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Ranged);
+		private static bool RangedWeapon(Item item) => item.CountsAsClass(DamageClass.Ranged) && Weapon(item);
 
-		private static bool MagicWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.ammo == 0 && item.CountsAsClass(DamageClass.Magic);
+		private static bool MagicWeapon(Item item) => item.CountsAsClass(DamageClass.Magic) && Weapon(item);
 
-		private static bool SummonWeapon(Item item) => item.maxStack == 1 && item.damage > 0 && item.CountsAsClass(DamageClass.Summon);
+		private static bool SummonWeapon(Item item) => item.CountsAsClass(DamageClass.Summon) && Weapon(item);
 
-		private static bool ThrownWeapon(Item item) =>
-			item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None && item.CountsAsClass(DamageClass.Throwing);
+		private static bool ThrownWeapon(Item item) => item.CountsAsClass(DamageClass.Throwing) && item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None;
 
-		private static bool Weapon(Item item) => item.damage > 0 && item.ammo == 0 && item.pick == 0 && item.axe == 0 && item.hammer == 0;
+		private static bool Weapon(Item item) => item.DamageType != DamageClass.Default && item.damage > 0 && item.ammo == 0 && !Tool(item);
 
 		private static bool Ammo(Item item) => item.ammo > 0 && item.damage > 0;
+
+		private static bool Tool(Item item) => item.pick > 0 || item.axe > 0 || item.hammer > 0;
 
 		private static bool Picksaw(Item item) => item.pick > 0 && item.axe > 0;
 
@@ -128,6 +133,10 @@ namespace MagicStorage.Sorting
 		private static bool Hammer(Item item) => item.hammer > 0;
 
 		private static bool TerraformingTool(Item item) => ItemID.Sets.SortingPriorityTerraforming[item.type] >= 0;
+
+		public static bool FishingPole(Item item) => item.fishingPole > 0;
+
+		public static bool FishingBait(Item item) => item.bait > 0;
 
 		private static bool AmmoTool(Item item) => item.ammo > 0;
 
@@ -177,45 +186,54 @@ namespace MagicStorage.Sorting
 
 		private static bool CommonTile(Item item) => item.createTile >= TileID.Dirt || item.createWall > 0;
 
-		private static int CompareRarity(Item item1, Item item2) => item1.rare - item2.rare;
+		private static int CompareRarity(Item item1, Item item2) => item1.rare.CompareTo(item2.rare);
 
 		private static int CompareValue(Item item1, Item item2) => Sorting.CompareValue.Instance.Compare(item1, item2);
 
 		private static int CompareDps(Item item1, Item item2)
 		{
 			int r = _dps.Compare(item1, item2);
-			return r != 0 ? -r : CompareValue(item1, item2);
+			if (r == 0)
+				r = CompareValue(item1, item2);
+			return r;
 		}
 
 		private static int CompareDamage(Item item1, Item item2) {
 			int r = Sorting.CompareDamage.Instance.Compare(item1, item2);
-			return r != 0 ? -r : CompareValue(item1, item2);
+			if (r == 0)
+				r = CompareValue(item1, item2);
+			return r;
 		}
+
+		private static int CompareToolPower(int tool1, int tool2) => tool1.CompareTo(tool2);
 
 		private static int ComparePicksaw(Item item1, Item item2)
 		{
-			int result = item1.pick - item2.pick;
+			int result = CompareToolPower(item1.pick, item2.pick);
 			if (result == 0)
-				result = item1.axe - item2.axe;
+				result = CompareToolPower(item1.axe, item2.axe);
 			return result;
 		}
 
 		private static int CompareHamaxe(Item item1, Item item2)
 		{
-			int result = item1.axe - item2.axe;
+			int result = CompareToolPower(item1.axe, item2.axe);
 			if (result == 0)
-				result = item1.hammer - item2.hammer;
+				result = CompareToolPower(item1.hammer, item2.hammer);
 			return result;
 		}
 
-		private static int ComparePickaxe(Item item1, Item item2) => item1.pick - item2.pick;
+		private static int ComparePickaxe(Item item1, Item item2) => CompareToolPower(item1.pick, item2.pick);
 
-		private static int CompareAxe(Item item1, Item item2) => item1.axe - item2.axe;
+		private static int CompareAxe(Item item1, Item item2) => CompareToolPower(item1.axe, item2.axe);
 
-		private static int CompareHammer(Item item1, Item item2) => item1.hammer - item2.hammer;
+		private static int CompareHammer(Item item1, Item item2) => CompareToolPower(item1.hammer, item2.hammer);
 
-		private static int CompareTerraformingPriority(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityTerraforming[item1.type] - ItemID.Sets.SortingPriorityTerraforming[item2.type];
+		private static int CompareTerraformingPriority(Item item1, Item item2) => ItemID.Sets.SortingPriorityTerraforming[item2.type].CompareTo(ItemID.Sets.SortingPriorityTerraforming[item1.type]);
+
+		private static int CompareFishingPole(Item item1, Item item2) => item1.fishingPole.CompareTo(item2.fishingPole);
+
+		private static int CompareFishingBait(Item item1, Item item2) => item1.bait.CompareTo(item2.bait);
 
 		private static int CompareAccessory(Item item1, Item item2)
 		{
@@ -229,7 +247,7 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
-				result = item1.dye - item2.dye;
+				result = item1.dye.CompareTo(item2.dye);
 			return result;
 		}
 
@@ -237,13 +255,13 @@ namespace MagicStorage.Sorting
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
-				result = item2.hairDye - item1.hairDye;
+				result = item1.hairDye.CompareTo(item2.hairDye);
 			return result;
 		}
 
-		private static int CompareHealing(Item item1, Item item2) => item1.healLife - item2.healLife;
+		private static int CompareHealing(Item item1, Item item2) => item1.healLife.CompareTo(item2.healLife);
 
-		private static int CompareMana(Item item1, Item item2) => item1.mana - item2.mana;
+		private static int CompareMana(Item item1, Item item2) => item1.mana.CompareTo(item2.mana);
 
 		private static int CompareElixir(Item item1, Item item2)
 		{
@@ -254,40 +272,39 @@ namespace MagicStorage.Sorting
 		}
 
 		private static int CompareBossSpawn(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityBossSpawns[item1.type] - ItemID.Sets.SortingPriorityBossSpawns[item2.type];
+			ItemID.Sets.SortingPriorityBossSpawns[item2.type].CompareTo(ItemID.Sets.SortingPriorityBossSpawns[item1.type]);
 
 		private static int ComparePainting(Item item1, Item item2)
 		{
-			int result = ItemID.Sets.SortingPriorityPainting[item1.type] - ItemID.Sets.SortingPriorityPainting[item2.type];
+			int result = ItemID.Sets.SortingPriorityPainting[item2.type].CompareTo(ItemID.Sets.SortingPriorityPainting[item1.type]);
 			if (result == 0)
-				result = item1.paint - item2.paint;
+				result = item2.paint.CompareTo(item1.paint);
 			return result;
 		}
 
 		private static int CompareWiring(Item item1, Item item2)
 		{
-			int result = ItemID.Sets.SortingPriorityWiring[item1.type] - ItemID.Sets.SortingPriorityWiring[item2.type];
+			int result = ItemID.Sets.SortingPriorityWiring[item2.type].CompareTo(ItemID.Sets.SortingPriorityWiring[item1.type]);
 			if (result == 0)
 				result = CompareRarity(item1, item2);
 			return result;
 		}
 
-		private static int CompareMaterial(Item item1, Item item2) => ItemID.Sets.SortingPriorityMaterials[item1.type] - ItemID.Sets.SortingPriorityMaterials[item2.type];
+		private static int CompareMaterial(Item item1, Item item2) => ItemID.Sets.SortingPriorityMaterials[item2.type].CompareTo(ItemID.Sets.SortingPriorityMaterials[item1.type]);
 
-		private static int CompareRope(Item item1, Item item2) => ItemID.Sets.SortingPriorityRopes[item1.type] - ItemID.Sets.SortingPriorityRopes[item2.type];
+		private static int CompareRope(Item item1, Item item2) => ItemID.Sets.SortingPriorityRopes[item2.type].CompareTo(ItemID.Sets.SortingPriorityRopes[item1.type]);
 
-		private static int CompareExtractible(Item item1, Item item2) =>
-			ItemID.Sets.SortingPriorityExtractibles[item1.type] - ItemID.Sets.SortingPriorityExtractibles[item2.type];
+		private static int CompareExtractible(Item item1, Item item2) => ItemID.Sets.SortingPriorityExtractibles[item2.type].CompareTo(ItemID.Sets.SortingPriorityExtractibles[item1.type]);
 
 		private static int CompareMisc(Item item1, Item item2)
 		{
 			int result = CompareRarity(item1, item2);
 			if (result == 0)
-				result = item1.value - item2.value;
+				result = CompareValue(item1, item2);
 			return result;
 		}
 
-		private static int CompareName(Item item1, Item item2) => Sorting.CompareName.Instance.Compare(item1, item2);
+		private static int CompareName(Item item1, Item item2) => Sorting.CompareName.Instance.Compare(item2, item1);  // Lower alphabetical names need to be first, swap the items again
 	}
 
 	public class DefaultSortClass

@@ -34,6 +34,11 @@ namespace MagicStorage.CrossMod {
 		/// </summary>
 		public virtual bool CacheFuzzySorting => true;
 
+		/// <summary>
+		/// Whether <see cref="Sorter"/> orders items in descending order.  Defaults to <see langword="false"/>.
+		/// </summary>
+		public virtual bool SortInDescendingOrder => false;
+
 		protected sealed override void Register() {
 			ModTypeLookup<SortingOption>.Register(this);
 
@@ -42,6 +47,9 @@ namespace MagicStorage.CrossMod {
 
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
+
+			// Force the tooltip to be generated if it's not present
+			_ = Tooltip;
 		}
 
 		public bool Visible { get; private set; } = true;

@@ -32,13 +32,13 @@ namespace MagicStorage {
 			itemsToRefresh = null;
 		}
 
-		public static void RefreshItems() {
+		internal static void RefreshItems() {
 			int[] toRefresh;
 			if (!MagicUI.ForceNextRefreshToBeFull) {
-				// Refresh the provided array
-				toRefresh = itemsToRefresh;
+				// Refresh the provided set
+				toRefresh = itemsToRefresh.ToArray();
 			} else {
-				// Force all recipes to be recalculated
+				// Force all items to be recalculated
 				itemsToRefresh = null;
 				toRefresh = null;
 			}
@@ -92,10 +92,6 @@ namespace MagicStorage {
 			int recipeChoice = page.recipeButtons.Choice;
 			int modSearchIndex = page.modSearchBox.ModIndex;
 
-			IEnumerable<IShimmerResultReport> reports = selectedItem == -1
-				? Array.Empty<IShimmerResultReport>()
-				: MagicCache.ShimmerInfos[selectedItem].GetShimmerReports();
-
 			ThreadState state;
 			StorageGUI.ThreadContext thread = new(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
 				heart = heart,
@@ -112,8 +108,7 @@ namespace MagicStorage {
 					globalHiddenTypes = globalHiddenRecipes,
 					hiddenTypes = hiddenRecipes,
 					favoritedTypes = favorited,
-					recipeFilterChoice = recipeChoice,
-					cachedShimmerReports = reports.Where(static r => r is ItemReport).ToList()  // Ignore any reports that aren't ItemReports, since that's all the result zone cares about
+					recipeFilterChoice = recipeChoice
 				}
 			};
 
@@ -121,6 +116,12 @@ namespace MagicStorage {
 			AnalyzeIngredients();
 
 			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => {
+				IEnumerable<IShimmerResultReport> reports = selectedItem == -1
+					? Array.Empty<IShimmerResultReport>()
+					: MagicCache.ShimmerInfos[selectedItem].GetShimmerReports();
+
+				state.cachedShimmerReports = reports.Where(static r => r is ItemReport).ToList();  // Ignore any reports that aren't ItemReports, since that's all the result zone cares about
+
 				state.decraftingRecipeAvailableSnapshot = Main.recipe.Take(Recipe.numRecipes).Select(ShimmerMetrics.IsDecraftAvailable).ToArray();
 				state.itemTypeToDecraftRecipeIndexSnapshot = ItemID.Sets.Factory.CreateIntSet(-1);
 				state.itemTransmuteAvailableSnapshot = ItemID.Sets.Factory.CreateBoolSet(false);

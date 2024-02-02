@@ -318,6 +318,8 @@ namespace MagicStorage
 			return null;
 		}
 
+		public static bool IsStorageCraftingOrDecrafting() => IsStorageCrafting() || IsStorageDecrafting();
+
 		public bool StorageCrafting()
 		{
 			if (storageAccess.X < 0 || storageAccess.Y < 0)

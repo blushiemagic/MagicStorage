@@ -282,7 +282,7 @@ namespace MagicStorage.UI.States {
 			filteringDropdown.Remove();
 
 			//Update the sorting and filtering button choices accordingly
-			bool craftingGUI = StoragePlayer.LocalPlayer.StorageCrafting();
+			bool craftingGUI = StoragePlayer.IsStorageCraftingOrDecrafting();
 
 			switch (current) {
 				case ButtonConfigurationMode.Legacy:

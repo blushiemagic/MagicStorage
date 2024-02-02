@@ -47,6 +47,9 @@ namespace MagicStorage.CrossMod {
 
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
+
+			// Force the tooltip to be generated if it's not present
+			_ = Tooltip;
 		}
 
 		public bool Visible { get; private set; } = true;
@@ -146,13 +149,16 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Summon { get; internal set; }
 			public static FilteringOption Throwing { get; internal set; }
 			public static FilteringOption Ammo { get; internal set; }
+			public static FilteringOption ToolsAndFishing { get; internal set; }
 			public static FilteringOption Tools { get; internal set; }
+			public static FilteringOption Fishing { get; internal set; }
 			public static FilteringOption ArmorAndEquips { get; internal set; }
 			public static FilteringOption Armor { get; internal set; }
 			public static FilteringOption Equips { get; internal set; }
 			public static FilteringOption Vanity { get; internal set; }
 			public static FilteringOption Potion { get; internal set; }
 			public static FilteringOption Tiles { get; internal set; }
+			public static FilteringOption MiscGameplayItems { get; internal set; }
 			public static FilteringOption Misc { get; internal set; }
 			public static FilteringOption Recent { get; internal set; }
 			public static FilteringOption OtherWeapons { get; internal set; }
@@ -200,7 +206,7 @@ namespace MagicStorage.CrossMod {
 			=> new FilteringOption[] {
 				Definitions.All,
 				Definitions.Weapon,
-				Definitions.Tools,
+				Definitions.ToolsAndFishing,
 				Definitions.ArmorAndEquips,
 				Definitions.Potion,
 				Definitions.Tiles,
@@ -220,13 +226,16 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Throwing = new FilterThrowing());
 			mod.AddContent(Definitions.OtherWeapons = new FilterOtherWeaponClasses());
 			mod.AddContent(Definitions.Ammo = new FilterAmmo());
+			mod.AddContent(Definitions.ToolsAndFishing = new FilterToolsAndFishing());
 			mod.AddContent(Definitions.Tools = new FilterTools());
+			mod.AddContent(Definitions.Fishing = new FilterFishing());
 			mod.AddContent(Definitions.ArmorAndEquips = new FilterArmorAndEquips());
 			mod.AddContent(Definitions.Armor = new FilterArmor());
 			mod.AddContent(Definitions.Equips = new FilterEquips());
 			mod.AddContent(Definitions.Vanity = new FilterVanity());
 			mod.AddContent(Definitions.Potion = new FilterPotion());
 			mod.AddContent(Definitions.Tiles = new FilterTiles());
+			mod.AddContent(Definitions.MiscGameplayItems = new FilterMiscGamePlayItems());
 			mod.AddContent(Definitions.Material = new FilterMaterials());
 			//mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
 			//mod.AddContent(Definitions.Stackables = new FilterStackables());

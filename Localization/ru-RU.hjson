@@ -868,6 +868,9 @@ Mods: {
 			NotFullyResearched.Tooltip: Фильтр (Непросмотренное)
 			FullyResearched.Tooltip: Фильтр (Просмотренное)
 			Materials.Tooltip: Фильтр (Материалы)
+			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
+			// Fishing.Tooltip: Filter Fishing Items
+			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
 		}
 
 		SortingOption: {

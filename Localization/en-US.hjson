@@ -855,7 +855,7 @@ Mods: {
 			WeaponsMelee.Tooltip: Filter Melee Weapons
 			WeaponsRanged.Tooltip: Filter Ranged Weapons
 			WeaponsMagic.Tooltip: Filter Magic Weapons
-			WeaponsSummon.Tooltip: Filter Summons
+			WeaponsSummon.Tooltip: Filter Summon Weapons
 			WeaponsThrown.Tooltip: Filter Throwing Weapons
 			Ammo.Tooltip: Filter Ammo
 			Armor.Tooltip: Filter Armor
@@ -871,6 +871,9 @@ Mods: {
 			NotFullyResearched.Tooltip: Filter Items Not Fully Researched
 			FullyResearched.Tooltip: Filter Items Fully Researched
 			Materials.Tooltip: Filter Materials
+			ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
+			Fishing.Tooltip: Filter Fishing Items
+			MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
 		}
 
 		SortingOption: {

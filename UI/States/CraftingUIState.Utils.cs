@@ -32,7 +32,10 @@ namespace MagicStorage.UI.States {
 				text.Clear().Append(s);
 			} else {
 				// Line still has enough room for the next string
-				text.Append(' ').Append(s);
+				if (!isEmpty)
+					text.Append(' ');
+
+				text.Append(s);
 			}
 
 			isEmpty = false;

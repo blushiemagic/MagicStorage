@@ -20,6 +20,12 @@ namespace MagicStorage.Common.Systems {
 				.Register();
 		}
 
+		public override void Unload()
+		{
+			toiletRecipeGroup = null;
+			fishingBobberRecipeGroup = null;
+		}
+
 		//Regexes for filtering vanilla item types
 		public static readonly Regex chestItemRegex = new(@"\b(?!Fake_)(.*Chest)\b", RegexOptions.Compiled);
 		public static readonly Regex workBenchItemRegex = new(@"\b(.*WorkBench)\b", RegexOptions.Compiled);
@@ -27,6 +33,11 @@ namespace MagicStorage.Common.Systems {
 		public static readonly Regex tableItemRegex = new(@"\b(.*Table)(?:WithCloth)?\b", RegexOptions.Compiled);
 		public static readonly Regex bookcaseItemRegex = new(@"\b(.*Bookcase)\b", RegexOptions.Compiled);
 		public static readonly Regex campfireItemRegex = new(@"\b(.*Campfire)\b", RegexOptions.Compiled);
+		public static readonly Regex toiletItemRegex = new(@"\b(.*Toilet)\b", RegexOptions.Compiled);
+		public static readonly Regex fishingBobberItemRegex = new(@"\b(FishingBobber.*)\b", RegexOptions.Compiled);
+
+		internal static RecipeGroup toiletRecipeGroup;
+		internal static RecipeGroup fishingBobberRecipeGroup;
 
 		public override void AddRecipeGroups()
 		{
@@ -132,6 +143,16 @@ namespace MagicStorage.Common.Systems {
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Campfire)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire", group);
 			RegisterGroupClone(group, nameof(ItemID.Campfire));
+
+			items = GetItems(ItemID.Toilet, toiletItemRegex);
+			toiletRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Toilet)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyToilet", group);
+			RegisterGroupClone(group, nameof(ItemID.Toilet));
+
+			items = GetItems(ItemID.FishingBobber, fishingBobberItemRegex);
+			fishingBobberRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.FishingBobber)}", items);
+			RecipeGroup.RegisterGroup("MagicStorage:AnyFishingBobber", group);
+			RegisterGroupClone(group, nameof(ItemID.FishingBobber));
 
 			items = new[] { ModContent.ItemType<DemonAltar>(), ModContent.ItemType<CrimsonAltar>() };
 

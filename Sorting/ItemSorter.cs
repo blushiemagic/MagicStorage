@@ -93,10 +93,10 @@ namespace MagicStorage.Sorting
 				if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
 					var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
-					orderedItems = orderedItems.OrderByDescending(x => objToItem(x), sortFunc);
+					orderedItems = sorter.SortInDescendingOrder ? orderedItems.OrderByDescending(objToItem, sortFunc) : orderedItems.OrderBy(objToItem, sortFunc);
 				}
 
-				return orderedItems.ThenByDescending(x => objToItem(x).type).ThenByDescending(x => objToItem(x).value);
+				return orderedItems.ThenBy(objToItem, CompareID.Instance).ThenByDescending(objToItem, CompareValue.Instance);
 			} catch when (thread.token.IsCancellationRequested) {
 				return Array.Empty<T>();
 			}

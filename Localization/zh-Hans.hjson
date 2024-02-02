@@ -869,6 +869,9 @@ Mods: {
 			NotFullyResearched.Tooltip: 未完全研究的物品
 			FullyResearched.Tooltip: 已完全研究的物品
 			Materials.Tooltip: 材料
+			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
+			// Fishing.Tooltip: Filter Fishing Items
+			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
 		}
 
 		SortingOption: {

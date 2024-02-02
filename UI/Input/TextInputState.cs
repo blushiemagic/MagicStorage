@@ -26,6 +26,8 @@ namespace MagicStorage.UI.Input {
 
 		public bool IsActive => _active;
 
+		public bool WasActive => _oldActive;
+
 		public int CursorLocation => _cursor;
 
 		public bool CursorBlink => _focused && _timer < 30;

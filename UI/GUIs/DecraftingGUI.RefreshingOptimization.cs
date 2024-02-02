@@ -1,41 +1,45 @@
-﻿using System.Collections.Generic;
+﻿using MagicStorage.Common.Systems;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		internal static int[] itemsToRefresh;
-
+		internal static HashSet<int> itemsToRefresh;
+		
 		/// <summary>
-		/// Adds <paramref name="items"/> to the list of items to refresh when calling <see cref="RefreshItems"/>
+		/// Adds <paramref name="itemType"/> to the list of items to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
-		/// <param name="items">An array of item IDs to refresh.  If <see langword="null"/>, then nothing happens</param>
-		public static void SetNextDefaultItemCollectionToRefresh(int[] items) {
-			if (itemsToRefresh is null) {
-				if (items is not null)
-					NetHelper.Report(true, $"Setting next refresh to check {items.Length} items");
+		/// <param name="itemType">An item ID to refresh</param>
+		public static void SetNextDefaultItemCollectionToRefresh(int itemType) {
+			itemsToRefresh ??= new();
+			itemsToRefresh.Add(itemType);
 
-				itemsToRefresh = items;
-				return;
-			}
-
-			if (items is null)
-				return;
-
-			itemsToRefresh = itemsToRefresh.Concat(items).Distinct().ToArray();
-
-			NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Length} items");
+			NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
 		}
 
 		/// <summary>
-		/// Adds <paramref name="item"/> to the list of items to refresh when calling <see cref="RefreshItems"/>
+		/// Adds <paramref name="itemTypes"/> to the list of items to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
-		/// <param name="item">An item ID to refresh</param>
-		public static void SetNextDefaultItemCollectionToRefresh(int item) => SetNextDefaultItemCollectionToRefresh(new[] { item });
+		/// <param name="itemTypes">An enumeration of item IDs to refresh.  If <see langword="null"/> or empty, then nothing happens</param>
+		public static void SetNextDefaultItemCollectionToRefresh(IEnumerable<int> itemTypes) {
+			if (itemTypes is null)
+				return;
+
+			itemsToRefresh ??= new();
+			
+			foreach (int id in itemTypes)
+				itemsToRefresh.Add(id);
+
+			if (itemsToRefresh.Count == 0)
+				itemsToRefresh = null;
+			else
+				NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
+		}
 
 		/// <summary>
-		/// Adds <paramref name="items"/> to the list of items to refresh when calling <see cref="RefreshItems"/>
+		/// Adds <paramref name="itemTypes"/> to the list of items to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
-		/// <param name="items">An enumeration of item IDs to refresh.  If <see langword="null"/>, then nothing happens</param>
-		public static void SetNextDefaultItemCollectionToRefresh(IEnumerable<int> items) => SetNextDefaultItemCollectionToRefresh(items?.ToArray());
+		/// <param name="itemTypes">An array of item IDs to refresh.  If <see langword="null"/>, then nothing happens</param>
+		public static void SetNextDefaultItemCollectionToRefresh(int[] itemTypes) => SetNextDefaultItemCollectionToRefresh((IEnumerable<int>)itemTypes);
 	}
 }

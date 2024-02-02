@@ -132,7 +132,7 @@ namespace MagicStorage.UI {
 		public override SortingOption GetOption(SortingOptionElement element) => element.option;
 
 		public override IEnumerable<SortingOption> GetOptions() {
-			IEnumerable<SortingOption> orig = SortingOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
+			IEnumerable<SortingOption> orig = SortingOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.IsStorageCraftingOrDecrafting());
 
 			if (!filterBaseOptions)
 				return orig;
@@ -155,7 +155,7 @@ namespace MagicStorage.UI {
 		public override FilteringOption GetOption(FilteringOptionElement element) => element.option;
 
 		public override IEnumerable<FilteringOption> GetOptions() {
-			IEnumerable<FilteringOption> orig = FilteringOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.LocalPlayer.StorageCrafting());
+			IEnumerable<FilteringOption> orig = FilteringOptionLoader.GetVisibleOptions(craftingGUI: StoragePlayer.IsStorageCraftingOrDecrafting());
 
 			if (!filterBaseOptions)
 				return orig;

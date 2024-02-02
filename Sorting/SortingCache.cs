@@ -1,6 +1,7 @@
 ﻿using MagicStorage.CrossMod;
 using SerousCommonLib.API;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -38,6 +39,20 @@ public class SortingCacheDictionary
 		}
 	}
 
+	private class KeepItemsInPlaceEnumerable<T> : IOrderedEnumerable<T> {
+		private readonly IEnumerable<T> source;
+
+		public KeepItemsInPlaceEnumerable(IEnumerable<T> source) {
+			this.source = source;
+		}
+
+		public IOrderedEnumerable<T> CreateOrderedEnumerable<TKey>(Func<T, TKey> keySelector, IComparer<TKey>? comparer, bool descending) => this;
+
+		public IEnumerator<T> GetEnumerator() => source.GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+	}
+
 	private readonly Dictionary<int, Entry> cache = new();
 
 	public int FindIndex(int mode, int itemType) => cache.TryGetValue(mode, out var entry) ? entry.FindIndex(itemType) : -1;
@@ -66,10 +81,9 @@ public class SortingCacheDictionary
 
 		var sorter = option.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
 
-		var items = ContentSamples.ItemsByType
-			.Select((pair, i) => (item: pair.Value, type: i))
-			.OrderBy(x => x.item, sorter)
-			.ToArray();
+		var itemsQuery = ContentSamples.ItemsByType.Select((pair, i) => (item: pair.Value, type: i));
+		itemsQuery = option.SortInDescendingOrder ? itemsQuery.OrderByDescending(x => x.item, sorter) : itemsQuery.OrderBy(x => x.item, sorter);
+		var items = itemsQuery.ToArray();
 
 		int[] indices = new int[items.Length];
 
@@ -95,11 +109,11 @@ public class SortingCacheDictionary
 		Entry entry = cache[mode];
 
 		if (source is null)
-			return Array.Empty<T>().OrderBy(_ => 0); //Failsafe - a pointless collection
+			return new KeepItemsInPlaceEnumerable<T>(Array.Empty<T>()); //Failsafe - a pointless collection
 
 		if (entry?.IndexByType is null)
-			return source.OrderBy(_ => 0); //Preserve item order, likely because the sorter uses runtime values
+			return new KeepItemsInPlaceEnumerable<T>(source); //Preserve item order, likely because the sorter uses runtime values
 
-		return source.Where(t => t is not null).OrderBy(t => entry.FindIndex(objToItem(t).type));
+		return source.OfType<T>().OrderBy(t => entry.FindIndex(objToItem(t).type));
 	}
 }

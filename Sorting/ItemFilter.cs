@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
 using System.Linq;
 using Terraria;
@@ -13,7 +14,7 @@ namespace MagicStorage.Sorting
 
 		public static readonly Filter All = item => true;
 
-		public static readonly Filter Weapon = item => item.DamageType != DamageClass.Default && item.damage > 0 && !Ammo(item) && !Tool(item);
+		public static readonly Filter Weapon = item => item.DamageType != DamageClass.Default && item.damage > 0 && item.ammo == 0 && !Tool(item);
 
 		public static readonly Filter WeaponMelee = item => item.DamageType.CountsAsClass(DamageClass.Melee) && Weapon(item);
 
@@ -30,7 +31,7 @@ namespace MagicStorage.Sorting
 			ItemID.MagicMirror => false,
 			ItemID.IceMirror   => false,
 			ItemID.TreasureMap => false,
-			_                  => item.CountsAsClass(DamageClass.Summon) || SortClassList.BossSpawn(item) || SortClassList.Cart(item) || SortClassList.LightPet(item) || SortClassList.Mount(item) || item.sentry,
+			_                  => item.CountsAsClass(DamageClass.Summon) || item.sentry,
 		};
 
 		public static readonly Filter WeaponThrown = item => item.type switch
@@ -41,7 +42,7 @@ namespace MagicStorage.Sorting
 			ItemID.Bomb           => true,
 			ItemID.StickyBomb     => true,
 			ItemID.BouncyBomb     => true,
-			_                     => item.CountsAsClass(DamageClass.Throwing) && Weapon(item),
+			_                     => item.CountsAsClass(DamageClass.Throwing) && item.damage > 0 && (item.ammo == 0 || item.notAmmo) && item.shoot > ProjectileID.None
 		};
 
 		public static readonly Filter WeaponOther = item => !FilteringOptionLoader.Options.Where(o => !object.ReferenceEquals(o, FilteringOptionLoader.Definitions.Weapon) && o.FiltersDamageClass).Any(o => o.Filter(item)) && Weapon(item);
@@ -52,6 +53,34 @@ namespace MagicStorage.Sorting
 		public static readonly Filter Tool = item =>
 			item.pick > 0 || item.axe > 0 || item.hammer > 0;
 
+		public static readonly Filter Fishing = item => item.type switch {
+			ItemID.AnglerHat => true,
+			ItemID.AnglerVest => true,
+			ItemID.AnglerPants => true,
+			ItemID.AnglerTackleBag => true,
+			ItemID.LavaproofTackleBag => true,
+			ItemID.AnglerEarring => true,
+			ItemID.FloatingTube => true,
+			ItemID.HighTestFishingLine => true,
+			ItemID.TackleBox => true,
+			ItemID.FishermansGuide => true,
+			ItemID.WeatherRadio => true,
+			ItemID.Sextant => true,
+			ItemID.FishFinder => true,
+			ItemID.ChumBucket => true,
+			ItemID.GummyWorm => true,
+			ItemID.MolluskWhistle => true,
+			ItemID.FishingPotion => true,
+			ItemID.CratePotion => true,
+			ItemID.SonarPotion => true,
+			ItemID.Ale => true,
+			_ when MagicRecipes.fishingBobberRecipeGroup.ValidItems.Contains(item.type) => true,
+			_ when MagicRecipes.toiletRecipeGroup.ValidItems.Contains(item.type) => true,
+			_ => SortClassList.FishingPole(item) || SortClassList.FishingBait(item)
+		};
+
+		public static readonly Filter ToolsAndFishing = item => Tool(item) || SortClassList.FishingPole(item);
+
 		public static readonly Filter Armor = item =>
 			!item.vanity && (item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0);
 
@@ -60,7 +89,7 @@ namespace MagicStorage.Sorting
 
 		public static readonly Filter Equipment = item =>
 			!item.vanity &&
-			(item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || (item.buffType > 0 && (Main.lightPet[item.buffType] || Main.vanityPet[item.buffType])));
+			(item.accessory || Main.projHook[item.shoot] || item.mountType >= 0 || SortClassList.Cart(item) || SortClassList.VanityPet(item) || SortClassList.LightPet(item) || SortClassList.Mount(item));
 
 		public static readonly Filter ArmorAndEquipment = item => Armor(item) || Equipment(item);
 
@@ -90,6 +119,8 @@ namespace MagicStorage.Sorting
 			&& item.dye <= 0
 			&& item.paint <= 0;
 
+		public static readonly Filter MiscGameplayItem = SortClassList.BossSpawn;
+
 		public static readonly Filter Misc = item =>
 			!blacklist.Any(filter => filter(item));
 
@@ -103,12 +134,7 @@ namespace MagicStorage.Sorting
 
 		private static readonly Filter[] blacklist =
 		{
-			WeaponMelee,
-			WeaponRanged,
-			WeaponMagic,
-			WeaponSummon,
-			WeaponThrown,
-			WeaponOther,
+			Weapon,
 			Ammo,
 			Vanity,
 			Tool,
@@ -116,6 +142,7 @@ namespace MagicStorage.Sorting
 			Equipment,
 			Potion,
 			Placeable,
+			MiscGameplayItem
 		};
 	}
 }

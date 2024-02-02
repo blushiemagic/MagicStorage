@@ -47,6 +47,8 @@ namespace MagicStorage.CrossMod {
 
 		public override bool SortAgainAfterFuzzy => true;
 
+		public override bool SortInDescendingOrder => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
 
@@ -59,6 +61,8 @@ namespace MagicStorage.CrossMod {
 		public override string Name => "QuantityAbsolute";
 
 		public override bool CacheFuzzySorting => false;  // Causes issues during mod loading
+
+		public override bool SortInDescendingOrder => true;
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
@@ -73,6 +77,8 @@ namespace MagicStorage.CrossMod {
 
 		public override bool CacheFuzzySorting => false;  // Causes issues during mod loading
 
+		public override bool SortInDescendingOrder => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
 
@@ -85,6 +91,9 @@ namespace MagicStorage.CrossMod {
 		public override string Name => "Damage";
 
 		public override bool SortAgainAfterFuzzy => true;
+
+
+		public override bool SortInDescendingOrder => true;
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}

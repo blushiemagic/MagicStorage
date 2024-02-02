@@ -107,12 +107,50 @@ namespace MagicStorage.CrossMod {
 	}
 
 	[Autoload(false)]
+	public sealed class FilterToolsAndFishing : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.ToolsAndFishing;
+
+		public override string Texture => "MagicStorage/Assets/FilterPickaxe";
+
+		public override string Name => "ToolsAndFishing";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override bool GetDefaultVisibility(bool craftingGUI) {
+			switch (MagicStorageConfig.ButtonUIMode) {
+				case ButtonConfigurationMode.Legacy:
+					return !MagicStorageConfig.ExtraFilterIcons;
+				case ButtonConfigurationMode.ModernPaged:
+				case ButtonConfigurationMode.ModernConfigurable:
+				case ButtonConfigurationMode.ModernDropdown:
+					return false;
+				case ButtonConfigurationMode.LegacyWithGear:
+				case ButtonConfigurationMode.LegacyBasicWithPaged:
+					return true;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+	}
+
+	[Autoload(false)]
 	public sealed class FilterTools : FilteringOption {
 		public override ItemFilter.Filter Filter => ItemFilter.Tool;
 
 		public override string Texture => "MagicStorage/Assets/FilterPickaxe";
 
 		public override string Name => "Tools";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterFishing : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.Fishing;
+
+		public override string Texture => "MagicStorage/Assets/FilterFishing";
+
+		public override string Name => "Fishing";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}
@@ -195,6 +233,17 @@ namespace MagicStorage.CrossMod {
 		public override string Texture => "MagicStorage/Assets/FilterTile";
 
 		public override string Name => "Tiles";
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterMiscGamePlayItems : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.MiscGameplayItem;
+
+		public override string Texture => "MagicStorage/Assets/FilterMiscGameplay";
+
+		public override string Name => "MiscGameplayItems";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 	}

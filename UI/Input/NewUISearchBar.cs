@@ -52,9 +52,9 @@ namespace MagicStorage.UI.Input {
 						MagicUI.mouseText = hoverText;
 					else
 						MagicUI.mouseText = "";
-				} else
-					MagicUI.mouseText = "";
-			}
+				}
+			} else if (State.WasActive)
+				MagicUI.mouseText = "";
 		}
 	}
 }

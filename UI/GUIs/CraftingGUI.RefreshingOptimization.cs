@@ -9,7 +9,7 @@ namespace MagicStorage {
 		private static Recipe[] recipesToRefresh;
 
 		/// <summary>
-		/// Adds <paramref name="recipes"/> to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// Adds <paramref name="recipes"/> to the collection of recipes to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
 		/// <param name="recipes">An array of recipes to update.  If <see langword="null"/>, then nothing happens</param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(Recipe[] recipes) {
@@ -45,7 +45,7 @@ namespace MagicStorage {
 		}
 
 		/// <summary>
-		/// Adds all recipes which use <paramref name="affectedItemType"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// Adds all recipes which use <paramref name="affectedItemType"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
 		/// <param name="affectedItemType">The item type to use when checking <see cref="MagicCache.RecipesUsingItemType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(int affectedItemType) {
@@ -53,7 +53,7 @@ namespace MagicStorage {
 		}
 
 		/// <summary>
-		/// Adds all recipes which use the IDs in <paramref name="affectedItemTypes"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// Adds all recipes which use the IDs in <paramref name="affectedItemTypes"/> as an ingredient or result to the collection of recipes to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
 		/// <param name="affectedItemTypes">A collection of item types to use when checking <see cref="MagicCache.RecipesUsingItemType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefresh(IEnumerable<int> affectedItemTypes) {
@@ -63,7 +63,7 @@ namespace MagicStorage {
 		}
 
 		/// <summary>
-		/// Adds all recipes which use <paramref name="affectedTileType"/> as a required tile to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// Adds all recipes which use <paramref name="affectedTileType"/> as a required tile to the collection of recipes to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
 		/// <param name="affectedTileType">The tile type to use when checking <see cref="MagicCache.RecipesUsingTileType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefreshFromTile(int affectedTileType) {
@@ -71,7 +71,7 @@ namespace MagicStorage {
 		}
 
 		/// <summary>
-		/// Adds all recipes which the IDs in <paramref name="affectedTileTypes"/> as a required tile to the collection of recipes to refresh when calling <see cref="RefreshItems"/>
+		/// Adds all recipes which the IDs in <paramref name="affectedTileTypes"/> as a required tile to the collection of recipes to refresh when calling <see cref="MagicUI.RefreshItems"/>
 		/// </summary>
 		/// <param name="affectedTileTypes">A collection of the tile type to use when checking <see cref="MagicCache.RecipesUsingTileType"/></param>
 		public static void SetNextDefaultRecipeCollectionToRefreshFromTile(IEnumerable<int> affectedTileTypes) {

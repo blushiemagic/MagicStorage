@@ -16,7 +16,7 @@ namespace MagicStorage.Common.Global {
 			if (Main.gameMenu)
 				return false;
 
-			if (StoragePlayer.LocalPlayer.StorageCrafting() || StoragePlayer.LocalPlayer.StorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
+			if (StoragePlayer.IsStorageCraftingOrDecrafting() || StoragePlayer.IsStorageEnvironment() || StoragePlayer.LocalPlayer.ViewingStorage().X < 0)
 				return false;
 
 			return !MagicUI.blockItemSlotActionsDetour;

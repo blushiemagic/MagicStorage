@@ -30,7 +30,9 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				: new ShimmerInfo(type, ShimmerMetrics.GetShimmerEquivalentType(type), isNullItem: false);
 		}
 
-		public ShimmerAttemptResult GetAttempt(out int decraftingRecipeIndex) {
+		public ShimmerAttemptResult GetAttempt(out int decraftingRecipeIndex) => GetAttempt(out decraftingRecipeIndex, ignoreShimmerChecks: false);
+		
+		private ShimmerAttemptResult GetAttempt(out int decraftingRecipeIndex, bool ignoreShimmerChecks) {
 			decraftingRecipeIndex = -1;
 
 			if (_isNullItem)
@@ -38,7 +40,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 			var sample = ContentSamples.ItemsByType[iconicItem];
 
-			if (!sample.CanShimmer())
+			if (!ignoreShimmerChecks && !sample.CanShimmer())
 				return ShimmerAttemptResult.None;
 
 			if (iconicItem is ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin || ItemID.Sets.CoinLuckValue[iconicItem] > 0)
@@ -63,8 +65,10 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			return ShimmerAttemptResult.None;
 		}
 
-		public IShimmerResult GetResult() {
-			var attempt = GetAttempt(out int decraftingRecipeIndex);
+		public IShimmerResult GetResult() => GetResult(ignoreShimmerChecks: false);
+		
+		private IShimmerResult GetResult(bool ignoreShimmerChecks) {
+			var attempt = GetAttempt(out int decraftingRecipeIndex, ignoreShimmerChecks);
 
 			return attempt switch {
 				ShimmerAttemptResult.None => null,
@@ -77,7 +81,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		}
 
 		public IEnumerable<IShimmerResultReport> GetShimmerReports() {
-			if (_isNullItem || GetResult() is not IShimmerResult result)
+			if (_isNullItem || GetResult(ignoreShimmerChecks: true) is not IShimmerResult result)
 				return new IShimmerResultReport[] { new NoResultReport() };
 
 			return result.GetShimmerReports(ContentSamples.ItemsByType[actualItem], iconicItem);

@@ -81,7 +81,7 @@ namespace MagicStorage.CrossMod.Control {
 
 			//Default to the first available option if this option was removed and it's selected
 			if (!enabled && SortingOptionLoader.Selected == option.Type) {
-				bool craftingGUI = !Main.gameMenu && StoragePlayer.LocalPlayer.StorageCrafting();
+				bool craftingGUI = !Main.gameMenu && StoragePlayer.IsStorageCraftingOrDecrafting();
 				var options = GetSortingOptions(craftingGUI);
 
 				SortingOptionLoader.Selected = !options.Any() ? -1 : options.First().Type;
@@ -101,7 +101,7 @@ namespace MagicStorage.CrossMod.Control {
 
 			//Default to the first available option if this option was removed and it's selected
 			if (!enabled && FilteringOptionLoader.Selected == option.Type) {
-				bool craftingGUI = !Main.gameMenu && StoragePlayer.LocalPlayer.StorageCrafting();
+				bool craftingGUI = !Main.gameMenu && StoragePlayer.IsStorageCraftingOrDecrafting();
 				var options = GetFilteringOptions(craftingGUI);
 
 				FilteringOptionLoader.Selected = !options.Any() ? -1 : options.First().Type;
