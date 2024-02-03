@@ -308,7 +308,7 @@ namespace MagicStorage.UI.States {
 					or ButtonConfigurationMode.ModernConfigurable
 					or ButtonConfigurationMode.LegacyWithGear
 					or ButtonConfigurationMode.LegacyBasicWithPaged => TopBar3Bottom,
-					ButtonConfigurationMode.ModernPaged => TopBar1Bottom,
+					ButtonConfigurationMode.ModernPaged => TopBar1Bottom + 16,
 					ButtonConfigurationMode.ModernDropdown => TopBar2Bottom,
 					_ => throw new ArgumentOutOfRangeException()
 				};
