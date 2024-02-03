@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.CrossMod;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -117,7 +118,7 @@ namespace MagicStorage.UI.States {
 
 		public abstract string DefaultPage { get; }
 
-		public BaseStorageUIPage GetPage(string page) => pages is null ? null : pages[page];
+		public BaseStorageUIPage GetPage(string page) => pages?.TryGetValue(page, out var pageValue) is true ? pageValue : null;
 
 		public BaseStorageUIPage GetDefaultPage() => GetPage(DefaultPage);
 
@@ -127,7 +128,7 @@ namespace MagicStorage.UI.States {
 				: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
 
 		public bool TryGetPage<T>(string page, [NotNullWhen(true)] out T result) where T : BaseStorageUIPage {
-			if (!pages.TryGetValue(page, out var pageValue) || pageValue is not T typedPageValue) {
+			if (pages?.TryGetValue(page, out var pageValue) is not true || pageValue is not T typedPageValue) {
 				result = null;
 				return false;
 			}
@@ -237,15 +238,17 @@ namespace MagicStorage.UI.States {
 				BaseOptionUIPage obj = e.Parent as BaseOptionUIPage;
 				
 				var optionPage = obj.parentUI.GetPage<BaseOptionUIPage>(obj.Name);
-				optionPage.option = option;
-				optionPage.SetLoaderSelection(option);
+				
+				optionPage.SetSelection(option);
 
 				//Deselect the option in the main UI
-				var defPage = obj.parentUI.GetDefaultPage<BaseStorageUIAccessPage>();
-				if (obj.Name == "Sorting")
-					defPage.sortingButtons.Choice = -1;
-				else if (obj.Name == "Filtering")
-					defPage.filteringButtons.Choice = -1;
+				if (!optionPage.IsOptionGeneral(e)) {
+					var defPage = obj.parentUI.GetDefaultPage<BaseStorageUIAccessPage>();
+					if (obj.Name == "Sorting")
+						defPage.sortingButtons.Choice = -1;
+					else if (obj.Name == "Filtering")
+						defPage.filteringButtons.Choice = -1;
+				}
 				
 				MagicUI.SetRefresh(forceFullRefresh: true);
 			};
@@ -269,10 +272,6 @@ namespace MagicStorage.UI.States {
 		public sealed override void OnActivate() => Open();
 
 		public sealed override void OnDeactivate() => Close();
-
-		public abstract int GetSortingOption();
-
-		public abstract int GetFilteringOption();
 
 		public abstract string GetSearchText();
 
@@ -317,6 +316,16 @@ namespace MagicStorage.UI.States {
 
 			SetPage(DefaultPage);
 
+			// Restore the saved sorting/filtering options
+			if (GetPage("Sorting") is SortingPage sortingPage)
+				SortingOptionLoader.Selected = sortingPage.selected;
+
+			if (GetPage("Filtering") is FilteringPage filteringPage) {
+				FilteringOptionLoader.Selected = filteringPage.selected;
+				FilteringOptionLoader.GeneralSelections.Clear();
+				FilteringOptionLoader.GeneralSelections.UnionWith(filteringPage.generalSelections);
+			}
+
 			pendingUIChange = true;
 
 			timeSpentOpen = 0;
@@ -331,6 +340,16 @@ namespace MagicStorage.UI.States {
 				currentPage.InvokeOnPageDeselected();
 
 				currentPage.Remove();
+
+				// Save the sorting/filtering options
+				if (GetPage("Sorting") is SortingPage sortingPage)
+					sortingPage.selected = SortingOptionLoader.Selected;
+
+				if (GetPage("Filtering") is FilteringPage filteringPage) {
+					filteringPage.selected = FilteringOptionLoader.Selected;
+					filteringPage.generalSelections.Clear();
+					filteringPage.generalSelections.UnionWith(FilteringOptionLoader.GeneralSelections);
+				}
 			}
 
 			currentPage = null;
@@ -419,17 +438,6 @@ namespace MagicStorage.UI.States {
 		}
 
 		protected virtual void OnButtonConfigChanged(ButtonConfigurationMode current) { }
-
-		internal void ModernPanelButtonClicked(string page, NewUIButtonChoice buttons) {
-			//Clicks from the main UI page's buttons
-
-			var optionPage = GetPage<BaseOptionUIPage>(page);
-			
-			optionPage.option = buttons.SelectionType;
-			optionPage.SetLoaderSelection(optionPage.option);
-			
-			MagicUI.SetRefresh(forceFullRefresh: true);
-		}
 
 		internal void OpenModernConfigPanel(string page) {
 			if (page == "Sorting")

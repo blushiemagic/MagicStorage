@@ -21,8 +21,6 @@ namespace MagicStorage.CrossMod {
 
 		public abstract IComparer<Item> Sorter { get; }
 
-		public virtual Action OnSelected { get; }
-
 		/// <summary>
 		/// Whether <see cref="Sorter"/> is used again after calculating sort order from fuzzy sorting
 		/// </summary>
@@ -54,6 +52,13 @@ namespace MagicStorage.CrossMod {
 
 		public bool Visible { get; private set; } = true;
 
+		/// <summary>
+		/// This method executes whenever this option is clicked in the UI
+		/// </summary>
+		/// <param name="choiceIndex">Which button set this option is currently assigned to</param>
+		/// <param name="source">Which button index this option refers to</param>
+		public virtual void OnSelected(NewUIButtonChoice source, int choiceIndex) { }
+
 		private readonly List<SortingOption> childrenBefore = new();
 		public IReadOnlyList<SortingOption> ChildrenBefore => childrenBefore;
 
@@ -72,7 +77,7 @@ namespace MagicStorage.CrossMod {
 
 		/// <summary> Returns the layer's default visibility. This is usually called as a layer is queued for drawing, but modders can call it too for information. </summary>
 		/// <returns> Whether or not this layer will be visible by default. Modders can hide layers later, if needed.</returns>
-		public virtual bool GetDefaultVisibility(bool craftinGUI) => true;
+		public virtual bool GetDefaultVisibility(bool craftingGUI) => true;
 
 		/// <summary>
 		/// Returns the layer's default position in regards to other options.
@@ -130,6 +135,8 @@ namespace MagicStorage.CrossMod {
 		protected override bool IsSelected() => MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable
 			? MagicStorageMod.Instance.optionsConfig.sortingOptions[option.Type] is not null
 			: option.Type == SortingOptionLoader.Selected;
+
+		protected override bool IsGeneralOption() => false;
 
 		public override int CompareTo(object obj) {
 			if (obj is not SortingOptionElement other)
@@ -236,7 +243,7 @@ namespace MagicStorage.CrossMod {
 							positions.Add(new SortingOptionSlot(option, cond, slot++), mulPos);
 						break;
 					default:
-						throw new ArgumentException($"PlayerDrawLayer {option} has unknown Position type {pos}");
+						throw new ArgumentException($"SortingOption {option} has unknown Position type {pos}");
 				}
 
 				positions.Remove(option);

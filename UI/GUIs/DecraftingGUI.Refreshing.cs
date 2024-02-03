@@ -2,6 +2,7 @@
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
+using MagicStorage.CrossMod;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
 using System;
@@ -80,8 +81,9 @@ namespace MagicStorage {
 				.Where(i => i.type > ItemID.None && i.stack > 0)
 				.DistinctBy(i => i, ReferenceEqualityComparer.Instance);  //Filter by distinct object references (prevents "duplicate" items from, say, 2 mods adding items from the player's inventory)
 
-			int sortMode = MagicUI.decraftingUI.GetPage<SortingPage>("Sorting").option;
-			int filterMode = MagicUI.decraftingUI.GetPage<FilteringPage>("Filtering").option;
+			int sortMode = SortingOptionLoader.Selected;
+			int filterMode = FilteringOptionLoader.Selected;
+			var generalFilters = FilteringOptionLoader.GeneralSelections;
 
 			string searchText = page.searchBar.State.InputText;
 
@@ -97,6 +99,7 @@ namespace MagicStorage {
 				heart = heart,
 				sortMode = sortMode,
 				filterMode = filterMode,
+				generalFilters = new(generalFilters),
 				searchText = searchText,
 				onlyFavorites = false,
 				modSearch = modSearchIndex,

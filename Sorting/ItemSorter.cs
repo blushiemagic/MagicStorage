@@ -27,10 +27,12 @@ namespace MagicStorage.Sorting
 			}
 		}
 
+		private static Item SelectFirstItem(List<Item> items) => items[0];
+
 		public static IEnumerable<Item> SortAndFilter(StorageGUI.ThreadContext thread, int? takeCount = null, bool aggregate = true)
 		{
 			try {
-				thread.context.items = DoFiltering(thread, thread.context.items, i => i);
+				thread.context.items = DoFiltering(thread, thread.context.items);
 
 				thread.CompleteOneTask();
 
@@ -41,18 +43,18 @@ namespace MagicStorage.Sorting
 
 				thread.CompleteOneTask();
 
-				thread.context.sourceItems = DoFiltering(thread, thread.context.sourceItems, i => i[0]);
+				thread.context.sourceItems = DoFiltering(thread, thread.context.sourceItems, SelectFirstItem);
 
 				thread.CompleteOneTask();
 
 				if (takeCount is int take2)
 					thread.context.sourceItems = thread.context.sourceItems.Take(take2);
 
-				thread.context.sourceItems = DoSorting(thread, thread.context.sourceItems, i => i[0]);
+				thread.context.sourceItems = DoSorting(thread, thread.context.sourceItems, SelectFirstItem);
 
 				thread.CompleteOneTask();
 
-				var items = DoSorting(thread, thread.context.items, i => i);
+				var items = DoSorting(thread, thread.context.items);
 
 				thread.CompleteOneTask();
 
@@ -66,39 +68,34 @@ namespace MagicStorage.Sorting
 		public static IEnumerable<T> DoFiltering<T>(StorageGUI.ThreadContext thread, IEnumerable<T> source, Func<T, Item> objToItem) {
 			try {
 				ArgumentNullException.ThrowIfNull(objToItem);
-
-				var filter = FilteringOptionLoader.Get(thread.filterMode)?.Filter;
-
-				if (filter is null)
-					throw new ArgumentOutOfRangeException(nameof(thread) + "." + nameof(thread.filterMode), "Filtering ID was invalid or its definition had a null filter");
-
-				return source.Where(x => filter(objToItem(x)) && FilterBySearchText(objToItem(x), thread.searchText, thread.modSearch));
+				return source.Filter(thread, objToItem);
 			} catch when (thread.token.IsCancellationRequested) {
 				return Array.Empty<T>();
+			}
+		}
+
+		public static IEnumerable<Item> DoFiltering(StorageGUI.ThreadContext thread, IEnumerable<Item> source) {
+			try {
+				return source.Filter(thread);
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<Item>();
 			}
 		}
 
 		public static IEnumerable<T> DoSorting<T>(StorageGUI.ThreadContext thread, IEnumerable<T> source, Func<T, Item> objToItem) {
 			try {
 				ArgumentNullException.ThrowIfNull(objToItem);
-
-				if (thread.sortMode < 0)
-					return source;
-
-				//Apply "fuzzy" sorting since it's faster, but less accurate
-				IOrderedEnumerable<T> orderedItems = SortingCache.dictionary.SortFuzzy(source, objToItem, thread.sortMode);
-
-				var sorter = SortingOptionLoader.Get(thread.sortMode);
-
-				if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
-					var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
-
-					orderedItems = sorter.SortInDescendingOrder ? orderedItems.OrderByDescending(objToItem, sortFunc) : orderedItems.OrderBy(objToItem, sortFunc);
-				}
-
-				return orderedItems.ThenBy(objToItem, CompareID.Instance).ThenByDescending(objToItem, CompareValue.Instance);
+				return new ThreadSortOrderedEnumerable<T>(thread, source, objToItem);
 			} catch when (thread.token.IsCancellationRequested) {
 				return Array.Empty<T>();
+			}
+		}
+
+		public static IEnumerable<Item> DoSorting(StorageGUI.ThreadContext thread, IEnumerable<Item> source) {
+			try {
+				return new ThreadSortOrderedItemEnumerable(thread, source);
+			} catch when (thread.token.IsCancellationRequested) {
+				return Array.Empty<Item>();
 			}
 		}
 
@@ -187,6 +184,8 @@ namespace MagicStorage.Sorting
 			}
 		}
 
+		internal static Item GetRecipeResult(Recipe recipe) => recipe.createItem;
+
 		public static ParallelQuery<Recipe> GetRecipes(StorageGUI.ThreadContext thread) {
 			try {
 				IEnumerable<Recipe> recipes;
@@ -208,7 +207,7 @@ namespace MagicStorage.Sorting
 				var filteredRecipes = recipes
 					.AsParallel()
 					.AsOrdered()
-					.Where(recipe => FilterBySearchText(recipe.createItem, thread.searchText, thread.modSearch));
+					.Filter(thread, GetRecipeResult);
 
 				thread.CompleteOneTask();
 
@@ -239,7 +238,7 @@ namespace MagicStorage.Sorting
 				var filteredItems = items
 					.AsParallel()
 					.AsOrdered()
-					.Where(item => FilterBySearchText(item, thread.searchText, thread.modSearch));
+					.Filter(thread);
 
 				thread.CompleteOneTask();
 

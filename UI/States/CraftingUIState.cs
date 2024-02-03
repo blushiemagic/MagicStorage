@@ -745,10 +745,6 @@ namespace MagicStorage.UI.States {
 			GetDefaultPage<BaseStorageUIAccessPage>().ReformatPage(current);
 		}
 
-		public override int GetSortingOption() => GetPage<SortingPage>("Sorting").option;
-
-		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
-
 		public override string GetSearchText() => GetDefaultPage<BaseStorageUIAccessPage>().searchBar.State.InputText;
 
 		protected override void GetConfigPanelLocation(out float left, out float top) {
@@ -883,27 +879,18 @@ namespace MagicStorage.UI.States {
 			}
 
 			private void InitFilterButtons() {
-				List<Asset<Texture2D>> assets = new() {
-					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAvailable", AssetRequestMode.ImmediateLoad),
-					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad)
-				};
+				static IEnumerable<ButtonChoiceInfo> MakeButtons() {
+					yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAvailable", "Mods.MagicStorage.RecipeAvailable", false);
+					yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAll", "Mods.MagicStorage.RecipeAll", true);
 
-				List<LocalizedText> texts = new() {
-					Language.GetText("Mods.MagicStorage.RecipeAvailable"),
-					Language.GetText("Mods.MagicStorage.RecipeAll")
-				};
+					if (MagicStorageConfig.CraftingFavoritingEnabled)
+						yield return new ButtonChoiceInfo("MagicStorage/Assets/FilterMisc", "Mods.MagicStorage.ShowOnlyFavorited", false);
 
-				if (MagicStorageConfig.CraftingFavoritingEnabled) {
-					assets.Add(MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad));
-					texts.Add(Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"));
+					if (MagicStorageConfig.RecipeBlacklistEnabled)
+						yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAll", "Mods.MagicStorage.RecipeBlacklist", false);
 				}
 
-				if (MagicStorageConfig.RecipeBlacklistEnabled) {
-					assets.Add(MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/RecipeAll", AssetRequestMode.ImmediateLoad));
-					texts.Add(Language.GetText("Mods.MagicStorage.RecipeBlacklist"));
-				}
-
-				recipeButtons.AssignButtons(assets.ToArray(), texts.ToArray());
+				recipeButtons.AssignButtons(MakeButtons());
 
 				lastKnownConfigFavorites = MagicStorageConfig.CraftingFavoritingEnabled;
 				lastKnownConfigBlacklist = MagicStorageConfig.RecipeBlacklistEnabled;

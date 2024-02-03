@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Sorting;
+using MagicStorage.UI;
 using MagicStorage.UI.States;
 using System;
 using Terraria;
@@ -293,7 +294,15 @@ namespace MagicStorage.CrossMod {
 
 		public override string Name => "Unstackables";
 
+		public override bool IsGeneralFilter => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override void OnSelected(NewUIButtonChoice source, int choiceIndex) {
+			int otherType = FilteringOptionLoader.Definitions.Stackables.Type;
+			FilteringOptionLoader.GeneralSelections.Remove(otherType);
+			source.DisableGeneralChoicesBasedOnRemapping(otherType);
+		}
 	}
 
 	[Autoload(false)]
@@ -304,7 +313,15 @@ namespace MagicStorage.CrossMod {
 
 		public override string Name => "Stackables";
 
+		public override bool IsGeneralFilter => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override void OnSelected(NewUIButtonChoice source, int choiceIndex) {
+			int otherType = FilteringOptionLoader.Definitions.Unstackables.Type;
+			FilteringOptionLoader.GeneralSelections.Remove(otherType);
+			source.DisableGeneralChoicesBasedOnRemapping(otherType);
+		}
 	}
 
 	[Autoload(false)]
@@ -317,9 +334,17 @@ namespace MagicStorage.CrossMod {
 
 		public override bool UsesFilterCache => false;
 
+		public override bool IsGeneralFilter => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
 		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
+
+		public override void OnSelected(NewUIButtonChoice source, int choiceIndex) {
+			int otherType = FilteringOptionLoader.Definitions.FullyResearched.Type;
+			FilteringOptionLoader.GeneralSelections.Remove(otherType);
+			source.DisableGeneralChoicesBasedOnRemapping(otherType);
+		}
 	}
 
 	[Autoload(false)]
@@ -332,9 +357,17 @@ namespace MagicStorage.CrossMod {
 
 		public override bool UsesFilterCache => false;
 
+		public override bool IsGeneralFilter => true;
+
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
 
 		public override bool GetDefaultVisibility(bool craftingGUI) => Main.gameMenu || Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
+
+		public override void OnSelected(NewUIButtonChoice source, int choiceIndex) {
+			int otherType = FilteringOptionLoader.Definitions.NotFullyResearched.Type;
+			FilteringOptionLoader.GeneralSelections.Remove(otherType);
+			source.DisableGeneralChoicesBasedOnRemapping(otherType);
+		}
 	}
 
 	[Autoload(false)]

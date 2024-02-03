@@ -106,8 +106,9 @@ namespace MagicStorage {
 				.Where(i => i.type > ItemID.None && i.stack > 0)
 				.DistinctBy(i => i, ReferenceEqualityComparer.Instance);  //Filter by distinct object references (prevents "duplicate" items from, say, 2 mods adding items from the player's inventory)
 
-			int sortMode = MagicUI.craftingUI.GetPage<SortingPage>("Sorting").option;
-			int filterMode = MagicUI.craftingUI.GetPage<FilteringPage>("Filtering").option;
+			int sortMode = SortingOptionLoader.Selected;
+			int filterMode = FilteringOptionLoader.Selected;
+			var generalFilters = FilteringOptionLoader.GeneralSelections;
 
 			string searchText = craftingPage.searchBar.State.InputText;
 
@@ -123,6 +124,7 @@ namespace MagicStorage {
 				heart = heart,
 				sortMode = sortMode,
 				filterMode = filterMode,
+				generalFilters = new(generalFilters),
 				searchText = searchText,
 				onlyFavorites = false,
 				modSearch = modSearchIndex,
@@ -204,6 +206,7 @@ namespace MagicStorage {
 				var clone = thread.Clone(
 					newSortMode: SortingOptionLoader.Definitions.ID.Type,
 					newFilterMode: FilteringOptionLoader.Definitions.All.Type,
+					newGeneralFilters: new(),
 					newSearchText: "",
 					newModSearch: ModSearchBox.ModIndexAll);
 

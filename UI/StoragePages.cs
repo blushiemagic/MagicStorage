@@ -4,16 +4,18 @@ using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	public delegate void OptionClicked(UIMouseEvent evt, UIElement target, int option);
+	public delegate void OptionClicked(UIMouseEvent evt, BaseOptionElement target, int option);
 
-	internal abstract class BaseOptionUIPage : BaseStorageUIPage {
-		public int option;
+	public abstract class BaseOptionUIPage : BaseStorageUIPage {
+		// Used to remember which filters were selected
+		public int selected;
 
 		public int buttonSize = 32, buttonPadding = 1;
 
@@ -27,7 +29,7 @@ namespace MagicStorage.UI {
 
 		public override void OnActivate() => InitOptionButtons(true);
 
-		protected void InvokeOnOptionClicked(UIMouseEvent evt, UIElement e, int option) => OnOptionClicked?.Invoke(evt, e, option);
+		protected void InvokeOnOptionClicked(UIMouseEvent evt, BaseOptionElement e, int option) => OnOptionClicked?.Invoke(evt, e, option);
 
 		public virtual void InitOptionButtons(bool activating) { }
 
@@ -48,10 +50,12 @@ namespace MagicStorage.UI {
 				InitOptionButtons(false);
 		}
 
-		public abstract void SetLoaderSelection(int selected);
+		public abstract bool IsOptionGeneral(BaseOptionElement element);
+
+		public virtual void SetSelection(int option) { }
 	}
 
-	internal abstract class BaseOptionUIPage<TOption, TElement> : BaseOptionUIPage where TElement : BaseOptionElement {
+	public abstract class BaseOptionUIPage<TOption, TElement> : BaseOptionUIPage where TElement : BaseOptionElement {
 		private readonly List<TElement> buttons = new();
 
 		public BaseOptionUIPage(BaseStorageUI parent, string name) : base(parent, name) { }
@@ -66,6 +70,21 @@ namespace MagicStorage.UI {
 
 		public abstract int GetOptionType(TElement element);
 
+		public sealed override bool IsOptionGeneral(BaseOptionElement element) => IsOptionGeneral((TElement)element);
+
+		public abstract bool IsOptionGeneral(TElement element);
+
+		private bool IsOptionNotGeneral(TElement element) => !IsOptionGeneral(element);
+
+		public abstract void UpdateLoaderSelection(int option, bool generalOption);
+
+		public sealed override void SetSelection(int option) {
+			var element = buttons[option];
+			UpdateLoaderSelection(GetOptionType(element), IsOptionGeneral(element));
+		}
+
+		private const int leftOrig = 20, topOrig = 0;
+
 		public sealed override void InitOptionButtons(bool activating) {
 			if (Main.gameMenu)
 				return;
@@ -75,34 +94,55 @@ namespace MagicStorage.UI {
 
 			buttons.Clear();
 
-			const int leftOrig = 20, topOrig = 0;
-
 			CalculatedStyle dims = GetInnerDimensions();
 
 			int buttonSizeWithBuffer = buttonSize + buttonPadding;
 
 			int columns = Math.Max(1, (int)(dims.Width - leftOrig * 2) / buttonSizeWithBuffer);
 
-			int index = 0;
-
 			foreach (TOption option in GetOptions()) {
 				TElement element = CreateElement(option);
 				element.OnLeftClick += ClickOption;
 
-				element.Left.Set(leftOrig + buttonSizeWithBuffer * (index % columns), 0f);
-				element.Top.Set(topOrig + buttonSizeWithBuffer * (index / columns), 0f);
 				element.SetSize(buttonSize);
 
 				Append(element);
 				buttons.Add(element);
+			}
 
-				if (!activating) {
-					element.Activate();
-					element.Recalculate();
-				}
+			int index = 0;
+			int left = leftOrig, top = topOrig;
 
+			foreach (var element in buttons.Where(IsOptionNotGeneral)) {
+				AlignButton(element, activating, index, buttonSizeWithBuffer, columns, ref left, ref top);
 				index++;
 			}
+
+			left = leftOrig;
+			if (index % columns != 0)
+				top += buttonSizeWithBuffer;
+			index = 0;
+
+			foreach (var element in buttons.Where(IsOptionGeneral)) {
+				AlignButton(element, activating, index, buttonSizeWithBuffer, columns, ref left, ref top);
+				index++;
+			}
+		}
+
+		private void AlignButton(TElement element, bool activating, int index, int buttonSizeWithBuffer, int columns, ref int left, ref int top) {
+			element.Left.Set(left, 0f);
+			element.Top.Set(top, 0f);
+
+			if (!activating) {
+				element.Activate();
+				element.Recalculate();
+			}
+
+			if ((index + 1) % columns == 0) {
+				left = leftOrig;
+				top += buttonSizeWithBuffer;
+			} else
+				left += buttonSizeWithBuffer;
 		}
 
 		internal void ClickOption(UIMouseEvent evt, UIElement e) {
@@ -113,14 +153,15 @@ namespace MagicStorage.UI {
 				return;
 			}
 
-			option = GetOptionType(e as TElement);
+			var element = (TElement)e;
+			var type = GetOptionType(element);
+
+			SetSelection(type);
 
 			MagicUI.SetRefresh(forceFullRefresh: true);
 			SoundEngine.PlaySound(SoundID.MenuTick);
 
-			SetLoaderSelection(option);
-
-			InvokeOnOptionClicked(evt, e, option);
+			InvokeOnOptionClicked(evt, element, type);
 		}
 	}
 
@@ -142,12 +183,17 @@ namespace MagicStorage.UI {
 
 		public override int GetOptionType(SortingOptionElement element) => element.option.Type;
 
+		public override bool IsOptionGeneral(SortingOptionElement element) => false;
+
 		protected override void OnConfigurationClicked(SortingOptionElement element) => MagicStorageMod.Instance.optionsConfig.ToggleEnabled(element.option);
 
-		public override void SetLoaderSelection(int selected) => SortingOptionLoader.Selected = selected;
+		public override void UpdateLoaderSelection(int option, bool generalOption) => SortingOptionLoader.Selected = option;
 	}
 
 	internal class FilteringPage : BaseOptionUIPage<FilteringOption, FilteringOptionElement> {
+		// Used to remember which filters were selected
+		public readonly HashSet<int> generalSelections = new();
+
 		public FilteringPage(BaseStorageUI parent) : base(parent, "Filtering") { }
 
 		public override FilteringOptionElement CreateElement(FilteringOption option) => new(option);
@@ -165,8 +211,19 @@ namespace MagicStorage.UI {
 
 		public override int GetOptionType(FilteringOptionElement element) => element.option.Type;
 
+		public override bool IsOptionGeneral(FilteringOptionElement element) => element.option.IsGeneralFilter;
+
 		protected override void OnConfigurationClicked(FilteringOptionElement element) => MagicStorageMod.Instance.optionsConfig.ToggleEnabled(element.option);
 
-		public override void SetLoaderSelection(int selected) => FilteringOptionLoader.Selected = selected;
+		public override void UpdateLoaderSelection(int option, bool generalOption) {
+			if (!generalOption)
+				FilteringOptionLoader.Selected = option;
+			else {
+				if (FilteringOptionLoader.GeneralSelections.Contains(option))
+					FilteringOptionLoader.GeneralSelections.Remove(option);
+				else
+					FilteringOptionLoader.GeneralSelections.Add(option);
+			}
+		}
 	}
 }

@@ -26,8 +26,6 @@ namespace MagicStorage.CrossMod {
 		/// </summary>
 		public abstract ItemFilter.Filter Filter { get; }
 
-		public virtual Action OnSelected { get; }
-
 		/// <summary>
 		/// Whether this filter is for a damage class of items<br/>
 		/// If this property returns true, this filter is blacklisted by <see cref="ItemFilter.WeaponOther"/>
@@ -38,6 +36,12 @@ namespace MagicStorage.CrossMod {
 		/// Whether this filter uses its cached list of valid recipes from <see cref="MagicCache.FilteredRecipesCache"/>
 		/// </summary>
 		public virtual bool UsesFilterCache => true;
+
+		/// <summary>
+		/// Whether this filter is considered a "general" filter.<br/>
+		/// Multiple general filters can be selected at once, and each acts as a whitelist for items rather than a blacklist.
+		/// </summary>
+		public virtual bool IsGeneralFilter => false;
 
 		protected sealed override void Register() {
 			ModTypeLookup<FilteringOption>.Register(this);
@@ -53,6 +57,13 @@ namespace MagicStorage.CrossMod {
 		}
 
 		public bool Visible { get; private set; } = true;
+
+		/// <summary>
+		/// This method executes whenever this option is clicked in the UI
+		/// </summary>
+		/// <param name="choiceIndex">Which button set this option is currently assigned to</param>
+		/// <param name="source">Which button index this option refers to</param>
+		public virtual void OnSelected(NewUIButtonChoice source, int choiceIndex) { }
 
 		private readonly List<FilteringOption> childrenBefore = new();
 		public IReadOnlyList<FilteringOption> ChildrenBefore => childrenBefore;
@@ -129,7 +140,9 @@ namespace MagicStorage.CrossMod {
 
 		protected override bool IsSelected() => MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable
 			? MagicStorageMod.Instance.optionsConfig.filteringOptions[option.Type] is not null
-			: option.Type == FilteringOptionLoader.Selected;
+			: option.Type == FilteringOptionLoader.Selected || FilteringOptionLoader.GeneralSelections.Contains(option.Type);
+
+		protected override bool IsGeneralOption() => option.IsGeneralFilter;
 
 		public override int CompareTo(object obj) {
 			if (obj is not FilteringOptionElement other)
@@ -162,48 +175,69 @@ namespace MagicStorage.CrossMod {
 			public static FilteringOption Misc { get; internal set; }
 			public static FilteringOption Recent { get; internal set; }
 			public static FilteringOption OtherWeapons { get; internal set; }
-			//public static FilteringOption Unstackables { get; internal set; }
-			//public static FilteringOption Stackables { get; internal set; }
+			public static FilteringOption Unstackables { get; internal set; }
+			public static FilteringOption Stackables { get; internal set; }
 			public static FilteringOption NotFullyResearched { get; internal set; }
 			public static FilteringOption FullyResearched { get; internal set; }
 			public static FilteringOption Material { get; internal set; }
 		}
 
+		private static readonly List<FilteringOption> allOptions = new();
 		private static readonly List<FilteringOption> options = new();
+		private static readonly List<FilteringOption> generalOptions = new();
 		internal static readonly Dictionary<string, HashSet<string>> optionNames = new();
 
 		public static IReadOnlyList<FilteringOption> Options => options.AsReadOnly();
 
+		public static IReadOnlyList<FilteringOption> GeneralOptions => generalOptions.AsReadOnly();
+
 		private static FilteringOption[] order;
+		private static FilteringOption[] generalOrder;
 
 		public static IReadOnlyList<FilteringOption> Order => order;
 
+		public static IReadOnlyList<FilteringOption> GeneralOrder => generalOrder;
+
 		public static int Selected { get; internal set; }
 
+		public static HashSet<int> GeneralSelections { get; } = new();
+
 		public static int Count => options.Count;
+
+		public static int GeneralCount => generalOptions.Count;
+
+		public static int TotalCount => allOptions.Count;
 
 		internal static int Add(FilteringOption option) {
 			//Ensure that the name doesn't conflict with a SortingOption
 			if (SortingOptionLoader.optionNames.TryGetValue(option.Mod.Name, out var hash) && hash.Contains(option.Name))
 				throw new Exception($"Cannot add a FilteringOption with the name \"{option.Mod.Name}:{option.Name}\".  A SortingOption with that name already exists.");
 
-			int count = Count;
+			int count = TotalCount;
 
-			options.Add(option);
+			if (option.IsGeneralFilter) {
+				generalOptions.Add(option);
+				generalOrder = null;
+			} else {
+				options.Add(option);
+				order = null;
+			}
+
+			allOptions.Add(option);
 
 			if (!optionNames.TryGetValue(option.Mod.Name, out hash))
 				optionNames[option.Mod.Name] = hash = new();
 
 			hash.Add(option.Name);
-			order = null;
 
 			return count;
 		}
 
-		public static FilteringOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
+		public static FilteringOption Get(int index) => index < 0 || index >= allOptions.Count ? null : allOptions[index];
 
 		public static IEnumerable<FilteringOption> BaseOptions
 			=> new FilteringOption[] {
+				// Standard filters
 				Definitions.All,
 				Definitions.Weapon,
 				Definitions.ToolsAndFishing,
@@ -211,12 +245,18 @@ namespace MagicStorage.CrossMod {
 				Definitions.Potion,
 				Definitions.Tiles,
 				Definitions.Misc,
-				Definitions.Recent
+				Definitions.Recent,
+				// General filters
+				Definitions.Unstackables,
+				Definitions.Stackables,
+				Definitions.NotFullyResearched,
+				Definitions.FullyResearched
 			};
 
 		internal static void Load() {
 			MagicStorageMod mod = MagicStorageMod.Instance;
 
+			// Standard filters
 			mod.AddContent(Definitions.All = new FilterAll());
 			mod.AddContent(Definitions.Weapon = new FilterWeapons());
 			mod.AddContent(Definitions.Melee = new FilterMelee());
@@ -237,17 +277,22 @@ namespace MagicStorage.CrossMod {
 			mod.AddContent(Definitions.Tiles = new FilterTiles());
 			mod.AddContent(Definitions.MiscGameplayItems = new FilterMiscGamePlayItems());
 			mod.AddContent(Definitions.Material = new FilterMaterials());
-			//mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
-			//mod.AddContent(Definitions.Stackables = new FilterStackables());
-			mod.AddContent(Definitions.NotFullyResearched = new FilterNotFullyResearched());
-			mod.AddContent(Definitions.FullyResearched = new FilterFullyResearched());
 			mod.AddContent(Definitions.Misc = new FilterMisc());
 			mod.AddContent(Definitions.Recent = new FilterRecent());
+
+			// General filters
+			mod.AddContent(Definitions.Unstackables = new FilterUnstackables());
+			mod.AddContent(Definitions.Stackables = new FilterStackables());
+			mod.AddContent(Definitions.NotFullyResearched = new FilterNotFullyResearched());
+			mod.AddContent(Definitions.FullyResearched = new FilterFullyResearched());
 		}
 
 		internal static void Unload() {
 			options.Clear();
+			generalOptions.Clear();
+			allOptions.Clear();
 			Selected = 0;
+			GeneralSelections.Clear();
 
 			optionNames.Clear();
 
@@ -256,25 +301,42 @@ namespace MagicStorage.CrossMod {
 		}
 
 		internal static void InitializeOrder() {
-			var positions = Options.ToDictionary(l => l, l => l.GetDefaultPosition());
+			InitializeOrder(Options, ref order);
+			InitializeOrder(GeneralOptions, ref generalOrder);
+		}
+
+		private static void InitializeOrder(IReadOnlyList<FilteringOption> list, ref FilteringOption[] order) {
+			var positions = list.ToDictionary(l => l, l => l.GetDefaultPosition());
 
 			foreach (var (option, pos) in positions) {
 				switch (pos) {
 					case FilteringOption.Between _:
 						continue;
 					case FilteringOption.BeforeParent b:
+						if (option.IsGeneralFilter != b.Parent.IsGeneralFilter)
+							throw new ArgumentException($"FilteringOption {option} and its parent {b.Parent} have different IsGeneralFilter values");
+
 						b.Parent.AddChildBefore(option);
 						break;
 					case FilteringOption.AfterParent a:
+						if (option.IsGeneralFilter != a.Parent.IsGeneralFilter)
+							throw new ArgumentException($"FilteringOption {option} and its parent {a.Parent} have different IsGeneralFilter values");
+
 						a.Parent.AddChildAfter(option);
 						break;
 					case FilteringOption.Multiple m:
 						int slot = 0;
-						foreach (var (mulPos, cond) in m.Positions)
+						foreach (var (mulPos, cond) in m.Positions) {
+							if (option.IsGeneralFilter != mulPos.Option1.IsGeneralFilter)
+								throw new ArgumentException($"FilteringOption {option} and its parent {mulPos.Option1} have different IsGeneralFilter values");
+							if (option.IsGeneralFilter != mulPos.Option2.IsGeneralFilter)
+								throw new ArgumentException($"FilteringOption {option} and its parent {mulPos.Option2} have different IsGeneralFilter values");
+
 							positions.Add(new FilteringOptionSlot(option, cond, slot++), mulPos);
+						}
 						break;
 					default:
-						throw new ArgumentException($"PlayerDrawLayer {option} has unknown Position type {pos}");
+						throw new ArgumentException($"FilteringOption {option} has unknown Position type {pos}");
 				}
 
 				positions.Remove(option);
@@ -287,11 +349,13 @@ namespace MagicStorage.CrossMod {
 			order = sort.Sort().ToArray();
 		}
 
-		public static FilteringOption[] GetOptions(bool craftingGUI) {
+		public static IEnumerable<FilteringOption> GetOptions(bool craftingGUI) {
 			foreach (var option in order)
 				option.ResetVisibility(craftingGUI);
+			foreach (var option in generalOrder)
+				option.ResetVisibility(craftingGUI);
 
-			return order;
+			return order.Concat(generalOrder);
 		}
 
 		public static IEnumerable<FilteringOption> GetVisibleOptions(bool craftingGUI) => GetOptions(craftingGUI).Where(o => o.Visible);

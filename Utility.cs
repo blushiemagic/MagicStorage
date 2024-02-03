@@ -3,6 +3,7 @@ using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
 using MagicStorage.Edits;
+using MagicStorage.Sorting;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections;
@@ -564,5 +565,35 @@ namespace MagicStorage {
 		public static bool IsSuccessfulButNotDecraftable(this ShimmerInfo.ShimmerAttemptResult result) => result != ShimmerInfo.ShimmerAttemptResult.None && result != ShimmerInfo.ShimmerAttemptResult.DecraftedItem;
 
 		public static IEnumerable<IShimmerResultReport> GetShimmerReports(this IShimmerResult result, int item) => result.GetShimmerReports(ContentSamples.ItemsByType[item], item);
+
+		internal static IEnumerable<T> Filter<T>(this IEnumerable<T> source, StorageGUI.ThreadContext thread, Func<T, Item> objToItem) {
+			ArgumentNullException.ThrowIfNull(source);
+			ArgumentNullException.ThrowIfNull(thread);
+			ArgumentNullException.ThrowIfNull(objToItem);
+
+			return new ThreadFilterEnumerator<T>(thread, source, objToItem);
+		}
+
+		internal static IEnumerable<Item> Filter(this IEnumerable<Item> source, StorageGUI.ThreadContext thread) {
+			ArgumentNullException.ThrowIfNull(source);
+			ArgumentNullException.ThrowIfNull(thread);
+
+			return new ThreadFilterItemEnumerator(thread, source);
+		}
+
+		internal static ParallelQuery<T> Filter<T>(this ParallelQuery<T> query, StorageGUI.ThreadContext thread, Func<T, Item> objToItem) {
+			ArgumentNullException.ThrowIfNull(query);
+			ArgumentNullException.ThrowIfNull(thread);
+			ArgumentNullException.ThrowIfNull(objToItem);
+
+			return new ThreadFilterParallelEnumerator<T>(thread, query, objToItem).GetQuery();
+		}
+
+		internal static ParallelQuery<Item> Filter(this ParallelQuery<Item> query, StorageGUI.ThreadContext thread) {
+			ArgumentNullException.ThrowIfNull(query);
+			ArgumentNullException.ThrowIfNull(thread);
+
+			return new ThreadFilterParallelItemEnumerator(thread, query).GetQuery();
+		}
 	}
 }

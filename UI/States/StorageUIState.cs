@@ -98,10 +98,6 @@ namespace MagicStorage.UI.States {
 			GetPage<FilteringPage>("Filtering").filterBaseOptions = pagesFilterBaseOptions;
 		}
 
-		public override int GetSortingOption() => GetPage<SortingPage>("Sorting").option;
-
-		public override int GetFilteringOption() => GetPage<FilteringPage>("Filtering").option;
-
 		public override string GetSearchText() => GetDefaultPage<StoragePage>().searchBar.State.InputText;
 
 		public override float GetMinimumResizeHeight() {

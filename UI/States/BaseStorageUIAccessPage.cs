@@ -227,9 +227,17 @@ namespace MagicStorage.UI.States {
 
 		public static LocalizedText GetRandomSearchText(bool includeMod) => Main.rand.Next(includeMod ? searchTextDefaults : searchTextDefaultsWithoutMod);
 
-		private void ModernConfigSortingButtonAction() => parentUI.ModernPanelButtonClicked("Sorting", sortingButtons);
+		private void ModernConfigSortingButtonAction() {
+			SortingOptionLoader.Selected = sortingButtons.SelectionType;
+			MagicUI.SetRefresh(forceFullRefresh: true);
+		}
 
-		private void ModernConfigFilteringButtonAction() => parentUI.ModernPanelButtonClicked("Filtering", filteringButtons);
+		private void ModernConfigFilteringButtonAction() {
+			FilteringOptionLoader.Selected = filteringButtons.SelectionType;
+			FilteringOptionLoader.GeneralSelections.Clear();
+			FilteringOptionLoader.GeneralSelections.UnionWith(filteringButtons.GeneralSelections);
+			MagicUI.SetRefresh(forceFullRefresh: true);
+		}
 
 		public abstract void GetZoneDimensions(out float top, out float bottomMargin);
 

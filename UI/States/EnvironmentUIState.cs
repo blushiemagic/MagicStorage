@@ -14,11 +14,7 @@ namespace MagicStorage.UI.States {
 	public class EnvironmentUIState : BaseStorageUI {
 		public override string DefaultPage => "Modules";
 
-		public override int GetFilteringOption() => throw new NotImplementedException();
-
 		public override string GetSearchText() => throw new NotImplementedException();
-
-		public override int GetSortingOption() => throw new NotImplementedException();
 
 		protected override IEnumerable<string> GetMenuOptions() {
 			yield return "Modules";

@@ -7,6 +7,7 @@ using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
 using MagicStorage.UI;
+using System.Collections.Generic;
 
 namespace MagicStorage {
 	partial class StorageGUI {
@@ -16,6 +17,7 @@ namespace MagicStorage {
 			public readonly CancellationToken token;
 			public TEStorageHeart heart;
 			public int sortMode, filterMode;
+			public HashSet<int> generalFilters;
 			public string searchText;
 			public bool onlyFavorites;
 			public int modSearch;
@@ -46,12 +48,13 @@ namespace MagicStorage {
 				this.afterWork = afterWork;
 			}
 
-			public ThreadContext Clone(int? newSortMode = null, int? newFilterMode = null, string newSearchText = null, int? newModSearch = null) {
+			public ThreadContext Clone(int? newSortMode = null, int? newFilterMode = null, HashSet<int> newGeneralFilters = null, string newSearchText = null, int? newModSearch = null) {
 				return new ThreadContext(tokenSource, work, afterWork) {
 					context = context,
 					heart = heart,
 					sortMode = newSortMode ?? sortMode,
 					filterMode = newFilterMode ?? filterMode,
+					generalFilters = newGeneralFilters ?? generalFilters,
 					searchText = newSearchText ?? searchText,
 					onlyFavorites = onlyFavorites,
 					modSearch = newModSearch ?? modSearch,
@@ -147,12 +150,15 @@ namespace MagicStorage {
 
 			NetHelper.Report(true, $"Refreshing {(itemTypesToUpdate is null ? "all" : $"{itemTypesToUpdate.Count}")} storage items");
 
-			int sortMode = MagicUI.storageUI.GetPage<SortingPage>("Sorting").option;
-			int filterMode = MagicUI.storageUI.GetPage<FilteringPage>("Filtering").option;
+			int sortMode = SortingOptionLoader.Selected;
+			int filterMode = FilteringOptionLoader.Selected;
+			var generalFilters = FilteringOptionLoader.GeneralSelections;
 
 			// Force filtering to specific value to make deleting the bad item stacks easier
-			if (itemDeletionMode)
+			if (itemDeletionMode) {
 				filterMode = FilteringOptionLoader.Definitions.All.Type;
+				generalFilters = null;
+			}
 
 			string searchText = storagePage.searchBar.State.InputText;
 			bool onlyFavorites = storagePage.filterFavorites.Value;
@@ -162,6 +168,7 @@ namespace MagicStorage {
 				heart = heart,
 				sortMode = sortMode,
 				filterMode = filterMode,
+				generalFilters = generalFilters is null ? new() : new(generalFilters),
 				searchText = searchText,
 				onlyFavorites = onlyFavorites,
 				modSearch = modSearch,

@@ -100,11 +100,14 @@ namespace MagicStorage.CrossMod.Control {
 				storagePage.pendingConfiguration = true;
 
 			//Default to the first available option if this option was removed and it's selected
-			if (!enabled && FilteringOptionLoader.Selected == option.Type) {
-				bool craftingGUI = !Main.gameMenu && StoragePlayer.IsStorageCraftingOrDecrafting();
-				var options = GetFilteringOptions(craftingGUI);
+			if (!enabled) {
+				if (!option.IsGeneralFilter && FilteringOptionLoader.Selected == option.Type) {
+					bool craftingGUI = !Main.gameMenu && StoragePlayer.IsStorageCraftingOrDecrafting();
+					var options = GetFilteringOptions(craftingGUI).Where(o => !o.IsGeneralFilter);
 
-				FilteringOptionLoader.Selected = !options.Any() ? -1 : options.First().Type;
+					FilteringOptionLoader.Selected = !options.Any() ? -1 : options.First().Type;
+				} else if (option.IsGeneralFilter)
+					FilteringOptionLoader.GeneralSelections.Remove(option.Type);
 			}
 		}
 
@@ -126,7 +129,7 @@ namespace MagicStorage.CrossMod.Control {
 					List<OptionDefinition> options = tags.Select(OptionDefinition.DeserializeData).ToList();
 
 					sortingOptions = BuildArray(options.Where(o => o.DefinesSorter), o => o.GetSortOption().Type, SortingOptionLoader.Count);
-					filteringOptions = BuildArray(options.Where(o => o.DefinesFilter), o => o.GetFilterOption().Type, FilteringOptionLoader.Count);
+					filteringOptions = BuildArray(options.Where(o => o.DefinesFilter), o => o.GetFilterOption().Type, FilteringOptionLoader.TotalCount);
 					unloadedOptions = options.Where(o => !o.Exists).ToList();
 					return;
 				} catch {
@@ -172,7 +175,7 @@ namespace MagicStorage.CrossMod.Control {
 		}
 
 		private static OptionDefinition?[] BuildArray(IEnumerable<FilteringOption> options) {
-			OptionDefinition?[] result = new OptionDefinition?[FilteringOptionLoader.Count];
+			OptionDefinition?[] result = new OptionDefinition?[FilteringOptionLoader.TotalCount];
 
 			foreach (var option in options)
 				result[option.Type] = new(option);

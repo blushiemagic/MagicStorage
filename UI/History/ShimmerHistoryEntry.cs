@@ -64,7 +64,6 @@ namespace MagicStorage.UI.History {
 			Recalculate();
 		}
 
-		// TODO: set context based on whether the "result" is present in storage
 		protected override void GetResultContext(int value, ref int context) {
 			if (value == DecraftingGUI.selectedItem)
 				context = ItemSlot.Context.TrashItem;

@@ -1,4 +1,5 @@
 ﻿using MagicStorage.CrossMod;
+using Mono.Cecil;
 using SerousCommonLib.API;
 using System;
 using System.Collections;
@@ -39,18 +40,47 @@ public class SortingCacheDictionary
 		}
 	}
 
-	private class KeepItemsInPlaceEnumerable<T> : IOrderedEnumerable<T> {
-		private readonly IEnumerable<T> source;
+	private class OrderByEntryOrderedEnumerable<T> : IOrderedEnumerable<T> {
+		private readonly IEnumerable<T> _source;
+		private readonly Entry _entry;
+		private readonly Func<T, Item> _objToItem;
+		private readonly IOrderedEnumerable<T> _query;
 
-		public KeepItemsInPlaceEnumerable(IEnumerable<T> source) {
-			this.source = source;
+		public OrderByEntryOrderedEnumerable(IEnumerable<T> source, Entry entry, Func<T, Item> objToItem) {
+			_source = source;
+			_entry = entry;
+			_objToItem = objToItem;
+			_query = CreateQuery();
 		}
 
-		public IOrderedEnumerable<T> CreateOrderedEnumerable<TKey>(Func<T, TKey> keySelector, IComparer<TKey>? comparer, bool descending) => this;
+		protected virtual Item GetItem(T value) => _objToItem(value);
 
-		public IEnumerator<T> GetEnumerator() => source.GetEnumerator();
+		private int Order(T value) {
+			Item item = GetItem(value);
+			return _entry.FindIndex(item.type);
+		}
+
+		private IOrderedEnumerable<T> CreateQuery() {
+			if (_source is null)
+				return new KeepItemsInPlaceEnumerable<T>(Array.Empty<T>()); // Failsafe - a pointless collection
+
+			if (_entry?.IndexByType is null)
+				return new KeepItemsInPlaceEnumerable<T>(_source); // Preserve item order, likely because the sorter uses runtime values
+
+			return _source.OfType<T>().OrderBy(Order);
+		}
+
+		public IOrderedEnumerable<T> CreateOrderedEnumerable<TKey>(Func<T, TKey> keySelector, IComparer<TKey>? comparer, bool descending) => _query.CreateOrderedEnumerable(keySelector, comparer, descending);
+
+		public IEnumerator<T> GetEnumerator() => _query.GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+	}
+
+	private class OrderByEntryOrderedItemEnumerable : OrderByEntryOrderedEnumerable<Item> {
+		public OrderByEntryOrderedItemEnumerable(IEnumerable<Item> source, Entry entry) : base(source, entry, null!) { }
+
+		protected override Item GetItem(Item value) => value;
 	}
 
 	private readonly Dictionary<int, Entry> cache = new();
@@ -108,12 +138,12 @@ public class SortingCacheDictionary
 
 		Entry entry = cache[mode];
 
-		if (source is null)
-			return new KeepItemsInPlaceEnumerable<T>(Array.Empty<T>()); //Failsafe - a pointless collection
+		return new OrderByEntryOrderedEnumerable<T>(source, entry, objToItem);
+	}
 
-		if (entry?.IndexByType is null)
-			return new KeepItemsInPlaceEnumerable<T>(source); //Preserve item order, likely because the sorter uses runtime values
+	public IOrderedEnumerable<Item> SortFuzzy(IEnumerable<Item> source, int mode) {
+		Entry entry = cache[mode];
 
-		return source.OfType<T>().OrderBy(t => entry.FindIndex(objToItem(t).type));
+		return new OrderByEntryOrderedItemEnumerable(source, entry);
 	}
 }

@@ -6,9 +6,11 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
-	internal abstract class BaseOptionElement : UIElement {
+	public abstract class BaseOptionElement : UIElement {
 		private static Asset<Texture2D> BackTexture => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
 		private static Asset<Texture2D> BackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
+
+		private static Asset<Texture2D> GeneralBackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundGeneralActive", AssetRequestMode.ImmediateLoad);
 
 		private UIImage background, icon;
 
@@ -20,6 +22,8 @@ namespace MagicStorage.UI {
 		protected abstract Asset<Texture2D> GetIcon();
 
 		protected abstract bool IsSelected();
+
+		protected abstract bool IsGeneralOption();
 
 		protected abstract string GetHoverText();
 
@@ -45,7 +49,7 @@ namespace MagicStorage.UI {
 		}
 
 		protected override void DrawChildren(SpriteBatch spriteBatch) {
-			background.SetImage(IsSelected() ? BackTextureActive : BackTexture);
+			background.SetImage(IsSelected() ? (IsGeneralOption() ? GeneralBackTextureActive : BackTextureActive) : BackTexture);
 			background.Color = IsMouseHovering ? Color.Silver : Color.White;
 			background.Recalculate();
 
