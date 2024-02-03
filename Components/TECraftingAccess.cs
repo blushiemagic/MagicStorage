@@ -287,10 +287,10 @@ namespace MagicStorage.Components
 			{
 				foreach (TagCompound stationTag in listStations)
 				{
-					Item item = ItemIO.Load(stationTag);
+					Item item = Utility.SafelyLoadItem(stationTag);
 					if (!item.IsAir)
 					{
-						stations.Add(ItemIO.Load(stationTag));
+						stations.Add(Utility.SafelyLoadItem(stationTag));
 					}
 				}
 			}

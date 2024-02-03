@@ -470,7 +470,7 @@ namespace MagicStorage {
 
 		public static Item FromBase64NoCompression(string base64) {
 			MemoryStream ms = new MemoryStream(Convert.FromBase64String(base64));
-			return ItemIO.Load(TagIO.FromStream(ms, false));
+			return SafelyLoadItem(TagIO.FromStream(ms, false));
 		}
 
 		public static void SetVanillaAdjTiles(Item item, out bool hasSnow, out bool hasGraveyard) {
@@ -594,6 +594,18 @@ namespace MagicStorage {
 			ArgumentNullException.ThrowIfNull(thread);
 
 			return new ThreadFilterParallelItemEnumerator(thread, query).GetQuery();
+		}
+
+		public static Item SafelyLoadItem(TagCompound tag) {
+			try {
+				return ItemIO.Load(tag);
+			} catch (KeyNotFoundException) {
+				// Item was malformed
+				return new Item();
+			} catch (Exception ex) {
+				MagicStorageMod.Instance.Logger.Error("Error loading item from tag", ex);
+				return new Item();
+			}
 		}
 	}
 }
