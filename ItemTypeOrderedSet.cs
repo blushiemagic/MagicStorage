@@ -86,7 +86,7 @@ namespace MagicStorage
 		{
 			if (tag.GetList<TagCompound>(_name) is { Count: > 0 } listV1) 
 			{
-				_items = listV1.Select(Utility.SafelyLoadItem).ToList();
+				_items = listV1.Select(Utility.SafelyLoadItem).Where(static i => !i.IsAir).ToList();
 			}
 			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2) 
 			{

@@ -453,7 +453,7 @@ namespace MagicStorage.Components
 		{
 			base.LoadData(tag);
 			ClearItemsData();
-			foreach (Item item in tag.GetList<TagCompound>("Items").Select(Utility.SafelyLoadItem))
+			foreach (Item item in tag.GetList<TagCompound>("Items").Select(Utility.SafelyLoadItem).Where(static i => !i.IsAir))
 			{
 				items.Add(item);
 				ItemData data = new(item);

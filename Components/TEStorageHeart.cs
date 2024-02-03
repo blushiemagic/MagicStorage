@@ -768,6 +768,8 @@ namespace MagicStorage.Components
 
 		internal void TryDeleteExactItem(string itemData) {
 			Item clone = Utility.FromBase64NoCompression(itemData);
+			if (clone.IsAir)
+				return;
 
 			foreach (TEStorageUnit unit in GetStorageUnits().OfType<TEStorageUnit>()) {
 				if (unit.IsEmpty || !unit.HasItem(clone, ignorePrefix: true))
