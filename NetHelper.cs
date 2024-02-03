@@ -1508,13 +1508,16 @@ namespace MagicStorage
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.DeleteSpecificItem);
 			packet.Write(heart.Position);
-			packet.Write(Utility.ToBase64NoCompression(item));
+			var data = Utility.ToByteSpanNoCompression(item);
+			packet.Write7BitEncodedInt(data.Length);
+			packet.Write(data);
 			packet.Send();
 		}
 
 		public static void ServerReceiveExactItemDeletionRequest(BinaryReader reader) {
 			Point16 point = reader.ReadPoint16();
-			string item = reader.ReadString();
+			int dataLength = reader.Read7BitEncodedInt();
+			ReadOnlySpan<byte> item = reader.ReadBytes(dataLength);
 
 			if (Main.netMode != NetmodeID.Server)
 				return;

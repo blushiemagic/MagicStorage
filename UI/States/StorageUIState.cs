@@ -386,7 +386,7 @@ namespace MagicStorage.UI.States {
 									if (Main.netMode != NetmodeID.SinglePlayer)
 										NetHelper.ClientRequestExactItemDeletion(heart, item);
 									else
-										heart.TryDeleteExactItem(Utility.ToBase64NoCompression(item));
+										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item));
 
 									StorageGUI.itemDeletionSlotFocus = -1;
 								}

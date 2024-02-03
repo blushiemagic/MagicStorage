@@ -766,8 +766,8 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal void TryDeleteExactItem(string itemData) {
-			Item clone = Utility.FromBase64NoCompression(itemData);
+		internal void TryDeleteExactItem(ReadOnlySpan<byte> itemData) {
+			Item clone = Utility.FromByteSpanNoCompression(itemData);
 			if (clone.IsAir)
 				return;
 
@@ -777,10 +777,10 @@ namespace MagicStorage.Components
 
 				for (int i = 0; i < unit.items.Count; i++) {
 					Item storage = unit.items[i];
-					string storageData = Utility.ToBase64NoCompression(storage);
+					ReadOnlySpan<byte> storageData = Utility.ToByteSpanNoCompression(storage);
 
 					// Must be an exact match
-					if (itemData == storageData) {
+					if (itemData.SequenceEqual(storageData)) {
 						unit.items.RemoveAt(i);
 						ResetCompactStage();
 

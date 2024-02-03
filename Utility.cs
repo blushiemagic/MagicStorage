@@ -462,14 +462,31 @@ namespace MagicStorage {
 			return Convert.ToBase64String(ms.ToArray());
 		}
 
+		public static ReadOnlySpan<byte> ToByteSpanNoCompression(Item item) {
+			MemoryStream ms = new MemoryStream();
+			TagIO.ToStream(ItemIO.Save(item), ms, false);
+			return ms.ToArray();
+		}
+
 		public static string ToBase64NoCompression(TagCompound tag) {
 			MemoryStream ms = new MemoryStream();
 			TagIO.ToStream(tag, ms, false);
 			return Convert.ToBase64String(ms.ToArray());
 		}
 
+		public static ReadOnlySpan<byte> ToByteSpanNoCompression(TagCompound tag) {
+			MemoryStream ms = new MemoryStream();
+			TagIO.ToStream(tag, ms, false);
+			return ms.ToArray();
+		}	
+
 		public static Item FromBase64NoCompression(string base64) {
 			MemoryStream ms = new MemoryStream(Convert.FromBase64String(base64));
+			return SafelyLoadItem(TagIO.FromStream(ms, false));
+		}
+
+		public static Item FromByteSpanNoCompression(ReadOnlySpan<byte> bytes) {
+			MemoryStream ms = new MemoryStream(bytes.ToArray());
 			return SafelyLoadItem(TagIO.FromStream(ms, false));
 		}
 
