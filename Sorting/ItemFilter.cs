@@ -1,5 +1,6 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
+using MagicStorage.UI.Selling;
 using System.Linq;
 using Terraria;
 using Terraria.Audio;
@@ -131,6 +132,8 @@ namespace MagicStorage.Sorting
 		public static readonly Filter FullyResearched = item => Utility.IsFullyResearched(item.type, mustBeResearchable: false);
 
 		public static readonly Filter NotFullyResearched = item => !Utility.IsFullyResearched(item.type, mustBeResearchable: false);
+
+		public static readonly Filter SellingItem = item => MagicUI.IsStorageUIOpen() && SellModeMetadata.HasItem(item, out _);
 
 		private static readonly Filter[] blacklist =
 		{

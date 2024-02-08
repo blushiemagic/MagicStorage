@@ -223,10 +223,10 @@ namespace MagicStorage.UI.States {
 						bool selected = object.ReferenceEquals(recipe, CraftingGUI.selectedRecipe);
 
 						if (selected)
-							context = 6;
+							context = MagicSlotContext.SelectedRecipe;
 
 						if (!available)
-							context = selected ? 4 : 3;
+							context = selected ? MagicSlotContext.SelectedRecipeNotAvailable : MagicSlotContext.RecipeNotAvailable;
 					
 						if (MagicStorageConfig.CraftingFavoritingEnabled && StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
 							item = item.Clone();

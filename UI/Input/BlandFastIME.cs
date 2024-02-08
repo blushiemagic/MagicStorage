@@ -32,11 +32,18 @@ namespace MagicStorage.UI.Input {
 		private static float backSpaceRate;
 
 		private static void Listen(char key) {
-			_inputQueue.Enqueue(key);
+			// Force vanilla to be cleared when this system is active, and vice versa
+			if (TextInputTracker.GetFocusedState() is not null) {
+				Main.keyCount = 0;
 
-			// Limit the queue to 10 characters, destroying the oldest ones
-			if (_inputQueue.Count > 10)
-				_inputQueue.Dequeue();
+				_inputQueue.Enqueue(key);
+
+				// Limit the queue to 10 characters, destroying the oldest ones
+				if (_inputQueue.Count > 10)
+					_inputQueue.Dequeue();
+			} else {
+				_inputQueue.Clear();
+			}
 		}
 
 		public static void Handle(StringBuilder text) {

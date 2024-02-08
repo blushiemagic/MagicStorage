@@ -13,6 +13,7 @@ using Terraria.UI.Chat;
 using Microsoft.Xna.Framework;
 using System;
 using Terraria.Localization;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage.UI.States {
 	partial class CraftingUIState {
@@ -96,7 +97,7 @@ namespace MagicStorage.UI.States {
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(scroll.ViewPosition);
 			Item item = index < CraftingGUI.storageItems.Count ? CraftingGUI.storageItems[index] : new Item();
 			if (CraftingGUI.blockStorageItems.Contains(new ItemData(item)))
-				context = ItemSlot.Context.ChestItem;  // Red
+				context = MagicSlotContext.IngredientBlocked;
 			return item;
 		}
 
@@ -177,7 +178,7 @@ namespace MagicStorage.UI.States {
 
 			SlotFocus(out var flag, out var updateFocus, out _);
 
-			if (result is not null && !result.IsAir && (Main.mouseItem.IsAir || ItemCombining.CanCombineItems(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
+			if (result is not null && !result.IsAir && (Main.mouseItem.IsAir || StorageAggregator.CanCombineItems(Main.mouseItem, result) && Main.mouseItem.stack < Main.mouseItem.maxStack))
 				flag.Value = true;
 
 			if (flag.Value) {

@@ -21,6 +21,8 @@ using MagicStorage.UI;
 using System.Threading;
 using ReLogic.Content;
 using MagicStorage.Common.Systems.Shimmering;
+using MagicStorage.UI.Selling;
+using Terraria.Localization;
 
 namespace MagicStorage
 {
@@ -1025,41 +1027,50 @@ namespace MagicStorage
 			}
 		}
 
-		public static void RequestDuplicateSelling(Point16 heart, int sellOption) {
+		public static bool RequestDuplicateSelling(Point16 heart) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
-				return;
+				return true;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.MassDuplicateSellRequest);
 			packet.Write(heart);
-			packet.Write((byte)sellOption);
+
+			if (!SellModeMetadata.NetSend(packet, consumedPacketSpace: sizeof(byte) + sizeof(short) * 2)) {
+				// Packet was too large to send
+				Main.NewTextMultiline(Language.GetTextValue("Mods.MagicStorage.StorageGUI.SellDuplicatesMenu.SoldItemsReport.PacketTooLarge"), c: Color.Red);
+				return false;
+			}
+			
 			packet.Send();
 
 			Report(true, MessageType.MassDuplicateSellRequest + " packet sent to the server");
+
+			return true;
 		}
 
 		public static void ReceiveDuplicateSellingRequest(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+			SellModeMetadata.NetReceive(reader);
+
 			if (Main.netMode == NetmodeID.Server) {
-				Point16 position = reader.ReadPoint16();
-				int sellOption = reader.ReadByte();
-
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
-					StorageUIState.ControlsPage.DoSell(heart, sellOption, out long coppersEarned, out var withdrawnItems);
+					int totalItemCount = SellModeMetadata.Count;
+					SellModeMetadata.HandleSell(heart, out int soldItemCount, out var sellValue, Main.player[sender]);
 
-					int sold = withdrawnItems.Values.Select(l => l.Count).Sum();
-
-					Report(false, $"{sold} items were sold for {coppersEarned} copper coins");
-
-					StorageUIState.ControlsPage.DuplicateSellingResult(heart, sold, coppersEarned, reportText: false, depositCoins: true);
+					Report(false, $"{soldItemCount} items were sold for {sellValue.TotalValue} copper coins");
 
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.MassDuplicateSellResult);
 					packet.Write((short)sender);
 					packet.Write(position);
-					packet.Write7BitEncodedInt64(coppersEarned);
-					packet.Write7BitEncodedInt(sold);
+					packet.Write7BitEncodedInt64(sellValue.TotalValue);
+					packet.Write7BitEncodedInt(soldItemCount);
+					packet.Write7BitEncodedInt(totalItemCount);
 
 					packet.Send();
+				} else {
+					// Invalid request
+					SellModeMetadata.Clear();
 				}
 
 				Report(false, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
@@ -1067,30 +1078,26 @@ namespace MagicStorage
 
 				PrintClientRequest(sender, "Sell Duplicates", position);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				reader.ReadPoint16();
-				reader.ReadInt32();
+				SellModeMetadata.Clear();
 
 				Report(true, MessageType.MassDuplicateSellRequest + " packet recevied by client " + Main.myPlayer);
 			}
 		}
 
 		public static void ClientReceiveDuplicateSellingResult(BinaryReader reader) {
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				//Read the data, but do nothing with it
-				_ = reader.ReadInt16();
-				_ = reader.ReadPoint16();
-				_ = reader.Read7BitEncodedInt64();
-
-				return;
-			}
-
 			short sender = reader.ReadInt16();
 			Point16 heart = reader.ReadPoint16();
 			long coppersEarned = reader.Read7BitEncodedInt64();
 
 			int sold = reader.Read7BitEncodedInt();
+			int totalItemsBeforeSell = reader.Read7BitEncodedInt();
 
-			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				//Read the data, but do nothing with it
+				return;
+			}
+
+			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart) {
 				Report(true, MessageType.MassDuplicateSellResult + " packet was malformed: Storage Heart location did not have a Storage Heart");
 				return;
 			}
@@ -1100,7 +1107,7 @@ namespace MagicStorage
 			Report(false, MessageType.MassDuplicateSellResult + " packet recevied by client " + Main.myPlayer);
 
 			if (sender == Main.myPlayer)
-				StorageUIState.ControlsPage.DuplicateSellingResult(storageHeart, sold, coppersEarned, reportText: true, depositCoins: false);
+				SellModeMetadata.ClientReportSell(sold, totalItemsBeforeSell, new SellModeMetadata.Coins(coppersEarned));
 		}
 
 		public static void RequestStorageUnitStyle(Point16 unit) {

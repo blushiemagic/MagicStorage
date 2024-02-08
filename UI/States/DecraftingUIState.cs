@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.Shimmering;
+using MagicStorage.CrossMod;
 using MagicStorage.UI.History;
 using MagicStorage.UI.Shimmer;
 using SerousCommonLib.UI;
@@ -186,7 +187,7 @@ namespace MagicStorage.UI.States {
 				DecraftingGUI.ResetSlotFocus();
 			}
 
-			if (objSlot < DecraftingGUI.resultItems.Count && (Main.mouseItem.IsAir || ItemCombining.CanCombineItems(Main.mouseItem, DecraftingGUI.resultItems[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack)) {
+			if (objSlot < DecraftingGUI.resultItems.Count && (Main.mouseItem.IsAir || StorageAggregator.CanCombineItems(Main.mouseItem, DecraftingGUI.resultItems[objSlot]) && Main.mouseItem.stack < Main.mouseItem.maxStack)) {
 				DecraftingGUI.hasSlotFocus = true;
 				DecraftingGUI.slotFocus = objSlot;
 			}
@@ -419,10 +420,10 @@ namespace MagicStorage.UI.States {
 						bool selected = type == DecraftingGUI.selectedItem;
 
 						if (selected)
-							context = 6;
+							context = MagicSlotContext.SelectedRecipe;
 
 						if (!available)
-							context = selected ? 4 : 3;
+							context = selected ? MagicSlotContext.SelectedRecipeNotAvailable : MagicSlotContext.RecipeNotAvailable;
 					
 						if (MagicStorageConfig.CraftingFavoritingEnabled && StoragePlayer.LocalPlayer.FavoritedShimmerItems.Contains(item)) {
 							item = item.Clone();

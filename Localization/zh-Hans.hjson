@@ -782,6 +782,7 @@ Mods: {
 			// InitShowcaseButton: Initialize Showcase
 			// ResetShowcaseButton: Reset Showcase Items
 			// ClearItemsButton: Clear All Items
+			// FillWithGarbage: Fill With Random Items
 			SellDuplicatesHeader: 出售同种物品
 			SellDuplicatesButton: 出售
 			// SetAStorageName: Enter a name here...
@@ -795,10 +796,22 @@ Mods: {
 			}
 
 			SellDuplicatesMenu: {
+				// Label: Item Selling Mode
+				// Enabled: Item Selling Mode is now [c/00ff00:enabled].  Click on items to mark them as items to sell.
+				// Disabled: Item Selling Mode is now [c/ff0000:disabled].
 				NoPrefix: 出售所有同种无词缀物品
 				KeepMostValue: 保留最值钱的物品
 				KeepLeastValue: 保留最不值钱的物品
+
+				SoldItemsReport: {
+					// GotCoins: "{0}/{1} items were sold for {2}"
+					// NoCoins: "{0}/{1} items were sold, but none had any value"
+					// NoSell: No items were sold
+					// PacketTooLarge: The amount of items to sell was too large to send in one packet.  Please try again with a smaller amount.
+				}
 			}
+
+			// Popup.Label: Quantity:
 		}
 
 		CraftingGUI: {
@@ -872,6 +885,7 @@ Mods: {
 			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
 			// Fishing.Tooltip: Filter Fishing Items
 			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
+			// SellingItems.Tooltip: Filter Items Being Sold
 		}
 
 		SortingOption: {
@@ -883,6 +897,12 @@ Mods: {
 			QuantityAbsolute.Tooltip: 按堆叠数量排序
 			QuantityRatio.Tooltip: 按堆叠占比排序
 			Damage.Tooltip: 按伤害排序
+		}
+
+		SellingDuplicateFinders: {
+			// SellAllExceptLeastExpensiveFinder.Label: Sell All Except Least Expensive
+			// SellAllExceptMostExpensiveFinder.Label: Sell All Except Most Expensive
+			// SellAllItemsWithNoPrefixFinder.Label: Sell All Items with No Prefix
 		}
 
 		ButtonConfigGear: Open Configuration Panel

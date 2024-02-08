@@ -326,8 +326,6 @@ namespace MagicStorage.UI.States {
 				FilteringOptionLoader.GeneralSelections.UnionWith(filteringPage.generalSelections);
 			}
 
-			pendingUIChange = true;
-
 			timeSpentOpen = 0;
 		}
 

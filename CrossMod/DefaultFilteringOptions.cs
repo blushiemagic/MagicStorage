@@ -1,4 +1,5 @@
-﻿using MagicStorage.Sorting;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Sorting;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
 using System;
@@ -379,5 +380,20 @@ namespace MagicStorage.CrossMod {
 		public override string Name => "Materials";
 
 		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+	}
+
+	[Autoload(false)]
+	public sealed class FilterSellingItems : FilteringOption {
+		public override ItemFilter.Filter Filter => ItemFilter.SellingItem;
+
+		public override string Texture => "MagicStorage/Assets/FilterSellingItems";
+
+		public override string Name => "SellingItems";
+
+		public override bool IsGeneralFilter => true;
+
+		public override Position GetDefaultPosition() => new Between();  //Order is determined by load order
+
+		public override bool GetDefaultVisibility(bool craftingGUI) => !craftingGUI && StorageGUI.currentMode is StorageGUI.ActionMode.Selling;
 	}
 }

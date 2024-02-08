@@ -155,7 +155,7 @@ namespace MagicStorage {
 			var generalFilters = FilteringOptionLoader.GeneralSelections;
 
 			// Force filtering to specific value to make deleting the bad item stacks easier
-			if (itemDeletionMode) {
+			if (ForciblySeparateItemStacks) {
 				filterMode = FilteringOptionLoader.Definitions.All.Type;
 				generalFilters = null;
 			}

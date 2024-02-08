@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
-using Terraria.UI;
 
 namespace MagicStorage.UI.Input {
 	public static class TextInputTracker {
@@ -30,6 +28,8 @@ namespace MagicStorage.UI.Input {
 			Main.drawingPlayerChat = false;
 			Main.chatRelease = false;
 		}
+
+		public static TextInputState GetFocusedState() => _inputs.Find(static s => s.HasFocus);
 
 		internal static void Update(GameTime gameTime) {
 			foreach (var input in _inputs) {

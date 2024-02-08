@@ -2,6 +2,7 @@
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
@@ -24,7 +25,7 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
-			if (!hasSlotFocus || slotFocus == -1 || slotFocus >= resultItems.Count || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, resultItems[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
+			if (!hasSlotFocus || slotFocus == -1 || slotFocus >= resultItems.Count || !Main.mouseItem.IsAir && (!StorageAggregator.CanCombineItems(Main.mouseItem, resultItems[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
 				ResetSlotFocus();
 			} else {
 				if (rightClickTimer <= 0) {

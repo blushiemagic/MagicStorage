@@ -781,6 +781,7 @@ Mods: {
 			InitShowcaseButton: Создание предпросмотра
 			ResetShowcaseButton: Сброс предметов предпросмотра
 			ClearItemsButton: Очистить все предметы
+			// FillWithGarbage: Fill With Random Items
 			SellDuplicatesHeader: Продажа дубликатов
 			SellDuplicatesButton: Продать
 			// SetAStorageName: Enter a name here...
@@ -794,10 +795,22 @@ Mods: {
 			}
 
 			SellDuplicatesMenu: {
+				// Label: Item Selling Mode
+				// Enabled: Item Selling Mode is now [c/00ff00:enabled].  Click on items to mark them as items to sell.
+				// Disabled: Item Selling Mode is now [c/ff0000:disabled].
 				NoPrefix: Продать дубликаты без модификаторов
 				KeepMostValue: Оставить дорогие предметы
 				KeepLeastValue: Оставить дешевые предметы
+
+				SoldItemsReport: {
+					// GotCoins: "{0}/{1} items were sold for {2}"
+					// NoCoins: "{0}/{1} items were sold, but none had any value"
+					// NoSell: No items were sold
+					// PacketTooLarge: The amount of items to sell was too large to send in one packet.  Please try again with a smaller amount.
+				}
 			}
+
+			// Popup.Label: Quantity:
 		}
 
 		CraftingGUI: {
@@ -871,6 +884,7 @@ Mods: {
 			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
 			// Fishing.Tooltip: Filter Fishing Items
 			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
+			// SellingItems.Tooltip: Filter Items Being Sold
 		}
 
 		SortingOption: {
@@ -882,6 +896,12 @@ Mods: {
 			QuantityAbsolute.Tooltip: Сортировка по общему кол-ву
 			QuantityRatio.Tooltip: Сортировка по кол-ву стека
 			Damage.Tooltip: Сортировка по урону
+		}
+
+		SellingDuplicateFinders: {
+			// SellAllExceptLeastExpensiveFinder.Label: Sell All Except Least Expensive
+			// SellAllExceptMostExpensiveFinder.Label: Sell All Except Most Expensive
+			// SellAllItemsWithNoPrefixFinder.Label: Sell All Items with No Prefix
 		}
 
 		ButtonConfigGear: Открыть панель конфигурации

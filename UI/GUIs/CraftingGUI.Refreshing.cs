@@ -211,8 +211,9 @@ namespace MagicStorage {
 					newModSearch: ModSearchBox.ModIndexAll);
 
 				thread.context = clone.context = new(state.simulatorItems);
+				thread.context.uniqueSlotPerItemStack = true;
 
-				items.AddRange(ItemSorter.SortAndFilter(clone, aggregate: false));
+				items.AddRange(ItemSorter.SortAndFilter(clone));
 
 				thread.CompleteOneTask();
 

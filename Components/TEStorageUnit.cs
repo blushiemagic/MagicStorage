@@ -1,5 +1,6 @@
 using Ionic.Zlib;
 using MagicStorage.Common.IO;
+using MagicStorage.CrossMod;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -118,7 +119,7 @@ namespace MagicStorage.Components
 
 			foreach (Item item in items)
 			{
-				if (ItemCombining.CanCombineItems(toDeposit, item) && item.stack < item.maxStack)
+				if (StorageAggregator.CanCombineItems(toDeposit, item) && item.stack < item.maxStack)
 				{
 					int total = item.stack + toDeposit.stack;
 					int newStack = total;
@@ -193,7 +194,7 @@ namespace MagicStorage.Components
 
 					if (result is not null) {
 						//Item data must be the same
-						if (!ItemCombining.CanCombineItems(result, item))
+						if (!StorageAggregator.CanCombineItems(result, item))
 							continue;
 
 						Utility.CallOnStackHooks(result, item, withdraw);
@@ -344,7 +345,7 @@ namespace MagicStorage.Components
 					if (pack.IsAir || pack.stack >= pack.maxStack)
 						continue;
 
-					if (ItemCombining.CanCombineItems(item, pack)) {
+					if (StorageAggregator.CanCombineItems(item, pack)) {
 						if (item.stack + pack.stack <= pack.maxStack) {
 							Utility.CallOnStackHooks(pack, item, item.stack);
 
@@ -397,7 +398,7 @@ namespace MagicStorage.Components
 					if (src.IsAir)
 						continue;
 
-					if (ItemCombining.CanCombineItems(dest, src)) {
+					if (StorageAggregator.CanCombineItems(dest, src)) {
 						Item transferred = src.Clone();
 
 						if (dest.stack + src.stack <= dest.maxStack) {

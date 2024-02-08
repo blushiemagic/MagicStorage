@@ -83,11 +83,11 @@ namespace MagicStorage {
 		internal static void RefreshItems_Inner()
 		{
 			// Force full refresh if item deletion mode is active
-			if (MagicUI.ForceNextRefreshToBeFull || itemDeletionMode)
+			if (MagicUI.ForceNextRefreshToBeFull || ForciblySeparateItemStacks)
 				itemTypesToUpdate = null;
 
 			// Prevent inconsistencies after refreshing items
-			itemDeletionSlotFocus = -1;
+			actionSlotFocus = -1;
 
 			var storagePage = MagicUI.storageUI.GetDefaultPage<StorageUIState.StoragePage>();
 
@@ -167,6 +167,8 @@ namespace MagicStorage {
 			} else {
 				thread.context = new(source);
 			}
+
+			thread.context.uniqueSlotPerItemStack = ForciblySeparateItemStacks;
 		}
 
 		private static void SortAndFilter(ThreadContext thread) {
@@ -230,11 +232,11 @@ namespace MagicStorage {
 
 					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					thread.context.items = ItemSorter.SortAndFilter(thread, 100, aggregate: !itemDeletionMode);
+					thread.context.items = ItemSorter.SortAndFilter(thread, 100);
 				}
 				else
 				{
-					thread.context.items = ItemSorter.SortAndFilter(thread, aggregate: !itemDeletionMode);
+					thread.context.items = ItemSorter.SortAndFilter(thread);
 				}
 
 				thread.CompleteOneTask();

@@ -2,6 +2,7 @@
 using Terraria.ID;
 using Terraria;
 using MagicStorage.Common.Systems;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -15,7 +16,7 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
-			if (!slotFocus || result == null || result.IsAir || !Main.mouseItem.IsAir && (!ItemCombining.CanCombineItems(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
+			if (!slotFocus || result == null || result.IsAir || !Main.mouseItem.IsAir && (!StorageAggregator.CanCombineItems(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
 			}

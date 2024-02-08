@@ -14,6 +14,7 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.UI;
+using static MagicStorage.UI.States.StorageUIState;
 
 namespace MagicStorage.UI.States {
 	public abstract class BaseStorageUIAccessPage : BaseStorageUIPage {
@@ -59,6 +60,9 @@ namespace MagicStorage.UI.States {
 
 				// Ensure that the UI is refreshed completely
 				MagicUI.SetRefresh(forceFullRefresh: true);
+
+				// Recalculates which options should appear and increases the panel height if needed
+				ReformatPage(MagicStorageConfig.ButtonUIMode);
 			};
 
 			OnPageDeselected += () => {

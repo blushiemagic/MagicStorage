@@ -20,6 +20,8 @@ namespace MagicStorage.Sorting
 			public ConditionalWeakTable<Item, byte[]> savedItemTagIO;
 			internal List<List<Item>> enumeratedSource;
 
+			public bool uniqueSlotPerItemStack;
+
 			public AggregateContext(IEnumerable<Item> items) {
 				this.items = items;
 				sourceItems = enumeratedSource = new();
@@ -29,7 +31,7 @@ namespace MagicStorage.Sorting
 
 		private static Item SelectFirstItem(List<Item> items) => items[0];
 
-		public static IEnumerable<Item> SortAndFilter(StorageGUI.ThreadContext thread, int? takeCount = null, bool aggregate = true)
+		public static IEnumerable<Item> SortAndFilter(StorageGUI.ThreadContext thread, int? takeCount = null)
 		{
 			try {
 				thread.context.items = DoFiltering(thread, thread.context.items);
@@ -39,7 +41,7 @@ namespace MagicStorage.Sorting
 				if (takeCount is int take)
 					thread.context.items = thread.context.items.Take(take);
 
-				thread.context.items = Aggregate(thread.context, thread.token, aggregate);
+				thread.context.items = Aggregate(thread.context, thread.token);
 
 				thread.CompleteOneTask();
 
@@ -101,7 +103,7 @@ namespace MagicStorage.Sorting
 
 		//Formerly returned IEnumerable<Item> for lazy evaluation
 		//Needs to return a collection so that "context.enumeratedSource" is properly assigned
-		public static List<Item> Aggregate(AggregateContext context, CancellationToken token, bool actuallyAggregate = true)
+		public static List<Item> Aggregate(AggregateContext context, CancellationToken token)
 		{
 			try
 			{
@@ -120,10 +122,10 @@ namespace MagicStorage.Sorting
 						continue;
 					}
 
-					bool combiningPermitted = ItemCombining.CanCombineItems(item, lastItem, checkPrefix: true, savedItemTagIO: context.savedItemTagIO);
-					if (combiningPermitted && (!actuallyAggregate || lastItem.stack + item.stack > 0))
+					bool combiningPermitted = StorageAggregator.CanCombineItems(item, lastItem, checkPrefix: true, strict: true, savedItemTagIO: context.savedItemTagIO);
+					if (combiningPermitted && (context.uniqueSlotPerItemStack || lastItem.stack + item.stack > 0))
 					{
-						if (actuallyAggregate)
+						if (!context.uniqueSlotPerItemStack)
 						{
 							if (item.favorited)
 							{

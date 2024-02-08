@@ -60,8 +60,7 @@ namespace MagicStorage {
 
 			EnvironmentModuleLoader.Unload();
 
-			ItemCombining.combiningObjectsByType = null!;
-			ItemCombining.NextID = 0;
+			Obsolete_Unload();
 
 			SortingOptionLoader.Unload();
 			FilteringOptionLoader.Unload();
@@ -70,6 +69,11 @@ namespace MagicStorage {
 
 			CheckModBuildVersionBeforeJIT.Mod = null;
 			CheckModBuildVersionBeforeJIT.versionChecked = false;
+		}
+
+		[Obsolete]
+		private static void Obsolete_Unload() {
+			ItemCombining.NextID = 0;
 		}
 
 		public override void PostSetupContent() {

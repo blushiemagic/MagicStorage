@@ -4,7 +4,7 @@ using Terraria.UI;
 namespace MagicStorage.UI {
 	public class MagicStorageItemSlot : EnhancedItemSlotV2 {
 		/// <inheritdoc/>
-		public MagicStorageItemSlot(int slot, int context = ItemSlot.Context.InventoryItem, float scale = 1f) : base(slot, context, scale) { }
+		public MagicStorageItemSlot(int slot, int context = MagicSlotContext.Normal, float scale = 1f) : base(slot, context, scale) { }
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);

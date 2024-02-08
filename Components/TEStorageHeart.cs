@@ -14,6 +14,8 @@ using Microsoft.Xna.Framework;
 using System;
 using MagicStorage.Common.Systems;
 using System.Collections;
+using MagicStorage.Common;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Components
 {
@@ -766,10 +768,15 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal void TryDeleteExactItem(ReadOnlySpan<byte> itemData) {
+		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, int? itemStackOverride = null, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
 			Item clone = Utility.FromByteSpanNoCompression(itemData);
 			if (clone.IsAir)
-				return;
+				return false;
+
+			if (itemStackOverride is { } stackOverride && clone.stack != stackOverride) {
+				clone.stack = stackOverride;
+				itemData = Utility.ToByteSpanNoCompression(clone);
+			}
 
 			foreach (TEStorageUnit unit in GetStorageUnits().OfType<TEStorageUnit>()) {
 				if (unit.IsEmpty || !unit.HasItem(clone, ignorePrefix: true))
@@ -777,11 +784,37 @@ namespace MagicStorage.Components
 
 				for (int i = 0; i < unit.items.Count; i++) {
 					Item storage = unit.items[i];
-					ReadOnlySpan<byte> storageData = Utility.ToByteSpanNoCompression(storage);
+					ReadOnlySpan<byte> storageData;
+
+					if (savedItemTagIO.TryGetValue(storage, out var storageDataArray)) {
+						// Retrieve the cached value
+						storageData = storageDataArray;
+					} else {
+						if (itemStackOverride is { } stackOverride2) {
+							using (ObjectSwitch.Create(ref storage.stack, stackOverride2))
+								storageDataArray = Utility.ToByteArrayNoCompression(storage);
+						} else
+							storageDataArray = Utility.ToByteArrayNoCompression(storage);
+
+						// Cache the value
+						savedItemTagIO.Add(storage, storageDataArray);
+						storageData = storageDataArray;
+					}
 
 					// Must be an exact match
 					if (itemData.SequenceEqual(storageData)) {
-						unit.items.RemoveAt(i);
+						if (clone.stack >= storage.stack) {
+							clone.stack -= storage.stack;
+
+							unit.items.RemoveAt(i);
+							savedItemTagIO.Remove(storage);
+
+							i--;
+						} else {
+							storage.stack -= clone.stack;
+							clone.stack = 0;
+						}
+
 						ResetCompactStage();
 
 						unit.PostChangeContents();
@@ -791,10 +824,13 @@ namespace MagicStorage.Components
 						else
 							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 
-						break;
+						if (clone.stack <= 0)
+							return true;
 					}
 				}
 			}
+
+			return clone.stack <= 0;
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)

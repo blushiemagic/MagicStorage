@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.CrossMod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -237,7 +238,7 @@ namespace MagicStorage {
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (ItemCombining.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]] && !moduleItems[i]) {
+					if (StorageAggregator.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]] && !moduleItems[i]) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							existing.stack += item.stack;
 							item.stack = 0;

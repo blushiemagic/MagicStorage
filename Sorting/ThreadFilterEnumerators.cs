@@ -36,7 +36,12 @@ namespace MagicStorage.Sorting {
 
 		private bool AllGeneralFiltersPass(Item item) {
 			foreach (var id in _context.generalFilters) {
-				var filter = FilteringOptionLoader.Get(id)?.Filter
+				var filterOption = FilteringOptionLoader.Get(id);
+
+				if (filterOption?.Visible is false)
+					continue;  // Skip unavailable filters
+
+				var filter = filterOption?.Filter
 					?? throw new ArgumentOutOfRangeException(nameof(_context) + "." + nameof(_context.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
 
 				if (!filter(item))

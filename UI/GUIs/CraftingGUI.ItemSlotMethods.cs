@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 using Terraria;
+using MagicStorage.UI;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -53,12 +54,11 @@ namespace MagicStorage {
 
 			if (!item.IsAir) {
 				if (storageItem.IsAir && totalGroupStack == 0)
-					context = ItemSlot.Context.ChestItem;  // Unavailable - Red
+					context = MagicSlotContext.IngredientNotCraftable;
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
-					context = ItemSlot.Context.BankItem;  // Partially in stock - Pinkish
+					context = MagicSlotContext.IngredientPartiallyInStock;
 
-				// context == 0 - Available - Default Blue
-				if (context != 0) {
+				if (context != MagicSlotContext.Normal) {
 					bool craftable;
 
 					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
@@ -67,7 +67,7 @@ namespace MagicStorage {
 					}
 
 					if (craftable)
-						context = ItemSlot.Context.TrashItem;  // Craftable - Light green
+						context = MagicSlotContext.IngredientCraftable;
 				}
 			}
 

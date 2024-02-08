@@ -1,5 +1,6 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
+using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using System;
@@ -246,7 +247,7 @@ namespace MagicStorage
 				return;
 			}
 
-			if (ItemCombining.CanCombineItems(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
+			if (StorageAggregator.CanCombineItems(Main.mouseItem, item) && Main.mouseItem.stack + item.stack < Main.mouseItem.maxStack)
 			{
 				Utility.CallOnStackHooks(Main.mouseItem, item, item.stack);
 

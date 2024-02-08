@@ -75,13 +75,13 @@ namespace MagicStorage.CrossMod {
 			childrenAfter.Clear();
 		}
 
-		/// <summary> Returns the layer's default visibility. This is usually called as a layer is queued for drawing, but modders can call it too for information. </summary>
-		/// <returns> Whether or not this layer will be visible by default. Modders can hide layers later, if needed.</returns>
+		/// <summary> Returns the option's default visibility. This is usually called as an option is read for refreshing logic, but modders can call it too for information. </summary>
+		/// <returns> Whether or not this option will be visible by default. Modders can hide options later, if needed.</returns>
 		public virtual bool GetDefaultVisibility(bool craftingGUI) => true;
 
 		/// <summary>
-		/// Returns the layer's default position in regards to other options.
-		/// Make use of e.g <see cref="BeforeParent"/>/<see cref="AfterParent"/>, and provide an option (usually a vanilla one from <see cref="SortingOptionLoader"/>).
+		/// Returns the option's default position in regards to other options.
+		/// Make use of e.g <see cref="BeforeParent"/>/<see cref="AfterParent"/>, and provide an option (usually a default one from <see cref="SortingOptionLoader"/>).
 		/// </summary>
 		public abstract Position GetDefaultPosition();
 

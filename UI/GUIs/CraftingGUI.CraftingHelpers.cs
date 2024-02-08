@@ -6,6 +6,7 @@ using Terraria;
 using System.Linq;
 using MagicStorage.Components;
 using System.Runtime.CompilerServices;
+using MagicStorage.CrossMod;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -174,7 +175,7 @@ namespace MagicStorage {
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (ItemCombining.CanCombineItems(item, existing)) {
+					if (StorageAggregator.CanCombineItems(item, existing)) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							Utility.CallOnStackHooks(existing, item, item.stack);
 
