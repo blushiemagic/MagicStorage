@@ -566,6 +566,7 @@ namespace MagicStorage.Components
 					if (toDeposit.IsAir)
 					{
 						_uniqueItemsPutHistory.Add(remember);
+						NetHelper.SyncStorageDepositHistory(this);
 						return;
 					}
 				}
@@ -902,6 +903,8 @@ namespace MagicStorage.Components
 			writer.Write((byte)arr.Length);
 			writer.Write(arr);
 
+			SendHistory(writer);
+
 			NetHelper.Report(true, "Sent tile entity data for TEStorageHeart");
 		}
 
@@ -915,7 +918,24 @@ namespace MagicStorage.Components
 			bits.Length -= 1;  // Need 255 entries, not 256
 			bits.CopyTo(clientUsingHeart, 0);
 
+			ReceiveHistory(reader);
+
 			NetHelper.Report(true, "Received tile entity data for TEStorageHeart");
+		}
+
+		public void SendHistory(BinaryWriter writer) {
+			writer.Write(_uniqueItemsPutHistory.Count);
+
+			foreach (Item item in _uniqueItemsPutHistory.Items)
+				writer.Write(item.type);
+		}
+
+		public void ReceiveHistory(BinaryReader reader) {
+			_uniqueItemsPutHistory.Clear();
+
+			int count = reader.ReadInt32();
+			for (int i = 0; i < count; i++)
+				_uniqueItemsPutHistory.Add(reader.ReadInt32());
 		}
 	}
 }

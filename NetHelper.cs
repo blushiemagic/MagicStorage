@@ -239,6 +239,9 @@ namespace MagicStorage
 				case MessageType.RenameStorageHeart:
 					ReceiveStorageHeartName(reader, sender);
 					break;
+				case MessageType.SyncDepositHistory:
+					ReceiveStorageDepositHistory(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -1621,6 +1624,42 @@ namespace MagicStorage
 
 			Report(true, MessageType.RenameStorageHeart + " packet sent from server from client " + sender);
 		}
+
+		public static void SyncStorageDepositHistory(TEStorageHeart heart) {
+			if (Main.netMode == NetmodeID.SinglePlayer)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SyncDepositHistory);
+			packet.Write(heart.Position);
+			heart.SendHistory(packet);
+			packet.Send();
+
+			Report(true, MessageType.SyncDepositHistory + " packet sent to the server");
+		}
+
+		public static void ReceiveStorageDepositHistory(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
+				return;
+
+			heart.ReceiveHistory(reader);
+
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				Report(true, MessageType.SyncDepositHistory + " packet received by client " + Main.myPlayer);
+				return;
+			}
+
+			// Forward the history to other clients
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SyncDepositHistory);
+			packet.Write(position);
+			heart.SendHistory(packet);
+			packet.Send(ignoreClient: sender);
+
+			Report(true, MessageType.SyncDepositHistory + " packet sent from server from client " + sender);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1660,6 +1699,7 @@ namespace MagicStorage
 		ClientUnlockStorageHeart,
 		DeleteSpecificItem,
 		RequestShimmerItemInStorage,
-		RenameStorageHeart
+		RenameStorageHeart,
+		SyncDepositHistory
 	}
 }
