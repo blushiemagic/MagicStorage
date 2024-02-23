@@ -32,6 +32,7 @@ namespace MagicStorage.Common.IO {
 		public static void SendItem(Item item, BinaryWriter writer, bool writeStack = true, bool writeFavorite = true) {
 			ValueWriter valueWriter = new(writer);
 			SendItem(item, valueWriter, writeStack, writeFavorite);
+			valueWriter.Flush();
 		}
 
 		public static void SendItem(Item item, ValueWriter writer, bool writeStack, bool writeFavorite) {
@@ -39,7 +40,7 @@ namespace MagicStorage.Common.IO {
 			ModContent.GetInstance<ItemPrefixTracker>().Send(item, writer);
 
 			if (writeStack)
-				writer.Write(item.stack, BitBuffer128.MAX_INT);
+				writer.Write(item.stack, GetBitSize(item.maxStack));
 
 			if (writeFavorite)
 				writer.Write(item.favorited);
@@ -54,6 +55,7 @@ namespace MagicStorage.Common.IO {
 		public static void SendItems(List<Item> items, BinaryWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
 			ValueWriter valueWriter = new(writer);
 			SendItems(items, valueWriter, writeStacks, writeFavorites, listCountBitSizeOverride);
+			valueWriter.Flush();
 		}
 
 		public static void SendItems(List<Item> items, ValueWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
@@ -74,7 +76,7 @@ namespace MagicStorage.Common.IO {
 			ModContent.GetInstance<ItemPrefixTracker>().Receive(ref item, reader);
 
 			if (readStack)
-				item.stack = reader.ReadInt32(BitBuffer128.MAX_INT);
+				item.stack = reader.ReadInt32(GetBitSize(item.maxStack));
 
 			if (readFavorite)
 				item.favorited = reader.ReadBoolean();

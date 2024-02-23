@@ -13,7 +13,7 @@ namespace MagicStorage.Stations
 
 		public sealed override void SetStaticDefaults()
 		{
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = SacrificeCount;
+			Item.ResearchUnlockCount = SacrificeCount;
 		}
 
 		public abstract void GetItemDimensions(out int width, out int height);

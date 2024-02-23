@@ -4,10 +4,6 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
 	public class PortableCraftingAccess : PortableAccess {
-		public override void SetStaticDefaults() {
-			Item.ResearchUnlockCount = 1;
-		}
-
 		public override void SetDefaults()
 		{
 			Item.width = 28;

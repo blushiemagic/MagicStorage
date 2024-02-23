@@ -1,7 +1,6 @@
 ﻿using MagicStorage.Components;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -10,11 +9,6 @@ namespace MagicStorage.Items
 {
 	public class StorageDeactivator : ModItem
 	{
-		public override void SetStaticDefaults()
-		{
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
-		}
-
 		public override void SetDefaults()
 		{
 			Item.width = 24;

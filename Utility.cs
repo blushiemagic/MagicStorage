@@ -619,5 +619,29 @@ namespace MagicStorage {
 				return new Item();
 			}
 		}
+
+		/// <summary>
+		/// Generates a hash for a byte array.  This method is <b>NOT</b> optimized for <see cref="object.GetHashCode"/> usage!
+		/// </summary>
+		public static int ComputeDataHash(byte[] data) {
+			if (data is not { Length: >0 })
+				return 0;
+
+			// Taken from: https://stackoverflow.com/a/468084
+			unchecked {
+				const int p = 16777619;
+				int hash = (int)2166136261;
+
+				for (int i = 0; i < data.Length; i++)
+					hash = (hash ^ data[i]) * p;
+
+				hash += hash << 13;
+				hash ^= hash >> 7;
+				hash += hash << 3;
+				hash ^= hash >> 17;
+				hash += hash << 5;
+				return hash;
+			}
+		}
 	}
 }

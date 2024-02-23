@@ -1,13 +1,8 @@
 ﻿using Terraria;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
 
 namespace MagicStorage.Items {
 	public class PortableCraftingAccessHM : PortableCraftingAccess {
-		public override void SetStaticDefaults() {
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
-		}
-
 		public override void SetDefaults() {
 			Item.width = 28;
 			Item.height = 28;

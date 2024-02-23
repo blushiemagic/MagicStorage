@@ -9,7 +9,7 @@ namespace MagicStorage.Items
 	{
 		public override void SetStaticDefaults()
 		{
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 3;
+			Item.ResearchUnlockCount = 3;
 		}
 
 		public override void SetDefaults()

@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 namespace MagicStorage.Items {
 	public class EnvironmentAccess : ModItem {
 		public override void SetStaticDefaults() {
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 3;
+			Item.ResearchUnlockCount = 3;
 		}
 
 		public override void SetDefaults() {

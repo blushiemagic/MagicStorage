@@ -1,6 +1,8 @@
 using Ionic.Zlib;
 using MagicStorage.Common.IO;
 using MagicStorage.CrossMod;
+using MagicStorage.Items;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,7 +24,9 @@ namespace MagicStorage.Components
 			Withdraw,
 			WithdrawStack,
 			PackItems,
-			Flatten
+			Flatten,
+			RemoveCore,
+			InsertCore
 		}
 
 		private struct NetOperation
@@ -52,6 +56,8 @@ namespace MagicStorage.Components
 		{
 			get
 			{
+				// I'm crying from just looking at this terrible code -- absoluteAquarian
+				/*
 				int style = Main.tile[Position.X, Position.Y].TileFrameY / 36;
 				if (style == 8)
 					return 4;
@@ -65,6 +71,9 @@ namespace MagicStorage.Components
 				if (capacity > 8)
 					capacity += 7;
 				return 40 * capacity;
+				*/
+				int tileStyle = Main.tile[Position].TileFrameY / 36;
+				return StorageUnitUpgradeMetrics.GetCapacity(tileStyle);
 			}
 		}
 
@@ -297,6 +306,48 @@ namespace MagicStorage.Components
 			return item;
 		}
 
+		internal void RemoveItemsAndSpawnCore() {
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving) {
+				NetHelper.ClientSendCoreRemoval(Position);
+				return;
+			}
+
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				StorageUnitTier tier = (StorageUnitTier)(Main.tile[Position].TileFrameY / 36);
+				Item core = new Item(StorageUnitUpgradeMetrics.GetCoreItem(tier));
+
+				((BaseStorageCore)core.ModItem).SetDataFrom(this);
+
+				Vector2 world = Position.ToWorldCoordinates(16, 16);
+				Item.NewItem(new EntitySource_TileEntity(this), world, core);
+			}
+
+			items.Clear();
+			StorageUnit.SetStyle(Position.X, Position.Y, (int)StorageUnitTier.Empty);
+
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				if (Main.netMode == NetmodeID.Server)
+					netOpQueue.Enqueue(new NetOperation(NetOperations.RemoveCore));
+				PostChangeContents();
+			}
+		}
+
+		internal void InsertCore(BaseStorageCore core) {
+			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving) {
+				NetHelper.ClientSendCoreInsertion(Position, core);
+				return;
+			}
+
+			items.Clear();
+			items.AddRange(core.RetrieveItems());
+
+			if (Main.netMode != NetmodeID.MultiplayerClient) {
+				if (Main.netMode == NetmodeID.Server)
+					netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
+				PostChangeContents();
+			}
+		}
+
 		internal void PackItems() {
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
 				return;
@@ -509,6 +560,11 @@ namespace MagicStorage.Components
 						break;
 					case NetOperations.PackItems:
 						break;
+					case NetOperations.RemoveCore:
+						break;
+					case NetOperations.InsertCore:
+						NetCompression.SendItem(netOp.item, bitWriter, false, false);
+						break;
 					default:
 						break;
 				}
@@ -590,6 +646,12 @@ namespace MagicStorage.Components
 								break;
 							case NetOperations.PackItems:
 								PackItems();
+								break;
+							case NetOperations.RemoveCore:
+								RemoveItemsAndSpawnCore();
+								break;
+							case NetOperations.InsertCore:
+								InsertCore((BaseStorageCore)NetCompression.ReceiveItem(bitReader, false, false).ModItem);
 								break;
 							default:
 								break;

@@ -1,22 +1,12 @@
 ﻿using Terraria;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
-	public class UpgradeTerra : ModItem
+	public class UpgradeTerra : BaseStorageUpgradeItem
 	{
-		public override void SetStaticDefaults()
-		{
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 1;
-		}
-
 		public override void SetDefaults()
 		{
-			Item.width = 12;
-			Item.height = 12;
-			Item.maxStack = 99;
 			Item.rare = ItemRarityID.Purple;
 			Item.value = Item.sellPrice(gold: 10);
 		}

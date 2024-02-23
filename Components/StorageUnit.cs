@@ -32,19 +32,8 @@ namespace MagicStorage.Components
 		public override int ItemType(int frameX, int frameY)
 		{
 			int style = frameY / 36;
-			int type = style switch
-			{
-				1 => ModContent.ItemType<StorageUnitDemonite>(),
-				2 => ModContent.ItemType<StorageUnitCrimtane>(),
-				3 => ModContent.ItemType<StorageUnitHellstone>(),
-				4 => ModContent.ItemType<StorageUnitHallowed>(),
-				5 => ModContent.ItemType<StorageUnitBlueChlorophyte>(),
-				6 => ModContent.ItemType<StorageUnitLuminite>(),
-				7 => ModContent.ItemType<StorageUnitTerra>(),
-				8 => ModContent.ItemType<StorageUnitTiny>(),
-				_ => ModContent.ItemType<Items.StorageUnit>()
-			};
-			return type;
+			
+			return StorageUnitUpgradeMetrics.GetUnitItem(style);
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
@@ -54,7 +43,8 @@ namespace MagicStorage.Components
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
-			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && Main.tile[i, j].TileFrameX / 36 % 3 != 0)
+			StorageUnitTier tier = (StorageUnitTier)(Main.tile[i, j].TileFrameY / 36);
+			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && tier != StorageUnitTier.Basic && tier != StorageUnitTier.Empty)
 				fail = true;
 		}
 
@@ -72,11 +62,15 @@ namespace MagicStorage.Components
 				i--;
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
-			if (TryUpgrade(i, j))
-				return true;
 
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
 				return false;
+
+			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageUpgradeItem && TryUpgrade(i, j, storageUnit))
+				return true;
+
+			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageCore core && TryCoreInsertion(i, j, storageUnit, core))
+				return true;
 
 			Main.LocalPlayer.tileInteractionHappened = true;
 			string activeString = storageUnit.Inactive ? Language.GetTextValue("Mods.MagicStorage.Inactive") : Language.GetTextValue("Mods.MagicStorage.Active");
@@ -85,80 +79,60 @@ namespace MagicStorage.Components
 			return base.RightClick(i, j);
 		}
 
-		private static bool TryUpgrade(int i, int j)
+		private static bool TryCoreInsertion(int i, int j, TEStorageUnit storageUnit, BaseStorageCore core) {
+			StorageUnitTier tier = (StorageUnitTier)(Main.tile[i, j].TileFrameY / 36);
+
+			if (tier != StorageUnitTier.Empty)
+				return false;
+
+			storageUnit.InsertCore(core);
+			SetStyle(i, j, (int)core.Tier);
+			TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
+
+			return true;
+		}
+
+		private static bool TryUpgrade(int i, int j, TEStorageUnit storageUnit)
 		{
 			Player player = Main.LocalPlayer;
 			Item item = player.HeldItem;
 			int style = Main.tile[i, j].TileFrameY / 36;
-			bool success = false;
-			if (style == 0 && item.type == ModContent.ItemType<UpgradeDemonite>())
-			{
-				SetStyle(i, j, 1);
-				success = true;
-			}
-			else if (style == 0 && item.type == ModContent.ItemType<UpgradeCrimtane>())
-			{
-				SetStyle(i, j, 2);
-				success = true;
-			}
-			else if ((style == 1 || style == 2) && item.type == ModContent.ItemType<UpgradeHellstone>())
-			{
-				SetStyle(i, j, 3);
-				success = true;
-			}
-			else if (style == 3 && item.type == ModContent.ItemType<UpgradeHallowed>())
-			{
-				SetStyle(i, j, 4);
-				success = true;
-			}
-			else if (style == 4 && item.type == ModContent.ItemType<UpgradeBlueChlorophyte>())
-			{
-				SetStyle(i, j, 5);
-				success = true;
-			}
-			else if (style == 5 && item.type == ModContent.ItemType<UpgradeLuminite>())
-			{
-				SetStyle(i, j, 6);
-				success = true;
-			}
-			else if (style == 6 && item.type == ModContent.ItemType<UpgradeTerra>())
-			{
-				SetStyle(i, j, 7);
-				success = true;
-			}
-
-			if (success)
-			{
-				if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
-					return false;
-
-				storageUnit.UpdateTileFrame();
-				NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
-				TEStorageHeart heart = storageUnit.GetHeart();
-				if (heart is not null)
-				{
-					if (Main.netMode == NetmodeID.SinglePlayer)
-						heart.ResetCompactStage();
-					else if (Main.netMode == NetmodeID.MultiplayerClient)
-						NetHelper.SendResetCompactStage(heart.Position);
-				}
-
-				item.stack--;
-				if (item.stack <= 0)
-					item.SetDefaults();
-				if (player.selectedItem == 58)
-					Main.mouseItem = item.Clone();
-
-				SoundEngine.PlaySound(SoundID.MaxMana, storageUnit.Position.ToWorldCoordinates());
-				Dust.NewDustPerfect(storageUnit.Position.ToWorldCoordinates(), DustID.PureSpray, Vector2.Zero, Scale: 2, newColor: Color.Green);
-
+			
+			if (StorageUnitUpgradeMetrics.AttemptUpgrade(ref style, item.type)) {
+				SetStyle(i, j, style);
+				TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
 				return true;
 			}
 
 			return false;
 		}
 
-		private static void SetStyle(int i, int j, int style)
+		private static void TriggerUnitMagicAndConsumeHeldItem(int i, int j, TEStorageUnit storageUnit) {
+			Player player = Main.LocalPlayer;
+			Item item = player.HeldItem;
+
+			storageUnit.UpdateTileFrame();
+			NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
+			TEStorageHeart heart = storageUnit.GetHeart();
+			if (heart is not null)
+			{
+				if (Main.netMode == NetmodeID.SinglePlayer)
+					heart.ResetCompactStage();
+				else if (Main.netMode == NetmodeID.MultiplayerClient)
+					NetHelper.SendResetCompactStage(heart.Position);
+			}
+
+			item.stack--;
+			if (item.stack <= 0)
+				item.SetDefaults();
+			if (player.selectedItem == 58)
+				Main.mouseItem = item.Clone();
+
+			SoundEngine.PlaySound(SoundID.MaxMana, storageUnit.Position.ToWorldCoordinates());
+			Dust.NewDustPerfect(storageUnit.Position.ToWorldCoordinates(), DustID.PureSpray, Vector2.Zero, Scale: 2, newColor: Color.Green);
+		}
+
+		internal static void SetStyle(int i, int j, int style)
 		{
 			Main.tile[i, j].TileFrameY = (short) (36 * style);
 			Main.tile[i + 1, j].TileFrameY = (short) (36 * style);

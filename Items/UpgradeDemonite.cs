@@ -1,22 +1,13 @@
 ﻿using Terraria;
-using Terraria.GameContent.Creative;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Items
 {
-	public class UpgradeDemonite : ModItem
+	public class UpgradeDemonite : BaseStorageUpgradeItem
 	{
-		public override void SetStaticDefaults()
-		{
-			CreativeItemSacrificesCatalog.Instance.SacrificeCountNeededByItemId[Type] = 10;
-		}
-
 		public override void SetDefaults()
 		{
-			Item.width = 12;
-			Item.height = 12;
-			Item.maxStack = 99;
+			base.SetDefaults();
 			Item.rare = ItemRarityID.Blue;
 			Item.value = Item.sellPrice(silver: 32);
 		}

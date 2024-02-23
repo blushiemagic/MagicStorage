@@ -9,7 +9,6 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
-using MagicStorage.UI.States;
 using System.Text;
 using System.Linq;
 using Terraria.Audio;
@@ -23,6 +22,7 @@ using ReLogic.Content;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.UI.Selling;
 using Terraria.Localization;
+using MagicStorage.Items;
 
 namespace MagicStorage
 {
@@ -241,6 +241,12 @@ namespace MagicStorage
 					break;
 				case MessageType.SyncDepositHistory:
 					ReceiveStorageDepositHistory(reader, sender);
+					break;
+				case MessageType.ClientSendCoreRemoval:
+					ReceiveCoreRemoval(reader, sender);
+					break;
+				case MessageType.ClientSendCoreInsertion:
+					ReceiveCoreInsertion(reader, sender);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
@@ -1660,6 +1666,62 @@ namespace MagicStorage
 
 			Report(true, MessageType.SyncDepositHistory + " packet sent from server from client " + sender);
 		}
+
+		public static void ClientSendCoreRemoval(Point16 position) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.ClientSendCoreRemoval);
+				packet.Write(position);
+				packet.Send();
+
+				Report(true, MessageType.ClientSendCoreRemoval + " packet sent from client " + Main.myPlayer);
+			}
+		}
+
+		public static void ReceiveCoreRemoval(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+
+			if (Main.netMode == NetmodeID.Server) {
+				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
+					unit.RemoveItemsAndSpawnCore();
+					unit.UpdateTileFrameWithNetSend();
+
+					if (unit.GetHeart() is TEStorageHeart heart)
+						heart.ResetCompactStage();
+				}
+
+				Report(true, MessageType.ClientSendCoreRemoval + " packet received by server from client " + sender);
+			}
+		}
+
+		public static void ClientSendCoreInsertion(Point16 position, BaseStorageCore core) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.ClientSendCoreInsertion);
+				packet.Write(position);
+				ItemIO.Send(core.Item, packet, false, false);
+				packet.Send();
+
+				Report(true, MessageType.ClientSendCoreInsertion + " packet sent from client " + Main.myPlayer);
+			}
+		}
+
+		public static void ReceiveCoreInsertion(BinaryReader reader, int sender) {
+			Point16 position = reader.ReadPoint16();
+			Item item = ItemIO.Receive(reader, false, false);
+
+			if (Main.netMode == NetmodeID.Server) {
+				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
+					unit.InsertCore((BaseStorageCore)item.ModItem);
+					unit.UpdateTileFrameWithNetSend();
+
+					if (unit.GetHeart() is TEStorageHeart heart)
+						heart.ResetCompactStage();
+				}
+
+				Report(true, MessageType.ClientSendCoreInsertion + " packet received by server from client " + sender);
+			}
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1700,6 +1762,8 @@ namespace MagicStorage
 		DeleteSpecificItem,
 		RequestShimmerItemInStorage,
 		RenameStorageHeart,
-		SyncDepositHistory
+		SyncDepositHistory,
+		ClientSendCoreRemoval,
+		ClientSendCoreInsertion
 	}
 }
