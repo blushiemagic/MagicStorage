@@ -334,7 +334,7 @@ namespace MagicStorage.Components
 				PostChangeContents();
 			}
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is var playerHeart && playerHeart.Position == GetHeart()?.Position) {
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && playerHeart.Position == GetHeart()?.Position) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
@@ -357,7 +357,7 @@ namespace MagicStorage.Components
 				PostChangeContents();
 			}
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is var playerHeart && playerHeart.Position == GetHeart()?.Position) {
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && playerHeart.Position == GetHeart()?.Position) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(coreItems.Select(static i => i.type).Distinct().ToList());
 			}
