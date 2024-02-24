@@ -1,5 +1,6 @@
 using Ionic.Zlib;
 using MagicStorage.Common.IO;
+using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
@@ -322,6 +323,8 @@ namespace MagicStorage.Components
 				Item.NewItem(new EntitySource_TileEntity(this), world, core);
 			}
 
+			var types = items.Select(static i => i.type).Distinct().ToList();
+
 			items.Clear();
 			StorageUnit.SetStyle(Position.X, Position.Y, (int)StorageUnitTier.Empty);
 
@@ -329,6 +332,11 @@ namespace MagicStorage.Components
 				if (Main.netMode == NetmodeID.Server)
 					netOpQueue.Enqueue(new NetOperation(NetOperations.RemoveCore));
 				PostChangeContents();
+			}
+
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is var playerHeart && playerHeart.Position == GetHeart()?.Position) {
+				MagicUI.SetRefresh();
+				MagicUI.SetNextCollectionsToRefresh(types);
 			}
 		}
 
@@ -339,12 +347,19 @@ namespace MagicStorage.Components
 			}
 
 			items.Clear();
-			items.AddRange(core.RetrieveItems());
+
+			var coreItems = core.RetrieveItems();
+			items.AddRange(coreItems);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient) {
 				if (Main.netMode == NetmodeID.Server)
 					netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
 				PostChangeContents();
+			}
+
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is var playerHeart && playerHeart.Position == GetHeart()?.Position) {
+				MagicUI.SetRefresh();
+				MagicUI.SetNextCollectionsToRefresh(coreItems.Select(static i => i.type).Distinct().ToList());
 			}
 		}
 
