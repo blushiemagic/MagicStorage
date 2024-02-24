@@ -49,7 +49,7 @@ namespace MagicStorage.Items
 						else
 						{
 							storageUnit.UpdateTileFrameWithNetSend();
-							storageUnit.GetHeart().ResetCompactStage();
+							storageUnit.GetHeart()?.ResetCompactStage();
 						}
 					}
 				}

@@ -535,7 +535,7 @@ namespace MagicStorage
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByPosition.ContainsKey(position)) {
+			if (TileEntity.ByPosition.ContainsKey(position) && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == position) {
 				MagicUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
@@ -1167,7 +1167,7 @@ namespace MagicStorage
 				SoundEngine.PlaySound(SoundID.Grab);
 			*/
 
-			if (origType > 0)
+			if (origType > 0 && MagicUI.uiInterface.CurrentState is not null)
 				MagicUI.SetNextCollectionsToRefresh(origType);
 		}
 
@@ -1683,11 +1683,15 @@ namespace MagicStorage
 
 			if (Main.netMode == NetmodeID.Server) {
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
+					var types = unit.GetItems().Select(static i => i.type).Distinct().ToList();
+
 					unit.RemoveItemsAndSpawnCore();
 					unit.UpdateTileFrameWithNetSend();
 
-					if (unit.GetHeart() is TEStorageHeart heart)
+					if (unit.GetHeart() is TEStorageHeart heart) {
 						heart.ResetCompactStage();
+						SendRefreshNetworkItems(heart.Position, typesToRefresh: types);
+					}
 				}
 
 				Report(true, MessageType.ClientSendCoreRemoval + " packet received by server from client " + sender);
@@ -1715,8 +1719,10 @@ namespace MagicStorage
 					unit.InsertCore((BaseStorageCore)item.ModItem);
 					unit.UpdateTileFrameWithNetSend();
 
-					if (unit.GetHeart() is TEStorageHeart heart)
+					if (unit.GetHeart() is TEStorageHeart heart) {
 						heart.ResetCompactStage();
+						SendRefreshNetworkItems(heart.Position, forceFullRefresh: true);
+					}
 				}
 
 				Report(true, MessageType.ClientSendCoreInsertion + " packet received by server from client " + sender);

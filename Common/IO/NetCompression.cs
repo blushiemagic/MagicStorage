@@ -36,11 +36,14 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public static void SendItem(Item item, ValueWriter writer, bool writeStack, bool writeFavorite) {
+			if (ValueWriter.LogWrites)
+				MagicStorageMod.Instance.Logger.Info($"ITEM WRITE: {item}");
+
 			ModContent.GetInstance<ItemTypeTracker>().Send(item, writer);
 			ModContent.GetInstance<ItemPrefixTracker>().Send(item, writer);
 
 			if (writeStack)
-				writer.Write(item.stack, GetBitSize(item.maxStack));
+				writer.Write7BitEncodedInt(item.stack);
 
 			if (writeFavorite)
 				writer.Write(item.favorited);
@@ -49,7 +52,8 @@ namespace MagicStorage.Common.IO {
 			using (BinaryWriter modWriter = new BinaryWriter(modData))
 				ItemIO.SendModData(item, modWriter);
 
-			writer.WriteBytes(modData.ToArray());
+			byte[] data = modData.ToArray();
+			writer.WriteBytes(data);
 		}
 
 		public static void SendItems(List<Item> items, BinaryWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
@@ -76,7 +80,7 @@ namespace MagicStorage.Common.IO {
 			ModContent.GetInstance<ItemPrefixTracker>().Receive(ref item, reader);
 
 			if (readStack)
-				item.stack = reader.ReadInt32(GetBitSize(item.maxStack));
+				item.stack = reader.Read7BitEncodedInt();
 
 			if (readFavorite)
 				item.favorited = reader.ReadBoolean();
@@ -85,16 +89,15 @@ namespace MagicStorage.Common.IO {
 			using (BinaryReader modReader = new BinaryReader(modData))
 				ItemIO.ReceiveModData(item, modReader);
 
+			if (ValueReader.LogReads)
+				MagicStorageMod.Instance.Logger.Info($"ITEM READ: {item}");
+
 			return item;
 		}
 
 		public static List<Item> ReceiveItems(BinaryReader reader, bool readStacks = true, bool readFavorites = true, int? listCountBitSizeOverride = null) {
 			ValueReader valueReader = new(reader);
-			int count = valueReader.ReadInt32(listCountBitSizeOverride ?? BitBuffer128.MAX_INT);
-			List<Item> items = new(count);
-			for (int k = 0; k < count; k++)
-				items.Add(ReceiveItem(valueReader, readStacks, readFavorites));
-			return items;
+			return ReceiveItems(valueReader, readStacks, readFavorites, listCountBitSizeOverride);
 		}
 
 		public static List<Item> ReceiveItems(ValueReader reader, bool readStacks = true, bool readFavorites = true, int? listCountBitSizeOverride = null) {

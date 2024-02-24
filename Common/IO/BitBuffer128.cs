@@ -64,15 +64,15 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Set(bool value, ref int head) {
-			int _head = head;
-			GetDataAndHead(out var dataRef, ref head, numBits: 1);
+			int localHead = head;
+			GetDataAndHead(out var dataRef, ref localHead, numBits: 1);
 
 			if (value)
-				dataRef.Value |= 1uL << head;
+				dataRef.Value |= 1uL << localHead;
 			else
-				dataRef.Value &= ~(1uL << head);
-
-			head = _head + 1;
+				dataRef.Value &= ~(1uL << localHead);
+			
+			head++;
 		}
 
 		public byte GetByte(ref int head, byte numBits = MAX_BYTE) {
@@ -85,7 +85,7 @@ namespace MagicStorage.Common.IO {
 
 			byte mask = (byte)((1u << numBits) - 1);
 			byte shiftOut = (byte)(_byte0 & mask);
-			_qword0 = (_qword0 >> numBits) | ((ulong)_byte8 & mask);
+			_qword0 = (_qword0 >> numBits) | (((ulong)_byte8 & mask) << (MAX_LONG - numBits));
 			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
@@ -97,14 +97,14 @@ namespace MagicStorage.Common.IO {
 			if (numBits > MAX_BYTE)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_BYTE}");
 
-			int _head = head;
-			GetDataAndHead(out var dataRef, ref head, numBits);
+			int localHead = head;
+			GetDataAndHead(out var dataRef, ref localHead, numBits);
 
 			byte mask = (byte)(byte.MaxValue >> (MAX_BYTE - numBits));
-			dataRef.Value &= ~((ulong)mask << head);
-			dataRef.Value |= (ulong)(value & mask) << head;
+			dataRef.Value &= ~((ulong)mask << localHead);
+			dataRef.Value |= (ulong)(value & mask) << localHead;
 			
-			head = _head + numBits;
+			head += numBits;
 		}
 
 		public ushort GetUInt16(ref int head, byte numBits = MAX_SHORT) {
@@ -117,7 +117,7 @@ namespace MagicStorage.Common.IO {
 
 			ushort mask = (ushort)((1u << numBits) - 1);
 			ushort shiftOut = (ushort)(_word0 & mask);
-			_qword0 = (_qword0 >> numBits) | ((ulong)_word4 & mask);
+			_qword0 = (_qword0 >> numBits) | (((ulong)_word4 & mask) << (MAX_LONG - numBits));
 			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
@@ -129,14 +129,14 @@ namespace MagicStorage.Common.IO {
 			if (numBits > MAX_SHORT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_SHORT}");
 
-			int _head = head;
-			GetDataAndHead(out var dataRef, ref head, numBits);
+			int localHead = head;
+			GetDataAndHead(out var dataRef, ref localHead, numBits);
 
 			ushort mask = (ushort)(ushort.MaxValue >> (MAX_SHORT - numBits));
-			dataRef.Value &= ~((ulong)mask << head);
-			dataRef.Value |= (ulong)(value & mask) << head;
+			dataRef.Value &= ~((ulong)mask << localHead);
+			dataRef.Value |= (ulong)(value & mask) << localHead;
 			
-			head = _head + numBits;
+			head += numBits;
 		}
 
 		public uint GetUInt32(ref int head, byte numBits = MAX_INT) {
@@ -149,7 +149,7 @@ namespace MagicStorage.Common.IO {
 
 			uint mask = (1u << numBits) - 1;
 			uint shiftOut = _dword0 & mask;
-			_qword0 = (_qword0 >> numBits) | (_dword2 & mask);
+			_qword0 = (_qword0 >> numBits) | ((_dword2 & mask) << (MAX_LONG - numBits));
 			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
@@ -161,14 +161,14 @@ namespace MagicStorage.Common.IO {
 			if (numBits > MAX_INT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_INT}");
 
-			int _head = head;
-			GetDataAndHead(out var dataRef, ref head, numBits);
+			int localHead = head;
+			GetDataAndHead(out var dataRef, ref localHead, numBits);
 
 			uint mask = uint.MaxValue >> (MAX_INT - numBits);
-			dataRef.Value &= ~((ulong)mask << head);
-			dataRef.Value |= (ulong)(value & mask) << head;
+			dataRef.Value &= ~((ulong)mask << localHead);
+			dataRef.Value |= (ulong)(value & mask) << localHead;
 			
-			head = _head + numBits;
+			head += numBits;
 		}
 
 		public ulong GetUInt64(ref int head, byte numBits = MAX_LONG) {
@@ -181,7 +181,7 @@ namespace MagicStorage.Common.IO {
 
 			ulong mask = (1uL << numBits) - 1;
 			ulong shiftOut = _qword0 & mask;
-			_qword0 = (_qword0 >> numBits) | (_qword1 & mask);
+			_qword0 = (_qword0 >> numBits) | ((_qword1 & mask) << (MAX_LONG - numBits));
 			_qword1 >>= numBits;
 			head -= numBits;
 			return shiftOut;
@@ -193,14 +193,14 @@ namespace MagicStorage.Common.IO {
 			if (numBits > MAX_LONG)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_LONG}");
 
-			int _head = head;
-			GetDataAndHead(out var dataRef, ref head, numBits);
+			int localHead = head;
+			GetDataAndHead(out var dataRef, ref localHead, numBits);
 
 			ulong mask = ulong.MaxValue >> (MAX_LONG - numBits);
-			dataRef.Value &= ~(mask << head);
-			dataRef.Value |= (value & mask) << head;
+			dataRef.Value &= ~(mask << localHead);
+			dataRef.Value |= (value & mask) << localHead;
 			
-			head = _head + numBits;
+			head += numBits;
 		}
 	}
 }

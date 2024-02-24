@@ -402,6 +402,69 @@ Mods: {
 				// DisplayName: Meta//Shimmer/Coin_Luck
 				// Tooltip: ""
 			}
+
+			StorageCore: {
+				// DisplayName: Storage Core (Basic)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+				/* CommonTooltip:
+					'''
+					<CAPACITY>
+					<HASH>
+					''' */
+				// Empty: Does not contain any items
+				// ItemsStored: "[c/{0}:{1} / {2} items]"
+				// Hash: Data hash: {0:x08}
+			}
+
+			StorageCoreBlueChlorophyte: {
+				// DisplayName: Storage Core (Blue Chlorophyte)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreCrimtane: {
+				// DisplayName: Storage Core (Crimtane)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreDemonite: {
+				// DisplayName: Storage Core (Demonite)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreHallowed: {
+				// DisplayName: Storage Core (Hallowed)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreHellstone: {
+				// DisplayName: Storage Core (Hellstone)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreLuminite: {
+				// DisplayName: Storage Core (Luminite)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageCoreTerra: {
+				// DisplayName: Storage Core (Terra)
+				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+			}
+
+			StorageExtractor: {
+				// DisplayName: Storage Core Wrench
+				// Tooltip: Can remove the Storage Core from a Storage Unit
+			}
+
+			StorageUnitEmpty: {
+				// DisplayName: Empty Storage Unit
+				/* Tooltip:
+					'''
+					A component for storing items in a Magic Storage storage system
+					Needs a Storage Core to function
+					Right click while holding a Storage Core to insert it
+					''' */
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: Биом в шаре

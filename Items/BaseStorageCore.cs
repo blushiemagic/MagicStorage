@@ -1,10 +1,12 @@
 ﻿using Ionic.Zlib;
+using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Components;
 using SerousCommonLib.API;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -33,7 +35,7 @@ namespace MagicStorage.Items {
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips) {
 			if (_unitData is null) {
-				TooltipHelper.FindAndModify(tooltips, "<QUANTITY>", Mod.GetLocalization("StoragewCore.Empty").Value);
+				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.Empty").Value);
 				TooltipHelper.FindAndRemoveLine(tooltips, "<HASH>");
 			} else {
 				int capacity = StorageUnitUpgradeMetrics.GetCapacity(Tier);
@@ -42,12 +44,12 @@ namespace MagicStorage.Items {
 				if (_itemCount == 0)
 					colorHex = "18c242";  // Green
 				else if (_itemCount < capacity)
-					colorHex = "34d833";  // Yellow
+					colorHex = "e4d833";  // Yellow
 				else
 					colorHex = "e43233";  // Red
 
-				TooltipHelper.FindAndModify(tooltips, "<QUANTITY>", Mod.GetLocalization("StoragewCore.ItemsStored").Format(colorHex, _itemCount, capacity));
-				TooltipHelper.FindAndModify(tooltips, "<HASH>", $"Data Hash: {_hash:x8}");
+				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.ItemsStored").Format(colorHex, _itemCount, capacity));
+				TooltipHelper.FindAndModify(tooltips, "<HASH>", Mod.GetLocalization("Items.StorageCore.Hash").Format(_hash));
 			}
 		}
 
@@ -89,7 +91,13 @@ namespace MagicStorage.Items {
 			using MemoryStream ms = new(65536);
 			using (BinaryWriter writer = new(ms)) {
 				// Write the unit's contents to the stream
-				NetCompression.SendItems(unit.items, writer, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+			//	using (FlagSwitch.ToggleTrue(ref ValueWriter.LogWrites)) {
+				//	MagicStorageMod.Instance.Logger.Info("==============================");
+				//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
+					NetCompression.SendItems(unit.items, writer, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+				//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
+				//	MagicStorageMod.Instance.Logger.Info("==============================");
+			//	}
 			}
 
 			byte[] data = NetCompression.Compress(ms.ToArray(), CompressionLevel.BestCompression);
@@ -112,7 +120,14 @@ namespace MagicStorage.Items {
 			using MemoryStream ms = new(NetCompression.Decompress(_unitData, CompressionLevel.BestCompression));
 			using BinaryReader reader = new(ms);
 
-			return NetCompression.ReceiveItems(reader, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+		//	using (FlagSwitch.ToggleTrue(ref ValueReader.LogReads)) {
+			//	MagicStorageMod.Instance.Logger.Info("==============================");
+			//	MagicStorageMod.Instance.Logger.Info($"Retrieving {_itemCount} items from Storage Core");
+			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
+				var items = NetCompression.ReceiveItems(reader, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+			//	MagicStorageMod.Instance.Logger.Info("==============================");
+				return items;
+		//	}
 		}
 	}
 

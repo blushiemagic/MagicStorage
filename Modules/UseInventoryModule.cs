@@ -21,7 +21,7 @@ namespace MagicStorage.Modules {
 			if (player.useVoidBag())
 				CheckInventory(player.bank4.item, 40, 58, typesToUpdate, ref needRefresh);
 
-			if (needRefresh) {
+			if (needRefresh && MagicUI.uiInterface.CurrentState is not null) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(typesToUpdate);
 			}

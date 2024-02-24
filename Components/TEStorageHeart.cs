@@ -574,7 +574,7 @@ namespace MagicStorage.Components
 			toDeposit.newAndShiny = prevNewAndShiny;
 
 			if (oldStack != toDeposit.stack) {
-				if (actualItem)
+				if (actualItem && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
 					MagicUI.SetNextCollectionsToRefresh(toDeposit.type);
 
 				ResetCompactStage();
@@ -650,7 +650,8 @@ namespace MagicStorage.Components
 						else
 							result.stack += withdrawn.stack;
 
-						MagicUI.SetNextCollectionsToRefresh(withdrawn.type);
+						if (StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
+							MagicUI.SetNextCollectionsToRefresh(withdrawn.type);
 
 						if (lookFor.stack <= 0)
 						{
@@ -713,7 +714,7 @@ namespace MagicStorage.Components
 					if (result.stack > 0) {
 						ResetCompactStage();
 
-						if (Main.netMode == NetmodeID.SinglePlayer)
+						if (Main.netMode == NetmodeID.SinglePlayer && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
 							MagicUI.SetNextCollectionsToRefresh(type);
 					}
 				}
@@ -759,7 +760,7 @@ namespace MagicStorage.Components
 				if (didSomething) {
 					ResetCompactStage();
 					
-					if (Main.netMode != NetmodeID.Server)
+					if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
 						MagicUI.SetNextCollectionsToRefresh(typesToRefresh);
 				}
 			} catch {

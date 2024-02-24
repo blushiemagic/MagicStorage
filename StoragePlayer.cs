@@ -280,7 +280,8 @@ namespace MagicStorage
 					oldType
 				};
 
-				MagicUI.SetNextCollectionsToRefresh(types);
+				if (MagicUI.uiInterface.CurrentState is not null)
+					MagicUI.SetNextCollectionsToRefresh(types);
 			}
 
 			return true;
