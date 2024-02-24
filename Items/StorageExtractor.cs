@@ -41,7 +41,7 @@ namespace MagicStorage.Items {
 				.AddIngredient(ItemID.Wrench)
 				.AddIngredient<StorageComponent>()
 				.AddIngredient(ItemID.Wire, 10)
-				.AddIngredient(ItemID.IronBar, 5)
+				.AddRecipeGroup(RecipeGroupID.IronBar, 5)
 				.AddTile(TileID.Anvils)
 				.Register();
 		}

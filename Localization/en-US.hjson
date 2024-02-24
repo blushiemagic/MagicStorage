@@ -408,10 +408,11 @@ Mods: {
 				Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 				CommonTooltip:
 					'''
+					Stores the items that were in a Storage Unit
+					<right> an Empty Storage Unit to insert it
 					<CAPACITY>
 					<HASH>
 					'''
-				Empty: Does not contain any items
 				ItemsStored: "[c/{0}:{1} / {2} items]"
 				Hash: Data hash: {0:x08}
 			}
@@ -696,6 +697,17 @@ Mods: {
 					To become a [c/cccc00:Server Operator], you must either be the host of the world via Host&Play, or you must use the [c/ff6a00:/reqop] command.  Using this command successfully will grant you the [c/cc0000:Server Admin] status.
 					Once you have the [c/cc0000:Server Admin] status, you can use the [c/ff6a00:/op] command to grant other players the [c/cccc00:Server Operator] status or [c/ff6a00:/deop] to remove it.
 					Either status will stay active until you disconnect from the server.
+					'''
+				Help23:
+					'''
+					Moving a storage system can be a hassle, especially if you have a lot of items stored.  To make it easier, you can use the Storage Core Wrench to remove the Storage Core from a placed Storage Unit.
+					[i:Wrench] + [i:MagicStorage/StorageComponent] + [i/s10:Wire] + [rg/s5:IronBar] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageExtractor]
+					Removing the Storage Core will turn the Storage Unit into an [i:MagicStorage/StorageUnitEmpty], which can then be picked up and placed elsewhere.
+					To insert the Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
+					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
+					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
+					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
+					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
 					'''
 			}
 

@@ -213,8 +213,9 @@ namespace MagicStorage.NPCs {
 			public const int PortableAccesses = 20;
 			public const int StorageUnitUpgrades2 = 21;
 			public const int ServerOperator = 22;
+			public const int StorageCores = 23;
 
-			public const int Count = 21;
+			public const int Count = 22;
 			public const int CountMP = Count + 1;
 
 			public static string GetHelpKey(int id) {
@@ -252,6 +253,7 @@ namespace MagicStorage.NPCs {
 					EvilAltar => ModContent.ItemType<DemonAltar>(),
 					RadiantJewel => ModContent.ItemType<RadiantJewel>(),
 					ConfigurationInterface => ModContent.ItemType<EnvironmentAccess>(),
+					StorageCores => ModContent.ItemType<StorageExtractor>(),
 					_ => 0
 				};
 			}
@@ -271,6 +273,7 @@ namespace MagicStorage.NPCs {
 			HelpOptionID.RadiantJewel,
 			HelpOptionID.StorageUnitUpgrades,
 			HelpOptionID.StorageUnitUpgrades2,
+			HelpOptionID.StorageCores,
 			HelpOptionID.StorageAccess,
 			HelpOptionID.BiomeGlobe,
 			HelpOptionID.RemoteAccess,

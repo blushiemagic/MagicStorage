@@ -35,7 +35,7 @@ namespace MagicStorage.Items {
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips) {
 			if (_unitData is null) {
-				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.Empty").Value);
+				TooltipHelper.FindAndRemoveLine(tooltips, "<CAPACITY>");
 				TooltipHelper.FindAndRemoveLine(tooltips, "<HASH>");
 			} else {
 				int capacity = StorageUnitUpgradeMetrics.GetCapacity(Tier);
