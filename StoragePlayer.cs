@@ -30,7 +30,7 @@ namespace MagicStorage
 		internal int wirelessLatency = -1;
 		internal const int MaxLatency = 10;
 
-		private int patreon;
+		private int? patreon;
 
 		// Automaton help tips
 		internal bool unlockedTip_Mechs, unlockedTip_MoonLord;
@@ -76,7 +76,7 @@ namespace MagicStorage
 			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);
 
 			if (tag.TryGet("shilling", out int waitCount))
-				patreon = waitCount >= 0 ? waitCount - 1 : 0;
+				patreon = waitCount >= 0 ? waitCount - 1 : waitCount;
 			else
 				patreon = Main.rand.Next(3, 8);
 		}
