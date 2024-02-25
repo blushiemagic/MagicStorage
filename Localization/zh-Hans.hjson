@@ -533,6 +533,20 @@ Mods: {
 			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
+		GameTips: {
+			// Automaton: The Automaton can teach you all there is to know about Magic Storage.
+			// ShadowDiamonds: Shadow Diamonds are dropped when a boss is defeated for the first time. They can be used as an alternative to Diamonds in Magic Storage recipes.
+			// RadiantJewel: The Moon Lord drops the Radiant Jewel, which can be used to craft Portable Remote Accesses with unlimited access range.
+			// StorageUpgrades: Running out of storage? Upgrade your Storage Units with Storage Upgrades!
+			// RemoteStorage: Access your storage at other locations in the world with a Remote Access after linking it to a Storage Heart with a Locator or Locator Disk.
+			// CombinedStations: Magic Storage provides Combined Crafting Stations to reduce the number of crafting stations you have to put in the Crafting Interface.
+			// EnvironmentAccess: The Storage Configuration Interface allows other mods to add "crafting modules" which can affect how the Crafting Interface functions.
+			// PortableAccess: Craft a Portable Remote Storage Access to access your storage while you're away from home.
+			// StorageCores: Use a Storage Core Wrench to remove the Storage Core from a Storage Unit, which can then be inserted into an Empty Storage Unit.
+			// DisableUnit: Use a Storage Unit Wand to disable a Storage Unit. A disabled Storage Unit cannot store items and will attempt to move its items to connected Storage Units.
+			// BiomeGlobe: The Biome Globe enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars.
+		}
+
 		Bestiary.Golem:
 			'''
 			一个由存储部件构成的自动装置，由难以捉摸的蓝魔法驱动。

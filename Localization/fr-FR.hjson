@@ -83,7 +83,7 @@ Mods: {
 				/* Tooltip:
 					'''
 					Allows remote access of a Storage Heart
-					Acts as a "storage center" for components like the Crafting Access
+					Acts as a "storage center" for components like the Crafting Interface
 					''' */
 			}
 
@@ -531,6 +531,20 @@ Mods: {
 			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
+		GameTips: {
+			// Automaton: The Automaton can teach you all there is to know about Magic Storage.
+			// ShadowDiamonds: Shadow Diamonds are dropped when a boss is defeated for the first time. They can be used as an alternative to Diamonds in Magic Storage recipes.
+			// RadiantJewel: The Moon Lord drops the Radiant Jewel, which can be used to craft Portable Remote Accesses with unlimited access range.
+			// StorageUpgrades: Running out of storage? Upgrade your Storage Units with Storage Upgrades!
+			// RemoteStorage: Access your storage at other locations in the world with a Remote Access after linking it to a Storage Heart with a Locator or Locator Disk.
+			// CombinedStations: Magic Storage provides Combined Crafting Stations to reduce the number of crafting stations you have to put in the Crafting Interface.
+			// EnvironmentAccess: The Storage Configuration Interface allows other mods to add "crafting modules" which can affect how the Crafting Interface functions.
+			// PortableAccess: Craft a Portable Remote Storage Access to access your storage while you're away from home.
+			// StorageCores: Use a Storage Core Wrench to remove the Storage Core from a Storage Unit, which can then be inserted into an Empty Storage Unit.
+			// DisableUnit: Use a Storage Unit Wand to disable a Storage Unit. A disabled Storage Unit cannot store items and will attempt to move its items to connected Storage Units.
+			// BiomeGlobe: The Biome Globe enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars.
+		}
+
 		/* Bestiary.Golem:
 			'''
 			A living automaton powered by the elusive Bluemagic.
@@ -564,12 +578,12 @@ Mods: {
 					''' */
 				/* Help4:
 					'''
-					In order to craft items in a storage system, you will need to make a Crafting Access.
+					In order to craft items in a storage system, you will need to make a Crafting Interface.
 					Recipe: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
 					''' */
 				/* Help5:
 					'''
-					The Crafting Access's station slots are more powerful than they seem. Some items can inherit multiple crafting requirements at once!
+					The Crafting Interface's station slots are more powerful than they seem. Some items can inherit multiple crafting requirements at once!
 					[i:GlassKiln] functions as a [i:Furnace]
 					[i:BewitchingTable] functions as a [i:WoodenTable]
 					[rg:MagicStorage:AnyTombstone] enables Ecto Mist recipes
@@ -607,7 +621,7 @@ Mods: {
 					''' */
 				/* Help11:
 					'''
-					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides the Biome Globe item. This item enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars. You can even hold it in your inventory and cook Marshmallows without needing to stand next to a Campfire!
+					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Interface, Magic Storage provides the Biome Globe item. This item enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars. You can even hold it in your inventory and cook Marshmallows without needing to stand next to a Campfire!
 					Recipe: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
 					''' */
 				/* Help12:
@@ -618,7 +632,7 @@ Mods: {
 					[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
 					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 					''' */
-				// Help13: You can attach storage components to a Remote Access and still be able to access the main storage system. It's very useful for having a Crafting Access away from the Storage Heart.
+				// Help13: You can attach storage components to a Remote Access and still be able to access the main storage system. It's very useful for having a Crafting Interface away from the Storage Heart.
 				// Help14: The Storage Deactivator lets you disable a [i:MagicStorage/StorageUnit]. A disabled [i:MagicStorage/StorageUnit] cannot store items and will quickly attempt to move its items to connected [i:MagicStorage/StorageUnit] tiles. If it cannot move its items, the items remain in the disabled [i:MagicStorage/StorageUnit].
 				/* Help15:
 					'''
@@ -629,7 +643,7 @@ Mods: {
 					''' */
 				/* Help16:
 					'''
-					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
+					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Interface, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
 					Recipes:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
@@ -637,7 +651,7 @@ Mods: {
 					''' */
 				/* Help17:
 					'''
-					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Access, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
+					As one of the many features to reduce the number of crafting stations you have to put in the Crafting Interface, Magic Storage provides several Combined Crafting Stations. Each Combined Crafting Station inherits the properties of its material crafting stations.
 					Recipes:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
 					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
@@ -721,8 +735,8 @@ Mods: {
 		// PortableAccessMissing: Storage Heart is missing!
 		// PortableAccessOutOfRange: Locator could not connect to its linked storage system
 		// PortableAccessNoPylons: No pylons were close enough to the linked storage system
-		// PortableCraftingUnlocated: Locator is not set to any Crafting Access
-		// PortableCraftingMissing: Crafting Access is missing!
+		// PortableCraftingUnlocated: Locator is not set to any Crafting Interface
+		// PortableCraftingMissing: Crafting Interface is missing!
 		// RemoteAccessSuccess: Success!
 		// RemoteAccessHasLocator: This Access already has a locator, please mine then replace to reset it
 		// RemoteAccessUnlocated: The locator has not been set to a destination
