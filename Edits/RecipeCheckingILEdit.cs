@@ -70,7 +70,7 @@ namespace MagicStorage.Edits {
 					string tile = recipe.requiredTile.Count == 0 ? "hand" : string.Join(", ", recipe.requiredTile.Select(t => TileID.Search.TryGetName(t, out string s) ? s : "<unknown>"));
 
 					throw new Exception($"Mod \"{mod.Name}\" added or modified a recipe to be in an invalid state.\n" +
-						"Reason: An ingredient had a stack size of zero or less.\n" +
+						"Reason: An ingredient had an invalid ID or a stack size of zero or less.\n" +
 						$"Problem Recipe:  {result} @ {tile}");
 				}
 			}
