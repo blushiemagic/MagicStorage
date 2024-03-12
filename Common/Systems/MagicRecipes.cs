@@ -201,6 +201,7 @@ namespace MagicStorage.Common.Systems {
 			} else {
 				RecipeGroup group = new RecipeGroup(original.GetText, new int[1]);
 				group.ValidItems = original.ValidItems;
+				group.IconicItemId = original.IconicItemId;
 				RecipeGroup.RegisterGroup(groupName, group);
 			}
 		}
