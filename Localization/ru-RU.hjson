@@ -26,11 +26,12 @@ Mods: {
 
 			CreativeStorageUnit: {
 				DisplayName: Творческая ячейка хранилища
-				/* Tooltip:
+				Tooltip:
 					'''
-					Stores an unlimited amount of every item type.
-					Does not count toward storage limits when in a storage system.
-					''' */
+					Ячейка хранилища, которая используется для системы хранения
+					Может хранить неограниченное кол-во предметов
+					Не учитывается при лимите.
+					'''
 			}
 
 			Locator: {
@@ -64,7 +65,7 @@ Mods: {
 			}
 
 			PortableCraftingAccess: {
-				DisplayName: Портативный удаленный доступ к созданию предметов
+				DisplayName: Портативный удаленный доступ к созданию предметов (Эпический)
 				Tooltip:
 					'''
 					<right> по модулю создания предметов, чтобы запомнить его местоположение
@@ -370,32 +371,34 @@ Mods: {
 			}
 
 			PortableCraftingAccessPreHM: {
-				// DisplayName: Basic Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: Портативный удаленный доступ к созданию предметов (Обычный)
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 1000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right> по модулю создания предметов, чтобы запомнить его местоположение
+					В данный момент местоположение не установлено
+					Используйте предмет, чтобы получить удаленный доступ к созданию предметов
+					Связанный модуль должен находиться не дальше 100 блоков от любого действующего пилона, 
+					чтобы обеспечить расширенный доступ через каждый пилон.
+					Игрок должен находиться не дальше 1000 блоков от связанного модуля или пилона, чтобы иметь доступ к созданию.
+					'''
 			}
 
 			PortableCraftingAccessHM: {
-				// DisplayName: Advanced Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: Портативный удаленный доступ к созданию предметов (Необычный)
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 200' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 3000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right> по модулю создания предметов, чтобы запомнить его местоположение
+					В данный момент местоположение не установлено
+					Используйте предмет, чтобы получить удаленный доступ к созданию предметов
+					Связанный модуль должен находиться не дальше 200 блоков от любого действующего пилона, 
+					чтобы обеспечить расширенный доступ через каждый пилон.
+					Игрок должен находиться не дальше 3000 блоков от связанного модуля или пилона, чтобы иметь доступ к созданию.
+					'''
 			}
 
 			DecraftingAccess: {
-				// DisplayName: Storage Aether Interface
-				// Tooltip: Enables shimmering with the items in a storage system
+				DisplayName: Модуль мерцания
+				Tooltip: Позволяет использовать преобразование для предметов в хранилище. 
 			}
 
 			Shimmer_CoinLuck: {
@@ -404,67 +407,67 @@ Mods: {
 			}
 
 			StorageCore: {
-				// DisplayName: Storage Core (Basic)
+				DisplayName: Ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
-				/* CommonTooltip:
+				CommonTooltip:
 					'''
-					Stores the items that were in a Storage Unit
-					<right> an Empty Storage Unit to insert it
+					Хранит предметы, которые находились в ячейке хранилища.
+					<right> по пустой ячейке хранилища, чтобы вставить.
 					<CAPACITY>
 					<HASH>
 					''' */
-				// ItemsStored: "[c/{0}:{1} / {2} items]"
+				ItemsStored: "[c/{0}:{1} / {2} предметов]"
 				// Hash: Data hash: {0:x08}
 			}
 
 			StorageCoreBlueChlorophyte: {
-				// DisplayName: Storage Core (Blue Chlorophyte)
+				DisplayName: Синее хлорофитовое ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreCrimtane: {
-				// DisplayName: Storage Core (Crimtane)
+				DisplayName: Кримтанитовое ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreDemonite: {
-				// DisplayName: Storage Core (Demonite)
+				DisplayName: Демонитовое ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreHallowed: {
-				// DisplayName: Storage Core (Hallowed)
+				DisplayName: Святое ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreHellstone: {
-				// DisplayName: Storage Core (Hellstone)
+				DisplayName: Адское ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreLuminite: {
-				// DisplayName: Storage Core (Luminite)
+				DisplayName: Люминитовое ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageCoreTerra: {
-				// DisplayName: Storage Core (Terra)
+				DisplayName: Терра ядро хранилища
 				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
 			}
 
 			StorageExtractor: {
-				// DisplayName: Storage Core Wrench
-				// Tooltip: Can remove the Storage Core from a Storage Unit
+				DisplayName: Жезл ядра хранилища
+				// Tooltip: Может извлечь ядро хранилища с ячейки хранилища
 			}
 
 			StorageUnitEmpty: {
-				// DisplayName: Empty Storage Unit
-				/* Tooltip:
+				DisplayName: Пустая ячейка хранилища
+				Tooltip:
 					'''
-					A component for storing items in a Magic Storage storage system
-					Needs a Storage Core to function
-					Right click while holding a Storage Core to insert it
-					''' */
+					Ячейка хранилища, которая используется для системы хранения
+					Требуется ядро хранилища для работы
+					Нажмите ПКМ, держа ядро хранилища, чтобы вставить его.
+					'''
 			}
 		}
 
@@ -501,12 +504,12 @@ Mods: {
 		EnvironmentModule: {
 			UseInventoryModule: {
 				DisplayName: Использовать предметы из инвентаря игрока
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: В данный момент это отключено.
 			}
 
 			UseInventoryNoFavoritesModule: {
 				DisplayName: Использовать неизбранные предметы из инвентаря игрока
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: В данный момент это отключено.
 			}
 
 			JourneyInfiniteItems: {
@@ -531,8 +534,8 @@ Mods: {
 			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations3Item.DisplayName}"
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
-			// EvilAltarTile.MapEntry: Evil Altar
-			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
+			EvilAltarTile.MapEntry: Алтарь
+			DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		GameTips: {
@@ -819,42 +822,42 @@ Mods: {
 
 		RecipeHidden: '''"{0}" рецептов были скрыты.'''
 		RecipeRevealed: '''"{0}" рецептов были показаны.'''
-		// RecipeHiddenGlobal: Recipe for item "{0}" was global blacklisted.
-		// RecipeRevealedGlobal: Recipe for item "{0}" was global whitelisted.
+		RecipeHiddenGlobal: "{0}" рецептов были скрыты в мире.
+		RecipeRevealedGlobal: "{0}" рецептов были показаны в мире.
 
 		RecipeConditions: {
 			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			CookedMarshmallowCondition: Биом в шаре в модуле создания предметов
 		}
 
-		DepositTooltip: Положить - клик, Положить все - ctrl+клик, Пополнить запасы - ПКМ
-		DepositTooltipAlt: Положить - ctrl+клик, Положить все - клик, Пополнить запасы - ПКМ
+		DepositTooltip: Положить - ЛКМ, Положить все - Ctrl+ЛКМ/ПКМ, Пополнить запасы - ПКМ
+		DepositTooltipAlt: Положить - Ctrl+ЛКМ/ПКМ, Положить все - ЛКМ, Пополнить запасы - ПКМ
 
 		ServerOperator: {
-			// ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
-			// ControlRequirement: This control requires the Server Operator status.
+ 			ConfigChangeDenied: Только пользователи со статусом оператора сервера или выше могут изменять эту настройку
+			ControlRequirement: Эта функция требует статус оператора сервера
 
 			CommandInfo: {
 				Descriptions: {
-					// reqop: Requests the Server Admin status (for Magic Storage) from the server
-					// op: Gives the Server Operator status (for Magic Storage) to client <number>
-					// deop: Removes the Server Operator status (for Magic Storage) from client <number>
-					// whois: Prints what each player's client index is
-					// whoami: Prints this client's player index
+					reqop: Запрашивает у сервера статус администратора (для Magic Storage)
+					op: Назначает статус оператора сервера (для Magic Storage) игроку <номер>
+					deop: Снимает статус оператора сервера (для Magic Storage) с игрока <номер>
+					whois: Выводит индекс для каждого игрока
+					whoami: Выводит индекс текущего игрока
 				}
 
-				// NoArguments: Expected no arguments
-				// MultiplayerOnly: This command can only be used by multiplayer clients
-				// AlreadyAdmin: This player already has the Server Admin status
-				// OneIntArgument: Expected one integer argument
-				// ArgumentNotByte: Argument was not a positive integer between 0 and 255
-				// MultiplayerAdminOnly: This command can only be used by multiplayer clients with the Server Admin status
-				// NotConnected: Client {0} is not connected to the server
-				// ClientAlreadyOp: Client {0} already has the Server Operator status
-				// ClientAlreadyDeop: Client {0} already lacks the Server Operator status
-				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
-				// Players: Players:
-				// YouAreClient: You are client {0}
+				// NoArguments: Аргументы не требуются
+				MultiplayerOnly: Эта команда доступна только для многопользовательских клиентов
+				AlreadyAdmin: Этот игрок уже имеет статус Администратора сервера
+				OneIntArgument: Требуется один числовой аргумент
+				ArgumentNotByte: Аргумент должен быть положительным числом от 0 до 255
+				MultiplayerAdminOnly: Эта команда доступна только для игроков с статусом Администратора сервера
+				NotConnected: Игрок {0} не подключен к серверу
+				ClientAlreadyOp: Игрок {0} уже имеет статус Оператора сервера
+				ClientAlreadyDeop: Игрок {0} уже не имеет статус Оператора сервера
+				MultiplayerOperatorOnly: Эта команда доступна только для игроков с статусом Оператора сервера
+				Players: Игроки:
+				YouAreClient: Вы игрок {0}
 			}
 		}
 
@@ -870,32 +873,32 @@ Mods: {
 			InitShowcaseButton: Создание предпросмотра
 			ResetShowcaseButton: Сброс предметов предпросмотра
 			ClearItemsButton: Очистить все предметы
-			// FillWithGarbage: Fill With Random Items
+			FillWithGarbage: Заполнить случайными предметами
 			SellDuplicatesHeader: Продажа дубликатов
 			SellDuplicatesButton: Продать
-			// SetAStorageName: Enter a name here...
-			// NameWasCleared: Name was cleared
-			// NameWasSetTo: Name was set to: {0}
+			SetAStorageName: Введите имя хранилища...
+			NameWasCleared: Имя было удалено
+			NameWasSetTo: Имя было установлено на: {0}
 
 			ItemDeletionMode: {
-				// Label: Item Deletion Mode
-				// Enabled: Item Deletion mode is now [c/00ff00:enabled].  Double click an item to delete it.
-				// Disabled: Item Deletion mode is now [c/ff0000:disabled].
+				Label: Режим удаления предметов
+				Enabled: Режим удаления предметов: [c/00ff00:enabled].  Двойное нажатие по предмету, чтобы удалить.
+				Disabled: Режим удаления предметов: [c/ff0000:disabled].
 			}
 
 			SellDuplicatesMenu: {
-				// Label: Item Selling Mode
-				// Enabled: Item Selling Mode is now [c/00ff00:enabled].  Click on items to mark them as items to sell.
-				// Disabled: Item Selling Mode is now [c/ff0000:disabled].
+				Label: Режим продажи предметов
+				Enabled: Режим продажи предметов: [c/00ff00:enabled].  Нажмите на предмет, чтобы отметить его как товар для продажи.
+				Disabled: Режим продажи предметов: [c/ff0000:disabled].
 				NoPrefix: Продать дубликаты без модификаторов
 				KeepMostValue: Оставить дорогие предметы
 				KeepLeastValue: Оставить дешевые предметы
 
 				SoldItemsReport: {
-					// GotCoins: "{0}/{1} items were sold for {2}"
-					// NoCoins: "{0}/{1} items were sold, but none had any value"
-					// NoSell: No items were sold
-					// PacketTooLarge: The amount of items to sell was too large to send in one packet.  Please try again with a smaller amount.
+					GotCoins: "{0}/{1} предметов было продано за {2}"
+					NoCoins: "{0}/{1} предметы были проданы, но ни один из них не имел ценности."
+					NoSell: Ни один предмет не был продан.
+					PacketTooLarge: Слишком много предметов для продажи за раз. Пожалуйста, попробуйте снова с меньшим количеством.
 				}
 			}
 
@@ -903,7 +906,7 @@ Mods: {
 		}
 
 		CraftingGUI: {
-			// ShowAllIngredients: Show all possible ingredients
+			ShowAllIngredients: Показать все возможные ингредиенты.
 
 			RecursionErrors: {
 				// NoRecipe: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe]"
@@ -924,24 +927,24 @@ Mods: {
 		}
 
 		DecraftingGUI: {
-			// StoredResults: Stored Result Items
-			// ShimmeringReports: Shimmering Results
-			// ItemHidden: Item "{0}" was blacklisted.
-			// ItemRevealed: Item "{0}" was whitelisted.
-			// ItemHiddenGlobal: Item "{0}" was global blacklisted.
-			// ItemRevealedGlobal: Item "{0}" was global whitelisted.
-			// ShimmerButton: Shimmer
-			// ShimmerButtonTooltip: Left click to Shimmer item
-			// ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
-			// ShimmerAmount: Shimmering: {0}
+			StoredResults: Сохраненные результаты предметов
+			ShimmeringReports: Сохраненные преобразования
+			ItemHidden: Предмет "{0}" был занесен в черный список.
+			ItemRevealed: Предмет "{0}" был занесен в белый список.
+			ItemHiddenGlobal: Предмет "{0}" был занесен в мировой черный список.
+			ItemRevealedGlobal: Предмет "{0}" был занесен в мировой белый список.
+			ShimmerButton: Мерцание
+			ShimmerButtonTooltip: ЛКМ, чтобы преобразовать предмет
+			ShimmerButtonTooltipOld: ЛКМ, чтобы преобразовать предмет (ctrl, чтобы максимальное кол-во)
+			ShimmerAmount: Преобразование: {0}
 
 			ShimmerReports: {
-				// DoesNotShimmer: No shimmer results found
-				// CoinLuck: +{0}% Luck (+{1:0.##} value)
+				DoesNotShimmer: Нет результатов преобразования
+				CoinLuck: +{0}% удачи (+{1:0.##} значение)
 
 				NPCSpawn: {
-					// DirectTransform: "{0}"
-					// IndirectTransform: "{0} (style #{1})"
+					DirectTransform: "{0}"
+					IndirectTransform: "{0} (вид #{1})"
 				}
 			}
 		}
@@ -970,10 +973,10 @@ Mods: {
 			NotFullyResearched.Tooltip: Фильтр (Непросмотренное)
 			FullyResearched.Tooltip: Фильтр (Просмотренное)
 			Materials.Tooltip: Фильтр (Материалы)
-			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
-			// Fishing.Tooltip: Filter Fishing Items
-			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
-			// SellingItems.Tooltip: Filter Items Being Sold
+			ToolsAndFishing.Tooltip: Фильтр (Инструменты и рыбалка)
+			Fishing.Tooltip: Фильтр (Рыбалка)
+			MiscGameplayItems.Tooltip: Фильтр (Разное)
+			SellingItems.Tooltip: Фильтр (Предметы на продажу)
 		}
 
 		SortingOption: {
@@ -988,9 +991,9 @@ Mods: {
 		}
 
 		SellingDuplicateFinders: {
-			// SellAllExceptLeastExpensiveFinder.Label: Sell All Except Least Expensive
-			// SellAllExceptMostExpensiveFinder.Label: Sell All Except Most Expensive
-			// SellAllItemsWithNoPrefixFinder.Label: Sell All Items with No Prefix
+			SellAllExceptLeastExpensiveFinder.Label: Продать все, кроме самого дешевого
+			SellAllExceptMostExpensiveFinder.Label: Продать все, кроме самого дорогого
+			SellAllItemsWithNoPrefixFinder.Label: Продать все предметы без префикса
 		}
 
 		ButtonConfigGear: Открыть панель конфигурации
@@ -1000,7 +1003,7 @@ Mods: {
 			Filtering: Фильтрация
 			Crafting: Создание
 			Storage: Хранилище
-			// Shimmering: Shimmering
+			Shimmering: Мерцание
 			# StorageGUI page for the extra controls
 			Controls: Настройки
 			# EnvironmentGUI page for the modules
@@ -1009,12 +1012,12 @@ Mods: {
 		}
 
 		Config: {
-			BetaLabel: Magic Storage BETA конфигурация
+			BetaLabel: Настройки Magic Storage (BETA)
 
 			Headers: {
-				Storage: "[i:MagicStorage/StorageHeart]  Конфигурация интерфейса хранилища"
-				Crafting: "[i:MagicStorage/CraftingAccess]  Конфигурация интерфейса создания"
-				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Конфигурация интерфейсов хранения и крафта"
+				Storage: "[i:MagicStorage/StorageHeart]  Настройки интерфейса хранилища"
+				Crafting: "[i:MagicStorage/CraftingAccess]  Настройки интерфейса создания"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Настройки интерфейсов хранения и крафта"
 				General: Дополнительно
 			}
 
@@ -1037,11 +1040,11 @@ Mods: {
 			}
 		}
 
-		// Keybinds.PrintItemData.DisplayName: Print Item Data
+		Keybinds.PrintItemData.DisplayName: Вывести данные о предмете.
 
 		Configs: {
 			MagicStorageConfig: {
-				DisplayName: Magic Storage конфигурация
+				DisplayName: Настройки Magic Storage
 
 				quickStackDepositMode: {
 					Label: "[i:Chest]  Режим быстрой стопки"
@@ -1064,13 +1067,13 @@ Mods: {
 				}
 
 				recipeBlacklist: {
-					Label: Белый/черный список рецептов
+					Label: Черный/белый список рецептов
 					Tooltip: Включите, чтобы разрешить добавление исключений в рецептах в интерфейсе создания
 				}
 
 				globalRecipeBlacklist: {
-					// Label: Global Recipe Blacklist
-					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
+					Label: Мировой черный/белый список рецептов
+					Tooltip: Нажмите левый Ctrl + левый Shift чтобы добавить в черный/белый список
 				}
 
 				clearHistory: {
@@ -1153,8 +1156,8 @@ Mods: {
 				}
 
 				globalShimmerItemBlacklist: {
-					// Label: Global Item Shimmering Blacklist
-					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
+					Label: Мировой черный/белый список преобразования предметов
+					Tooltip: Нажмите левый Ctrl + левый Shift чтобы добавить в черный/белый список
 				}
 			}
 
@@ -1177,8 +1180,8 @@ Mods: {
 				}
 
 				auditLog: {
-					// Label: Server Audit Log
-					// Tooltip: Enable to make client interactions with any storage system be reported to an audit log
+					Label: Логи сервера
+					Tooltip: Включите, чтобы действия игрока с любой системой хранения фиксировались в логах.
 				}
 			}
 
