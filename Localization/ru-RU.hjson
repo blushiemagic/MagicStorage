@@ -412,9 +412,11 @@ Mods: {
 					<right> an Empty Storage Unit to insert it
 					<CAPACITY>
 					<HASH>
+					<BYTES>
 					''' */
 				// ItemsStored: "[c/{0}:{1} / {2} items]"
 				// Hash: Data hash: {0:x08}
+				// BytesUsed: "[c/{0}:{1} bytes]"
 			}
 
 			StorageCoreBlueChlorophyte: {

@@ -37,19 +37,29 @@ namespace MagicStorage.Items {
 			if (_unitData is null) {
 				TooltipHelper.FindAndRemoveLine(tooltips, "<CAPACITY>");
 				TooltipHelper.FindAndRemoveLine(tooltips, "<HASH>");
+				TooltipHelper.FindAndRemoveLine(tooltips, "<BYTES>");
 			} else {
 				int capacity = StorageUnitUpgradeMetrics.GetCapacity(Tier);
 
-				string colorHex;
+				string countColorHex;
 				if (_itemCount == 0)
-					colorHex = "18c242";  // Green
+					countColorHex = "18c242";  // Green
 				else if (_itemCount < capacity)
-					colorHex = "e4d833";  // Yellow
+					countColorHex = "e4d833";  // Yellow
 				else
-					colorHex = "e43233";  // Red
+					countColorHex = "e43233";  // Red
 
-				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.ItemsStored").Format(colorHex, _itemCount, capacity));
+				string dataColorHex;
+				if (_unitData.Length < 400)
+					dataColorHex = "18c242";  // Green
+				else if (_unitData.Length < 1200)
+					dataColorHex = "e4d833";  // Yellow
+				else
+					dataColorHex = "e43233";  // Red
+
+				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.ItemsStored").Format(countColorHex, _itemCount, capacity));
 				TooltipHelper.FindAndModify(tooltips, "<HASH>", Mod.GetLocalization("Items.StorageCore.Hash").Format(_hash));
+				TooltipHelper.FindAndModify(tooltips, "<BYTES>", Mod.GetLocalization("Items.StorageCore.BytesUsed").Format(dataColorHex, _unitData.Length));
 			}
 		}
 
