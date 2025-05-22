@@ -601,7 +601,7 @@ namespace MagicStorage.UI.States {
 				resize.Dragging = false;
 
 			// Prevent item slot interactions immediately after opening the UI
-			if (timeSpentOpen < 35) {
+			if (timeSpentOpen < 60) {
 				using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, true))
 					base.Update(gameTime);
 			} else
