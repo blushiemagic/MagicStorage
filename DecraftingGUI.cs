@@ -4,6 +4,7 @@ using Terraria.ID;
 using Terraria.ModLoader.IO;
 using Terraria.ModLoader;
 using Terraria;
+using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	public static partial class DecraftingGUI {
@@ -11,10 +12,10 @@ namespace MagicStorage {
 		internal static readonly List<bool> itemAvailable = new();
 		internal static int selectedItem = -1;
 
-		internal static void Unload() => ClearAllCollections(unloading: true);
+		internal static void Unload() => ClearAllCollections(callCraftingClear: true);
 
-		private static void ClearAllCollections(bool unloading) {
-			if (!unloading)
+		internal static void ClearAllCollections(bool callCraftingClear) {
+			if (callCraftingClear)
 				CraftingGUI.ClearAllCollections();
 
 			ResetRefreshCache();
@@ -34,6 +35,8 @@ namespace MagicStorage {
 			TEStorageHeart heart = GetHeart();
 			if (heart is null)
 				return new Item();
+
+			using var _ = SecuritySystem.CreateAccessContext();
 
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				ModPacket packet = heart.PrepareClientRequest(toInventory ? TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory : TEStorageHeart.Operation.WithdrawThenTryModuleInventory);

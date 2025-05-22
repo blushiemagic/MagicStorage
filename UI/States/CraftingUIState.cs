@@ -64,6 +64,38 @@ namespace MagicStorage.UI.States {
 
 		public override string DefaultPage => "Crafting";
 
+		public CraftingUIState() {
+			recipePanel = new();
+			recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
+			ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
+			recipeHeaderZone = new(CraftingGUI.SmallScale);
+			ingredientZone = new(CraftingGUI.SmallScale);
+			reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
+			reqObjTextHolder = new();
+			reqObjTextLines = new();
+			history = CreateHistory();
+			recipeHistory = new(history, 1f);
+			recipeHistoryPanel = new(true, history, [ ("History", Language.GetText("Mods.MagicStorage.UIPages.History")) ]);
+			storageZone = new(CraftingGUI.SmallScale);
+			storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+			recursionButton = new(Language.GetText("Mods.MagicStorage.CraftingGUI.ShowAllIngredients"));
+			resultZone = new(CraftingGUI.InventoryScale);
+			craftP1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus1"), SmallerScale);
+			craftP10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus10"), SmallerScale);
+			craftP100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus100"), SmallerScale);
+			craftM1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus1"), SmallerScale);
+			craftM10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus10"), SmallerScale);
+			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"), SmallerScale);
+			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallerScale);
+			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallerScale);
+			craftAmount = new UIText(Language.GetTextValue(GetCraftAmountLocalizationKey(), 1), CraftingGUI.SmallScale);
+			recipeWaitPanel = new UIPanel();
+			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f) {
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
+		}
+
 		protected override IEnumerable<string> GetMenuOptions() {
 			yield return "Crafting";
 		//	yield return "Tree";
@@ -87,8 +119,6 @@ namespace MagicStorage.UI.States {
 
 			panel.OnRecalculate += MoveRecipePanel;
 
-			recipePanel = new();
-
 			recipeTop = PanelTop;
 			recipeLeft = PanelLeft + PanelWidth;
 			recipeWidth = CraftingGUI.IngredientColumns * (smallSlotWidth + CraftingGUI.Padding) + 20f + CraftingGUI.Padding;
@@ -100,16 +130,13 @@ namespace MagicStorage.UI.States {
 			recipePanel.Width.Set(recipeWidth, 0f);
 			recipePanel.Height.Set(recipeHeight, 0f);
 
-			recipePanelHeader = new UIText(Language.GetText("Mods.MagicStorage.SelectedRecipe"));
 			recipePanelHeader.Left.Set(60, 0f);
 			recipePanel.Append(recipePanelHeader);
 
-			ingredientText = new UIText(Language.GetText("Mods.MagicStorage.Ingredients"));
 			ingredientText.Top.Set(30f, 0f);
 			ingredientText.Left.Set(60, 0f);
 			recipePanel.Append(ingredientText);
 
-			recipeHeaderZone = new(CraftingGUI.SmallScale);
 			recipeHeaderZone.InitializeSlot = static (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
 					IgnoreClicks = true  // Purely visual
@@ -124,7 +151,6 @@ namespace MagicStorage.UI.States {
 			recipeHeaderZone.Height.Set(recipeHeaderZone.ZoneHeight, 0);
 			recipePanel.Append(recipeHeaderZone);
 
-			ingredientZone = new(CraftingGUI.SmallScale);
 			ingredientZone.Width.Set(0, 1f);
 
 			ingredientZone.InitializeSlot = (slot, scale) => {
@@ -138,10 +164,8 @@ namespace MagicStorage.UI.States {
 			};
 
 			recipePanel.Append(ingredientZone);
-
+			
 			InitializeScrollBar(ingredientZone, ref ingredientScrollBar, ingredientScrollBarMaxViewSize);
-
-			reqObjText = new UIText(Language.GetText("LegacyInterface.22"));
 
 			reqObjText.OnUpdate += static e => {
 				UIText text = e as UIText;
@@ -163,9 +187,6 @@ namespace MagicStorage.UI.States {
 				MagicUI.mouseText = "";
 			};
 
-			reqObjTextLines = new();
-
-			reqObjTextHolder = new();
 			reqObjTextHolder.Width.Set(0, 1f);
 			reqObjTextHolder.MinHeight.Set(10, 0f);
 			recipePanel.Append(reqObjTextHolder);
@@ -174,10 +195,6 @@ namespace MagicStorage.UI.States {
 			recipePanel.Append(reqObjText);
 		//	recipePanel.Append(reqObjText2);
 
-			history = CreateHistory();
-
-			recipeHistory = new(history, 1f);
-
 			recipeHistory.OnButtonClicked += () => {
 				OpenRecipeHistoryPanel();
 				SoundEngine.PlaySound(SoundID.MenuTick);
@@ -185,13 +202,9 @@ namespace MagicStorage.UI.States {
 
 			recipePanel.Append(recipeHistory);
 
-			recipeHistoryPanel = new(true, history, new[] { ("History", Language.GetText("Mods.MagicStorage.UIPages.History")) });
-
 			recipeHistoryPanel.OnMenuClose += CloseRecipeHistoryPanel;
 
 			recipeHistoryPanel.SetActivePage("History");
-
-			storageZone = new(CraftingGUI.SmallScale);
 
 			storageZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
@@ -207,8 +220,8 @@ namespace MagicStorage.UI.States {
 				if (storageScrollBar is not null)
 					storageScrollBar.ViewPosition -= evt.ScrollWheelValue / storageScrollBar.ScrollDividend;
 			};
-
-			storedItemsText = new UIText(Language.GetText("Mods.MagicStorage.StoredItems"));
+			
+			InitializeScrollBar(storageZone, ref storageScrollBar, storageScrollBarMaxViewSize);
 
 			storedItemsText.OnUpdate += static e => {
 				UIText text = e as UIText;
@@ -232,7 +245,6 @@ namespace MagicStorage.UI.States {
 
 			recipePanel.Append(storedItemsText);
 
-			recursionButton = new(Language.GetText("Mods.MagicStorage.CraftingGUI.ShowAllIngredients"));
 			recursionButton.mouseOver = Color.White;
 			recursionButton.Left.Set(18, 0f);
 			recursionButton.Width.Set(recursionButton.Text.MinWidth.Pixels + 30, 0f);
@@ -247,8 +259,6 @@ namespace MagicStorage.UI.States {
 			
 			recipePanel.Append(storageZone);
 
-			InitializeScrollBar(storageZone, ref storageScrollBar, storageScrollBarMaxViewSize);
-
 			craftButton = CreateCraftButton();
 			craftButton.Top.Set(-48f, 1f);
 			craftButton.Width.Set(100f, 0f);
@@ -256,8 +266,6 @@ namespace MagicStorage.UI.States {
 			craftButton.PaddingTop = 8f;
 			craftButton.PaddingBottom = 8f;
 			recipePanel.Append(craftButton);
-
-			resultZone = new(CraftingGUI.InventoryScale);
 
 			resultZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
@@ -284,40 +292,23 @@ namespace MagicStorage.UI.States {
 			resultZone.Height.Set(itemSlotHeight, 0f);
 			recipePanel.Append(resultZone);
 
-			craftP1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus1"), SmallerScale);
 			craftP1.SetAmountInformation(+1, true);
-			craftP10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus10"), SmallerScale);
 			craftP10.SetAmountInformation(+10, true);
-			craftP100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Plus100"), SmallerScale);
 			craftP100.SetAmountInformation(+100, true);
-			craftM1 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus1"), SmallerScale);
 			craftM1.SetAmountInformation(-1, true);
-			craftM10 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus10"), SmallerScale);
 			craftM10.SetAmountInformation(-10, true);
-			craftM100 = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Minus100"), SmallerScale);
 			craftM100.SetAmountInformation(-100, true);
-			craftMax = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.MaxStack"), SmallerScale);
 			craftMax.SetAmountInformation(9999, false);
-			craftReset = new UICraftAmountAdjustment(Language.GetText("Mods.MagicStorage.Crafting.Reset"), SmallerScale);
 			craftReset.SetAmountInformation(1, false);
-
-			craftAmount = new UIText(Language.GetTextValue(GetCraftAmountLocalizationKey(), 1), CraftingGUI.SmallScale);
 
 			InitCraftButtonDimensions();
 
 			ToggleCraftButtons(hide: config);
 
-			recipeWaitPanel = new UIPanel();
-
 			recipeWaitPanel.Left.Set(0f, 0.05f);
 			recipeWaitPanel.Top.Set(70f, 0f);
 			recipeWaitPanel.Width.Set(0f, 0.9f);
 			recipeWaitPanel.Height.Set(50f, 0f);
-
-			recipeWaitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), textScale: 1.2f) {
-				HAlign = 0.5f,
-				VAlign = 0.5f
-			};
 
 			recipeWaitPanel.Append(recipeWaitText);
 
@@ -781,6 +772,14 @@ namespace MagicStorage.UI.States {
 			return Math.Max(dropdownHeight, Math.Max(mainPageMinimumHeight, recipePanelMinimumHeight));
 		}
 
+		protected override void OnAccessDeniedPopupsShown() {
+			recipePanel.IgnoresMouseInteraction = true;
+		}
+
+		protected override void OnAccessDeniedPopupsCleared() {
+			recipePanel.IgnoresMouseInteraction = false;
+		}
+
 		public partial class RecipesPage : BaseStorageUIAccessPage {
 			internal NewUIButtonChoice recipeButtons;
 			internal UIText stationText;
@@ -792,12 +791,14 @@ namespace MagicStorage.UI.States {
 			private bool lastKnownConfigBlacklist;
 
 			protected RecipesPage(BaseStorageUI parent, string name) : base(parent, name) {
+				recipeButtons = new(() => MagicUI.SetRefresh(forceFullRefresh: true), 32, 5, forceGearIconToNotBeCreated: true);
+				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
+				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
+
 				OnPageDeselected += DeselectPage;
 			}
 
-			public RecipesPage(BaseStorageUI parent) : base(parent, "Crafting") {
-				OnPageDeselected += DeselectPage;
-			}
+			public RecipesPage(BaseStorageUI parent) : this(parent, "Crafting") { }
 
 			private void DeselectPage() {
 				lastKnownStationsCount = -1;
@@ -815,14 +816,10 @@ namespace MagicStorage.UI.States {
 
 				float itemSlotHeight = TextureAssets.InventoryBack.Value.Height * CraftingGUI.InventoryScale;
 
-				recipeButtons = new(() => MagicUI.SetRefresh(forceFullRefresh: true), 32, 5, forceGearIconToNotBeCreated: true);
 				InitFilterButtons();
 				topBar.Append(recipeButtons);
 
-				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 				Append(stationText);
-
-				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
 				stationZone.InitializeSlot = static (slot, scale) => {
 					MagicStorageItemSlot itemSlot = new(slot, scale: scale) {

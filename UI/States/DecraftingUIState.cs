@@ -34,6 +34,14 @@ namespace MagicStorage.UI.States {
 
 		public override string DefaultPage => "Shimmering";
 
+		public DecraftingUIState() {
+			zoneLayout = new UIElement();
+			resultText = new UIText(Language.GetText("Mods.MagicStorage.DecraftingGUI.StoredResults"));
+			resultZone = new NewUISlotZone(CraftingGUI.SmallScale);
+			shimmerReportList = new ShimmerReportList();
+			reportListScrollBar = new();
+		}
+
 		protected override IEnumerable<string> GetMenuOptions() {
 			yield return "Shimmering";
 			yield return "Sorting";
@@ -52,12 +60,10 @@ namespace MagicStorage.UI.States {
 			base.PostInitializePages();
 
 			// Both zones need to take up only half of the remaining space
-			zoneLayout = new UIElement();
 			zoneLayout.Width.Set(0, 1f);
 
 			recipePanel.Append(zoneLayout);
 
-			resultText = new UIText(Language.GetText("Mods.MagicStorage.DecraftingGUI.StoredResults"));
 			resultText.MaxWidth.Set(0, 1f);
 			resultText.Top.Set(0, 0.5f);
 
@@ -74,8 +80,6 @@ namespace MagicStorage.UI.States {
 			zoneLayout.Append(storageZone);
 
 			// Result zone is expanded to a slot zone for transformed items and results from decrafting
-			resultZone = new NewUISlotZone(CraftingGUI.SmallScale);
-
 			resultZone.OnScrollWheel += (evt, e) => {
 				if (resultScrollBar is not null)
 					resultScrollBar.ViewPosition -= evt.ScrollWheelValue / resultScrollBar.ScrollDividend;
@@ -114,20 +118,19 @@ namespace MagicStorage.UI.States {
 			ingredientText.SetText(Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmeringReports"));
 			ingredientText.Left.Pixels -= 14f;
 
-			shimmerReportList = new ShimmerReportList();
 			shimmerReportList.Left.Set(0, 0f);
 			shimmerReportList.Width.Set(0, 1f);
 			shimmerReportList.Height.Set(ShimmerReportList.ENTRY_HEIGHT * 3 + 10, 0f);  // 3 rows
 			
 			shimmerReportList._innerList.Width.Set(-20, 1f);
 
-			reportListScrollBar = new();
 			reportListScrollBar.Width.Set(20, 0);
 			reportListScrollBar.Height.Set(0, 0.825f);
 			reportListScrollBar.Left.Set(-20, 1f);
 			reportListScrollBar.Top.Set(0, 0.1f);
 
 			shimmerReportList._innerList.SetScrollbar(reportListScrollBar);
+			// NOTE: The NewUIScrollBar should NOT be appended to the NewUIList directly, since its children think that it has a (practically) infinite height
 			shimmerReportList.Append(reportListScrollBar);
 
 			recipePanel.Append(shimmerReportList);

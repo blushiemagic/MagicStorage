@@ -21,7 +21,7 @@ namespace MagicStorage.UI {
 
 		private UIAutoScaleTextTextPanel<string> _textPanel;
 
-		public override void OnInitialize()
+		public UILoadingProgress()
 		{
 			_textPanel = new UIAutoScaleTextTextPanel<string>(_cachedText ?? "", 1f, false) {
 				Top = { Pixels = 10 },
@@ -30,6 +30,10 @@ namespace MagicStorage.UI {
 				Height = { Pixels = 60 },
 				DrawPanel = false
 			};
+		}
+
+		public override void OnInitialize()
+		{
 			Append(_textPanel);
 		}
 

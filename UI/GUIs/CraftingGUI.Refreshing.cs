@@ -85,7 +85,9 @@ namespace MagicStorage {
 			sourceItemsFromModules.Clear();
 			numItemsWithoutSimulators = 0;
 			TEStorageHeart heart = GetHeart();
-			if (heart == null) {
+			if (heart == null || !StoragePlayer.IsCurrentLocalNetworkAccessible()) {
+				NetHelper.Report(true, "CraftingGUI: RefreshItems invoked with no heart or inaccessible network");
+
 				ClearAllCollections();
 
 				craftingPage?.RequestThreadWait(waiting: false);

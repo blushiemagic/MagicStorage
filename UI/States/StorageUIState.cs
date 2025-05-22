@@ -56,7 +56,7 @@ namespace MagicStorage.UI.States {
 			GetDefaultPage<StoragePage>().scrollBar.ViewPosition = 0f;
 
 			StorageGUI.currentMode = StorageGUI.ActionMode.Normal;
-			GetPage<ControlsPage>("Controls").setItemDeletionMode.SetState(false);
+			GetPage<ControlsPage>("Controls").setItemDeletionMode?.SetState(false);
 		}
 
 		public override void Refresh() {
@@ -139,6 +139,15 @@ namespace MagicStorage.UI.States {
 			private float depositButtonRight;
 
 			public StoragePage(BaseStorageUI parent) : base(parent, "Storage") {
+				filterFavorites = new(() => MagicUI.SetRefresh(forceFullRefresh: true),
+					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
+					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
+					32);
+				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
+				confirmSell = new SellConfirmButton();
+				cancelSell = new UITextPanel<LocalizedText>(Language.GetText("UI.Cancel"), 0.8f);
+				_popupBlocker = new UIElement();
+
 				OnPageSelected += () => {
 					if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable)
 						pendingConfiguration = true;
@@ -150,18 +159,11 @@ namespace MagicStorage.UI.States {
 
 			public override void OnInitialize() {
 				base.OnInitialize();
-				
-				filterFavorites = new(() => MagicUI.SetRefresh(forceFullRefresh: true),
-					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
-					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
-					32);
 
 				InitFilterButtons();
 				filterFavorites.Recalculate();
 
 				float x = filterFavorites.GetDimensions().Width + 2 * StorageGUI.padding;
-
-				depositButton = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.DepositAll"));
 
 				depositButton.OnLeftClick += (evt, e) => {
 					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl);
@@ -203,7 +205,6 @@ namespace MagicStorage.UI.States {
 
 				depositButtonRight = x;
 
-				confirmSell = new SellConfirmButton();
 				confirmSell.OnLeftClick += (evt, e) => {
 					try {
 						if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
@@ -225,7 +226,6 @@ namespace MagicStorage.UI.States {
 					}
 				};
 
-				cancelSell = new UITextPanel<LocalizedText>(Language.GetText("UI.Cancel"), 0.8f);
 				cancelSell.OnLeftClick += (evt, e) => {
 					SellModeMetadata.Clear();
 
@@ -239,7 +239,6 @@ namespace MagicStorage.UI.States {
 					ReformatPage(MagicStorageConfig.ButtonUIMode);
 				};
 
-				_popupBlocker = new UIElement();
 				_popupBlocker.Width.Set(0, 1f);
 				_popupBlocker.Height.Set(0, 1f);
 
@@ -645,6 +644,7 @@ namespace MagicStorage.UI.States {
 			public const int SellAllExceptLeastExpensive = 2;
 
 			public StorageNamingTextInputBar setStorageName;
+			public UIText activeStorageNetwork;
 
 			public UITextPanel<LocalizedText> forceRefresh, compactCoins, deleteUnloadedItems, deleteUnloadedData;
 
@@ -661,6 +661,13 @@ namespace MagicStorage.UI.States {
 			public int SellMenuChoice { get; private set; }
 
 			public ControlsPage(BaseStorageUI parent) : base(parent, "Controls") {
+				list = new();
+				scroll = new();
+				setStorageName = new StorageNamingTextInputBar(Language.GetText("Mods.MagicStorage.StorageGUI.SetAStorageName"));
+				activeStorageNetwork = new UIText(Language.GetText("Mods.MagicStorage.StorageGUI.ActiveNetwork.None"));
+				setItemDeletionMode = new UIToggleLabel(Language.GetText("Mods.MagicStorage.StorageGUI.ItemDeletionMode.Label"), false);
+				setItemSellingMode = new UIToggleLabel(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesMenu.Label"), false);
+
 				OnPageSelected += () => {
 					SellMenuChoice = 0;
 					sellMenuLabels[0].LeftClick(new(sellMenuLabels[0], Main.MouseScreen));
@@ -680,27 +687,38 @@ namespace MagicStorage.UI.States {
 			public override void OnInitialize() {
 				base.OnInitialize();
 
-				list = new();
+				UIElement listWrapper = new();
+				listWrapper.Width.Set(0, 1f);
+				listWrapper.Height.Set(0, 1f);
+
 				list.SetPadding(0);
 				list.Width.Set(-20, 1f);
 				list.Height.Set(-20, 1f);
 				list.Left.Set(10, 0f);
 				list.Top.Set(10, 0f);
 
-				scroll = new();
 				scroll.Height.Set(-30, 1f);
 				scroll.Left.Set(-20, 1f);
 				scroll.Top.Set(10, 0f);
 
 				list.SetScrollbar(scroll);
-				list.Append(scroll);
+				// NOTE: The NewUIScrollBar should NOT be appended to the NewUIList directly, since its children think that it has a (practically) infinite height
+			//	list.Append(scroll);
 				list.ListPadding = 10;
-				Append(list);
+			//	Append(list);
+				listWrapper.Append(list);
+				listWrapper.Append(scroll);
+				Append(listWrapper);
 
-				setStorageName = new StorageNamingTextInputBar(Language.GetText("Mods.MagicStorage.StorageGUI.SetAStorageName"));
 				setStorageName.Width.Set(0, 0.7f);
 				setStorageName.Height.Set(32, 0f);
 				list.Add(setStorageName);
+
+				activeStorageNetwork.Width.Set(0, 1f);
+				activeStorageNetwork.Height = activeStorageNetwork.MinHeight;
+				list.Add(activeStorageNetwork);
+
+				// NOTE: The Controls page typically can't be accessed if the player doesn't have access to the Storage Heart, so checking for accessibility via SecuritySystem shouldn't be needed
 
 				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
 
@@ -709,7 +727,8 @@ namespace MagicStorage.UI.States {
 						return;
 
 					if (Main.netMode == NetmodeID.SinglePlayer) {
-						heart.CompactCoins();
+						using (SecuritySystem.CreateAccessContext())
+							heart.CompactCoins();
 						MagicUI.SetRefresh();
 					} else
 						NetHelper.SendCoinCompactRequest(heart.Position);
@@ -750,13 +769,11 @@ namespace MagicStorage.UI.States {
 							p.bank4.item[i] = inv[i];
 					});
 
-				setItemDeletionMode = new UIToggleLabel(Language.GetText("Mods.MagicStorage.StorageGUI.ItemDeletionMode.Label"), false);
 				setItemDeletionMode.SetPadding(0);
 				setItemDeletionMode.Width.Set(setItemDeletionMode.Text.MinWidth.Pixels + 30, 0);
 				setItemDeletionMode.OnLeftClick += (evt, e) => ClickModeToggle((UIToggleLabel)e, StorageGUI.ActionMode.Deletion, requiresOp: true, "ItemDeletionMode");
 				list.Add(setItemDeletionMode);
 
-				setItemSellingMode = new UIToggleLabel(Language.GetText("Mods.MagicStorage.StorageGUI.SellDuplicatesMenu.Label"), false);
 				setItemSellingMode.SetPadding(0);
 				setItemSellingMode.Width.Set(setItemSellingMode.Text.MinWidth.Pixels + 30, 0);
 				setItemSellingMode.OnLeftClick += (evt, e) => {
@@ -984,6 +1001,17 @@ namespace MagicStorage.UI.States {
 				button.OnMouseOver += (evt, e) => (e as UIPanel).BackgroundColor = new Color(73, 94, 171);
 
 				button.OnMouseOut += (evt, e) => (e as UIPanel).BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			}
+
+			public override void Update(GameTime gameTime) {
+				if (Main.LocalPlayer.GetModPlayer<StoragePlayer>().GetStorageHeart() is TEStorageHeart heart) {
+					if (heart.assignedNetwork < 0)
+						activeStorageNetwork.SetText(Language.GetText("Mods.MagicStorage.StorageGUI.ActiveNetwork.None"));
+					else
+						activeStorageNetwork.SetText(Language.GetTextValue("Mods.MagicStorage.StorageGUI.ActiveNetwork.Assigned", SecuritySystem.GetNetwork(heart.assignedNetwork).name ?? "<INVALID NETWORK>"));
+				}
+
+				base.Update(gameTime);
 			}
 
 			/*

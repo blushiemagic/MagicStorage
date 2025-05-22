@@ -79,7 +79,7 @@ namespace MagicStorage.UI.Selling {
 			_cancel.OnLeftClick += (evt, e) => OnCancel?.Invoke(this);
 			_panel.Append(_cancel);
 
-			_confirm = new UITextPanel<LocalizedText>(Language.GetText(updating ? "UI.Save" :  "UI.Create"));
+			_confirm = new UITextPanel<LocalizedText>(Language.GetText(updating ? "UI.Save" : "UI.Create"));
 			_confirm.Left.Set(-_confirm.MinWidth.Pixels - _cancel.MinWidth.Pixels - 8, 1f);
 			_confirm.Top.Set(-_confirm.MinHeight.Pixels - 4, 1f);
 			_confirm.OnLeftClick += (evt, e) => OnConfirmAmount?.Invoke(this);

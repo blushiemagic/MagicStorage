@@ -9,6 +9,7 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace MagicStorage.UI.States {
 	public class EnvironmentUIState : BaseStorageUI {
@@ -54,27 +55,36 @@ namespace MagicStorage.UI.States {
 			private UIText noModulesLoaded;
 			private NewUIScrollbar scroll;
 
-			public ModulesPage(BaseStorageUI parent) : base(parent, "Modules") { }
+			public ModulesPage(BaseStorageUI parent) : base(parent, "Modules") {
+				list = new();
+				scroll = new();
+			}
 
 			public override void OnInitialize() {
 				base.OnInitialize();
 
-				list = new();
+				UIElement listWrapper = new();
+				listWrapper.Width.Set(0, 1f);
+				listWrapper.Height.Set(0, 1f);
+
 				list.SetPadding(0);
 				list.Width.Set(-20, 1f);
 				list.Height.Set(-20, 1f);
 				list.Left.Set(10, 0f);
 				list.Top.Set(10, 0f);
 
-				scroll = new();
 				scroll.Height.Set(-30, 1f);
 				scroll.Left.Set(-20, 1f);
 				scroll.Top.Set(10, 0f);
 
 				list.SetScrollbar(scroll);
-				list.Append(scroll);
+				// NOTE: The NewUIScrollBar should NOT be appended to the NewUIList directly, since its children think that it has a (practically) infinite height
+			//	list.Append(scroll);
 				list.ListPadding = 10;
-				Append(list);
+			//	Append(list);
+				listWrapper.Append(list);
+				listWrapper.Append(scroll);
+				Append(listWrapper);
 
 				foreach (Mod mod in ModLoader.Mods) {
 					EnvironmentGUIModEntry entry = new(mod);
@@ -110,13 +120,18 @@ namespace MagicStorage.UI.States {
 			}
 
 			public override void Update(GameTime gameTime) {
-				base.Update(gameTime);
+				if (EnvironmentGUI.accessPopulationPending && StoragePlayer.IsCurrentLocalNetworkAccessible()) {
+					NetHelper.Report(true, "EnvironmentGUI: Update invoked with delayed module population");
 
-				EnvironmentUIState parent = parentUI as EnvironmentUIState;
+					EnvironmentGUI.accessPopulationPending = false;
+					LoadModules(EnvironmentGUI.currentAccess);
+				}
+
+				base.Update(gameTime);
 
 				Player player = Main.LocalPlayer;
 
-				if (Main.mouseX > parent.PanelLeft && Main.mouseX < parent.PanelRight && Main.mouseY > parent.PanelTop && Main.mouseY < parent.PanelBottom) {
+				if (Main.mouseX > parentUI.PanelLeft && Main.mouseX < parentUI.PanelRight && Main.mouseY > parentUI.PanelTop && Main.mouseY < parentUI.PanelBottom) {
 					player.mouseInterface = true;
 					player.cursorItemIconEnabled = false;
 					InterfaceHelper.HideItemIconCache();

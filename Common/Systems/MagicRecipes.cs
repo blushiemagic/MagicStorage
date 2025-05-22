@@ -11,7 +11,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems {
-	internal class MagicRecipes : ModSystem {
+	internal partial class MagicRecipes : ModSystem {
 		public override void AddRecipes()
 		{
 			Recipe.Create(ItemID.CookedMarshmallow)
@@ -25,16 +25,6 @@ namespace MagicStorage.Common.Systems {
 			toiletRecipeGroup = null;
 			fishingBobberRecipeGroup = null;
 		}
-
-		//Regexes for filtering vanilla item types
-		public static readonly Regex chestItemRegex = new(@"\b(?!Fake_)(.*Chest)\b", RegexOptions.Compiled);
-		public static readonly Regex workBenchItemRegex = new(@"\b(.*WorkBench)\b", RegexOptions.Compiled);
-		public static readonly Regex sinkItemRegex = new(@"\b(.*Sink)(?:Does)?\b", RegexOptions.Compiled);
-		public static readonly Regex tableItemRegex = new(@"\b(.*Table)(?:WithCloth)?\b", RegexOptions.Compiled);
-		public static readonly Regex bookcaseItemRegex = new(@"\b(.*Bookcase)\b", RegexOptions.Compiled);
-		public static readonly Regex campfireItemRegex = new(@"\b(.*Campfire)\b", RegexOptions.Compiled);
-		public static readonly Regex toiletItemRegex = new(@"\b(.*Toilet)\b", RegexOptions.Compiled);
-		public static readonly Regex fishingBobberItemRegex = new(@"\b(FishingBobber.*)\b", RegexOptions.Compiled);
 
 		internal static RecipeGroup toiletRecipeGroup;
 		internal static RecipeGroup fishingBobberRecipeGroup;
@@ -59,7 +49,7 @@ namespace MagicStorage.Common.Systems {
 
 			string any = Language.GetTextValue("LegacyMisc.37");
 
-			int[] items = GetItems(ItemID.Chest, chestItemRegex);
+			int[] items = GetItems(ItemID.Chest, MatchChestItem());
 			RecipeGroup group = new(() => $"{any} Chest", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			RegisterGroupClone(group, nameof(ItemID.Chest));
@@ -74,7 +64,7 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 			RegisterGroupClone(group, nameof(ItemID.Diamond));
 
-			items = GetItems(ItemID.WorkBench, workBenchItemRegex,
+			items = GetItems(ItemID.WorkBench, MatchWorkBenchItem(),
 				ItemID.HeavyWorkBench);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WorkBench)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyWorkBench", group);
@@ -90,12 +80,12 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyBottle", group);
 			RegisterGroupClone(group, nameof(ItemID.Bottle));
 
-			items = GetItems(ItemID.MetalSink, sinkItemRegex);
+			items = GetItems(ItemID.MetalSink, MatchSinkItem());
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.MetalSink)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnySink", group);
 			RegisterGroupClone(group, nameof(ItemID.MetalSink));
 
-			items = GetItems(ItemID.WoodenTable, tableItemRegex,
+			items = GetItems(ItemID.WoodenTable, MatchTableItem(),
 				ItemID.BewitchingTable, ItemID.AlchemyTable);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WoodenTable)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyTable", group);
@@ -116,7 +106,7 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyHmFurnace", group);
 			RegisterGroupClone(group, nameof(ItemID.AdamantiteForge));
 
-			items = GetItems(ItemID.Bookcase, bookcaseItemRegex);
+			items = GetItems(ItemID.Bookcase, MatchBookcaseItem());
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Bookcase)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyBookcase", group);
 			RegisterGroupClone(group, nameof(ItemID.Bookcase));
@@ -139,17 +129,17 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyTombstone", group);
 			RegisterGroupClone(group, nameof(ItemID.Tombstone));
 
-			items = GetItems(ItemID.Campfire, campfireItemRegex);
+			items = GetItems(ItemID.Campfire, MatchCampfireItem());
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Campfire)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire", group);
 			RegisterGroupClone(group, nameof(ItemID.Campfire));
 
-			items = GetItems(ItemID.Toilet, toiletItemRegex);
+			items = GetItems(ItemID.Toilet, MatchToiletItem());
 			toiletRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Toilet)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyToilet", group);
 			RegisterGroupClone(group, nameof(ItemID.Toilet));
 
-			items = GetItems(ItemID.FishingBobber, fishingBobberItemRegex);
+			items = GetItems(ItemID.FishingBobber, MatchFishingBobberItem());
 			fishingBobberRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.FishingBobber)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyFishingBobber", group);
 			RegisterGroupClone(group, nameof(ItemID.FishingBobber));
@@ -205,5 +195,15 @@ namespace MagicStorage.Common.Systems {
 				RecipeGroup.RegisterGroup(groupName, group);
 			}
 		}
+		
+		// Regexes for filtering vanilla item types
+		[GeneratedRegex(@"\b(?!Fake_)(.*Chest)\b")] private static partial Regex MatchChestItem();
+		[GeneratedRegex(@"\b(.*WorkBench)\b")] private static partial Regex MatchWorkBenchItem();
+		[GeneratedRegex(@"\b(.*Sink)(?:Does)?\b")] private static partial Regex MatchSinkItem();
+		[GeneratedRegex(@"\b(.*Table)(?:WithCloth)?\b")] private static partial Regex MatchTableItem();
+		[GeneratedRegex(@"\b(.*Bookcase)\b")] private static partial Regex MatchBookcaseItem();
+		[GeneratedRegex(@"\b(.*Campfire)\b")] private static partial Regex MatchCampfireItem();
+		[GeneratedRegex(@"\b(.*Toilet)\b")] private static partial Regex MatchToiletItem();
+		[GeneratedRegex(@"\b(FishingBobber.*)\b")] private static partial Regex MatchFishingBobberItem();
 	}
 }

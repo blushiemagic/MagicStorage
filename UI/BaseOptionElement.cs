@@ -17,6 +17,15 @@ namespace MagicStorage.UI {
 		public BaseOptionElement() {
 			Width.Set(32, 0);
 			Height.Set(32, 0);
+			
+			background = new(BackTexture) {
+				ScaleToFit = true
+			};
+			icon = new(GetIcon()) {
+				ScaleToFit = true,
+				HAlign = 0.5f,
+				VAlign = 0.5f
+			};
 		}
 
 		protected abstract Asset<Texture2D> GetIcon();
@@ -28,16 +37,8 @@ namespace MagicStorage.UI {
 		protected abstract string GetHoverText();
 
 		public override void OnInitialize() {
-			background = new(BackTexture) {
-				ScaleToFit = true
-			};
 			Append(background);
 
-			icon = new(GetIcon()) {
-				ScaleToFit = true,
-				HAlign = 0.5f,
-				VAlign = 0.5f
-			};
 			Append(icon);
 		}
 

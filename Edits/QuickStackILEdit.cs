@@ -93,6 +93,8 @@ namespace MagicStorage.Edits {
 			if (!centers.Any())
 				return;
 
+			using var _ = SecuritySystem.CreateAccessContext(player.whoAmI);
+
 			for (int i = 10; i < 50; i++) {
 				Item item = player.inventory[i];
 
@@ -139,6 +141,7 @@ namespace MagicStorage.Edits {
 
 		private static Item CheckStorageQuickStacking(Item item, byte plr) {
 			Player player = Main.player[plr];
+			using var _ = SecuritySystem.CreateAccessContext(plr);
 			TryItemTransfer(player, item, player.GetNearbyCenters());
 			return item;
 		}

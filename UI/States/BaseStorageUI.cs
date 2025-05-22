@@ -1,7 +1,11 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using MagicStorage.CrossMod;
+using MagicStorage.UI.Security;
 using Microsoft.Xna.Framework;
+using SerousCommonLib.UI;
+using SerousCommonLib.UI.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -9,6 +13,7 @@ using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
@@ -30,7 +35,17 @@ namespace MagicStorage.UI.States {
 		
 		private bool needsRecalculate;
 
-		internal UIResizeButton resize;
+		private UIResizeButton resize;
+
+		private bool _requestingPassword;
+		private PasswordRequestPopup _passwordRequest;
+		private MissingHeartPopup _missingHeart;
+		private UIElement _networkAccessBlocker;
+		public UITextPanel<LocalizedText> clientResponses;
+		private bool _clientResponsesDirty;
+		private bool _clearPopup;
+
+		private int _requestedNetwork;
 
 		public float PanelLeft {
 			get => panel.Left.Pixels;
@@ -118,6 +133,31 @@ namespace MagicStorage.UI.States {
 
 		public abstract string DefaultPage { get; }
 
+		public BaseStorageUI() {
+			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetText("Mods.MagicStorage.UIPages." + p))));
+			pages = new();
+
+			foreach ((string key, var tab) in panel.menus)
+				pages[key] = InitPage(key);
+
+			config = new(true, [
+				("Sorting", Language.GetText("Mods.MagicStorage.UIPages.Sorting")),
+				("Filtering", Language.GetText("Mods.MagicStorage.UIPages.Filtering"))
+			]);
+
+			configPages = new();
+
+			InitConfigPage("Sorting", new SortingPage(this) { filterBaseOptions = true });
+			InitConfigPage("Filtering", new FilteringPage(this) { filterBaseOptions = true });
+
+			resize = new() {
+				ResizeWidth = false
+			};
+
+			_networkAccessBlocker = new UIElement();
+			clientResponses = new UITextPanel<LocalizedText>(Language.GetText("Mods.MagicStorage.Security.UI.NoResponse"));
+		}
+
 		public BaseStorageUIPage GetPage(string page) => pages?.TryGetValue(page, out var pageValue) is true ? pageValue : null;
 
 		public BaseStorageUIPage GetDefaultPage() => GetPage(DefaultPage);
@@ -144,12 +184,7 @@ namespace MagicStorage.UI.States {
 		public override void OnInitialize() {
 			float itemSlotWidth = TextureAssets.InventoryBack.Value.Width * CraftingGUI.InventoryScale;
 
-			panel = new(true, GetMenuOptions().Select(p => (p, Language.GetText("Mods.MagicStorage.UIPages." + p))));
-
-			panel.OnMenuClose += () => {
-				StoragePlayer.LocalPlayer.CloseStorage();
-				CloseModernConfigPanel();
-			};
+			panel.OnMenuClose += CloseCompletely;
 
 			panel.OnRecalculate += UpdateFields;
 			panel.OnMenuReset += () => pendingUIChange = true;
@@ -160,10 +195,8 @@ namespace MagicStorage.UI.States {
 			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight + 2 * UIDragablePanel.cornerPadding;
 			PanelHeight = Main.screenHeight - (PanelTop + 2 * UIDragablePanel.cornerPadding);
 
-			pages = new();
-
 			foreach ((string key, var tab) in panel.menus) {
-				var page = pages[key] = InitPage(key);
+				var page = pages[key];
 				page.Width = StyleDimension.Fill;
 				page.Height = StyleDimension.Fill;
 
@@ -175,16 +208,7 @@ namespace MagicStorage.UI.States {
 
 			PostInitializePages();
 
-			//Need to manually activate the pages
-			foreach (var page in pages.Values)
-				page.Activate();
-
 			lastKnownMode = MagicStorageConfig.ButtonUIMode;
-
-			config = new(true, new (string, LocalizedText)[] {
-				("Sorting", Language.GetText("Mods.MagicStorage.UIPages.Sorting")),
-				("Filtering", Language.GetText("Mods.MagicStorage.UIPages.Filtering"))
-			});
 
 			config.OnMenuClose += CloseModernConfigPanel;
 
@@ -193,15 +217,6 @@ namespace MagicStorage.UI.States {
 
 			config.Width.Set(200f, 0f);
 			config.viewArea.SetPadding(0);
-
-			configPages = new();
-
-			InitConfigPage("Sorting", new SortingPage(this) { filterBaseOptions = true });
-			InitConfigPage("Filtering", new FilteringPage(this) { filterBaseOptions = true });
-
-			resize = new() {
-				ResizeWidth = false
-			};
 
 			// NOTE: this isn't called in UIResizeButton.Recalculate and for good reason
 			resize.OnDragging += r => {
@@ -223,7 +238,28 @@ namespace MagicStorage.UI.States {
 
 			PostAppendPanel();
 
-			OnButtonConfigChanged(lastKnownMode);
+			/*
+			_networkAccessBlocker.GetLayoutManager().Attributes = new LayoutAttributes()
+				.AddConstraint(LayoutConstraintType.TopToTopOf, panel, LayoutUnit.Zero)
+				.AddConstraint(LayoutConstraintType.BottomToBottomOf, panel, LayoutUnit.Zero)
+				.AddConstraint(LayoutConstraintType.LeftToLeftOf, panel, LayoutUnit.Zero)
+				.AddConstraint(LayoutConstraintType.RightToRightOf, panel, LayoutUnit.Zero);
+			*/
+			_networkAccessBlocker.Width.Set(0, 1f);
+			_networkAccessBlocker.Height.Set(0, 1f);
+
+			/*
+			clientResponses.GetLayoutManager().Attributes = new LayoutAttributes()
+				.AddConstraint(LayoutConstraintType.LeftToLeftOf, null, new LayoutUnit(pixels: 8f))
+				.AddConstraint(LayoutConstraintType.RightToRightOf, null, new LayoutUnit(pixels: 8f))
+				.AddConstraint(LayoutConstraintType.BottomToBottomOf, null, new LayoutUnit(pixels: 8f))
+				.InheritSizeFrom(clientResponses);
+			*/
+			clientResponses.Left.Set(8f, 0f);
+			clientResponses.SetBottomAlignment(8f);
+			clientResponses.Width.Set(-16f, 1f);
+
+			_networkAccessBlocker.Append(clientResponses);
 
 			needsRecalculate = false;
 			preventHeightClamping = false;
@@ -269,7 +305,12 @@ namespace MagicStorage.UI.States {
 			config.Recalculate();
 		}
 
-		public sealed override void OnActivate() => Open();
+		public sealed override void OnActivate() {
+			Open();
+
+			// Ensure that the button layout is accurate
+			OnButtonConfigChanged(lastKnownMode);
+		}
 
 		public sealed override void OnDeactivate() => Close();
 
@@ -292,13 +333,14 @@ namespace MagicStorage.UI.States {
 
 				if (currentPage is not null) {
 					currentPage.InvokeOnPageDeselected();
-
-					currentPage.Remove();
+					currentPage.RemoveAndDeactivate();
 				}
 
 				currentPage = newPage;
 
 				panel.viewArea.Append(currentPage);
+				
+				currentPage.Activate();
 
 				currentPage.InvokeOnPageSelected();
 
@@ -312,9 +354,9 @@ namespace MagicStorage.UI.States {
 			if (currentPage is not null)
 				return;
 
-			OnOpen();
-
 			SetPage(DefaultPage);
+
+			OnOpen();
 
 			// Restore the saved sorting/filtering options
 			if (GetPage("Sorting") is SortingPage sortingPage)
@@ -326,10 +368,108 @@ namespace MagicStorage.UI.States {
 				FilteringOptionLoader.GeneralSelections.UnionWith(filteringPage.generalSelections);
 			}
 
+			_requestedNetwork = -1;
+
+			_pendingAccess = false;
+			_pendingResult = default;
+			_pendingActionData = null;
+
+			if (this is not SecurityUIState && !StoragePlayer.IsCurrentLocalNetworkAccessible()) {
+				NetHelper.Report(true, "BaseStorageUI: Attempted to access an inaccessible network...");
+
+				_requestingPassword = true;
+				SecuritySystem.OnClientResultUpdated += SetResponse;
+				SecuritySystem.OnInformResultToClient += ReceiveClientResult;
+
+				// Safe to assume that the component actually exists at this point
+				TEStorageComponent component = StoragePlayer.LocalPlayer.GetStorageComponent();
+				SecuritySystem.NetworkView view = SecuritySystem.GetNetwork(component.assignedNetwork);
+
+				_requestedNetwork = view.id;
+
+				if (component.GetHeart() is null) {
+					NetHelper.Report(false, "  Storage component did not have an assigned Storage Heart");
+
+					_missingHeart?.Remove();
+					_missingHeart = new MissingHeartPopup(view);
+
+					_missingHeart.Activate();
+					_missingHeart.Recalculate();
+
+					_networkAccessBlocker.Append(_missingHeart);
+				} else {
+					NetHelper.Report(false, "  Storage component had an assigned Storage Heart");
+
+					if (_passwordRequest is null) {
+						_passwordRequest = new PasswordRequestPopup(view);
+						_passwordRequest.OnPasswordEntered += CheckPassword;
+						_passwordRequest.OnCancel += self => CloseCompletely();
+						// Popup sets its layout attributes in its constructor
+					} else {
+						_passwordRequest.UpdateView(view);
+					}
+
+					_passwordRequest.Activate();
+					_passwordRequest.ClearInputs();
+
+					_networkAccessBlocker.Append(_passwordRequest);
+				}
+
+				panel.Append(_networkAccessBlocker);
+
+				needsRecalculate = true;
+			}
+
 			timeSpentOpen = 0;
 		}
 
+		private void SetResponse(LocalizedText response) {
+			clientResponses.SetText(response);
+			_clientResponsesDirty = true;
+		}
+
+		private bool _pendingAccess;
+		private NetworkActionResult _pendingResult;
+		private object _pendingActionData;
+
+		private void ReceiveClientResult(NetworkActionResult result, NetworkReportCategory category) {
+			_pendingResult = result;
+		}
+
+		private void CheckPassword(string enteredPassword) {
+			NetHelper.Report(true, "BaseStorageUI: Checking entered password...");
+
+			var storagePlayer = StoragePlayer.LocalPlayer;
+			TEStorageComponent component = storagePlayer.GetStorageComponent();
+			SecuritySystem.NetworkView view = SecuritySystem.GetNetwork(component.assignedNetwork);
+
+			NetworkActionResult result = SecuritySystem.JoinNetwork(view.id, enteredPassword);
+
+			SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Join);
+
+			NetHelper.Report(false, $"  Result: {result}");
+
+			_pendingAccess = true;
+			_pendingActionData = enteredPassword;
+		}
+
+		private void CheckPassword_Result() {
+			NetHelper.Report(true, $"BaseStorageUI: Delayed password check result: {_pendingResult}");
+
+			SecuritySystem.HandleNetworkAccessibilityOnJoin(_pendingResult, Main.LocalPlayer, StoragePlayer.LocalPlayer.GetStorageComponent().assignedNetwork, (string)_pendingActionData);
+
+			if (_pendingResult.IsSuccess()) {
+				_clearPopup = true;
+				MagicUI.SetRefresh(forceFullRefresh: true);  // Force the UI to populate the relevant collections
+			}
+		}
+
 		protected virtual void OnOpen() { }
+
+		private void CloseCompletely() {
+			StoragePlayer.LocalPlayer.CloseStorage();
+			CloseModernConfigPanel();
+		}
 
 		public void Close() {
 			if (currentPage is not null) {
@@ -337,7 +477,7 @@ namespace MagicStorage.UI.States {
 
 				currentPage.InvokeOnPageDeselected();
 
-				currentPage.Remove();
+				currentPage.RemoveAndDeactivate();
 
 				// Save the sorting/filtering options
 				if (GetPage("Sorting") is SortingPage sortingPage)
@@ -348,6 +488,31 @@ namespace MagicStorage.UI.States {
 					filteringPage.generalSelections.Clear();
 					filteringPage.generalSelections.UnionWith(FilteringOptionLoader.GeneralSelections);
 				}
+			}
+
+			_passwordRequest?.RemoveAndDeactivate();
+			_missingHeart.RemoveAndDeactivate();
+
+			_networkAccessBlocker.RemoveAndDeactivate();
+
+			OnAccessDeniedPopupsCleared();
+
+			if (_requestingPassword) {
+				SecuritySystem.OnClientResultUpdated -= SetResponse;
+				SecuritySystem.OnInformResultToClient -= ReceiveClientResult;
+
+				_passwordRequest?.RemoveAndDeactivate();
+				_missingHeart.RemoveAndDeactivate();
+				_networkAccessBlocker.RemoveAndDeactivate();
+
+				_requestingPassword = false;
+				_clearPopup = false;
+				_clientResponsesDirty = false;
+
+				_pendingResult = default;
+				_pendingActionData = null;
+				
+				needsRecalculate = false;
 			}
 
 			currentPage = null;
@@ -367,6 +532,43 @@ namespace MagicStorage.UI.States {
 		private int timeSpentOpen;
 
 		public override void Update(GameTime gameTime) {
+			if (_requestedNetwork >= 0 && StoragePlayer.LocalPlayer.GetStorageComponent() is TEStorageComponent component && component.assignedNetwork != _requestedNetwork) {
+				// Assigned network has changed, force the UI to close
+				CloseCompletely();
+				return;
+			}
+
+			if (_requestingPassword) {
+				if (_pendingAccess && _pendingResult is not NetworkActionResult.NeedsServerApproval) {
+					CheckPassword_Result();
+
+					_pendingAccess = false;
+					_pendingResult = default;
+					_pendingActionData = null;
+				}
+
+				if (_clearPopup) {
+					_clearPopup = false;
+					_passwordRequest?.RemoveAndDeactivate();
+					_missingHeart.RemoveAndDeactivate();
+					_networkAccessBlocker.RemoveAndDeactivate();
+
+					_requestingPassword = false;
+					_clientResponsesDirty = false;
+					needsRecalculate = true;
+
+					SecuritySystem.OnClientResultUpdated -= SetResponse;
+					SecuritySystem.OnInformResultToClient -= ReceiveClientResult;
+				}
+
+				if (_clientResponsesDirty) {
+					_clientResponsesDirty = false;
+					clientResponses.Recalculate();
+
+					SoundEngine.PlaySound(SoundID.MenuTick);
+				}
+			}
+
 			if (needsRecalculate) {
 				Refresh();
 				Recalculate();
@@ -443,6 +645,8 @@ namespace MagicStorage.UI.States {
 			else
 				OpenModernConfigPage("Filtering", "Sorting");
 
+			config.Activate();
+
 			Append(config);
 		}
 
@@ -452,11 +656,11 @@ namespace MagicStorage.UI.States {
 
 			currentConfigPage.InvokeOnPageDeselected();
 
-			currentConfigPage.Remove();
+			currentConfigPage.RemoveAndDeactivate();
 
 			currentConfigPage = null;
 
-			config.Remove();
+			config.RemoveAndDeactivate();
 		}
 
 		private void OpenModernConfigPage(string pageToOpen, string pageToClose) {
@@ -466,7 +670,7 @@ namespace MagicStorage.UI.States {
 				if (currentConfigPage is not null) {
 					currentConfigPage.InvokeOnPageDeselected();
 
-					currentConfigPage.Remove();
+					currentConfigPage.RemoveAndDeactivate();
 				}
 
 				config.HideTab(pageToClose);
@@ -479,5 +683,9 @@ namespace MagicStorage.UI.States {
 				currentConfigPage.InvokeOnPageSelected();
 			}
 		}
+
+		protected virtual void OnAccessDeniedPopupsShown() { }
+
+		protected virtual void OnAccessDeniedPopupsCleared() { }
 	}
 }

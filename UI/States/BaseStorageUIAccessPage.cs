@@ -14,7 +14,6 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.UI;
-using static MagicStorage.UI.States.StorageUIState;
 
 namespace MagicStorage.UI.States {
 	public abstract class BaseStorageUIAccessPage : BaseStorageUIPage {
@@ -52,9 +51,32 @@ namespace MagicStorage.UI.States {
 		protected float lastKnownScrollBarViewPosition = -1;
 
 		public BaseStorageUIAccessPage(BaseStorageUI parent, string name) : base(parent, name) {
-			OnPageSelected += () => {
-				searchBar.State.Activate();
+			topBar = new();
+			searchBar = new NewUISearchBar(Language.GetText("Mods.MagicStorage.SearchName")) {
+				GetHoverText = GetSearchHoverText
+			};
+			topBar2 = new UIElement();
+			modSearchBox = new(ModSearchChanged, 0.72f);
+			topBar3 = new UIElement();
+			slotZone = new(CraftingGUI.InventoryScale);
+			waitPanel = new UIPanel();
+			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true) {
+				HAlign = 0.5f,
+				VAlign = 0.25f
+			};
+			waitProgress = new UILoadingProgress() {
+				HAlign = 0.5f,
+				VAlign = 0.9f
+			};
+			scrollBar = new(scrollDividend: 250f);
+			bottomBar = new();
+			capacityText = new UIText("Items");
+			sortingButtons = new(ModernConfigSortingButtonAction, 21, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
+			filteringButtons = new(ModernConfigFilteringButtonAction, 21, 22, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
+			sortingDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
+			filteringDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Filtering"), 135, 2, 250);
 
+			OnPageSelected += () => {
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
 
@@ -72,10 +94,7 @@ namespace MagicStorage.UI.States {
 
 				slotZone.ClearItems();
 
-				searchBar.State.Unfocus();
 				MagicUI.SetRefresh(forceFullRefresh: true);
-
-				searchBar.State.Deactivate();
 
 				sortingDropdown.Reset();
 				filteringDropdown.Reset();
@@ -108,26 +127,16 @@ namespace MagicStorage.UI.States {
 		public override void OnInitialize() {
 			base.OnInitialize();
 
-			topBar = new();
 			topBar.Width.Set(0f, 1f);
 			topBar.Height.Set(32f, 0f);
 			Append(topBar);
 
-			searchBar = new NewUISearchBar(Language.GetText("Mods.MagicStorage.SearchName")) {
-				GetHoverText = () => {
-					return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
-						? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
-						: Language.GetTextValue("Mods.MagicStorage.SearchTips.TipTooltipOnly");
-				}
-			};
 			topBar.Append(searchBar);
 
-			topBar2 = new UIElement();
 			topBar2.Width.Set(0f, 1f);
 			topBar2.Height.Set(21, 0f);
 			topBar2.Top.Set(36f, 0f);
 
-			modSearchBox = new(ModSearchChanged, 0.72f);
 			modSearchBox.Left.Set(-190, 1f);
 			modSearchBox.Width.Set(190, 0f);
 			modSearchBox.Height.Set(21, 0f);
@@ -135,12 +144,9 @@ namespace MagicStorage.UI.States {
 			modSearchBox.PaddingTop = 5;
 			modSearchBox.PaddingBottom = 2;
 
-			topBar3 = new UIElement();
 			topBar3.Width.Set(0f, 1f);
 			topBar3.Height.Set(21, 0f);
 			topBar3.Top.Set(72f, 0f);
-
-			slotZone = new(CraftingGUI.InventoryScale);
 
 			slotZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
@@ -160,53 +166,40 @@ namespace MagicStorage.UI.States {
 			slotZone.Width.Set(0f, 1f);
 			Append(slotZone);
 
-			waitPanel = new UIPanel();
-
 			waitPanel.Left.Set(0f, 0.1f);
 			waitPanel.Top.Set(20f, 0f);
 			waitPanel.Width.Set(0f, 0.8f);
 			waitPanel.Height.Set(160f, 0f);
 
-			waitText = new UIText(Language.GetText("Mods.MagicStorage.SortWaiting"), large: true) {
-				HAlign = 0.5f,
-				VAlign = 0.25f
-			};
-
 			waitPanel.Append(waitText);
 
-			waitProgress = new UILoadingProgress() {
-				HAlign = 0.5f,
-				VAlign = 0.9f
-			};
 			waitProgress.Width.Set(0, 0.8f);
 			waitProgress.Height.Set(80, 0f);
 
 			waitPanel.Append(waitProgress);
 
-			scrollBar = new(scrollDividend: 250f);
 			scrollBar.Left.Set(-20f, 1f);
 			slotZone.Append(scrollBar);
 
-			bottomBar = new();
 			bottomBar.Width.Set(0f, 1f);
 			Append(bottomBar);
 
-			capacityText = new UIText("Items");
 			capacityText.Left.Set(10f, 0f);
 			capacityText.Top.Set(6f, 0f);
 
 			bottomBar.Append(capacityText);
 
-			sortingButtons = new(ModernConfigSortingButtonAction, 21, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
-			filteringButtons = new(ModernConfigFilteringButtonAction, 21, 22, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
-
-			sortingDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
 			sortingDropdown.Left.Set(10, 0f);
 			sortingDropdown.Top = topBar2.Top;
 
-			filteringDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Filtering"), 135, 2, 250);
 			filteringDropdown.Left.Set(sortingDropdown.Left.Pixels + sortingDropdown.Width.Pixels + 30, 0f);
 			filteringDropdown.Top = topBar2.Top;
+		}
+
+		private string GetSearchHoverText() {
+			return modSearchBox.ModIndex == ModSearchBox.ModIndexAll
+				? Language.GetTextValue("Mods.MagicStorage.SearchTips.TipModAndTooltip")
+				: Language.GetTextValue("Mods.MagicStorage.SearchTips.TipTooltipOnly");
 		}
 
 		private void ModSearchChanged(int old, int index) {

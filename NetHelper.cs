@@ -14,7 +14,6 @@ using System.Linq;
 using Terraria.Audio;
 using MagicStorage.Common.Global;
 using MagicStorage.Common.Systems;
-using static MagicStorage.Common.Systems.StringScrambling;
 using MagicStorage.Common.Players;
 using MagicStorage.UI;
 using System.Threading;
@@ -23,6 +22,7 @@ using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.UI.Selling;
 using Terraria.Localization;
 using MagicStorage.Items;
+using System.Threading.Channels;
 
 namespace MagicStorage
 {
@@ -248,6 +248,36 @@ namespace MagicStorage
 				case MessageType.ClientSendCoreInsertion:
 					ReceiveCoreInsertion(reader, sender);
 					break;
+				case MessageType.SecurityNetworkCreation:
+					ReceiveSecurityNetworkCreation(reader, sender);
+					break;
+				case MessageType.SecurityNetworkRemoval:
+					ReceiveSecurityNetworkRemoval(reader, sender);
+					break;
+				case MessageType.SecurityNetworkJoin:
+					ReceiveSecurityNetworkJoinAttempt(reader, sender);
+					break;
+				case MessageType.SecurityNetworkAccessible:
+					ReceiveSecurityNetworkAccessAttempt(reader, sender);
+					break;
+				case MessageType.SecurityNetworkModification:
+					ReceiveSecurityNetworkChange(reader, sender);
+					break;
+				case MessageType.RequestSecurityNetworkList:
+					ReceiveSecurityNetworkList(reader, sender);
+					break;
+				case MessageType.SecurityPlayerSync:
+					ReceiveSecurityPlayerSync(reader, sender);
+					break;
+				case MessageType.StorageHeartNetwork:
+					ReceiveStorageComponentNetwork(reader, sender);
+					break;
+				case MessageType.StorageHeartNetworkAssignment:
+					ReceiveStorageHeartNetworkAssignmentRequest(reader, sender);
+					break;
+				case MessageType.DefaultAccessibleNetworks:
+					RecieveAccessibleNetworksByDefaultRequest(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -380,6 +410,8 @@ namespace MagicStorage
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
+			bool hasContext = reader.ReadSecurityAccess(out var context);
+
 			if (Main.netMode != NetmodeID.Server)
 			{
 				//The data still needs to be read for exceptions to not be thrown...
@@ -407,16 +439,20 @@ namespace MagicStorage
 					_ = ItemIO.Receive(reader, true, true);
 				}
 
-				return;
+				goto cleanupContext;
 			}
 
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
-				return;
+				goto cleanupContext;
 
 			heart.QClientOperation(reader, op, sender);
 
 			Report(true, MessageType.ClinetStorageOperation + " packet recieved by client " + Main.myPlayer);
 			Report(false, "Operation: " + op);
+
+cleanupContext:
+			if (hasContext)
+				context.Dispose();
 		}
 
 		public static void ReciveServerStorageResult(BinaryReader reader)
@@ -904,7 +940,7 @@ namespace MagicStorage
 				packet.Write(heart.Position.X);
 				packet.Write(heart.Position.Y);
 
-				packet.Send(ignoreClient: Main.myPlayer);
+				packet.Send();
 
 				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from client " + Main.myPlayer);
 			}
@@ -941,7 +977,7 @@ namespace MagicStorage
 				packet.Write((byte)MessageType.TransferItems);
 				packet.Write(destination.Position);
 				packet.Write(source.Position);
-				packet.Send(ignoreClient: Main.myPlayer);
+				packet.Send();
 
 				Report(true, MessageType.TransferItems + " packet sent from client " + Main.myPlayer);
 			}
@@ -1014,6 +1050,7 @@ namespace MagicStorage
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.RequestCoinCompact);
 			packet.Write(heart);
+			packet.WriteSecurityAccess();
 			packet.Send();
 
 			Report(true, MessageType.RequestCoinCompact + " packet sent to all clients");
@@ -1022,8 +1059,14 @@ namespace MagicStorage
 		public static void ReceiveCoinCompactRequest(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				Point16 position = reader.ReadPoint16();
+
+				bool hasContext = reader.ReadSecurityAccess(out var context);
+
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
 					heart.CompactCoins();
+
+				if (hasContext)
+					context.Dispose();
 
 				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
@@ -1260,7 +1303,7 @@ namespace MagicStorage
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ClientRequestServerOpConfirmation);
-			byte[] bytes = ToBytes(Scramble(key));
+			byte[] bytes = StringScrambling.Scramble(key);
 			packet.Write((byte)bytes.Length);
 			packet.Write(bytes);
 			packet.Send();
@@ -1275,7 +1318,7 @@ namespace MagicStorage
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			string key = Unscramble(FromBytes(bytes));
+			string key = StringScrambling.Unscramble(bytes);
 
 			bool valid = key == Netcode.ServerOperatorKey;
 
@@ -1305,7 +1348,7 @@ namespace MagicStorage
 
 				mp.manualOp = mp.hasOp = true;
 
-				ClientSendPlayerHasOp(Main.myPlayer);
+				ClientSendPlayerHasOp(Main.myPlayer);  // NOTE: Administrators will automatically request the full security network list
 			}
 		}
 
@@ -1321,7 +1364,7 @@ namespace MagicStorage
 			BitsByte bb = new(mp.hasOp, mp.manualOp);
 
 			packet.Write(bb);
-			packet.Send(ignoreClient: Main.myPlayer);
+			packet.Send();
 
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to the server");
 		}
@@ -1334,22 +1377,30 @@ namespace MagicStorage
 
 			opFlags.Retrieve(ref mp.hasOp, ref mp.manualOp);
 
+			if (Main.netMode == NetmodeID.MultiplayerClient && plr == Main.myPlayer && mp.IsAdministrator)  // Force a sync of the network information
+				RequestAccessibleNetworksByDefault();
+
 			if (Main.netMode != NetmodeID.Server) {
 				Report(true, MessageType.PlayerHasServerOp + " packet received by client " + Main.myPlayer);
 				return;
 			}
 
 			//Forward the result
+			ModPacket packet = ServerPreparePlayerHasOperatorPacket(plr, mp);
+			packet.Send(ignoreClient: plr);
+
+			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
+		}
+
+		private static ModPacket ServerPreparePlayerHasOperatorPacket(int plr, OperatorPlayer mp) {
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.PlayerHasServerOp);
 			packet.Write(plr);
 
 			BitsByte bb = new(mp.hasOp, mp.manualOp);
-
 			packet.Write(bb);
-			packet.Send(ignoreClient: plr);
-
-			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
+			
+			return packet;
 		}
 
 		public static void ClientRequestDepositFromBank(Item[] inventory, Point16 heart, Action<Player, Item[]> netResult) {
@@ -1487,7 +1538,7 @@ namespace MagicStorage
 			packet.Write((byte)msg);
 			packet.Write((byte)Main.myPlayer);
 			packet.Write(heart.Position);
-			packet.Send(ignoreClient: Main.myPlayer);
+			packet.Send();
 			packet.Send();
 
 			Report(true, msg + " packet sent to the server");
@@ -1728,6 +1779,558 @@ namespace MagicStorage
 				Report(true, MessageType.ClientSendCoreInsertion + " packet received by server from client " + sender);
 			}
 		}
+
+		public static void RequestSecurityNetworkCreation(string name, string password, bool restricted) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkCreation);
+			packet.WriteStringsSafely(name, password);
+			packet.Write(restricted);
+			packet.Send();
+
+			Report(true, MessageType.SecurityNetworkCreation + " packet sent to the server");
+		}
+
+		public static void ReceiveSecurityNetworkCreation(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				reader.ReadStringsSafely(out string name, out string password);
+				bool restricted = reader.ReadBoolean();
+
+				Report(true, MessageType.SecurityNetworkCreation + " packet received by server from client " + sender);
+
+				var result = SecuritySystem.ServerCreateNetwork(sender, name, password, restricted, out int networkID);
+
+				// Inform all clients of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkCreation);
+				packet.Write((byte)result);
+				packet.Write(networkID);
+				packet.Write((byte)sender);
+				packet.Send();
+
+				Report(true, MessageType.SecurityNetworkCreation + " packet sent to all clients");
+			} else {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int networkID = reader.ReadInt32();
+				int creator = reader.ReadByte();
+
+				Report(true, MessageType.SecurityNetworkCreation + " packet received by client " + Main.myPlayer);
+
+				if (creator == Main.myPlayer)
+					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Creation);
+
+				SecuritySystem.HandleNetworkAccessibilityOnCreation(result, creator, Main.LocalPlayer, networkID);
+
+				Report(false, $"  Result: {result}");
+
+				// Ensure that Administrators always know the password for the network
+				if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+					RequestPasswordForNetwork(networkID);
+
+				RequestSecurityNetworkList();
+			}
+		}
+
+		public static void RequestSecurityNetworkRemoval(int networkID, string password) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkRemoval);
+			packet.Write(networkID);
+			packet.WriteStringSafely(password);
+			packet.Send();
+
+			Report(true, MessageType.SecurityNetworkRemoval + " packet sent to the server");
+		}
+
+		public static void ReceiveSecurityNetworkRemoval(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				int networkID = reader.ReadInt32();
+				string password = reader.ReadStringSafely();
+
+				Report(true, MessageType.SecurityNetworkRemoval + " packet received by server from client " + sender);
+
+				var result = SecuritySystem.ServerRemoveNetwork(sender, networkID, password);
+
+				// Inform all clients of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkRemoval);
+				packet.Write((byte)result);
+				packet.Write(networkID);
+				packet.Write((byte)sender);
+				packet.Send();
+
+				Report(true, MessageType.SecurityNetworkRemoval + " packet sent to all clients");
+			} else {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int networkID = reader.ReadInt32();
+				int requestingPlayer = reader.ReadByte();
+
+				Report(true, MessageType.SecurityNetworkRemoval + " packet received by client " + Main.myPlayer);
+
+				if (requestingPlayer == Main.myPlayer)
+					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Removal);
+
+				SecuritySystem.HandleNetworkAccessibilityOnRemoval(result, Main.LocalPlayer, networkID);
+
+				Report(false, $"  Result: {result}");
+
+				RequestSecurityNetworkList();
+			}
+		}
+
+		public static void RequestSecurityNetworkJoin(int networkID, string password) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			// Check if the player already has access to the network
+			if (Main.LocalPlayer.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID))
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkJoin);
+			packet.Write(networkID);
+			packet.WriteStringSafely(password);
+			packet.Send();
+
+			Report(true, MessageType.SecurityNetworkJoin + " packet sent to the server");
+		}
+
+		public static void ReceiveSecurityNetworkJoinAttempt(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				int networkID = reader.ReadInt32();
+				string password = reader.ReadStringSafely();
+
+				Report(true, MessageType.SecurityNetworkJoin + " packet received by server from client " + sender);
+
+				var result = SecuritySystem.ServerJoinNetwork(sender, networkID, password);
+
+				// Inform the client of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkJoin);
+				packet.Write((byte)result);
+				packet.Write(networkID);
+				packet.WriteStringSafely(password);
+				packet.Send(toClient: sender);
+
+				Report(true, MessageType.SecurityNetworkJoin + " packet sent to client " + sender);
+			} else {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int networkID = reader.ReadInt32();
+				string password = reader.ReadStringSafely();
+
+				Report(true, MessageType.SecurityNetworkJoin + " packet received by client " + Main.myPlayer);
+
+				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Join);
+
+				SecuritySystem.HandleNetworkAccessibilityOnJoin(result, Main.LocalPlayer, networkID, password);
+
+				Report(false, $"  Result: {result}");
+			}
+		}
+
+		public static void RequestSecurityNetworkAccess(int networkID) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			// Check if the player already has access to the network
+			if (Main.LocalPlayer.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID))
+				return;
+
+			// Check for operator status, and immediately give access in that case
+			if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp) {
+				Report(true, "Granting immediate access to network due to operator status");
+
+				SecuritySystem.ReportNetworkResult(NetworkActionResult.OperatorForcedSuccess, NetworkReportCategory.Access);
+
+				SecuritySystem.HandleNetworkAccessibilityOnAccess(NetworkActionResult.OperatorForcedSuccess, Main.LocalPlayer, networkID);
+
+				return;
+			}
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkAccessible);
+			packet.Write(networkID);
+			packet.Send();
+
+			Report(true, MessageType.SecurityNetworkAccessible + " packet sent to the server");
+		}
+
+		public static void ReceiveSecurityNetworkAccessAttempt(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				int networkID = reader.ReadInt32();
+
+				Report(true, MessageType.SecurityNetworkAccessible + " packet received by server from client " + sender);
+
+				var result = SecuritySystem.ServerAccessNetwork(sender, networkID);
+
+				// Inform the client of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkAccessible);
+				packet.Write((byte)result);
+				packet.Write(networkID);
+				packet.Send(toClient: sender);
+
+				Report(true, MessageType.SecurityNetworkAccessible + " packet sent to client " + sender);
+			} else {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int networkID = reader.ReadInt32();
+
+				Report(true, MessageType.SecurityNetworkAccessible + " packet received by client " + Main.myPlayer);
+
+				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Access);
+
+				SecuritySystem.HandleNetworkAccessibilityOnAccess(result, Main.LocalPlayer, networkID);
+
+				Report(false, $"  Result: {result}");
+			}
+		}
+
+		public static void RequestSecurityNetworkChange(int networkID, string newName, string newPassword, bool? newRestricted) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkModification);
+			packet.Write(networkID);
+
+			BitsByte flags = new BitsByte(newName is not null, newPassword is not null, newRestricted is not null);
+			if (newRestricted is bool restricted)
+				flags[3] = restricted;
+
+			packet.Write(flags);
+
+			if (newName is not null)
+				packet.Write(newName);
+			if (newPassword is not null)
+				packet.Write(newPassword);
+
+			packet.Send();
+		}
+
+		public static void ReceiveSecurityNetworkChange(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				int networkID = reader.ReadInt32();
+				BitsByte flags = reader.ReadByte();
+
+				string newName = flags[0] ? reader.ReadString() : null;
+				string newPassword = flags[1] ? reader.ReadString() : null;
+				bool? newRestricted = flags[2] ? flags[3] : null;
+
+				Report(true, MessageType.SecurityNetworkModification + " packet received by server from client " + sender);
+
+				var result = SecuritySystem.ServerModifyNetwork(sender, networkID, newName, newPassword, newRestricted, out bool passwordChanged, out bool privacyChanged);
+				BitsByte changed = new BitsByte(passwordChanged, privacyChanged);
+
+				// Inform all clients of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkModification);
+				packet.Write((byte)result);
+				packet.Write(networkID);
+				packet.Write(changed);
+				packet.Write((byte)sender);
+				packet.Send();
+
+				Report(true, MessageType.SecurityNetworkModification + " packet sent to all clients");
+			} else {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int networkID = reader.ReadInt32();
+				BitsByte flags = reader.ReadByte();
+				int requestingPlayer = reader.ReadByte();
+
+				if (requestingPlayer == Main.myPlayer)
+					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Modification);
+
+				bool outdatedAuthorization = flags[0] || flags[1];  // If the password or restricted status was changed, the client's authorization status is outdated
+				if (outdatedAuthorization && requestingPlayer != Main.myPlayer)
+					Main.LocalPlayer.GetModPlayer<SecurityPlayer>().RemoveNetworkAccess(networkID);
+
+				Report(true, MessageType.SecurityNetworkModification + " packet received by client " + Main.myPlayer);
+
+				Report(false, $"  Result: {result}");
+
+				// Ensure that Administrators always know the password for the network
+				if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+					RequestPasswordForNetwork(networkID);
+
+				RequestSecurityNetworkList();
+			}
+		}
+
+		public static void RequestSecurityNetworkList() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.RequestSecurityNetworkList);
+			packet.Send();
+
+			Report(true, MessageType.RequestSecurityNetworkList + " packet sent to the server");
+		}
+
+		public static void ReceiveSecurityNetworkList(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				Report(true, MessageType.RequestSecurityNetworkList + " packet received by server from client " + sender);
+
+				// Inform the client of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.RequestSecurityNetworkList);
+				SecuritySystem.SyncClientNetworkViews(packet);
+				packet.Send(sender);
+
+				if (sender == -1)
+					Report(true, MessageType.RequestSecurityNetworkList + " packet sent to all clients");
+				else
+					Report(true, MessageType.RequestSecurityNetworkList + " packet sent to client " + sender);
+			} else {
+				SecuritySystem.ReceiveClientNetworkViews(reader);
+
+				ReportNetworkList();
+
+				Report(false, MessageType.RequestSecurityNetworkList + " packet received by client " + Main.myPlayer);
+			}
+		}
+
+		[Conditional("NETPLAY")]
+		private static void ReportNetworkList() {
+			var networks = SecuritySystem.GetNetworks().ToList();
+
+			StringBuilder sb = new($"Security list updated with {networks.Count} networks:\n");
+			foreach (var network in networks)
+				sb.Append("  ").Append(network.name).Append(" (ID: ").Append(network.id).AppendLine(")");
+
+			Report(true, sb.ToString());
+		}
+
+		public static void ReceiveSecurityPlayerSync(BinaryReader reader, int sender) {
+			byte plr = reader.ReadByte();
+			SecurityPlayer mp = Main.player[plr].GetModPlayer<SecurityPlayer>();
+			mp.ReceiveSync(reader);
+
+			if (Main.netMode == NetmodeID.Server) {
+				// Forward the result
+				mp.SyncPlayer(-1, sender, false);
+			}
+		}
+
+		public static void SyncStorageComponentNetwork(TEStorageComponent component) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			// Inform all clients of the result
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.StorageHeartNetwork);
+			packet.Write(component.Position);
+			packet.Write(component.assignedNetwork);
+
+			packet.Send();
+
+			Report(true, MessageType.StorageHeartNetwork + " packet sent to all clients");
+		}
+
+		public static void ReceiveStorageComponentNetwork(BinaryReader reader, int sender) {
+			Point16 componentPosition = reader.ReadPoint16();
+			int networkID = reader.ReadInt32();
+
+			if (TileEntity.ByPosition.TryGetValue(componentPosition, out TileEntity te) && te is TEStorageComponent component)
+				component.assignedNetwork = networkID;
+
+			if (Main.netMode == NetmodeID.Server) {
+				Report(true, MessageType.StorageHeartNetwork + " packet received by server from client " + sender);
+				return;
+			}
+
+			// Checking for the security UI shouldn't be necessary, since components will set to a network either
+			//   via the heart (which is handled by another netcode packet) or when destroying the heart (which would
+			//   close the security UI anyway)
+			/*
+			Point16 viewing = Main.LocalPlayer.GetModPlayer<StoragePlayer>().ViewingStorage();
+
+			if (viewing == componentPosition && MagicUI.IsSecurityUIOpen()) {
+				// The security UI will need to update
+				SecuritySystem.clientListDirty = true;
+			}
+			*/
+
+			Report(true, $"Component at position {componentPosition} was assigned to network {networkID}");
+
+			Report(false, MessageType.StorageHeartNetwork + " packet received by client " + Main.myPlayer);
+		}
+
+		public static void RequestStorageHeartNetworkAssignment(Player player, TEStorageHeart heart, int networkID) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			if (!player.GetModPlayer<OperatorPlayer>().hasOp && !player.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID))
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.StorageHeartNetworkAssignment);
+			packet.Write(heart.Position);
+			packet.Write(networkID);
+			packet.Send();
+		}
+
+		public static void ReceiveStorageHeartNetworkAssignmentRequest(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				Point16 heartPosition = reader.ReadPoint16();
+				int networkID = reader.ReadInt32();
+
+				Report(true, MessageType.StorageHeartNetworkAssignment + " packet received by server from client " + sender);
+
+				NetworkActionResult result = SecuritySystem.ServerAssignNetwork(sender, heartPosition, networkID);
+
+				// Inform all clients of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.StorageHeartNetworkAssignment);
+				packet.Write((byte)result);
+				packet.Write((byte)sender);
+				packet.Write(heartPosition);  // The location of the heart needs to be sent again in case the client is viewing its security list
+				packet.Send();
+
+				Report(true, MessageType.StorageHeartNetworkAssignment + " packet sent to all clients");
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				int requestingPlayer = reader.ReadByte();
+				Point16 heartPosition = reader.ReadPoint16();
+
+				Report(true, $"Attempted to modify security network for Storage Heart at position {heartPosition} by client {requestingPlayer} (result: {result})");
+
+				if (requestingPlayer == Main.myPlayer)
+					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.NetworkChange);
+
+				// Shouldn't be necessary, since the UI will listen for the action result
+				/*
+				if (result.IsSuccess() && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == heartPosition && MagicUI.IsStorageUIOpen()) {
+					// The security UI will need to update
+					SecuritySystem.clientListDirty = true;
+				}
+				*/
+
+				Report(false, MessageType.StorageHeartNetworkAssignment + " packet received by client " + Main.myPlayer);
+			}
+		}
+
+		public static void RequestAccessibleNetworksByDefault() {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.DefaultAccessibleNetworks);
+			packet.Send();
+		}
+
+		public static void RecieveAccessibleNetworksByDefaultRequest(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				Report(true, MessageType.DefaultAccessibleNetworks + " packet received by server from client " + sender);
+
+				NetworkActionResult result = SecuritySystem.ServerDefaultAccessibleNetworks(sender, out var networks);
+
+				// Inform the client of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.DefaultAccessibleNetworks);
+				packet.Write((byte)result);
+
+				if (result.IsSuccess()) {
+					packet.Write(networks.Length);
+
+					if (networks.Length > 0) {
+						foreach (var network in networks) {
+							packet.Write(network.id);
+							packet.WriteStringSafely(network.password);
+						}
+					}
+				}
+				
+				packet.Send(toClient: sender);
+
+				Report(true, MessageType.DefaultAccessibleNetworks + " packet sent to client " + sender);
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+
+				if (result.IsSuccess()) {
+					SecurityPlayer securityPlayer = Main.LocalPlayer.GetModPlayer<SecurityPlayer>();
+
+					int count = reader.ReadInt32();
+
+					Report(true, count + " networks were available by default" + (count > 0 ? ":" : ""));
+
+					for (int i = 0; i < count; i++) {
+						int id = reader.ReadInt32();
+						securityPlayer.JoinNetwork(id);
+
+						var password = reader.ReadStringSafely();
+						if (password is not null) {
+							securityPlayer.RememberPassword(id, password);
+
+							Report(false, "  ID: " + id + ", Password: " + password);
+						} else
+							Report(false, "  ID: " + id);
+					}
+				}
+
+				Report(!result.IsSuccess(), MessageType.DefaultAccessibleNetworks + " packet received by client " + Main.myPlayer);
+			}
+		}
+
+		public static void RequestPasswordForNetwork(int networkID) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			// Only Administrators can forcibly request the password
+			if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.SecurityNetworkPassword);
+			packet.Write(networkID);
+			packet.Send();
+
+			Report(true, MessageType.SecurityNetworkPassword + " packet sent to the server");
+		}
+
+		public static void ReceiveNetworkPasswordRequest(BinaryReader reader, int sender) {
+			if (Main.netMode == NetmodeID.Server) {
+				int networkID = reader.ReadInt32();
+
+				Report(true, MessageType.SecurityNetworkPassword + " packet received by server from client " + sender);
+
+				NetworkActionResult result = SecuritySystem.TryGetPassword(networkID, out string password);
+
+				// Inform the client of the result
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SecurityNetworkPassword);
+				packet.Write((byte)result);
+				packet.WriteStringSafely(password);
+				packet.Send(toClient: sender);
+
+				Report(true, MessageType.SecurityNetworkPassword + " packet sent to client " + sender);
+			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
+				int networkID = reader.ReadInt32();
+				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+				string password = reader.ReadStringSafely();
+
+				// Ensure that only Administrators can receive the password
+				if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+					return;
+
+				Report(true, MessageType.SecurityNetworkPassword + " packet received by client " + Main.myPlayer);
+
+				Report(false, $"  Result: {result}");
+
+				if (result.IsSuccess()) {
+					SecurityPlayer securityPlayer = Main.LocalPlayer.GetModPlayer<SecurityPlayer>();
+
+					securityPlayer.JoinNetwork(networkID);
+					securityPlayer.RememberPassword(networkID, password);
+
+					Report(false, "  ID: " + networkID + ", Password: " + password);
+				}
+			}
+		}
 	}
 
 	internal enum MessageType : byte
@@ -1770,6 +2373,17 @@ namespace MagicStorage
 		RenameStorageHeart,
 		SyncDepositHistory,
 		ClientSendCoreRemoval,
-		ClientSendCoreInsertion
+		ClientSendCoreInsertion,
+		SecurityNetworkCreation,
+		SecurityNetworkRemoval,
+		SecurityNetworkJoin,
+		SecurityNetworkAccessible,
+		SecurityNetworkModification,
+		RequestSecurityNetworkList,
+		SecurityPlayerSync,
+		StorageHeartNetwork,
+		StorageHeartNetworkAssignment,
+		DefaultAccessibleNetworks,
+		SecurityNetworkPassword
 	}
 }

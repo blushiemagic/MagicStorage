@@ -34,7 +34,9 @@ namespace MagicStorage.UI {
 				if (StorageGUI.oldMouse.LeftButton == ButtonState.Released)
 					SoundEngine.PlaySound(SoundID.MenuTick);
 
-				LeftMouseDown(new(this, Main.MouseScreen));
+				// Click events are handled before Update (which is what calls OnHoveringAndValidRecipe)
+				// So including a manual event call here is unnecessary
+			//	LeftMouseDown(new(this, Main.MouseScreen));
 
 				bool stillCrafting = false;
 				HandleCraft(ref stillCrafting);

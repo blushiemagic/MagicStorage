@@ -169,11 +169,17 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool auditLog;
 
+		[DefaultValue(false)]
+		public bool localHostAdmin;
+
 		[JsonIgnore]
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
 
 		[JsonIgnore]
 		public static bool ReportClientStorageUsage => Instance.auditLog;
+
+		[JsonIgnore]
+		public static bool GiveLocalHostAdminOnJoin => Instance.localHostAdmin;
 
 		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref NetworkText message) {
 			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)

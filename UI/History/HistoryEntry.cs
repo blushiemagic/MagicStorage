@@ -30,13 +30,13 @@ namespace MagicStorage.UI.History {
 
 			SetPadding(0);
 			MarginLeft = MarginTop = MarginRight = MarginBottom = 0;
-		}
 
-		public override void OnInitialize() {
 			resultSlot = new(0, scale: CraftingGUI.InventoryScale) {
 				IgnoreClicks = true
 			};
+		}
 
+		public override void OnInitialize() {
 			Append(resultSlot);
 		}
 

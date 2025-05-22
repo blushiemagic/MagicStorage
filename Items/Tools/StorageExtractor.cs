@@ -1,7 +1,9 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
@@ -29,8 +31,12 @@ namespace MagicStorage.Items {
 					j--;
 
 				Point16 point = new(i, j);
-				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageUnit storage)
-					storage.RemoveItemsAndSpawnCore();
+				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageUnit storage) {
+					if (SecuritySystem.CanPlayerAccessImmediately(player, storage.assignedNetwork))
+						storage.RemoveItemsAndSpawnCore();
+					else
+						SecuritySystem.PrintStorageInaccessible();
+				}
 			}
 
 			return true;

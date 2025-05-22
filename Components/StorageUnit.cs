@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -65,6 +66,11 @@ namespace MagicStorage.Components
 
 			if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TEStorageUnit storageUnit)
 				return false;
+
+			if (!SecuritySystem.CanPlayerAccessImmediately(Main.LocalPlayer, storageUnit.assignedNetwork)) {
+				SecuritySystem.PrintStorageInaccessible();
+				return true;
+			}
 
 			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageUpgradeItem && TryUpgrade(i, j, storageUnit))
 				return true;

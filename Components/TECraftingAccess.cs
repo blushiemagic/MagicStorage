@@ -56,6 +56,8 @@ namespace MagicStorage.Components
 
 		public override void Update()
 		{
+			base.Update();
+
 			if (Main.netMode == NetmodeID.Server)
 			{
 				processClientOperations();

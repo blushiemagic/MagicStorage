@@ -1,3 +1,6 @@
+using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems;
+using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -88,6 +91,12 @@ namespace MagicStorage.Components
 				player.SetTalkNPC(-1);
 				Main.npcChatCornerItem = 0;
 				Main.npcChatText = string.Empty;
+			}
+
+			if (MagicUI.IsSecurityUIOpen() != player.GetModPlayer<SecurityPlayer>().RequestingSecurityUI) {
+				// Either the Security UI is being opened, or the player is switching to a new UI
+				// Prevent the UI from being closed by later conditions
+				modPlayer.CloseStorage();
 			}
 
 			bool hadChestOpen = player.chest != -1;

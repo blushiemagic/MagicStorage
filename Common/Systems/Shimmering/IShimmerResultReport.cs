@@ -26,8 +26,6 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		Rectangle GetAnimationFrame();
 
-		bool Equals(IShimmerResultReport report);
-
 		bool Render(SpriteBatch spriteBatch);
 
 		void Update();

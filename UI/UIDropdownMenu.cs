@@ -93,6 +93,10 @@ namespace MagicStorage.UI {
 			viewArea.SetPadding(0);
 			Append(viewArea);
 
+			UIElement listWrapper = new();
+			listWrapper.Width.Set(0, 1f);
+			listWrapper.Height.Set(fullDropdownSize - 20, 0f);
+
 			// Normally i'd just use relative Height and Top values, but that breaks the cool "slide open" effect, so constant values it is
 			list = new();
 			list.SetPadding(0);
@@ -100,23 +104,28 @@ namespace MagicStorage.UI {
 			list.Top.Set(10, 0f);
 			list.Width.Set(-44, 1f);
 			//list.Height.Set(0f, 1f);
-			list.Height.Set(fullDropdownSize - 20, 0f);
-			viewArea.Append(list);
+		//	list.Height.Set(fullDropdownSize - 20, 0f);
+			list.Height.Set(listWrapper.Height.Pixels, 0f);
+		//	viewArea.Append(list);
 
 			scroll = new(scrollDividend: 1f) {
 				IgnoreParentBoundsWhenDrawing = true
 			};
 			scroll.Width.Set(20, 0);
 			//scroll.Height.Set(0, 0.825f);
-			scroll.Height.Set(list.Height.Pixels * 0.95f, 0f);
+			scroll.Height.Set(listWrapper.Height.Pixels * 0.95f, 0f);
 			scroll.Left.Set(-20, 1f);
 			//scroll.Top.Set(0, 0.1f);
-			scroll.Top.Set(list.Height.Pixels * 0.025f, 0f);
+			scroll.Top.Set(listWrapper.Height.Pixels * 0.025f, 0f);
 
 			list.SetScrollbar(scroll);
-			list.Append(scroll);
+			// NOTE: The NewUIScrollBar should NOT be appended to the NewUIList directly, since its children think that it has a (practically) infinite height
+		//	list.Append(scroll);
 			list.ListPadding = listPadding;
-			
+			listWrapper.Append(list);
+			listWrapper.Append(scroll);
+			viewArea.Append(listWrapper);
+
 			//Append the header last so that it and its children take priority over the view area
 			Append(header);
 		}

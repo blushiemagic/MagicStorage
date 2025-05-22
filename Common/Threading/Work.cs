@@ -19,6 +19,7 @@ namespace MagicStorage.Common.Threading {
 		
 		public Work(CancellationToken token) {
 			_task = new Task(DoWork, token, TaskCreationOptions.LongRunning);
+			_token = token;
 		}
 
 		internal void Start() => _task.Start();
@@ -35,7 +36,7 @@ namespace MagicStorage.Common.Threading {
 				waitingForWork = false;
 
 				if (!waitingForCompletion) {
-					Exception? exception = null;
+					Exception exception = null;
 
 					try {
 						Tick();

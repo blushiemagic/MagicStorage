@@ -1,3 +1,4 @@
+using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems;
 using System.Collections.Generic;
 using System.IO;
@@ -38,6 +39,10 @@ namespace MagicStorage.Components
 			get => _storageCenter;
 			set => _storageCenter = value;
 		}
+
+		internal int assignedNetwork = -1;
+
+		public bool CanLocalClientAccess() => SecuritySystem.CanPlayerAccessImmediately(Main.LocalPlayer, assignedNetwork);
 
 		public virtual TEStorageHeart GetHeart() {
 			Point16 center = StorageCenter;
@@ -124,7 +129,8 @@ namespace MagicStorage.Components
 		}
 
 		public override void Update() {
-			GetHeart()?.ComponentManager.LinkIfNotExists(this);
+			if (this is not TEStorageHeart)
+				GetHeart()?.ComponentManager.LinkIfNotExists(this);
 		}
 
 		public virtual void OnPlace()
@@ -221,21 +227,22 @@ namespace MagicStorage.Components
 
 		public override void NetSend(BinaryWriter writer) {
 			writer.Write(_storageCenter);
+			writer.Write(assignedNetwork);
 		}
 
 		public override void NetReceive(BinaryReader reader) {
 			_storageCenter = reader.ReadPoint16();
+			assignedNetwork = reader.ReadInt32();
 		}
 
 		public override void SaveData(TagCompound tag) {
 			tag["center"] = _storageCenter;
+			tag["network"] = assignedNetwork;
 		}
 
 		public override void LoadData(TagCompound tag) {
-			if (tag.TryGet("center", out Point16 center))
-				_storageCenter = center;
-			else
-				_storageCenter = Point16.NegativeOne;
+			_storageCenter = tag.TryGet("center", out Point16 center) ? center : Point16.NegativeOne;
+			assignedNetwork = tag.TryGet("network", out int network) ? network : -1;
 		}
 	}
 }

@@ -22,6 +22,8 @@ namespace MagicStorage
 
 		public IEnumerable<Item> Items => _items;
 
+		public int? MemoryLimit { get; init; }  // Necessary for TEStorageHeart so that it doesn't take up thousands of bytes when syncing in NetSend/NetReceive
+
 		public ItemTypeOrderedSet(string name)
 		{
 			_name = name;
@@ -31,11 +33,22 @@ namespace MagicStorage
 
 		public bool Add(int type)
 		{
-			Item item = new();
-			item.SetDefaults(type);
-			if (_set.Add(item.type))
+			if (_set.Add(type))
 			{
-				_items.Add(item);
+				if (MemoryLimit is int limit)
+				{
+					// Prioritize unloaded items over loaded items
+					while (_unloadedItems.Count > 0 && _set.Count + _unloadedItems.Count >= limit)
+						_unloadedItems.RemoveAt(_unloadedItems.Count - 1);
+
+					while (_set.Count >= limit)
+					{
+						// The implementation of First() may be inconsistent across .NET versions, but that shouldn't matter
+						Remove(_set.First());
+					}
+				}
+
+				_items.Add(new Item(type));
 				return true;
 			}
 
@@ -65,48 +78,56 @@ namespace MagicStorage
 			_items.Clear();
 		}
 
-		public bool RemoveAt(int index)
-		{
-			Item item = _items[index];
-			if (_set.Remove(item.type))
-			{
-				_items.RemoveAt(index);
-				return true;
-			}
-
-			return false;
-		}
-
 		public void Save(TagCompound c)
 		{
-			c.Add(_name + Suffix3, _items.Select(x => new ItemDefinition(x.type)).Concat(_unloadedItems).ToList());
+			List<ItemDefinition> list = _set.Select(x => new ItemDefinition(x)).TakeLastIfLimitExists(MemoryLimit).ToList();
+			if (MemoryLimit is int limit && list.Count < limit)
+				list.AddRange(_unloadedItems.TakeLast(limit - list.Count));
+
+			c.Add(_name + Suffix3, list);
 		}
 
 		public void Load(TagCompound tag)
 		{
 			if (tag.GetList<TagCompound>(_name) is { Count: > 0 } listV1) 
 			{
-				_items = listV1.Select(Utility.SafelyLoadItem).Where(static i => !i.IsAir).ToList();
+				_items = listV1
+					.Select(Utility.SafelyLoadItem)
+					.Where(static i => !i.IsAir)
+					.TakeLastIfLimitExists(MemoryLimit)
+					.ToList();
+
+				_set = new HashSet<int>(_items.Select(static i => i.type));
 			}
 			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2) 
 			{
 				_items = listV2
-					.Where(x => x < ItemLoader.ItemCount) // Unable to reliably restore invalid IDs; just ignore them
-					.Select(x => new Item(x))
-					.Where(x => !x.IsAir) // Filters out deprecated items
+					.Where(static x => x < ItemLoader.ItemCount)  // Unable to reliably restore invalid IDs; just ignore them
+					.Select(static x => new Item(x))
+					.Where(static x => !x.IsAir)  // Filters out deprecated items
+					.TakeLastIfLimitExists(MemoryLimit)
 					.ToList();
+
+				_set = new HashSet<int>(_items.Select(static i => i.type));
 			}
 			else if (tag.GetList<ItemDefinition>(_name + Suffix3) is { Count: > 0 } listV3) 
 			{
-				_items = listV3.Where(x => !x.IsUnloaded).Select(x => new Item(x.Type)).ToList();
-				_unloadedItems = listV3.Where(x => x.IsUnloaded).ToList();
+				foreach (var def in listV3.TakeLastIfLimitExists(MemoryLimit))
+				{
+					if (!def.IsUnloaded)
+					{
+						_items.Add(new Item(def.Type));
+						_set.Add(def.Type);
+					}
+					else
+						_unloadedItems.Add(def);
+				}
 			} 
 			else 
 			{
 				_items = new List<Item>();
+				_set = new HashSet<int>();
 			}
-
-			_set = new HashSet<int>(_items.Select(x => x.type));
 		}
 	}
 }

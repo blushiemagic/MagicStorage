@@ -32,6 +32,8 @@ namespace MagicStorage.Components
 
 		public override void SaveData(TagCompound tag)
 		{
+			base.SaveData(tag);
+
 			tag.Set("Inactive", Inactive);
 			TagCompound tagCenter = new();
 			tagCenter.Set("X", center.X);
@@ -41,6 +43,8 @@ namespace MagicStorage.Components
 
 		public override void LoadData(TagCompound tag)
 		{
+			base.LoadData(tag);
+
 			Inactive = tag.GetBool("Inactive");
 			TagCompound tagCenter = tag.GetCompound("Center");
 			center = new Point16(tagCenter.GetShort("X"), tagCenter.GetShort("Y"));
@@ -48,6 +52,8 @@ namespace MagicStorage.Components
 
 		public override void NetSend(BinaryWriter writer)
 		{
+			base.NetSend(writer);
+
 			writer.Write(Inactive);
 			writer.Write(center.X);
 			writer.Write(center.Y);
@@ -55,6 +61,8 @@ namespace MagicStorage.Components
 
 		public override void NetReceive(BinaryReader reader)
 		{
+			base.NetReceive(reader);
+
 			Inactive = reader.ReadBoolean();
 			center = new Point16(reader.ReadInt16(), reader.ReadInt16());
 		}

@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.Items;
 using Terraria;
 using Terraria.DataStructures;
@@ -32,6 +33,11 @@ namespace MagicStorage.Components
 
 				if (!TileEntity.ByPosition.TryGetValue(new Point16(i, j), out var te) || te is not TERemoteAccess remoteAccess)
 					return false;
+
+				if (!SecuritySystem.CanPlayerAccessImmediately(Main.LocalPlayer, remoteAccess.assignedNetwork)) {
+					SecuritySystem.PrintStorageInaccessible();
+					return true;
+				}
 
 				Locator locator = (Locator)item.ModItem;
 				if (remoteAccess.TryLocate(locator.Location, out string message))

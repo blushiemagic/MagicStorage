@@ -55,8 +55,10 @@ namespace MagicStorage.Common.Systems {
 				Main.NewText("Server Operator status was successfully modified.", Color.Green);
 		}
 
-		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound)
-			=> TryQuickStackItemIntoNearbyStorageSystems(self.Center, self.GetNearbyCenters(), item, ref playSound);
+		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound) {
+			using var _ = SecuritySystem.CreateAccessContext(self.whoAmI);
+			return TryQuickStackItemIntoNearbyStorageSystems(self.Center, self.GetNearbyCenters(), item, ref playSound);
+		}
 
 		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Vector2 depositOrigin, IEnumerable<TEStorageCenter> nearbyCenters, Item item, ref bool playSound) {
 			if (Main.netMode == NetmodeID.MultiplayerClient || item.IsAir || !nearbyCenters.Any())

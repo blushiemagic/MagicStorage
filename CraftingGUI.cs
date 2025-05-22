@@ -155,7 +155,7 @@ namespace MagicStorage
 			var items = new List<Item>();
 			foreach (Item tryWithdraw in toWithdraw)
 			{
-				Item withdrawn = heart.TryWithdraw(tryWithdraw, false);
+				Item withdrawn = heart.TryWithdraw(tryWithdraw, false, accessingPlayer: Main.LocalPlayer);
 				if (!withdrawn.IsAir)
 					items.Add(withdrawn);
 				if (withdrawn.stack < tryWithdraw.stack)
@@ -193,7 +193,7 @@ namespace MagicStorage
 			if (heart is null)
 				return false;
 
-			heart.TryDeposit(item);
+			heart.TryDeposit(item, accessingPlayer: Main.LocalPlayer);
 
 			return oldStack != item.stack;
 		}
@@ -203,6 +203,8 @@ namespace MagicStorage
 			TEStorageHeart heart = GetHeart();
 			if (heart is null)
 				return new Item();
+
+			using var _ = SecuritySystem.CreateAccessContext();
 
 			Item clone = result.Clone();
 			clone.stack = Math.Min(amountToWithdraw, clone.maxStack);

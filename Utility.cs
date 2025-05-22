@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
@@ -9,23 +10,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
+using Terraria.UI;
 
 namespace MagicStorage {
 	public static partial class Utility {
 		public static bool DownedAllMechs => NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3;
+
+		public static Color PanelColorWithoutTransparency => new(63, 82, 151);  // Same color as vanilla, but without the transparency
 
 		public static int GetCardinality(this BitArray bitArray) {
 			int[] ints = new int[(bitArray.Count >> 5) + 1];
@@ -641,6 +648,148 @@ namespace MagicStorage {
 				hash ^= hash >> 17;
 				hash += hash << 5;
 				return hash;
+			}
+		}
+
+		public static void ClearPaddingAndMargins(this UIElement element) {
+			element.SetPadding(0);
+			element.MarginTop = element.MarginLeft = element.MarginRight = element.MarginBottom = 0;
+		}
+
+		public static void ClearMargins(this UIElement element) {
+			element.MarginTop = element.MarginLeft = element.MarginRight = element.MarginBottom = 0;
+		}
+
+		public static T Repeat<T>(this T number, T max) where T : System.Numerics.INumberBase<T>, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IModulusOperators<T, T, T>
+			=> number.Repeat(T.Zero, max);
+
+		public static T Repeat<T>(this T number, T min, T max) where T : System.Numerics.INumberBase<T>, System.Numerics.IComparisonOperators<T, T, bool>, System.Numerics.IModulusOperators<T, T, T> {
+			// Modulus, but keeps the result between "min" and "max"
+			// I.e. Repeat(-1, 0, 10) = 9
+			T range = max - min;
+			T result = (number - min) % range;
+			return result + (result < min ? range : min);
+		}
+
+		public static void RemoveAndDeactivate(this UIElement element) {
+			if (element is not null) {
+				element.Remove();
+				element.Deactivate();
+			}
+		}
+
+		public static void SetBasicHoverColorChangeEvents<T>(this UITextPanel<T> panel) {
+			panel.OnMouseOver += HoverTextToYellow<T>;
+			panel.OnMouseOut += HoverTextToWhite<T>;
+		}
+
+		public static void HoverTextToYellow<T>(UIMouseEvent evt, UIElement e) {
+			if (e is UITextPanel<T> panel)
+				panel.TextColor = Color.Yellow;
+		}
+
+		public static void HoverTextToWhite<T>(UIMouseEvent evt, UIElement e) {
+			if (e is UITextPanel<T> panel)
+				panel.TextColor = Color.White;
+		}
+
+		public static IEnumerable<T> TakeIfLimitExists<T>(this IEnumerable<T> source, int? limit) => limit is int lim ? source.Take(lim) : source;
+
+		public static IEnumerable<T> TakeLastIfLimitExists<T>(this IEnumerable<T> source, int? limit) => limit is int lim ? source.TakeLast(lim) : source;
+
+		public static TileEntity ResolveToTileEntity(this Point16 position) => position.X >= 0 && position.Y >= 0 && TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) ? entity : null;
+
+		public static T ResolveToTileEntity<T>(this Point16 position) where T : TileEntity => position.ResolveToTileEntity() is T entity ? entity : null;
+
+		public static IEnumerable<TileEntity> ResolveTileEntities(this IEnumerable<Point16> positions) => positions.Select(ResolveToTileEntity).OfType<TileEntity>();
+
+		public static IEnumerable<T> ResolveTileEntities<T>(this IEnumerable<Point16> position) where T : TileEntity => position.Select(ResolveToTileEntity).OfType<T>();
+
+		public static bool IsSuccess(this NetworkActionResult result) => result is NetworkActionResult.Success or NetworkActionResult.OperatorForcedSuccess;
+
+		public static void WriteStringSafely(this BinaryWriter writer, string value) {
+			writer.Write(value is not null);
+			if (value is not null)
+				writer.Write(value);
+		}
+
+		public static string ReadStringSafely(this BinaryReader reader) => reader.ReadBoolean() ? reader.ReadString() : null;
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1) {
+			new PackedStrings(s0, s1).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2) {
+			new PackedStrings(s0, s1, s2).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2, string s3) {
+			new PackedStrings(s0, s1, s2, s3).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2, string s3, string s4) {
+			new PackedStrings(s0, s1, s2, s3, s4).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2, string s3, string s4, string s5) {
+			new PackedStrings(s0, s1, s2, s3, s4, s5).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2, string s3, string s4, string s5, string s6) {
+			new PackedStrings(s0, s1, s2, s3, s4, s5, s6).Write(writer);
+		}
+
+		public static void WriteStringsSafely(this BinaryWriter writer, string s0, string s1, string s2, string s3, string s4, string s5, string s6, string s7) {
+			new PackedStrings(s0, s1, s2, s3, s4, s5, s6, s7).Write(writer);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2, out string s3) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2, out s3);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2, out string s3, out string s4) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2, out s3, out s4);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2, out string s3, out string s4, out string s5) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2, out s3, out s4, out s5);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2, out string s3, out string s4, out string s5, out string s6) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2, out s3, out s4, out s5, out s6);
+		}
+
+		public static void ReadStringsSafely(this BinaryReader reader, out string s0, out string s1, out string s2, out string s3, out string s4, out string s5, out string s6, out string s7) {
+			PackedStrings.Read(reader).Retrieve(out s0, out s1, out s2, out s3, out s4, out s5, out s6, out s7);
+		}
+
+		public static void WriteSecurityAccess(this BinaryWriter writer) {
+			if (SecuritySystem.TryGetCurrentAccessContext(out var context)) {
+				writer.Write(true);
+				writer.Write((byte)context.Player);
+			} else
+				writer.Write(false);
+		}
+
+		public static bool ReadSecurityAccess(this BinaryReader reader, out SecuritySystem.AccessContext context, bool automaticallyUse = true) {
+			if (reader.ReadBoolean()) {
+				context = new(reader.ReadByte());
+
+				if (automaticallyUse)
+					context.Use();
+
+				return true;
+			} else {
+				context = default;
+				return false;
 			}
 		}
 	}

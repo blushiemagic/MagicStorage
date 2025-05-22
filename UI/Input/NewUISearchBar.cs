@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SerousCommonLib.UI;
 using System;
 using Terraria.Localization;
 using Terraria.UI;
@@ -11,9 +12,9 @@ namespace MagicStorage.UI.Input {
 
 		public NewUISearchBar(LocalizedText hintText) : base(hintText) { }
 
-		protected override bool PreDrawText(SpriteBatch spriteBatch, ref Color color) {
-			if (MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
-				color = Color.Red;
+		protected override bool PreDrawText(SpriteBatch spriteBatch, ref Color textColor, ref Color hintColor) {
+			if (State.HasText && MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
+				textColor = Color.Red;
 
 			return true;
 		}
@@ -53,8 +54,7 @@ namespace MagicStorage.UI.Input {
 					else
 						MagicUI.mouseText = "";
 				}
-			} else if (State.WasActive)
-				MagicUI.mouseText = "";
+			}
 		}
 	}
 }

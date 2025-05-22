@@ -466,6 +466,17 @@ Mods: {
 					Right click while holding a Storage Core to insert it
 					''' */
 			}
+
+			StorageSecurity: {
+				// DisplayName: Storage Security Wand
+				/* Tooltip:
+					'''
+					<left> a Storage Heart to open the Security Network
+					Storage components connected to a Storage Heart assigned to a private Security Network
+					  cannot be accessed until the password for the Security Network has been entered.
+					The creator of a Security Network will always have access to it, however.
+					''' */
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: Globo de Biomas
@@ -744,6 +755,7 @@ Mods: {
 		RemoteAccessSuccess: Sucesso!
 		RemoteAccessHasLocator: Esta Interface já possui um localizador, por favor minere e depois substitua para redefini-lo.
 		RemoteAccessUnlocated: O localizador não foi definido para um destino
+		// RemoteAccessInvalidLocator: The locator is not connected to a Storage Heart
 		StorageUnitActivated: Unidade de Armazenamento foi Ativada
 		StorageUnitDeactivated: Unidade de Armazenamento foi Desativada
 		FilterAllMods: Todos os mods
@@ -903,6 +915,11 @@ Mods: {
 			}
 
 			Popup.Label: Quantidade:
+
+			ActiveNetwork: {
+				// None: Active security network: Unassigned
+				// Assigned: Active security network: {0}
+			}
 		}
 
 		CraftingGUI: {
@@ -1009,6 +1026,67 @@ Mods: {
 			# EnvironmentGUI page for the modules
 			Modules: Modulos
 			History: Histórico
+			// Networks: Security Networks
+		}
+
+		Security: {
+			// Creation.Success: "[c/00ff00:Successfully created a new network]"
+			// Join.Success: "[c/00ff00:Successfully joined the network]"
+			// Removal.Success: "[c/00ff00:Successfully deleted the network]"
+			// Modification.Success: "[c/00ff00:Successfully modified the network's settings]"
+			// Access.Success: "[c/00ff00:Successfully granted access to the network]"
+			// NetworkChange.Success: "[c/00ff00:Successfully updated the network for this Storage Heart]"
+			// NetworkNotFound: "[c/ff0000:No network with the given ID was found]"
+			// EmptyPassword: "[c/ff0000:Password cannot be empty for private networks]"
+			// EmptyName: "[c/ff0000:Display name cannot be empty]"
+			// InvalidPassword: "[c/ff0000:Invalid password]"
+			// InvalidPlayer: "[c/ff0000:Player instance did not refer to a valid player]"
+			// UnauthorizedAccess: "[c/ff0000:Player does not meet the requirements to access the network]"
+			// UnauthorizedModification: "[c/ff0000:Player does not meet the requirements to modify the network]"
+			// EntityNotFound: "[c/ff0000:Storage entity could not be found for the request]"
+			// EntityNotAccessible: "[c/ff0000:Player does not meet the requirements to access the storage entity]"
+
+			UnauthorizedNetmodeContext: {
+				// Singleplayer: "[c/ff0000:Cannot perform this action in singleplayer]"
+				// MultiplayerClient: "[c/ff0000:Cannot perform this action as a client in multiplayer]"
+				// MultiplayerServer: "[c/ff0000:Cannot perform this action as a server in multiplayer]"
+			}
+
+			UI: {
+				// NameHint: Enter a name for the network
+				// PasswordHint: Enter a password for the network
+				// Private: Private network
+				// Public: Public network
+				// SearchHint: Search for a network
+				// NetworkAccessQuestion: Private network?
+				// Create: Create a new network
+				// ServerWait: Waiting for server response...
+				// RequestingPassword: Enter password for: {0}
+				// AccessPasswordHint: Password...
+				// NoResponse: Security responses will be displayed here
+				// NoHeartAccessDenied: Access Denied
+				// NoHeartMustConnect1: Connect a [i:MagicStorage/StorageHeart] assigned to the security network
+				// NoHeartMustConnect2: with ID {0} to access.
+				// NetworkOwner: Owner: {0}
+				// NetworkID: ID: {0}
+
+				Modes: {
+					Search: {
+						// All: All networks
+						// Restricted: Private networks
+						// Public: Public networks
+					}
+
+					Sort: {
+						// Name: Name A-Z
+						// NameReverse: Name Z-A
+						// Creator: Owner A-Z
+						// CreatorReverse: Owner Z-A
+						// ID: ID Ascending
+						// IDReverse: ID Descending
+					}
+				}
+			}
 		}
 
 		Config: {
@@ -1182,6 +1260,11 @@ Mods: {
 				auditLog: {
 					Label: Log de auditoria do servidor
 					Tooltip: Habilitar para que as interações do cliente com qualquer sistema de armazenamento sejam relatadas em um log de auditoria
+				}
+
+				localHostAdmin: {
+					// Label: Give Server Admin to Local Host
+					// Tooltip: Enable to force the local host to have the Server Administrator status when joining a server
 				}
 			}
 

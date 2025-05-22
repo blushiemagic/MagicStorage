@@ -1,3 +1,4 @@
+using MagicStorage.Common.Systems;
 using MagicStorage.Items;
 using Terraria;
 using Terraria.DataStructures;
@@ -31,9 +32,20 @@ namespace MagicStorage.Components
 					i--;
 				if (Main.tile[i, j].TileFrameY % 36 == 18)
 					j--;
+
+				if (GetHeart(i, j) is not TEStorageHeart heart)
+					return false;
+
+				if (!SecuritySystem.CanPlayerAccessImmediately(Main.LocalPlayer, heart.assignedNetwork)) {
+					SecuritySystem.PrintStorageInaccessible();
+					return true;
+				}
+
 				locator.Location = new Point16(i, j);
 				if (player.selectedItem == 58)
 					Main.mouseItem = item.Clone();
+
+				Main.LocalPlayer.tileInteractAttempted = true;
 				
 				Utility.ConvertToGPSCoordinates(new Point16(i, j).ToWorldCoordinates(), out string compassText, out string depthText);
 

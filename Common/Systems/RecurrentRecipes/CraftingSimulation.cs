@@ -35,7 +35,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			int craftingTarget = Math.Min(amountToCraft, 9999);
 			
 			int iterations = 0;
-			NetHelper.Report(true, "Requesting crafting simulation for max craftable...");
+		//	NetHelper.Report(true, "Requesting crafting simulation for max craftable...");
 
 			int mainResultItem = recipe.original.createItem.type;
 
@@ -87,7 +87,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (sum > craftingTarget)
 				sum = craftingTarget;
 
-			NetHelper.Report(true, $"Possible crafts = {sum}, Iterations: {iterations}");
+		//	NetHelper.Report(true, $"Possible crafts = {sum}, Iterations: {iterations}");
 
 			AmountCrafted = sum;
 		}

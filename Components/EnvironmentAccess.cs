@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using MagicStorage.Common.Systems;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ObjectInteractions;
 using Terraria.ModLoader;
@@ -12,8 +13,6 @@ namespace MagicStorage.Components {
 		public override ModTileEntity GetTileEntity() => ModContent.GetInstance<TEEnvironmentAccess>();
 
 		public override bool RightClick(int i, int j) {
-			bool ret = base.RightClick(i, j);
-
 			Tile tile = Main.tile[i, j];
 			Point16 topLeft = new(i - tile.TileFrameX / 18, j - tile.TileFrameY / 18);
 
@@ -27,7 +26,7 @@ namespace MagicStorage.Components {
 				*/
 			}
 
-			return ret;
+			return base.RightClick(i, j);
 		}
 	}
 }

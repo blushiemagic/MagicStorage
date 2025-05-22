@@ -16,6 +16,7 @@ using MagicStorage.Common.Systems;
 using System.Collections;
 using MagicStorage.Common;
 using System.Runtime.CompilerServices;
+using MagicStorage.Common.Players;
 
 namespace MagicStorage.Components
 {
@@ -62,11 +63,14 @@ namespace MagicStorage.Components
 			public List<Item> items { get; }
 			public bool keepOneInFavorite { get; }
 			public int client { get; }
+
+			public int? AccessingPlayer { get; set; }
 		}
 
 		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
 		internal bool compactCoins = false;
-		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
+		private const int UNIQUE_ITEM_HISTORY_SIZE = StorageGUI.RECENT_FILTER_ITEM_COUNT + 30;
+		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory") { MemoryLimit = UNIQUE_ITEM_HISTORY_SIZE };
 		private int compactStage;
 
 		[Obsolete("Use ComponentManager.GetRemoteAccesses() instead", true)]
@@ -191,6 +195,13 @@ namespace MagicStorage.Components
 				NetOperation op;
 				if (clientOpQ.TryDequeue(out op))
 				{
+					SecuritySystem.AccessContext context = default;
+					bool hasContext = false;
+					if (op.AccessingPlayer is int plr) {
+						hasContext = true;
+						context = SecuritySystem.CreateAccessContext(plr);
+					}
+
 					networkRefresh = true;
 					if (op.type == Operation.Withdraw || op.type == Operation.WithdrawToInventory)
 					{
@@ -273,6 +284,9 @@ namespace MagicStorage.Components
 						packet.Write(stack);
 						packet.Send(op.client);
 					}
+
+					if (hasContext)
+						context.Dispose();
 				}
 			}
 
@@ -284,18 +298,20 @@ namespace MagicStorage.Components
 
 		public void QClientOperation(BinaryReader reader, Operation op, int client)
 		{
+			NetOperation netOp = null;
+
 			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
 			{
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new NetOperation(op, item, keepOneIfFavorite, client));
+				netOp = new NetOperation(op, item, keepOneIfFavorite, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new NetOperation(op, item, client));
+				netOp = new NetOperation(op, item, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
@@ -308,29 +324,36 @@ namespace MagicStorage.Components
 					Item item = ItemIO.Receive(reader, true, true);
 					items.Add(item);
 				}
-				clientOpQ.Enqueue(new NetOperation(op, items, client));
+				netOp = new NetOperation(op, items, client);
 
 				NetHelper.PrintClientRequest(client, "Deposit All", Position);
 			}
 			else if (op == Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
-				clientOpQ.Enqueue(new NetOperation(op, new Item(type), client));
+				netOp = new NetOperation(op, new Item(type), client);
 
 				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Items", Position);
 			}
 			else if (op == Operation.DeleteUnloadedGlobalItemData)
 			{
-				clientOpQ.Enqueue(new NetOperation(op, (Item)null, client));
+				netOp = new NetOperation(op, (Item)null, client);
 
 				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Data", Position);
 			}
 			else if (op == Operation.WithdrawThenTryModuleInventory || op == Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new NetOperation(op, item, false, client));
+				netOp = new NetOperation(op, item, false, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
+			}
+
+			if (netOp is not null) {
+				if (SecuritySystem.TryGetCurrentAccessContext(out var context))
+					netOp.AccessingPlayer = context.Player;
+
+				clientOpQ.Enqueue(netOp);
 			}
 		}
 
@@ -349,11 +372,16 @@ namespace MagicStorage.Components
 			packet.Write(Position.X);
 			packet.Write(Position.Y);
 			packet.Write((byte)op);
+			packet.WriteSecurityAccess();
+
 			return packet;
 		}
 
 		public void CompactCoins()
 		{
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+				return;
+
 			Dictionary<int, int> coinsQty = new Dictionary<int, int>();
 			coinsQty.Add(ItemID.CopperCoin, 0);
 			coinsQty.Add(ItemID.SilverCoin, 0);
@@ -546,6 +574,9 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+				return;
+
 			bool actualItem = !toDeposit.IsAir;
 			int oldStack = toDeposit.stack;
 			int remember = toDeposit.type;
@@ -596,6 +627,12 @@ namespace MagicStorage.Components
 			}
 		}
 
+		public void TryDeposit(Item item, Player accessingPlayer)
+		{
+			using var _ = SecuritySystem.CreateAccessContext(accessingPlayer.whoAmI);
+			TryDeposit(item);
+		}
+
 		public bool TryDeposit(List<Item> items)
 		{
 			bool changed = false;
@@ -635,8 +672,17 @@ namespace MagicStorage.Components
 			return changed;
 		}
 
+		public bool TryDeposit(List<Item> items, Player accessingPlayer)
+		{
+			using var _ = SecuritySystem.CreateAccessContext(accessingPlayer.whoAmI);
+			return TryDeposit(items);
+		}
+
 		public Item Withdraw(Item lookFor, bool keepOneIfFavorite)
 		{
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+				return new Item();
+
 			Item result = new();
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 			{
@@ -682,6 +728,12 @@ namespace MagicStorage.Components
 			var item = Withdraw(lookFor, keepOneIfFavorite);
 
 			return item;
+		}
+
+		public Item TryWithdraw(Item lookFor, bool keepOneIfFavorite, Player accessingPlayer, bool toInventory = false)
+		{
+			using var _ = SecuritySystem.CreateAccessContext(accessingPlayer.whoAmI);
+			return TryWithdraw(lookFor, keepOneIfFavorite, toInventory);
 		}
 
 		internal void WithdrawManyAndDestroy(int type, bool net = false) {
@@ -837,15 +889,27 @@ namespace MagicStorage.Components
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
 		{
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+				return false;
+
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				if (storageUnit.HasItem(lookFor, ignorePrefix))
 					return true;
 			return false;
 		}
 
+		public bool HasItem(Item lookFor, Player accessingPlayer, bool ignorePrefix = false)
+		{
+			using var _ = SecuritySystem.CreateAccessContext(accessingPlayer.whoAmI);
+			return HasItem(lookFor, ignorePrefix);
+		}
+
 		public override void SaveData(TagCompound tag)
 		{
 			base.SaveData(tag);
+
+			// Legacy data; saving is unnecessary
+			/*
 			List<TagCompound> tagRemotes = new();
 			foreach (Point16 remoteAccess in Obsolete_remoteAccesses())
 			{
@@ -866,6 +930,7 @@ namespace MagicStorage.Components
 			}
 
 			tag["EnvironmentAccesses"] = tagEnvironments;
+			*/
 
 			_uniqueItemsPutHistory.Save(tag);
 
@@ -906,6 +971,8 @@ namespace MagicStorage.Components
 
 			SendHistory(writer);
 
+			writer.WriteStringSafely(storageName);
+
 			NetHelper.Report(true, "Sent tile entity data for TEStorageHeart");
 		}
 
@@ -920,6 +987,8 @@ namespace MagicStorage.Components
 			bits.CopyTo(clientUsingHeart, 0);
 
 			ReceiveHistory(reader);
+
+			storageName = reader.ReadStringSafely();
 
 			NetHelper.Report(true, "Received tile entity data for TEStorageHeart");
 		}

@@ -31,8 +31,8 @@ namespace MagicStorage.Components
 			if (locator.X < 0 || locator.Y < 0)
 				return null;
 
-			if (ByPosition.TryGetValue(locator, out TileEntity te))
-				return te as TEStorageHeart;
+			if (base.GetHeart() is TEStorageHeart heart)
+				return heart;
 
 			LoadLocation();
 			return null;
@@ -61,6 +61,16 @@ namespace MagicStorage.Components
 				return false;
 			}
 
+			if (toLocate.ResolveToTileEntity() is not TEStorageHeart heart)
+			{
+				message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessInvalidLocator");
+				return false;
+			}
+
+			// TODO: check if assigning, loading and using Remote Accesses still works with the new system
+
+			heart.ComponentManager.Link(this);
+
 			message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessSuccess");
 			locator = toLocate;
 			NetHelper.ClientSendTEUpdate(Position);
@@ -80,7 +90,16 @@ namespace MagicStorage.Components
 		{
 			base.LoadData(tag);
 			TagCompound tagLocator = tag.GetCompound("Locator");
-			locator = new Point16(tagLocator.GetShort("X"), tagLocator.GetShort("Y"));
+			var location = new Point16(tagLocator.GetShort("X"), tagLocator.GetShort("Y"));
+
+			// Migration to new manager system
+			// NOTE: TEStorageCenter.LoadData() should be loading the connection properly.  This section just makes sure that older Remote Accesses still have the link
+			var manager = ComponentManager;
+			if (manager.GetStorageHeart() is null && location.ResolveToTileEntity() is TEStorageHeart heart)
+				heart.ComponentManager.Link(this);  // NOTE: ComponentManager.Link() calls TEStorageComponent.Link(), which updates StorageCenter
+
+			if (locator != location)
+				Mod.Logger.Warn($"[TERemoteAccess] Migration code should've assigned locator, but did not");
 		}
 
 		public override void NetSend(BinaryWriter writer)
@@ -93,7 +112,15 @@ namespace MagicStorage.Components
 		public override void NetReceive(BinaryReader reader)
 		{
 			base.NetReceive(reader);
-			locator = new Point16(reader.ReadInt16(), reader.ReadInt16());
+			var location = new Point16(reader.ReadInt16(), reader.ReadInt16());
+
+			// NOTE: Like with LoadData, this section just ensures that the link is properly kept
+			var manager = ComponentManager;
+			if (manager.GetStorageHeart() is null && location.ResolveToTileEntity() is TEStorageHeart heart)
+				heart.ComponentManager.Link(this);  // NOTE: ComponentManager.Link() calls TEStorageComponent.Link(), which updates StorageCenter
+
+			if (locator != location)
+				Mod.Logger.Warn($"[TERemoteAccess] Migration code should've assigned locator, but did not");
 		}
 	}
 }

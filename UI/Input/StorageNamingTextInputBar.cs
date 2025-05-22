@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SerousCommonLib.UI;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Localization;
@@ -9,9 +10,9 @@ namespace MagicStorage.UI.Input {
 	public class StorageNamingTextInputBar : TextInputBar {
 		public StorageNamingTextInputBar(LocalizedText hintText) : base(hintText) { }
 
-		protected override bool PreDrawText(SpriteBatch spriteBatch, ref Color color) {
+		protected override bool PreDrawText(SpriteBatch spriteBatch, ref Color textColor, ref Color hintColor) {
 			if (State.HasText && State.HasChanges)
-				color = Color.Goldenrod;
+				textColor = Color.Goldenrod;
 
 			return true;
 		}

@@ -20,7 +20,8 @@ namespace MagicStorage.Components
 				EnvironmentAccess,
 				RemoteAccess,
 				DecraftingAccess,
-				Unknown
+				Unknown,
+				DeferredLoad  // In cases where attempting to use ByPosition won't work
 			}
 
 			private readonly struct Component {
@@ -35,7 +36,8 @@ namespace MagicStorage.Components
 
 			private readonly List<Component> _components = new();
 			private readonly TEStorageCenter _center;
-			private TEStorageHeart _foundHeart;
+			private Point16 _foundHeart;
+			private readonly HashSet<int> _unresolvedComponents = [];
 
 			private readonly Dictionary<ComponentType, HashSet<Point16>> _knownComponentLocationCache = new();
 
@@ -46,13 +48,16 @@ namespace MagicStorage.Components
 			public ConnectedComponentManager(TEStorageCenter center) {
 				_center = center;
 				if (center is TEStorageHeart heart)
-					_foundHeart = heart;
+					_foundHeart = heart.Position;
 			}
 
 			internal void Reset() {
 				_components.Clear();
-				_foundHeart = null;
 				_knownComponentLocationCache.Clear();
+				_unresolvedComponents.Clear();
+				
+				if (_center is not TEStorageHeart)
+					_foundHeart = Point16.NegativeOne;
 			}
 
 			public void LinkIfNotExists(TEStorageComponent component) {
@@ -67,16 +72,21 @@ namespace MagicStorage.Components
 			}
 
 			public void Link(TEStorageComponent component) {
+				NetHelper.Report(true, "Attempting to link " + component.GetType().Name + " at " + component.Position + " to Center at " + _center.Position);
+
 				if (component is TEStorageHeart heart) {
 					// Don't link storage hearts to storage storage hearts
-					if (_center is TEStorageHeart)
-						return;
-					else if (_foundHeart is null)
-						_foundHeart = heart;
-					else {
+					if (_center is TEStorageHeart) {
+						NetHelper.Report(false, " -- FAILED: Storage Heart cannot link to another Storage Heart");
+					} else if (_foundHeart == Point16.NegativeOne) {
+						NetHelper.Report(false, " -- SUCCESS: Found Storage Heart at " + heart.Position);
+						_foundHeart = heart.Position;
+					} else {
 						// Normally, I'd throw an exception here, but I'll just have the logic silently return instead
-						return;
+						NetHelper.Report(false, " -- FAILED: Storage Heart already found at " + _foundHeart);
 					}
+
+					return;
 				}
 
 				ComponentType type = GetComponentType(component);
@@ -87,6 +97,12 @@ namespace MagicStorage.Components
 
 				_components.Add(new Component(component.Position, type));
 				component.Link(_center.Position);
+
+				if (_center is TEStorageHeart && component is TEStorageCenter otherCenter)
+					otherCenter.ComponentManager.Link(_center);
+
+				NetHelper.Report(false, " -- SUCCESS: Component classification is " + type);
+
 				NetHelper.SendTEUpdate(component.ID, component.Position);
 			}
 
@@ -107,6 +123,8 @@ namespace MagicStorage.Components
 					TEAbstractStorageUnit => ComponentType.StorageUnit,
 					// TECraftingAccess inherits from TEStorageAccess, so it must be checked first
 					TECraftingAccess => ComponentType.CraftingAccess,
+					// TEDecraftingAccess inherits from TEStorageAccess, so it must be checked first
+					TEDecraftingAccess => ComponentType.DecraftingAccess,
 					TEStorageAccess => ComponentType.StorageAccess,
 					TEEnvironmentAccess => ComponentType.EnvironmentAccess,
 					TERemoteAccess => ComponentType.RemoteAccess,
@@ -115,82 +133,152 @@ namespace MagicStorage.Components
 			}
 
 			public void Unlink(Point16 location) {
-				List<Component> components = _components.Where(c => c.location == location).ToList();
+				for (int i = _components.Count - 1; i >= 0; i--) {
+					var component = _components[i];
 
-				foreach (Component component in components) {
-					_components.Remove(component);
+					if (component.location == location) {
+						if (component.location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
+							storageComponent.Unlink();
+							NetHelper.SendTEUpdate(storageComponent.ID, storageComponent.Position);
+						}
 
-					if (ByPosition.TryGetValue(component.location, out TileEntity te) && te is TEStorageComponent storageComponent) {
-						storageComponent.Unlink();
-						NetHelper.SendTEUpdate(storageComponent.ID, storageComponent.Position);
+						_components.RemoveAt(i);
+
+						MarkIndexAsResolved(i);
 					}
 				}
 			}
 
-			public IEnumerable<Point16> GetStorageUnits() => _components.Where(static c => c.type == ComponentType.StorageUnit).Select(static c => c.location);
+			private List<Component> ResolveComponents() {
+				if (_unresolvedComponents.Count > 0) {
+					// There are still some components that need to be resolved
+					List<int> toRemove = [];
+					foreach (var index in _unresolvedComponents) {
+						var component = _components[index];
+						if (component.location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
+							Link(storageComponent);
+							toRemove.Add(index);
+						}
+					}
 
-			public IEnumerable<TEAbstractStorageUnit> GetStorageUnitEntities() => GetStorageUnits().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEAbstractStorageUnit>();
+					for (int k = toRemove.Count - 1; k >= 0; k--) {
+						int index = toRemove[k];
+						_components.RemoveAt(index);
 
-			public IEnumerable<TEStorageUnit> GetRealStorageUnitEntities() => GetStorageUnits().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEStorageUnit>();
+						MarkIndexAsResolved(index);
+					}
+				}
 
-			public IEnumerable<Point16> GetStorageAccesses() => _components.Where(static c => c.type == ComponentType.StorageAccess).Select(static c => c.location);
+				return _components;
+			}
 
-			public IEnumerable<TEStorageAccess> GetStorageAccessEntities() => GetStorageAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEStorageAccess>();
+			private void MarkIndexAsResolved(int i) {
+				if (_unresolvedComponents.Remove(i) && _unresolvedComponents.Count > 0) {
+					// Shift all unresolved component indices after this one down by 1
+					List<int> toAdjust = [];
+					foreach (var index in _unresolvedComponents) {
+						if (index > i)
+							toAdjust.Add(index);
+					}
 
-			public IEnumerable<Point16> GetCraftingAccesses() => _components.Where(static c => c.type == ComponentType.CraftingAccess).Select(static c => c.location);
+					foreach (var index in toAdjust) {
+						_unresolvedComponents.Remove(index);
+						_unresolvedComponents.Add(index - 1);
+					}
+				}
+			}
 
-			public IEnumerable<TECraftingAccess> GetCraftingAccessEntities() => GetCraftingAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TECraftingAccess>();
+			public IEnumerable<Point16> GetStorageUnits() => ResolveComponents().Where(static c => c.type == ComponentType.StorageUnit).Select(static c => c.location);
 
-			public IEnumerable<Point16> GetEnvironmentAccesses() => _components.Where(static c => c.type == ComponentType.EnvironmentAccess).Select(static c => c.location);
+			public IEnumerable<TEAbstractStorageUnit> GetStorageUnitEntities() => GetStorageUnits().ResolveTileEntities<TEAbstractStorageUnit>();
 
-			public IEnumerable<TEEnvironmentAccess> GetEnvironmentAccessEntities() => GetEnvironmentAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEEnvironmentAccess>();
+			public IEnumerable<TEStorageUnit> GetRealStorageUnitEntities() => GetStorageUnits().ResolveTileEntities<TEStorageUnit>();
 
-			public IEnumerable<Point16> GetRemoteAccesses() => _components.Where(static c => c.type == ComponentType.RemoteAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetStorageAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.StorageAccess).Select(static c => c.location);
 
-			public IEnumerable<TERemoteAccess> GetRemoteAccessEntities() => GetRemoteAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TERemoteAccess>();
+			public IEnumerable<TEStorageAccess> GetStorageAccessEntities() => GetStorageAccesses().ResolveTileEntities<TEStorageAccess>();
 
-			public IEnumerable<Point16> GetDecraftingAccesses() => _components.Where(static c => c.type == ComponentType.DecraftingAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetCraftingAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.CraftingAccess).Select(static c => c.location);
 
-			public IEnumerable<TEDecraftingAccess> GetDecraftingAccessEntities() => GetDecraftingAccesses().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEDecraftingAccess>();
+			public IEnumerable<TECraftingAccess> GetCraftingAccessEntities() => GetCraftingAccesses().ResolveTileEntities<TECraftingAccess>();
 
-			public IEnumerable<Point16> GetMiscellaneousComponents() => _components.Where(static c => c.type == ComponentType.Unknown).Select(static c => c.location);
+			public IEnumerable<Point16> GetEnvironmentAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.EnvironmentAccess).Select(static c => c.location);
 
-			public IEnumerable<TEStorageComponent> GetMiscellaneousComponentEntities() => GetMiscellaneousComponents().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEStorageComponent>();
+			public IEnumerable<TEEnvironmentAccess> GetEnvironmentAccessEntities() => GetEnvironmentAccesses().ResolveTileEntities<TEEnvironmentAccess>();
 
-			public IEnumerable<Point16> GetAllComponents() => _components.Select(static c => c.location);
+			public IEnumerable<Point16> GetRemoteAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.RemoteAccess).Select(static c => c.location);
 
-			public IEnumerable<TEStorageComponent> GetAllComponentEntities() => GetAllComponents().Select(static p => ByPosition.TryGetValue(p, out TileEntity te) ? te : null).OfType<TEStorageComponent>();
+			public IEnumerable<TERemoteAccess> GetRemoteAccessEntities() => GetRemoteAccesses().ResolveTileEntities<TERemoteAccess>();
 
-			public TEStorageHeart GetStorageHeart() => _foundHeart;
+			public IEnumerable<Point16> GetDecraftingAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.DecraftingAccess).Select(static c => c.location);
+
+			public IEnumerable<TEDecraftingAccess> GetDecraftingAccessEntities() => GetDecraftingAccesses().ResolveTileEntities<TEDecraftingAccess>();
+
+			public IEnumerable<Point16> GetMiscellaneousComponents() => ResolveComponents().Where(static c => c.type == ComponentType.Unknown).Select(static c => c.location);
+
+			public IEnumerable<TEStorageComponent> GetMiscellaneousComponentEntities() => GetMiscellaneousComponents().ResolveTileEntities<TEStorageComponent>();
+
+			public IEnumerable<Point16> GetAllComponents() => ResolveComponents().Select(static c => c.location);
+
+			public IEnumerable<TEStorageComponent> GetAllComponentEntities() => GetAllComponents().ResolveTileEntities<TEStorageComponent>();
+
+			public TEStorageHeart GetStorageHeart() {
+				if (_foundHeart.ResolveToTileEntity() is TEStorageHeart heart)
+					return heart;
+
+				_foundHeart = Point16.NegativeOne;
+				return null;
+			}
 
 			public void CheckForRemovedEntities() {
-				List<Point16> _toRemove = new();
+				List<Point16> toRemove = new();
 				foreach (Component component in _components) {
-					if (!ByPosition.TryGetValue(component.location, out TileEntity te) || te is not TEStorageComponent storageComponent || component.type != GetComponentType(storageComponent))
-						_toRemove.Add(component.location);
+					if (component.location.ResolveToTileEntity() is not TEStorageComponent storageComponent || component.type != GetComponentType(storageComponent) || storageComponent.StorageCenter != _center.Position)
+						toRemove.Add(component.location);
 				}
 
-				foreach (Point16 point in _toRemove) {
-					Point16 p = point;
-					_components.RemoveAll(c => c.location == p);
-				}
+				foreach (Point16 location in toRemove)
+					Unlink(location);
 			}
 
 			public void Serialize(BinaryWriter writer) {
 				writer.Write(_components.Count);
 				foreach (Component component in _components)
 					writer.Write(component.location);
+
+				if (_center is not TEStorageHeart)
+					writer.Write(_foundHeart);
+
+				NetHelper.Report(true, "ConnectedComponentManager.Serialize invoked.  Component count: " + _components.Count);
 			}
 
 			public void Deserialize(BinaryReader reader) {
 				Reset();
 
 				int count = reader.ReadInt32();
+
+				NetHelper.Report(true, "ConnectedComponentManager.Deserialize invoked.  Component count: " + count);
+
 				for (int k = 0; k < count; k++) {
 					Point16 loc = reader.ReadPoint16();
-					if (ByPosition.TryGetValue(loc, out TileEntity te) && te is TEStorageComponent component)
-						Link(component);
+					if (loc.ResolveToTileEntity() is TileEntity te) {
+						if (te is TEStorageComponent component)
+							Link(component);
+						else {
+							NetHelper.Report(false, "Tile entity at location " + loc + " is not a TEStorageComponent");
+
+							_components.Add(new Component(loc, ComponentType.Unknown));
+						}
+					} else {
+						NetHelper.Report(false, "Tile entity at location " + loc + " could not be found");
+
+						_components.Add(new Component(loc, ComponentType.DeferredLoad));
+						_unresolvedComponents.Add(k);
+					}
 				}
+
+				if (_center is not TEStorageHeart && reader.ReadPoint16().ResolveToTileEntity() is TEStorageHeart heart)
+					_foundHeart = heart.Position;
 			}
 
 			public void Save(TagCompound tag) {
@@ -198,8 +286,8 @@ namespace MagicStorage.Components
 					["locations"] = _components.Select(static c => c.location).ToList()
 				};
 
-				if (_center is not TEStorageHeart && _foundHeart is not null)
-					data["heart"] = _foundHeart.Position;
+				if (_center is not TEStorageHeart && _foundHeart != Point16.NegativeOne)
+					data["heart"] = _foundHeart;
 
 				tag["components"] = data;
 			}
@@ -209,12 +297,19 @@ namespace MagicStorage.Components
 
 				if (tag.TryGet("components", out TagCompound data)) {
 					foreach (Point16 loc in data.GetList<Point16>("components")) {
-						if (ByPosition.TryGetValue(loc, out TileEntity te) && te is TEStorageComponent component)
-							Link(component);
+						if (loc.ResolveToTileEntity() is TileEntity te) {
+							if (te is TEStorageComponent component)
+								Link(component);
+							else
+								_components.Add(new Component(loc, ComponentType.Unknown));
+						} else {
+							_components.Add(new Component(loc, ComponentType.DeferredLoad));
+							_unresolvedComponents.Add(_components.Count - 1);
+						}
 					}
 
-					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && ByPosition.TryGetValue(location, out TileEntity te2) && te2 is TEStorageHeart heart)
-						_foundHeart = heart;
+					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location.ResolveToTileEntity() is TEStorageHeart)
+						_foundHeart = location;
 				}
 			}
 		}
@@ -254,7 +349,18 @@ namespace MagicStorage.Components
 		}
 
 		public override void Update() {
+			base.Update();
+
 			ComponentManager.CheckForRemovedEntities();
+
+			// Ensure network assignments are up to date
+			// NOTE:  For TEStorageHeart and TERemoteAccess, Heart will update Remote in one tick, then Remote will update its components in the next tick
+			foreach (var component in ComponentManager.GetAllComponentEntities()) {
+				if (component.assignedNetwork != assignedNetwork) {
+					component.assignedNetwork = assignedNetwork;
+					NetHelper.SyncStorageComponentNetwork(component);
+				}
+			}
 		}
 
 		private void CheckMapSections() {
@@ -315,7 +421,7 @@ namespace MagicStorage.Components
 			foreach (Point16 oldComponent in oldComponents)
 				if (!hashComponents.Contains(oldComponent))
 				{
-					if (ByPosition.TryGetValue(oldComponent, out TileEntity te) && te is TEStorageComponent storageUnit)
+					if (oldComponent.ResolveToTileEntity() is TEStorageComponent storageUnit)
 					{
 						storageUnit.Unlink();
 						NetHelper.SendTEUpdate(storageUnit.ID, storageUnit.Position);
@@ -345,11 +451,8 @@ namespace MagicStorage.Components
 		{
 			ConnectedComponentManager manager = ComponentManager;
 
-			foreach (Point16 storageUnit in manager.GetAllComponents())
+			foreach (var component in manager.GetAllComponentEntities())
 			{
-				if (!ByPosition.TryGetValue(storageUnit, out var te) || te is not TEStorageComponent component)
-					continue;
-				
 				component.Unlink();
 				NetHelper.SendTEUpdate(component.ID, component.Position);
 			}
@@ -360,23 +463,27 @@ namespace MagicStorage.Components
 		public static bool IsStorageCenter(Point16 point) => ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter;
 
 		public static bool HeartsMatch(Point16 center, Point16 heart) {
-			if (!TileEntity.ByPosition.TryGetValue(center, out TileEntity entity) || entity is not TEStorageCenter centerEntity)
-				return false;
-
-			return centerEntity.GetHeart()?.Position == heart;
+			return center.ResolveToTileEntity<TEStorageCenter>()?.GetHeart() is TEStorageHeart heartEntity && heartEntity.Position == heart;
 		}
 
 		public override void SaveData(TagCompound tag)
 		{
-			ComponentManager.Save(tag);
+			base.SaveData(tag);
+
+			TagCompound networkStuff = new();
+			ComponentManager.Save(networkStuff);
+			tag["networkMeta"] = networkStuff;  // IMPORTANT: base uses "network" tag!
 		}
 
 		public override void LoadData(TagCompound tag)
 		{
+			base.LoadData(tag);
+
 			// NOTE: Load resets the manager's collection
 			ConnectedComponentManager manager = ComponentManager;
 
-			manager.Load(tag);
+			if (tag.TryGet("networkMeta", out TagCompound networkStuff))  // IMPORTANT: base uses "network" tag!
+				manager.Load(networkStuff);
 
 			// Legacy data
 			foreach (TagCompound tagUnit in tag.GetList<TagCompound>("StorageUnits"))
@@ -385,11 +492,15 @@ namespace MagicStorage.Components
 
 		public override void NetSend(BinaryWriter writer)
 		{
+			base.NetSend(writer);
+
 			ComponentManager.Serialize(writer);
 		}
 
 		public override void NetReceive(BinaryReader reader)
 		{
+			base.NetReceive(reader);
+
 			ComponentManager.Deserialize(reader);
 
 			CheckMapSections();

@@ -220,6 +220,8 @@ namespace MagicStorage {
 
 		private static bool filterOutFavorites;
 
+		internal const int RECENT_FILTER_ITEM_COUNT = 100;
+
 		private static void DoFiltering(ThreadContext thread)
 		{
 			try {
@@ -232,7 +234,7 @@ namespace MagicStorage {
 
 					thread.filterMode = FilteringOptionLoader.Definitions.All.Type;
 
-					thread.context.items = ItemSorter.SortAndFilter(thread, 100);
+					thread.context.items = ItemSorter.SortAndFilter(thread, RECENT_FILTER_ITEM_COUNT);
 				}
 				else
 				{

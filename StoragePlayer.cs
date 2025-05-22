@@ -152,17 +152,19 @@ namespace MagicStorage
 			}
 		}
 
+		public bool CanAccessCurrentNetwork() => GetStorageComponent() is TEStorageComponent component && SecuritySystem.CanPlayerAccessImmediately(Player, component.assignedNetwork);
+
+		public static bool IsCurrentLocalNetworkAccessible() => LocalPlayer.CanAccessCurrentNetwork();
+
 		public void OpenStorage(Point16 point, bool remote = false)
 		{
 			storageAccess = point;
 			remoteAccess = remote;
 
-			Main.playerInventory = true;
-
 			MagicUI.OpenUI();
 
 			if (MagicStorageConfig.UseConfigFilter) {
-				if (MagicUI.craftingUI.GetDefaultPage() is CraftingUIState.RecipesPage page) {
+				if (MagicUI.IsCraftingUIOpen() && MagicUI.craftingUI.GetDefaultPage() is CraftingUIState.RecipesPage page) {
 					page.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
 						? 1   //Show all recipes
 						: 0;  //Show available recipes
@@ -170,7 +172,7 @@ namespace MagicStorage
 					page.recipeButtons.OnChanged();
 				}
 
-				if (MagicUI.decraftingUI.GetDefaultPage() is DecraftingUIState.ShimmeringPage decraftingPage) {
+				if (MagicUI.IsDecraftingUIOpen() && MagicUI.decraftingUI.GetDefaultPage() is DecraftingUIState.ShimmeringPage decraftingPage) {
 					decraftingPage.recipeButtons.Choice = MagicStorageConfig.ShowAllRecipes
 						? 1   //Show all recipes
 						: 0;  //Show available recipes
@@ -185,6 +187,8 @@ namespace MagicStorage
 				MagicUI.craftingUI.ResetSearchBars();
 				MagicUI.environmentUI.ResetSearchBars();
 				MagicUI.decraftingUI.ResetSearchBars();
+				MagicUI.environmentUI.ResetSearchBars();
+				MagicUI.securityUI.ResetSearchBars();
 			}
 
 			MagicUI.SetRefresh(forceFullRefresh: true);
@@ -290,7 +294,9 @@ namespace MagicStorage
 				return false;
 			int oldType = item.type;
 			int oldStack = item.stack;
-			GetStorageHeart().TryDeposit(item);
+
+			using (SecuritySystem.CreateAccessContext())
+				GetStorageHeart().TryDeposit(item);
 
 			if (item.type != oldType || item.stack != oldStack)
 			{
@@ -306,6 +312,16 @@ namespace MagicStorage
 			}
 
 			return true;
+		}
+
+		public TEStorageComponent GetStorageComponent() {
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return null;
+
+			if (TileEntity.ByPosition.TryGetValue(storageAccess, out TileEntity te))
+				return te as TEStorageComponent;
+
+			return null;
 		}
 
 		public TEStorageHeart GetStorageHeart()

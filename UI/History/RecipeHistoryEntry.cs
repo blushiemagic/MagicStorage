@@ -7,12 +7,13 @@ namespace MagicStorage.UI.History {
 	public class RecipeHistoryEntry : HistoryEntry<Recipe> {
 		public NewUISlotZone ingredientZone;
 
-		public RecipeHistoryEntry(int index, IHistoryCollection<Recipe> history) : base(index, history) { }
+		public RecipeHistoryEntry(int index, IHistoryCollection<Recipe> history) : base(index, history) {
+			ingredientZone = new(CraftingGUI.InventoryScale * 0.55f);
+		}
 
 		public override void OnInitialize() {
 			base.OnInitialize();
 
-			ingredientZone = new(CraftingGUI.InventoryScale * 0.55f);
 			ingredientZone.Left.Set(resultSlot.Width.Pixels + 4, 0f);
 
 			ingredientZone.InitializeSlot = (slot, scale) => {

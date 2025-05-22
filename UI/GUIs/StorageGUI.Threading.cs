@@ -139,7 +139,9 @@ namespace MagicStorage {
 			}
 
 			TEStorageHeart heart = GetHeart();
-			if (heart == null) {
+			if (heart == null || !StoragePlayer.IsCurrentLocalNetworkAccessible()) {
+				NetHelper.Report(true, "StorageGUI: InitializeThreadContext invoked with no heart or inaccessible network");
+
 				ClearAllCollections();
 
 				storagePage?.RequestThreadWait(waiting: false);

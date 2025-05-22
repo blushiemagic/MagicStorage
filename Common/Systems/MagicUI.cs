@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using MagicStorage.Common.Players;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using MagicStorage.UI;
@@ -22,7 +23,7 @@ public class MagicUI : ModSystem
 {
 	public static UserInterface uiInterface;
 
-	public static BaseStorageUI craftingUI, storageUI, environmentUI, decraftingUI;
+	public static BaseStorageUI craftingUI, storageUI, environmentUI, decraftingUI, securityUI;
 
 	public static bool IsStorageUIOpen() => storageUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, storageUI);
 
@@ -31,6 +32,8 @@ public class MagicUI : ModSystem
 	public static bool IsEnvironmentUIOpen() => environmentUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, environmentUI);
 
 	public static bool IsDecraftingUIOpen() => decraftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, decraftingUI);
+
+	public static bool IsSecurityUIOpen() => securityUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, securityUI);
 
 	private static bool _refreshUI;
 	public static bool RefreshUI {
@@ -64,8 +67,16 @@ public class MagicUI : ModSystem
 
 	public static void PulseWatchdogs() => _pendingWatchdogPulse = true;
 
+	private static bool _checkedAccessibility;
+
 	internal static void CheckRefresh() {
-		if (!CurrentlyRefreshing && _pendingWatchdogPulse) {
+		if (!StoragePlayer.IsCurrentLocalNetworkAccessible()) {
+			if (!_checkedAccessibility)
+				SecuritySystem.PrintStorageInaccessible();
+
+			_checkedAccessibility = true;
+			_pendingWatchdogPulse = false;
+		} else if (!CurrentlyRefreshing && _pendingWatchdogPulse) {
 			if (IsCraftingUIOpen())
 				CraftingGUI.ExecuteInCraftingGuiEnvironment(HandleWatchdogs);
 			else
@@ -127,24 +138,24 @@ public class MagicUI : ModSystem
 		StorageGUI.Obsolete_needRefresh() = false;
 
 		if (IsStorageUIOpen()) {
-			CraftingGUI.ResetRefreshCache();
-			DecraftingGUI.ResetRefreshCache();
+			CraftingGUI.ClearAllCollections();
+			DecraftingGUI.ClearAllCollections(callCraftingClear: false);
 
 			StorageGUI.RefreshItems_Inner();
 		} else if (IsCraftingUIOpen()) {
-			StorageGUI.ResetRefreshCache();
-			DecraftingGUI.ResetRefreshCache();
+			StorageGUI.ClearAllCollections();
+			DecraftingGUI.ClearAllCollections(callCraftingClear: false);
 
 			CraftingGUI.RefreshItems_Inner();
 		} else if (IsDecraftingUIOpen()) {
-			StorageGUI.ResetRefreshCache();
-			CraftingGUI.ResetRefreshCache();
+			StorageGUI.ClearAllCollections();
+			CraftingGUI.ClearAllCollections();
 
 			DecraftingGUI.RefreshItems();
 		} else {
-			StorageGUI.ResetRefreshCache();
-			CraftingGUI.ResetRefreshCache();
-			DecraftingGUI.ResetRefreshCache();
+			StorageGUI.ClearAllCollections();
+			CraftingGUI.ClearAllCollections();
+			DecraftingGUI.ClearAllCollections(callCraftingClear: false);
 		}
 
 		forceFullRefresh = false;
@@ -176,6 +187,7 @@ public class MagicUI : ModSystem
 		storageUI = new StorageUIState();
 		environmentUI = new EnvironmentUIState();
 		decraftingUI = new DecraftingUIState();
+		securityUI = new SecurityUIState();
 
 		Main.OnResolutionChanged += PendingResolutionChange;
 	}
@@ -193,9 +205,9 @@ public class MagicUI : ModSystem
 		storageUI = null;
 		environmentUI = null;
 		decraftingUI = null;
+		securityUI = null;
 
 		Obsolete_ClearSearchBars();
-		TextInputTracker.Unload();
 	}
 
 	[Obsolete]
@@ -349,14 +361,11 @@ public class MagicUI : ModSystem
 		blockItemSlotActionsDetour = true;
 
 		if (pendingUIChangeForAnyReason) {
-			if (craftingUI is CraftingUIState cUI)
-				cUI.pendingUIChange = true;
-
-			if (storageUI is StorageUIState sUI)
-				sUI.pendingUIChange = true;
-
-			if (environmentUI is EnvironmentUIState eUI)
-				eUI.pendingUIChange = true;
+			storageUI.pendingUIChange = true;
+			craftingUI.pendingUIChange = true;
+			environmentUI.pendingUIChange = true;
+			decraftingUI.pendingUIChange = true;
+			securityUI.pendingUIChange = true;
 			
 			pendingUIChangeForAnyReason = false;
 		}
@@ -401,7 +410,6 @@ public class MagicUI : ModSystem
 			return;
 
 		Obsolete_UpdateSearchBars();
-		TextInputTracker.Update(lastGameTime);
 	}
 
 	[Obsolete]
@@ -411,20 +419,24 @@ public class MagicUI : ModSystem
 	}
 
 	internal static void OpenUI() {
+		Main.playerInventory = true;
+
 		if (uiInterface.CurrentState is not null)
 			return;  //UI is already open
 
 		Player player = Main.LocalPlayer;
 		StoragePlayer modPlayer = player.GetModPlayer<StoragePlayer>();
 		Point16 storageAccess = modPlayer.ViewingStorage();
-		if (!Main.playerInventory || storageAccess.X < 0 || storageAccess.Y < 0)
+		if (storageAccess.X < 0 || storageAccess.Y < 0)
 			return;
 
 		ModTile modTile = TileLoader.GetTile(Main.tile[storageAccess.X, storageAccess.Y].TileType);
 		if (modTile is not StorageAccess access)
 			return;
 
-		if (access is EnvironmentAccess)
+		if (player.GetModPlayer<SecurityPlayer>().RequestingSecurityUI)
+			uiInterface.SetState(securityUI);
+		else if (access is EnvironmentAccess)
 			uiInterface.SetState(environmentUI);
 		else if (access is CraftingAccess)
 			uiInterface.SetState(craftingUI);
@@ -432,6 +444,8 @@ public class MagicUI : ModSystem
 			uiInterface.SetState(decraftingUI);
 		else
 			uiInterface.SetState(storageUI);
+
+		_checkedAccessibility = false;
 	}
 
 	internal static void CloseUI() {

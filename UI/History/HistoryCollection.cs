@@ -20,7 +20,7 @@ namespace MagicStorage.UI.History {
 
 		public HistoryCollection() {
 			List = new() {
-				DisplayChildrenInReverseOrder = true
+				ReversedOrder = true
 			};
 			List.SetPadding(0);
 			List.Width = StyleDimension.Fill;
