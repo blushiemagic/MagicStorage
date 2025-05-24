@@ -1,7 +1,9 @@
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Items;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -46,6 +48,9 @@ namespace MagicStorage.Components
 					Main.mouseItem = item.Clone();
 
 				Main.LocalPlayer.tileInteractAttempted = true;
+
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					AuditSystem.NetReportPortableAccessLink(Main.myPlayer, heart, new ReducedItem(item));
 				
 				Utility.ConvertToGPSCoordinates(new Point16(i, j).ToWorldCoordinates(), out string compassText, out string depthText);
 

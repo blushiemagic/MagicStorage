@@ -419,6 +419,13 @@ namespace MagicStorage {
 			// Copy/paste of logic from the info accessories
 			ConvertToGPSCoordinates(worldCoordinate, out int compass, out int depth);
 
+			GetGPSText(compass, depth, out compassText, out depthText);
+		}
+
+		public static void GetGPSText(int compass, int depth, out string compassText, out string depthText) {
+			// Reverse the depth conversion
+			float worldCoordinateY = (float)(depth + Main.worldSurface * 2.0f) / 2f;
+
 			// Get the compass text
 			compassText = compass switch {
 				>0 => Language.GetTextValue("GameUI.CompassEast", compass),
@@ -432,12 +439,12 @@ namespace MagicStorage {
 
 			int cavernsOffset = 1200;
 
-			float surface = (float)((worldCoordinate.Y / 16f - (65f + 10f * sizeFactor)) / (Main.worldSurface / 5.0));
+			float surface = (float)((worldCoordinateY / 16f - (65f + 10f * sizeFactor)) / (Main.worldSurface / 5.0));
 
 			string layerText;
-			if (worldCoordinate.Y > (Main.maxTilesY - 204) * 16)
+			if (worldCoordinateY > (Main.maxTilesY - 204) * 16)
 				layerText = Language.GetTextValue("GameUI.LayerUnderworld");
-			else if (worldCoordinate.Y > Main.rockLayer * 16.0 + cavernsOffset / 2f + 16.0)
+			else if (worldCoordinateY > Main.rockLayer * 16.0 + cavernsOffset / 2f + 16.0)
 				layerText = Language.GetTextValue("GameUI.LayerCaverns");
 			else if (depth > 0)
 				layerText = Language.GetTextValue("GameUI.LayerUnderground");

@@ -1,4 +1,5 @@
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -94,6 +95,9 @@ namespace MagicStorage.Components
 			storageUnit.InsertCore(core);
 			SetStyle(i, j, (int)core.Tier);
 			TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
+
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+				AuditSystem.NetReportStorageUnitCoreInsertion(Main.myPlayer, storageUnit, core);
 
 			return true;
 		}

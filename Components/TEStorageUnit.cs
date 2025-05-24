@@ -307,12 +307,13 @@ namespace MagicStorage.Components
 			return item;
 		}
 
-		internal void RemoveItemsAndSpawnCore() {
+		internal Item RemoveItemsAndSpawnCore() {
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving) {
 				NetHelper.ClientSendCoreRemoval(Position);
-				return;
+				return null;
 			}
 
+			Item spawnedItem = null;
 			if (Main.netMode != NetmodeID.MultiplayerClient) {
 				StorageUnitTier tier = (StorageUnitTier)(Main.tile[Position].TileFrameY / 36);
 				Item core = new Item(StorageUnitUpgradeMetrics.GetCoreItem(tier));
@@ -321,6 +322,8 @@ namespace MagicStorage.Components
 
 				Vector2 world = Position.ToWorldCoordinates(16, 16);
 				Item.NewItem(new EntitySource_TileEntity(this), world, core);
+
+				spawnedItem = core;
 			}
 
 			var types = items.Select(static i => i.type).Distinct().ToList();
@@ -338,6 +341,8 @@ namespace MagicStorage.Components
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
+
+			return spawnedItem;
 		}
 
 		internal void InsertCore(BaseStorageCore core) {

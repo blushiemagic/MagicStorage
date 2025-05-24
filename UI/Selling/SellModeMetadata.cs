@@ -216,7 +216,7 @@ namespace MagicStorage.UI.Selling {
 
 			ConditionalWeakTable<Item, byte[]> savedItemTagIO = new();
 			foreach (var item in _items)
-				heart.TryDeleteExactItem(item.data, itemStackOverride: item.stack, savedItemTagIO);
+				heart.TryDeleteExactItem(item.data, out _, itemStackOverride: item.stack, savedItemTagIO);
 
 			if (sellValue.platinum > 0)
 				heart.DepositItem(new Item(ItemID.PlatinumCoin, sellValue.platinum));

@@ -1,7 +1,9 @@
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Items;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Components
@@ -42,6 +44,9 @@ namespace MagicStorage.Components
 				Locator locator = (Locator)item.ModItem;
 				if (remoteAccess.TryLocate(locator.Location, out string message))
 				{
+					if (Main.netMode == NetmodeID.MultiplayerClient)
+						AuditSystem.NetReportRemoteAccessLink(Main.myPlayer, locator.Location.ResolveToTileEntity<TEStorageHeart>(), remoteAccess);
+
 					if (item.type == ModContent.ItemType<LocatorDisk>())
 						locator.Location = Point16.NegativeOne;
 					else

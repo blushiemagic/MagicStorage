@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Components;
 using System;
 using System.Collections.Generic;
@@ -483,7 +484,11 @@ namespace MagicStorage.Common.Systems {
 			if (!result.IsSuccess())
 				return result;
 
-			return CheckNetworkRemoval(plr, id, password);
+			result = CheckNetworkRemoval(plr, id, password);
+			if (result.IsSuccess())
+				AuditSystem.ReportSecurityNetworkDeletion(player, id);
+
+			return result;
 		}
 
 		private static NetworkActionResult CheckNetworkRemoval(Player player, int id, string password) {
@@ -540,7 +545,11 @@ namespace MagicStorage.Common.Systems {
 			if (!result.IsSuccess())
 				return result;
 
-			return CheckNetworkJoin(plr, id, password);
+			result = CheckNetworkJoin(plr, id, password);
+			if (result.IsSuccess())
+				AuditSystem.ReportSecurityNetworkJoin(player, id);
+
+			return result;
 		}
 
 		private static NetworkActionResult CheckNetworkJoin(Player player, int id, string password) {
@@ -645,7 +654,16 @@ namespace MagicStorage.Common.Systems {
 			if (!result.IsSuccess())
 				return result;
 
-			return CheckNetworkModification(plr, SecurityPlayer.GetID(player), id, updatedName, updatedPassword, updatedRestricted, out passwordChanged, out privacyChanged);
+			if (!TryGetPassword(id, out string? oldPassword).IsSuccess())
+				return NetworkActionResult.NetworkNotFound;
+
+			bool oldRestricted = GetNetwork(id).restricted;
+
+			result = CheckNetworkModification(plr, SecurityPlayer.GetID(player), id, updatedName, updatedPassword, updatedRestricted, out passwordChanged, out privacyChanged);
+			if (result.IsSuccess())
+				AuditSystem.ReportSecurityNetworkModification(plr, id, oldPassword, oldRestricted, updatedPassword ?? oldPassword, updatedRestricted ?? oldRestricted);
+
+			return result;
 		}
 
 		private static NetworkActionResult CheckNetworkModification(Player requestingPlayer, Guid requestingPlayerID, int id, string? updatedName, string? updatedPassword, bool? updatedRestricted, out bool passwordChanged, out bool privacyChanged) {
@@ -713,7 +731,7 @@ namespace MagicStorage.Common.Systems {
 			return ChangeNetworkAssignments(Main.LocalPlayer, heart, id);
 		}
 
-		internal static NetworkActionResult ServerAssignNetwork(int player, Point16 centerPosition, int id) {
+		internal static NetworkActionResult ServerAssignNetwork(int player, Point16 heartPosition, int id) {
 			if (Main.netMode != NetmodeID.Server)
 				return NetworkActionResult.UnauthorizedNetmodeContext;
 
@@ -721,17 +739,19 @@ namespace MagicStorage.Common.Systems {
 			if (!result.IsSuccess())
 				return result;
 
-			if (!TileEntity.ByPosition.TryGetValue(centerPosition, out TileEntity? te) || te is not TEStorageCenter center)
+			if (!TileEntity.ByPosition.TryGetValue(heartPosition, out TileEntity? te) || te is not TEStorageHeart heart)
 				return NetworkActionResult.EntityNotFound;
 
-			return ChangeNetworkAssignments(plr, center, id);
+			AuditSystem.ReportSecurityNetworkAssignment(plr, heart, id);
+
+			return ChangeNetworkAssignments(plr, heart, id);
 		}
 
-		private static NetworkActionResult ChangeNetworkAssignments(Player player, TEStorageCenter center, int id) {
-			center.assignedNetwork = id;
-			NetHelper.SyncStorageComponentNetwork(center);
+		private static NetworkActionResult ChangeNetworkAssignments(Player player, TEStorageHeart heart, int id) {
+			heart.assignedNetwork = id;
+			NetHelper.SyncStorageComponentNetwork(heart);
 
-			foreach (TEStorageComponent component in center.ComponentManager.GetAllComponentEntities()) {
+			foreach (TEStorageComponent component in heart.ComponentManager.GetAllComponentEntities()) {
 				component.assignedNetwork = id;
 				NetHelper.SyncStorageComponentNetwork(component);
 			}

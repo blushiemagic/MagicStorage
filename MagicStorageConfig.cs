@@ -176,7 +176,7 @@ namespace MagicStorage {
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
 
 		[JsonIgnore]
-		public static bool ReportClientStorageUsage => Instance.auditLog;
+		public static bool AuditLoggingEnabled => Instance.auditLog;
 
 		[JsonIgnore]
 		public static bool GiveLocalHostAdminOnJoin => Instance.localHostAdmin;

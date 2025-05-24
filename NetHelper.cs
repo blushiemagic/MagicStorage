@@ -23,6 +23,8 @@ using MagicStorage.UI.Selling;
 using Terraria.Localization;
 using MagicStorage.Items;
 using System.Threading.Channels;
+using MagicStorage.Common.Systems.Auditing;
+using System.Runtime.InteropServices;
 
 namespace MagicStorage
 {
@@ -106,17 +108,6 @@ namespace MagicStorage
 			sb.Append(message);
 
 			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
-		}
-
-		public static void PrintClientRequest(int sender, string requestName, Vector2 worldCoordinates) {
-			if (!MagicStorageMod.UsingPrivateBeta && MagicStorageServerConfig.ReportClientStorageUsage) {
-				Utility.ConvertToGPSCoordinates(worldCoordinates, out string compassText, out string depthText);
-				PrintToServerLogAndConsole(true, $"Client \"{Netplay.Clients[sender].Name}\" requested action \"{requestName}\" at location: {compassText} | {depthText}");
-			}
-		}
-
-		public static void PrintClientRequest(int sender, string requestName, Point16 tileCoordinates) {
-			PrintClientRequest(sender, requestName, tileCoordinates.ToWorldCoordinates());
 		}
 
 		public static void HandlePacket(BinaryReader reader, int sender)
@@ -231,7 +222,7 @@ namespace MagicStorage
 					ReceiveStorageHeartUsage(reader, sender, type == MessageType.ClientLockStorageHeart);
 					break;
 				case MessageType.DeleteSpecificItem:
-					ServerReceiveExactItemDeletionRequest(reader);
+					ServerReceiveExactItemDeletionRequest(reader, sender);
 					break;
 				case MessageType.RequestShimmerItemInStorage:
 					ServerReceiveItemShimmeringRequest(reader, sender);
@@ -277,6 +268,9 @@ namespace MagicStorage
 					break;
 				case MessageType.DefaultAccessibleNetworks:
 					RecieveAccessibleNetworksByDefaultRequest(reader, sender);
+					break;
+				case MessageType.AuditSystemMessage:
+					AuditSystem.HandlePacket(reader, sender);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
@@ -507,13 +501,13 @@ cleanupContext:
 
 				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 
-				heart.WithdrawManyAndDestroy(type, net: true);
+				heart.WithdrawManyAndDestroy(type, out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.DeleteUnloadedGlobalItemData)
 			{
 				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 
-				heart.DestroyUnloadedGlobalItemData(net: true);
+				heart.DestroyUnloadedGlobalItemData(out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
@@ -881,6 +875,8 @@ cleanupContext:
 				packet.Send(sender);
 
 				Report(false, MessageType.CraftResult + " packet sent to all clients");
+
+				AuditSystem.ReportCraftRequest(sender, heart, CollectionsMarshal.AsSpan(results), CollectionsMarshal.AsSpan(toWithdraw));
 			}
 
 			SendRefreshNetworkItems(position, false, typesToUpdate);
@@ -1062,16 +1058,16 @@ cleanupContext:
 
 				bool hasContext = reader.ReadSecurityAccess(out var context);
 
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
+				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
 					heart.CompactCoins();
+					AuditSystem.ReportControlCoinCompacting(sender, heart);
+				}
 
 				if (hasContext)
 					context.Dispose();
 
 				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
-
-				PrintClientRequest(sender, "Compact Coins", position);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				reader.ReadPoint16();
 
@@ -1120,6 +1116,8 @@ cleanupContext:
 					packet.Write7BitEncodedInt(totalItemCount);
 
 					packet.Send();
+
+					AuditSystem.ReportMassItemSell(sender, heart, soldItemCount, sellValue.TotalValue);
 				} else {
 					// Invalid request
 					SellModeMetadata.Clear();
@@ -1127,8 +1125,6 @@ cleanupContext:
 
 				Report(false, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
-
-				PrintClientRequest(sender, "Sell Duplicates", position);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				SellModeMetadata.Clear();
 
@@ -1330,7 +1326,7 @@ cleanupContext:
 			Report(false, MessageType.ServerOpConfirmationResult + " packet sent to client " + sender);
 
 			if (valid)
-				PrintClientRequest(sender, "Enable Server Oprator", Main.player[sender].Center);
+				AuditSystem.ReportAdministratorStatusAssignment(sender);
 		}
 
 		public static void ClientReceiveOperatorConformationResult(BinaryReader reader) {
@@ -1375,6 +1371,8 @@ cleanupContext:
 
 			var mp = Main.player[plr].GetModPlayer<OperatorPlayer>();
 
+			bool wasOperator = mp.hasOp, wasAdministrator = mp.IsAdministrator;
+
 			opFlags.Retrieve(ref mp.hasOp, ref mp.manualOp);
 
 			if (Main.netMode == NetmodeID.MultiplayerClient && plr == Main.myPlayer && mp.IsAdministrator)  // Force a sync of the network information
@@ -1390,6 +1388,16 @@ cleanupContext:
 			packet.Send(ignoreClient: plr);
 
 			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
+
+			if (mp.IsAdministrator != wasAdministrator) {
+				if (mp.IsAdministrator)
+					AuditSystem.ReportAdministratorStatusAssignment(plr);
+			} else if (mp.hasOp != wasOperator) {
+				if (mp.hasOp)
+					AuditSystem.ReportOperatorStatusAssignment(plr);
+				else
+					AuditSystem.ReportOperatorStatusRemoval(plr);
+			}
 		}
 
 		private static ModPacket ServerPreparePlayerHasOperatorPacket(int plr, OperatorPlayer mp) {
@@ -1581,7 +1589,7 @@ cleanupContext:
 			packet.Send();
 		}
 
-		public static void ServerReceiveExactItemDeletionRequest(BinaryReader reader) {
+		public static void ServerReceiveExactItemDeletionRequest(BinaryReader reader, int sender) {
 			Point16 point = reader.ReadPoint16();
 			int dataLength = reader.Read7BitEncodedInt();
 			ReadOnlySpan<byte> item = reader.ReadBytes(dataLength);
@@ -1592,7 +1600,8 @@ cleanupContext:
 			if (!TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) || entity is not TEStorageHeart heart)
 				return;
 
-			heart.TryDeleteExactItem(item);
+			if (heart.TryDeleteExactItem(item, out var netItem))
+				AuditSystem.ReportItemDeletion(sender, heart, netItem);
 		}
 
 		public static void RequestItemShimmering(int itemType, int toShimmer, StorageIntermediary storage, List<IShimmerResult> results) {
@@ -1736,7 +1745,9 @@ cleanupContext:
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
 					var types = unit.GetItems().Select(static i => i.type).Distinct().ToList();
 
-					unit.RemoveItemsAndSpawnCore();
+					Item spawnedItem = unit.RemoveItemsAndSpawnCore();
+					AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
+
 					unit.UpdateTileFrameWithNetSend();
 
 					if (unit.GetHeart() is TEStorageHeart heart) {
@@ -2384,6 +2395,7 @@ cleanupContext:
 		StorageHeartNetwork,
 		StorageHeartNetworkAssignment,
 		DefaultAccessibleNetworks,
-		SecurityNetworkPassword
+		SecurityNetworkPassword,
+		AuditSystemMessage
 	}
 }

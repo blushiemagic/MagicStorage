@@ -493,7 +493,7 @@ namespace MagicStorage.UI.States {
 									if (Main.netMode != NetmodeID.SinglePlayer)
 										NetHelper.ClientRequestExactItemDeletion(heart, item);
 									else
-										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item));
+										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _);
 								} else {
 									// If the item wasn't selected, initialize a popup for it
 									if (!SellModeMetadata.Remove(item)) {
@@ -738,14 +738,14 @@ namespace MagicStorage.UI.States {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>());
+					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>(), out _);
 				});
 
 				InitButton(ref deleteUnloadedData, "StorageGUI.DestroyUnloadedDataButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					heart.DestroyUnloadedGlobalItemData();
+					heart.DestroyUnloadedGlobalItemData(out _);
 				});
 
 				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", p => p.bank.item,

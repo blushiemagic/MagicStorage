@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Components;
 using Terraria;
 using Terraria.DataStructures;
@@ -41,6 +42,11 @@ namespace MagicStorage.Items {
 						if (storage is TEStorageUnit storageUnit) {
 							if (Main.netMode == NetmodeID.MultiplayerClient) {
 								NetHelper.ClientSendDeactivate(storageUnit.Position, storageUnit.Inactive);
+
+								if (storageUnit.Inactive)
+									AuditSystem.NetReportStorageUnitDeactivation(Main.myPlayer, storageUnit);
+								else
+									AuditSystem.NetReportStorageUnitActivation(Main.myPlayer, storageUnit);
 							} else {
 								storageUnit.UpdateTileFrameWithNetSend();
 								storageUnit.GetHeart()?.ResetCompactStage();

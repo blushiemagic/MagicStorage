@@ -875,6 +875,18 @@ Mods: {
 			}
 		}
 
+		AuditLogging: {
+			CommandInfo: {
+				Descriptions: {
+					msaudit: Translates the Magic Storage audit log for the world into a human-readable format
+				}
+
+				NoArguments: Expected no arguments
+				MultiplayerOnly: This command can only be used by multiplayer clients or the server console
+				NoLogFile: No Magic Storage audit log file found for this world, please enable audit logging in the config first
+			}
+		}
+
 		StorageGUI: {
 			ForceRefreshButton: Force UI refresh
 			CompactCoinsButton: Compact Coins

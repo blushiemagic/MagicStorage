@@ -17,6 +17,8 @@ using System.Collections;
 using MagicStorage.Common;
 using System.Runtime.CompilerServices;
 using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems.Auditing;
+using System.Runtime.InteropServices;
 
 namespace MagicStorage.Components
 {
@@ -212,10 +214,14 @@ namespace MagicStorage.Components
 							ModPacket packet = PrepareServerResult(op.type);
 							ItemIO.Send(item, packet, true, true);
 							packet.Send(op.client);
+
+							AuditSystem.ReportItemWithdraw(op.client, this, item);
 						}
 					}
 					else if (op.type == Operation.Deposit)
 					{
+						ReducedItem netItem = new(op.item);
+
 						typesToRefresh.Add(op.item.type);
 						DepositItem(op.item);
 						if (!op.item.IsAir)
@@ -224,19 +230,28 @@ namespace MagicStorage.Components
 							ItemIO.Send(op.item, packet, true, true);
 							packet.Send(op.client);
 						}
+
+						if (op.item.stack != netItem.Stack)
+							AuditSystem.ReportItemDeposit(op.client, this, netItem.WithStack(netItem.Stack - op.item.stack));
 					}
 					else if (op.type == Operation.DepositAll)
 					{
 						NetHelper.StartUpdateQueue();
 						List<Item> leftOvers = new List<Item>();
+						List<ReducedItem> netItems = new List<ReducedItem>();
 						foreach (Item item in op.items)
 						{
+							ReducedItem netItem = new(item);
+
 							typesToRefresh.Add(item.type);
 							DepositItem(item);
 							if (!item.IsAir)
 							{
 								leftOvers.Add(item);
 							}
+
+							if (item.stack != netItem.Stack)
+								netItems.Add(netItem.WithStack(netItem.Stack - item.stack));
 						}
 						NetHelper.ProcessUpdateQueue();
 
@@ -250,10 +265,13 @@ namespace MagicStorage.Components
 							}
 							packet.Send(op.client);
 						}
+
+						if (netItems.Count > 0)
+							AuditSystem.ReportItemDeposit(op.client, this, CollectionsMarshal.AsSpan(netItems));
 					}
 					else if (op.type == Operation.WithdrawAllAndDestroy)
 					{
-						WithdrawManyAndDestroy(op.item.type);
+						WithdrawManyAndDestroy(op.item.type, out int itemsDestroyed);
 
 						if (HasItem(op.item, true))
 						{
@@ -263,15 +281,25 @@ namespace MagicStorage.Components
 
 							forcedRefresh = true;
 						}
+
+						if (itemsDestroyed > 0) {
+							if (op.item.type == ModContent.ItemType<UnloadedItem>())
+								AuditSystem.ReportControlDeleteUnloadedItems(op.client, this, itemsDestroyed);
+							else
+								AuditSystem.ReportItemDeletion(op.client, this, new ReducedItem(op.item.type, itemsDestroyed));
+						}
 					}
 					else if (op.type == Operation.DeleteUnloadedGlobalItemData)
 					{
-						DestroyUnloadedGlobalItemData();
+						DestroyUnloadedGlobalItemData(out int itemsAffected);
 
 						ModPacket packet = PrepareServerResult(op.type);
 						packet.Send();
 
 						forcedRefresh = true;
+
+						if (itemsAffected > 0)
+							AuditSystem.ReportControlDeleteUnloadedData(op.client, this, itemsAffected);
 					}
 					else if (op.type == Operation.WithdrawThenTryModuleInventory || op.type == Operation.WithdrawToInventoryThenTryModuleInventory)
 					{
@@ -283,6 +311,9 @@ namespace MagicStorage.Components
 						ItemIO.Send(item, packet, true, true);
 						packet.Write(stack);
 						packet.Send(op.client);
+
+						if (!item.IsAir)
+							AuditSystem.ReportItemWithdraw(op.client, this, item);
 					}
 
 					if (hasContext)
@@ -305,15 +336,11 @@ namespace MagicStorage.Components
 				bool keepOneIfFavorite = reader.ReadBoolean();
 				Item item = ItemIO.Receive(reader, true, true);
 				netOp = new NetOperation(op, item, keepOneIfFavorite, client);
-
-			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else if (op == Operation.Deposit)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				netOp = new NetOperation(op, item, client);
-
-			//	NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 			else if (op == Operation.DepositAll)
 			{
@@ -325,28 +352,21 @@ namespace MagicStorage.Components
 					items.Add(item);
 				}
 				netOp = new NetOperation(op, items, client);
-
-				NetHelper.PrintClientRequest(client, "Deposit All", Position);
 			}
 			else if (op == Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
-				netOp = new NetOperation(op, new Item(type), client);
-
-				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Items", Position);
+				Item dummy = new Item(type);
+				netOp = new NetOperation(op, dummy, client);
 			}
 			else if (op == Operation.DeleteUnloadedGlobalItemData)
 			{
 				netOp = new NetOperation(op, (Item)null, client);
-
-				NetHelper.PrintClientRequest(client, "Delete Unloaded Mod Data", Position);
 			}
 			else if (op == Operation.WithdrawThenTryModuleInventory || op == Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				Item item = ItemIO.Receive(reader, true, true);
 				netOp = new NetOperation(op, item, false, client);
-
-			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 
 			if (netOp is not null) {
@@ -736,7 +756,9 @@ namespace MagicStorage.Components
 			return TryWithdraw(lookFor, keepOneIfFavorite, toInventory);
 		}
 
-		internal void WithdrawManyAndDestroy(int type, bool net = false) {
+		internal void WithdrawManyAndDestroy(int type, out int itemsDestroyed, bool net = false) {
+			itemsDestroyed = 0;
+
 			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
 				ModPacket packet = PrepareClientRequest(Operation.WithdrawAllAndDestroy);
 				packet.Write(type);
@@ -759,6 +781,8 @@ namespace MagicStorage.Components
 									result = withdrawn;
 								else
 									result.stack += withdrawn.stack;
+
+								itemsDestroyed += withdrawn.stack;
 							}
 						}
 					}
@@ -780,7 +804,9 @@ namespace MagicStorage.Components
 		internal static readonly FieldInfo Item_globalItems = typeof(Item).GetField("_globals", BindingFlags.NonPublic | BindingFlags.Instance);
 		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
 
-		internal void DestroyUnloadedGlobalItemData(bool net = false) {
+		internal void DestroyUnloadedGlobalItemData(out int itemsAffected, bool net = false) {
+			itemsAffected = 0;
+
 			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
 				ModPacket packet = PrepareClientRequest(Operation.DeleteUnloadedGlobalItemData);
 				packet.Send();
@@ -807,6 +833,8 @@ namespace MagicStorage.Components
 						// Clear the data
 						data?.Clear();
 					}
+
+					itemsAffected++;
 				}
 
 				if (didSomething) {
@@ -822,8 +850,9 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, int? itemStackOverride = null, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
+		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, out ReducedItem detectedItem, int? itemStackOverride = null, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
 			Item clone = Utility.FromByteSpanNoCompression(itemData);
+			detectedItem = new(clone);
 			if (clone.IsAir)
 				return false;
 
