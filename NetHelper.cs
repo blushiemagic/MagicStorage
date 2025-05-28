@@ -42,7 +42,7 @@ namespace MagicStorage
 				string msg = message;
 				DateTime now = DateTime.Now;
 
-				Main.QueueMainThreadAction(() => Report_Inner(report, msg, now));
+				ServerActionsQueue.QueueActionBasedOnClientPresence(() => Report_Inner(report, msg, now));
 			} else
 				Report_Inner(reportTime, message, DateTime.Now);
 		}
@@ -62,50 +62,11 @@ namespace MagicStorage
 				#endif
 					Main.NewTextMultiline(sb.ToString(), c: Color.White);
 			} else if (Main.dedServ) {
-				if (reportTime) {
-					ConsoleColor fg = Console.ForegroundColor;
-					ConsoleColor bg = Console.BackgroundColor;
+				if (reportTime)
+					Utility.PrettyWriteLineToConsole("Time: " + now.Ticks, ConsoleColor.Red, ConsoleColor.Black);
 
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.BackgroundColor = ConsoleColor.Black;
-
-					Console.WriteLine("Time: " + now.Ticks);
-
-					Console.ForegroundColor = fg;
-					Console.BackgroundColor = bg;
-				}
-
-				Console.WriteLine(message);
+				Utility.WriteLineSafely(message);
 			}
-
-			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
-		}
-
-		public static void PrintToServerLogAndConsole(bool reportTime, string message) {
-			if (!Main.dedServ)
-				return;
-
-			if (reportTime) {
-				ConsoleColor fg = Console.ForegroundColor;
-				ConsoleColor bg = Console.BackgroundColor;
-
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.BackgroundColor = ConsoleColor.Black;
-
-				Console.WriteLine("Time: " + DateTime.Now.Ticks);
-
-				Console.ForegroundColor = fg;
-				Console.BackgroundColor = bg;
-			}
-
-			Console.WriteLine(message);
-
-			StringBuilder sb = new();
-
-			if (reportTime)
-				sb.Append("Time: " + DateTime.Now.Ticks + " ");
-
-			sb.Append(message);
 
 			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
 		}
@@ -876,7 +837,7 @@ cleanupContext:
 
 				Report(false, MessageType.CraftResult + " packet sent to all clients");
 
-				AuditSystem.ReportCraftRequest(sender, heart, CollectionsMarshal.AsSpan(results), CollectionsMarshal.AsSpan(toWithdraw));
+				AuditSystem.ReportCraftRequest(sender, heart, [.. results], [.. toWithdraw]);
 			}
 
 			SendRefreshNetworkItems(position, false, typesToUpdate);
@@ -1248,23 +1209,11 @@ cleanupContext:
 			Report(false, MessageType.ClientRequestServerOp + " packet received by server from client " + sender);
 
 			if (print) {
-				ConsoleColor fg = Console.ForegroundColor;
-				ConsoleColor bg = Console.BackgroundColor;
+				string keyMsg = MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ServerKeyText").Format(key);
 
-				Console.ForegroundColor = ConsoleColor.Yellow;
-				Console.BackgroundColor = ConsoleColor.Black;
-
-				string keyMsg = "=====\n" +
-					"THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!\n" +
-					"Server Operator Key: " + key + "\n" +
-					"=====";
-
-				Console.WriteLine(keyMsg);
-				// Send the text to the client log as well
+				Utility.WriteLineColoredSafely(keyMsg, ConsoleColor.Yellow, ConsoleColor.Black);
+				// Send the text to the server log as well
 				MagicStorageMod.Instance.Logger.Info("\n" + keyMsg);
-
-				Console.ForegroundColor = fg;
-				Console.BackgroundColor = bg;
 			}
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
@@ -1280,7 +1229,7 @@ cleanupContext:
 
 			Report(false, MessageType.ServerOpResponse + " packet received by client " + Main.myPlayer);
 
-			Main.NewText("=== ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE ===", Color.Yellow);
+			Main.NewText("=== ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE/LOG ===", Color.Yellow);
 
 			Netcode.RequestingOperatorKey = true;
 		}
@@ -1978,6 +1927,8 @@ cleanupContext:
 
 				var result = SecuritySystem.ServerAccessNetwork(sender, networkID);
 
+				SecuritySystem.HandleNetworkAccessibilityOnAccess(result, Main.player[sender], networkID);
+
 				// Inform the client of the result
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SecurityNetworkAccessible);
@@ -2034,14 +1985,21 @@ cleanupContext:
 				Report(true, MessageType.SecurityNetworkModification + " packet received by server from client " + sender);
 
 				var result = SecuritySystem.ServerModifyNetwork(sender, networkID, newName, newPassword, newRestricted, out bool passwordChanged, out bool privacyChanged);
-				BitsByte changed = new BitsByte(passwordChanged, privacyChanged);
+
+				if (result.IsSuccess()) {
+					bool outdatedAuthorization = passwordChanged || privacyChanged;
+					var network = SecuritySystem.GetNetwork(networkID);
+
+					foreach (var player in Main.ActivePlayers)
+						SecuritySystem.HandleNetworkAccessibilityOnModification(result, player, network, outdatedAuthorization, player.whoAmI == sender);
+				}
 
 				// Inform all clients of the result
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SecurityNetworkModification);
 				packet.Write((byte)result);
 				packet.Write(networkID);
-				packet.Write(changed);
+				packet.Write(new BitsByte(passwordChanged, privacyChanged));
 				packet.Write((byte)sender);
 				packet.Send();
 
@@ -2055,16 +2013,16 @@ cleanupContext:
 				if (requestingPlayer == Main.myPlayer)
 					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Modification);
 
-				bool outdatedAuthorization = flags[0] || flags[1];  // If the password or restricted status was changed, the client's authorization status is outdated
-				if (outdatedAuthorization && requestingPlayer != Main.myPlayer)
-					Main.LocalPlayer.GetModPlayer<SecurityPlayer>().RemoveNetworkAccess(networkID);
+				// If the password or restricted status was changed, the client's authorization status is outdated
+				var network = SecuritySystem.GetNetwork(networkID);
+				SecuritySystem.HandleNetworkAccessibilityOnModification(result, Main.LocalPlayer, network, flags[0] || flags[1], requestingPlayer == Main.myPlayer);
 
 				Report(true, MessageType.SecurityNetworkModification + " packet received by client " + Main.myPlayer);
 
 				Report(false, $"  Result: {result}");
 
 				// Ensure that Administrators always know the password for the network
-				if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+				if (flags[0] && Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
 					RequestPasswordForNetwork(networkID);
 
 				RequestSecurityNetworkList();
@@ -2246,12 +2204,18 @@ cleanupContext:
 				packet.Write((byte)result);
 
 				if (result.IsSuccess()) {
+					SecurityPlayer securityPlayer = Main.player[sender].GetModPlayer<SecurityPlayer>();
+
 					packet.Write(networks.Length);
 
 					if (networks.Length > 0) {
 						foreach (var network in networks) {
 							packet.Write(network.id);
 							packet.WriteStringSafely(network.password);
+
+							// Ensure that the server's player instance is able to access the network
+							securityPlayer.JoinNetwork(network.id);
+							securityPlayer.RememberPassword(network.id, network.password);
 						}
 					}
 				}
@@ -2310,6 +2274,13 @@ cleanupContext:
 				Report(true, MessageType.SecurityNetworkPassword + " packet received by server from client " + sender);
 
 				NetworkActionResult result = SecuritySystem.TryGetPassword(networkID, out string password);
+
+				if (result.IsSuccess()) {
+					// Ensure that the server's player instance is able to access the network
+					SecurityPlayer securityPlayer = Main.player[sender].GetModPlayer<SecurityPlayer>();
+					securityPlayer.JoinNetwork(networkID);
+					securityPlayer.RememberPassword(networkID, password);
+				}
 
 				// Inform the client of the result
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();

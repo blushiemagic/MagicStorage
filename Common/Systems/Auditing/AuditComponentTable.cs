@@ -27,6 +27,13 @@ namespace MagicStorage.Common.Systems.Auditing {
 				};
 			}
 
+			static Entry IAuditableEntry<Entry, TEStorageComponent, int>.CreateFrom<TAlternate>(TAlternate source) {
+				return new Entry() {
+					Type = TAlternate.GetValue(source),
+					Name = TAlternate.GetName(source)
+				};
+			}
+
 			static int IAuditableEntry<Entry, TEStorageComponent, int>.GetKey(Entry self) => self.Type;
 
 			static int IAuditableEntry<Entry, TEStorageComponent, int>.GetKey(TEStorageComponent source) => source.Type;

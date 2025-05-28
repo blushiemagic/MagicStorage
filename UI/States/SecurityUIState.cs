@@ -458,7 +458,7 @@ namespace MagicStorage.UI.States {
 
 				NetHelper.Report(true, $"Network join for configuration access result: {result}");
 
-				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Access);
+				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Join);
 
 				_pendingNetworkActionData = enteredPassword;
 
@@ -507,6 +507,11 @@ namespace MagicStorage.UI.States {
 				Append(_popupBlocker);
 			}
 
+			private class NetworkModificationData(bool passwordChanged, bool privacyChanged) {
+				public readonly bool passwordChanged = passwordChanged;
+				public readonly bool privacyChanged = privacyChanged;
+			}
+
 			private void CheckNetworkUpdate(NetworkInfoPopup self) {
 				NetworkActionResult result = SecuritySystem.ModifyNetwork(_activeNetwork.View.id, self.NetworkName, self.Password, self.Restricted);
 
@@ -514,11 +519,19 @@ namespace MagicStorage.UI.States {
 
 				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Modification);
 
+				if (!SecuritySystem.TryGetPassword(_activeNetwork.View.id, out string password).IsSuccess())
+					password = null;
+
 				_pendingNetworkAction = NETWORK_ACTION_UPDATE;
+				_pendingNetworkActionData = new NetworkModificationData(self.Password != password, _activeNetwork.View.restricted != self.Restricted);
 			}
 
 			private void CheckNetworkUpdate_Result() {
 				NetHelper.Report(false, $"  Result: {_networkActionResult}");
+
+				NetworkModificationData data = (NetworkModificationData)_pendingNetworkActionData;
+				Guid creator = SecuritySystem.GetCreator(_activeNetwork.View.id);
+				SecuritySystem.HandleNetworkAccessibilityOnModification(_networkActionResult, Main.LocalPlayer, _activeNetwork.View, data.passwordChanged || data.privacyChanged, Main.LocalPlayer.GetModPlayer<SecurityPlayer>().UniqueID == creator);
 
 				if (_networkActionResult.IsSuccess()) {
 					_needNetworkPopup = NETWORK_POPUP_DESTROY;

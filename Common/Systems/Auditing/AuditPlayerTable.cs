@@ -31,6 +31,13 @@ namespace MagicStorage.Common.Systems.Auditing {
 				};
 			}
 
+			static Entry IAuditableEntry<Entry, Player, Guid>.CreateFrom<TAlternate>(TAlternate source) {
+				return new Entry() {
+					Guid = TAlternate.GetValue(source),
+					Name = TAlternate.GetName(source)
+				};
+			}
+
 			static Guid IAuditableEntry<Entry, Player, Guid>.GetKey(Entry self) => self.Guid;
 
 			static Guid IAuditableEntry<Entry, Player, Guid>.GetKey(Player source) => source.GetModPlayer<SecurityPlayer>().UniqueID;

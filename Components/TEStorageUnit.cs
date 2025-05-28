@@ -541,6 +541,8 @@ namespace MagicStorage.Components
 			netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 		}
 
+		const int MAX_REQUESTS = 32;
+
 		public override void NetSend(BinaryWriter trueWriter)
 		{
 			using MemoryStream buffer = new(65536);
@@ -549,17 +551,30 @@ namespace MagicStorage.Components
 			base.NetSend(writer);
 
 			// too many updates at this point just fully sync
-			if (netOpQueue.Count > Capacity / 2)
+			if (netOpQueue.Count > MAX_REQUESTS)
 			{
+				// Preserve operations that aren't just a sync of inventory contents
+				// This is especially important for InsertCore, since that would be executed on a Storage Unit with zero Capacity
+				var specialOps = netOpQueue.Where(static op => op.netOperation is NetOperations.InsertCore or NetOperations.RemoveCore)
+					.Take(MAX_REQUESTS)
+					.ToList();
+
 				netOpQueue.Clear();
-				netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
+
+				if (specialOps.Count > 0)
+				{
+					foreach (NetOperation op in specialOps)
+						netOpQueue.Enqueue(op);
+				}
+				else
+					netOpQueue.Enqueue(new NetOperation(NetOperations.FullySync));
 			}
 
 			ValueWriter bitWriter = new ValueWriter(writer);
 
 			int capacityBits = NetCompression.GetBitSize(Capacity);
 			bitWriter.Write((ushort)items.Count, capacityBits);
-			bitWriter.Write((ushort)netOpQueue.Count, capacityBits - 1);  // GetBitSize(Capacity / 2)
+			bitWriter.Write((ushort)netOpQueue.Count, NetCompression.GetBitSize(MAX_REQUESTS));
 			while (netOpQueue.Count > 0)
 			{
 				NetOperation netOp = netOpQueue.Dequeue();
@@ -617,7 +632,7 @@ namespace MagicStorage.Components
 
 			int capacityBits = NetCompression.GetBitSize(Capacity);
 			int serverItemsCount = bitReader.ReadUInt16(capacityBits);
-			int opCount = bitReader.ReadUInt16(capacityBits - 1);  // GetBitSize(Capacity / 2)
+			int opCount = bitReader.ReadUInt16(NetCompression.GetBitSize(MAX_REQUESTS));
 			if (opCount > 0)
 			{
 				if (ByPosition.TryGetValue(Position, out TileEntity te) && te is TEStorageUnit otherUnit)
@@ -681,11 +696,8 @@ namespace MagicStorage.Components
 					{
 						if (Main.netMode != NetmodeID.Server)
 							Main.NewText($"NetRecive Bad OP: {netOp}", Microsoft.Xna.Framework.Color.Red);
-						else {
-							Console.ForegroundColor = ConsoleColor.Red;
-							Console.WriteLine($"NetRecive Bad OP: {netOp}");
-							Console.ResetColor();
-						}
+						else
+							Utility.WriteLineColoredSafely($"NetRecive Bad OP: {netOp}", ConsoleColor.Red, ConsoleColor.Black);
 					}
 				}
 

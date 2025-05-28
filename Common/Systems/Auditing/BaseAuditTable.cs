@@ -7,19 +7,28 @@ namespace MagicStorage.Common.Systems.Auditing {
 		private readonly List<TEntry> _entries = [];
 		private readonly Dictionary<TKey, int> _keyToIndex = [];
 
-		public int Add(TSource obj) {
-			TEntry entry = TEntry.CreateFrom(obj);
+		public int Add(TSource obj) => Add_Common(TEntry.CreateFrom(obj));
+
+		public int Add<TAlternate>(TAlternate obj) where TAlternate : IAlternateAuditSource<TAlternate, TSource, TKey> => Add_Common(TEntry.CreateFrom(obj));
+
+		private int Add_Common(TEntry entry) {
 			TKey key = TEntry.GetKey(entry);
 
-			if (_keyToIndex.TryAdd(key, _entries.Count)) {
-				_entries.Add(entry);
-				return _entries.Count - 1;
-			}
+			if (_keyToIndex.TryGetValue(key, out int index))
+				return index;
 
-			return _keyToIndex[key];
+			_entries.Add(entry);
+			return _keyToIndex[key] = _entries.Count - 1;
+		}
+
+		public void Clear() {
+			_entries.Clear();
+			_keyToIndex.Clear();
 		}
 
 		public int FindIndex(TSource obj) => FindIndex(TEntry.GetKey(obj));
+
+		public int FindIndex<TAlternate>(TAlternate obj) where TAlternate : IAlternateAuditSource<TAlternate, TSource, TKey> => FindIndex(TAlternate.GetValue(obj));
 
 		public int FindIndex(TKey key) => _keyToIndex.TryGetValue(key, out int index) ? index : -1;
 
@@ -33,9 +42,14 @@ namespace MagicStorage.Common.Systems.Auditing {
 			try {
 				int count = reader.ReadUInt16();
 
+				NetHelper.Report(false, $"[AUDIT]     {count} entries found");
+
 				for (int i = 0; i < count; i++) {
 					TEntry entry = new();
 					TEntry.DeserializeOne(reader, ref entry);
+
+					NetHelper.Report(false, $"[AUDIT]       {entry.GetType().Name} | key: {TEntry.GetKey(entry)}, name: \"{TEntry.GetName(entry) ?? "null"}\"");
+
 					instance._entries.Add(entry);
 					instance._keyToIndex.Add(TEntry.GetKey(entry), i);
 				}
@@ -47,10 +61,15 @@ namespace MagicStorage.Common.Systems.Auditing {
 		}
 
 		public void Serialize(BinaryWriter writer) {
+			NetHelper.Report(false, $"[AUDIT]     {_entries.Count} entries found");
+
 			try {
 				writer.Write((ushort)_entries.Count);
-				foreach (TEntry entry in _entries)
+				foreach (TEntry entry in _entries) {
+					NetHelper.Report(false, $"[AUDIT]       {entry.GetType().Name} | name: \"{TEntry.GetName(entry) ?? "null"}\", key: {TEntry.GetKey(entry)}");
+
 					entry.Serialize(writer);
+				}
 			} catch (Exception ex) {
 				MagicStorageMod.Instance.Logger.Error($"Failed to serialize {GetType().Name}", ex);
 			}

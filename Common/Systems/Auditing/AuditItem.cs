@@ -14,20 +14,20 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		public int GetItemType(AuditFile source) => source.Items.GetKeyFromIndex(index);
 
-		public static AuditItem CreateAndLink(Item item, AuditFile source) => new(source.Items.Add(item), item.stack);
+		public static AuditItem CreateAndLink(AuditFile source, Item item) => new(source.Items.Add(item), item.stack);
 
-		public static AuditItem CreateAndLink(ReducedItem item, AuditFile source) {
+		public static AuditItem CreateAndLink(AuditFile source, ReducedItem item) {
 			var sample = ContentSamples.ItemsByType[item.Type];
 			return new(source.Items.Add(sample), item.Stack);
 		}
 
-		public static AuditItem DeserializeOne(BinaryReader reader, AuditFile source) {
+		public static AuditItem DeserializeOne(BinaryReader reader) {
 			int index = reader.Read7BitEncodedInt();
 			int stack = reader.Read7BitEncodedInt();
 			return new(index, stack);
 		}
 
-		public void Serialize(BinaryWriter writer, AuditFile source) {
+		public void Serialize(BinaryWriter writer) {
 			writer.Write7BitEncodedInt(index);
 			writer.Write7BitEncodedInt(stack);
 		}

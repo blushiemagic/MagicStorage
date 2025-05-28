@@ -50,9 +50,9 @@ namespace MagicStorage.Common.Systems {
 
 		internal static void ClientPrintKeyReponse(bool valid) {
 			if (!valid)
-				Main.NewText("Inputted key did not match the key stored on the server.", Color.Red);
+				Main.NewText(MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ClientKeyResponseFailed").Value, Color.Red);
 			else
-				Main.NewText("Server Operator status was successfully modified.", Color.Green);
+				Main.NewText(MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ClientKeyResponseSuccess").Value, Color.Green);
 		}
 
 		internal static bool TryQuickStackItemIntoNearbyStorageSystems(Player self, Item item, ref bool playSound) {

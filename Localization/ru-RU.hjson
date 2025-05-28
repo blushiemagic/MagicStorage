@@ -869,6 +869,64 @@ Mods: {
 				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
 				// Players: Players:
 				// YouAreClient: You are client {0}
+				/* ServerKeyText:
+					'''
+					=====
+					THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!
+					Server Operator/Administrator Key: {0}
+					=====
+					''' */
+				// ClientKeyText: === ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE AND LOG FILE ===
+				// ClientKeyResponseFailed: Inputted key did not match the key stored on the server.
+				// ClientKeyResponseSuccess: Magic Storage Server Operator and Administrator statuses have been successfully added.
+			}
+		}
+
+		AuditLogging: {
+			CommandInfo: {
+				Descriptions: {
+					/* msaudit:
+						'''
+						Translates the Magic Storage audit log for the world into a human-readable format
+						The name of the resulting file is derived from the world file's name and is placed in the Worlds folder
+						''' */
+					// msauditclear: Clears the Magic Storage audit log for the world
+				}
+
+				// NoArguments: Expected no arguments
+				// MultiplayerOnly: This command can only be used by the server console
+				// NoLogFile: No Magic Storage audit log file found for this world
+				// LoggingDisabled: Magic Storage audit logging is disabled in the config, please enable it first
+				// AdminOnly: This command can only be used by by the server console or multiplayer clients with the Server Administrator status
+			}
+
+			Errors: {
+				Client: {
+					// NoBuffers: Translation audit file couldn't be written due to missing buffers
+					// IncompleteBuffers: Translation audit file couldn't be written due to some sections not being received
+					// MismatchedBufferCount: Translation audit file couldn't be written due to the amount of received sections ({0}) not matching the expected amount ({1})
+				}
+
+				// LoadFailed: Failed to load audit file
+				// SaveFailed: Failed to save audit file
+				// TranslationFailed: Failed to write translated audit log to file
+				// TranslationAlreadyRunning: The Magic Storage audit log is already being translated, please wait for the action to finish
+				// ClearingAlreadyRunning: The Magic Storage audit log is already being cleared, please wait for the action to finish
+			}
+
+			Messages: {
+				Client: {
+					// RequestSent: Command request sent to the server, check the server console or log for information
+					// TranslationSuccess: Translation success! Magic Storage audit log was translated to:
+				}
+
+				// LoadSuccess: Magic Storage audit log was loaded from: {0}
+				// SaveSuccess: Magic Storage audit log was saved to: {0}
+				// TranslationFileNotLoaded: Magic Storage audit log was not loaded yet, forcing load before translation...
+				// TranslationStarted: Translating Magic Storage audit log to a human-readable format...
+				// TranslationSuccess: Magic Storage audit log was translated to: {0}
+				// ClearingStarted: Magic Storage audit log will be cleared...
+				// ClearingSuccess: Magic Storage audit log was cleared, serializing empty file is pending
 			}
 		}
 

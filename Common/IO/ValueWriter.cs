@@ -41,7 +41,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(byte value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_BYTE)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
@@ -55,7 +58,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(sbyte value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_BYTE)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
@@ -76,7 +82,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(ushort value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_SHORT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
@@ -90,7 +99,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(short value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_SHORT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
@@ -111,7 +123,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(uint value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_INT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
@@ -125,7 +140,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(int value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_INT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
@@ -146,7 +164,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(ulong value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_LONG)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
@@ -160,7 +181,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public void Write(long value, int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)  // No bits to write
+				return;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_LONG)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");

@@ -6,6 +6,7 @@ using MagicStorage.Components;
 using MagicStorage.Edits;
 using MagicStorage.Sorting;
 using Microsoft.Xna.Framework;
+using ReLogic.Content;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -424,15 +425,16 @@ namespace MagicStorage {
 
 		public static void GetGPSText(int compass, int depth, out string compassText, out string depthText) {
 			// Reverse the depth conversion
-			float worldCoordinateY = (float)(depth + Main.worldSurface * 2.0f) / 2f;
+			float worldCoordinateY = (float)(depth + Main.worldSurface * 2.0f) / 2f * 16f;
 
 			// Get the compass text
-			compassText = compass switch {
-				>0 => Language.GetTextValue("GameUI.CompassEast", compass),
-				 0 => Language.GetTextValue("GameUI.CompassCenter"),
-				<0 => Language.GetTextValue("GameUI.CompassWest", compass)
-			};
-			
+			if (compass > 0)
+				compassText = Language.GetTextValue("GameUI.CompassEast", compass);
+			else if (compass == 0)
+				compassText = Language.GetTextValue("GameUI.CompassCenter");
+			else
+				compassText = Language.GetTextValue("GameUI.CompassWest", -compass);
+
 			// Get the depth text
 			float sizeFactor = Main.maxTilesX / 4200f;
 			sizeFactor *= sizeFactor;
@@ -455,10 +457,7 @@ namespace MagicStorage {
 
 			depth = Math.Abs(depth);
 
-			string coordText = depth switch {
-				0 => Language.GetTextValue("GameUI.DepthLevel"),
-				_ => Language.GetTextValue("GameUI.Depth", depth)
-			};
+			string coordText = depth == 0 ? Language.GetTextValue("GameUI.DepthLevel") : Language.GetTextValue("GameUI.Depth", depth);
 
 			depthText = $"{coordText} {layerText}";
 		}
@@ -713,6 +712,51 @@ namespace MagicStorage {
 		public static IEnumerable<T> ResolveTileEntities<T>(this IEnumerable<Point16> position) where T : TileEntity => position.Select(ResolveToTileEntity).OfType<T>();
 
 		public static bool IsSuccess(this NetworkActionResult result) => result is NetworkActionResult.Success or NetworkActionResult.OperatorForcedSuccess;
+
+		public static void WriteLineSafely(string text) {
+			if (!AssetRepository.IsMainThread) {
+				// Local capturing
+				string t = text;
+
+				ServerActionsQueue.QueueActionBasedOnClientPresence(() => WriteLineSafely_Inner(t));
+			} else
+				WriteLineSafely_Inner(text);
+		}
+
+		private static void WriteLineSafely_Inner(string text) {
+			using (ConsoleColorLock.Acquire())
+				Console.WriteLine(text);
+		}
+
+		public static void WriteLineColoredSafely(string text, ConsoleColor fg, ConsoleColor bg) {
+			if (!AssetRepository.IsMainThread) {
+				// Local capturing
+				string t = text;
+				ConsoleColor f = fg, b = bg;
+
+				ServerActionsQueue.QueueActionBasedOnClientPresence(() => WriteLineColoredSafely_Inner(t, f, b));
+			} else
+				WriteLineColoredSafely_Inner(text, fg, bg);
+		}
+
+		private static void WriteLineColoredSafely_Inner(string text, ConsoleColor fg, ConsoleColor bg) {
+			using (ConsoleColorLock.Acquire(fg, bg))
+				Console.WriteLine(text);
+		}
+
+		public static void PrettyWriteLineToConsole(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor) => WriteLineColoredSafely(text, foregroundColor, backgroundColor);
+
+		public static void Write(this BinaryWriter writer, Guid guid) {
+			writer.Write((byte)16);
+			writer.Write(guid.ToByteArray());
+		}
+
+		public static Guid ReadGuid(this BinaryReader reader) {
+			if (reader.ReadByte() != 16)
+				throw new InvalidDataException("Expected a byte array of Guid data");
+
+			return new Guid(reader.ReadBytes(16));
+		}
 
 		public static void WriteStringSafely(this BinaryWriter writer, string value) {
 			writer.Write(value is not null);

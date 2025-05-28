@@ -59,6 +59,7 @@ namespace MagicStorage.Common.Systems {
 
 		public readonly struct NetworkView {
 			public readonly string creator;
+			public readonly Guid creatorID;
 			public readonly string name;
 			public readonly bool restricted;
 			public readonly int id;
@@ -66,11 +67,12 @@ namespace MagicStorage.Common.Systems {
 
 			public bool Valid => _validInstance;
 
-			internal NetworkView(string creator, string name, bool restricted, int id) {
+			internal NetworkView(string creator, Guid creatorID, string name, bool restricted, int id) {
 				ArgumentNullException.ThrowIfNull(creator);
 				ArgumentNullException.ThrowIfNull(name);
 
 				this.creator = creator;
+				this.creatorID = creatorID;
 				this.name = name;
 				this.restricted = restricted;
 				this.id = id;
@@ -221,7 +223,7 @@ namespace MagicStorage.Common.Systems {
 			} else {
 				foreach (Network network in _networks) {
 					if (network.uniqueID == id)
-						return new NetworkView(network.GetCreator(), network.name, network.restricted, network.uniqueID);
+						return new NetworkView(network.GetCreator(), network.creator, network.name, network.restricted, network.uniqueID);
 				}
 			}
 
@@ -237,7 +239,7 @@ namespace MagicStorage.Common.Systems {
 			}
 
 			foreach (Network network in _networks)
-				yield return new NetworkView(network.GetCreator(), network.name, network.restricted, network.uniqueID);
+				yield return new NetworkView(network.GetCreator(), network.creator, network.name, network.restricted, network.uniqueID);
 		}
 
 		public static IEnumerable<NetworkView> EnumerateNetworksWithSettings() {
@@ -328,10 +330,27 @@ namespace MagicStorage.Common.Systems {
 			return false;
 		}
 
+		internal static Guid GetCreator(int networkID) {
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				foreach (NetworkView view in _clientViews) {
+					if (view.id == networkID)
+						return view.creatorID;
+				}
+			} else {
+				foreach (Network network in _networks) {
+					if (network.uniqueID == networkID)
+						return network.creator;
+				}
+			}
+
+			return Guid.Empty;
+		}
+
 		internal static void SyncClientNetworkViews(BinaryWriter writer) {
 			writer.Write(_networks.Count);
 			foreach (var view in GetNetworks()) {
 				writer.Write(view.creator);
+				writer.Write(view.creatorID);
 				writer.Write(view.name);
 				writer.Write(view.restricted);
 				writer.Write(view.id);
@@ -343,10 +362,11 @@ namespace MagicStorage.Common.Systems {
 			int count = reader.ReadInt32();
 			for (int i = 0; i < count; i++) {
 				string creator = reader.ReadString();
+				Guid creatorID = reader.ReadGuid();
 				string name = reader.ReadString();
 				bool restricted = reader.ReadBoolean();
 				int id = reader.ReadInt32();
-				_clientViews.Add(new NetworkView(creator, name, restricted, id));
+				_clientViews.Add(new NetworkView(creator, creatorID, name, restricted, id));
 			}
 
 			clientListDirty = true;
@@ -759,54 +779,52 @@ namespace MagicStorage.Common.Systems {
 			return player.GetModPlayer<OperatorPlayer>().hasOp ? NetworkActionResult.OperatorForcedSuccess : NetworkActionResult.Success;
 		}
 
-		internal static void HandleNetworkAccessibilityOnCreation(NetworkActionResult result, int creator, Player player, int networkID)
-			=> HandleNetworkAccessibilityOnCreation(result, creator, player.GetModPlayer<SecurityPlayer>(), networkID);
-
-		internal static void HandleNetworkAccessibilityOnCreation(NetworkActionResult result, int creator, SecurityPlayer player, int networkID) {
+		internal static void HandleNetworkAccessibilityOnCreation(NetworkActionResult result, int creator, Player player, int networkID) {
 			if (result is NetworkActionResult.NeedsServerApproval) {
 				// Waiting for the server to respond
 				return;
 			}
 
+			var securityPlayer = player.GetModPlayer<SecurityPlayer>();
+
 			if (!result.IsSuccess()) {
 				// Remove access as a precaution
-				player.RemoveNetworkAccess(networkID);
+				securityPlayer.RemoveNetworkAccess(networkID);
 				return;
 			}
 
 			if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (creator == Main.myPlayer) {
-					player.JoinNetwork(networkID);
+					securityPlayer.JoinNetwork(networkID);
 
 					// Transfer the temporary password to the actual password
-					if (!player.TryGetPassword(SecurityPlayer.TEMPORARY_PASSWORD, out string password))
+					if (!securityPlayer.TryGetPassword(SecurityPlayer.TEMPORARY_PASSWORD, out string password))
 						throw new InvalidOperationException("Temporary client password not found, player likely attempted to create networks too quickly");
 
-					player.RememberPassword(networkID, password);
-					player.ForgetPassword(SecurityPlayer.TEMPORARY_PASSWORD);
+					securityPlayer.RememberPassword(networkID, password);
+					securityPlayer.ForgetPassword(SecurityPlayer.TEMPORARY_PASSWORD);
 				} else
-					player.RemoveNetworkAccess(networkID);  // Ensure that other players don't somehow have access to a stale network
+					securityPlayer.RemoveNetworkAccess(networkID);  // Ensure that other players don't somehow have access to a stale network
 			}
 		}
 
-		internal static void HandleNetworkAccessibilityOnJoin(NetworkActionResult result, Player player, int networkID, string? password = null)
-			=> HandleNetworkAccessibilityOnJoin(result, player.GetModPlayer<SecurityPlayer>(), networkID, password);
-
-		internal static void HandleNetworkAccessibilityOnJoin(NetworkActionResult result, SecurityPlayer player, int networkID, string? password = null) {
+		internal static void HandleNetworkAccessibilityOnJoin(NetworkActionResult result, Player player, int networkID, string? password = null) {
 			if (result is NetworkActionResult.NeedsServerApproval) {
 				// Waiting for the server to respond
 				return;
 			}
 
+			var securityPlayer = player.GetModPlayer<SecurityPlayer>();
+
 			if (!result.IsSuccess()) {
 				// If the player is not authorized to access the network or something else went wrong, remove access
-				player.RemoveNetworkAccess(networkID);
+				securityPlayer.RemoveNetworkAccess(networkID);
 				return;
 			}
 
 			if (!TryGetNetwork(networkID, out int index)) {
 				// Network doesn't exist, so remove access as a precaution
-				player.RemoveNetworkAccess(networkID);
+				securityPlayer.RemoveNetworkAccess(networkID);
 				return;
 			}
 
@@ -820,21 +838,18 @@ namespace MagicStorage.Common.Systems {
 				if (password is null)
 					throw new ArgumentNullException(nameof(password), "Password cannot be null for restricted networks");  // Invalid callee parameters
 
-				player.RememberPassword(networkID, password);
+				securityPlayer.RememberPassword(networkID, password);
 			} else {
 				if (password is not null)
 					throw new ArgumentException("Password must be null for public networks", nameof(password));  // Invalid callee parameters
 
-				player.RememberPassword(networkID, null);
+				securityPlayer.RememberPassword(networkID, null);
 			}
 
-			player.JoinNetwork(networkID);
+			securityPlayer.JoinNetwork(networkID);
 		}
 
-		internal static void HandleNetworkAccessibilityOnRemoval(NetworkActionResult result, Player player, int networkID)
-			=> HandleNetworkAccessibilityOnRemoval(result, player.GetModPlayer<SecurityPlayer>(), networkID);
-
-		internal static void HandleNetworkAccessibilityOnRemoval(NetworkActionResult result, SecurityPlayer player, int networkID) {
+		internal static void HandleNetworkAccessibilityOnRemoval(NetworkActionResult result, Player player, int networkID) {
 			if (result is NetworkActionResult.NeedsServerApproval) {
 				// Waiting for the server to respond
 				return;
@@ -843,13 +858,10 @@ namespace MagicStorage.Common.Systems {
 			if (!result.IsSuccess())
 				return;
 
-			player.RemoveNetworkAccess(networkID);
+			player.GetModPlayer<SecurityPlayer>().RemoveNetworkAccess(networkID);
 		}
 
-		internal static void HandleNetworkAccessibilityOnAccess(NetworkActionResult result, Player player, int networkID)
-			=> HandleNetworkAccessibilityOnAccess(result, player.GetModPlayer<SecurityPlayer>(), networkID);
-
-		internal static void HandleNetworkAccessibilityOnAccess(NetworkActionResult result, SecurityPlayer player, int networkID) {
+		internal static void HandleNetworkAccessibilityOnAccess(NetworkActionResult result, Player player, int networkID) {
 			if (result is NetworkActionResult.NeedsServerApproval) {
 				// Waiting for the server to respond
 				return;
@@ -858,7 +870,28 @@ namespace MagicStorage.Common.Systems {
 			if (result.IsSuccess())
 				return;
 
-			player.RemoveNetworkAccess(networkID);
+			player.GetModPlayer<SecurityPlayer>().RemoveNetworkAccess(networkID);
+		}
+
+		internal static void HandleNetworkAccessibilityOnModification(NetworkActionResult result, Player player, NetworkView view, bool outdatedAuthorization, bool isOwner) {
+			if (result is NetworkActionResult.NeedsServerApproval) {
+				// Waiting for the server to respond
+				return;
+			}
+
+			if (result.IsSuccess())
+				return;
+
+			var securityPlayer = player.GetModPlayer<SecurityPlayer>();
+
+			if (!view.restricted) {
+				// Public networks are always accessible
+				securityPlayer.JoinNetwork(view.id);
+
+			} else if (!isOwner && !player.GetModPlayer<OperatorPlayer>().hasOp) {
+				// Non-Operators should have their access revoked
+				securityPlayer.RemoveNetworkAccess(view.id);
+			}
 		}
 
 		internal readonly struct SimpleNetworkView(int id, string? password) {

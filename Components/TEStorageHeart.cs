@@ -267,7 +267,7 @@ namespace MagicStorage.Components
 						}
 
 						if (netItems.Count > 0)
-							AuditSystem.ReportItemDeposit(op.client, this, CollectionsMarshal.AsSpan(netItems));
+							AuditSystem.ReportItemDeposit(op.client, this, [.. netItems]);
 					}
 					else if (op.type == Operation.WithdrawAllAndDestroy)
 					{

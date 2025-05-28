@@ -37,7 +37,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public byte ReadByte(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_BYTE)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
@@ -52,7 +55,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public sbyte ReadSByte(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_BYTE)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
@@ -76,7 +82,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public ushort ReadUInt16(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_SHORT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
@@ -91,7 +100,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public short ReadInt16(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_SHORT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
@@ -115,7 +127,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public uint ReadUInt32(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_INT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
@@ -130,7 +145,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public int ReadInt32(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_INT)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
@@ -154,7 +172,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public ulong ReadUInt64(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_LONG)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
@@ -169,7 +190,10 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public long ReadInt64(int numBits) {
-			if (numBits <= 0)
+			if (numBits == 0)
+				return 0;
+
+			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 			if (numBits > BitBuffer128.MAX_LONG)
 				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
