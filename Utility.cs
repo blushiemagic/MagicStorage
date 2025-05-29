@@ -3,6 +3,7 @@ using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
+using MagicStorage.CrossMod;
 using MagicStorage.Edits;
 using MagicStorage.Sorting;
 using Microsoft.Xna.Framework;
@@ -117,7 +118,8 @@ namespace MagicStorage {
 				return retVal;
 			}
 			using MemoryStream memoryStream = new(200);
-			TagIO.ToStream(ItemIO.Save(item), memoryStream, false);
+			TagCompound saveData = StorageAggregatorLoader.GetItemData(item, out var tag) ? tag : ItemIO.Save(item);
+			TagIO.ToStream(saveData, memoryStream, false);
 			retVal = memoryStream.ToArray();
 			savedItemTagIO?.Add(item, retVal);
 			return retVal;

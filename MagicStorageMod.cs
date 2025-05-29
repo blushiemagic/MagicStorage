@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.CrossMod;
+using MagicStorage.CrossMod.Calls;
 using MagicStorage.CrossMod.Control;
 using MagicStorage.Items;
 using MagicStorage.NPCs;
@@ -94,107 +95,10 @@ namespace MagicStorage {
 			if (args.Length < 1)
 				throw new ArgumentException("Call requires at least one argument");
 
-			string function = "";
+			if (args[0] is not string function)
+				throw new ArgumentException("Expected function name");
 
-			void TryParseAs<T>(int arg, out T value) {
-				if (args.Length < arg + 1)
-					throw new ArgumentException($"Call \"{function}\" requires at least {arg} arguments");
-
-				if (args[arg] is T v)
-					value = v;
-				else
-					throw new ArgumentException($"Call requires argument #{arg + 1} to be of type {typeof(T).GetSimplifiedGenericTypeName()}");
-			}
-
-			void ThrowWithMessage(string message, int argument = -1) {
-				if (argument < 0)
-					throw new ArgumentException($"Call \"{function}\" could not be performed.\nReason: {message}");
-				else
-					throw new ArgumentException($"Call \"{function}\" had an invalid value for argument #{argument}\nReason: {message}");
-			}
-
-			TryParseAs(0, out function);
-
-			switch (function) {
-				case "Prevent Shadow Diamond Drop":
-					if (args.Length != 2)
-						ThrowWithMessage("Expected 2 arguments");
-
-					TryParseAs(1, out int npcID);
-
-					if (npcID < 0)
-						ThrowWithMessage("NPC ID must be positive", 1);
-					else if (npcID < NPCID.Count)
-						ThrowWithMessage("NPC ID must refer to a modded NPC ID", 1);
-
-					StorageWorld.disallowDropModded.Add(npcID);
-					break;
-				case "Set Shadow Diamond Drop Rule":
-					if (args.Length != 3)
-						ThrowWithMessage("Expected 3 arguments");
-
-					TryParseAs(1, out npcID);
-					TryParseAs(2, out IItemDropRule rule);
-
-					if (npcID < 0)
-						ThrowWithMessage("NPC ID must be positive", 1);
-					else if (npcID < NPCID.Count)
-						ThrowWithMessage("NPC ID must refer to a modded NPC ID", 1);
-
-					StorageWorld.moddedDiamondDropRulesByType.Add(npcID, rule);
-					break;
-				case "Get Shadow Diamond Drop Rule":
-					if (args.Length < 2 || args.Length > 3)
-						ThrowWithMessage("Expected 2 or 3 arguments");
-
-					TryParseAs(1, out int dropNormal);
-					int dropExpert = -1;
-
-					if (args.Length == 3)
-						TryParseAs(2, out dropExpert);
-
-					if (dropNormal < 1)
-						ThrowWithMessage("Normal mode drop stack must be positive", 1);
-
-					return ShadowDiamondDrop.DropDiamond(dropNormal, dropExpert);
-				case "Get Campfire Condition":
-					if (args.Length != 1)
-						ThrowWithMessage("Expected 1 argument");
-
-					return HasCampfire;
-				case "Simulating Crafts":
-					if (args.Length != 1)
-						ThrowWithMessage("Expected 1 argument");
-
-					return CraftingGUI.SimulatingCrafts;
-				case "Add Extra Craft Drop":
-					if (args.Length != 3)
-						ThrowWithMessage("Expected 3 arguments");
-
-					TryParseAs(2, out IItemDropRule extraDropRule);
-
-					if (args[1] is Recipe recipe)
-						ExtraCraftItemsSystem.RegisterDrop(recipe, extraDropRule);
-					else if (args[1] is Func<Recipe, bool> condition)
-						ExtraCraftItemsSystem.RegisterDrop(condition, extraDropRule);
-					else
-						ThrowWithMessage("First argument must be a \"Recipe\" or \"Func<Recipe, bool>\" object", 1);
-
-					return true;
-				case "Block Recursion":
-					if (args.Length != 2)
-						ThrowWithMessage("Expected 2 arguments");
-
-					TryParseAs(1, out Recipe recipeToBlock);
-
-					MagicCache.BlockRecipeRecursionFor(recipeToBlock);
-
-					return true;
-				default:
-					throw new ArgumentException("Call does not support the function \"" + function + "\"");
-			}
-
-			return null;
+			return BaseCallFunction.Find(this, function).Call(args.AsSpan(1));
 		}
 	}
 }

@@ -801,8 +801,13 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal static readonly FieldInfo Item_globalItems = typeof(Item).GetField("_globals", BindingFlags.NonPublic | BindingFlags.Instance);
 		internal static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
+
+		[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_globals")]
+		extern static GlobalItem[] GetGlobalItems(Item item);
+
+		[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "data")]
+		extern static IList<TagCompound> GetData(UnloadedGlobalItem unloaded);
 
 		internal void DestroyUnloadedGlobalItemData(out int itemsAffected, bool net = false) {
 			itemsAffected = 0;
@@ -823,15 +828,13 @@ namespace MagicStorage.Components
 					if (item is null || item.IsAir || item.ModItem is UnloadedItem)
 						continue;
 
-					if (Item_globalItems.GetValue(item) is not GlobalItem[] globalItems || globalItems.Length == 0)
+					if (GetGlobalItems(item) is not { Length: >0 } globalItems)
 						continue;
 
 					// NOTE: items should only have one UnloadedGlobalItem, but the class is not "sealed", so having multiple is possible
 					foreach (UnloadedGlobalItem unloaded in globalItems.OfType<UnloadedGlobalItem>()) {
-						var data = UnloadedGlobalItem_data.GetValue(unloaded) as IList<TagCompound>;
-
 						// Clear the data
-						data?.Clear();
+						GetData(unloaded)?.Clear();
 					}
 
 					itemsAffected++;
