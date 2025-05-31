@@ -736,6 +736,18 @@ Mods: {
 					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
 					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
 					''' */
+				/* Help24:
+					'''
+					Dropping a [i:MagicStorage/CraftingAccess] into Shimmer will transform it into an Aether Interface, which can be used to shimmer items in a storage system.
+					All actions from shimmering are supported: decrafting items into their ingredients, transmuting items into other items, sacrificing coins for Coin Luck, and spawning NPCs from shimmering certain items.
+					''' */
+				/* Help25:
+					'''
+					By default, all [i:MagicStorage/StorageHeart] (and their components) are accessible to everyone.
+					To make your storage more secure, consider creating a Storage Security Wand. While holding the tool, left click a [i:MagicStorage/StorageHeart] to open the Security system.
+					In this system's UI, you can create a Security Network which, when made private, will cause the [i:MagicStorage/StorageHeart] and its components to require a password to access.
+					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
+					''' */
 			}
 
 			ChatOptions: {
@@ -744,6 +756,8 @@ Mods: {
 					PrevHelp: Anterior
 				}
 			}
+
+			// NewHelpAvailable: The Automaton has new help tips available.
 		}
 
 		Active: Ativo

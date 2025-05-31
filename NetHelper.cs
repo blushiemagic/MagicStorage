@@ -1184,7 +1184,7 @@ cleanupContext:
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			GolemTextTracking.SetPendingText();
+			GolemTextTracking.SayPendingText();
 		}
 
 		public static void ClientRequestServerOperator() {

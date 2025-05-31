@@ -33,10 +33,16 @@ namespace MagicStorage
 		private int? patreon;
 
 		// Automaton help tips
-		internal bool unlockedTip_Mechs, unlockedTip_MoonLord;
+		[Obsolete("Use the GolemHelpFlags class instead")]
+		internal bool unlockedTip_Mechs;
+		[Obsolete("Use the GolemHelpFlags class instead")]
+		internal bool unlockedTip_MoonLord;
 		internal int automatonHelpTip;
 
-		internal const int SAVE_VERSION = 1;
+		internal const int SAVE_VERSION = SAVE_VERSION_UNIFIED_TIPS;
+
+		internal const int SAVE_VERSION_SAVED_TIP_INDEX = 1;
+		internal const int SAVE_VERSION_UNIFIED_TIPS = 2;
 
 		protected override bool CloneNewInstances => false;
 
@@ -56,8 +62,10 @@ namespace MagicStorage
 			FavoritedShimmerItems.Save(tag);
 			tag["automaton"] = automatonHelpTip;
 
+			/*
 			BitsByte unlocked = new(unlockedTip_Mechs, unlockedTip_MoonLord);
 			tag["unlocked"] = (byte)unlocked;
+			*/
 
 			tag["version"] = SAVE_VERSION;
 
@@ -71,7 +79,17 @@ namespace MagicStorage
 			HiddenShimmerItems.Load(tag);
 			FavoritedShimmerItems.Load(tag);
 
-			automatonHelpTip = tag.GetInt("version") == SAVE_VERSION ? tag.GetInt("automaton") : 0;
+			int version = tag.GetInt("version");
+			if (version >= SAVE_VERSION_SAVED_TIP_INDEX) {
+				automatonHelpTip = tag.GetInt("automaton");
+
+				if (version < SAVE_VERSION_UNIFIED_TIPS) {
+					// The only multiplayer tip was added to the rest, so adjust accordingly
+					automatonHelpTip++;
+				}
+			} else
+				automatonHelpTip = 0;
+
 			BitsByte unlocked = tag.GetByte("unlocked");
 			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);
 

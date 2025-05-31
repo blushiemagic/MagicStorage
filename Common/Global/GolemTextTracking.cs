@@ -1,6 +1,4 @@
-﻿using MagicStorage.NPCs;
-using Microsoft.Xna.Framework;
-using System.Linq;
+﻿using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -23,18 +21,20 @@ namespace MagicStorage.Common.Global {
 
 			if (newText) {
 				if (Main.netMode == NetmodeID.SinglePlayer)
-					SetPendingText();
+					SayPendingText();
 				else
 					NetHelper.SendGolemTextUpdate();
 			}
 		}
 
-		internal static void SetPendingText() {
+		public static void SayPendingText() {
+			// Legacy code, decided later that it's fine if the NPC checks every tick for the tip flags
+			/*
 			foreach (Golem golem in Main.npc.Take(Main.maxNPCs).Where(n => n.active && n.ModNPC is Golem).Select(n => n.ModNPC as Golem))
 				golem.pendingNewHelpTextCheck = true;
+			*/
 
-			// TODO: localization entry
-			Main.NewText("The Automaton has new help tips available.", Color.CadetBlue);
+			Main.NewText(MagicStorageMod.Instance.GetLocalization("Dialogue.NewHelpAvailable").Value, Color.CadetBlue);
 		}
 	}
 }

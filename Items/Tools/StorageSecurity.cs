@@ -33,11 +33,10 @@ namespace MagicStorage.Items {
 
 				Point16 point = new(i, j);
 				if (TileEntity.ByPosition.TryGetValue(point, out TileEntity te) && te is TEStorageCenter center) {
-					player.GetModPlayer<SecurityPlayer>().RequestingSecurityUI = true;
-
-					if (SecuritySystem.CanPlayerAccessImmediately(player, center.assignedNetwork))
+					if (SecuritySystem.CanPlayerAccessImmediately(player, center.assignedNetwork)) {
+						player.GetModPlayer<SecurityPlayer>().RequestingSecurityUI = true;
 						Components.StorageAccess.OpenStorage(player, center.Position.X, center.Position.Y);
-					else
+					} else
 						SecuritySystem.PrintStorageInaccessible();
 				}
 			}

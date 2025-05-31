@@ -1,10 +1,13 @@
-﻿using MagicStorage.Items;
+﻿using MagicStorage.Common.Global;
+using MagicStorage.Items;
 using MagicStorage.Stations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
@@ -13,13 +16,30 @@ using Terraria.GameContent.Personalities;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 
 namespace MagicStorage.NPCs {
 	[AutoloadHead]
 	internal class Golem : ModNPC {
+		private BitsByte _helpTipFlags;
+
+		public bool HasMechsTip {
+			get => _helpTipFlags[0];
+			set => _helpTipFlags[0] = value;
+		}
+
+		public bool HasMoonLordTip {
+			get => _helpTipFlags[1];
+			set => _helpTipFlags[1] = value;
+		}
+
+		public bool HasAetherTip {
+			get => _helpTipFlags[2];
+			set => _helpTipFlags[2] = value;
+		}
+
 		public bool newHelpTextAvailable;
-		public bool pendingNewHelpTextCheck;
 
 		private int newHelpTextAvailableCounter;
 
@@ -97,20 +117,69 @@ namespace MagicStorage.NPCs {
 			else
 				newHelpTextAvailableCounter = 0;
 
-			if (pendingNewHelpTextCheck) {
+			if (Main.netMode != NetmodeID.Server) {
 				StoragePlayer player = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 
-				if (Utility.DownedAllMechs && !player.unlockedTip_Mechs) {
-					player.unlockedTip_Mechs = true;
-					newHelpTextAvailable = true;
-				} else if (NPC.downedMoonlord && !player.unlockedTip_MoonLord) {
-					player.unlockedTip_MoonLord = true;
-					newHelpTextAvailable = true;
+				// Redirect legacy data
+				// It won't be saved, so this is just for smooth migration
+				if (player.unlockedTip_Mechs && !HasMechsTip)
+					HasMechsTip = true;
+				if (player.unlockedTip_MoonLord && !HasMoonLordTip)
+					HasMoonLordTip = true;
+
+				if (!HasMechsTip && Utility.DownedAllMechs) {
+					HasMechsTip = true;
+					TipUnlocked();
+				}
+				
+				if (!HasMoonLordTip && NPC.downedMoonlord) {
+					HasMoonLordTip = true;
+					TipUnlocked();
 				}
 
-				pendingNewHelpTextCheck = false;
-				newHelpTextAvailableCounter = 0;
+				if (!HasAetherTip) {
+					foreach (Player plr in Main.ActivePlayers) {
+						if (plr.ZoneShimmer) {
+							HasAetherTip = true;
+							TipUnlocked();
+							break;
+						}
+					}
+				}
 			}
+		}
+
+		private void TipUnlocked() {
+			newHelpTextAvailable = true;
+			newHelpTextAvailableCounter = 0;
+
+			if (Main.netMode == NetmodeID.SinglePlayer)
+				GolemTextTracking.SayPendingText();
+			else
+				NetHelper.SendGolemTextUpdate();
+		}
+
+		private const int VERSION = 0;
+		private const int VERSION_TIPS = 0;
+
+		public override void SaveData(TagCompound tag) {
+			tag["version"] = VERSION;
+			tag["flags"] = (byte)_helpTipFlags;
+		}
+
+		public override void LoadData(TagCompound tag) {
+			int version = tag.GetInt("version");
+
+			if (version == VERSION_TIPS)
+				_helpTipFlags = tag.GetByte("flags");
+		}
+
+		public override void SendExtraAI(BinaryWriter writer) {
+			writer.Write(_helpTipFlags);
+		}
+
+		public override void ReceiveExtraAI(BinaryReader reader) {
+			_helpTipFlags = reader.ReadByte();
 		}
 
 		public override void HitEffect(NPC.HitInfo hit) {
@@ -171,21 +240,36 @@ namespace MagicStorage.NPCs {
 
 		public override void SetChatButtons(ref string button, ref string button2) {
 			// Sanity check
-			int max = Main.netMode == NetmodeID.SinglePlayer ? HelpOptionID.Count : HelpOptionID.CountMP;
-
 			if (helpOption < 0)
 				helpOption = 0;
-			else if (helpOption > max)
-				helpOption = max;
+			else if (helpOption > HelpOptionID.Count)
+				helpOption = HelpOptionID.Count;
+
+			// Find the previous available options
+			int prevOption = helpOption;
+			while (prevOption-- > 1) {
+				if (HelpOptionID.IsOptionAvailable(this, helpOptionsByIndex[prevOption - 1])) {
+					// A valid option was found
+					break;
+				}
+			}
 
 			button = helpOption == 0
 				? Language.GetTextValue("LegacyInterface.51")
-				: helpOption > 1
+				: prevOption > 0
 					? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.PrevHelp")
 					: "";
 
+			// Find the next available option
+			int nextOption = helpOption;
+			while (nextOption++ < HelpOptionID.Count) {
+				if (HelpOptionID.IsOptionAvailable(this, helpOptionsByIndex[nextOption - 1])) {
+					// A valid option was found
+					break;
+				}
+			}
 
-			button2 = helpOption > 0 && helpOption < max
+			button2 = helpOption > 0 && nextOption <= HelpOptionID.Count
 				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
 				: "";
 		}
@@ -214,9 +298,10 @@ namespace MagicStorage.NPCs {
 			public const int StorageUnitUpgrades2 = 21;
 			public const int ServerOperator = 22;
 			public const int StorageCores = 23;
+			public const int DecraftingAccess = 24;
+			public const int StorageSecurity = 25;
 
-			public const int Count = 22;
-			public const int CountMP = Count + 1;
+			public const int Count = 25;
 
 			public static string GetHelpKey(int id) {
 				string key = "Mods.MagicStorage.Dialogue.Golem.Help";
@@ -242,6 +327,7 @@ namespace MagicStorage.NPCs {
 					CraftingStationMoreFunctionality2 or
 					CombinedStations or
 					CombinedStations2 => ModContent.ItemType<CraftingAccess>(),
+					DecraftingAccess => ModContent.ItemType<DecraftingAccess>(),
 					StorageConnector => ModContent.ItemType<StorageConnector>(),
 					ShadowDiamond => ModContent.ItemType<ShadowDiamond>(),
 					StorageAccess => ModContent.ItemType<StorageAccess>(),
@@ -250,6 +336,7 @@ namespace MagicStorage.NPCs {
 					RemoteAccess2 or
 					PortableAccesses => ModContent.ItemType<RemoteAccess>(),
 					StorageUnitWand => ModContent.ItemType<StorageDeactivator>(),
+					StorageSecurity => ModContent.ItemType<StorageSecurity>(),
 					EvilAltar => ModContent.ItemType<DemonAltar>(),
 					RadiantJewel => ModContent.ItemType<RadiantJewel>(),
 					ConfigurationInterface => ModContent.ItemType<EnvironmentAccess>(),
@@ -257,17 +344,27 @@ namespace MagicStorage.NPCs {
 					_ => 0
 				};
 			}
+
+			public static bool IsOptionAvailable(Golem self, int id) {
+				return id switch {
+					ServerOperator => Main.netMode != NetmodeID.SinglePlayer,
+					DecraftingAccess => self.HasAetherTip,
+					_ => true
+				};
+			}
 		}
 
 		public int helpOption;
 
 		public static readonly int[] helpOptionsByIndex = new int[HelpOptionID.Count] {
+			HelpOptionID.ServerOperator,
 			HelpOptionID.StorageComponent,
 			HelpOptionID.StorageHeart,
 			HelpOptionID.StorageUnit,
 			HelpOptionID.CraftingInterface,
 			HelpOptionID.CraftingStationMoreFunctionality,
 			HelpOptionID.CraftingStationMoreFunctionality2,
+			HelpOptionID.DecraftingAccess,
 			HelpOptionID.StorageConnector,
 			HelpOptionID.ShadowDiamond,
 			HelpOptionID.RadiantJewel,
@@ -280,16 +377,17 @@ namespace MagicStorage.NPCs {
 			HelpOptionID.RemoteAccess2,
 			HelpOptionID.PortableAccesses,
 			HelpOptionID.StorageUnitWand,
+			HelpOptionID.StorageSecurity,
 			HelpOptionID.EvilAltar,
 			HelpOptionID.CombinedStations,
 			HelpOptionID.CombinedStations2,
 			HelpOptionID.ConfigurationInterface
 		};
 
-		public static readonly int[] mpHelpOptionsByIndex = helpOptionsByIndex.Prepend(HelpOptionID.ServerOperator).ToArray();
-
 		public override void OnChatButtonClicked(bool firstButton, ref string shopName) {
-			ref int savedTip = ref Main.LocalPlayer.GetModPlayer<StoragePlayer>().automatonHelpTip;
+			var player = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
+
+			ref int savedTip = ref player.automatonHelpTip;
 
 			bool wasHelpOptionUninitialized = false;
 			if (helpOption == 0) {
@@ -297,6 +395,7 @@ namespace MagicStorage.NPCs {
 					savedTip = 0;
 
 				helpOption = savedTip;
+
 				wasHelpOptionUninitialized = true;
 			}
 
@@ -307,17 +406,35 @@ namespace MagicStorage.NPCs {
 					helpOption++;
 			}
 
-			int max = Main.netMode == NetmodeID.SinglePlayer ? HelpOptionID.Count : HelpOptionID.CountMP;
-			int[] helpOptionsArray = Main.netMode == NetmodeID.SinglePlayer ? helpOptionsByIndex : mpHelpOptionsByIndex;
+			// Redirect tips if the player can't view them yet
+			bool forcedSkipForward = false;
+			for (int i = 1; i < HelpOptionID.Count; i++) {
+				if (helpOption > 0 && !HelpOptionID.IsOptionAvailable(this, helpOptionsByIndex[helpOption - 1])) {
+					if (!forcedSkipForward && helpOption == 1)
+						forcedSkipForward = true;
 
-			if (helpOption > max)
-				helpOption = max;
+					if (!forcedSkipForward && !wasHelpOptionUninitialized) {
+						// Skip over the unavailable option
+						if (firstButton)
+							helpOption--;
+						else
+							helpOption++;
+					} else {
+						// Reset the option
+						helpOption = i;
+					}
+				} else
+					break;
+			}
+
+			if (helpOption > HelpOptionID.Count)
+				helpOption = HelpOptionID.Count;
 			else if (helpOption < 1)
 				helpOption = 1;
 
 			savedTip = helpOption;
 
-			int option = helpOptionsArray[helpOption - 1];
+			int option = helpOptionsByIndex[helpOption - 1];
 
 			Main.npcChatText = HelpOptionID.GetHelpText(option);
 			Main.npcChatCornerItem = HelpOptionID.GetHelpItem(option);
