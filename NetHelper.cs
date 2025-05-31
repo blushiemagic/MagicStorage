@@ -25,6 +25,7 @@ using MagicStorage.Items;
 using System.Threading.Channels;
 using MagicStorage.Common.Systems.Auditing;
 using System.Runtime.InteropServices;
+using MagicStorage.NPCs;
 
 namespace MagicStorage
 {
@@ -149,7 +150,7 @@ namespace MagicStorage
 					ClientReceiveQuickStackToNearbyStorageResult(reader);
 					break;
 				case MessageType.GolemHelpTextUpdate:
-					ClientReceiveGolemTextUpdate();
+					ClientReceiveGolemTextUpdate(reader);
 					break;
 				case MessageType.ClientRequestServerOp:
 					ServerReceiveOperatorRequest(sender);
@@ -1177,14 +1178,16 @@ cleanupContext:
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.GolemHelpTextUpdate);
+			StorageWorld.NetSendHelpTips(packet);
 			packet.Send();
 		}
 
-		public static void ClientReceiveGolemTextUpdate() {
+		public static void ClientReceiveGolemTextUpdate(BinaryReader reader) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			GolemTextTracking.SayPendingText();
+			StorageWorld.NetReceiveHelpTips(reader);
+			Golem.ReportNewTipUnlocked();
 		}
 
 		public static void ClientRequestServerOperator() {

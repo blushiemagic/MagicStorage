@@ -7,15 +7,41 @@ using System.Linq;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.UI;
 using Terraria.WorldBuilding;
 
 namespace MagicStorage.Common.Systems
 {
 	public class StorageWorld : ModSystem
 	{
+		public static class UnlockedHelpTips
+		{
+			public static bool PortableAccess_AdvancedTier {
+				get => _automatonHelpTips[0];
+				set => _automatonHelpTips[0] = value;
+			}
+
+			public static bool PortableAccess_UltimateTier {
+				get => _automatonHelpTips[1];
+				set => _automatonHelpTips[1] = value;
+			}
+
+			public static bool DecraftingAccess {
+				get => _automatonHelpTips[2];
+				set => _automatonHelpTips[2] = value;
+			}
+		}
+
+		private static BitsByte _automatonHelpTips;
+
+		internal static void NetSendHelpTips(BinaryWriter writer) => writer.Write(_automatonHelpTips);
+
+		internal static void NetReceiveHelpTips(BinaryReader reader) => _automatonHelpTips = reader.ReadByte();
+
 		public static bool kingSlimeDiamond;
 		public static bool boss1Diamond;
 		public static bool boss2Diamond;
@@ -52,6 +78,8 @@ namespace MagicStorage.Common.Systems
 
 		public override void OnWorldLoad()
 		{
+			_automatonHelpTips = default;
+
 			kingSlimeDiamond = false;
 			boss1Diamond = false;
 			boss2Diamond = false;
@@ -81,10 +109,12 @@ namespace MagicStorage.Common.Systems
 
 		public override void ClearWorld() => OnWorldLoad();
 
-		private const int MIGRATION_VERSION_0_6_1 = 1;
+		private const int MIGRATION_VERSION_0_7 = 1;
 
 		public override void SaveWorldData(TagCompound tag)
 		{
+			tag["helpTips"] = (byte)_automatonHelpTips;
+
 			tag["kingSlimeDiamond"] = kingSlimeDiamond;
 			tag["boss1Diamond"] = boss1Diamond;
 			tag["boss2Diamond"] = boss2Diamond;
@@ -103,7 +133,7 @@ namespace MagicStorage.Common.Systems
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
-			tag["migration"] = MIGRATION_VERSION_0_6_1;
+			tag["migration"] = MIGRATION_VERSION_0_7;
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -111,6 +141,8 @@ namespace MagicStorage.Common.Systems
 
 		public override void LoadWorldData(TagCompound tag)
 		{
+			_automatonHelpTips = tag.GetByte("helpTips");
+
 			kingSlimeDiamond = tag.GetBool("kingSlimeDiamond");
 			boss1Diamond = tag.GetBool("boss1Diamond");
 			boss2Diamond = tag.GetBool("boss2Diamond");
@@ -145,8 +177,8 @@ namespace MagicStorage.Common.Systems
 			}
 
 			int migration = tag.GetInt("migration");
-			if (migration < MIGRATION_VERSION_0_6_1) {
-				Mod.Logger.Debug("Migrating world to v0.6.1 state...");
+			if (migration < MIGRATION_VERSION_0_7) {
+				Mod.Logger.Debug("Migrating world to v0.7 state...");
 
 				// Scan the entire world for Storage Access components, and place the tile entity if it doesn't exist
 				// Also force all storage systems to recalculate their components
@@ -194,6 +226,39 @@ namespace MagicStorage.Common.Systems
 			}
 		}
 
+
+		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
+			if (UnlockedHelpTips.PortableAccess_AdvancedTier && UnlockedHelpTips.PortableAccess_UltimateTier)
+				return;
+
+			foreach (Player player in Main.ActivePlayers) {
+				StoragePlayer storagePlayer = player.GetModPlayer<StoragePlayer>();
+
+				// Migrate legacy data migration; actual assignment is handled in Common/Global/GolemTextTracking.cs
+				if (storagePlayer.unlockedTip_Mechs && !UnlockedHelpTips.PortableAccess_AdvancedTier)
+					UnlockedHelpTips.PortableAccess_AdvancedTier = true;
+				if (storagePlayer.unlockedTip_MoonLord && !UnlockedHelpTips.PortableAccess_UltimateTier)
+					UnlockedHelpTips.PortableAccess_UltimateTier = true;
+			}
+		}
+
+		public override void PostUpdatePlayers() {
+			// Servers will inform clients of any new help tips that were unlocked
+			if (Main.netMode == NetmodeID.MultiplayerClient)
+				return;
+
+			if (UnlockedHelpTips.DecraftingAccess)
+				return;
+
+			foreach (Player player in Main.ActivePlayers) {
+				if (player.ZoneShimmer) {
+					UnlockedHelpTips.DecraftingAccess = true;
+					Golem.ReportNewTipUnlocked();
+					break;
+				}
+			}
+		}
+
 		public override void PostUpdateEverything() {
 			// Tile Entity logic does not run on clients
 			// Hence, the delayed sound playing on storage hearts has to be handled here
@@ -203,6 +268,8 @@ namespace MagicStorage.Common.Systems
 
 		public override void NetSend(BinaryWriter writer)
 		{
+			writer.Write(_automatonHelpTips);
+
 			BitsByte bb = new(kingSlimeDiamond, boss1Diamond, boss2Diamond, boss3Diamond, queenBeeDiamond, hardmodeDiamond, mechBoss1Diamond, mechBoss2Diamond);
 			writer.Write(bb);
 
@@ -219,6 +286,8 @@ namespace MagicStorage.Common.Systems
 
 		public override void NetReceive(BinaryReader reader)
 		{
+			_automatonHelpTips = reader.ReadByte();
+
 			BitsByte bb = reader.ReadByte();
 			bb.Retrieve(ref kingSlimeDiamond, ref boss1Diamond, ref boss2Diamond, ref boss3Diamond, ref queenBeeDiamond, ref hardmodeDiamond, ref mechBoss1Diamond, ref mechBoss2Diamond);
 
