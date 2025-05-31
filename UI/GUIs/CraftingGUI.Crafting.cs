@@ -10,6 +10,7 @@ using Terraria.ID;
 using MagicStorage.CrossMod;
 using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using Terraria.GameContent.Achievements;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -33,6 +34,22 @@ namespace MagicStorage {
 			public Recipe recipe;
 
 			public IEnumerable<Item> ConsumedItems => toWithdraw.Concat(consumedItemsFromModules);
+		}
+
+		internal static class RecipeEventHijack {
+			public readonly record struct HijackArgs(int NetID, int Stack);
+
+			public static HijackArgs? Args { get; private set; }
+
+			public static void Invoke(Recipe recipe) => AchievementsHelper.NotifyItemCraft(recipe);
+
+			public static void Invoke(Recipe recipe, HijackArgs args) {
+				Args = args;
+				Invoke(recipe);
+				Args = null;
+			}
+
+			public static void Invoke(Recipe recipe, Item item) => Invoke(recipe, new HijackArgs(item.netID, item.stack));
 		}
 
 		/// <summary>
@@ -85,6 +102,9 @@ namespace MagicStorage {
 			context.toWithdraw = CompactItemList(context.toWithdraw);
 			
 			context.results = CompactItemList(context.results);
+
+			foreach (Item result in context.results)
+				RecipeEventHijack.Invoke(selectedRecipe, result);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				NetHelper.Report(true, "Spawning excess results on player...");
