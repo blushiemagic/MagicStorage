@@ -763,6 +763,7 @@ Mods: {
 					To make your storage more secure, consider creating a Storage Security Wand. While holding the tool, left click a [i:MagicStorage/StorageHeart] to open the Security system.
 					In this system's UI, you can create a Security Network which, when made private, will cause the [i:MagicStorage/StorageHeart] and its components to require a password to access.
 					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
+					Recipe: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
 					''' */
 			}
 
