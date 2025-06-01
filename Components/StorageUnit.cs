@@ -1,8 +1,10 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.Auditing;
+using MagicStorage.CrossMod.Storage;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -33,9 +35,8 @@ namespace MagicStorage.Components
 
 		public override int ItemType(int frameX, int frameY)
 		{
-			int style = frameY / 36;
-			
-			return StorageUnitUpgradeMetrics.GetUnitItem(style);
+			return StorageUnitTierLoader.FindFromTileFrame(Type, frameX, frameY)?.StorageUnitItemType
+				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
@@ -45,8 +46,10 @@ namespace MagicStorage.Components
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
-			StorageUnitTier tier = (StorageUnitTier)(Main.tile[i, j].TileFrameY / 36);
-			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && tier != StorageUnitTier.Basic && tier != StorageUnitTier.Empty)
+			StorageUnitTier tier = StorageUnitTierLoader.FindFromTile(i, j)
+				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+
+			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && tier.Type != StorageUnitTier.Basic.Type && tier.Type != StorageUnitTier.Empty.Type)
 				fail = true;
 		}
 
@@ -73,7 +76,7 @@ namespace MagicStorage.Components
 				return true;
 			}
 
-			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageUpgradeItem && TryUpgrade(i, j, storageUnit))
+			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageUpgradeItem upgrade && TryUpgrade(i, j, storageUnit, upgrade))
 				return true;
 
 			if (Main.LocalPlayer.HeldItem.ModItem is BaseStorageCore core && TryCoreInsertion(i, j, storageUnit, core))
@@ -87,13 +90,15 @@ namespace MagicStorage.Components
 		}
 
 		private static bool TryCoreInsertion(int i, int j, TEStorageUnit storageUnit, BaseStorageCore core) {
-			StorageUnitTier tier = (StorageUnitTier)(Main.tile[i, j].TileFrameY / 36);
+			StorageUnitTier existingTier = StorageUnitTierLoader.FindFromTile(i, j)
+				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
 
-			if (tier != StorageUnitTier.Empty)
+			if (existingTier.Type != StorageUnitTier.Empty.Type)
 				return false;
 
 			storageUnit.InsertCore(core);
-			SetStyle(i, j, (int)core.Tier);
+			storageUnit.GetFramingState(out var fullness, out bool active);
+			SetTypeAndStyle(i, j, core.Tier, fullness, active);
 			TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
 
 			if (Main.netMode == NetmodeID.MultiplayerClient)
@@ -102,14 +107,14 @@ namespace MagicStorage.Components
 			return true;
 		}
 
-		private static bool TryUpgrade(int i, int j, TEStorageUnit storageUnit)
+		private static bool TryUpgrade(int i, int j, TEStorageUnit storageUnit, BaseStorageUpgradeItem item)
 		{
-			Player player = Main.LocalPlayer;
-			Item item = player.HeldItem;
-			int style = Main.tile[i, j].TileFrameY / 36;
-			
-			if (StorageUnitUpgradeMetrics.AttemptUpgrade(ref style, item.type)) {
-				SetStyle(i, j, style);
+			StorageUnitTier existingTier = StorageUnitTierLoader.FindFromTile(i, j)
+				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+
+			if (existingTier.CanUpgradeTo(item.Tier)) {
+				storageUnit.GetFramingState(out var fullness, out bool active);
+				SetTypeAndStyle(i, j, item.Tier, fullness, active);
 				TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
 				return true;
 			}
@@ -142,12 +147,23 @@ namespace MagicStorage.Components
 			Dust.NewDustPerfect(storageUnit.Position.ToWorldCoordinates(), DustID.PureSpray, Vector2.Zero, Scale: 2, newColor: Color.Green);
 		}
 
-		internal static void SetStyle(int i, int j, int style)
+		internal static void SetTypeAndStyle(int i, int j, StorageUnitTier tier, StorageUnitFullness fullness, bool active)
 		{
-			Main.tile[i, j].TileFrameY = (short) (36 * style);
-			Main.tile[i + 1, j].TileFrameY = (short) (36 * style);
-			Main.tile[i, j + 1].TileFrameY = (short) (36 * style + 18);
-			Main.tile[i + 1, j + 1].TileFrameY = (short) (36 * style + 18);
+			int type = tier.StorageUnitTileType;
+			tier.Frame(fullness, active, out int frameX, out int frameY);
+
+			SetTypeAndStyle(i, j, type, frameX, frameY);
+			SetTypeAndStyle(i + 1, j, type, frameX + 18, frameY);
+			SetTypeAndStyle(i, j + 1, type, frameX, frameY + 18);
+			SetTypeAndStyle(i + 1, j + 1, type, frameX + 18, frameY + 18);
+		}
+
+		private static void SetTypeAndStyle(int i, int j, int type, int frameX, int frameY)
+		{
+			Tile tile = Main.tile[i, j];
+			tile.TileType = (ushort)type;
+			tile.TileFrameX = (short)frameX;
+			tile.TileFrameY = (short)frameY;
 		}
 
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)

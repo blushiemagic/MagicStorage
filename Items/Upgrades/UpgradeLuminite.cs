@@ -1,10 +1,13 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class UpgradeLuminite : BaseStorageUpgradeItem
 	{
+		public override StorageUnitTier Tier => StorageUnitTier.Luminite;
+
 		public override void SetDefaults()
 		{
 			Item.rare = ItemRarityID.Red;

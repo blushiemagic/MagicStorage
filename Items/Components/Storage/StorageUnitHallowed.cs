@@ -1,10 +1,10 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.CrossMod.Storage;
 using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
-	public class StorageUnitHallowed : BaseStorageUnitItem<StorageUnitHellstone, UpgradeHallowed>
+	public class StorageUnitHallowed : BaseStorageUnitItem
 	{
 		public override StorageUnitTier Tier => StorageUnitTier.Hallowed;
 

@@ -3,6 +3,7 @@ using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.CrossMod;
 using MagicStorage.CrossMod.Calls;
 using MagicStorage.CrossMod.Control;
+using MagicStorage.CrossMod.Storage;
 using MagicStorage.Items;
 using MagicStorage.NPCs;
 using MagicStorage.Stations;
@@ -85,6 +86,8 @@ namespace MagicStorage {
 
 			SortingOptionLoader.InitializeOrder();
 			FilteringOptionLoader.InitializeOrder();
+			StorageUnitTierLoader.PostSetupContent();
+			StorageTierModifierLoader.PostSetupContent();
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {

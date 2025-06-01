@@ -1,13 +1,13 @@
 ﻿using Ionic.Zlib;
-using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Components;
+using MagicStorage.CrossMod.Storage;
 using SerousCommonLib.API;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -39,7 +39,7 @@ namespace MagicStorage.Items {
 				TooltipHelper.FindAndRemoveLine(tooltips, "<HASH>");
 				TooltipHelper.FindAndRemoveLine(tooltips, "<BYTES>");
 			} else {
-				int capacity = StorageUnitUpgradeMetrics.GetCapacity(Tier);
+				int capacity = Tier.Capacity;
 
 				string countColorHex;
 				if (_itemCount == 0)
@@ -93,10 +93,11 @@ namespace MagicStorage.Items {
 		}
 
 		public void SetDataFrom(TEStorageUnit unit) {
-			StorageUnitTier unitTier = (StorageUnitTier)(Main.tile[unit.Position].TileFrameY / 36);
+			StorageUnitTier unitTier = unit.GetCurrentTier()
+				?? throw new InvalidOperationException("No Storage Unit tier was found for the provided Storage Unit");
 
-			if (unitTier != Tier)
-				throw new InvalidOperationException($"Unit tier ({unitTier}) does not match core tier ({Tier})");
+			if (unitTier.Type != Tier.Type)
+				throw new InvalidOperationException($"Unit tier ({unitTier.FullName}) does not match core tier ({Tier.FullName})");
 
 			using MemoryStream ms = new(65536);
 			using (BinaryWriter writer = new(ms)) {
@@ -104,7 +105,7 @@ namespace MagicStorage.Items {
 			//	using (FlagSwitch.ToggleTrue(ref ValueWriter.LogWrites)) {
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 				//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
-					NetCompression.SendItems(unit.items, writer, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+					NetCompression.SendItems(unit.items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
 				//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 			//	}
@@ -134,7 +135,7 @@ namespace MagicStorage.Items {
 			//	MagicStorageMod.Instance.Logger.Info("==============================");
 			//	MagicStorageMod.Instance.Logger.Info($"Retrieving {_itemCount} items from Storage Core");
 			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
-				var items = NetCompression.ReceiveItems(reader, true, true, NetCompression.GetBitSize(StorageUnitUpgradeMetrics.GetCapacity(Tier)));
+				var items = NetCompression.ReceiveItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
 			//	MagicStorageMod.Instance.Logger.Info("==============================");
 				return items;
 		//	}

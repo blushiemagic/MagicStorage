@@ -1,4 +1,4 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.CrossMod.Storage;
 using Terraria;
 using Terraria.ID;
 

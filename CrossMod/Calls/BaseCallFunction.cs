@@ -52,7 +52,9 @@ namespace MagicStorage.CrossMod.Calls {
 		/// </summary>
 		public abstract object Call(ReadOnlySpan<object> args);
 
-		protected sealed override void Register() { }
+		protected sealed override void Register() {
+			ModTypeLookup<BaseCallFunction>.Register(this);
+		}
 
 		protected sealed override void InitTemplateInstance() { }
 

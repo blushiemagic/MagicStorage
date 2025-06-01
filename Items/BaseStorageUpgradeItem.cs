@@ -1,9 +1,12 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
 	public abstract class BaseStorageUpgradeItem : ModItem {
+		public abstract StorageUnitTier Tier { get; }
+
 		public override void SetStaticDefaults() {
 			Item.ResearchUnlockCount = 10;
 		}

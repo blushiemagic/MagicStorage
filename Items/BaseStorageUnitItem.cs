@@ -1,10 +1,11 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
 	public abstract class BaseStorageUnitItem : ModItem {
-		public abstract Components.StorageUnitTier Tier { get; }
+		public abstract StorageUnitTier Tier { get; }
 
 		public override void SetStaticDefaults() {
 			Item.ResearchUnlockCount = 10;
@@ -21,16 +22,17 @@ namespace MagicStorage.Items {
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.consumable = true;
 			Item.createTile = ModContent.TileType<Components.StorageUnit>();
-			Item.placeStyle = (int)Tier;
+			Item.placeStyle = Tier.ItemPlaceStyle;
 		}
-	}
 
-	public abstract class BaseStorageUnitItem<TUnit, TUpgrade> : BaseStorageUnitItem where TUnit : BaseStorageUnitItem where TUpgrade : BaseStorageUpgradeItem {
-		public sealed override void AddRecipes() {
-			CreateRecipe()
-				.AddIngredient<TUnit>()
-				.AddIngredient<TUpgrade>()
-				.Register();
+		public override void AddRecipes() {
+			// For every tier that this item's tier can upgrade to, create a recipe
+			foreach (var nextTier in Tier.NextTiers) {
+				Recipe.Create(nextTier.StorageUnitItemType)
+					.AddIngredient(Tier.StorageUnitItemType)
+					.AddIngredient(nextTier.UpgradeItemType)
+					.Register();
+			}
 		}
 	}
 }

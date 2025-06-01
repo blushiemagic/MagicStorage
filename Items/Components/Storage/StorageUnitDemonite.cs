@@ -1,10 +1,10 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.CrossMod.Storage;
 using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
-	public class StorageUnitDemonite : BaseStorageUnitItem<StorageUnit, UpgradeDemonite>
+	public class StorageUnitDemonite : BaseStorageUnitItem
 	{
 		public override StorageUnitTier Tier => StorageUnitTier.Demonite;
 

@@ -1,10 +1,13 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class UpgradeHallowed : BaseStorageUpgradeItem
 	{
+		public override StorageUnitTier Tier => StorageUnitTier.Hallowed;
+
 		public override void SetDefaults()
 		{
 			Item.rare = ItemRarityID.LightRed;

@@ -1,12 +1,12 @@
-﻿using Terraria;
-using Terraria.GameContent.Creative;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class StorageUnit : BaseStorageUnitItem
 	{
-		public override Components.StorageUnitTier Tier => Components.StorageUnitTier.Basic;
+		public override StorageUnitTier Tier => StorageUnitTier.Basic;
 
 		public override void SetStaticDefaults()
 		{
@@ -29,6 +29,8 @@ namespace MagicStorage.Items
 			recipe.AddRecipeGroup("MagicStorage:AnySilverBar", 10);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.Register();
+
+			base.AddRecipes();  // BaseStorageUnitItem creates recipes for upgrading from Basic to higher tiers
 		}
 	}
 }

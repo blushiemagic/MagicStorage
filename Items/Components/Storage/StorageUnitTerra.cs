@@ -1,10 +1,10 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.CrossMod.Storage;
 using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
-	public class StorageUnitTerra : BaseStorageUnitItem<StorageUnitLuminite, UpgradeTerra>
+	public class StorageUnitTerra : BaseStorageUnitItem
 	{
 		public override StorageUnitTier Tier => StorageUnitTier.Terra;
 

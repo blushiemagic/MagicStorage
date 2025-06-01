@@ -1,10 +1,13 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class UpgradeCrimtane : BaseStorageUpgradeItem
 	{
+		public override StorageUnitTier Tier => StorageUnitTier.Crimtane;
+
 		public override void SetDefaults()
 		{
 			Item.rare = ItemRarityID.Blue;

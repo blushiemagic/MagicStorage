@@ -1,10 +1,13 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class UpgradeBlueChlorophyte : BaseStorageUpgradeItem
 	{
+		public override StorageUnitTier Tier => StorageUnitTier.BlueChlorophyte;
+
 		public override void SetDefaults()
 		{
 			Item.rare = ItemRarityID.Lime;

@@ -1,10 +1,13 @@
-﻿using Terraria;
+﻿using MagicStorage.CrossMod.Storage;
+using Terraria;
 using Terraria.ID;
 
 namespace MagicStorage.Items
 {
 	public class UpgradeTerra : BaseStorageUpgradeItem
 	{
+		public override StorageUnitTier Tier => StorageUnitTier.Terra;
+
 		public override void SetDefaults()
 		{
 			Item.rare = ItemRarityID.Purple;

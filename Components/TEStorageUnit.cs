@@ -2,6 +2,7 @@ using Ionic.Zlib;
 using MagicStorage.Common.IO;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
+using MagicStorage.CrossMod.Storage;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using System;
@@ -73,8 +74,8 @@ namespace MagicStorage.Components
 					capacity += 7;
 				return 40 * capacity;
 				*/
-				int tileStyle = Main.tile[Position].TileFrameY / 36;
-				return StorageUnitUpgradeMetrics.GetCapacity(tileStyle);
+				return GetCurrentTier()?.Capacity
+					?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
 			}
 		}
 
@@ -83,6 +84,18 @@ namespace MagicStorage.Components
 		public bool IsEmpty => items.Count == 0;
 
 		public int NumItems => items.Count;
+
+		public StorageUnitTier GetCurrentTier() => StorageUnitTierLoader.FindFromTile(Position.X, Position.Y);
+
+		public void GetFramingState(out StorageUnitFullness fullness, out bool active) {
+			fullness = items.Count == 0
+				? StorageUnitFullness.Empty
+				: items.Count < Capacity
+					? StorageUnitFullness.PartiallyFull
+					: StorageUnitFullness.Full;
+
+			active = !Inactive;
+		}
 
 		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<StorageUnit>() && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
 
@@ -315,8 +328,8 @@ namespace MagicStorage.Components
 
 			Item spawnedItem = null;
 			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				StorageUnitTier tier = (StorageUnitTier)(Main.tile[Position].TileFrameY / 36);
-				Item core = new Item(StorageUnitUpgradeMetrics.GetCoreItem(tier));
+				StorageUnitTier tier = GetCurrentTier();
+				Item core = new Item(tier.CoreItemType);
 
 				((BaseStorageCore)core.ModItem).SetDataFrom(this);
 
@@ -329,7 +342,7 @@ namespace MagicStorage.Components
 			var types = items.Select(static i => i.type).Distinct().ToList();
 
 			items.Clear();
-			StorageUnit.SetStyle(Position.X, Position.Y, (int)StorageUnitTier.Empty);
+			StorageUnit.SetTypeAndStyle(Position.X, Position.Y, StorageUnitTier.Empty, StorageUnitFullness.Empty, !Inactive);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient) {
 				if (Main.netMode == NetmodeID.Server)
