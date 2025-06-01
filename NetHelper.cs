@@ -234,6 +234,9 @@ namespace MagicStorage
 				case MessageType.AuditSystemMessage:
 					AuditSystem.HandlePacket(reader, sender);
 					break;
+				case MessageType.SyncPityDropsPlayer:
+					ReceivePityDropsPlayerSync(reader, sender);
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
 			}
@@ -2316,6 +2319,17 @@ cleanupContext:
 				}
 			}
 		}
+
+		public static void ReceivePityDropsPlayerSync(BinaryReader reader, int sender) {
+			byte plr = reader.ReadByte();
+			PityLootDrops mp = Main.player[plr].GetModPlayer<PityLootDrops>();
+			mp.ReceiveSync(reader);
+
+			if (Main.netMode == NetmodeID.Server) {
+				// Forward the result
+				mp.SyncPlayer(-1, sender, false);
+			}
+		}
 	}
 
 	internal enum MessageType : byte
@@ -2370,6 +2384,7 @@ cleanupContext:
 		StorageHeartNetworkAssignment,
 		DefaultAccessibleNetworks,
 		SecurityNetworkPassword,
-		AuditSystemMessage
+		AuditSystemMessage,
+		SyncPityDropsPlayer
 	}
 }

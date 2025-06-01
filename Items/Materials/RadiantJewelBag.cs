@@ -1,3 +1,4 @@
+using MagicStorage.Common.DropRules;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
@@ -17,13 +18,17 @@ namespace MagicStorage.Items
 				chanceDenominator: 50,
 				minimumDropped: 1,
 				maximumDropped: 1,
-				chanceNumerator: 9));
+				chanceNumerator: 9)
+				.WithPityDrops(RadiantJewelDrop.PITY_DROP_STRENGTH)
+			);
 			itemLoot.Add(ItemDropRule.ByCondition(new Conditions.IsMasterMode(),
 				ModContent.ItemType<RadiantJewel>(),
 				chanceDenominator: 4,
 				minimumDropped: 1,
 				maximumDropped: 1,
-				chanceNumerator: 1));
+				chanceNumerator: 1)
+				.WithPityDrops(RadiantJewelDrop.PITY_DROP_STRENGTH)
+			);
 		}
 	}
 

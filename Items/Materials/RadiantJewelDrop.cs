@@ -1,3 +1,4 @@
+using MagicStorage.Common.DropRules;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
@@ -7,6 +8,8 @@ namespace MagicStorage.Items
 {
 	public class RadiantJewelDrop : GlobalNPC
 	{
+		public const float PITY_DROP_STRENGTH = 2f / 3f;  // Every 3 kills, 2 extra rolls are performed
+
 		public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
 		{
 			if (npc.type == NPCID.MoonLordCore)
@@ -17,7 +20,9 @@ namespace MagicStorage.Items
 					chanceDenominator: 10,
 					minimumDropped: 1,
 					maximumDropped: 1,
-					chanceNumerator: 1));
+					chanceNumerator: 1)
+					.WithPityDrops(PITY_DROP_STRENGTH)
+				);
 			}
 		}
 	}
