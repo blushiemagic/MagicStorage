@@ -8,7 +8,7 @@ namespace MagicStorage.Modules {
 	public class InfiniteItemsInventory {
 		private HashSet<int> inventory;
 
-		private HashSet<int> Inventory => inventory ??= (inventory = InitializeInventory());
+		private HashSet<int> Inventory => inventory ??= InitializeInventory();
 
 		private bool inventoryWasUpdated = true;
 
@@ -35,6 +35,12 @@ namespace MagicStorage.Modules {
 				inventoryWasUpdated = true;
 
 			return Inventory.Contains(item);
+		}
+
+		public void Clear() {
+			// Force the next usage of the inventory to reinitialize it
+			inventory = null;
+			inventoryWasUpdated = true;
 		}
 
 		public IEnumerable<Item> GetItems() {
