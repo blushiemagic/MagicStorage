@@ -16,10 +16,7 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		public static AuditItem CreateAndLink(AuditFile source, Item item) => new(source.Items.Add(item), item.stack);
 
-		public static AuditItem CreateAndLink(AuditFile source, ReducedItem item) {
-			var sample = ContentSamples.ItemsByType[item.Type];
-			return new(source.Items.Add(sample), item.Stack);
-		}
+		public static AuditItem CreateAndLink(AuditFile source, ReducedItem item) => new(source.Items.Add(item), item.Stack);
 
 		public static AuditItem DeserializeOne(BinaryReader reader) {
 			int index = reader.Read7BitEncodedInt();
