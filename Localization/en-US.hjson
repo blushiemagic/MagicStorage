@@ -749,6 +749,34 @@ Mods: {
 					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
 					Recipe: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
 					'''
+				Help26_Header: Are you finding the text prompts in the UIs cumbersome to use? Here are some helpful controls you can use to help with that:
+				Help26:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
+					While the prompt is focused:
+					  [c/cccc00:Ctrl + Z] to clear
+					  [c/cccc00:Ctrl + X] or [c/cccc00:Shift + Delete] to copy to clipboard then clear
+					  [c/cccc00:Ctrl + C] to copy to clipboard
+					  [c/cccc00:Ctrl + V] or [c/cccc00:Shift + Insert] to paste from clipboard
+					(1/3)
+					'''
+				Help27:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
+					While the prompt is focused:
+					[c/cccc00:Ctrl + Backspace] to delete the last space-separated word
+					  [c/cccc00:Left Arrow] and [c/cccc00:Right Arrow] to move the cursor left and right by one character
+					  [c/cccc00:Home] and [c/cccc00:End] to move the cursor to the start and end
+					  [c/cccc00:Escape] or [c/cccc00:Right Click] the prompt to revert any changes made
+					(2/3)
+					'''
+				Help28:
+					'''
+					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
+					While the prompt is not focused:
+					  [c/cccc00:Right Click] the prompt to clear
+					(3/3)
+					'''
 			}
 
 			ChatOptions: {

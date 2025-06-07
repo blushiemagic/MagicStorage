@@ -39,10 +39,11 @@ namespace MagicStorage
 		internal bool unlockedTip_MoonLord;
 		internal int automatonHelpTip;
 
-		internal const int SAVE_VERSION = SAVE_VERSION_UNIFIED_TIPS;
+		internal const int SAVE_VERSION = SAVE_VERSION_SEARCH_TIPS;
 
 		internal const int SAVE_VERSION_SAVED_TIP_INDEX = 1;
 		internal const int SAVE_VERSION_UNIFIED_TIPS = 2;
+		internal const int SAVE_VERSION_SEARCH_TIPS = 3;
 
 		protected override bool CloneNewInstances => false;
 
@@ -79,16 +80,10 @@ namespace MagicStorage
 			HiddenShimmerItems.Load(tag);
 			FavoritedShimmerItems.Load(tag);
 
-			int version = tag.GetInt("version");
-			if (version >= SAVE_VERSION_SAVED_TIP_INDEX) {
+			if (tag.GetInt("version") == SAVE_VERSION)
 				automatonHelpTip = tag.GetInt("automaton");
-
-				if (version < SAVE_VERSION_UNIFIED_TIPS) {
-					// The only multiplayer tip was added to the rest, so adjust accordingly
-					automatonHelpTip++;
-				}
-			} else
-				automatonHelpTip = 0;
+			else
+				automatonHelpTip = 0;  // Reset to default if the version doesn't match
 
 			BitsByte unlocked = tag.GetByte("unlocked");
 			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);

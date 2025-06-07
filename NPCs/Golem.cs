@@ -178,37 +178,17 @@ namespace MagicStorage.NPCs {
 		}
 
 		public override void SetChatButtons(ref string button, ref string button2) {
-			// Sanity check
-			if (helpOption < 0)
-				helpOption = 0;
-			else if (helpOption > HelpOptionID.Count)
-				helpOption = HelpOptionID.Count;
-
-			// Find the previous available options
-			int prevOption = helpOption;
-			while (prevOption-- > 1) {
-				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[prevOption - 1])) {
-					// A valid option was found
-					break;
-				}
-			}
+			// Ensure that the current option isn't an unavailable one
+			if (helpOption > 0)
+				SkipOverUnavailableTips(false, ref helpOption);
 
 			button = helpOption == 0
 				? Language.GetTextValue("LegacyInterface.51")
-				: prevOption > 0
+				: SkipBackwards(helpOption, out int prevOption) && prevOption > 0
 					? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.PrevHelp")
 					: "";
 
-			// Find the next available option
-			int nextOption = helpOption;
-			while (nextOption++ < HelpOptionID.Count) {
-				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[nextOption - 1])) {
-					// A valid option was found
-					break;
-				}
-			}
-
-			button2 = helpOption > 0 && nextOption <= HelpOptionID.Count
+			button2 = helpOption > 0 && SkipForwards(helpOption, out int nextOption) && nextOption > 0
 				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
 				: "";
 		}
@@ -239,8 +219,11 @@ namespace MagicStorage.NPCs {
 			public const int StorageCores = 23;
 			public const int DecraftingAccess = 24;
 			public const int StorageSecurity = 25;
+			public const int SearchBarControls = 26;
+			public const int SearchBarControls2 = 27;
+			public const int SearchBarControls3 = 28;
 
-			public const int Count = 25;
+			public const int Count = 28;
 
 			public static string GetHelpKey(int id) {
 				string key = "Mods.MagicStorage.Dialogue.Golem.Help";
@@ -304,6 +287,9 @@ namespace MagicStorage.NPCs {
 			HelpOptionID.CraftingStationMoreFunctionality,
 			HelpOptionID.CraftingStationMoreFunctionality2,
 			HelpOptionID.DecraftingAccess,
+			HelpOptionID.SearchBarControls,
+			HelpOptionID.SearchBarControls2,
+			HelpOptionID.SearchBarControls3,
 			HelpOptionID.StorageConnector,
 			HelpOptionID.ShadowDiamond,
 			HelpOptionID.RadiantJewel,
@@ -322,6 +308,8 @@ namespace MagicStorage.NPCs {
 			HelpOptionID.CombinedStations2,
 			HelpOptionID.ConfigurationInterface
 		};
+
+		public int GetSelectedHelp() => helpOption > 0 && helpOption <= HelpOptionID.Count ? helpOptionsByIndex[helpOption - 1] : 0;
 
 		public override void OnChatButtonClicked(bool firstButton, ref string shopName) {
 			var player = Main.LocalPlayer.GetModPlayer<StoragePlayer>();
@@ -345,38 +333,66 @@ namespace MagicStorage.NPCs {
 					helpOption++;
 			}
 
-			// Redirect tips if the player can't view them yet
-			bool forcedSkipForward = false;
-			for (int i = 1; i < HelpOptionID.Count; i++) {
-				if (helpOption > 0 && !HelpOptionID.IsOptionAvailable(helpOptionsByIndex[helpOption - 1])) {
-					if (!forcedSkipForward && helpOption == 1)
-						forcedSkipForward = true;
-
-					if (!forcedSkipForward && !wasHelpOptionUninitialized) {
-						// Skip over the unavailable option
-						if (firstButton)
-							helpOption--;
-						else
-							helpOption++;
-					} else {
-						// Reset the option
-						helpOption = i;
-					}
-				} else
-					break;
-			}
-
-			if (helpOption > HelpOptionID.Count)
-				helpOption = HelpOptionID.Count;
-			else if (helpOption < 1)
-				helpOption = 1;
+			SkipOverUnavailableTips(!wasHelpOptionUninitialized && !firstButton, ref helpOption);
 
 			savedTip = helpOption;
 
-			int option = helpOptionsByIndex[helpOption - 1];
+			int option = GetSelectedHelp();
 
 			Main.npcChatText = HelpOptionID.GetHelpText(option);
 			Main.npcChatCornerItem = HelpOptionID.GetHelpItem(option);
+		}
+
+		private static void SkipOverUnavailableTips(bool forwards, ref int option) {
+			if (option > 0 && HelpOptionID.IsOptionAvailable(helpOptionsByIndex[option - 1]))
+				return;  // The current option is available, no need to skip
+
+			int validIndex;
+			if (forwards) {
+				// Scan forwards, then scan backwards if that fails
+				if (!SkipForwards(option, out validIndex))
+					SkipBackwards(option,out validIndex);
+			} else {
+				// Scan backwards, then scan forwards if that fails
+				if (!SkipBackwards(option, out validIndex))
+					SkipForwards(option, out validIndex);
+			}
+
+			// There's always going to be at least one option that's available
+			option = validIndex;
+
+			if (option < 1)
+				option = 1;
+			else if (option > HelpOptionID.Count)
+				option = HelpOptionID.Count;
+		}
+
+		private static bool SkipForwards(int current, out int validOption) {
+			for (int i = current; i <= HelpOptionID.Count; i++) {
+				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[i - 1])) {
+					// Found a valid option
+					validOption = i;
+					return true;
+				}
+			}
+
+			// No valid options were found
+			validOption = 0;
+			return false;
+		}
+
+		private static bool SkipBackwards(int current, out int validOption) {
+			for (int i = current; i >= 1; i--) {
+				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[i - 1])) {
+					// Found a valid option
+					validOption = i;
+					return true;
+				}
+			}
+
+			// No valid options were found
+			validOption = 0;
+			return false;
 		}
 
 		// Make this Town NPC teleport to the King and/or Queen statue when triggered.
