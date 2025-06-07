@@ -24,8 +24,12 @@ namespace MagicStorage {
 			public HashSet<int> globalHiddenTypes;
 			public ItemTypeOrderedSet hiddenTypes, favoritedTypes;
 			public int recipeFilterChoice;
+			public bool creativeUnitPresent;
+			public HashSet<int> infiniteItems;
 
 			public bool IsHidden(int item) => globalHiddenTypes.Contains(item) || hiddenTypes.Contains(item);
+
+			public bool IsInfiniteIngredient(int item) => creativeUnitPresent || infiniteItems.Contains(item);
 		}
 
 		private class ThreadState : CommonCraftingState {
@@ -40,6 +44,9 @@ namespace MagicStorage {
 		internal static readonly Dictionary<int, int> itemCounts = new();
 		internal static readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = new();
 
+		internal static readonly HashSet<int> isItemInfinite = [];
+		internal static bool allItemsAreInfinite;
+
 		// Only used by DoWithdrawResult to check items from modules
 		internal static readonly List<Item> sourceItemsFromModules = new();
 
@@ -51,6 +58,8 @@ namespace MagicStorage {
 
 		internal static void ResetRefreshCache() {
 			recipesToRefresh = null;
+			isItemInfinite.Clear();
+			allItemsAreInfinite = false;
 		}
 		
 		internal static void RefreshItems_Inner() {
@@ -138,7 +147,9 @@ namespace MagicStorage {
 					globalHiddenTypes = globalHiddenRecipes,
 					hiddenTypes = hiddenRecipes,
 					favoritedTypes = favorited,
-					recipeFilterChoice = recipeChoice
+					recipeFilterChoice = recipeChoice,
+					creativeUnitPresent = CheckForCreativeUnit(heart),
+					infiniteItems = LoadInfiniteItems(heart)
 				}
 			};
 
@@ -155,6 +166,19 @@ namespace MagicStorage {
 			}
 
 			StorageGUI.ThreadContext.Begin(thread);
+		}
+
+		private static bool CheckForCreativeUnit(TEStorageHeart heart) => heart is not null && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
+
+		private static HashSet<int> LoadInfiniteItems(TEStorageHeart heart) {
+			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
+			
+			if (heart is not null) {
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
+				infiniteItems.UnionWith(heart.GetModules().SelectMany(m => m.GetInfiniteItems(sandbox) ?? []));
+			}
+
+			return infiniteItems;
 		}
 
 		private static void SortAndFilter(StorageGUI.ThreadContext thread) {

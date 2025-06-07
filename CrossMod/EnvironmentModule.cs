@@ -38,6 +38,11 @@ namespace MagicStorage {
 		public virtual IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => null;
 
 		/// <summary>
+		/// Allows you to specify what ingredients are considered "infinite" and, thus, aren't consumed when crafting in the Crafting GUI.
+		/// </summary>
+		public virtual IEnumerable<int> GetInfiniteItems(EnvironmentSandbox sandbox) => null;
+
+		/// <summary>
 		/// Allows you to specify which additional recipes should be refreshed when depositing or withdrawing <paramref name="stationItem"/> from the Station Slots in the Crafting UI.<br/>
 		/// Use of the various collections in <see cref="MagicCache"/> or your own cached recipe collections is recommended.
 		/// </summary>

@@ -96,6 +96,9 @@ namespace MagicStorage {
 			int recipeChoice = page.recipeButtons.Choice;
 			int modSearchIndex = page.modSearchBox.ModIndex;
 
+			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
+			infiniteItems.UnionWith(heart.GetModules().SelectMany(m => m.GetInfiniteItems(sandbox) ?? []));
+
 			ThreadState state;
 			StorageGUI.ThreadContext thread = new(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
 				heart = heart,
@@ -113,7 +116,9 @@ namespace MagicStorage {
 					globalHiddenTypes = globalHiddenRecipes,
 					hiddenTypes = hiddenRecipes,
 					favoritedTypes = favorited,
-					recipeFilterChoice = recipeChoice
+					recipeFilterChoice = recipeChoice,
+					creativeUnitPresent = heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any(),
+					infiniteItems = infiniteItems
 				}
 			};
 

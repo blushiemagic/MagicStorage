@@ -146,8 +146,14 @@ namespace MagicStorage
 		}
 
 		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
-			bool[] availableRecipes = currentlyThreading && MagicUI.activeThread.state is ThreadState { recipeConditionsMetSnapshot: bool[] snapshot } ? snapshot : null;
-			return new AvailableRecipeObjects(adjTiles, GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty), availableRecipes);
+			var inventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty);
+
+			if (currentlyThreading && MagicUI.activeThread.state is ThreadState state)
+				return new AvailableRecipeObjects(adjTiles, inventory, state.recipeConditionsMetSnapshot, isItemInfinite, state.creativeUnitPresent);
+			else {
+				var heart = GetHeart();
+				return new AvailableRecipeObjects(adjTiles, inventory, null, LoadInfiniteItems(heart), CheckForCreativeUnit(heart));
+			}
 		}
 
 		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)

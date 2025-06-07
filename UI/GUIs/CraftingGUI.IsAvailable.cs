@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,16 +69,29 @@ namespace MagicStorage {
 			if (recipe.requiredTile.Any(tile => !adjTiles[tile]))
 				return false;
 
+			ThreadState threadState = currentlyThreading && MagicUI.activeThread.state is ThreadState state ? state : null;
+			TEStorageHeart heart = GetHeart();
+
+			if ((currentlyThreading && threadState is not null && threadState.creativeUnitPresent) || CheckForCreativeUnit(heart))
+				goto SkipIngredientChecks;
+
+			HashSet<int> infiniteItems = currentlyThreading && threadState is not null ? threadState.infiniteItems : LoadInfiniteItems(heart);
+
 			var itemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
 
 			foreach (Item ingredient in recipe.requiredItem)
 			{
+				if (infiniteItems.Contains(ingredient.type))
+					continue;
+
 				if (ingredient.stack * batches - IsAvailable_GetItemCount(recipe, ingredient.type, itemCountsDictionary) > 0)
 					return false;
 			}
 
+			SkipIngredientChecks:
+
 			if (currentlyThreading)
-				return MagicUI.activeThread.state is ThreadState state && state.recipeConditionsMetSnapshot[recipe.RecipeIndex];
+				return threadState is not null && threadState.recipeConditionsMetSnapshot[recipe.RecipeIndex];
 
 			bool retValue = true;
 

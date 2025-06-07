@@ -55,6 +55,8 @@ namespace MagicStorage.Modules {
 			return items;
 		}
 
+		public IEnumerable<int> EnumerateIDs() => [.. Inventory];
+
 		private static HashSet<int> InitializeInventory() {
 			HashSet<int> inv = new();
 
@@ -82,6 +84,8 @@ namespace MagicStorage.Modules {
 		public override bool IsAvailable() => Main.LocalPlayer.difficulty == PlayerDifficultyID.Creative;
 
 		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => inventory.GetItems();
+
+		public override IEnumerable<int> GetInfiniteItems(EnvironmentSandbox sandbox) => inventory.EnumerateIDs();
 
 		public override void ConsumeItemForRecipe(EnvironmentSandbox sandbox, Recipe recipe, int type, ref int stack) {
 			if (inventory.Has(type))

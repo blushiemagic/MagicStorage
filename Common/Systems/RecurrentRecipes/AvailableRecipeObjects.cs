@@ -7,11 +7,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		private readonly bool[] tiles;
 		private readonly Dictionary<int, int> inventory;
 		private readonly bool[] recipeToConditionsAvailableCache;
+		public readonly HashSet<int> isItemInfinite;
+		public readonly bool creativeUnitPresent;
 
-		internal AvailableRecipeObjects(bool[] tiles, Dictionary<int, int> inventory, bool[] recipeToConditionsAvailableCache = null) {
+		internal AvailableRecipeObjects(bool[] tiles, Dictionary<int, int> inventory, bool[] recipeToConditionsAvailableCache, HashSet<int> isItemInfinite, bool creativeUnitPresent) {
 			this.tiles = tiles;
 			this.inventory = inventory;
 			this.recipeToConditionsAvailableCache = recipeToConditionsAvailableCache;
+			this.isItemInfinite = isItemInfinite;
+			this.creativeUnitPresent = creativeUnitPresent;
 		}
 
 		public bool IsTileAvailable(int tile) => tile >= 0 && tile < TileLoader.TileCount && tiles[tile];

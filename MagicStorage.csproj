@@ -10,6 +10,28 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" />
   <ItemGroup>
+	<PackageReference Include="Krafs.Publicizer" Version="2.2.1" PrivateAssets="all" />
+	
+	<Publicize Include="tModLoader" />
+	
+	<DoNotPublicize Include="tModLoader:Terraria.Main.OnResolutionChanged" />
+	<DoNotPublicize Include="tModLoader:Terraria.Main.OnTickForThirdPartySoftwareOnly" />
+	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType`2.CloneNewInstances" />
+	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.InitTemplateInstance" />
+	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.Register" />
+	<DoNotPublicize Include="tModLoader:Terraria.ModLoader.ModType.ValidateType" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawChildren" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.DrawSelf" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnLeftClick" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnMouseOut" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnMouseOver" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnRightClick" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnRightMouseDown" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnScrollWheel" />
+	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnUpdate" />
+	<DoNotPublicize Include="tModLoader:Terraria.WorldBuilding.GenPass" />
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="Common\Systems\scramble" />
     <EmbeddedResource Include="Common\Systems\unscramble" />
   </ItemGroup>

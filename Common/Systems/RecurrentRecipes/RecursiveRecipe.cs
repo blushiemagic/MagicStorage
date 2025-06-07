@@ -61,7 +61,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, new SharedCounter(batches * batchSize)), 0);
 			int depth = 0, maxDepth = 0;
 
-			if (MagicStorageConfig.IsRecursionEnabled)
+			if (MagicStorageConfig.IsRecursionEnabled && !available.creativeUnitPresent)
 				ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
 
 			return orderedTree;
@@ -89,7 +89,13 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			foreach (RecipeIngredientInfo ingredient in tree.Root.info.ingredientTrees) {
 				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
 				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
-				
+
+				if (available.isItemInfinite.Contains(requiredItem.type)) {
+					// No recursion needed, go to next ingredient
+					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
+					continue;
+				}
+
 				int requiredPerCraft = requiredItem.stack;
 
 				SharedCounter counter = new SharedCounter(requiredPerCraft * parentBatches);
@@ -127,7 +133,6 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (!anyRecipes) {
 					// Cannot recurse further, go to next ingredient
 					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
-					continue;
 				}
 			}
 
@@ -152,7 +157,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (available is not null)
 				craftingTree.TrimBranches(available);
 
-			craftingTree.GetCraftingInformation(out result);
+			craftingTree.GetCraftingInformation(available, out result);
 		}
 
 		/// <summary>
@@ -166,6 +171,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// <exception cref="ArgumentNullException"/>
 		public int GetMaxCraftable(AvailableRecipeObjects available) {
 			ArgumentNullException.ThrowIfNull(available);
+
+			if (available.creativeUnitPresent || available.isItemInfinite.Contains(original.createItem.type))
+				return 9999;
 
 			var simulation = new CraftingSimulation();
 			simulation.SimulateCrafts(this, 9999, available);

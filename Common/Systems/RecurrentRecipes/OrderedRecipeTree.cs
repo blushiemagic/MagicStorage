@@ -75,6 +75,14 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			if (Invalid)
 				return;
 
+			if (available.creativeUnitPresent) {
+				if (!CraftingGUI.disableNetPrintingForIsAvailable)
+					NetHelper.Report(false, "Creative unit is present, forcing root to be trimmed.");
+
+				Clear();
+				return;
+			}
+
 			// Go from the top of the tree down, cutting off any branches when necessary
 			Queue<OrderedRecipeTree> queue = new();
 			foreach (var leaf in leaves)
@@ -84,19 +92,27 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				if (branch.Invalid)
 					continue;  // Invalid branch, ignore
 
+				Recipe recipe = branch.context.recipe;
+				int result = recipe.createItem.type;
+
+				bool trimBranch;
+				int count = 0;
+
+				if (available.creativeUnitPresent) {
+					// All ingredient requirements are always met
+					trimBranch = true;
+					goto SkipIngredientChecks;
+				}
+
 				// Check if the amount needed has been satisfied
 				// If it is, this recipe and its children are not needed
-				Recipe recipe = branch.context.recipe;
-
-				int result = recipe.createItem.type;
-				SharedCounter remaining = branch.context.amountToCraft;
-
 				Recipe parentRecipe = branch.Root.context.recipe;
 
-				int count = available.GetTotalIngredientQuantity(parentRecipe, result);
-				bool trimBranch = count >= parentRecipe.requiredItem[branch.parentLeafIndex].stack;
-				if (!trimBranch)
-					trimBranch = !available.CanUseRecipe(recipe);
+				count = available.GetTotalIngredientQuantity(parentRecipe, result);
+				Item ingredient = parentRecipe.requiredItem[branch.parentLeafIndex];
+				trimBranch = available.isItemInfinite.Contains(ingredient.type) || count >= ingredient.stack || !available.CanUseRecipe(recipe);
+
+				SkipIngredientChecks:
 
 				if (trimBranch) {
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
@@ -104,6 +120,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 					branch.Clear();
 				} else {
+					SharedCounter remaining = branch.context.amountToCraft;
+
 					remaining -= count;
 
 					remaining.EnsureNotNegative();
@@ -148,7 +166,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 
-		public void GetCraftingInformation(out CraftResult result) {
+		public void GetCraftingInformation(AvailableRecipeObjects available, out CraftResult result) {
 			if (Invalid) {
 				result = default;
 				return;
@@ -197,13 +215,23 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					continue;
 
 				int ingredientBatches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
-
+				
 				Recipe recipe = context.recipe;
+
+				if (available.creativeUnitPresent)
+					goto SkipIngredientChecks;
+
 				int ingredientIndex = 0;
 				foreach (Item item in recipe.requiredItem) {
 					// Consume from the excess results first
 					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack);
 					ingredientIndex++;
+
+					if (available.isItemInfinite.Contains(item.type)) {
+						// The ingredient doesn't need to be crafted, so skip it
+						stack.Reset();
+						continue;
+					}
 
 					if (excessIndicies.TryGetValue(item.type, out int excessIndex)) {
 						ExcessItemInfo info = excessResults[excessIndex];
@@ -265,6 +293,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 							materials[index].UpdateStack(stack);
 					}
 				}
+
+				SkipIngredientChecks:
 
 				// Fake a craft
 				Item createItem = recipe.createItem.Clone();

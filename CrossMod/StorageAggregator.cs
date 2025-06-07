@@ -237,9 +237,6 @@ namespace MagicStorage.CrossMod {
 			}
 		}
 
-		[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "data")]
-		extern static IList<TagCompound> GetData(UnloadedGlobalItem unloaded);
-
 		private static List<TagCompound> GetGlobalItemData(Item item, List<StorageAggregator> aggregators) {
 			if (item.ModItem is UnloadedItem)
 				return null;  // UnloadedItems cannot have global data
@@ -249,7 +246,7 @@ namespace MagicStorage.CrossMod {
 
 			foreach (var globalItem in item.Globals) {
 				if (globalItem is UnloadedGlobalItem unloaded) {
-					list.AddRange(GetData(unloaded));
+					list.AddRange(unloaded.data);
 					continue;
 				}
 

@@ -11,7 +11,6 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria;
 using Microsoft.Xna.Framework;
-using static MagicStorage.CraftingGUI;
 using MagicStorage.CrossMod;
 
 namespace MagicStorage {
