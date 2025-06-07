@@ -220,8 +220,10 @@ namespace MagicStorage.Components
 			if (center != Point16.NegativeOne && ByPosition.TryGetValue(center, out var te) && te is TEStorageCenter centerEnt) {
 				centerEnt.ResetAndSearch();
 
-				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0 && centerEnt.GetHeart()?.Position == StoragePlayer.LocalPlayer.GetStorageHeart().Position)
-					MagicUI.SetRefresh(forceFullRefresh: false);
+				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0) {
+					if (centerEnt.GetHeart() is TEStorageHeart centerHeart && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && centerHeart.Position == playerHeart.Position)
+						MagicUI.SetRefresh(forceFullRefresh: false);
+				}
 			}
 		}
 
