@@ -121,7 +121,7 @@ namespace MagicStorage.CrossMod.Control {
 				try {
 					TagCompound tag = TagIO.FromFile(DestinationPath);
 
-					if (tag.GetList<TagCompound>("options") is not List<TagCompound> tags) {
+					if (tag.GetList<TagCompound>("options") is not { Count: >0 } tags) {
 						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
 						goto UseDefault;
 					}

@@ -91,7 +91,7 @@ namespace MagicStorage.Items
 
 		public override void LoadData(TagCompound tag)
 		{
-			if (tag.GetInt("version") < SAVE_VERSION || tag.GetList<TagCompound>("locations") is not List<TagCompound> locations) {
+			if (tag.GetInt("version") < SAVE_VERSION || tag.GetList<TagCompound>("locations") is not { Count: >0 } locations) {
 				//Default to the last known location
 				Location = new Point16(tag.GetShort("X"), tag.GetShort("Y"));
 			} else {
