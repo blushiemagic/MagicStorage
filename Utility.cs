@@ -760,6 +760,10 @@ namespace MagicStorage {
 			return new Guid(reader.ReadBytes(16));
 		}
 
+		public static string GetUsageText(this ModCommand command) => $"[c/ff6a00: {command.Command}]";
+
+		public static string GetUsageText(this ModCommand command, string args) => $"[c/ff6a00: {command.Command} {args}]";
+
 		public static void WriteStringSafely(this BinaryWriter writer, string value) {
 			writer.Write(value is not null);
 			if (value is not null)

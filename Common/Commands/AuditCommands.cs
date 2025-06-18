@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Players;
-using MagicStorage.Common.Systems.Auditing;
+﻿using MagicStorage.Common.Systems.Auditing;
 using Microsoft.Xna.Framework;
 using System;
 using System.IO;
@@ -13,7 +12,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat | CommandType.Console;
 
-		public override string Usage => "[c/ff6a00:Usage: /msaudit <file>]";
+		public override string Usage => this.GetUsageText(args: "<file>");
 
 		public override string Description => Mod.GetLocalization("AuditLogging.CommandInfo.Descriptions.msaudit").Value;
 
@@ -63,7 +62,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat | CommandType.Console;
 
-		public override string Usage => "[c/ff6a00:Usage: /msauditclear]";
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("AuditLogging.CommandInfo.Descriptions.msauditclear").Value;
 

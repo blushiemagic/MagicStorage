@@ -105,6 +105,9 @@ namespace MagicStorage
 			RefreshStorageItems();
 			blockStorageItems.Clear();
 
+			// Reset the craft buttons
+			craftAmountTarget = 1;
+
 			NetHelper.Report(true, "Successfully reassigned current recipe!");
 		}
 

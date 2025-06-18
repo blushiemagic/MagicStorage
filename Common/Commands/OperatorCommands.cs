@@ -9,11 +9,11 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Commands {
 	internal class RequestOperator : ModCommand {
-		public override string Command => "reqop";
+		public override string Command => "msreqop";
 
 		public override CommandType Type => CommandType.Chat;
 
-		public override string Usage => "[c/ff6a00:Usage: /reqop]";
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.reqop").Value;
 
@@ -42,7 +42,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat;
 
-		public override string Usage => $"[c/ff6a00:Usage: /{Command} <number>]";
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions." + (GivesOperatorStatus ? "op" : "deop")).Value;
 
@@ -91,13 +91,13 @@ namespace MagicStorage.Common.Commands {
 	}
 
 	internal class GiveOperator : ChangeOperatorStatusCommand {
-		public override string Command => "op";
+		public override string Command => "msop";
 
 		public override bool GivesOperatorStatus => true;
 	}
 
 	internal class RemoveOperator : ChangeOperatorStatusCommand {
-		public override string Command => "deop";
+		public override string Command => "msdeop";
 
 		public override bool GivesOperatorStatus => false;
 	}
@@ -107,7 +107,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat;
 
-		public override string Usage => "[c/ff6a00:Usage: /whois]";
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.whois").Value;
 
@@ -142,7 +142,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat;
 
-		public override string Usage => "[c/ff6a00:Usage: /whoami]";
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("ServerOperator.CommandInfo.Descriptions.whoami").Value;
 
