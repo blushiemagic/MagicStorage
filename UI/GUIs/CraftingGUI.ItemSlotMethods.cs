@@ -20,7 +20,7 @@ namespace MagicStorage {
 
 		internal static Item GetHeader(int slot, ref int context)
 		{
-			return selectedRecipe?.createItem ?? new Item();
+			return (selectedRecipe?.createItem.Clone()) ?? new Item();
 		}
 
 		internal static Item GetIngredient(int slot, ref int context)
