@@ -93,6 +93,9 @@ namespace MagicStorage.Components
 
 		public string storageName;
 
+		internal bool netcodeUpdate;
+		internal int netDesync;
+
 		public IEnumerable<Item> UniqueItemsPutHistory => _uniqueItemsPutHistory.Items;
 
 		public override void OnKill()
@@ -640,6 +643,9 @@ namespace MagicStorage.Components
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 				item.SetDefaults(0, true);
+
+				netcodeUpdate = true;
+				netDesync = 0;
 			}
 			else
 			{
@@ -678,6 +684,9 @@ namespace MagicStorage.Components
 					item.SetDefaults(0, true);
 				}
 				changed = true;
+
+				netcodeUpdate = true;
+				netDesync = 0;
 			}
 			else
 			{
@@ -742,6 +751,9 @@ namespace MagicStorage.Components
 				ItemIO.Send(lookFor, packet, true, true);
 				packet.Send();
 
+				netcodeUpdate = true;
+				netDesync = 0;
+
 				return new Item();
 			}
 
@@ -763,6 +775,10 @@ namespace MagicStorage.Components
 				ModPacket packet = PrepareClientRequest(Operation.WithdrawAllAndDestroy);
 				packet.Write(type);
 				packet.Send();
+
+				netcodeUpdate = true;
+				netDesync = 0;
+
 				return;
 			}
 
@@ -807,6 +823,10 @@ namespace MagicStorage.Components
 			if (!net && Main.netMode == NetmodeID.MultiplayerClient) {
 				ModPacket packet = PrepareClientRequest(Operation.DeleteUnloadedGlobalItemData);
 				packet.Send();
+
+				netcodeUpdate = true;
+				netDesync = 0;
+
 				return;
 			}
 

@@ -444,10 +444,12 @@ cleanupContext:
 				return;
 			}
 
+			var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+
 			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
-				var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+				
 				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventory);
 			}
 			else if (op == TEStorageHeart.Operation.DepositAll)
@@ -456,7 +458,6 @@ cleanupContext:
 				for (int k = 0; k < count; k++)
 				{
 					Item item  = ItemIO.Receive(reader, true, true);
-					var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, false);
 				}
 			}
@@ -464,26 +465,24 @@ cleanupContext:
 			{
 				int type = reader.ReadInt32();
 
-				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-
 				heart.WithdrawManyAndDestroy(type, out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.DeleteUnloadedGlobalItemData)
 			{
-				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-
 				heart.DestroyUnloadedGlobalItemData(out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
-				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
 
 				if (item.IsAir)
 					item = CraftingGUI.TryToWithdrawFromModuleItems(item, wasAlreadyCloned: true);
 
 				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory);
 			}
+
+			heart.netcodeUpdate = true;
+			heart.netDesync = 0;
 
 			Report(true, MessageType.ServerStorageResult + " packet received by client " + Main.myPlayer);
 			Report(false, "Operation: " + op);
@@ -530,9 +529,12 @@ cleanupContext:
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByPosition.ContainsKey(position) && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == position) {
+			if (TileEntity.ByPosition.ContainsKey(position) && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == position) {
 				MagicUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				MagicUI.SetNextCollectionsToRefresh(types);
+
+				heart.netcodeUpdate = true;
+				heart.netDesync = 0;
 			}
 
 			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);

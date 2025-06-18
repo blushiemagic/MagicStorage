@@ -270,6 +270,21 @@ namespace MagicStorage.UI.States {
 					_popupBlocker.Remove();
 				}
 
+				if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart) {
+					// Force a full refresh if netcode packets have been sent or received
+					// This is to hopefully mitigate any phantom/fake items that clients receive, since they go away when reopening the UI anyway
+					if (heart.netcodeUpdate) {
+						heart.netDesync++;
+
+						if (heart.netDesync >= 40) {
+							heart.netcodeUpdate = false;
+							heart.netDesync = 0;
+
+							MagicUI.SetRefresh(forceFullRefresh: true);
+						}
+					}
+				}
+
 				MagicUI.CheckRefresh();
 
 				if (!Main.mouseRight)
