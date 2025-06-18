@@ -62,12 +62,12 @@ namespace MagicStorage.Common.Systems
 		public static bool empressDiamond;
 
 		//Modded support
-		public static HashSet<int> moddedDiamonds;
-		private static HashSet<string> unloadedModdedDiamonds;
+		public static HashSet<int> moddedDiamonds = [];
+		private static HashSet<string> unloadedModdedDiamonds = [];
 
-		internal static HashSet<int> disallowDropModded;
-		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType;
-		internal static Dictionary<int, IItemDropRule> moddedDiamondDropRulesByType;
+		internal static HashSet<int> disallowDropModded = [];
+		internal static Dictionary<int, Func<int>> moddedDiamondsDroppedByType = [];
+		internal static Dictionary<int, IItemDropRule> moddedDiamondDropRulesByType = [];
 
 		public override void Load()
 		{
