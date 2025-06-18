@@ -10,12 +10,6 @@ using Terraria.ModLoader;
 namespace MagicStorage.Common.MapObjects {
 	internal class PortableAccessRangeDisplay : ModMapLayer {
 		private struct MapOverlayDrawContextCapture {
-			public static readonly FieldInfo _mapPosition = typeof(MapOverlayDrawContext).GetField("_mapPosition", BindingFlags.NonPublic | BindingFlags.Instance);
-			public static readonly FieldInfo _mapOffset = typeof(MapOverlayDrawContext).GetField("_mapOffset", BindingFlags.NonPublic | BindingFlags.Instance);
-			public static readonly FieldInfo _clippingRect = typeof(MapOverlayDrawContext).GetField("_clippingRect", BindingFlags.NonPublic | BindingFlags.Instance);
-			public static readonly FieldInfo _mapScale = typeof(MapOverlayDrawContext).GetField("_mapScale", BindingFlags.NonPublic | BindingFlags.Instance);
-			public static readonly FieldInfo _drawScale = typeof(MapOverlayDrawContext).GetField("_drawScale", BindingFlags.NonPublic | BindingFlags.Instance);
-
 			public Vector2 mapPosition;
 			public Vector2 mapOffset;
 			public Rectangle? clippingRect;
@@ -25,11 +19,11 @@ namespace MagicStorage.Common.MapObjects {
 			public static MapOverlayDrawContextCapture Capture(MapOverlayDrawContext context) {
 				MapOverlayDrawContextCapture capture = new();
 
-				capture.mapPosition = (Vector2)_mapPosition.GetValue(context);
-				capture.mapOffset = (Vector2)_mapOffset.GetValue(context);
-				capture.clippingRect = (Rectangle?)_clippingRect.GetValue(context);
-				capture.mapScale = (float)_mapScale.GetValue(context);
-				capture.drawScale = (float)_drawScale.GetValue(context);
+				capture.mapPosition = context._mapPosition;
+				capture.mapOffset = context._mapOffset;
+				capture.clippingRect = context._clippingRect;
+				capture.mapScale = context._mapScale;
+				capture.drawScale = context._drawScale;
 				
 				return capture;
 			}
@@ -54,7 +48,7 @@ namespace MagicStorage.Common.MapObjects {
 			if (!drawContext.valid)
 				return;
 
-			drawContext.Extract(out Texture2D texture, out var position, out var color, out var frame, out var scale, out var alignment);
+			drawContext.ExtractToMap(out Texture2D texture, out var position, out var color, out var frame, out var scale, out var alignment);
 
 			position = (position - capture.mapPosition) * capture.mapScale + capture.mapOffset;
 			if (capture.clippingRect.HasValue && !capture.clippingRect.Value.Contains(position.ToPoint()))

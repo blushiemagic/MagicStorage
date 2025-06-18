@@ -12,7 +12,7 @@ using Terraria.UI;
 
 namespace MagicStorage.Common.Systems {
 	internal class PortableAccessAreas : ModSystem {
-		public struct DrawingContext {
+		public readonly struct DrawingContext {
 			public readonly System.Drawing.RectangleF area;
 			public readonly float colorFactor;
 			public readonly Vector2 worldCenter;
@@ -53,7 +53,7 @@ namespace MagicStorage.Common.Systems {
 				valid = true;
 			}
 
-			public void Extract(out Asset<Texture2D> asset, out Vector2 position, out Rectangle source, out Color color, out Vector2 origin, out float scale) {
+			public void ExtractToWorld(out Asset<Texture2D> asset, out Vector2 position, out Rectangle source, out Color color, out Vector2 origin, out float scale) {
 				asset = DebugArea;
 				position = worldCenter - Main.screenPosition;
 				
@@ -67,7 +67,7 @@ namespace MagicStorage.Common.Systems {
 				scale = playerToPylonRange * 2f;
 			}
 
-			public void Extract(out Texture2D texture, out Vector2 position, out Color color, out SpriteFrame frame, out float scale, out Alignment alignment) {
+			public void ExtractToMap(out Texture2D texture, out Vector2 position, out Color color, out SpriteFrame frame, out float scale, out Alignment alignment) {
 				texture = DebugArea.Value;
 				position = worldCenter.ToTileCoordinates16().ToVector2();
 				color = Color.White * colorFactor;
@@ -125,7 +125,7 @@ namespace MagicStorage.Common.Systems {
 			GetDrawingInformation(player, access, playerToPylonRange, drawNear, out var contexts);
 
 			foreach (DrawingContext context in contexts) {
-				context.Extract(out Asset<Texture2D> asset, out var position, out var source, out var color, out var origin, out var scale);
+				context.ExtractToWorld(out Asset<Texture2D> asset, out var position, out var source, out var color, out var origin, out var scale);
 
 				spriteBatch.Draw(asset.Value, position, source, color, 0, origin, scale, SpriteEffects.None, 0);
 			}
