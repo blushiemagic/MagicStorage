@@ -209,6 +209,7 @@ namespace MagicStorage.Sorting
 				var filteredRecipes = recipes
 					.AsParallel()
 					.AsOrdered()
+					.Where(r => !HiddenRecipes.IsHidden(r))
 					.Filter(thread, GetRecipeResult);
 
 				thread.CompleteOneTask();

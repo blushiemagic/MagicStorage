@@ -152,7 +152,7 @@ namespace MagicStorage {
 			forceSpecificRecipeResort = false;
 		}
 
-		private static bool IsRecipeValidForQuery(StorageGUI.ThreadContext thread, Recipe recipe) => recipe is not null && ItemSorter.RecipePassesFilter(recipe, thread);
+		private static bool IsRecipeValidForQuery(StorageGUI.ThreadContext thread, Recipe recipe) => recipe is not null && !HiddenRecipes.IsHidden(recipe) && ItemSorter.RecipePassesFilter(recipe, thread);
 
 		private static bool CanBeAdded(StorageGUI.ThreadContext thread, CommonCraftingState state, Recipe r)
 			=> FilteringOptionLoader.Get(thread.filterMode).Filter(r.createItem) && DoesItemPassFilters(thread, state, r.createItem);
