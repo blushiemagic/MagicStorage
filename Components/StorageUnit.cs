@@ -4,6 +4,7 @@ using MagicStorage.CrossMod.Storage;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -169,12 +170,20 @@ namespace MagicStorage.Components
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			Tile tile = Main.tile[i, j];
+			if (!GetGlowmask(i, j, tile.TileType, tile.TileFrameX, tile.TileFrameY, out var asset, out var color))
+				return;
+
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
 			Rectangle frame = new(tile.TileFrameX, tile.TileFrameY, 16, 16);
-			Color lightColor = Lighting.GetColor(i, j, Color.White);
-			Color color = Color.Lerp(Color.White, lightColor, 0.5f);
-			spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/StorageUnit_Glow").Value, drawPos, frame, color);
+			spriteBatch.Draw(asset.Value, drawPos, frame, color);
+		}
+
+		protected virtual bool GetGlowmask(int x, int y, int type, int frameX, int frameY, out Asset<Texture2D> asset, out Color drawColor) {
+			asset = Mod.Assets.Request<Texture2D>("Components/StorageUnit_Glow");
+			Color lightColor = Lighting.GetColor(x, y, Color.White);
+			drawColor = Color.Lerp(Color.White, lightColor, 0.5f);
+			return true;
 		}
 	}
 }
