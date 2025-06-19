@@ -29,27 +29,34 @@ namespace MagicStorage.Common.Systems {
 		internal static RecipeGroup toiletRecipeGroup;
 		internal static RecipeGroup fishingBobberRecipeGroup;
 
+		private static readonly int[] _vanillaItemIDs = Enumerable.Range(1, ItemID.Count - 1).ToArray();
+
+		private static int[] GetItems(int iconicItem, Func<Item, bool> doesItemCount, params int[] ignore) {
+			List<int> ids = _vanillaItemIDs
+				.Select(static id => ContentSamples.ItemsByType[id])
+				.Where(static item => !item.IsAir)
+				.Where(doesItemCount)
+				.Select(static item => item.type)
+				.ToList();
+
+			ids.Remove(iconicItem);
+			ids.Insert(0, iconicItem);
+
+			foreach (int id in ignore)
+				ids.Remove(id);
+
+			return [.. ids];
+		}
+
+		private static int[] GetItems(int startID, int endID) => Enumerable.Range(startID, endID - startID + 1).ToArray();
+
 		public override void AddRecipeGroups()
 		{
 			ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicRecipes::AddRecipeGroups");
 
-			IEnumerable<int> vanillaItems = Enumerable.Range(0, ItemID.Count);
-
-			int[] GetItems(int iconicItem, Regex regex, params int[] ignore) {
-				List<int> ids = vanillaItems.Where(id => regex.IsMatch(ItemID.Search.GetName(id))).ToList();
-
-				ids.Remove(iconicItem);
-				ids.Insert(0, iconicItem);
-
-				foreach (int id in ignore)
-					ids.Remove(id);
-
-				return ids.ToArray();
-			}
-
 			string any = Language.GetTextValue("LegacyMisc.37");
 
-			int[] items = GetItems(ItemID.Chest, MatchChestItem());
+			int[] items = GetItems(ItemID.Chest, static item => item.createTile > -1 && TileID.Sets.BasicChest[item.createTile]);
 			RecipeGroup group = new(() => $"{any} Chest", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyChest", group);
 			RegisterGroupClone(group, nameof(ItemID.Chest));
@@ -64,8 +71,7 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyDiamond", group);
 			RegisterGroupClone(group, nameof(ItemID.Diamond));
 
-			items = GetItems(ItemID.WorkBench, MatchWorkBenchItem(),
-				ItemID.HeavyWorkBench);
+			items = GetItems(ItemID.WorkBench, static item => item.createTile is TileID.WorkBenches);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WorkBench)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyWorkBench", group);
 			RegisterGroupClone(group, nameof(ItemID.WorkBench));
@@ -80,13 +86,12 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyBottle", group);
 			RegisterGroupClone(group, nameof(ItemID.Bottle));
 
-			items = GetItems(ItemID.MetalSink, MatchSinkItem());
+			items = GetItems(ItemID.MetalSink, static item => item.createTile is TileID.Sinks);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.MetalSink)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnySink", group);
 			RegisterGroupClone(group, nameof(ItemID.MetalSink));
 
-			items = GetItems(ItemID.WoodenTable, MatchTableItem(),
-				ItemID.BewitchingTable, ItemID.AlchemyTable);
+			items = GetItems(ItemID.WoodenTable, static item => item.createTile is TileID.Tables or TileID.Tables2);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.WoodenTable)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyTable", group);
 			RegisterGroupClone(group, nameof(ItemID.WoodenTable));
@@ -106,40 +111,27 @@ namespace MagicStorage.Common.Systems {
 			RecipeGroup.RegisterGroup("MagicStorage:AnyHmFurnace", group);
 			RegisterGroupClone(group, nameof(ItemID.AdamantiteForge));
 
-			items = GetItems(ItemID.Bookcase, MatchBookcaseItem());
+			items = GetItems(ItemID.Bookcase, static item => item.createTile is TileID.Bookcases);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Bookcase)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyBookcase", group);
 			RegisterGroupClone(group, nameof(ItemID.Bookcase));
 
-			items = new int[]
-			{
-				ItemID.Tombstone,
-				ItemID.GraveMarker,
-				ItemID.CrossGraveMarker,
-				ItemID.Headstone,
-				ItemID.Gravestone,
-				ItemID.Obelisk,
-				ItemID.RichGravestone1,
-				ItemID.RichGravestone2,
-				ItemID.RichGravestone3,
-				ItemID.RichGravestone4,
-				ItemID.RichGravestone5
-			};
+			items = GetItems(ItemID.Tombstone, static item => item.createTile is TileID.Tombstones);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Tombstone)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyTombstone", group);
 			RegisterGroupClone(group, nameof(ItemID.Tombstone));
 
-			items = GetItems(ItemID.Campfire, MatchCampfireItem());
+			items = GetItems(ItemID.Campfire, static item => item.createTile is TileID.Campfire);
 			group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Campfire)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyCampfire", group);
 			RegisterGroupClone(group, nameof(ItemID.Campfire));
 
-			items = GetItems(ItemID.Toilet, MatchToiletItem());
+			items = GetItems(ItemID.Toilet, static item => item.createTile is TileID.Toilets);
 			toiletRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.Toilet)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyToilet", group);
 			RegisterGroupClone(group, nameof(ItemID.Toilet));
 
-			items = GetItems(ItemID.FishingBobber, MatchFishingBobberItem());
+			items = GetItems(startID: ItemID.FishingBobber, endID: ItemID.FishingBobberGlowingRainbow);
 			fishingBobberRecipeGroup = group = new RecipeGroup(() => $"{any} {Lang.GetItemNameValue(ItemID.FishingBobber)}", items);
 			RecipeGroup.RegisterGroup("MagicStorage:AnyFishingBobber", group);
 			RegisterGroupClone(group, nameof(ItemID.FishingBobber));
@@ -195,15 +187,5 @@ namespace MagicStorage.Common.Systems {
 				RecipeGroup.RegisterGroup(groupName, group);
 			}
 		}
-		
-		// Regexes for filtering vanilla item types
-		[GeneratedRegex(@"\b(?!Fake_)(.*Chest)\b")] private static partial Regex MatchChestItem();
-		[GeneratedRegex(@"\b(.*WorkBench)\b")] private static partial Regex MatchWorkBenchItem();
-		[GeneratedRegex(@"\b(.*Sink)(?:Does)?\b")] private static partial Regex MatchSinkItem();
-		[GeneratedRegex(@"\b(.*Table)(?:WithCloth)?\b")] private static partial Regex MatchTableItem();
-		[GeneratedRegex(@"\b(.*Bookcase)\b")] private static partial Regex MatchBookcaseItem();
-		[GeneratedRegex(@"\b(.*Campfire)\b")] private static partial Regex MatchCampfireItem();
-		[GeneratedRegex(@"\b(.*Toilet)\b")] private static partial Regex MatchToiletItem();
-		[GeneratedRegex(@"\b(FishingBobber.*)\b")] private static partial Regex MatchFishingBobberItem();
 	}
 }
