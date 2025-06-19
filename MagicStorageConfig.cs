@@ -172,6 +172,9 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool localHostAdmin;
 
+		[DefaultValue(true)]
+		public bool automatonHappiness;
+
 		[JsonIgnore]
 		public static bool AllowAutomatonToMoveIn => Instance.allowAutomatonToMoveIn;
 
@@ -180,6 +183,9 @@ namespace MagicStorage {
 
 		[JsonIgnore]
 		public static bool GiveLocalHostAdminOnJoin => Instance.localHostAdmin;
+
+		[JsonIgnore]
+		public static bool AutomatonHappinessAffectsSellPrices => Instance.automatonHappiness;
 
 		public override bool AcceptClientChanges(ModConfig pendingConfig, int whoAmI, ref NetworkText message) {
 			if (Main.player[whoAmI].GetModPlayer<OperatorPlayer>().hasOp)

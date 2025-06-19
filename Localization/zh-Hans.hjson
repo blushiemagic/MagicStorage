@@ -1372,6 +1372,11 @@ Mods: {
 					// Label: Give Server Admin to Local Host
 					// Tooltip: Enable to force the local host to have the Server Administrator status when joining a server
 				}
+
+				automatonHappiness: {
+					// Label: Automaton Happiness Affects Sell Prices
+					// Tooltip: Disable to prevent the Automaton from affecting the sell value of items sold via Item Selling Mode
+				}
 			}
 
 			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"

@@ -2,6 +2,7 @@
 using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Components;
+using MagicStorage.NPCs;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -299,12 +300,28 @@ namespace MagicStorage.UI.Selling {
 		public static void GetSellValues(Player sellingPlayer, out Coins coins) {
 			ClampedLongArithmetic sum = 0;
 
+			double adjustment = 1.0;
+
+			if (MagicStorageServerConfig.AutomatonHappinessAffectsSellPrices) {
+				foreach (NPC npc in Main.ActiveNPCs) {
+					if (npc.ModNPC is not Golem)
+						continue;
+
+					var settings = Main.ShopHelper.GetShoppingSettings(sellingPlayer, npc);
+					adjustment *= settings.PriceAdjustment;
+				}
+			}
+
 			foreach (var item in _items) {
 				if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item.possiblyUnreliableItemInstance))
 					continue;
 
 				sum += (long)item._fastGetItemValue * item.stack;
 			}
+
+			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
+			// Hence, we need to divide instead to make items worth less when happiness is worse
+			sum = (long)(sum / adjustment);
 
 			coins = new Coins(sum);
 		}
