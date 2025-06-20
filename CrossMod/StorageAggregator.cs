@@ -16,11 +16,7 @@ namespace MagicStorage.CrossMod {
 		public int Type { get; private set; }
 
 		private bool? _conditionallyApplies;
-		/// <summary>
-		/// Whether this aggregator conditionally applies to some items but not others.<br/>
-		/// <see langword="true"/> if the type overrides <see cref="AppliesToItem(Item)"/>
-		/// </summary>
-		public bool ConditionallyAppliesToItems {
+		internal bool ConditionallyAppliesToItems {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get => _conditionallyApplies ??= LoaderUtils.HasOverride(this, m => m.AppliesToItem);
 		}
@@ -159,7 +155,7 @@ namespace MagicStorage.CrossMod {
 
 			try {
 				foreach (var aggregator in _aggregators) {
-					if (aggregator.AppliesToItem(destination) && aggregator.AppliesToItem(checking)) {
+					if (aggregator.ConditionallyAppliesToItems && aggregator.AppliesToItem(destination) && aggregator.AppliesToItem(checking)) {
 						bool? result = aggregator.CanAggregateItems(destination, checking);
 
 						if (result is bool resultValue) {
