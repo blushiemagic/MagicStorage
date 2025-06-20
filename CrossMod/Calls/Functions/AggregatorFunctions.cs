@@ -78,8 +78,7 @@ namespace MagicStorage.CrossMod.Calls.Functions {
 			);
 		}
 
-		private static bool Handle(Mod mod, string name, Func<Item, bool> appliesToItem, NothingOr<Func<Item, Item, bool?>> canAggregateItems,
-			NothingOr<Action<ModItem, TagCompound>> selectData, NothingOr<Action<GlobalItem, TagCompound>> selectGlobalData) {
+		private static bool Handle(Mod mod, string name, Func<Item, bool> appliesToItem, NothingOr<Func<Item, Item, bool?>> canAggregateItems, NothingOr<Action<ModItem, TagCompound>> selectData, NothingOr<Action<GlobalItem, TagCompound>> selectGlobalData) {
 			StorageAggregator instance;
 			if (selectData.IsValue && selectGlobalData.IsValue) {
 				DynamicAggregator_SelectAllData aggregator = new() {
