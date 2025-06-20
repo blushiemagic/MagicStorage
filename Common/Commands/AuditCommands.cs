@@ -12,7 +12,7 @@ namespace MagicStorage.Common.Commands {
 
 		public override CommandType Type => CommandType.Chat | CommandType.Console;
 
-		public override string Usage => this.GetUsageText(args: "<file>");
+		public override string Usage => this.GetUsageText();
 
 		public override string Description => Mod.GetLocalization("AuditLogging.CommandInfo.Descriptions.msaudit").Value;
 
