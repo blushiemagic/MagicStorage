@@ -17,8 +17,8 @@ Want to support the mod's development?  Donate to absoluteAquarian's Patreon:  h
 [c/ffff00:wvlad]
 - For implementing important bug fixes that were integrated into the 1.4 port for this mod
 [c/ffff00:Exterminator]
-- For developing [c/cccc00:Magic Storage - Extra] fork of this mod for 1.3 tModLoader
+- For developing the [c/cccc00:Magic Storage - Extra] fork of this mod for 1.3 tModLoader
 [c/ffff00:AdipemDragon]
-- For crating most of the sprites used in the mod
+- For creating most of the sprites used in the mod
 [c/ffff00:Yowave]
 - For implementing bug fixes and optimizations for the mod during my hiatus in Fall 2021

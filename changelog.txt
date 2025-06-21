@@ -1,4 +1,8 @@
-﻿[h1]v0.6.1[/h1]
-See [url=https://discord.com/channels/860671977449979914/864921239957012481]#magic-storage-changelog[/url] for more information.
+﻿[h1]v0.7[/h1]
+- Numerous bug fixes
+- Improved the performance and stability of the in-house recursion crafting system
+- Added new content:  Storage Cores, Storage Security, Storage Aether Interface and more
+- Added new APIs for mod developers: StorageUnitTier, HiddenRecipes, ExtraCraftItemsSystem and more
+- Added new Mod.Call() functions
 
-TODO
+To see the full change log, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
