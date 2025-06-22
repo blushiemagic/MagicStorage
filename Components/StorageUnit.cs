@@ -47,11 +47,16 @@ namespace MagicStorage.Components
 			if (Main.tile[i, j].TileFrameY % 36 == 18)
 				j--;
 
-			StorageUnitTier tier = StorageUnitTierLoader.FindFromTile(i, j)
-				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j))) {
+				StorageUnitTier tier = StorageUnitTierLoader.FindFromTile(i, j)
+					?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
 
-			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j)) && tier.Type != StorageUnitTier.Basic.Type && tier.Type != StorageUnitTier.Empty.Type)
-				fail = true;
+				Tile tile = Main.tile[i, j];
+				tier.GetState(tile.TileFrameX, tile.TileFrameY, out StorageUnitFullness fullness, out _);
+
+				if (fullness != StorageUnitFullness.Empty)
+					fail = true;
+			}
 		}
 
 		public override bool CanExplode(int i, int j) {
@@ -180,7 +185,7 @@ namespace MagicStorage.Components
 		}
 
 		protected virtual bool GetGlowmask(int x, int y, int type, int frameX, int frameY, out Asset<Texture2D> asset, out Color drawColor) {
-			asset = Mod.Assets.Request<Texture2D>("Components/StorageUnit_Glow");
+			asset = ModContent.Request<Texture2D>(Texture + "_Glow");
 			Color lightColor = Lighting.GetColor(x, y, Color.White);
 			drawColor = Color.Lerp(Color.White, lightColor, 0.5f);
 			return true;

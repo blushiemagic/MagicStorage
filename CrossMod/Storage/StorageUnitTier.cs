@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod.Default;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace MagicStorage.CrossMod.Storage {
 	/// <summary>
 	/// The base class containing information about a Storage Unit tier
 	/// </summary>
-	public abstract class StorageUnitTier : ModType {
+	public abstract class StorageUnitTier : ModType, IValidateAtPostSetupContent {
 		public static StorageUnitTier Basic { get; internal set; }
 
 		public static StorageUnitTier Demonite { get; internal set; }
@@ -79,9 +80,7 @@ namespace MagicStorage.CrossMod.Storage {
 
 		public sealed override void SetupContent() => SetStaticDefaults();
 
-		protected override void ValidateType() {
-			base.ValidateType();
-
+		void IValidateAtPostSetupContent.ValidateType() {
 			// The internal classes for the base tiers have special treatment, so these checks aren't needed for them
 			if (this is not MagicStorageTier) {
 				if (ModContent.GetModItem(UpgradeItemType) is not Items.BaseStorageUpgradeItem)
@@ -128,15 +127,19 @@ namespace MagicStorage.CrossMod.Storage {
 		public bool CanUpgradeTo(StorageUnitTier other) {
 			ArgumentNullException.ThrowIfNull(other);
 
+			if (Type < 0 || other.Type < 0)
+				return false;
+
 			return !_blacklisted.Contains(other.Type) && _upgradedByHash.Contains(other.Type);
 		}
 
 		/// <summary>
-		/// Marks <see langword="this"/> as upgradeable by <paramref name="nextTier"/> (<see langword="this"/> --> <paramref name="nextTier"/>).<br/>
+		/// Marks <see langword="this"/> as upgradeable by <paramref name="nextTier"/> (<see langword="this"/> --&gt; <paramref name="nextTier"/>).<br/>
 		/// Does nothing if the connection was previously destroyed
 		/// </summary>
 		/// <exception cref="ArgumentException"/>
 		/// <exception cref="ArgumentNullException"/>
+		/// <exception cref="Exception"/>
 		/// <exception cref="InvalidOperationException"/>
 		public void SetUpgradeableTo(StorageUnitTier nextTier) {
 			ArgumentNullException.ThrowIfNull(nextTier);
@@ -144,8 +147,23 @@ namespace MagicStorage.CrossMod.Storage {
 			if (!StorageUnitTierLoader.Loading)
 				throw new Exception("StorageUnitTier connections can only be established during mod loading");
 
-			if (object.ReferenceEquals(nextTier, this))
+			if (Type < 0)
+				throw new InvalidOperationException("Cannot establish upgrade paths for a StorageUnitTier that has not been registered yet");
+
+			if (nextTier.Type < 0)
+				throw new InvalidOperationException("Cannot establish upgrade paths to a StorageUnitTier that has not been registered yet");
+
+			if (Type == Empty.Type)
+				throw new InvalidOperationException("This operation is not supported for StorageUnitTier.Empty");
+
+			if (nextTier.Type == Empty.Type)
+				throw new InvalidOperationException("This operation is not supported for StorageUnitTier.Empty");
+
+			if (Type == nextTier.Type || object.ReferenceEquals(nextTier, this))
 				throw new ArgumentException("An upgrade cannot upgrade to itself", nameof(nextTier));
+
+			if (nextTier.Capacity < Capacity)
+				throw new ArgumentException($"Cannot upgrade to a StorageUnitTier with a lower capacity ({nextTier.Capacity} < {Capacity})", nameof(nextTier));
 
 			if (_blacklisted.Contains(nextTier.Type)) {
 				Mod.Logger.Warn($"Attempt to connect upgrade path ({FullNameExceptFromMagicStorage(this)} --> {FullNameExceptFromMagicStorage(nextTier)}) was blocked due to a mod preventing the connection.");
@@ -166,10 +184,11 @@ namespace MagicStorage.CrossMod.Storage {
 		}
 
 		/// <summary>
-		/// Marks <paramref name="previousTier"/> as upgradeable by <see langword="this"/> (<paramref name="previousTier"/> --> <see langword="this"/>).
+		/// Marks <paramref name="previousTier"/> as upgradeable by <see langword="this"/> (<paramref name="previousTier"/> --&gt; <see langword="this"/>).
 		/// </summary>
 		/// <exception cref="ArgumentException"/>
 		/// <exception cref="ArgumentNullException"/>
+		/// <exception cref="Exception"/>
 		/// <exception cref="InvalidOperationException"/>
 		public void SetUpgradeableFrom(StorageUnitTier previousTier) => previousTier.SetUpgradeableTo(this);
 
@@ -179,11 +198,24 @@ namespace MagicStorage.CrossMod.Storage {
 		/// </summary>
 		/// <exception cref="ArgumentNullException"/>
 		/// <exception cref="Exception"/>
+		/// <exception cref="InvalidOperationException"/>
 		public void RemoveConnections(StorageUnitTier adjacentTier) {
 			ArgumentNullException.ThrowIfNull(adjacentTier);
 
 			if (!StorageUnitTierLoader.Loading)
 				throw new Exception("StorageUnitTier connections can only be removed during mod loading");
+
+			if (Type < 0)
+				throw new InvalidOperationException("Cannot remove upgrade paths for a StorageUnitTier that has not been registered yet");
+
+			if (adjacentTier.Type < 0)
+				throw new InvalidOperationException("Cannot remove upgrade paths to a StorageUnitTier that has not been registered yet");
+
+			if (Type == Empty.Type)
+				throw new InvalidOperationException("This operation is not supported for StorageUnitTier.Empty");
+
+			if (adjacentTier.Type == Empty.Type)
+				throw new InvalidOperationException("This operation is not supported for StorageUnitTier.Empty");
 
 			if (_blacklisted.Add(adjacentTier.Type)) {
 				// Remove the connection: this --> adjacentTier
@@ -200,9 +232,16 @@ namespace MagicStorage.CrossMod.Storage {
 		/// Attempting to reconnect any of the affected upgrade tiers will not restore the connections.<br/>
 		/// </summary>
 		/// <exception cref="Exception"/>
+		/// <exception cref="InvalidOperationException"/>
 		public void RemoveAllConnections() {
 			if (!StorageUnitTierLoader.Loading)
 				throw new Exception("StorageUnitTier connections can only be removed during mod loading");
+
+			if (Type < 0)
+				throw new InvalidOperationException("Cannot remove upgrade paths for a StorageUnitTier that has not been registered yet");
+
+			if (Type == Empty.Type)
+				throw new InvalidOperationException("This operation is not supported for StorageUnitTier.Empty");
 
 			foreach (var upgrade in _canBeUpgradedBy) {
 				// Remove the connection: this --> upgrade

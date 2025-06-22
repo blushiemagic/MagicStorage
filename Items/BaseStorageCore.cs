@@ -1,19 +1,21 @@
 ﻿using Ionic.Zlib;
 using MagicStorage.Common.IO;
+using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod.Storage;
 using SerousCommonLib.API;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Items {
-	public abstract class BaseStorageCore : ModItem {
+	public abstract class BaseStorageCore : ModItem, IValidateAtPostSetupContent {
 		private byte[] _unitData;
 		private int _hash;
 		private int _itemCount;
@@ -22,8 +24,15 @@ namespace MagicStorage.Items {
 
 		public abstract StorageUnitTier Tier { get; }
 
+		public override LocalizedText Tooltip => Language.GetText("Mods.MagicStorage.Items.StorageCore.CommonTooltip");
+
 		public override void SetStaticDefaults() {
 			Item.ResearchUnlockCount = 0;
+		}
+
+		void IValidateAtPostSetupContent.ValidateType() {
+			if (Tier.CoreItemType != Type)
+				throw new Exception($"Storage Core item \"{FullName}\" does not match the item ID assigned to its Storage Unit tier \"{Tier.FullName}\"");
 		}
 
 		public override void SetDefaults() {
@@ -31,6 +40,12 @@ namespace MagicStorage.Items {
 			Item.height = 16;
 			Item.maxStack = 1;
 			Item.value = 0;
+
+			int unitItem = Tier.StorageUnitItemType;
+			if (ContentSamples.ItemsByType is null || !ContentSamples.ItemsByType.TryGetValue(unitItem, out Item sample))
+				sample = new Item(unitItem);
+
+			Item.rare = sample.rare;
 		}
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips) {
@@ -139,21 +154,6 @@ namespace MagicStorage.Items {
 			//	MagicStorageMod.Instance.Logger.Info("==============================");
 				return items;
 		//	}
-		}
-	}
-
-	public abstract class BaseStorageCore<T> : BaseStorageCore where T : BaseStorageUnitItem {
-		public sealed override StorageUnitTier Tier => ModContent.GetInstance<T>().Tier;
-
-		public override void SetDefaults() {
-			base.SetDefaults();
-
-			int sampleType = ModContent.ItemType<T>();
-
-			if (ContentSamples.ItemsByType is null || !ContentSamples.ItemsByType.TryGetValue(sampleType, out Item sample))
-				sample = new Item(sampleType);
-
-			Item.rare = sample.rare;
 		}
 	}
 }

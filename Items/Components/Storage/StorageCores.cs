@@ -1,17 +1,35 @@
-﻿namespace MagicStorage.Items {
-	public class StorageCore : BaseStorageCore<StorageUnit> { }
+﻿using MagicStorage.CrossMod.Storage;
 
-	public class StorageCoreDemonite : BaseStorageCore<StorageUnitDemonite> { }
+namespace MagicStorage.Items {
+	public class StorageCore : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Basic;
+	}
 
-	public class StorageCoreCrimtane : BaseStorageCore<StorageUnitCrimtane> { }
+	public class StorageCoreDemonite : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Demonite;
+	}
 
-	public class StorageCoreHellstone : BaseStorageCore<StorageUnitHellstone> { }
+	public class StorageCoreCrimtane : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Crimtane;
+	}
 
-	public class StorageCoreHallowed : BaseStorageCore<StorageUnitHallowed> { }
+	public class StorageCoreHellstone : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Hellstone;
+	}
 
-	public class StorageCoreBlueChlorophyte : BaseStorageCore<StorageUnitBlueChlorophyte> { }
+	public class StorageCoreHallowed : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Hallowed;
+	}
 
-	public class StorageCoreLuminite : BaseStorageCore<StorageUnitLuminite> { }
+	public class StorageCoreBlueChlorophyte : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.BlueChlorophyte;
+	}
 
-	public class StorageCoreTerra : BaseStorageCore<StorageUnitTerra> { }
+	public class StorageCoreLuminite : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Luminite;
+	}
+
+	public class StorageCoreTerra : BaseStorageCore {
+		public override StorageUnitTier Tier => StorageUnitTier.Terra;
+	}
 }

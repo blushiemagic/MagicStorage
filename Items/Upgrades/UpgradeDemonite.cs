@@ -11,7 +11,6 @@ namespace MagicStorage.Items
 		public override void SetDefaults()
 		{
 			base.SetDefaults();
-			Item.rare = ItemRarityID.Blue;
 			Item.value = Item.sellPrice(silver: 32);
 		}
 

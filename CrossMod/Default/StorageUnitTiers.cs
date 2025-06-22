@@ -138,5 +138,11 @@ namespace MagicStorage.CrossMod.Default {
 		public override int StorageUnitItemType => ModContent.ItemType<StorageUnitEmpty>();
 		protected override int FrameRow => 9;
 		protected override StorageUnitTier UpgradesFrom => null;
+
+		public override void GetState(int frameX, int frameY, out StorageUnitFullness fullness, out bool active) {
+			// Empty units are always inactive and empty
+			fullness = StorageUnitFullness.Empty;
+			active = false;
+		}
 	}
 }
