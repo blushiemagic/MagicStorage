@@ -878,7 +878,7 @@ namespace MagicStorage.UI.States {
 			private void InitFilterButtons() {
 				static IEnumerable<ButtonChoiceInfo> MakeButtons() {
 					yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAvailable", "Mods.MagicStorage.RecipeAvailable", false);
-					yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAll", "Mods.MagicStorage.RecipeAll", true);
+					yield return new ButtonChoiceInfo("MagicStorage/Assets/RecipeAll", "Mods.MagicStorage.RecipeAll", false);
 
 					if (MagicStorageConfig.CraftingFavoritingEnabled)
 						yield return new ButtonChoiceInfo("MagicStorage/Assets/FilterMisc", "Mods.MagicStorage.ShowOnlyFavorited", false);

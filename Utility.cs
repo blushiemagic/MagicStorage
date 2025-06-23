@@ -348,7 +348,7 @@ namespace MagicStorage {
 
 			NearbyEffectsBlockingDuringPylonScanningDetour.DoBlockHooks = true;
 
-			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info);
+			int necessaryNPCCount = HowManyNPCsDoesPylonNeed(info, player);
 			bool flag = DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
 			if (!flag)
 				key = "Net.CannotTeleportToPylonBecauseNotEnoughNPCs";
@@ -366,7 +366,7 @@ namespace MagicStorage {
 			}
 
 			if (flag) {
-				CheckValidDestination(info, ref flag);
+				CheckValidDestination(info, player, ref flag);
 				if (!flag)
 					key = "Net.CannotTeleportToPylonBecauseNotMeetingBiomeRequirements";
 			}

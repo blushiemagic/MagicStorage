@@ -21,7 +21,9 @@ namespace MagicStorage.UI {
 			background = new(BackTexture) {
 				ScaleToFit = true
 			};
-			icon = new(GetIcon()) {
+
+			// NOTE: Do not call GetIcon() here!  It is too early.  Default to a "?" icon instead
+			icon = new(MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterAll")) {
 				ScaleToFit = true,
 				HAlign = 0.5f,
 				VAlign = 0.5f

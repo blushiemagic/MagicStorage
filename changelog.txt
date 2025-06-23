@@ -1,8 +1,6 @@
-﻿[h1]v0.7[/h1]
-- Numerous bug fixes
-- Improved the performance and stability of the in-house recursion crafting system
-- Added new content:  Storage Cores, Storage Security, Storage Aether Interface and more
-- Added new APIs for mod developers: StorageUnitTier, HiddenRecipes, ExtraCraftItemsSystem and more
-- Added new Mod.Call() functions
+﻿[h1]v0.7.0.1[/h1]
+- Fixed the Portable Remote Access items not working
+- Fixed a bug in the initialization code for the Dropdown button layout
+- Fixed a bug where the [i]Show all known recipes[/i] button in the Crafting UI was being placed in the wrong location
 
-To see the full change log, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
+To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

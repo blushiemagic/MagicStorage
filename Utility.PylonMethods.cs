@@ -1,7 +1,5 @@
 ﻿using MagicStorage.Common;
 using System;
-using System.Linq.Expressions;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -9,34 +7,12 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class Utility {
-		// Copy/pasted from tML source for handling pylon validity
-		// We don't need the "nearby player" checks for limited-range portable accesses, hence why they aren't included
+		// NOTE: Previously, this code used reflection to invoke the methods.  A publicizer has been introduced since then, so calling indirectly is no longer necessary.
 		private static SceneMetrics _sceneMetrics;
 
-		private static Func<TeleportPylonInfo, int> _HowManyNPCsDoesPylonNeed;
-		public static int HowManyNPCsDoesPylonNeed(TeleportPylonInfo info) {
-			return (_HowManyNPCsDoesPylonNeed ??= CreateMethodCall())(info);
+		private static int HowManyNPCsDoesPylonNeed(TeleportPylonInfo info, Player player) => Main.PylonSystem.HowManyNPCsDoesPylonNeed(info, player);
 
-			static Func<TeleportPylonInfo, int> CreateMethodCall() {
-				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("HowManyNPCsDoesPylonNeed", BindingFlags.Instance | BindingFlags.NonPublic)
-					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.HowManyNPCsDoesPylonNeed' method");
-				ParameterExpression parameter = Expression.Parameter(typeof(TeleportPylonInfo), "info");
-				return Expression.Lambda<Func<TeleportPylonInfo, int>>(Expression.Call(parameter, method), parameter).Compile();
-			}
-		}
-
-		private static Func<TeleportPylonInfo, int, bool> _DoesPylonHaveEnoughNPCsAroundIt;
-		private static bool DoesPylonHaveEnoughNPCsAroundIt(TeleportPylonInfo info, int necessaryNPCCount) {
-			return (_DoesPylonHaveEnoughNPCsAroundIt ??= CreateMethodCall())(info, necessaryNPCCount);
-
-			static Func<TeleportPylonInfo, int, bool> CreateMethodCall() {
-				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("DoesPylonHaveEnoughNPCsAroundIt", BindingFlags.Instance | BindingFlags.NonPublic)
-					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.DoesPylonHaveEnoughNPCsAroundIt' method");
-				ParameterExpression parameter1 = Expression.Parameter(typeof(TeleportPylonInfo), "info");
-				ParameterExpression parameter2 = Expression.Parameter(typeof(int), "necessaryNPCCount");
-				return Expression.Lambda<Func<TeleportPylonInfo, int, bool>>(Expression.Call(parameter1, method, parameter2), parameter1, parameter2).Compile();
-			}
-		}
+		private static bool DoesPylonHaveEnoughNPCsAroundIt(TeleportPylonInfo info, int necessaryNPCCount) => Main.PylonSystem.DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
 
 		private static void CheckNPCDanger(TeleportPylonInfo info, ref bool flag) {
 			flag &= !NPC.AnyDanger(quickBossNPCCheck: false, ignorePillarsAndMoonlordCountdown: true);
@@ -50,7 +26,7 @@ namespace MagicStorage {
 				flag = false;
 		}
 
-		private static void CheckValidDestination(TeleportPylonInfo info, ref bool flag) {
+		private static void CheckValidDestination(TeleportPylonInfo info, Player player, ref bool flag) {
 			_sceneMetrics ??= new();
 
 			try {
@@ -62,25 +38,17 @@ namespace MagicStorage {
 				};
 
 				sceneMetrics.ScanAndExportToMain(settings);
-				flag = DoesPylonAcceptTeleportation(info);
+				flag = DoesPylonAcceptTeleportation(info, player);
 			} catch {
 				// Swallow any exceptions and assume that the pylon was invalid
 				flag = false;
 			}
 		}
 
-		private static Func<TeleportPylonInfo, bool> _DoesPylonAcceptTeleportation;
-		private static bool DoesPylonAcceptTeleportation(TeleportPylonInfo info) {
+		private static bool DoesPylonAcceptTeleportation(TeleportPylonInfo info, Player player) {
 			// Force the drone tracker to be ignored
 			using (ObjectSwitch.SwapNull(ref Main.DroneCameraTracker))
-				return (_DoesPylonAcceptTeleportation ??= CreateMethodCall())(info);
-
-			static Func<TeleportPylonInfo, bool> CreateMethodCall() {
-				MethodInfo method = typeof(TeleportPylonsSystem).GetMethod("DoesPylonAcceptTeleportation", BindingFlags.Instance | BindingFlags.NonPublic)
-					?? throw new Exception("Cannot get 'Terraria.GameContent.TeleportPylonsSystem.DoesPylonAcceptTeleportation' method");
-				ParameterExpression parameter = Expression.Parameter(typeof(TeleportPylonInfo), "info");
-				return Expression.Lambda<Func<TeleportPylonInfo, bool>>(Expression.Call(parameter, method), parameter).Compile();
-			}
+				return Main.PylonSystem.DoesPylonAcceptTeleportation(info, player);
 		}
 	}
 }
