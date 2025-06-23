@@ -59,7 +59,7 @@ namespace MagicStorage.Common.Systems.Auditing {
 		}
 
 		private static void CheckForAudits() {
-			if (Main.netMode != NetmodeID.Server || _loading || _writing || _printing || _clearing)
+			if (Main.netMode != NetmodeID.Server || _loading || _writing || _printing || _clearing || _file is null)
 				return;
 
 			if (_queue.Count > 0)

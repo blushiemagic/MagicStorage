@@ -1,7 +1,4 @@
-﻿[h1]v0.7.0.2[/h1]
-- Fixed a bug that caused Storage Units to fail to be destroyed properly, resulting in loose corner tiles being left behind
-- Fixed the search bars not properly refreshing the UI when reset via right-click while in focus
-- Fixed custom Storage Units sometimes not framing correctly
-- Fixed a bug caused by the craft result slot of the Crafting UI not being initialized properly
+﻿[h1]v0.7.0.3[/h1]
+- Fixed a bug from the Storage Auditing system that caused servers to crash
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
