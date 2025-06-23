@@ -608,7 +608,7 @@ namespace MagicStorage.Components
 				{
 					storageUnit.DepositItem(toDeposit);
 					if (toDeposit.IsAir)
-						return;
+						goto MakeTheUIRefresh;
 				}
 
 			bool prevNewAndShiny = toDeposit.newAndShiny;
@@ -621,15 +621,16 @@ namespace MagicStorage.Components
 					{
 						_uniqueItemsPutHistory.Add(remember);
 						NetHelper.SyncStorageDepositHistory(this);
-						return;
+						goto MakeTheUIRefresh;
 					}
 				}
 
 			toDeposit.newAndShiny = prevNewAndShiny;
 
+			MakeTheUIRefresh:
 			if (oldStack != toDeposit.stack) {
 				if (actualItem && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
-					MagicUI.SetNextCollectionsToRefresh(toDeposit.type);
+					MagicUI.SetNextCollectionsToRefresh(remember);
 
 				ResetCompactStage();
 			}

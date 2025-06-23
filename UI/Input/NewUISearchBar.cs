@@ -33,8 +33,7 @@ namespace MagicStorage.UI.Input {
 		}
 
 		public override void OnInputFocusLost() {
-			if (!MagicStorageConfig.SearchBarRefreshOnKey)
-				MagicUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.SetRefresh(forceFullRefresh: true);
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {

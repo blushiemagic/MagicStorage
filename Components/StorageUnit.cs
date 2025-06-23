@@ -42,12 +42,15 @@ namespace MagicStorage.Components
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
 		{
-			if (Main.tile[i, j].TileFrameX % 36 == 18)
-				i--;
-			if (Main.tile[i, j].TileFrameY % 36 == 18)
-				j--;
+			// FIX: Using the modified coordinates for finding the tier can fail when the top-left tile has already been destroyed.  Instead, only use them to check for a tile entity.
+			int entityX = i, entityY = j;
 
-			if (TileEntity.ByPosition.ContainsKey(new Point16(i, j))) {
+			if (Main.tile[entityX, entityY].TileFrameX % 36 == 18)
+				entityX--;
+			if (Main.tile[entityX, entityY].TileFrameY % 36 == 18)
+				entityY--;
+
+			if (TileEntity.ByPosition.ContainsKey(new Point16(entityX, entityY))) {
 				StorageUnitTier tier = StorageUnitTierLoader.FindFromTile(i, j)
 					?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
 
@@ -56,6 +59,10 @@ namespace MagicStorage.Components
 
 				if (fullness != StorageUnitFullness.Empty)
 					fail = true;
+			} else {
+				// A bug in v0.7 and v0.7.0.1 caused StorageUnit destruction to fail.
+				// In the event that only a corner was left, make it always destroyable.
+				fail = true;
 			}
 		}
 

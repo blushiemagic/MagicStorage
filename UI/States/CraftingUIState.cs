@@ -269,6 +269,7 @@ namespace MagicStorage.UI.States {
 
 			resultZone.InitializeSlot = (slot, scale) => {
 				MagicStorageItemSlot itemSlot = new(slot, scale: scale) {
+					IgnoreClicks = true,  // Purely visual
 					CanShareItemToChat = true
 				};
 

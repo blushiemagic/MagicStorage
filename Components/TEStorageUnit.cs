@@ -255,23 +255,46 @@ namespace MagicStorage.Components
 
 		public bool UpdateTileFrame()
 		{
-			Tile topLeft = Main.tile[Position.X, Position.Y];
-			int oldFrame = topLeft.TileFrameX;
-			int style;
+			StorageUnitTier tier = GetCurrentTier()
+				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+
+			Tile tile = Main.tile[Position.X, Position.Y];
+
+			tier.GetState(tile.TileFrameX, tile.TileFrameY, out var previousFullness, out var previousActive);
+
+			StorageUnitFullness currentFullness;
 			if (IsEmpty)
-				style = 0;
+				currentFullness = StorageUnitFullness.Empty;
 			else if (IsFull)
-				style = 2;
+				currentFullness = StorageUnitFullness.Full;
 			else
-				style = 1;
-			if (Inactive)
-				style += 3;
-			style *= 36;
-			topLeft.TileFrameX = (short)style;
-			Main.tile[Position.X, Position.Y + 1].TileFrameX = (short)style;
-			Main.tile[Position.X + 1, Position.Y].TileFrameX = (short)(style + 18);
-			Main.tile[Position.X + 1, Position.Y + 1].TileFrameX = (short)(style + 18);
-			return oldFrame != style;
+				currentFullness = StorageUnitFullness.PartiallyFull;
+
+			bool currentActive = !Inactive;
+
+			tier.Frame(currentFullness, currentActive, out int targetFrameX, out int targetFrameY);
+
+			if (previousFullness != currentFullness || previousActive != currentActive) {
+				int x = Position.X, y = Position.Y;
+				tile.TileFrameX = (short)targetFrameX;
+				tile.TileFrameY = (short)targetFrameY;
+
+				tile = Main.tile[x + 1, y];
+				tile.TileFrameX = (short)(targetFrameX + 18);
+				tile.TileFrameY = (short)targetFrameY;
+
+				tile = Main.tile[x, y + 1];
+				tile.TileFrameX = (short)targetFrameX;
+				tile.TileFrameY = (short)(targetFrameY + 18);
+
+				tile = Main.tile[x + 1, y + 1];
+				tile.TileFrameX = (short)(targetFrameX + 18);
+				tile.TileFrameY = (short)(targetFrameY + 18);
+
+				return true;
+			}
+
+			return false;
 		}
 
 		public void UpdateTileFrameWithNetSend()

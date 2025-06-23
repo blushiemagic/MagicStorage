@@ -1,6 +1,7 @@
-﻿[h1]v0.7.0.1[/h1]
-- Fixed the Portable Remote Access items not working
-- Fixed a bug in the initialization code for the Dropdown button layout
-- Fixed a bug where the [i]Show all known recipes[/i] button in the Crafting UI was being placed in the wrong location
+﻿[h1]v0.7.0.2[/h1]
+- Fixed a bug that caused Storage Units to fail to be destroyed properly, resulting in loose corner tiles being left behind
+- Fixed the search bars not properly refreshing the UI when reset via right-click while in focus
+- Fixed custom Storage Units sometimes not framing correctly
+- Fixed a bug caused by the craft result slot of the Crafting UI not being initialized properly
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
