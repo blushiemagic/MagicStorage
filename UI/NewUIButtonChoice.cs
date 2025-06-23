@@ -36,6 +36,9 @@ namespace MagicStorage.UI {
 
 		public event Action<int, int> OnChoiceClicked;
 
+		// Too lazy to make something better
+		internal readonly List<ChoiceElement> choiceElements = [];
+
 		public NewUIButtonChoice(Action onChanged, int buttonSize, int maxButtonsPerRow, int buttonPadding = 1, Action onGearChoiceSelected = null, bool forceGearIconToNotBeCreated = false) {
 			ArgumentNullException.ThrowIfNull(onChanged);
 
@@ -75,6 +78,7 @@ namespace MagicStorage.UI {
 
 			choices.Clear();
 			generalChoices.Clear();
+			choiceElements.Clear();
 
 			// Create the choices
 			int numChoices = 0;
@@ -85,6 +89,8 @@ namespace MagicStorage.UI {
 					generalChoices.Add(choice);
 				else
 					choices.Add(choice);
+
+				choiceElements.Add(choice);
 
 				Append(choice);
 
@@ -175,7 +181,7 @@ namespace MagicStorage.UI {
 			}
 		}
 
-		private class ChoiceElement : UIElement {
+		internal class ChoiceElement : UIElement {
 			private static Asset<Texture2D> BackTexture => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackground", AssetRequestMode.ImmediateLoad);
 			private static Asset<Texture2D> BackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundActive", AssetRequestMode.ImmediateLoad);
 			private static Asset<Texture2D> GeneralBackTextureActive => MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/SortButtonBackgroundGeneralActive", AssetRequestMode.ImmediateLoad);

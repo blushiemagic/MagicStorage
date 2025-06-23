@@ -198,8 +198,7 @@ namespace MagicStorage.CrossMod {
 				Definitions.Name,
 				Definitions.Value,
 				Definitions.Damage,
-				Definitions.Quantity,
-				Definitions.QuantityRatio
+				Definitions.Quantity
 			};
 
 		internal static void Load() {

@@ -1,4 +1,6 @@
 ﻿[h1]v0.7.0.3[/h1]
 - Fixed a bug from the Storage Auditing system that caused servers to crash
+- Fixed some bugs which caused clicking a button in the Dropdown button layout's dropdown menus to crash the game
+- Fixed the Dropdown button layout's dropdowns using the wrong text for the menu caption
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

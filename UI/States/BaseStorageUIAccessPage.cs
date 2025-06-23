@@ -10,6 +10,7 @@ using SerousCommonLib.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
@@ -73,8 +74,8 @@ namespace MagicStorage.UI.States {
 			capacityText = new UIText("Items");
 			sortingButtons = new(ModernConfigSortingButtonAction, 21, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
 			filteringButtons = new(ModernConfigFilteringButtonAction, 21, 22, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
-			sortingDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
-			filteringDropdown = new(Language.GetTextValue("Mods.MagicStorage.UIPages.Filtering"), 135, 2, 250);
+			sortingDropdown = new(Language.GetText("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
+			filteringDropdown = new(Language.GetText("Mods.MagicStorage.UIPages.Filtering"), 135, 2, 250);
 
 			OnPageSelected += () => {
 				//Search bar text is affected by this call
@@ -291,7 +292,10 @@ namespace MagicStorage.UI.States {
 
 			switch (current) {
 				case ButtonConfigurationMode.Legacy:
-					sortingButtons.AssignOptions(SortingOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
+					if (MagicStorageConfig.ExtraFilterIcons)
+						sortingButtons.AssignOptions(SortingOptionLoader.GetVisibleOptions(craftingGUI));
+					else
+						sortingButtons.AssignOptions(SortingOptionLoader.BaseOptions.Where(o => o.GetDefaultVisibility(craftingGUI)));
 
 					sortingButtons.UpdateButtonLayout(newButtonSize: 21, newMaxButtonsPerRow: 15);
 
@@ -367,16 +371,22 @@ namespace MagicStorage.UI.States {
 					Append(topBar3);
 					break;
 				case ButtonConfigurationMode.ModernDropdown:
+					// While these options contains aren't going to be visible, they still need options since
+					//   I can't be bothered to redo the backend to support option clicks in the dropdown menus
+					// TODO: change UIDropdownMenu to use inherent choice elements?
+					sortingButtons.AssignOptions(SortingOptionLoader.GetVisibleOptions(craftingGUI));
+					filteringButtons.AssignOptions(FilteringOptionLoader.GetVisibleOptions(craftingGUI));
+
 					//Initialize the menu
 					sortingDropdown.Clear();
-					sortingDropdown.AddRange(CreatePairedDropdownOptionElements(SortingOptionLoader.GetVisibleOptions(craftingGUI), sortingDropdown.list.ListPadding, CreateDropdownOption));
+					sortingDropdown.AddRange(CreatePairedDropdownOptionElements(sortingButtons.Options, sortingDropdown.list.ListPadding, CreateDropdownOption));
 
 					foreach (var child in sortingDropdown.Children)
 						child.Activate();
 
 					//Initialize the menu
 					filteringDropdown.Clear();
-					filteringDropdown.AddRange(CreatePairedDropdownOptionElements(FilteringOptionLoader.GetVisibleOptions(craftingGUI), filteringDropdown.list.ListPadding, CreateDropdownOption));
+					filteringDropdown.AddRange(CreatePairedDropdownOptionElements(filteringButtons.Options, filteringDropdown.list.ListPadding, CreateDropdownOption));
 
 					foreach (var child in filteringDropdown.Children)
 						child.Activate();
@@ -402,10 +412,35 @@ namespace MagicStorage.UI.States {
 
 		public abstract void PostReformatPage(ButtonConfigurationMode current);
 
+		// Lazy hack just to get this working correctly
+		private static ConditionalWeakTable<SortingOptionElement, NewUIButtonChoice.ChoiceElement> _dropdownSortingOptionToButtonElement = [];
+		private static ConditionalWeakTable<FilteringOptionElement, NewUIButtonChoice.ChoiceElement> _dropdownFilteringOptionToButtonElement = [];
+
 		private static IEnumerable<UIElement> CreatePairedDropdownOptionElements<T>(IEnumerable<T> source, float padding, Func<T, UIElement> createElement) {
 			UIElement first = null, second;
 
+			bool forceANewRow = false;
+
 			foreach (var option in source) {
+				if (typeof(T) == typeof(FilteringOption)) {
+					var copy = option;
+					var filter = Unsafe.As<T, FilteringOption>(ref copy);
+					if (!forceANewRow && filter.IsGeneralFilter) {
+						forceANewRow = true;
+
+						if (first is not null) {
+							// Force the current row to end
+							UIDropdownElementRowContainer container = new(padding);
+
+							container.SetElements(first);
+							
+							yield return container;
+							
+							first = null;
+						}
+					}
+				}
+
 				if (first is null)
 					first = createElement(option);
 				else {
@@ -436,17 +471,37 @@ namespace MagicStorage.UI.States {
 		private SortingOptionElement CreateDropdownOption(SortingOption option) {
 			SortingOptionElement element = new(option);
 
-			element.OnLeftClick += parentUI.GetPage<SortingPage>("Sorting").ClickOption;
+			if (sortingButtons.choiceElements.FirstOrDefault(e => sortingButtons.RemapChoice(e.option) == option.Type) is NewUIButtonChoice.ChoiceElement choiceElement)
+				_dropdownSortingOptionToButtonElement.Add(element, choiceElement);
+
+			element.OnLeftClick += ClickSortingDropdownOption;
 
 			return element;
+		}
+
+		private void ClickSortingDropdownOption(UIMouseEvent evt, UIElement e) {
+			SortingOptionElement self = (SortingOptionElement)e;
+
+			if (_dropdownSortingOptionToButtonElement.TryGetValue(self, out var element))
+				element.LeftClick(evt);
 		}
 
 		private FilteringOptionElement CreateDropdownOption(FilteringOption option) {
 			FilteringOptionElement element = new(option);
 
-			element.OnLeftClick += parentUI.GetPage<FilteringPage>("Filtering").ClickOption;
+			if (filteringButtons.choiceElements.FirstOrDefault(e => filteringButtons.RemapChoice(e.option) == option.Type) is NewUIButtonChoice.ChoiceElement choiceElement)
+				_dropdownFilteringOptionToButtonElement.Add(element, choiceElement);
+
+			element.OnLeftClick += ClickFilteringDropdownOption;
 
 			return element;
+		}
+
+		private void ClickFilteringDropdownOption(UIMouseEvent evt, UIElement e) {
+			FilteringOptionElement self = (FilteringOptionElement)e;
+
+			if (_dropdownFilteringOptionToButtonElement.TryGetValue(self, out var element))
+				element.LeftClick(evt);
 		}
 
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);

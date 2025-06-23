@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
@@ -52,7 +53,7 @@ namespace MagicStorage.UI {
 
 		public float MaxExpandedHeight => header.Height.Pixels + fullDropdownSize;
 
-		public UIDropdownMenu(string captionText, float width, int listPadding, float fullDropdownSize) {
+		public UIDropdownMenu(LocalizedText captionText, float width, int listPadding, float fullDropdownSize) {
 			Width.Set(width, 0f);
 			MinWidth = Width;
 
