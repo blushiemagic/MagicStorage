@@ -4,6 +4,7 @@
   <PropertyGroup>
     <AssemblyName>MagicStorage</AssemblyName>
     <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants);NETPLAY</DefineConstants>
