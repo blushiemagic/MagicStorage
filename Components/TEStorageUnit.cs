@@ -255,8 +255,9 @@ namespace MagicStorage.Components
 
 		public bool UpdateTileFrame()
 		{
-			StorageUnitTier tier = GetCurrentTier()
-				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+			// FIX: v0.7.0.4 - Return early instead of throwing an exception
+			if (GetCurrentTier() is not StorageUnitTier tier)
+				return false;
 
 			Tile tile = Main.tile[Position.X, Position.Y];
 
@@ -350,8 +351,8 @@ namespace MagicStorage.Components
 			}
 
 			Item spawnedItem = null;
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				StorageUnitTier tier = GetCurrentTier();
+			// FIX: v0.7.0.4 - Do nothing instead of throwing an exception
+			if (Main.netMode != NetmodeID.MultiplayerClient && GetCurrentTier() is StorageUnitTier tier) {
 				Item core = new Item(tier.CoreItemType);
 
 				((BaseStorageCore)core.ModItem).SetDataFrom(this);

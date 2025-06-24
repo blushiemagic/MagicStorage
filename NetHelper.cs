@@ -1703,7 +1703,8 @@ cleanupContext:
 					var types = unit.GetItems().Select(static i => i.type).Distinct().ToList();
 
 					Item spawnedItem = unit.RemoveItemsAndSpawnCore();
-					AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
+					if (spawnedItem is not null)
+						AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
 
 					unit.UpdateTileFrameWithNetSend();
 
