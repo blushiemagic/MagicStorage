@@ -953,8 +953,7 @@ namespace MagicStorage.Components
 		{
 			base.SaveData(tag);
 
-			// Legacy data; saving is unnecessary
-			/*
+			// FIX: v0.7.0.3 - Restore legacy data for backwards compatibility
 			List<TagCompound> tagRemotes = new();
 			foreach (Point16 remoteAccess in Obsolete_remoteAccesses())
 			{
@@ -975,7 +974,6 @@ namespace MagicStorage.Components
 			}
 
 			tag["EnvironmentAccesses"] = tagEnvironments;
-			*/
 
 			_uniqueItemsPutHistory.Save(tag);
 

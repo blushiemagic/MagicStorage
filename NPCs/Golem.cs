@@ -368,6 +368,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		private static bool SkipForwards(int current, out int validOption) {
+			if (current < 1)
+				current = 1;
+
 			for (int i = current; i <= HelpOptionID.Count; i++) {
 				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[i - 1])) {
 					// Found a valid option
@@ -382,6 +385,9 @@ namespace MagicStorage.NPCs {
 		}
 
 		private static bool SkipBackwards(int current, out int validOption) {
+			if (current > HelpOptionID.Count)
+				current = HelpOptionID.Count;
+
 			for (int i = current; i >= 1; i--) {
 				if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[i - 1])) {
 					// Found a valid option

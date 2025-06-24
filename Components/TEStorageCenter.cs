@@ -308,8 +308,10 @@ namespace MagicStorage.Components
 						}
 					}
 
-					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location.ResolveToTileEntity() is TEStorageHeart)
-						_foundHeart = location;
+					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location.ResolveToTileEntity() is TEStorageHeart heart) {
+						Link(heart);
+						_center.Link(heart.Position);
+					}
 				}
 			}
 		}
@@ -376,6 +378,7 @@ namespace MagicStorage.Components
 			ConnectedComponentManager manager = ComponentManager;
 
 			List<Point16> oldComponents = manager.GetAllComponents().ToList();
+			TEStorageHeart assignedHeart = manager.GetStorageHeart();
 
 			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch invoked.  Current component count: " + manager.Count);
 
@@ -428,6 +431,10 @@ namespace MagicStorage.Components
 					}
 				}
 
+			// Restore the link to the Heart
+			if (assignedHeart is not null)
+				manager.Link(assignedHeart);
+
 			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch finished.  New component count: " + manager.Count);
 
 			TEStorageHeart heart = GetHeart();
@@ -473,6 +480,21 @@ namespace MagicStorage.Components
 			TagCompound networkStuff = new();
 			ComponentManager.Save(networkStuff);
 			tag["networkMeta"] = networkStuff;  // IMPORTANT: base uses "network" tag!
+
+			// FIX: v0.7.0.3 - Restore legacy data for backwards compatibility
+			var storageUnits = Obsolete_storageUnits();
+			if (storageUnits.Count > 0) {
+				List<TagCompound> tags = [];
+
+				foreach (Point16 unit in storageUnits) {
+					tags.Add(new TagCompound() {
+						["X"] = unit.X,
+						["Y"] = unit.Y
+					});
+				}
+
+				tag["StorageUnits"] = tags;
+			}
 		}
 
 		public override void LoadData(TagCompound tag)
