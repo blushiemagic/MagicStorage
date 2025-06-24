@@ -16,6 +16,7 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Items {
 	public abstract class BaseStorageCore : ModItem, IValidateAtPostSetupContent {
+		[CloneByReference]
 		private byte[] _unitData;
 		private int _hash;
 		private int _itemCount;
