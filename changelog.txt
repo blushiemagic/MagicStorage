@@ -6,6 +6,7 @@
 - Fixed some bugs that caused a Remote Access to forget what Storage Heart it was linked to when loading a world
 - Fixed some bugs that caused storage components to not recognize their connected Storage Heart
 - Fixed a bug that caused the [i]Show all possible ingredients[/i] control in the Crafting UI to freeze the game when clicked
+- Removed some error-handling code that was causing upgraded Storage Units to crash the server when destroyed
 - Restored legacy save data for backwards compatibility with versions prior to v0.7
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

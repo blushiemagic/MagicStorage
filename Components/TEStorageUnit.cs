@@ -74,8 +74,8 @@ namespace MagicStorage.Components
 					capacity += 7;
 				return 40 * capacity;
 				*/
-				return GetCurrentTier()?.Capacity
-					?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+				// FIX: v0.7.0.3 - Return zero instead of throwing an error
+				return GetCurrentTier()?.Capacity ?? 0;
 			}
 		}
 
