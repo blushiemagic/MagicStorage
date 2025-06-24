@@ -62,7 +62,9 @@ namespace MagicStorage.Components
 			} else {
 				// A bug in v0.7 and v0.7.0.1 caused StorageUnit destruction to fail.
 				// In the event that only a corner was left, make it always destroyable.
-				fail = true;
+				fail = false;
+				effectOnly = false;
+				noItem = true;
 			}
 		}
 
