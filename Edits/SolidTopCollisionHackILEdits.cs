@@ -10,106 +10,84 @@ using IL_Collision = Terraria.IL_Collision;
 
 namespace MagicStorage.Edits {
 	internal class SolidTopCollisionHackILEdits : Edit {
-		private static Func<Tile, bool> emitFunc;
+		private static ILContext.Manipulator _patchIsTopOfTile, _patchIsNotTopOfTile;
 
 		public override void LoadEdits() {
 			// For some reason, the game only allows Main.tileSolidTop[] collision on the topmost subtiles in a tile spritesheet,
 			// necessitating this dumb hack to make the Storage Unit upgrades not lose collision
 
 			// These functions check "tile.frameY == 0"
-			emitFunc = HackIsTopOfTile;
-			IL_Collision.SolidCollision_Vector2_int_int_bool += Collision_SolidCollision;
-			IL_Collision.HitTiles += Collision_HitTiles;
-			IL_Collision.SolidTiles_int_int_int_int_bool += Collision_SolidTiles;
-			IL_Collision.StepUp += Collision_StepUp;
-			IL_Collision.GetTileRotation += Collision_GetTileRotation;
+			_patchIsTopOfTile = new PatchContext(HackIsTopOfTile).Patch;
+			IL_Collision.SolidCollision_Vector2_int_int_bool += _patchIsTopOfTile;
+			IL_Collision.HitTiles += _patchIsTopOfTile;
+			IL_Collision.SolidTiles_int_int_int_int_bool += _patchIsTopOfTile;
+			IL_Collision.StepUp += _patchIsTopOfTile;
+			IL_Collision.GetTileRotation += _patchIsTopOfTile;
 
 			// These functions check "tile.frameY != 0"
-			emitFunc = HackIsNotTopOfTile;
-			IL_Collision.TileCollision += Collision_TileCollision;
-			IL_Collision.AdvancedTileCollision += Collision_AdvancedTileCollision;
-			IL_Collision.SlopeCollision += Collision_SlopeCollision;
-			IL_Collision.noSlopeCollision += Collision_noSlopeCollision;
-			emitFunc = null;
+			_patchIsNotTopOfTile = new PatchContext(HackIsNotTopOfTile).Patch;
+			IL_Collision.TileCollision += _patchIsNotTopOfTile;
+			IL_Collision.AdvancedTileCollision += _patchIsNotTopOfTile;
+			IL_Collision.SlopeCollision += _patchIsNotTopOfTile;
+			IL_Collision.noSlopeCollision += _patchIsNotTopOfTile;
 		}
 
 		public override void UnloadEdits() {
-			IL_Collision.SolidCollision_Vector2_int_int_bool -= Collision_SolidCollision;
-			IL_Collision.HitTiles -= Collision_HitTiles;
-			IL_Collision.SolidTiles_int_int_int_int_bool -= Collision_SolidTiles;
-			IL_Collision.StepUp -= Collision_StepUp;
-			IL_Collision.GetTileRotation -= Collision_GetTileRotation;
-			IL_Collision.TileCollision -= Collision_TileCollision;
-			IL_Collision.AdvancedTileCollision -= Collision_AdvancedTileCollision;
-			IL_Collision.SlopeCollision -= Collision_SlopeCollision;
-			IL_Collision.noSlopeCollision -= Collision_noSlopeCollision;
-		}
+			if (_patchIsTopOfTile is not null) {
+				IL_Collision.SolidCollision_Vector2_int_int_bool -= _patchIsTopOfTile;
+				IL_Collision.HitTiles -= _patchIsTopOfTile;
+				IL_Collision.SolidTiles_int_int_int_int_bool -= _patchIsTopOfTile;
+				IL_Collision.StepUp -= _patchIsTopOfTile;
+				IL_Collision.GetTileRotation -= _patchIsTopOfTile;
 
-		private static void Collision_SolidCollision(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
+				_patchIsTopOfTile = null;
+			}
 
-		private static void Collision_HitTiles(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
+			if (_patchIsNotTopOfTile is not null) {
+				IL_Collision.TileCollision -= _patchIsNotTopOfTile;
+				IL_Collision.AdvancedTileCollision -= _patchIsNotTopOfTile;
+				IL_Collision.SlopeCollision -= _patchIsNotTopOfTile;
+				IL_Collision.noSlopeCollision -= _patchIsNotTopOfTile;
 
-		private static void Collision_SolidTiles(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_StepUp(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_GetTileRotation(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_TileCollision(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_AdvancedTileCollision(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_SlopeCollision(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
-		}
-
-		private static void Collision_noSlopeCollision(ILContext il) {
-			ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
+				_patchIsNotTopOfTile = null;
+			}
 		}
 
 		private static readonly MethodInfo Tile_get_frameY = typeof(Tile).GetProperty("frameY", BindingFlags.NonPublic | BindingFlags.Instance).GetMethod;
 
-		private static bool Patch_FrameY_Check(ILCursor c, ref string badReturnReason) {
-			// For each instance of Tile.frameY being accessed, inject a condition before it
-			int found = 0;
-			while (FindClause(c, out OpCode branch, out ILLabel label, out int local, out int codeStride)) {
-				// Found a match, inject the logic
-				found++;
+		private class PatchContext(Func<Tile, bool> injectedFunc) {
+			private readonly Func<Tile, bool> _injectedFunc = injectedFunc;
 
-				c.Emit(OpCodes.Ldloc, local);
-				c.EmitDelegate(emitFunc);
-				c.Emit(branch, label);
+			public void Patch(ILContext il) => ILHelper.CommonPatchingWrapper(il, MagicStorageMod.Instance, false, Patch_FrameY_Check);
 
-				// Nop the original code
-				for (int i = 0; i < codeStride; i++) {
-					c.Next.OpCode = OpCodes.Nop;
-					c.Next.Operand = null;
-					c.Index++;
+			private bool Patch_FrameY_Check(ILCursor c, ref string badReturnReason) {
+				// For each instance of Tile.frameY being accessed, inject a condition before it
+				int found = 0;
+				while (FindClause(c, out OpCode branch, out ILLabel label, out int local, out int codeStride)) {
+					// Found a match, inject the logic
+					found++;
+
+					c.Emit(OpCodes.Ldloc, local);
+					c.EmitDelegate(_injectedFunc);
+					c.Emit(branch, label);
+
+					// Nop the original code
+					for (int i = 0; i < codeStride; i++) {
+						c.Next.OpCode = OpCodes.Nop;
+						c.Next.Operand = null;
+						c.Index++;
+					}
 				}
+
+				if (found == 0) {
+					badReturnReason = "Could not find any valid Tile::frameY clauses used in boolean arithmetic";
+					return false;
+				}
+
+			//	MagicStorageMod.Instance.Logger.Debug($"Patched {found} clause{(found == 1 ? "" : "s")} in {c.Method.Name}");
+
+				return true;
 			}
-
-			if (found == 0) {
-				badReturnReason = "Could not find any valid Tile::frameY clauses used in boolean arithmetic";
-				return false;
-			}
-
-		//	MagicStorageMod.Instance.Logger.Debug($"Patched {found} clause{(found == 1 ? "" : "s")} in {c.Method.Name}");
-
-			return true;
 		}
 
 		private static bool HackIsTopOfTile(Tile tile) {
