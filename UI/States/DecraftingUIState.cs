@@ -96,7 +96,7 @@ namespace MagicStorage.UI.States {
 					CanShareItemToChat = true
 				};
 
-				itemSlot.OnLeftClick += (evt, e) => HandleStorageInteraction((MagicStorageItemSlot)e);
+				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, int.MaxValue, GetResult, (existing, incoming) => DecraftingGUI.IsItemValidForResult(incoming));
 
 				itemSlot.OnRightMouseDown += (evt, e) => HandleResultSlotRightHold((MagicStorageItemSlot)e);
 
@@ -135,45 +135,6 @@ namespace MagicStorage.UI.States {
 			shimmerReportList.Append(reportListScrollBar);
 
 			recipePanel.Append(shimmerReportList);
-		}
-
-		private void HandleStorageInteraction(MagicStorageItemSlot slot) {
-			// Prevent actions while refreshing the items
-			if (MagicUI.CurrentlyRefreshing)
-				return;
-
-			Player player = Main.LocalPlayer;
-
-			int objSlot = slot.id + CraftingGUI.IngredientColumns * (int)Math.Round(resultScrollBar.ViewPosition);
-
-			bool changed;
-			int type = 0;
-			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0) {
-				type = Main.mouseItem.type;
-				changed = StorageGUI.TryDeposit(Main.mouseItem);
-			} else {
-				Item toWithdraw = slot.StoredItem.Clone();
-				type = toWithdraw.type;
-
-				if (toWithdraw.stack > toWithdraw.maxStack)
-					toWithdraw.stack = toWithdraw.maxStack;
-								
-				Main.mouseItem = StorageGUI.DoWithdraw(toWithdraw, ItemSlot.ShiftInUse);
-								
-				if (ItemSlot.ShiftInUse)
-					Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-								
-				changed = true;
-			}
-
-			if (changed) {
-				MagicUI.SetRefresh();
-				DecraftingGUI.SetNextDefaultItemCollectionToRefresh(type);
-
-				slot.IgnoreNextHandleAction = true;
-
-				SoundEngine.PlaySound(SoundID.Grab);
-			}
 		}
 
 		private void HandleResultFocus(MagicStorageItemSlot slot) {

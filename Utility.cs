@@ -15,8 +15,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Terraria;
@@ -572,18 +570,8 @@ namespace MagicStorage {
 			}
 		}
 
-		private static Action<ModConfig> ConfigManagerSave;
 
-		public static void SaveModConfig(ModConfig config) {
-			(ConfigManagerSave ??= CreateConfigManagerSave())(config);
-
-			static Action<ModConfig> CreateConfigManagerSave() {
-				MethodInfo configManagerSaveMethod = typeof(ConfigManager).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic, new[] { typeof(ModConfig) }) 
-					?? throw new InvalidOperationException("Cannot get 'Terraria.ModLoader.Config.ConfigManager.Save' method.");
-				ParameterExpression modConfigParameter = Expression.Parameter(typeof(ModConfig));
-				return Expression.Lambda<Action<ModConfig>>(Expression.Call(configManagerSaveMethod, modConfigParameter), modConfigParameter).Compile();
-			}
-		}
+		public static void SaveModConfig(ModConfig config) => ConfigManager.Save(config);
 
 		public static Item GetItemSample(int item) => ContentSamples.ItemsByType[item];
 

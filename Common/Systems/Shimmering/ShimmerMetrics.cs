@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
-using System.Reflection;
 using Terraria;
 using Terraria.Enums;
 using Terraria.GameContent;
@@ -197,14 +195,26 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			return results;
 		}
 
+		[ThreadStatic]
+		internal static int? DecraftAmountStackOverride;
+
 		public static int GetDecraftAmount(int type, int stack) {
 			DecraftAmountStackOverride = stack;
 
-			int result = ContentSamples.ItemsByType[type].GetDecraftAmount();
+			int result = ContentSamples.ItemsByType[type].FindDecraftAmount();
 
 			DecraftAmountStackOverride = null;
 
 			return result;
+		}
+
+		public static int GetShimmerEquivalentType(int type) {
+			return ContentSamples.ItemsByType[type].GetShimmerEquivalentType();
+		}
+
+		public static float CalculateCoinLuck(this Player player, float forcedCoinLuckValue) {
+			using (ObjectSwitch.Create(ref player.coinLuck, forcedCoinLuckValue))
+				return player.CalculateCoinLuck();
 		}
 
 		/*
@@ -221,70 +231,5 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			return result;
 		}
 		*/
-
-		// Hidden functions from Item
-		private static Func<Item, int> _getShimmerEquivalentType;
-		public static int GetShimmerEquivalentType(this Item item) {
-			static Func<Item, int> MakeFunction() {
-				// Generate a System.Linq.Expression delegate that takes an Item as a parameter, calls Terraria.Item.GetShimmerEquivalentType(), and returns the result
-				// This is done to avoid using reflection, which is slow
-				var itemParameter = Expression.Parameter(typeof(Item), "item");
-				var call = Expression.Call(itemParameter, typeof(Item).GetMethod("GetShimmerEquivalentType", BindingFlags.NonPublic | BindingFlags.Instance));
-				var lambda = Expression.Lambda<Func<Item, int>>(call, itemParameter);
-				return lambda.Compile();
-			}
-
-			return (_getShimmerEquivalentType ??= MakeFunction())(item);
-		}
-
-		public static int GetShimmerEquivalentType(int type) {
-			return ContentSamples.ItemsByType[type].GetShimmerEquivalentType();
-		}
-
-		[ThreadStatic]
-		internal static int? DecraftAmountStackOverride;
-
-		private static Func<Item, int> _getDecraftAmount;
-		public static int GetDecraftAmount(this Item item) {
-			static Func<Item, int> MakeFunction() {
-				// Generate a System.Ling.Expression delegate that takes an Item as a parameter, calls Terraria.Item.GetDecraftAmount(), and returns the result
-				// This is done to avoid using reflection, which is slow
-				var itemParameter = Expression.Parameter(typeof(Item), "item");
-				var call = Expression.Call(itemParameter, typeof(Item).GetMethod("GetDecraftAmount", BindingFlags.NonPublic | BindingFlags.Instance));
-				var lambda = Expression.Lambda<Func<Item, int>>(call, itemParameter);
-				return lambda.Compile();
-			}
-
-			return (_getDecraftAmount ??= MakeFunction())(item);
-		}
-
-		private static Func<Player, float> _calculateCoinLuck;
-		public static float CalculateCoinLuck(this Player player, float forcedCoinLuckValue) {
-			static Func<Player, float> MakeFunction() {
-				// Generate a System.Linq.Expression delegate that takes a Player as a parameter, calls Terraria.Player.CalculateCoinLuck(), and returns the result
-				// This is done to avoid using reflection, which is slow
-				var playerParameter = Expression.Parameter(typeof(Player), "player");
-				var call = Expression.Call(playerParameter, typeof(Player).GetMethod("CalculateCoinLuck", BindingFlags.NonPublic | BindingFlags.Instance));
-				var lambda = Expression.Lambda<Func<Player, float>>(call, playerParameter);
-				return lambda.Compile();
-			}
-
-			using (ObjectSwitch.Create(ref player.coinLuck, forcedCoinLuckValue))
-				return (_calculateCoinLuck ??= MakeFunction())(player);
-		}
-
-		private static Action<NPC> _getShimmered;
-		public static void GetShimmered(this NPC npc) {
-			static Action<NPC> MakeFunction() {
-				// Generate a System.Linq.Expression delegate that takes an NPC as a parameter, calls Terraria.NPC.GetShimmered(), and returns the result
-				// This is done to avoid using reflection, which is slow
-				var npcParameter = Expression.Parameter(typeof(NPC), "npc");
-				var call = Expression.Call(npcParameter, typeof(NPC).GetMethod("GetShimmered", BindingFlags.NonPublic | BindingFlags.Instance));
-				var lambda = Expression.Lambda<Action<NPC>>(call, npcParameter);
-				return lambda.Compile();
-			}
-
-			(_getShimmered ??= MakeFunction())(npc);
-		}
 	}
 }

@@ -1,12 +1,6 @@
-﻿[h1]v0.7.0.3[/h1]
-- Fixed a bug from the Storage Auditing system that caused servers to crash
-- Fixed some bugs which caused clicking a button in the Dropdown button layout's dropdown menus to crash the game
-- Fixed the Dropdown button layout's dropdowns using the wrong text for the menu caption
-- Fixed a bug that caused the Automaton to not be able to display its help dialogue
-- Fixed some bugs that caused a Remote Access to forget what Storage Heart it was linked to when loading a world
-- Fixed some bugs that caused storage components to not recognize their connected Storage Heart
-- Fixed a bug that caused the [i]Show all possible ingredients[/i] control in the Crafting UI to freeze the game when clicked
-- Removed some error-handling code that was causing upgraded Storage Units to crash the server when destroyed
-- Restored legacy save data for backwards compatibility with versions prior to v0.7
+﻿[h1]v0.7.0.4[/h1]
+- Optimized more code using Reflection that had been missed previously
+- Fixed a bug that caused empty slots in the Aether Interface's result item slot zone to still play sounds when clicked
+- Fixed the Aether Interface not being able to decraft items
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

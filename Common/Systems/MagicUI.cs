@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Reflection;
 using MagicStorage.Common.Players;
 using MagicStorage.Components;
 using MagicStorage.Edits;
@@ -223,11 +222,6 @@ public class MagicUI : ModSystem
 		public readonly int oldMouseX, oldMouseY, oldPIMouseX, oldPIMouseY, oldPIOrigMouseX, oldPIOrigMouseY, oldPIOrigLastMouseX, oldPIOrigLastMouseY;
 		public readonly bool oldMouseLeft, oldMouseLeftRelease, oldMouseRight, oldMouseRightRelease;
 
-		public static readonly FieldInfo PlayerInput__originalMouseX = typeof(PlayerInput).GetField("_originalMouseX", BindingFlags.NonPublic | BindingFlags.Static);
-		public static readonly FieldInfo PlayerInput__originalMouseY = typeof(PlayerInput).GetField("_originalMouseY", BindingFlags.NonPublic | BindingFlags.Static);
-		public static readonly FieldInfo PlayerInput__originalLastMouseX = typeof(PlayerInput).GetField("_originalLastMouseX", BindingFlags.NonPublic | BindingFlags.Static);
-		public static readonly FieldInfo PlayerInput__originalLastMouseY = typeof(PlayerInput).GetField("_originalLastMouseY", BindingFlags.NonPublic | BindingFlags.Static);
-
 		private MouseCache() {
 			oldMouseX = Main.mouseX;
 			oldMouseY = Main.mouseY;
@@ -237,10 +231,10 @@ public class MagicUI : ModSystem
 			oldMouseRightRelease = Main.mouseRightRelease;
 			oldPIMouseX = PlayerInput.MouseX;
 			oldPIMouseY = PlayerInput.MouseY;
-			oldPIOrigMouseX = (int)PlayerInput__originalMouseX.GetValue(null);
-			oldPIOrigMouseY = (int)PlayerInput__originalMouseY.GetValue(null);
-			oldPIOrigLastMouseX = (int)PlayerInput__originalLastMouseX.GetValue(null);
-			oldPIOrigLastMouseY = (int)PlayerInput__originalLastMouseY.GetValue(null);
+			oldPIOrigMouseX = PlayerInput._originalMouseX;
+			oldPIOrigMouseY = PlayerInput._originalMouseY;
+			oldPIOrigLastMouseX = PlayerInput._originalLastMouseX;
+			oldPIOrigLastMouseY = PlayerInput._originalLastMouseY;
 		}
 
 		private static MouseCache cache;
@@ -262,10 +256,10 @@ public class MagicUI : ModSystem
 			Main.mouseLeft = Main.mouseLeftRelease = Main.mouseRight = Main.mouseRightRelease = false;
 			PlayerInput.MouseX = -1;
 			PlayerInput.MouseY = -1;
-			PlayerInput__originalMouseX.SetValue(null, -1);
-			PlayerInput__originalMouseY.SetValue(null, -1);
-			PlayerInput__originalLastMouseX.SetValue(null, -1);
-			PlayerInput__originalLastMouseY.SetValue(null, -1);
+			PlayerInput._originalMouseX = -1;
+			PlayerInput._originalMouseY = -1;
+			PlayerInput._originalLastMouseX = -1;
+			PlayerInput._originalLastMouseY = -1;
 		}
 
 		public static void FreeCache(bool destroy) {
@@ -283,10 +277,10 @@ public class MagicUI : ModSystem
 			Main.mouseRightRelease = c.oldMouseRightRelease;
 			PlayerInput.MouseX = c.oldPIMouseX;
 			PlayerInput.MouseY = c.oldPIMouseY;
-			PlayerInput__originalMouseX.SetValue(null, c.oldPIOrigMouseX);
-			PlayerInput__originalMouseY.SetValue(null, c.oldPIOrigMouseY);
-			PlayerInput__originalLastMouseX.SetValue(null, c.oldPIOrigLastMouseX);
-			PlayerInput__originalLastMouseY.SetValue(null, c.oldPIOrigLastMouseY);
+			PlayerInput._originalMouseX = c.oldPIOrigMouseX;
+			PlayerInput._originalMouseY = c.oldPIOrigMouseY;
+			PlayerInput._originalLastMouseX = c.oldPIOrigLastMouseX;
+			PlayerInput._originalLastMouseY = c.oldPIOrigLastMouseY;
 		}
 	}
 

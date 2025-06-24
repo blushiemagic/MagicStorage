@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
@@ -53,8 +52,6 @@ namespace MagicStorage.Common.Global {
 			}
 		}
 
-		private static readonly FieldInfo UnloadedGlobalItem_data = typeof(UnloadedGlobalItem).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
-
 		internal static IEnumerable<(string, string)> Sources(Item item) {
 			var globalsEnumerator = item.Globals.GetEnumerator();
 			var globals = new List<GlobalItem>();
@@ -68,7 +65,7 @@ namespace MagicStorage.Common.Global {
 
 				// Account for UnloadedGlobalItem no longer using SaveData in 1.4.4
 				if (gItem is UnloadedGlobalItem unloaded) {
-					var data = UnloadedGlobalItem_data.GetValue(unloaded) as IList<TagCompound>;
+					var data = unloaded.data;
 					if (data.Count > 0)
 						tag["modData"] = data;
 				} else

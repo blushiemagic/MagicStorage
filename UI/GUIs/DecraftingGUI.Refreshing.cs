@@ -243,9 +243,9 @@ namespace MagicStorage {
 			}
 		}
 
-		private static bool IsItemValidForStorage(Item item) => item.type == selectedItem && item.stack > 0;
+		internal static bool IsItemValidForStorage(Item item) => item.type == selectedItem && item.stack > 0;
 
-		private static bool IsItemValidForResult(Item item) {
+		internal static bool IsItemValidForResult(Item item) {
 			if (selectedItem == -1)
 				return false;
 

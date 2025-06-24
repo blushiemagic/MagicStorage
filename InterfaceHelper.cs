@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.UI;
@@ -8,19 +7,14 @@ namespace MagicStorage
 {
 	public static class InterfaceHelper
 	{
-		private static FieldInfo _itemIconCacheTimeInfo;
-
 		public static void Initialize()
 		{
-			_itemIconCacheTimeInfo = typeof(Main).GetField("_itemIconCacheTime", BindingFlags.NonPublic | BindingFlags.Static);
-
-			if (_itemIconCacheTimeInfo is null)
-				throw new Exception("Reflection value was null (source: InterfaceHelper.Initialize)");
+			// Now does nothing due to Reflection usage being removed
 		}
 
 		public static void HideItemIconCache()
 		{
-			_itemIconCacheTimeInfo.SetValue(null, 0);
+			Main._itemIconCacheTime = 0;
 		}
 
 		public static Rectangle GetFullRectangle(UIElement element)

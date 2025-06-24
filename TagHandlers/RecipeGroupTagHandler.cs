@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
 using System.Collections.Concurrent;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI;
@@ -70,10 +69,7 @@ namespace MagicStorage.TagHandlers {
 		}
 
 		public void Unload() {
-			ConcurrentDictionary<string, ITagHandler> _handlers = typeof(ChatManager)
-				.GetField("_handlers", BindingFlags.NonPublic | BindingFlags.Static)
-				.GetValue(null)
-				as ConcurrentDictionary<string, ITagHandler>;
+			var _handlers = ChatManager._handlers;
 
 			_handlers.TryRemove("rg", out _);
 			_handlers.TryRemove("recgroup", out _);

@@ -123,7 +123,9 @@ namespace MagicStorage.UI.States {
 			zone.SetItemsAndContexts(setItemCount, getItem);
 		}
 
-		protected void HandleResultSlotLeftClick(NewUISlotZone zone, MagicStorageItemSlot slot, int setItemCount, UISlotZone.GetItem getItem) {
+		protected delegate bool AcceptsItemAsResult(Item existing, Item incoming);
+
+		protected void HandleResultSlotLeftClick(NewUISlotZone zone, MagicStorageItemSlot slot, int setItemCount, UISlotZone.GetItem getItem, AcceptsItemAsResult acceptsItem) {
 			// Prevent actions while refreshing the items
 			if (MagicUI.CurrentlyRefreshing)
 				return;
@@ -142,7 +144,9 @@ namespace MagicStorage.UI.States {
 			Player player = Main.LocalPlayer;
 
 			bool changed = false;
-			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && item is not null && Main.mouseItem.type == item.type) {
+			int type = 0;
+			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && item is not null && acceptsItem(item, Main.mouseItem)) {
+				type = Main.mouseItem.type;
 				if (DepositItem(Main.mouseItem))
 					changed = true;
 			} else if (Main.mouseItem.IsAir && item?.IsAir is false) {
@@ -155,13 +159,14 @@ namespace MagicStorage.UI.States {
 							
 					if (ItemSlot.ShiftInUse)
 						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-							
+
 					changed = true;
+					type = item.type;
 				}
 			}
 
 			if (changed) {
-				MagicUI.SetRefresh();
+				MagicUI.SetNextCollectionsToRefresh(type);
 
 				SoundEngine.PlaySound(SoundID.Grab);
 

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent.Bestiary;
 using Terraria.ModLoader;
@@ -71,7 +69,7 @@ namespace MagicStorage.Common {
 			if (entry.icon is null)
 				return;
 
-			NPC npc = GetNPC(entry.icon);
+			NPC npc = entry.icon._npcCache;
 
 			var info = new BestiaryUICollectionInfo() {
 				UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1
@@ -111,22 +109,6 @@ namespace MagicStorage.Common {
 			npc.scale = oldScale;
 
 			Main.spriteBatch.GraphicsDevice.ScissorRectangle = oldRect;
-		}
-
-		private static Func<UnlockableNPCEntryIcon, NPC> _getCachedNPC;
-
-		private static NPC GetNPC(UnlockableNPCEntryIcon icon) {
-			static Func<UnlockableNPCEntryIcon, NPC> MakeFunction() {
-				// Generate a System.Linq.Expression delegate that takes an UnlockableNPCEntryIcon as a parameter and returns its _npcCache field
-				// This is done to avoid using reflection, which is slow
-				var param = Expression.Parameter(typeof(UnlockableNPCEntryIcon));
-				var field = typeof(UnlockableNPCEntryIcon).GetField("_npcCache", BindingFlags.NonPublic | BindingFlags.Instance);
-				var body = Expression.Field(param, field);
-				var lambda = Expression.Lambda<Func<UnlockableNPCEntryIcon, NPC>>(body, param);
-				return lambda.Compile();
-			}
-
-			return (_getCachedNPC ??= MakeFunction())(icon);
 		}
 	}
 }
