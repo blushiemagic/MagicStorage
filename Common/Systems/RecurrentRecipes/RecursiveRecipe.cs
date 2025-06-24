@@ -61,7 +61,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, new SharedCounter(batches * batchSize)), 0);
 			int depth = 0, maxDepth = 0;
 
-			if (MagicStorageConfig.IsRecursionEnabled && !available.creativeUnitPresent)
+			if (MagicStorageConfig.IsRecursionEnabled && available is not null && !available.creativeUnitPresent)
 				ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
 
 			return orderedTree;
