@@ -50,8 +50,8 @@ namespace MagicStorage.Components
 			if (center.X < 0 || center.Y < 0)
 				return null;
 
-			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageHeart heart)
-				return heart;
+			if (ByPosition.TryGetValue(center, out TileEntity te) && te is TEStorageCenter storageCenter)
+				return storageCenter.GetHeart();
 
 			return null;
 		}

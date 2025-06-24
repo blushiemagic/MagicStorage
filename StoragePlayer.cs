@@ -63,10 +63,9 @@ namespace MagicStorage
 			FavoritedShimmerItems.Save(tag);
 			tag["automaton"] = automatonHelpTip;
 
-			/*
+			// FIX: v0.7.0.3 - Restore legacy data for backwards compatibility
 			BitsByte unlocked = new(unlockedTip_Mechs, unlockedTip_MoonLord);
 			tag["unlocked"] = (byte)unlocked;
-			*/
 
 			tag["version"] = SAVE_VERSION;
 
