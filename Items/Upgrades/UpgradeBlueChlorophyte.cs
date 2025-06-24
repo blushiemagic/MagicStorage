@@ -10,6 +10,7 @@ namespace MagicStorage.Items
 
 		public override void SetDefaults()
 		{
+			base.SetDefaults();
 			Item.value = Item.sellPrice(gold: 1);
 		}
 
