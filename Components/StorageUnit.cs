@@ -36,8 +36,8 @@ namespace MagicStorage.Components
 
 		public override int ItemType(int frameX, int frameY)
 		{
-			return StorageUnitTierLoader.FindFromTileFrame(Type, frameX, frameY)?.StorageUnitItemType
-				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
+			// FIX: v0.7.0.4 - Default to air item instead of throwing an exception
+			return StorageUnitTierLoader.FindFromTileFrame(Type, frameX, frameY)?.StorageUnitItemType ?? ItemID.None;
 		}
 
 		public override void KillTile(int i, int j, ref bool fail, ref bool effectOnly, ref bool noItem)
@@ -50,10 +50,8 @@ namespace MagicStorage.Components
 			if (Main.tile[entityX, entityY].TileFrameY % 36 == 18)
 				entityY--;
 
-			if (TileEntity.ByPosition.ContainsKey(new Point16(entityX, entityY))) {
-				StorageUnitTier tier = StorageUnitTierLoader.FindFromTile(i, j)
-					?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
-
+			// FIX: v0.7.0.4 - Always allow destruction instead of throwing an exception, also fix the else clause
+			if (TileEntity.ByPosition.ContainsKey(new Point16(entityX, entityY)) && StorageUnitTierLoader.FindFromTile(i, j) is StorageUnitTier tier) {
 				Tile tile = Main.tile[i, j];
 				tier.GetState(tile.TileFrameX, tile.TileFrameY, out StorageUnitFullness fullness, out _);
 
@@ -105,10 +103,8 @@ namespace MagicStorage.Components
 		}
 
 		private static bool TryCoreInsertion(int i, int j, TEStorageUnit storageUnit, BaseStorageCore core) {
-			StorageUnitTier existingTier = StorageUnitTierLoader.FindFromTile(i, j)
-				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
-
-			if (existingTier.Type != StorageUnitTier.Empty.Type)
+			// FIX: v0.7.0.4 - Return early instead of throwing an exception
+			if (StorageUnitTierLoader.FindFromTile(i, j) is StorageUnitTier existingTier && existingTier.Type != StorageUnitTier.Empty.Type)
 				return false;
 
 			storageUnit.InsertCore(core);
@@ -124,10 +120,8 @@ namespace MagicStorage.Components
 
 		private static bool TryUpgrade(int i, int j, TEStorageUnit storageUnit, BaseStorageUpgradeItem item)
 		{
-			StorageUnitTier existingTier = StorageUnitTierLoader.FindFromTile(i, j)
-				?? throw new Exception("No Storage Unit tier was found for this Storage Unit");
-
-			if (existingTier.CanUpgradeTo(item.Tier)) {
+			// FIX: v0.7.0.4 - Return early instead of throwing an exception
+			if (StorageUnitTierLoader.FindFromTile(i, j) is StorageUnitTier existingTier && existingTier.CanUpgradeTo(item.Tier)) {
 				storageUnit.GetFramingState(out var fullness, out bool active);
 				SetTypeAndStyle(i, j, item.Tier, fullness, active);
 				TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);

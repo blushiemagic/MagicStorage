@@ -3,5 +3,6 @@
 - Fixed a bug that caused empty slots in the Aether Interface's result item slot zone to still play sounds when clicked
 - Fixed the Aether Interface not being able to decraft items
 - Fixed a faulty code injection that was causing other mods to end up in deadlock, preventing mods from finishing loading
+- Fixed Storage Units causing crashes when being destroyed
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
