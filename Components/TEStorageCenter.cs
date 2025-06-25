@@ -72,7 +72,7 @@ namespace MagicStorage.Components
 			}
 
 			public void Link(TEStorageComponent component) {
-				NetHelper.Report(true, "Attempting to link " + component.GetType().Name + " at " + component.Position + " to Center at " + _center.Position);
+				NetHelper.Report(true, $"Attempting to link {component.FullName} at {component.Position} to Center ({_center.FullName}) at {_center.Position}");
 
 				if (component is TEStorageHeart heart) {
 					// Don't link storage hearts to storage storage hearts
@@ -81,6 +81,7 @@ namespace MagicStorage.Components
 					} else if (_foundHeart == Point16.NegativeOne) {
 						NetHelper.Report(false, " -- SUCCESS: Found Storage Heart at " + heart.Position);
 						_foundHeart = heart.Position;
+						_center.Link(heart.Position);
 					} else {
 						// Normally, I'd throw an exception here, but I'll just have the logic silently return instead
 						NetHelper.Report(false, " -- FAILED: Storage Heart already found at " + _foundHeart);
@@ -277,10 +278,8 @@ namespace MagicStorage.Components
 					}
 				}
 
-				if (_center is not TEStorageHeart && reader.ReadPoint16().ResolveToTileEntity() is TEStorageHeart heart) {
+				if (_center is not TEStorageHeart && reader.ReadPoint16().ResolveToTileEntity() is TEStorageHeart heart)
 					Link(heart);
-					_center.Link(heart.Position);
-				}
 			}
 
 			public void Save(TagCompound tag) {
@@ -310,10 +309,8 @@ namespace MagicStorage.Components
 						}
 					}
 
-					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location.ResolveToTileEntity() is TEStorageHeart heart) {
+					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location.ResolveToTileEntity() is TEStorageHeart heart)
 						Link(heart);
-						_center.Link(heart.Position);
-					}
 				}
 			}
 		}
