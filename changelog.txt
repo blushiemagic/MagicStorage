@@ -1,4 +1,8 @@
 ﻿[h1]v0.7.0.5[/h1]
+- Added some migration code for worlds created before v0.7.0.5 to force Storage Hearts and Remote Access to check for connected components
 - Fixed a mistake that caused the Terra Storage Unit to have a capacity of 400 items instead of the intended 640
+- Fixed the auditiing system recording an item ID of "None" for [i]UnitCoreInsert[/i] events
+- Fixed inserting Storage Cores on multiplayer clients not updating Storage Unit to the inserted core's tier
+- Fixed Remote Accesses not recognizing their linked Storage Heart on multiplayer clients until the Storage Heart was opened
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

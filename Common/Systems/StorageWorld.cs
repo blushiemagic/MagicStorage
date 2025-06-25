@@ -110,6 +110,7 @@ namespace MagicStorage.Common.Systems
 		public override void ClearWorld() => OnWorldLoad();
 
 		private const int MIGRATION_VERSION_0_7 = 1;
+		private const int FIX_STORAGE_DISCONNECTED = 2;
 
 		public override void SaveWorldData(TagCompound tag)
 		{
@@ -133,7 +134,7 @@ namespace MagicStorage.Common.Systems
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
-			tag["migration"] = MIGRATION_VERSION_0_7;
+			tag["migration"] = FIX_STORAGE_DISCONNECTED;
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -223,6 +224,19 @@ namespace MagicStorage.Common.Systems
 				int numAccesses = accessesToPlace.Count;
 				int numNetworks = heartsToUpdate.Count + remotesToUpdate.Count;
 				Mod.Logger.Debug($"Success!  Placed {numAccesses} new Storage Access entit{(numAccesses == 1 ? "y" : "ies")}, recalculated components for {numNetworks} storage network{(numNetworks == 1 ? "" : "s")}");
+			}
+
+			if (migration < FIX_STORAGE_DISCONNECTED) {
+				Mod.Logger.Debug("Marking all Remote Accesses and Storage Hearts for forced component searching...");
+
+				// NOTE: The above.  Tile entities have already loaded their data by this point, so we can just force a network refresh here
+				int count = 0;
+				foreach (TEStorageCenter center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>()) {
+					center.ResetAndSearch();
+					count++;
+				}
+
+				Mod.Logger.Debug($"Success!  Forced component searching on {count} entities");
 			}
 		}
 

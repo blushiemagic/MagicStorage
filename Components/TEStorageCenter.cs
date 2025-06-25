@@ -277,8 +277,10 @@ namespace MagicStorage.Components
 					}
 				}
 
-				if (_center is not TEStorageHeart && reader.ReadPoint16().ResolveToTileEntity() is TEStorageHeart heart)
-					_foundHeart = heart.Position;
+				if (_center is not TEStorageHeart && reader.ReadPoint16().ResolveToTileEntity() is TEStorageHeart heart) {
+					Link(heart);
+					_center.Link(heart.Position);
+				}
 			}
 
 			public void Save(TagCompound tag) {

@@ -110,10 +110,12 @@ namespace MagicStorage.Components
 			storageUnit.InsertCore(core);
 			storageUnit.GetFramingState(out var fullness, out bool active);
 			SetTypeAndStyle(i, j, core.Tier, fullness, active);
-			TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
 
+			// FIX: v0.7.0.5 - Audit needs to be logged before the item is consumed
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 				AuditSystem.NetReportStorageUnitCoreInsertion(Main.myPlayer, storageUnit, core);
+
+			TriggerUnitMagicAndConsumeHeldItem(i, j, storageUnit);
 
 			return true;
 		}

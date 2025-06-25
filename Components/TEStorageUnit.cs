@@ -126,12 +126,10 @@ namespace MagicStorage.Components
 			
 			DepositToItemCollection(items, toDeposit, Capacity, out bool hasChange);
 
-			if (hasChange && Main.netMode != NetmodeID.MultiplayerClient)
+			if (hasChange)
 			{
 				if (Main.netMode == NetmodeID.Server)
-				{
 					netOpQueue.Enqueue(new NetOperation(NetOperations.Deposit, original));
-				}
 				PostChangeContents();
 			}
 		}
@@ -190,15 +188,9 @@ namespace MagicStorage.Components
 			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite))
 				return result;
 
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				if (Main.netMode == NetmodeID.Server)
-				{
-					netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
-				}
-
-				PostChangeContents();
-			}
+			if (Main.netMode == NetmodeID.Server)
+				netOpQueue.Enqueue(new NetOperation(NetOperations.Withdraw, original, keepOneIfFavorite));
+			PostChangeContents();
 
 			return result;
 		}
@@ -253,6 +245,8 @@ namespace MagicStorage.Components
 			return true;
 		}
 
+		private int _lastKnowFramingTier = -1;
+
 		public bool UpdateTileFrame()
 		{
 			// FIX: v0.7.0.4 - Return early instead of throwing an exception
@@ -275,7 +269,9 @@ namespace MagicStorage.Components
 
 			tier.Frame(currentFullness, currentActive, out int targetFrameX, out int targetFrameY);
 
-			if (previousFullness != currentFullness || previousActive != currentActive) {
+			if (previousFullness != currentFullness || previousActive != currentActive || _lastKnowFramingTier != tier.Type) {
+				_lastKnowFramingTier = tier.Type;
+
 				int x = Position.X, y = Position.Y;
 				tile.TileFrameX = (short)targetFrameX;
 				tile.TileFrameY = (short)targetFrameY;
@@ -294,6 +290,8 @@ namespace MagicStorage.Components
 
 				return true;
 			}
+
+			_lastKnowFramingTier = tier.Type;
 
 			return false;
 		}
@@ -332,14 +330,10 @@ namespace MagicStorage.Components
 
 			Item item = items[items.Count - 1];
 			items.RemoveAt(items.Count - 1);
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				if (Main.netMode == NetmodeID.Server)
-				{
-					netOpQueue.Enqueue(new NetOperation(NetOperations.WithdrawStack));
-				}
-				PostChangeContents();
-			}
+
+			if (Main.netMode == NetmodeID.Server)
+				netOpQueue.Enqueue(new NetOperation(NetOperations.WithdrawStack));
+			PostChangeContents();
 
 			return item;
 		}
@@ -368,13 +362,11 @@ namespace MagicStorage.Components
 			items.Clear();
 			StorageUnit.SetTypeAndStyle(Position.X, Position.Y, StorageUnitTier.Empty, StorageUnitFullness.Empty, !Inactive);
 
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				if (Main.netMode == NetmodeID.Server)
-					netOpQueue.Enqueue(new NetOperation(NetOperations.RemoveCore));
-				PostChangeContents();
-			}
+			if (Main.netMode == NetmodeID.Server)
+				netOpQueue.Enqueue(new NetOperation(NetOperations.RemoveCore));
+			PostChangeContents();
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && playerHeart.Position == GetHeart()?.Position) {
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && GetHeart() is TEStorageHeart storageHeart && playerHeart.Position == storageHeart.Position) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
@@ -393,11 +385,9 @@ namespace MagicStorage.Components
 			var coreItems = core.RetrieveItems();
 			items.AddRange(coreItems);
 
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				if (Main.netMode == NetmodeID.Server)
-					netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
-				PostChangeContents();
-			}
+			if (Main.netMode == NetmodeID.Server)
+				netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
+			PostChangeContents();
 
 			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && playerHeart.Position == GetHeart()?.Position) {
 				MagicUI.SetRefresh();
@@ -414,12 +404,10 @@ namespace MagicStorage.Components
 
 			items = Compact(items, out bool didPack);
 
-			if (didPack && Main.netMode != NetmodeID.MultiplayerClient)
+			if (didPack)
 			{
 				if (Main.netMode == NetmodeID.Server)
-				{
 					netOpQueue.Enqueue(new NetOperation(NetOperations.PackItems));
-				}
 				PostChangeContents();
 			}
 		}

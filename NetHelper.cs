@@ -1706,7 +1706,8 @@ cleanupContext:
 					if (spawnedItem is not null)
 						AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
 
-					unit.UpdateTileFrameWithNetSend();
+					// RemoveItemsAndSpawnCore() already sends the frame change
+				//	unit.UpdateTileFrameWithNetSend();
 
 					if (unit.GetHeart() is TEStorageHeart heart) {
 						heart.ResetCompactStage();
@@ -1737,7 +1738,8 @@ cleanupContext:
 			if (Main.netMode == NetmodeID.Server) {
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
 					unit.InsertCore((BaseStorageCore)item.ModItem);
-					unit.UpdateTileFrameWithNetSend();
+					// InsertCore already sends the frame change
+				//	unit.UpdateTileFrameWithNetSend();
 
 					if (unit.GetHeart() is TEStorageHeart heart) {
 						heart.ResetCompactStage();
