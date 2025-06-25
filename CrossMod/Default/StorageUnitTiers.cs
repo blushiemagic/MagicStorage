@@ -113,7 +113,7 @@ namespace MagicStorage.CrossMod.Default {
 	internal sealed class TierTerra : MagicStorageTier {
 		public override int UpgradeItemType => ModContent.ItemType<UpgradeTerra>();
 		public override int CoreItemType => ModContent.ItemType<StorageCoreTerra>();
-		public override int Capacity => 400;
+		public override int Capacity => 640;
 		public override int StorageUnitItemType => ModContent.ItemType<StorageUnitTerra>();
 		protected override int FrameRow => 7;
 		protected override StorageUnitTier UpgradesFrom => Luminite;
