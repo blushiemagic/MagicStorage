@@ -36,6 +36,8 @@ namespace MagicStorage.Items {
 			// For every tier that this item's tier can upgrade to, create a recipe
 			// this.Tier.StorageUnitItemType should be the same ID as this item, so no need to reference it
 			foreach (var nextTier in Tier.NextTiers) {
+			//	Mod.Logger.Info($"Registering recipe for Storage tier ({Tier.FullName} -> {nextTier.FullName}): {FullName} + {ItemLoader.GetItem(nextTier.UpgradeItemType)?.FullName ?? "<null>"} = {ItemLoader.GetItem(nextTier.StorageUnitItemType)?.FullName ?? "<null>"}");
+
 				Recipe.Create(nextTier.StorageUnitItemType)
 					.AddIngredient(this)
 					.AddIngredient(nextTier.UpgradeItemType)
