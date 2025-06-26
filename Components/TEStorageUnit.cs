@@ -389,7 +389,7 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
 			PostChangeContents();
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && playerHeart.Position == GetHeart()?.Position) {
+			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && GetHeart() is TEStorageHeart storageHeart && playerHeart.Position == storageHeart.Position) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(coreItems.Select(static i => i.type).Distinct().ToList());
 			}

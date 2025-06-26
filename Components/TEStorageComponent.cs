@@ -56,6 +56,15 @@ namespace MagicStorage.Components
 			return null;
 		}
 
+		public TEStorageCenter GetLocalCenter() {
+			Point16 center = StorageCenter;
+
+			if (center.X < 0 || center.Y < 0)
+				return null;
+
+			return center.ResolveToTileEntity<TEStorageCenter>();
+		}
+
 		public override bool IsTileValidForEntity(int x, int y)
 		{
 			Tile tile = Main.tile[x, y];
@@ -130,7 +139,7 @@ namespace MagicStorage.Components
 
 		public override void Update() {
 			if (this is not TEStorageHeart)
-				GetHeart()?.ComponentManager.LinkIfNotExists(this);
+				GetLocalCenter()?.ComponentManager.LinkIfNotExists(this);
 		}
 
 		public virtual void OnPlace()

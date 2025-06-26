@@ -30,7 +30,8 @@ namespace MagicStorage
 		internal int wirelessLatency = -1;
 		internal const int MaxLatency = 10;
 
-		private int? patreon;
+		private int patreon = -1;
+		private int messageDelay;
 
 		// Automaton help tips
 		[Obsolete("Use the GolemHelpFlags class instead")]
@@ -87,24 +88,18 @@ namespace MagicStorage
 			BitsByte unlocked = tag.GetByte("unlocked");
 			unlocked.Retrieve(ref unlockedTip_Mechs, ref unlockedTip_MoonLord);
 
-			if (tag.TryGet("shilling", out int waitCount))
-				patreon = waitCount >= 0 ? waitCount - 1 : waitCount;
+			if (tag.TryGet("shilling", out int waitCount) && waitCount > 0)
+				patreon = waitCount;
 			else
 				patreon = Main.rand.Next(3, 8);
+
+			messageDelay = 300;
 		}
 
 		public override void OnEnterWorld() {
 			if (MagicStorageMod.UsingPrivateBeta) {
 				Main.NewTextMultiline("Thank you for helping test a private beta for Magic Storage!\n" +
 					"Do note that using this private beta build will cause a ton of text to be printed to the chat (when the config is enabled) and to your log files.",
-					c: Color.LightBlue);
-			}
-
-			if (patreon == 0) {
-				Main.NewTextMultiline("Thank you for playing Magic Storage!\n" +
-					"Please consider supporting the development of Magic Storage by becoming a patron for the absoluteAquarian Patreon.\n" +
-					"Patrons will gain early access to future updates of Magic Storage, plus other benefits.\n" +
-					"[c/dddd00:NOTE:] This message will only be displayed once per player.",
 					c: Color.LightBlue);
 			}
 		}
@@ -126,6 +121,13 @@ namespace MagicStorage
 
 			if (Player.whoAmI != Main.myPlayer)
 				return;
+
+			if (messageDelay >= 0 && --messageDelay < 0 && --patreon < 0) {
+				Main.NewTextMultiline("Thank you for playing Magic Storage!\n" +
+					"Please consider supporting the development of Magic Storage by becoming a patron for the absoluteAquarian Patreon.\n" +
+					"Patrons will gain early access to future updates of Magic Storage, plus other benefits.",
+					c: Color.LightBlue);
+			}
 
 			if (timeSinceOpen < 1 && !Main.autoPause && storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
