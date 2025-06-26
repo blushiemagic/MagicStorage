@@ -6,5 +6,6 @@
 - Fixed Remote Accesses not recognizing their linked Storage Heart on multiplayer clients until the Storage Heart was opened
 - Fixed storage components not recognizing their linked Storage Heart when on a network with a Remote Access
 - Fixed an oversight which caused the Hallowed Storage Unit to be uncraftable and the Hellstone Storage Unit's recipes to be duplicated
+- [i]StorageAggregator.AppliesToItem()[/i] now no longer requires an overridden definition to be executed
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

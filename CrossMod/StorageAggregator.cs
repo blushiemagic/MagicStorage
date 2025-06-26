@@ -15,12 +15,6 @@ namespace MagicStorage.CrossMod {
 	public abstract class StorageAggregator : ModType {
 		public int Type { get; private set; }
 
-		private bool? _conditionallyApplies;
-		internal bool ConditionallyAppliesToItems {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => _conditionallyApplies ??= LoaderUtils.HasOverride(this, m => m.AppliesToItem);
-		}
-
 		private bool? _selectsData;
 		internal bool SelectsItemData {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -155,7 +149,7 @@ namespace MagicStorage.CrossMod {
 
 			try {
 				foreach (var aggregator in _aggregators) {
-					if (aggregator.ConditionallyAppliesToItems && aggregator.AppliesToItem(destination) && aggregator.AppliesToItem(checking)) {
+					if (aggregator.AppliesToItem(destination) && aggregator.AppliesToItem(checking)) {
 						bool? result = aggregator.CanAggregateItems(destination, checking);
 
 						if (result is bool resultValue) {
