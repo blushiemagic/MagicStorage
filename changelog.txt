@@ -4,5 +4,6 @@
 - Fixed the auditiing system recording an item ID of "None" for [i]UnitCoreInsert[/i] events
 - Fixed inserting Storage Cores on multiplayer clients not updating Storage Unit to the inserted core's tier
 - Fixed Remote Accesses not recognizing their linked Storage Heart on multiplayer clients until the Storage Heart was opened
+- Fixed storage components not recognizing their linked Storage Heart when on a network with a Remote Access
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]
