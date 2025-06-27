@@ -6,4 +6,4 @@ hideCode = false
 hideResources = false
 includeSource = true
 includePDB = true
-modReferences = SerousCommonLib@1.0.6
+modReferences = SerousCommonLib@1.0.6.1
