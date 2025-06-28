@@ -111,6 +111,7 @@ namespace MagicStorage.Common.Systems
 
 		private const int MIGRATION_VERSION_0_7 = 1;
 		private const int FIX_STORAGE_DISCONNECTED = 2;
+		private const int FIX_ZERO_STORAGE_CENTER = 3;
 
 		public override void SaveWorldData(TagCompound tag)
 		{
@@ -134,7 +135,7 @@ namespace MagicStorage.Common.Systems
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
-			tag["migration"] = FIX_STORAGE_DISCONNECTED;
+			tag["migration"] = FIX_ZERO_STORAGE_CENTER;
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -177,7 +178,30 @@ namespace MagicStorage.Common.Systems
 				}
 			}
 
+			// NOTE: ModSystem.LoadWorldData runs AFTER tile enties load their data!
+			//       This is helpful since we can modify the components en-masse without needing to
+			//       store the version number in each tile entity.
 			int migration = tag.GetInt("migration");
+
+			if (migration < FIX_ZERO_STORAGE_CENTER) {
+				Mod.Logger.Debug("Scanning for storage components whose linked center is set to (0, 0)...");
+
+				// Scan each storage component and force the linked StorageCenter to (-1, -1) if it was using
+				//   the previous default of (0, 0) instead
+				// Components can only be relinked if they are not linked to a TEStorageCenter, and (0, 0)
+				//   is not considered "unlinked"
+				int count = 0;
+				foreach (TEStorageComponent component in TileEntity.ByPosition.Values.OfType<TEStorageComponent>()) {
+					var center = component.StorageCenter;
+					if (center.X == 0 && center.Y == 0) {
+						component.StorageCenter = Point16.NegativeOne;
+						count++;
+					}
+				}
+
+				Mod.Logger.Debug($"Success!  Scan affected {count} storage component{(count == 1 ? "" : "s")}.");
+			}
+
 			if (migration < MIGRATION_VERSION_0_7) {
 				Mod.Logger.Debug("Migrating world to v0.7 state...");
 
@@ -209,9 +233,6 @@ namespace MagicStorage.Common.Systems
 					}
 				}
 
-				// NOTE: ModSystem.LoadWorldData runs AFTER tile enties load their data!
-				//       This is preferable since some components have new data in the migration, and that will be set here
-				//       when the network's connections are recalculated.
 				foreach (Point16 pos in accessesToPlace)
 					accessTE.Place(pos.X, pos.Y);
 
@@ -226,10 +247,9 @@ namespace MagicStorage.Common.Systems
 				Mod.Logger.Debug($"Success!  Placed {numAccesses} new Storage Access entit{(numAccesses == 1 ? "y" : "ies")}, recalculated components for {numNetworks} storage network{(numNetworks == 1 ? "" : "s")}");
 			}
 
-			if (migration < FIX_STORAGE_DISCONNECTED) {
+			if (migration < FIX_STORAGE_DISCONNECTED || migration < FIX_ZERO_STORAGE_CENTER) {
 				Mod.Logger.Debug("Marking all Remote Accesses and Storage Hearts for forced component searching...");
 
-				// NOTE: The above.  Tile entities have already loaded their data by this point, so we can just force a network refresh here
 				int count = 0;
 				foreach (TEStorageCenter center in TileEntity.ByPosition.Values.OfType<TEStorageCenter>()) {
 					center.ResetAndSearch();

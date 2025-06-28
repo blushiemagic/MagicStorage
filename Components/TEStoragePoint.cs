@@ -7,7 +7,7 @@ namespace MagicStorage.Components
 {
 	public abstract class TEStoragePoint : TEStorageComponent
 	{
-		internal Point16 center;
+		internal Point16 center = Point16.NegativeOne;
 
 		public override Point16 StorageCenter {
 			get => center;

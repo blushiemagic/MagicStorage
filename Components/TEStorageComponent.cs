@@ -32,7 +32,7 @@ namespace MagicStorage.Components
 			new Point16(0, 1)
 		};
 
-		protected Point16 _storageCenter;
+		protected Point16 _storageCenter = Point16.NegativeOne;
 
 		public virtual Point16 StorageCenter
 		{

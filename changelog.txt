@@ -1,11 +1,5 @@
-﻿[h1]v0.7.0.5[/h1]
-- Added some migration code for worlds created before v0.7.0.5 to force Storage Hearts and Remote Access to check for connected components
-- Fixed a mistake that caused the Terra Storage Unit to have a capacity of 400 items instead of the intended 640
-- Fixed the auditiing system recording an item ID of "None" for [i]UnitCoreInsert[/i] events
-- Fixed inserting Storage Cores on multiplayer clients not updating Storage Unit to the inserted core's tier
-- Fixed Remote Accesses not recognizing their linked Storage Heart on multiplayer clients until the Storage Heart was opened
-- Fixed storage components not recognizing their linked Storage Heart when on a network with a Remote Access
-- Fixed an oversight which caused the Hallowed Storage Unit to be uncraftable and the Hellstone Storage Unit's recipes to be duplicated
-- [i]StorageAggregator.AppliesToItem()[/i] now no longer requires an overridden definition to be executed
+﻿[h1]v0.7.0.6[/h1]
+- Fixed a bug which caused newly-placed storage components to not be able to connect to storage networks
+- Fixed a bug which caused the Storage Heart to not try to empty items from inactive Storage Units
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

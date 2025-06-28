@@ -8,7 +8,7 @@ namespace MagicStorage.Components
 {
 	public abstract class TEAbstractStorageUnit : TEStorageComponent
 	{
-		private Point16 center;
+		private Point16 center = Point16.NegativeOne;
 
 		public bool Inactive { get; set; }
 
