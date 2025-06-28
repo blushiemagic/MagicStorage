@@ -1,5 +1,11 @@
-﻿[h1]v0.7.0.6[/h1]
-- Fixed a bug which caused newly-placed storage components to not be able to connect to storage networks
-- Fixed a bug which caused the Storage Heart to not try to empty items from inactive Storage Units
+﻿[h1]v0.7.0.7[/h1]
+- Fixed a bug where storage components connected to a Storage Heart aren't properly disconnected, causing them to only be accessible if placing a new Storage Heart at the same position as the previous Storage Heart
+- Fixed a memory leak from generating Shimmering reports in the Aether Interface
+- Fixed an oversight which caused Mannequins to spam the patreon promotion message
+- Fixed a bug where decrafting in the Aether Interface would attempt to consume too many items, sometimes causing the process to fail when it shouldn't
+- Fixed a bug where the Aether Interface would only use items with no prefix
+- Fixed a bug where the Aether Interface did not respect whether any Stored Ingredients were blocked
+- Fixed a bug where destroying a storage component or Connector wouldn't properly unlink storage components no longer connected to the storage network
+- Added more optimizations to refreshing the UIs of the Crafting and Aether Interfaces
 
 To see the full change log for v0.7, check [url=https://gist.github.com/absoluteAquarian/138c497da1be407b9d8d3662ce9cf185]this GitHub Gist document[/url]

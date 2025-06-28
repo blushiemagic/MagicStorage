@@ -60,7 +60,7 @@ namespace MagicStorage {
 			if (CraftingGUI.craftAmountTarget < 1 || selectedItem == -1 || !IsAvailable(selectedItem))
 				CraftingGUI.craftAmountTarget = 1;
 			else {
-				int max = CraftingGUI.itemCounts.TryGetValue(selectedItem, out int count) ? count : 1;
+				int max = CraftingGUI.GetItemCountsWithBlockedItemsRemoved().TryGetValue(selectedItem, out int count) ? count : 1;
 
 				if (CraftingGUI.craftAmountTarget > max)
 					CraftingGUI.craftAmountTarget = max;

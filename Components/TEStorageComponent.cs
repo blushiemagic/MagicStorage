@@ -149,11 +149,15 @@ namespace MagicStorage.Components
 
 		public override void OnKill()
 		{
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				NetHelper.SendSearchAndRefresh(Position.X, Position.Y);
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 				NetHelper.SendComponentDestruction(Position);
-			} else
-				SearchAndRefreshNetwork(Position);
+
+			if (GetLocalCenter() is TEStorageCenter center) {
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					NetHelper.SendSearchAndRefresh(center.Position.X, center.Position.Y);
+				else
+					center.ResetAndSearch();
+			}
 		}
 
 		public IEnumerable<Point16> AdjacentComponents() => AdjacentComponents(Position);
@@ -230,7 +234,7 @@ namespace MagicStorage.Components
 				centerEnt.ResetAndSearch();
 
 				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0) {
-					if (centerEnt.GetHeart() is TEStorageHeart centerHeart && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && centerHeart.Position == playerHeart.Position)
+					if (centerEnt.GetHeart() is TEStorageHeart centerHeart && StoragePlayer.IsClientViewingHeart(centerHeart))
 						MagicUI.SetRefresh(forceFullRefresh: false);
 				}
 			}

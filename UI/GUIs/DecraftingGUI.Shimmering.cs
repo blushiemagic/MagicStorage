@@ -6,6 +6,7 @@ using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
 using Terraria.DataStructures;
 using System.Collections.Generic;
+using MagicStorage.Common;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
@@ -28,7 +29,7 @@ namespace MagicStorage {
 
 			// Additional safeguard against absurdly high craft targets
 			int origShimmerRequest = toShimmer;
-			toShimmer = Math.Min(toShimmer, CraftingGUI.itemCounts[selectedItem]);
+			toShimmer = Math.Min(toShimmer, CraftingGUI.GetCurrentInventory().GetIngredientQuantity(selectedItem));
 
 			if (toShimmer != origShimmerRequest)
 				NetHelper.Report(false, $"Shimmer amount reduced to {toShimmer}");
@@ -62,10 +63,12 @@ namespace MagicStorage {
 			var toDeposit = CraftingGUI.CompactItemList(context.storage.toDeposit);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				NetHelper.Report(true, "Spawning excess item results on player...");
+				NetHelper.Report(true, "Handling storage inventory changes and spawning excess results on player...");
 
-				foreach (Item item in CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, toDeposit))
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
+				using(FlagSwitch.ToggleTrue(ref TEStorageUnit.ignorePrefixesWhenWithdrawing))  // Stupid fugly hack
+				using(SecuritySystem.CreateAccessContext())
+					foreach (Item item in CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, toDeposit))
+						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 
 				MagicUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {

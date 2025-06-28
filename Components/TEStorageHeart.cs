@@ -100,6 +100,7 @@ namespace MagicStorage.Components
 
 		public override void OnKill()
 		{
+			base.OnKill();  // NOTE: very important!  TEStorageCenter.OnKill() handles disconnecting the components in the network
 			IsAlive = false;
 		}
 
@@ -402,8 +403,10 @@ namespace MagicStorage.Components
 
 		public void CompactCoins()
 		{
-			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork)) {
+				NetHelper.Report(true, $"[TEStorageHeart] Access denied for accessing player {(SecuritySystem.TryGetCurrentAccessContext(out var context) ? context.Player : -1)} at {Position}");
 				return;
+			}
 
 			Dictionary<int, int> coinsQty = new Dictionary<int, int>();
 			coinsQty.Add(ItemID.CopperCoin, 0);
@@ -597,8 +600,10 @@ namespace MagicStorage.Components
 
 		public void DepositItem(Item toDeposit)
 		{
-			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork)) {
+				NetHelper.Report(true, $"[TEStorageHeart] Access denied for accessing player {(SecuritySystem.TryGetCurrentAccessContext(out var context) ? context.Player : -1)} at {Position}");
 				return;
+			}
 
 			bool actualItem = !toDeposit.IsAir;
 			int oldStack = toDeposit.stack;
@@ -629,7 +634,7 @@ namespace MagicStorage.Components
 
 			MakeTheUIRefresh:
 			if (oldStack != toDeposit.stack) {
-				if (actualItem && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
+				if (actualItem && StoragePlayer.IsClientViewingHeart(this))
 					MagicUI.SetNextCollectionsToRefresh(remember);
 
 				ResetCompactStage();
@@ -710,8 +715,10 @@ namespace MagicStorage.Components
 
 		public Item Withdraw(Item lookFor, bool keepOneIfFavorite)
 		{
-			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork)) {
+				NetHelper.Report(true, $"[TEStorageHeart] Access denied for accessing player {(SecuritySystem.TryGetCurrentAccessContext(out var context) ? context.Player : -1)} at {Position}");
 				return new Item();
+			}
 
 			Item result = new();
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
@@ -726,7 +733,7 @@ namespace MagicStorage.Components
 						else
 							result.stack += withdrawn.stack;
 
-						if (StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
+						if (StoragePlayer.IsClientViewingHeart(this))
 							MagicUI.SetNextCollectionsToRefresh(withdrawn.type);
 
 						if (lookFor.stack <= 0)
@@ -807,7 +814,7 @@ namespace MagicStorage.Components
 					if (result.stack > 0) {
 						ResetCompactStage();
 
-						if (Main.netMode == NetmodeID.SinglePlayer && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
+						if (StoragePlayer.IsClientViewingHeart(this))
 							MagicUI.SetNextCollectionsToRefresh(type);
 					}
 				}
@@ -856,7 +863,7 @@ namespace MagicStorage.Components
 				if (didSomething) {
 					ResetCompactStage();
 					
-					if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart()?.Position == this.Position)
+					if (StoragePlayer.IsClientViewingHeart(this))
 						MagicUI.SetNextCollectionsToRefresh(typesToRefresh);
 				}
 			} catch {
@@ -934,8 +941,10 @@ namespace MagicStorage.Components
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)
 		{
-			if (!SecuritySystem.AccessibleFromContext(assignedNetwork))
+			if (!SecuritySystem.AccessibleFromContext(assignedNetwork)) {
+				NetHelper.Report(true, $"[TEStorageHeart] Access denied for accessing player {(SecuritySystem.TryGetCurrentAccessContext(out var context) ? context.Player : -1)} at {Position}");
 				return false;
+			}
 
 			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits())
 				if (storageUnit.HasItem(lookFor, ignorePrefix))

@@ -44,7 +44,7 @@ namespace MagicStorage.UI.Shimmer {
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
-				if (IsMouseHovering && _report is not ItemReport && _report?.Label?.Value is { } report)
+				if (IsMouseHovering && _report is not ItemReport && _report?.Label is { } report)
 					MagicUI.mouseText = report;
 			}
 

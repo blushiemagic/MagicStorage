@@ -85,6 +85,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		}
 
 		public static IShimmerResult AttemptItemTransmutation(Item item, StorageIntermediary storage, bool net) {
+			NetHelper.Report(false, $"Attempting to shimmer item \"{ItemID.Search.GetName(item.type)}\"...");
+
 			var info = MagicCache.ShimmerInfos[item.type];
 			var result = info.GetResult();
 
@@ -142,14 +144,13 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			foreach (Item item in items) {
 				int ingredientStack = amount * item.stack;
 
-				if (applyIngredientReductionRules) {
-					// tModLoader has a bug where it doesn't properly check ingredient consumption when decrafting
-					// Adding that bug here wouldn't be sensible
-					RecipeLoader.ConsumeItem(recipe, item.type, ref ingredientStack);
-				}
+				if (applyIngredientReductionRules)
+					RecipeLoader.ConsumeIngredient(recipe, item.type, ref ingredientStack, isDecrafting: true);
 
 				if (ingredientStack <= 0)
 					continue;
+
+				NetHelper.Report(false, $"    -> {item.IdentifierWithStack(ingredientStack)}");
 
 				results.Add(new DecraftResult(item.type, ingredientStack));
 			}
@@ -160,6 +161,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		}
 
 		internal static void SendShimmerResults(BinaryWriter writer, List<IShimmerResult> results) {
+			NetHelper.Report(true, $"[ShimmerMetrics] Sending {results.Count} shimmer results...");
+
 			writer.Write((short)results.Count);
 			foreach (var result in results) {
 				byte type = result switch {
@@ -170,6 +173,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					_ => throw new ArgumentException($"Invalid shimmer result type \"{result?.GetType().ToString() ?? "null"}\"")
 				};
 
+				NetHelper.Report(false, $"  {result.GetType().Name}");
+
 				writer.Write(type);
 				result.Send(writer);
 			}
@@ -177,6 +182,9 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		internal static List<IShimmerResult> ReceiveShimmerResults(BinaryReader reader) {
 			int count = reader.ReadInt16();
+
+			NetHelper.Report(true, $"[ShimmerMetrics] Receiving {count} shimmer results...");
+
 			List<IShimmerResult> results = new(count);
 
 			for (int i = 0; i < count; i++) {
@@ -188,6 +196,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					3 => default(Decraft),
 					_ => throw new ArgumentException($"Invalid shimmer result net type \"{type}\"")
 				};
+
+				NetHelper.Report(false, $"  {result.GetType().Name}");
 
 				results.Add(result.Receive(reader));
 			}

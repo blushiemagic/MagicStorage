@@ -129,7 +129,7 @@ namespace MagicStorage
 			}
 		}
 
-		private static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) {
+		internal static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) {
 			if (!cloneIfBlockEmpty && blockStorageItems.Count == 0)
 				return itemCounts;
 
@@ -151,24 +151,39 @@ namespace MagicStorage
 		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
 			var inventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty);
 
-			if (currentlyThreading && MagicUI.activeThread.state is ThreadState state)
-				return new AvailableRecipeObjects(adjTiles, inventory, state.recipeConditionsMetSnapshot, isItemInfinite, state.creativeUnitPresent);
-			else {
-				var heart = GetHeart();
-				return new AvailableRecipeObjects(adjTiles, inventory, null, LoadInfiniteItems(heart), CheckForCreativeUnit(heart));
+			if (currentlyThreading) {
+				if (MagicUI.activeThread.state is CommonCraftingState commonState) {
+					if (commonState is ThreadState state)
+						return new AvailableRecipeObjects(adjTiles, inventory, state.recipeConditionsMetSnapshot, commonState.infiniteItems, commonState.creativeUnitPresent);
+
+					return new AvailableRecipeObjects(adjTiles, inventory, null, commonState.infiniteItems, commonState.creativeUnitPresent);
+				}
 			}
+
+			var heart = GetHeart();
+			return new AvailableRecipeObjects(adjTiles, inventory, null, [.. isItemInfinite], allItemsAreInfinite);
 		}
 
 		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)
 		{
+			NetHelper.Report(true, $"Withdrawing {toWithdraw.Count} items...");
+
 			var items = new List<Item>();
 			foreach (Item tryWithdraw in toWithdraw)
 			{
-				Item withdrawn = heart.TryWithdraw(tryWithdraw, false, accessingPlayer: Main.LocalPlayer);
-				if (!withdrawn.IsAir)
+				NetHelper.Report(false, $"  {tryWithdraw.IdentifierAndStack()}");
+
+				int expectedStack = tryWithdraw.stack;
+				Item withdrawn = heart.TryWithdraw(tryWithdraw, false);
+				if (!withdrawn.IsAir) {
 					items.Add(withdrawn);
-				if (withdrawn.stack < tryWithdraw.stack)
+					NetHelper.Report(false, $"    SUCCESS: Withdrew {withdrawn.stack} items");
+				}
+				if (withdrawn.stack < expectedStack)
 				{
+					// There weren't enough of this item to withdraw, deposit what was already withdrawn
+					NetHelper.Report(false, $"    FAILED: Stack requirement not met ({withdrawn.stack} < {expectedStack}), aborting procedure");
+
 					for (int k = 0; k < items.Count; k++)
 					{
 						heart.DepositItem(items[k]);
@@ -179,17 +194,35 @@ namespace MagicStorage
 						}
 					}
 
-					return items;
+					goto ReturnFromMethod;
 				}
 			}
+
+			NetHelper.Report(false, $"Withdrew {items.Count} items");
+
+			NetHelper.Report(false, $"Depositing {results.Count} items...");
 
 			items.Clear();
 			foreach (Item result in results)
 			{
+				NetHelper.Report(false, $"  {result.IdentifierAndStack()}");
+
+				int stack = result.stack;
 				heart.DepositItem(result);
+
+				if (result.stack != stack) {
+					int deposited = stack - result.stack;
+					NetHelper.Report(false, $"    SUCCESS: Deposited {deposited} items");
+				} else
+					NetHelper.Report(false, $"    FAILED");
+
 				if (!result.IsAir)
 					items.Add(result);
 			}
+
+			ReturnFromMethod:
+			if (items.Count > 0)
+				NetHelper.Report(false, $"Operation had {items.Count} leftover items");
 
 			return items;
 		}

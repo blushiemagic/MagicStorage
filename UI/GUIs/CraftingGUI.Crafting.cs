@@ -107,10 +107,12 @@ namespace MagicStorage {
 				RecipeEventHijack.Invoke(selectedRecipe, result);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
-				NetHelper.Report(true, "Spawning excess results on player...");
+				NetHelper.Report(true, "Handling storage inventory changes and spawning excess results on player...");
 
-				foreach (Item item in HandleCraftWithdrawAndDeposit(heart, context.toWithdraw, context.results))
-					Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
+				using (SecuritySystem.CreateAccessContext()) {
+					foreach (Item item in HandleCraftWithdrawAndDeposit(heart, context.toWithdraw, context.results))
+						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
+				}
 
 				MagicUI.SetRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {

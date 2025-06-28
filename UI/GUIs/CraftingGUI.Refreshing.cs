@@ -58,8 +58,6 @@ namespace MagicStorage {
 
 		internal static void ResetRefreshCache() {
 			recipesToRefresh = null;
-			isItemInfinite.Clear();
-			allItemsAreInfinite = false;
 		}
 		
 		internal static void RefreshItems_Inner() {
@@ -148,10 +146,13 @@ namespace MagicStorage {
 					hiddenTypes = hiddenRecipes,
 					favoritedTypes = favorited,
 					recipeFilterChoice = recipeChoice,
-					creativeUnitPresent = CheckForCreativeUnit(heart),
+					creativeUnitPresent = allItemsAreInfinite = CheckForCreativeUnit(heart),
 					infiniteItems = LoadInfiniteItems(heart)
 				}
 			};
+
+			isItemInfinite.Clear();
+			isItemInfinite.UnionWith(state.infiniteItems);
 
 			// Update the adjacent tiles and condition contexts
 			AnalyzeIngredients();
@@ -168,9 +169,9 @@ namespace MagicStorage {
 			StorageGUI.ThreadContext.Begin(thread);
 		}
 
-		private static bool CheckForCreativeUnit(TEStorageHeart heart) => heart is not null && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
+		internal static bool CheckForCreativeUnit(TEStorageHeart heart) => heart is not null && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
 
-		private static HashSet<int> LoadInfiniteItems(TEStorageHeart heart) {
+		internal static HashSet<int> LoadInfiniteItems(TEStorageHeart heart) {
 			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
 			
 			if (heart is not null) {

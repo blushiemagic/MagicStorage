@@ -26,6 +26,7 @@ using System.Threading.Channels;
 using MagicStorage.Common.Systems.Auditing;
 using System.Runtime.InteropServices;
 using MagicStorage.NPCs;
+using MagicStorage.Common;
 
 namespace MagicStorage
 {
@@ -529,7 +530,7 @@ cleanupContext:
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (TileEntity.ByPosition.ContainsKey(position) && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == position) {
+			if (position.ResolveToTileEntity() is TEStorageHeart heart && StoragePlayer.IsClientViewingHeart(heart)) {
 				MagicUI.ForceNextRefreshToBeFull = forceFullRefresh;
 				MagicUI.SetNextCollectionsToRefresh(types);
 
@@ -828,9 +829,13 @@ cleanupContext:
 				typesToUpdate.Add(result.type);
 			}
 
-			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
-
 			Report(true, MessageType.CraftRequest + " packet received by server from client " + sender);
+
+			Report(false, "Handling storage inventory changes and sending excess items...");
+
+			List<Item> items;
+			using (SecuritySystem.CreateAccessContext(sender))
+				items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
 
 			if (items.Count > 0)
 			{
@@ -926,7 +931,7 @@ cleanupContext:
 
 			//	PrintClientRequest(sender, "Refresh UI", storage);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				if (StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart heart && heart.Position == storage && StoragePlayer.IsStorageCrafting()) {
+				if (StoragePlayer.IsClientViewingHeart(storage) && StoragePlayer.IsStorageCrafting()) {
 					MagicUI.RefreshItems();
 
 					Report(true, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
@@ -1587,15 +1592,22 @@ cleanupContext:
 			if (Main.netMode != NetmodeID.Server || storage is null)
 				return;
 
+			Report(true, MessageType.RequestShimmerItemInStorage + " packet received by server from client " + sender);
+
 			Item shimmeringItem = new Item(itemType, toShimmer);
 			int iconicItem = MagicCache.ShimmerInfos[itemType].iconicItem;
+
+			Report(false, "Handling shimmer results...");
 
 			foreach (var result in results)
 				result?.OnShimmer(shimmeringItem, iconicItem, storage, false);
 
-			List<Item> items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
+			Report(false, "Handling storage inventory changes and sending excess items...");
 
-			Report(true, MessageType.RequestShimmerItemInStorage + " packet received by server from client " + sender);
+			List<Item> items;
+			using (FlagSwitch.ToggleTrue(ref TEStorageUnit.ignorePrefixesWhenWithdrawing))  // Stupid fugly hack
+			using (SecuritySystem.CreateAccessContext(sender))
+				items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
 
 			if (items.Count > 0) {
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();

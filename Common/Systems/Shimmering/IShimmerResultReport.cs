@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
-using Terraria.Localization;
 
 namespace MagicStorage.Common.Systems.Shimmering {
 	/// <summary>
@@ -12,7 +11,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		/// <summary>
 		/// The label for this report
 		/// </summary>
-		LocalizedText Label { get; }
+		string Label { get; }
 
 		/// <summary>
 		/// The texture that appears next to the label

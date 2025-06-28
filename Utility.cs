@@ -752,6 +752,12 @@ namespace MagicStorage {
 
 		public static string GetUsageText(this ModCommand command, string args) => $"[c/ff6a00: {command.Command} {args}]";
 
+		public static string IdentifierAndStack(this Item item) => $"{ItemID.Search.GetName(item.type)}{(item.stack > 1 ? $" ({item.stack})" : "")}";
+
+		public static string IdentifierWithStack(this Item item, int stack) => $"{ItemID.Search.GetName(item.type)}{(stack > 1 ? $" ({stack})" : "")}";
+
+		public static string ItemIdentifierWithStack(int type, int stack) => $"{ItemID.Search.GetName(type)}{(stack > 1 ? $" ({stack})" : "")}";
+
 		public static void WriteStringSafely(this BinaryWriter writer, string value) {
 			writer.Write(value is not null);
 			if (value is not null)

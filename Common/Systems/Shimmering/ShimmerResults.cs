@@ -13,6 +13,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
 			int result = ShimmerMetrics.TransformItem(iconicType);
 
+			NetHelper.Report(false, $"  TransformItem: {ItemID.Search.GetName(iconicType)} -> {ItemID.Search.GetName(result)}");
+
 			if (!net) {
 				storage.Deposit(new Item(result, item.stack));
 				storage.Withdraw(item.type, item.stack);
@@ -32,13 +34,18 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		}
 
 		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
-			Player player = Main.LocalPlayer;
-			
 			int coinValue = item.stack * ItemID.Sets.CoinLuckValue[iconicType];
-			player.AddCoinLuck(storage.playerCenter, coinValue);
-			NetMessage.SendData(MessageID.ShimmerActions, number: 1, number2: (int)storage.playerCenter.X, number3: (int)storage.playerCenter.Y, number4: coinValue);
 
-			storage.Withdraw(item.type, item.stack);
+			NetHelper.Report(false, $"  CoinLuck: {Utility.ItemIdentifierWithStack(iconicType, item.stack)} -> {coinValue} luck value");
+
+			if (Main.netMode == NetmodeID.SinglePlayer)
+				Main.LocalPlayer.AddCoinLuck(storage.playerCenter, coinValue);  // Add coin luck immediately
+			
+			if (!net) {
+				NetMessage.SendData(MessageID.ShimmerActions, number: 1, number2: (int)storage.playerCenter.X, number3: (int)storage.playerCenter.Y, number4: coinValue);
+				storage.Withdraw(item.type, item.stack);
+			}
+
 			item.stack = 0;
 		}
 
@@ -61,6 +68,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				if (NPC.unlockedSlimeRainbowSpawn)
 					return;
 
+				NetHelper.Report(false, $"  NPCSpawn: {ItemID.Search.GetName(iconicType)} -> {nameof(NPCID.TownSlimeRainbow)}");
+
 				if (!net) {
 					NPC.unlockedSlimeRainbowSpawn = true;
 					NetMessage.SendData(MessageID.WorldData);
@@ -82,6 +91,12 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				int num10 = 50;
 				int num11 = NPC.GetAvailableAmountOfNPCsToSpawnUpToSlot(item.stack, Main.maxNPCs);
 				int count = 0;
+
+				int shimmerTransform = NPCID.Sets.ShimmerTransformToNPC[item.makeNPC];
+
+				if (num11 > 0)
+					NetHelper.Report(false, $"  NPCSpawn: {ItemID.Search.GetName(iconicType)} -> {NPCID.Search.GetName(shimmerTransform < 0 ? item.makeNPC : shimmerTransform)}{(shimmerTransform < 0 ? $" (style: {item.placeStyle})" : "")}");
+
 				while (num10 > 0 && num11 > 0 && item.stack > 0) {
 					num10--;
 					num11--;
@@ -89,8 +104,6 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					count++;
 
 					if (!net) {
-						int shimmerTransform = NPCID.Sets.ShimmerTransformToNPC[item.makeNPC];
-
 						int spawnedNPC = shimmerTransform < 0
 							? NPC.ReleaseNPC((int)storage.playerBottom.X, (int)storage.playerBottom.Y, item.makeNPC, item.placeStyle, Main.myPlayer)
 							: NPC.ReleaseNPC((int)storage.playerBottom.X, (int)storage.playerBottom.Y, shimmerTransform, 0, Main.myPlayer);
@@ -137,12 +150,16 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
 			int oldStack = item.stack;
+
+			NetHelper.Report(false, $"  Decraft: {ItemID.Search.GetName(iconicType)}");
+
 			foreach (var result in ShimmerMetrics.AttemptDecraft(Main.recipe[decraftingRecipeIndex], iconicType, ref item.stack)) {
-				if (!net) {
-					storage.Withdraw(item.type, oldStack - item.stack);
+				if (!net)
 					storage.Deposit(new Item(result.type, result.stack));
-				}
 			}
+
+			if (!net)
+				storage.Withdraw(item.type, oldStack - item.stack);
 		}
 
 		void IShimmerResult.Send(BinaryWriter writer) {

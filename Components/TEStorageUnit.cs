@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -178,6 +179,10 @@ namespace MagicStorage.Components
 			return finished;
 		}
 
+		// Stupid ugly hack since TryWithdraw is an abstract method, and changing it would break compatibility
+		// The Aether Interface needs to not care about item prefixes, and TryWithdraw doesn't really have anything for that
+		internal static bool ignorePrefixesWhenWithdrawing;
+
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
@@ -185,7 +190,7 @@ namespace MagicStorage.Components
 
 			Item original = lookFor.Clone();
 
-			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite))
+			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite, !ignorePrefixesWhenWithdrawing))
 				return result;
 
 			if (Main.netMode == NetmodeID.Server)
@@ -195,12 +200,13 @@ namespace MagicStorage.Components
 			return result;
 		}
 
-		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, Action<int> onItemRemoved = null, Action<int, int> onItemStackReduced = null) {
+		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, bool checkPrefix = true, Action<int> onItemRemoved = null, Action<int, int> onItemStackReduced = null) {
 			result = null;
+			ConditionalWeakTable<Item, byte[]> cachedItemIO = [];
 			for (int k = items.Count - 1; k >= 0; k--)
 			{
 				Item item = items[k];
-				if (ItemData.Matches(lookFor, item))
+				if ((checkPrefix && ItemData.Matches(lookFor, item)) || lookFor.type == item.type)
 				{
 					int maxToTake = item.stack;
 					if (item.stack > 0 && item.favorited && keepOneIfFavorite)
@@ -209,7 +215,7 @@ namespace MagicStorage.Components
 
 					if (result is not null) {
 						//Item data must be the same
-						if (!StorageAggregator.CanCombineItems(result, item))
+						if (!StorageAggregator.CanCombineItems(result, item, checkPrefix, true, cachedItemIO))
 							continue;
 
 						Utility.CallOnStackHooks(result, item, withdraw);
@@ -366,7 +372,7 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.RemoveCore));
 			PostChangeContents();
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && GetHeart() is TEStorageHeart storageHeart && playerHeart.Position == storageHeart.Position) {
+			if (GetHeart() is TEStorageHeart storageHeart && StoragePlayer.IsClientViewingHeart(storageHeart)) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
@@ -389,7 +395,7 @@ namespace MagicStorage.Components
 				netOpQueue.Enqueue(new NetOperation(NetOperations.InsertCore, core.Item));
 			PostChangeContents();
 
-			if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.GetStorageHeart() is TEStorageHeart playerHeart && GetHeart() is TEStorageHeart storageHeart && playerHeart.Position == storageHeart.Position) {
+			if (GetHeart() is TEStorageHeart storageHeart && StoragePlayer.IsClientViewingHeart(storageHeart)) {
 				MagicUI.SetRefresh();
 				MagicUI.SetNextCollectionsToRefresh(coreItems.Select(static i => i.type).Distinct().ToList());
 			}

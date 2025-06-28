@@ -18,6 +18,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			this.creativeUnitPresent = creativeUnitPresent;
 		}
 
+		public bool IsItemInfinite(int item) => creativeUnitPresent || isItemInfinite.Contains(item);
+
 		public bool IsTileAvailable(int tile) => tile >= 0 && tile < TileLoader.TileCount && tiles[tile];
 
 		public bool IsRecipeAvailable(Recipe recipe) {
@@ -39,12 +41,22 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return IsRecipeAvailable(recipe);
 		}
 
-		public int GetIngredientQuantity(int item) => inventory.TryGetValue(item, out int quantity) ? quantity : 0;
+		public int GetIngredientQuantity(int item) => IsItemInfinite(item) ? int.MaxValue : inventory.TryGetValue(item, out int quantity) ? quantity : 0;
 
-		public bool TryGetIngredientQuantity(int item, out int quantity) => inventory.TryGetValue(item, out quantity);
+		public bool TryGetIngredientQuantity(int item, out int quantity) {
+			if (IsItemInfinite(item)) {
+				quantity = int.MaxValue;
+				return true;
+			}
+
+			return inventory.TryGetValue(item, out quantity);
+		}
 
 		public int GetTotalIngredientQuantity(Recipe recipe, int item) {
-			int stack = 0;
+			if (IsItemInfinite(item))
+				return int.MaxValue;
+
+			ClampedArithmetic stack = 0;
 			int quantity;
 
 			bool usedRecipeGroup = false;
@@ -67,8 +79,13 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public IEnumerable<(int, int)> EnumerateInventory() {
-			foreach (var (type, quantity) in inventory)
-				yield return (type, quantity);
+			foreach (var (type, quantity) in inventory) {
+				int _quantity = quantity;
+				if (IsItemInfinite(type))
+					_quantity = int.MaxValue;
+
+				yield return (type, _quantity);
+			}
 		}
 
 		public int UpdateIngredient(int item, int amount) {

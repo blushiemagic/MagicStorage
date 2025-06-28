@@ -929,6 +929,7 @@ namespace MagicStorage.Common.Systems {
 			return NetworkActionResult.Success;
 		}
 
+		// NOTE: let this default to 0 since that would refer to the local player in singleplayer
 		private static int accessingPlayer;
 
 		public ref struct AccessContext : IDisposable {

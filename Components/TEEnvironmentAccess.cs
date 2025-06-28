@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +8,7 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components {
 	public class TEEnvironmentAccess : TEStoragePoint {
-		public IEnumerable<EnvironmentModule> Modules => EnvironmentModuleLoader.modules.Where((m, i) => Enabled(i));
+		public IEnumerable<EnvironmentModule> Modules => EnvironmentModuleLoader.modules.Where(Enabled);
 
 		private BitArray enabled;
 

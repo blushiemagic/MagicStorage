@@ -122,13 +122,6 @@ namespace MagicStorage
 			if (Player.whoAmI != Main.myPlayer)
 				return;
 
-			if (messageDelay >= 0 && --messageDelay < 0 && --patreon < 0) {
-				Main.NewTextMultiline("Thank you for playing Magic Storage!\n" +
-					"Please consider supporting the development of Magic Storage by becoming a patron for the absoluteAquarian Patreon.\n" +
-					"Patrons will gain early access to future updates of Magic Storage, plus other benefits.",
-					c: Color.LightBlue);
-			}
-
 			if (timeSinceOpen < 1 && !Main.autoPause && storageAccess.X >= 0 && storageAccess.Y >= 0)
 			{
 				Player.SetTalkNPC(-1);
@@ -163,6 +156,18 @@ namespace MagicStorage
 					CloseStorage();
 					Recipe.FindRecipes();
 				}
+			}
+		}
+
+		public override void PreUpdate() {
+			if (Main.myPlayer != Player.whoAmI)
+				return;
+
+			if (messageDelay >= 0 && --messageDelay < 0 && --patreon <= 0) {
+				Main.NewTextMultiline("Thank you for playing Magic Storage!\n" +
+					"Please consider supporting the development of Magic Storage by becoming a patron for the absoluteAquarian Patreon.\n" +
+					"Patrons will gain early access to future updates of Magic Storage, plus other benefits.",
+					c: Color.LightBlue);
 			}
 		}
 
@@ -348,6 +353,14 @@ namespace MagicStorage
 			ModTile modTile = TileLoader.GetTile(tile.TileType);
 			return (modTile as StorageAccess)?.GetHeart(storageAccess.X, storageAccess.Y);
 		}
+
+		public bool IsViewingHeart(Point16 heartLocation) => GetStorageHeart() is TEStorageHeart heart && heart.Position == heartLocation;
+
+		public bool IsViewingHeart(TEStorageHeart heart) => IsViewingHeart(heart.Position);
+
+		public static bool IsClientViewingHeart(Point16 heartLocation) => Main.netMode != NetmodeID.Server && LocalPlayer.IsViewingHeart(heartLocation);
+
+		public static bool IsClientViewingHeart(TEStorageHeart heart) => Main.netMode != NetmodeID.Server && LocalPlayer.IsViewingHeart(heart);
 
 		public TECraftingAccess GetCraftingAccess()
 		{

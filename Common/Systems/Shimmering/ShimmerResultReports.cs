@@ -9,7 +9,9 @@ using Terraria.Localization;
 
 namespace MagicStorage.Common.Systems.Shimmering {
 	public struct NoResultReport : IShimmerResultReport {
-		public LocalizedText Label { get; }
+		private static LocalizedText _label;
+
+		public readonly string Label => _label.Value;
 
 		// Unused, no icon draws
 		public readonly Asset<Texture2D> Texture => null;
@@ -17,7 +19,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		public object Parent { get; set; }
 
 		public NoResultReport() {
-			Label = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.DoesNotShimmer");
+			_label ??= Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.DoesNotShimmer");
 		}
 
 		public readonly bool Equals(IShimmerResultReport report) => report is NoResultReport;
@@ -32,8 +34,9 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 	public struct ItemReport : IShimmerResultReport {
 		public readonly int itemType;
+		private readonly LocalizedText _itemName;
 
-		public LocalizedText Label { get; }
+		public readonly string Label => _itemName.Value;
 
 		public Asset<Texture2D> Texture { get; }
 
@@ -41,7 +44,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		public ItemReport(int itemType) {
 			this.itemType = itemType;
-			Label = Lang.GetItemName(itemType);
+			_itemName = Lang.GetItemName(itemType);
 			Texture = TextureAssets.Item[itemType];
 		}
 
@@ -65,7 +68,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		public readonly int coinValue;
 
 		private readonly LocalizedText _baseLabel = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.CoinLuck");
-		public readonly LocalizedText Label => GetCoinLuckAdjustment(_baseLabel);
+		public readonly string Label => GetCoinLuckAdjustment(_baseLabel);
 
 		public Asset<Texture2D> Texture { get; }
 
@@ -76,7 +79,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			Texture = TextureAssets.Item[ItemID.GoldCoin];
 		}
 
-		private readonly LocalizedText GetCoinLuckAdjustment(LocalizedText text) {
+		private readonly string GetCoinLuckAdjustment(LocalizedText text) {
 			Player player = Main.LocalPlayer;
 
 			float currentLuckValue = player.coinLuck;
@@ -85,7 +88,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			float luck = player.CalculateCoinLuck(currentLuckValue);
 			float adjustedLuck = player.CalculateCoinLuck(adjustedLuckValue);
 
-			return text.WithFormatArgs(adjustedLuck - luck, adjustedLuckValue - currentLuckValue);
+			return text.Format(adjustedLuck - luck, adjustedLuckValue - currentLuckValue);
 		}
 
 		public readonly Rectangle GetAnimationFrame() => Texture.Frame();
@@ -101,7 +104,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 		public readonly int npcType;
 		public float renderScale = 1f;
 
-		public LocalizedText Label { get; }
+		public string Label { get; }
 		
 		// Unused, icon is drawn manually
 		public readonly Asset<Texture2D> Texture => null;
@@ -110,7 +113,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 		public NPCSpawnReport(int npcType) {
 			this.npcType = npcType;
-			Label = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType));
+			Label = Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").Format(Lang.GetNPCNameValue(npcType));
 		}
 
 		public NPCSpawnReport(Item item) {
@@ -120,8 +123,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			npcType = shimmerTransform < 0 ? npc : shimmerTransform;
 
 			Label = shimmerTransform < 0
-				? Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.IndirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType), item.placeStyle + 1)
-				: Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").WithFormatArgs(Lang.GetNPCNameValue(npcType));
+				? Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.IndirectTransform").Format(Lang.GetNPCNameValue(npcType), item.placeStyle + 1)
+				: Language.GetText("Mods.MagicStorage.DecraftingGUI.ShimmerReports.NPCSpawn.DirectTransform").Format(Lang.GetNPCNameValue(npcType));
 		}
 
 		// Unused, icon is drawn manually

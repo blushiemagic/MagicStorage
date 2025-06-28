@@ -72,10 +72,10 @@ namespace MagicStorage {
 			ThreadState threadState = currentlyThreading && MagicUI.activeThread.state is ThreadState state ? state : null;
 			TEStorageHeart heart = GetHeart();
 
-			if ((currentlyThreading && threadState is not null && threadState.creativeUnitPresent) || CheckForCreativeUnit(heart))
+			if ((currentlyThreading && threadState is not null && threadState.creativeUnitPresent) || allItemsAreInfinite)
 				goto SkipIngredientChecks;
 
-			HashSet<int> infiniteItems = currentlyThreading && threadState is not null ? threadState.infiniteItems : LoadInfiniteItems(heart);
+			HashSet<int> infiniteItems = currentlyThreading && threadState is not null ? threadState.infiniteItems : isItemInfinite;
 
 			var itemCountsDictionary = GetItemCountsWithBlockedItemsRemoved();
 

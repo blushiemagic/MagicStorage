@@ -2,7 +2,7 @@
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		public static bool IsAvailable(int itemType) => CraftingGUI.itemCounts.TryGetValue(itemType, out int count) && count > 0 && IsAvailable_CheckShimmering(itemType);
+		public static bool IsAvailable(int itemType) => CraftingGUI.GetItemCountsWithBlockedItemsRemoved().TryGetValue(itemType, out int count) && count > 0 && IsAvailable_CheckShimmering(itemType);
 
 		private static bool IsAvailable_CheckShimmering(int itemType) {
 			if (currentlyThreading) {
