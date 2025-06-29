@@ -61,7 +61,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			OrderedRecipeTree orderedTree = new OrderedRecipeTree(new OrderedRecipeContext(original, 0, new SharedCounter(batches * batchSize)), 0);
 			int depth = 0, maxDepth = 0;
 
-			if (MagicStorageConfig.IsRecursionEnabled && available is not null && !available.creativeUnitPresent)
+			if (MagicStorageConfig.IsRecursionEnabled && (available is null || !available.creativeUnitPresent))
 				ModifyCraftingTree(available, recursionStack, orderedTree, ref depth, ref maxDepth, batches, blockedSubrecipeIngredient);
 
 			return orderedTree;
@@ -90,7 +90,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				Recipe sourceRecipe = ingredient.parent.sourceRecipe;
 				Item requiredItem = sourceRecipe.requiredItem[ingredient.recipeIngredientIndex];
 
-				if (available.isItemInfinite.Contains(requiredItem.type)) {
+				if (available is not null && available.isItemInfinite.Contains(requiredItem.type)) {
 					// No recursion needed, go to next ingredient
 					root.Add(new OrderedRecipeTree(null, ingredient.recipeIngredientIndex));
 					continue;
@@ -172,7 +172,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public int GetMaxCraftable(AvailableRecipeObjects available) {
 			ArgumentNullException.ThrowIfNull(available);
 
-			if (available.creativeUnitPresent || available.isItemInfinite.Contains(original.createItem.type))
+			if (available is not null && (available.creativeUnitPresent || available.isItemInfinite.Contains(original.createItem.type)))
 				return 9999;
 
 			var simulation = new CraftingSimulation();

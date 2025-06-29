@@ -218,7 +218,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				
 				Recipe recipe = context.recipe;
 
-				if (available.creativeUnitPresent)
+				if (available is not null && available.creativeUnitPresent)
 					goto SkipIngredientChecks;
 
 				int ingredientIndex = 0;
@@ -227,7 +227,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack);
 					ingredientIndex++;
 
-					if (available.isItemInfinite.Contains(item.type)) {
+					if (available is not null && available.isItemInfinite.Contains(item.type)) {
 						// The ingredient doesn't need to be crafted, so skip it
 						stack.Reset();
 						continue;
