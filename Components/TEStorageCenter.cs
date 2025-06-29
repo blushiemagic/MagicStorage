@@ -82,6 +82,7 @@ namespace MagicStorage.Components
 						NetHelper.Report(false, " -- SUCCESS: Found Storage Heart at " + heart.Position);
 						_foundHeart = heart.Position;
 						_center.Link(heart.Position);
+						heart.ComponentManager.LinkIfNotExists(_center);
 					} else {
 						// Normally, I'd throw an exception here, but I'll just have the logic silently return instead
 						NetHelper.Report(false, " -- FAILED: Storage Heart already found at " + _foundHeart);
@@ -92,11 +93,12 @@ namespace MagicStorage.Components
 
 				if (component.StorageCenter != Point16.NegativeOne) {
 					if (component.StorageCenter != _center.Position) {
-						NetHelper.Report(false, $" -- FAILED: Component has already been assigned to the Center at {component.StorageCenter}");
-						return;
-					}
+						NetHelper.Report(false, $"Component has already been assigned to the Center at {component.StorageCenter}, unlinking...");
 
-					NetHelper.Report(false, "Component save data has it linked to the Center, adding proper reference connections...");
+						if (component.StorageCenter.ResolveToTileEntity() is TEStorageCenter previousCenter)
+							previousCenter.ComponentManager.Unlink(component.Position);
+					} else
+						NetHelper.Report(false, "Component save data has it linked to the Center, adding proper reference connections...");
 				}
 
 				ComponentType type = GetComponentType(component);
@@ -207,6 +209,11 @@ namespace MagicStorage.Components
 				return _components;
 			}
 
+			private void DeferLinking(Point16 location) {
+				_unresolvedComponents.Add(_components.Count);
+				_components.Add(new Component(location, ComponentType.DeferredLoad));
+			}
+
 			private void MarkIndexAsResolved(int i) {
 				if (_unresolvedComponents.Remove(i) && _unresolvedComponents.Count > 0) {
 					// Shift all unresolved component indices after this one down by 1
@@ -267,7 +274,11 @@ namespace MagicStorage.Components
 					return heart;
 				}
 
-				_foundHeart = Point16.NegativeOne;
+				// IMPORTANT: RemoteAccess -> StorageHeart may be an actual link, but the StorageHeart may not be loaded yet.
+				//            Hence, keep the connection "alive" on clients since it could be loaded later.
+				if (Main.netMode != NetmodeID.MultiplayerClient)
+					_foundHeart = Point16.NegativeOne;
+
 				return null;
 			}
 
@@ -283,18 +294,24 @@ namespace MagicStorage.Components
 			}
 
 			public void Serialize(BinaryWriter writer) {
+				if (_center is not TEStorageHeart)
+					writer.Write(_foundHeart);
+
 				writer.Write(_components.Count);
 				foreach (Component component in _components)
 					writer.Write(component.location);
-
-				if (_center is not TEStorageHeart)
-					writer.Write(_foundHeart);
 
 				NetHelper.Report(true, "ConnectedComponentManager.Serialize invoked.  Component count: " + _components.Count);
 			}
 
 			public void Deserialize(BinaryReader reader) {
 				Reset();
+
+				// FIX: v0.7.0.5 - Assume that the read coordinate is the heart, and defer linking it
+				if (_center is not TEStorageHeart) {
+					_foundHeart = reader.ReadPoint16();
+					DeferLinking(_foundHeart);
+				}
 
 				int count = reader.ReadInt32();
 
@@ -313,14 +330,9 @@ namespace MagicStorage.Components
 					} else {
 						NetHelper.Report(false, "Tile entity at location " + loc + " could not be found");
 
-						_components.Add(new Component(loc, ComponentType.DeferredLoad));
-						_unresolvedComponents.Add(k);
+						DeferLinking(loc);
 					}
 				}
-
-				// FIX: v0.7.0.5 - Assume that the read coordinate is the heart, and defer linking it
-				if (_center is not TEStorageHeart)
-					_foundHeart = reader.ReadPoint16();
 			}
 
 			public void Save(TagCompound tag) {

@@ -1,3 +1,4 @@
 ﻿[h1]v0.7.0.8[/h1]
 - Fixed the "Show all possible ingredients" control in the Crafting UI
 - Fixed a bug that caused recipe recursion to sometimes not recurse through recipes, consuming far fewer materials than were expected
+- Attempted to fix the storage connection issues again

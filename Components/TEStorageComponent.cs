@@ -138,8 +138,16 @@ namespace MagicStorage.Components
 		}
 
 		public override void Update() {
-			if (this is not TEStorageHeart)
-				GetLocalCenter()?.ComponentManager.LinkIfNotExists(this);
+			if (this is not TEStorageHeart) {
+				if (GetLocalCenter() is TEStorageCenter center) {
+					// Ensure that connections are complete
+					center.ComponentManager.LinkIfNotExists(this);
+				} else {
+					// No center found, force the component to not be connected to anything
+					if (Unlink())
+						NetHelper.SendTEUpdate(ID, Position);
+				}
+			}
 		}
 
 		public virtual void OnPlace()
