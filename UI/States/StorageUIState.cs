@@ -54,6 +54,7 @@ namespace MagicStorage.UI.States {
 
 			StorageGUI.currentMode = StorageGUI.ActionMode.Normal;
 			GetPage<ControlsPage>("Controls").setItemDeletionMode?.SetState(false);
+			GetPage<ControlsPage>("Controls").setItemSellingMode?.SetState(false);
 		}
 
 		public override void Refresh() {
