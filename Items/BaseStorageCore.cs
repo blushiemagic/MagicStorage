@@ -73,9 +73,9 @@ namespace MagicStorage.Items {
 				else
 					dataColorHex = "e43233";  // Red
 
-				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Mod.GetLocalization("Items.StorageCore.ItemsStored").Format(countColorHex, _itemCount, capacity));
-				TooltipHelper.FindAndModify(tooltips, "<HASH>", Mod.GetLocalization("Items.StorageCore.Hash").Format(_hash));
-				TooltipHelper.FindAndModify(tooltips, "<BYTES>", Mod.GetLocalization("Items.StorageCore.BytesUsed").Format(dataColorHex, _unitData.Length));
+				TooltipHelper.FindAndModify(tooltips, "<CAPACITY>", Language.GetText("Mods.MagicStorage.Items.StorageCore.ItemsStored").Format(countColorHex, _itemCount, capacity));
+				TooltipHelper.FindAndModify(tooltips, "<HASH>", Language.GetText("Mods.MagicStorage.Items.StorageCore.Hash").Format(_hash));
+				TooltipHelper.FindAndModify(tooltips, "<BYTES>", Language.GetText("Mods.MagicStorage.Items.StorageCore.BytesUsed").Format(dataColorHex, _unitData.Length));
 			}
 		}
 

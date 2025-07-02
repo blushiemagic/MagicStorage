@@ -9,3 +9,4 @@
 - Fixed a bug that caused the Sell Duplicates submenu to only initially select 1 of each item duplicate stack
 - Fixed a bug that caused Item Selling Mode to sometimes not sell items, even if they were selected to be sold
 - Attempted to fix a bug that caused the tabs for the UIs to be significantly misaligned (could not be replicated during testing)
+- Fixed a bug that caused custom Storage Cores to mot be able to display their tooltip correctly
