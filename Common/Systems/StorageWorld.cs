@@ -112,6 +112,7 @@ namespace MagicStorage.Common.Systems
 		private const int MIGRATION_VERSION_0_7 = 1;
 		private const int FIX_STORAGE_DISCONNECTED = 2;
 		private const int FIX_ZERO_STORAGE_CENTER = 3;
+		private const int FIX_STORAGE_DISCONNECTED_2_ELECTRIC_BOOGALOO = 4;
 
 		public override void SaveWorldData(TagCompound tag)
 		{
@@ -135,7 +136,7 @@ namespace MagicStorage.Common.Systems
 			tag["empressDiamond"] = empressDiamond;
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
-			tag["migration"] = FIX_ZERO_STORAGE_CENTER;
+			tag["migration"] = FIX_STORAGE_DISCONNECTED_2_ELECTRIC_BOOGALOO;
 
 			if (!Main.dedServ)
 				MagicStorageMod.Instance.optionsConfig.Save();
@@ -247,7 +248,7 @@ namespace MagicStorage.Common.Systems
 				Mod.Logger.Debug($"Success!  Placed {numAccesses} new Storage Access entit{(numAccesses == 1 ? "y" : "ies")}, recalculated components for {numNetworks} storage network{(numNetworks == 1 ? "" : "s")}");
 			}
 
-			if (migration < FIX_STORAGE_DISCONNECTED || migration < FIX_ZERO_STORAGE_CENTER) {
+			if (migration < FIX_STORAGE_DISCONNECTED_2_ELECTRIC_BOOGALOO) {
 				Mod.Logger.Debug("Marking all Remote Accesses and Storage Hearts for forced component searching...");
 
 				int count = 0;
