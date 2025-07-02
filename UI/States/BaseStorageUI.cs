@@ -195,11 +195,21 @@ namespace MagicStorage.UI.States {
 			PanelWidth = panel.PaddingLeft + innerPanelWidth + panel.PaddingRight + 2 * UIDragablePanel.cornerPadding;
 			PanelHeight = Main.screenHeight - (PanelTop + 2 * UIDragablePanel.cornerPadding);
 
+			// UIPanelTab creation automatically sets UIElement.Left based on the width of the localization string.
+			// Normally, this would be fine, but apparently the localization can sometimes not load by the time the
+			//   constructor for BaseStorageUI is called?
+			// To remedy this, we just recalculate the alignments again here.
+			float left = 0;
+
 			foreach ((string key, var tab) in panel.menus) {
 				var page = pages[key];
 				page.Width = StyleDimension.Fill;
 				page.Height = StyleDimension.Fill;
 
+				// Force the MinWidth to be changed for the tab by reassigning its text
+				tab.SetText(tab._text);
+				tab.Left.Set(left, 0f);
+				left += tab.GetDimensions().Width + 10;
 				tab.OnLeftClick += (evt, e) => {
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					SetPage((e as UIPanelTab).Name);
