@@ -105,9 +105,10 @@ namespace MagicStorage.Components
 
 				if (!_knownComponentLocationCache.TryGetValue(type, out var set))
 					_knownComponentLocationCache[type] = set = new HashSet<Point16>();
-				set.Add(component.Position);
+				
+				if (set.Add(component.Position))
+					_components.Add(new Component(component.Position, type));
 
-				_components.Add(new Component(component.Position, type));
 				component.Link(_center.Position);
 
 				NetHelper.Report(false, " -- SUCCESS: Component classification is " + type);
@@ -115,6 +116,7 @@ namespace MagicStorage.Components
 				if (_center is TEStorageHeart && component is TEStorageCenter otherCenter)
 					otherCenter.ComponentManager.Link(_center);
 
+				NetHelper.SendTEUpdate(_center.ID, _center.Position);
 				NetHelper.SendTEUpdate(component.ID, component.Position);
 			}
 
@@ -310,7 +312,9 @@ namespace MagicStorage.Components
 				// FIX: v0.7.0.5 - Assume that the read coordinate is the heart, and defer linking it
 				if (_center is not TEStorageHeart) {
 					_foundHeart = reader.ReadPoint16();
-					DeferLinking(_foundHeart);
+
+					if (_foundHeart != Point16.NegativeOne)
+						DeferLinking(_foundHeart);
 				}
 
 				int count = reader.ReadInt32();
@@ -356,7 +360,7 @@ namespace MagicStorage.Components
 								Link(component);
 							else
 								_components.Add(new Component(loc, ComponentType.Unknown));
-						} else {
+						} else if (loc != Point16.NegativeOne) {
 							_components.Add(new Component(loc, ComponentType.DeferredLoad));
 							_unresolvedComponents.Add(_components.Count - 1);
 						}
@@ -512,7 +516,7 @@ namespace MagicStorage.Components
 		{
 			ConnectedComponentManager manager = ComponentManager;
 
-			foreach (var component in manager.GetAllComponentEntities())
+			foreach (var component in manager.GetAllComponentEntities().ToList())
 			{
 				manager.Unlink(component.Position);
 				NetHelper.SendTEUpdate(component.ID, component.Position);

@@ -22,6 +22,7 @@ namespace MagicStorage.UI {
 
 			// Restore the selection
 			// If no match was found, the first option will automatically be selected
+			bool didAnything = false;
 			bool hasSelection = false;
 			for (int i = 0; i < this.options.Count; i++) {
 				int remapped = RemapChoice(i);
@@ -29,10 +30,16 @@ namespace MagicStorage.UI {
 					if (!hasSelection) {
 						Choice = i;
 						hasSelection = true;
+						didAnything = true;
 					}
-				} else if (generalSelections.Contains(remapped))
+				} else if (generalSelections.Contains(remapped)) {
 					GeneralChoices.Add(i);
+					didAnything = true;
+				}
 			}
+
+			if (didAnything)
+				OnChanged();
 		}
 
 		public void AutomaticallyUpdateButtonLayout(int newButtonPadding = -1) {
@@ -69,6 +76,7 @@ namespace MagicStorage.UI {
 
 			// Restore the selection(s)
 			// If no match was found, the first non-general option will automatically be selected
+			bool didAnything = false;
 			bool hasSelection = false;
 			for (int i = 0; i < this.options.Count; i++) {
 				int remapped = RemapChoice(i);
@@ -76,10 +84,16 @@ namespace MagicStorage.UI {
 					if (!hasSelection) {
 						Choice = i;
 						hasSelection = true;
+						didAnything = true;
 					}
-				} else if (generalSelections.Contains(remapped))
+				} else if (generalSelections.Contains(remapped)) {
 					GeneralChoices.Add(i);
+					didAnything = true;
+				}
 			}
+
+			if (didAnything)
+				OnChanged();
 		}
 
 		public void AutomaticallyUpdateButtonLayout(int newButtonPadding = -1) {

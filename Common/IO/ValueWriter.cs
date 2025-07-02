@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Common.IO {
 	public class ValueWriter {
@@ -40,176 +42,111 @@ namespace MagicStorage.Common.IO {
 			CheckBits();
 		}
 
-		public void Write(byte value, int numBits) {
+		public void WriteUnsigned<T>(T value, int numBits) where T : IUnsignedNumber<T>, IBinaryInteger<T> {
+			if (typeof(T) == typeof(byte)) {
+				if (numBits > BitBuffer128.MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
+			} else if (typeof(T) == typeof(ushort)) {
+				if (numBits > BitBuffer128.MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
+			} else if (typeof(T) == typeof(uint)) {
+				if (numBits > BitBuffer128.MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
+			} else if (typeof(T) == typeof(ulong)) {
+				if (numBits > BitBuffer128.MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
+			} else
+				throw new NotSupportedException($"Unsupported type: {typeof(T)}");
+
 			if (numBits == 0)  // No bits to write
 				return;
 
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
 
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [byte]: {value:X02} ({numBits} bits)");
+			if (LogWrites) {
+				if (typeof(T) == typeof(byte))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [byte]: {value:X02} ({numBits} bits)");
+				else if (typeof(T) == typeof(ushort))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [ushort]: {value:X04} ({numBits} bits)");
+				else if (typeof(T) == typeof(uint))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [uint]: {value:X08} ({numBits} bits)");
+				else if (typeof(T) == typeof(ulong))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [ulong]: {value:X016} ({numBits} bits)");
+			}
 
-			_bits.Set(value, ref _head, (byte)numBits);
+			_bits.SetVariant(value, ref _head, (byte)numBits);
 
 			CheckBits();
 		}
 
-		public void Write(sbyte value, int numBits) {
+		public void WriteSigned<T>(T value, int numBits) where T : ISignedNumber<T>, IBinaryInteger<T>, IComparisonOperators<T, T, bool> {
+			if (typeof(T) == typeof(sbyte)) {
+				if (numBits > BitBuffer128.MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
+			} else if (typeof(T) == typeof(short)) {
+				if (numBits > BitBuffer128.MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
+			} else if (typeof(T) == typeof(int)) {
+				if (numBits > BitBuffer128.MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
+			} else if (typeof(T) == typeof(long)) {
+				if (numBits > BitBuffer128.MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
+			} else
+				throw new NotSupportedException($"Unsupported type: {typeof(T)}");
+
 			if (numBits == 0)  // No bits to write
 				return;
 
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
 
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [sbyte]: {value:X02} ({numBits} bits)");
+			if (LogWrites) {
+				if (typeof(T) == typeof(sbyte))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [sbyte]: {value:X02} ({numBits} bits)");
+				else if (typeof(T) == typeof(short))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [short]: {value:X04} ({numBits} bits)");
+				else if (typeof(T) == typeof(int))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [int]: {value:X08} ({numBits} bits)");
+				else if (typeof(T) == typeof(long))
+					MagicStorageMod.Instance.Logger.Info($"WRITE [long]: {value:X016} ({numBits} bits)");
+			}
 
-			_bits.Set(value < 0, ref _head);
-
-			CheckBits();
-
-			if (numBits == BitBuffer128.MAX_BYTE)
-				numBits--;
-
-			_bits.Set((byte)(value & sbyte.MaxValue), ref _head, (byte)numBits);
-
-			CheckBits();
-		}
-
-		public void Write(ushort value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
-
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [ushort]: {value:X04} ({numBits} bits)");
-
-			_bits.Set(value, ref _head, (byte)numBits);
+			if (typeof(T) == typeof(sbyte))
+				_bits.SetVariant((byte)Unsafe.As<T, sbyte>(ref value), ref _head, (byte)numBits);
+			else if (typeof(T) == typeof(short))
+				_bits.SetVariant((ushort)Unsafe.As<T, short>(ref value), ref _head, (byte)numBits);
+			else if (typeof(T) == typeof(int))
+				_bits.SetVariant((uint)Unsafe.As<T, int>(ref value), ref _head, (byte)numBits);
+			else if (typeof(T) == typeof(long))
+				_bits.SetVariant((ulong)Unsafe.As<T, long>(ref value), ref _head, (byte)numBits);
 
 			CheckBits();
 		}
 
-		public void Write(short value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
+		public void Write(byte value, int numBits) => WriteUnsigned(value, numBits);
 
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
+		public void Write(sbyte value, int numBits) => WriteSigned(value, numBits);
 
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [short]: {value:X04} ({numBits} bits)");
+		public void Write(ushort value, int numBits) => WriteUnsigned(value, numBits);
 
-			_bits.Set(value < 0, ref _head);
+		public void Write(short value, int numBits) => WriteSigned(value, numBits);
 
-			CheckBits();
+		public void Write(uint value, int numBits) => WriteUnsigned(value, numBits);
 
-			if (numBits == BitBuffer128.MAX_SHORT)
-				numBits--;
+		public void Write(int value, int numBits) => WriteSigned(value, numBits);
 
-			_bits.Set((ushort)(value & short.MaxValue), ref _head, (byte)numBits);
+		public void Write(ulong value, int numBits) => WriteUnsigned(value, numBits);
 
-			CheckBits();
-		}
-
-		public void Write(uint value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
-
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [uint]: {value:X08} ({numBits} bits)");
-
-			_bits.Set(value, ref _head, (byte)numBits);
-
-			CheckBits();
-		}
-
-		public void Write(int value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
-
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [int]: {value:X08} ({numBits} bits)");
-
-			_bits.Set(value < 0, ref _head);
-
-			CheckBits();
-
-			if (numBits == BitBuffer128.MAX_INT)
-				numBits--;
-
-			_bits.Set((uint)(value & int.MaxValue), ref _head, (byte)numBits);
-
-			CheckBits();
-		}
-
-		public void Write(ulong value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
-
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [ulong]: {value:X016} ({numBits} bits)");
-
-			_bits.Set(value, ref _head, (byte)numBits);
-
-			CheckBits();
-		}
-
-		public void Write(long value, int numBits) {
-			if (numBits == 0)  // No bits to write
-				return;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
-
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE [long]: {value:X016} ({numBits} bits)");
-
-			_bits.Set(value < 0, ref _head);
-
-			CheckBits();
-
-			if (numBits == BitBuffer128.MAX_LONG)
-				numBits--;
-
-			_bits.Set((ulong)(value & long.MaxValue), ref _head, (byte)numBits);
-
-			CheckBits();
-		}
+		public void Write(long value, int numBits) => WriteSigned(value, numBits);
 
 		public void WriteBytes(byte[] bytes) {
 			if (bytes is null)
 				throw new ArgumentNullException(nameof(bytes), "Value cannot be null");
 
 			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE START [byte[]]: {bytes.Length} bytes");
+				MagicStorageMod.Instance.Logger.Info("WRITE START [byte[]]");
 
 			Write7BitEncodedInt(bytes.Length);
 
@@ -217,26 +154,35 @@ namespace MagicStorage.Common.IO {
 				Write(bytes[i], BitBuffer128.MAX_BYTE);
 
 			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [byte[]]");
+				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [byte[]]: {bytes.Length} bytes");
 		}
 
 		public void Write7BitEncodedInt(int value) {
 			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE START [7BitEncodedInt]: {value:X08}");
-			
+				MagicStorageMod.Instance.Logger.Info("WRITE START [7BitEncodedInt]");
+
 			uint num = (uint)value;
 
 			while (num >= 128u) {
-				Write((byte)(num & 0x7F), BitBuffer128.MAX_BYTE - 1);
-				Write(true);
+				if (LogWrites)
+					MagicStorageMod.Instance.Logger.Info($"WRITE [7BitEncodedInt/byte]: {num & 0x7F:X02} (continuing)");
+
+				using (FlagSwitch.Create(ref LogWrites, false))  {
+					Write((byte)(num & 0x7F), BitBuffer128.MAX_BYTE - 1);
+					Write(true);
+				}
 				num >>= 7;
 			}
 
-			Write((byte)num, BitBuffer128.MAX_BYTE - 1);
-			Write(false);
+			using (FlagSwitch.Create(ref LogWrites, false)) {
+				Write((byte)num, BitBuffer128.MAX_BYTE - 1);
+				Write(false);
+			}
 
-			if (LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [7BitEncodedInt]");
+			if (LogWrites) {
+				MagicStorageMod.Instance.Logger.Info($"WRITE [7BitEncodedInt/byte]: {num:X02} (final)");
+				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [7BitEncodedInt]: {value:X08}");
+			}
 		}
 	}
 }

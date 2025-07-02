@@ -506,7 +506,7 @@ namespace MagicStorage.UI.States {
 									if (Main.netMode != NetmodeID.SinglePlayer)
 										NetHelper.ClientRequestExactItemDeletion(heart, item);
 									else
-										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _);
+										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _, item.stack);
 								} else {
 									// If the item wasn't selected, initialize a popup for it
 									if (!SellModeMetadata.Remove(item)) {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -75,107 +76,25 @@ namespace MagicStorage.Common.IO {
 			head++;
 		}
 
-		public byte GetByte(ref int head, byte numBits = MAX_BYTE) {
+		public T GetVariant<T>(ref int head, byte numBits) where T : IUnsignedNumber<T>, IBinaryInteger<T> {
+			if (typeof(T) == typeof(byte)) {
+				if (numBits > MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_BYTE}");
+			} else if (typeof(T) == typeof(ushort)) {
+				if (numBits > MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_SHORT}");
+			} else if (typeof(T) == typeof(uint)) {
+				if (numBits > MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_INT}");
+			} else if (typeof(T) == typeof(ulong)) {
+				if (numBits > MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_LONG}");
+			} else
+				throw new InvalidOperationException($"Unsupported type: {typeof(T).FullName}");
+
 			if (numBits == 0)
-				return 0;
-			if (numBits > MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_BYTE}");
-			if (head < numBits)
-				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
+				return T.Zero;
 
-			byte mask = (byte)((1u << numBits) - 1);
-			byte shiftOut = (byte)(_byte0 & mask);
-			_qword0 = (_qword0 >> numBits) | (((ulong)_byte8 & mask) << (MAX_LONG - numBits));
-			_qword1 >>= numBits;
-			head -= numBits;
-			return shiftOut;
-		}
-
-		public void Set(byte value, ref int head, byte numBits = MAX_BYTE) {
-			if (numBits == 0)
-				return;
-			if (numBits > MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_BYTE}");
-
-			int localHead = head;
-			GetDataAndHead(out var dataRef, ref localHead, numBits);
-
-			byte mask = (byte)(byte.MaxValue >> (MAX_BYTE - numBits));
-			dataRef.Value &= ~((ulong)mask << localHead);
-			dataRef.Value |= (ulong)(value & mask) << localHead;
-			
-			head += numBits;
-		}
-
-		public ushort GetUInt16(ref int head, byte numBits = MAX_SHORT) {
-			if (numBits == 0)
-				return 0;
-			if (numBits > MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_SHORT}");
-			if (head < numBits)
-				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
-
-			ushort mask = (ushort)((1u << numBits) - 1);
-			ushort shiftOut = (ushort)(_word0 & mask);
-			_qword0 = (_qword0 >> numBits) | (((ulong)_word4 & mask) << (MAX_LONG - numBits));
-			_qword1 >>= numBits;
-			head -= numBits;
-			return shiftOut;
-		}
-
-		public void Set(ushort value, ref int head, byte numBits = MAX_SHORT) {
-			if (numBits == 0)
-				return;
-			if (numBits > MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_SHORT}");
-
-			int localHead = head;
-			GetDataAndHead(out var dataRef, ref localHead, numBits);
-
-			ushort mask = (ushort)(ushort.MaxValue >> (MAX_SHORT - numBits));
-			dataRef.Value &= ~((ulong)mask << localHead);
-			dataRef.Value |= (ulong)(value & mask) << localHead;
-			
-			head += numBits;
-		}
-
-		public uint GetUInt32(ref int head, byte numBits = MAX_INT) {
-			if (numBits == 0)
-				return 0;
-			if (numBits > MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_INT}");
-			if (head < numBits)
-				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
-
-			uint mask = (1u << numBits) - 1;
-			uint shiftOut = _dword0 & mask;
-			_qword0 = (_qword0 >> numBits) | ((_dword2 & mask) << (MAX_LONG - numBits));
-			_qword1 >>= numBits;
-			head -= numBits;
-			return shiftOut;
-		}
-
-		public void Set(uint value, ref int head, byte numBits = MAX_INT) {
-			if (numBits == 0)
-				return;
-			if (numBits > MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_INT}");
-
-			int localHead = head;
-			GetDataAndHead(out var dataRef, ref localHead, numBits);
-
-			uint mask = uint.MaxValue >> (MAX_INT - numBits);
-			dataRef.Value &= ~((ulong)mask << localHead);
-			dataRef.Value |= (ulong)(value & mask) << localHead;
-			
-			head += numBits;
-		}
-
-		public ulong GetUInt64(ref int head, byte numBits = MAX_LONG) {
-			if (numBits == 0)
-				return 0;
-			if (numBits > MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_LONG}");
 			if (head < numBits)
 				throw new InvalidOperationException($"Expected {numBits} bits, found only {head}");
 
@@ -184,23 +103,81 @@ namespace MagicStorage.Common.IO {
 			_qword0 = (_qword0 >> numBits) | ((_qword1 & mask) << (MAX_LONG - numBits));
 			_qword1 >>= numBits;
 			head -= numBits;
-			return shiftOut;
+
+			if (typeof(T) == typeof(byte)) {
+				byte ret = (byte)shiftOut;
+				return Unsafe.As<byte, T>(ref ret);
+			} else if (typeof(T) == typeof(ushort)) {
+				ushort ret = (ushort)shiftOut;
+				return Unsafe.As<ushort, T>(ref ret);
+			} else if (typeof(T) == typeof(uint)) {
+				uint ret = (uint)shiftOut;
+				return Unsafe.As<uint, T>(ref ret);
+			} else if (typeof(T) == typeof(ulong)) {
+				ulong ret = shiftOut;
+				return Unsafe.As<ulong, T>(ref ret);
+			}
+
+			return default;  // Unreachable, but required for compilation
 		}
 
-		public void Set(ulong value, ref int head, byte numBits = MAX_LONG) {
+		public void SetVariant<T>(T value, ref int head, byte numBits) where T : IUnsignedNumber<T>, IBinaryInteger<T> {
+			if (typeof(T) == typeof(byte)) {
+				if (numBits > MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_BYTE}");
+			} else if (typeof(T) == typeof(ushort)) {
+				if (numBits > MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_SHORT}");
+			} else if (typeof(T) == typeof(uint)) {
+				if (numBits > MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_INT}");
+			} else if (typeof(T) == typeof(ulong)) {
+				if (numBits > MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count ({numBits}) must be less than or equal to {MAX_LONG}");
+			} else
+				throw new InvalidOperationException($"Unsupported type: {typeof(T).FullName}");
+
 			if (numBits == 0)
 				return;
-			if (numBits > MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"numBits must be less than or equal to {MAX_LONG}");
 
 			int localHead = head;
 			GetDataAndHead(out var dataRef, ref localHead, numBits);
 
-			ulong mask = ulong.MaxValue >> (MAX_LONG - numBits);
-			dataRef.Value &= ~(mask << localHead);
-			dataRef.Value |= (value & mask) << localHead;
-			
+			if (typeof(T) == typeof(byte)) {
+				byte mask = (byte)(byte.MaxValue >> (MAX_BYTE - numBits));
+				dataRef.Value &= ~((ulong)mask << localHead);
+				dataRef.Value |= (ulong)(Unsafe.As<T, byte>(ref value) & mask) << localHead;
+			} else if (typeof(T) == typeof(ushort)) {
+				ushort mask = (ushort)(ushort.MaxValue >> (MAX_SHORT - numBits));
+				dataRef.Value &= ~((ulong)mask << localHead);
+				dataRef.Value |= (ulong)(Unsafe.As<T, ushort>(ref value) & mask) << localHead;
+			} else if (typeof(T) == typeof(uint)) {
+				uint mask = uint.MaxValue >> (MAX_INT - numBits);
+				dataRef.Value &= ~((ulong)mask << localHead);
+				dataRef.Value |= (ulong)(Unsafe.As<T, uint>(ref value) & mask) << localHead;
+			} else if (typeof(T) == typeof(ulong)) {
+				ulong mask = ulong.MaxValue >> (MAX_LONG - numBits);
+				dataRef.Value &= ~(mask << localHead);
+				dataRef.Value |= (Unsafe.As<T, ulong>(ref value) & mask) << localHead;
+			}
+
 			head += numBits;
 		}
+
+		public byte GetByte(ref int head, byte numBits = MAX_BYTE) => GetVariant<byte>(ref head, numBits);
+
+		public void Set(byte value, ref int head, byte numBits = MAX_BYTE) => SetVariant(value, ref head, numBits);
+
+		public ushort GetUInt16(ref int head, byte numBits = MAX_SHORT) => GetVariant<ushort>(ref head, numBits);
+
+		public void Set(ushort value, ref int head, byte numBits = MAX_SHORT) => SetVariant(value, ref head, numBits);
+
+		public uint GetUInt32(ref int head, byte numBits = MAX_INT) => GetVariant<uint>(ref head, numBits);
+
+		public void Set(uint value, ref int head, byte numBits = MAX_INT) => SetVariant(value, ref head, numBits);
+
+		public ulong GetUInt64(ref int head, byte numBits = MAX_LONG) => GetVariant<ulong>(ref head, numBits);
+
+		public void Set(ulong value, ref int head, byte numBits = MAX_LONG) => SetVariant(value, ref head, numBits);
 	}
 }

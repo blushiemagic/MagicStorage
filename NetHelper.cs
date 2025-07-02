@@ -1545,9 +1545,12 @@ cleanupContext:
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.DeleteSpecificItem);
 			packet.Write(heart.Position);
-			var data = Utility.ToByteSpanNoCompression(item);
+			ReadOnlySpan<byte> data;
+			using (ObjectSwitch.Create(ref item.stack, 1))
+				data = Utility.ToByteSpanNoCompression(item);
 			packet.Write7BitEncodedInt(data.Length);
 			packet.Write(data);
+			packet.Write(item.stack);
 			packet.Send();
 		}
 
@@ -1555,6 +1558,7 @@ cleanupContext:
 			Point16 point = reader.ReadPoint16();
 			int dataLength = reader.Read7BitEncodedInt();
 			ReadOnlySpan<byte> item = reader.ReadBytes(dataLength);
+			int stack = reader.ReadInt32();
 
 			if (Main.netMode != NetmodeID.Server)
 				return;
@@ -1562,7 +1566,7 @@ cleanupContext:
 			if (!TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) || entity is not TEStorageHeart heart)
 				return;
 
-			if (heart.TryDeleteExactItem(item, out var netItem))
+			if (heart.TryDeleteExactItem(item, out var netItem, stack))
 				AuditSystem.ReportItemDeletion(sender, heart, netItem);
 		}
 

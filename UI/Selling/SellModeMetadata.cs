@@ -13,40 +13,35 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage.UI.Selling {
 	public static class SellModeMetadata {
-		private class SelectedItem {
-			public readonly byte[] data;
-			public int stack;
+		private class SelectedItems {
+			public int totalStack;
 
-			public readonly int _fastGetItemType;
-			public readonly int _fastGetItemValue;
-			public readonly int _fastGetPrefix;
+			public int _fastGetItemType = -42069;
+			public int _fastGetItemValue;
+			public int _fastGetPrefix;
+			public byte[] _fastGetData;
 
-			public Item possiblyUnreliableItemInstance;
+			private Item _iconicItem;
 
-			public SelectedItem(Item item, int stack) {
-				// Stack can't be saved in the byte array due to comparisons not knowing the stacks of the selected items
-				using (ObjectSwitch.Create(ref item.stack, 1))
-					data = Utility.ToByteArrayNoCompression(item);
+			private readonly List<Item> _items = [];
+			public IReadOnlyList<Item> Items => _items.AsReadOnly();
 
-				this.stack = stack;
-				_fastGetItemType = item.type;
-				_fastGetItemValue = item.value;
-				_fastGetPrefix = item.prefix;
-				possiblyUnreliableItemInstance = item;
-			}
+			public void Add(Item item, ReadOnlySpan<byte> data) {
+				if (_fastGetItemType < 0) {
+					_fastGetItemType = item.type;
+					_fastGetItemValue = item.value;
+					_fastGetPrefix = item.prefix;
+					_fastGetData = data.ToArray();
 
-			public SelectedItem(byte[] data, int stack) {
-				this.data = data;
-				this.stack = stack;
+					_iconicItem = item;
+				}
 
-				Item item = Utility.FromByteArrayNoCompression(data);
-				possiblyUnreliableItemInstance = item;
-				_fastGetItemType = item.type;
-				_fastGetItemValue = item.value;
-				_fastGetPrefix = item.prefix;
+				_items.Add(item);
+				totalStack += item.stack;
 			}
 
 			public bool Matches(Item item, ReadOnlySpan<byte> itemData) {
@@ -56,7 +51,71 @@ namespace MagicStorage.UI.Selling {
 				if (_fastGetPrefix != item.prefix)
 					return false;
 
-				return itemData.SequenceEqual(data);
+				return itemData.SequenceEqual(_fastGetData);
+			}
+
+			public void Write(BinaryWriter writer) {
+				if (_iconicItem is null || totalStack < 0) {
+					// Invalid state, cannot write
+					writer.Write(0);
+					return;
+				}
+
+				writer.Write(totalStack);
+
+			//	using var _ = FlagSwitch.Create(ref ValueWriter.LogWrites, true);
+
+				ValueWriter bitWriter = new ValueWriter(writer);
+
+				NetCompression.SendItem(_iconicItem, bitWriter, writeStack: false, writeFavorite: true);
+
+				bitWriter.Write7BitEncodedInt(_items.Count);
+
+				int maxStackBits = _items.Count > 0 ? NetCompression.GetBitSize(ContentSamples.ItemsByType[_fastGetItemType].maxStack) : 0;
+
+				foreach (Item item in _items)
+					bitWriter.Write((uint)item.stack, maxStackBits);
+
+				bitWriter.Flush();
+			}
+
+			public void Read(BinaryReader reader) {
+				_fastGetItemType = -42069;
+				_fastGetItemValue = 0;
+				_fastGetPrefix = 0;
+				_fastGetData = null;
+				_iconicItem = null;
+				_items.Clear();
+
+				totalStack = reader.ReadInt32();
+
+				if (totalStack <= 0) {
+					// Nothing to read
+					return;
+				}
+
+			//	using var _ = FlagSwitch.Create(ref ValueReader.LogReads, true);
+
+				ValueReader bitReader = new ValueReader(reader);
+
+				var item = NetCompression.ReceiveItem(bitReader, readStack: false, readFavorite: true);
+
+				// Use Add() to set the fast-get fields
+				Add(item, Utility.ToByteSpanNoCompression(item));
+
+				_items.Clear();
+
+				int itemCount = bitReader.Read7BitEncodedInt();
+				int maxStackBits = itemCount > 0 ? NetCompression.GetBitSize(ContentSamples.ItemsByType[_fastGetItemType].maxStack) : 0;
+
+				for (int i = 0; i < itemCount; i++) {
+					int stack = (int)bitReader.ReadUInt32(maxStackBits);
+
+					var clone = item.Clone();
+					clone.stack = stack;
+
+					_items.Add(clone);
+				}
 			}
 		}
 
@@ -104,7 +163,7 @@ namespace MagicStorage.UI.Selling {
 			}
 		}
 
-		private static readonly List<SelectedItem> _items = new();
+		private static readonly List<SelectedItems> _items = new();
 
 		public static int Count { get; private set; }
 
@@ -117,15 +176,16 @@ namespace MagicStorage.UI.Selling {
 			if (!IsValidForSelling(item))
 				return null;
 
-			if (Find(item, out var selected)) {
-				Count -= selected.stack;
-				selected.stack = stack;
-				Count += stack;
-				selected.possiblyUnreliableItemInstance = item;
-				return false;
-			}
+			ReadOnlySpan<byte> data;
+			using (ObjectSwitch.Create(ref item.stack, 1))
+				data = Utility.ToByteSpanNoCompression(item);
 
-			_items.Add(new SelectedItem(item, stack));
+			if (!Find(item, data, out var selected)) {
+				selected = new SelectedItems();
+				_items.Add(selected);
+			}
+			
+			selected.Add(item, data);
 			Count += stack;
 			return true;
 		}
@@ -140,9 +200,11 @@ namespace MagicStorage.UI.Selling {
 				return;
 
 			if (Find(item, out var selected)) {
-				Count -= selected.stack;
-				selected.stack = stack;
-				Count += stack;
+				int difference = stack - selected.totalStack;
+				if (difference != 0) {
+					selected.totalStack = stack;
+					Count += difference;
+				}
 			} else
 				throw new InvalidOperationException("Item not found in cache");
 		}
@@ -158,7 +220,7 @@ namespace MagicStorage.UI.Selling {
 			for (int i = 0; i < _items.Count; i++) {
 				var selectedItem = _items[i];
 				if (selectedItem.Matches(item, itemData)) {
-					Count -= selectedItem.stack;
+					Count -= selectedItem.totalStack;
 					_items.RemoveAt(i);
 					return true;
 				}
@@ -179,7 +241,7 @@ namespace MagicStorage.UI.Selling {
 			}
 
 			if (Find(item, out var selected)) {
-				selectedQuantity = selected.stack;
+				selectedQuantity = selected.totalStack;
 				return true;
 			}
 
@@ -187,13 +249,16 @@ namespace MagicStorage.UI.Selling {
 			return false;
 		}
 
-		private static bool Find(Item item, out SelectedItem selected) {
-			ReadOnlySpan<byte> itemData;
+		private static bool Find(Item item, out SelectedItems selected) {
+			ReadOnlySpan<byte> data;
 			using (ObjectSwitch.Create(ref item.stack, 1))
-				itemData = Utility.ToByteSpanNoCompression(item);
+				data = Utility.ToByteSpanNoCompression(item);
+			return Find(item, data, out selected);
+		}
 
+		private static bool Find(Item item, ReadOnlySpan<byte> data, out SelectedItems selected) {
 			foreach (var selectedItem in _items) {
-				if (selectedItem.Matches(item, itemData)) {
+				if (selectedItem.Matches(item, data)) {
 					selected = selectedItem;
 					return true;
 				}
@@ -217,7 +282,7 @@ namespace MagicStorage.UI.Selling {
 
 			ConditionalWeakTable<Item, byte[]> savedItemTagIO = new();
 			foreach (var item in _items)
-				heart.TryDeleteExactItem(item.data, out _, itemStackOverride: item.stack, savedItemTagIO);
+				heart.TryDeleteExactItem(item._fastGetData, out _, itemCountToDelete: item.totalStack, savedItemTagIO);
 
 			if (sellValue.platinum > 0)
 				heart.DepositItem(new Item(ItemID.PlatinumCoin, sellValue.platinum));
@@ -253,11 +318,8 @@ namespace MagicStorage.UI.Selling {
 			using (BinaryWriter compressedWriter = new BinaryWriter(ms)) {
 				// Write the items
 				compressedWriter.Write7BitEncodedInt(_items.Count);
-				foreach (var item in _items) {
-					compressedWriter.Write7BitEncodedInt(item.data.Length);
-					compressedWriter.Write(item.data);
-					compressedWriter.Write(item.stack);
-				}
+				foreach (var item in _items)
+					item.Write(compressedWriter);
 			}
 
 			byte[] uncompressedData = ms.ToArray();
@@ -286,12 +348,13 @@ namespace MagicStorage.UI.Selling {
 			// Read the items
 			int itemCount = decompressedReader.Read7BitEncodedInt();
 			for (int i = 0; i < itemCount; i++) {
-				int itemDataLength = decompressedReader.Read7BitEncodedInt();
-				byte[] itemData = decompressedReader.ReadBytes(itemDataLength);
-				int stack = decompressedReader.ReadInt32();
+				var item = new SelectedItems();
+				item.Read(decompressedReader);
 
-				_items.Add(new SelectedItem(itemData, stack));
-				Count += stack;
+				if (item.totalStack > 0) {
+					_items.Add(item);
+					Count += item.totalStack;
+				}
 			}
 		}
 
@@ -312,11 +375,19 @@ namespace MagicStorage.UI.Selling {
 				}
 			}
 
-			foreach (var item in _items) {
-				if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item.possiblyUnreliableItemInstance))
+			foreach (var selectedItems in _items) {
+				bool allowed = true;
+				foreach (var item in selectedItems.Items) {
+					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item)) {
+						allowed = false;
+						break;
+					}
+				}
+
+				if (!allowed)
 					continue;
 
-				sum += (long)item._fastGetItemValue * item.stack;
+				sum += (long)selectedItems._fastGetItemValue * selectedItems.totalStack;
 			}
 
 			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
@@ -330,15 +401,40 @@ namespace MagicStorage.UI.Selling {
 			ClampedLongArithmetic sum = 0;
 			soldItemCount = 0;
 
-			foreach (var item in _items) {
-				if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item.possiblyUnreliableItemInstance))
+			double adjustment = 1.0;
+
+			if (MagicStorageServerConfig.AutomatonHappinessAffectsSellPrices) {
+				foreach (NPC npc in Main.ActiveNPCs) {
+					if (npc.ModNPC is not Golem)
+						continue;
+
+					var settings = Main.ShopHelper.GetShoppingSettings(sellingPlayer, npc);
+					adjustment *= settings.PriceAdjustment;
+				}
+			}
+
+			foreach (var selectedItems in _items) {
+				bool allowed = true;
+				foreach (var item in selectedItems.Items) {
+					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item)) {
+						allowed = false;
+						break;
+					}
+				}
+
+				if (!allowed)
 					continue;
 
-				sum += (long)item._fastGetItemValue * item.stack;
-				soldItemCount += item.stack;
+				sum += (long)selectedItems._fastGetItemValue * selectedItems.totalStack;
+				soldItemCount += selectedItems.totalStack;
 
-				PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item.possiblyUnreliableItemInstance);
+				foreach (var item in selectedItems.Items)
+					PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item);
 			}
+
+			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
+			// Hence, we need to divide instead to make items worth less when happiness is worse
+			sum = (long)(sum / adjustment);
 
 			coins = new Coins(sum);
 		}

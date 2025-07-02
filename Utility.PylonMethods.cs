@@ -1,5 +1,4 @@
 ﻿using MagicStorage.Common;
-using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -8,8 +7,6 @@ using Terraria.ModLoader;
 namespace MagicStorage {
 	partial class Utility {
 		// NOTE: Previously, this code used reflection to invoke the methods.  A publicizer has been introduced since then, so calling indirectly is no longer necessary.
-		private static SceneMetrics _sceneMetrics;
-
 		private static int HowManyNPCsDoesPylonNeed(TeleportPylonInfo info, Player player) => Main.PylonSystem.HowManyNPCsDoesPylonNeed(info, player);
 
 		private static bool DoesPylonHaveEnoughNPCsAroundIt(TeleportPylonInfo info, int necessaryNPCCount) => Main.PylonSystem.DoesPylonHaveEnoughNPCsAroundIt(info, necessaryNPCCount);
@@ -27,10 +24,10 @@ namespace MagicStorage {
 		}
 
 		private static void CheckValidDestination(TeleportPylonInfo info, Player player, ref bool flag) {
-			_sceneMetrics ??= new();
+			Main.PylonSystem._sceneMetrics ??= new();
 
 			try {
-				SceneMetrics sceneMetrics = _sceneMetrics;
+				SceneMetrics sceneMetrics = Main.PylonSystem._sceneMetrics;
 				SceneMetricsScanSettings settings = new SceneMetricsScanSettings {
 					VisualScanArea = null,
 					BiomeScanCenterPositionInWorld = info.PositionInTiles.ToWorldCoordinates(),

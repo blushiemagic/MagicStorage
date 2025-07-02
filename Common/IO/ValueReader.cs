@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Common.IO {
 	public class ValueReader {
@@ -36,185 +38,126 @@ namespace MagicStorage.Common.IO {
 			return ret;
 		}
 
-		public byte ReadByte(int numBits) {
+		public T ReadUnsigned<T>(int numBits) where T : IUnsignedNumber<T>, IBinaryInteger<T> {
+			if (typeof(T) == typeof(byte)) {
+				if (numBits > BitBuffer128.MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
+			} else if (typeof(T) == typeof(ushort)) {
+				if (numBits > BitBuffer128.MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
+			} else if (typeof(T) == typeof(uint)) {
+				if (numBits > BitBuffer128.MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
+			} else if (typeof(T) == typeof(ulong)) {
+				if (numBits > BitBuffer128.MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
+			} else
+				throw new NotSupportedException($"Unsupported type: {typeof(T)}");
+
 			if (numBits == 0)
-				return 0;
+				return T.Zero;
 
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
 
 			CheckBits(numBits);
-			byte ret = _bits.GetByte(ref _head, (byte)numBits);
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [byte]: {ret:X02} ({numBits} bits)");
+			T ret = _bits.GetVariant<T>(ref _head, (byte)numBits);
 
-			return ret;
-		}
-
-		public sbyte ReadSByte(int numBits) {
-			if (numBits == 0)
-				return 0;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_BYTE)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
-			
-			CheckBits(Math.Min(numBits + 1, BitBuffer128.MAX_BYTE));
-
-			bool negative;
-			using (FlagSwitch.Create(ref LogReads, false))
-				negative = ReadBoolean();
-
-			if (numBits == BitBuffer128.MAX_BYTE)
-				numBits--;
-
-			byte mold = (byte)(negative ? byte.MaxValue << numBits : 0);
-			sbyte ret = (sbyte)(mold | _bits.GetByte(ref _head, (byte)numBits));
-
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [sbyte]: {ret:X02} ({numBits} bits)");
+			if (LogReads) {
+				if (typeof(T) == typeof(byte))
+					MagicStorageMod.Instance.Logger.Info($"READ [byte]: {ret:X02} ({numBits} bits)");
+				else if (typeof(T) == typeof(ushort))
+					MagicStorageMod.Instance.Logger.Info($"READ [ushort]: {ret:X04} ({numBits} bits)");
+				else if (typeof(T) == typeof(uint))
+					MagicStorageMod.Instance.Logger.Info($"READ [uint]: {ret:X08} ({numBits} bits)");
+				else if (typeof(T) == typeof(ulong))
+					MagicStorageMod.Instance.Logger.Info($"READ [ulong]: {ret:X016} ({numBits} bits)");
+			}
 
 			return ret;
 		}
 
-		public ushort ReadUInt16(int numBits) {
+		public T ReadSigned<T>(int numBits) where T : ISignedNumber<T>, IBinaryInteger<T> {
+			if (typeof(T) == typeof(sbyte)) {
+				if (numBits > BitBuffer128.MAX_BYTE)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_BYTE}");
+			} else if (typeof(T) == typeof(short)) {
+				if (numBits > BitBuffer128.MAX_SHORT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
+			} else if (typeof(T) == typeof(int)) {
+				if (numBits > BitBuffer128.MAX_INT)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
+			} else if (typeof(T) == typeof(long)) {
+				if (numBits > BitBuffer128.MAX_LONG)
+					throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
+			} else
+				throw new NotSupportedException($"Unsupported type: {typeof(T)}");
+
 			if (numBits == 0)
-				return 0;
+				return T.Zero;
 
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
-			
+
 			CheckBits(numBits);
-			ushort ret = _bits.GetUInt16(ref _head, (byte)numBits);
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [ushort]: {ret:X04} ({numBits} bits)");
+			T ret = default;
+			if (typeof(T) == typeof(sbyte)) {
+				byte read = ReadSigned_GetAndSignExtend<byte>(numBits);
+				ret = Unsafe.As<byte, T>(ref read);
+			} else if (typeof(T) == typeof(short)) {
+				ushort read = ReadSigned_GetAndSignExtend<ushort>(numBits);
+				ret = Unsafe.As<ushort, T>(ref read);
+			} else if (typeof(T) == typeof(int)) {
+				uint read = ReadSigned_GetAndSignExtend<uint>(numBits);
+				ret = Unsafe.As<uint, T>(ref read);
+			} else if (typeof(T) == typeof(long)) {
+				ulong read = ReadSigned_GetAndSignExtend<ulong>(numBits);
+				ret = Unsafe.As<ulong, T>(ref read);
+			}
 
-			return ret;
-		}
-
-		public short ReadInt16(int numBits) {
-			if (numBits == 0)
-				return 0;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_SHORT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_SHORT}");
-			
-			CheckBits(Math.Min(numBits + 1, BitBuffer128.MAX_SHORT));
-
-			bool negative;
-			using (FlagSwitch.Create(ref LogReads, false))
-				negative = ReadBoolean();
-
-			if (numBits == BitBuffer128.MAX_SHORT)
-				numBits--;
-
-			ushort mold = (ushort)(negative ? ushort.MaxValue << numBits : 0);
-			short ret = (short)(mold | _bits.GetUInt16(ref _head, (byte)numBits));
-
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [short]: {ret:X04} ({numBits} bits)");
+			if (LogReads) {
+				if (typeof(T) == typeof(sbyte))
+					MagicStorageMod.Instance.Logger.Info($"READ [sbyte]: {ret:X02} ({numBits} bits)");
+				else if (typeof(T) == typeof(short))
+					MagicStorageMod.Instance.Logger.Info($"READ [short]: {ret:X04} ({numBits} bits)");
+				else if (typeof(T) == typeof(int))
+					MagicStorageMod.Instance.Logger.Info($"READ [int]: {ret:X08} ({numBits} bits)");
+				else if (typeof(T) == typeof(long))
+					MagicStorageMod.Instance.Logger.Info($"READ [long]: {ret:X016} ({numBits} bits)");
+			}
 
 			return ret;
 		}
 
-		public uint ReadUInt32(int numBits) {
-			if (numBits == 0)
-				return 0;
+		private T ReadSigned_GetAndSignExtend<T>(int numBits) where T : IUnsignedNumber<T>, IBinaryInteger<T> {
+			T read = _bits.GetVariant<T>(ref _head, (byte)numBits);
+			bool negative = (read & (T.One << (numBits - 1))) != T.Zero;
 
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
-			
-			CheckBits(numBits);
-			uint ret = _bits.GetUInt32(ref _head, (byte)numBits);
+			if (negative) {
+				long mask = -1 << numBits;
+				read = Unsafe.As<long, T>(ref mask) | read; // Sign extend
+			}
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [uint]: {ret:X08} ({numBits} bits)");
-
-			return ret;
+			return read;
 		}
 
-		public int ReadInt32(int numBits) {
-			if (numBits == 0)
-				return 0;
+		public byte ReadByte(int numBits) => ReadUnsigned<byte>(numBits);
 
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_INT)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_INT}");
-			
-			CheckBits(Math.Min(numBits + 1, BitBuffer128.MAX_INT));
+		public sbyte ReadSByte(int numBits) => ReadSigned<sbyte>(numBits);
 
-			bool negative;
-			using (FlagSwitch.Create(ref LogReads, false))
-				negative = ReadBoolean();
+		public ushort ReadUInt16(int numBits) => ReadUnsigned<ushort>(numBits);
 
-			if (numBits == BitBuffer128.MAX_INT)
-				numBits--;
+		public short ReadInt16(int numBits) => ReadSigned<short>(numBits);
 
-			uint mold = negative ? uint.MaxValue << numBits : 0;
-			int ret = (int)(mold | _bits.GetUInt32(ref _head, (byte)numBits));
+		public uint ReadUInt32(int numBits) => ReadUnsigned<uint>(numBits);
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [int]: {ret:X08} ({numBits} bits)");
+		public int ReadInt32(int numBits) => ReadSigned<int>(numBits);
 
-			return ret;
-		}
+		public ulong ReadUInt64(int numBits) => ReadUnsigned<ulong>(numBits);
 
-		public ulong ReadUInt64(int numBits) {
-			if (numBits == 0)
-				return 0;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
-			
-			CheckBits(numBits);
-			ulong ret = _bits.GetUInt64(ref _head, (byte)numBits);
-
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [ulong]: {ret:X016} ({numBits} bits)");
-
-			return ret;
-		}
-
-		public long ReadInt64(int numBits) {
-			if (numBits == 0)
-				return 0;
-
-			if (numBits < 0)
-				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
-			if (numBits > BitBuffer128.MAX_LONG)
-				throw new ArgumentOutOfRangeException(nameof(numBits), $"Bit count must be less than or equal to {BitBuffer128.MAX_LONG}");
-			
-			CheckBits(Math.Min(numBits + 1, BitBuffer128.MAX_LONG));
-
-			bool negative;
-			using (FlagSwitch.Create(ref LogReads, false))
-				negative = ReadBoolean();
-
-			if (numBits == BitBuffer128.MAX_LONG)
-				numBits--;
-
-			ulong mold = negative ? ulong.MaxValue << numBits : 0;
-			long ret = (long)(mold | _bits.GetUInt64(ref _head, (byte)numBits));
-
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [long]: {ret:X016} ({numBits} bits)");
-
-			return ret;
-		}
+		public long ReadInt64(int numBits) => ReadSigned<long>(numBits);
 
 		public byte[] ReadBytes() {
 			if (LogReads)
@@ -240,17 +183,26 @@ namespace MagicStorage.Common.IO {
 				MagicStorageMod.Instance.Logger.Info("READ START [7BitEncodedInt]");
 
 			while (shift < BitBuffer128.MAX_INT) {
-				byte b = ReadByte(BitBuffer128.MAX_BYTE - 1);
-				read |= (b & 0x7F) << shift;
-				shift += BitBuffer128.MAX_BYTE - 1;
+				byte b;
+				bool more;
+
+				using (FlagSwitch.Create(ref LogReads, false)) {
+					b = ReadByte(BitBuffer128.MAX_BYTE - 1);
+					read |= (b & 0x7F) << shift;
+					shift += BitBuffer128.MAX_BYTE - 1;
 				
-				bool more = ReadBoolean();
+					more = ReadBoolean();
+				}
+
 				if (!more) {
-					if (LogReads)
+					if (LogReads) {
+						MagicStorageMod.Instance.Logger.Info($"READ [7BitEncodedInt/byte]: {b:X02} (final)");
 						MagicStorageMod.Instance.Logger.Info($"READ FINISH [7BitEncodedInt]: {read:X08}");
+					}
 
 					return read;
-				}
+				} else if (LogReads)
+					MagicStorageMod.Instance.Logger.Info($"READ [7BitEncodedInt/byte]: {b:X02} (continuing)");
 			}
 
 			throw new FormatException("Invalid 7-bit encoded integer");

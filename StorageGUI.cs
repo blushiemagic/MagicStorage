@@ -66,6 +66,8 @@ namespace MagicStorage
 			if (center is null)
 				return false;
 
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
 
 			if (wrapper.Valid) {
@@ -75,7 +77,7 @@ namespace MagicStorage
 				heart.TryDeposit(item, accessingPlayer: Main.LocalPlayer);
 
 				if (oldStack != item.stack) {
-					if (GetHeart()?.Position == heart.Position)
+					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
 						MagicUI.SetNextCollectionsToRefresh(oldType);
 
 					return true;
@@ -92,9 +94,13 @@ namespace MagicStorage
 		/// <returns>Whether the deposit was successful</returns>
 		public static bool TryDeposit(Item item)
 		{
+			if (GetHeart() is not TEStorageHeart heart)
+				return false;
+
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			int oldStack = item.stack;
 			int oldType = item.type;
-			TEStorageHeart heart = GetHeart();
 			heart.TryDeposit(item, accessingPlayer: Main.LocalPlayer);
 
 			if (oldStack != item.stack) {
@@ -116,6 +122,8 @@ namespace MagicStorage
 			if (center is null)
 				return false;
 
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
 
 			if (wrapper.Valid) {
@@ -123,7 +131,7 @@ namespace MagicStorage
 				int[] types = items.Select(static i => i.type).ToArray();
 
 				if (heart.TryDeposit(items, accessingPlayer: Main.LocalPlayer)) {
-					if (GetHeart()?.Position == heart.Position)
+					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
 						MagicUI.SetNextCollectionsToRefresh(types);
 					return true;
 				}
@@ -146,20 +154,20 @@ namespace MagicStorage
 			if (center is null)
 				return false;
 
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
 
 			if (wrapper.Valid) {
 				TEStorageHeart heart = wrapper.Heart;
 
-				if (quickStack) {
-					using var _ = SecuritySystem.CreateAccessContext();
+				if (quickStack)
 					items = new(items.Where(i => heart.HasItem(i, ignorePrefix: true)));
-				}
 
 				int[] types = items.Select(static i => i.type).ToArray();
 
 				if (heart.TryDeposit(items, accessingPlayer: Main.LocalPlayer)) {
-					if (GetHeart()?.Position == heart.Position)
+					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
 						MagicUI.SetNextCollectionsToRefresh(types);
 					return true;
 				}
@@ -180,6 +188,8 @@ namespace MagicStorage
 			if (GetHeart() is not TEStorageHeart heart)
 				return false;
 
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			int[] types = items.Select(static i => i.type).ToArray();
 			
 			if (heart.TryDeposit(items, accessingPlayer: Main.LocalPlayer)) {
@@ -192,10 +202,12 @@ namespace MagicStorage
 
 		internal static bool TryDepositAll(bool quickStack)
 		{
+			if (GetHeart() is not TEStorageHeart heart)
+				return false;
+
 			using var _ = SecuritySystem.CreateAccessContext();
 
 			Player player = Main.LocalPlayer;
-			TEStorageHeart heart = GetHeart();
 
 			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			var items = new List<Item>();
@@ -219,8 +231,12 @@ namespace MagicStorage
 
 		internal static bool TryRestock()
 		{
+			if (GetHeart() is null)
+				return false;
+
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			Player player = Main.LocalPlayer;
-			GetHeart();
 			bool changed = false;
 
 			foreach (Item item in player.inventory)
@@ -256,13 +272,15 @@ namespace MagicStorage
 			if (center is null)
 				return new Item();
 
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
 
 			if (wrapper.Valid) {
 				TEStorageHeart heart = wrapper.Heart;
 				Item withdrawn = heart.TryWithdraw(item, keepOneIfFavorite, accessingPlayer: Main.LocalPlayer, toInventory);
 
-				if (!withdrawn.IsAir && GetHeart()?.Position == heart.Position)
+				if (!withdrawn.IsAir && GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
 					SetNextItemTypeToRefresh(withdrawn.type);
 
 				return withdrawn;
@@ -283,7 +301,11 @@ namespace MagicStorage
 		/// <returns>A valid item instance if the withdrawal was succesful, an air item otherwise.</returns>
 		public static Item DoWithdraw(Item item, bool toInventory = false, bool keepOneIfFavorite = false)
 		{
-			TEStorageHeart heart = GetHeart();
+			if (GetHeart() is not TEStorageHeart heart)
+				return new Item();
+
+			using var _ = SecuritySystem.CreateAccessContext();
+
 			Item withdrawn = heart.TryWithdraw(item, keepOneIfFavorite, accessingPlayer: Main.LocalPlayer, toInventory);
 
 			if (!withdrawn.IsAir)

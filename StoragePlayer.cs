@@ -91,7 +91,7 @@ namespace MagicStorage
 			if (tag.TryGet("shilling", out int waitCount) && waitCount > 0)
 				patreon = waitCount;
 			else
-				patreon = Main.rand.Next(3, 8);
+				patreon = Main.rand.Next(8, 15);
 
 			messageDelay = 300;
 		}

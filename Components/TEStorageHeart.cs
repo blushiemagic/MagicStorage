@@ -873,14 +873,15 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, out ReducedItem detectedItem, int? itemStackOverride = null, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
+		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, out ReducedItem detectedItem, int itemCountToDelete, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
 			Item clone = Utility.FromByteSpanNoCompression(itemData);
 			detectedItem = new(clone);
 			if (clone.IsAir)
 				return false;
 
-			if (itemStackOverride is { } stackOverride && clone.stack != stackOverride) {
-				clone.stack = stackOverride;
+			if (clone.stack != 1) {
+				// Stack should be ignored when comparing data
+				clone.stack = 1;
 				itemData = Utility.ToByteSpanNoCompression(clone);
 			}
 
@@ -888,37 +889,36 @@ namespace MagicStorage.Components
 				if (unit.IsEmpty || !unit.HasItem(clone, ignorePrefix: true))
 					continue;
 
-				for (int i = 0; i < unit.items.Count; i++) {
+				for (int i = unit.items.Count - 1; i >= 0; i--) {
 					Item storage = unit.items[i];
+					if (storage.type != clone.type)
+						continue;
+
 					ReadOnlySpan<byte> storageData;
 
-					if (savedItemTagIO.TryGetValue(storage, out var storageDataArray)) {
+					if (savedItemTagIO is not null && savedItemTagIO.TryGetValue(storage, out var storageDataArray)) {
 						// Retrieve the cached value
 						storageData = storageDataArray;
 					} else {
-						if (itemStackOverride is { } stackOverride2) {
-							using (ObjectSwitch.Create(ref storage.stack, stackOverride2))
-								storageDataArray = Utility.ToByteArrayNoCompression(storage);
-						} else
+						// Stack should be ignored when comparing data
+						using (ObjectSwitch.Create(ref storage.stack, 1))
 							storageDataArray = Utility.ToByteArrayNoCompression(storage);
 
 						// Cache the value
-						savedItemTagIO.Add(storage, storageDataArray);
+						savedItemTagIO?.Add(storage, storageDataArray);
 						storageData = storageDataArray;
 					}
 
 					// Must be an exact match
 					if (itemData.SequenceEqual(storageData)) {
-						if (clone.stack >= storage.stack) {
-							clone.stack -= storage.stack;
+						if (itemCountToDelete >= storage.stack) {
+							itemCountToDelete -= storage.stack;
 
 							unit.items.RemoveAt(i);
-							savedItemTagIO.Remove(storage);
-
-							i--;
+							savedItemTagIO?.Remove(storage);
 						} else {
-							storage.stack -= clone.stack;
-							clone.stack = 0;
+							storage.stack -= itemCountToDelete;
+							itemCountToDelete = 0;
 						}
 
 						ResetCompactStage();
@@ -930,7 +930,7 @@ namespace MagicStorage.Components
 						else
 							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 
-						if (clone.stack <= 0)
+						if (itemCountToDelete <= 0)
 							return true;
 					}
 				}

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -37,13 +38,13 @@ namespace MagicStorage.Common.IO {
 
 		public static void SendItem(Item item, ValueWriter writer, bool writeStack, bool writeFavorite) {
 			if (ValueWriter.LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"ITEM WRITE: {item}");
+				MagicStorageMod.Instance.Logger.Info("WRITE START [SendItem]");
 
 			ModContent.GetInstance<ItemTypeTracker>().Send(item, writer);
 			ModContent.GetInstance<ItemPrefixTracker>().Send(item, writer);
 
-			if (writeStack)
-				writer.Write7BitEncodedInt(item.stack);
+			if (writeStack && item.maxStack > 1)
+				writer.Write((uint)item.stack, GetBitSize(item.maxStack));
 
 			if (writeFavorite)
 				writer.Write(item.favorited);
@@ -54,6 +55,9 @@ namespace MagicStorage.Common.IO {
 
 			byte[] data = modData.ToArray();
 			writer.WriteBytes(data);
+
+			if (ValueWriter.LogWrites)
+				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [SendItem]: {ItemID.Search.GetName(item.type)} (stack {item.stack}, prefix {item.prefix}, favorited {item.favorited}, modData {data.Length} bytes)");
 		}
 
 		public static void SendItems(List<Item> items, BinaryWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
@@ -63,7 +67,7 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public static void SendItems(List<Item> items, ValueWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
-			writer.Write(items.Count, listCountBitSizeOverride ?? BitBuffer128.MAX_INT);
+			writer.Write((uint)items.Count, listCountBitSizeOverride ?? BitBuffer128.MAX_INT);
 			foreach (Item item in items)
 				SendItem(item, writer, writeStacks, writeFavorites);
 		}
@@ -74,23 +78,27 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public static Item ReceiveItem(ValueReader reader, bool readStack, bool readFavorite) {
+			if (ValueReader.LogReads)
+				MagicStorageMod.Instance.Logger.Info("READ START [ReceiveItem]");
+
 			Item item = new Item();
 
 			ModContent.GetInstance<ItemTypeTracker>().Receive(ref item, reader);
 			ModContent.GetInstance<ItemPrefixTracker>().Receive(ref item, reader);
 
-			if (readStack)
-				item.stack = reader.Read7BitEncodedInt();
+			if (readStack && item.maxStack > 1)
+				item.stack = reader.ReadUInt16(GetBitSize(item.maxStack));
 
 			if (readFavorite)
 				item.favorited = reader.ReadBoolean();
 
 			using MemoryStream modData = new MemoryStream(reader.ReadBytes());
-			using (BinaryReader modReader = new BinaryReader(modData))
+			using (BinaryReader modReader = new BinaryReader(modData)) {
 				ItemIO.ReceiveModData(item, modReader);
 
-			if (ValueReader.LogReads)
-				MagicStorageMod.Instance.Logger.Info($"ITEM READ: {item}");
+				if (ValueReader.LogReads)
+					MagicStorageMod.Instance.Logger.Info($"READ FINISH [ReceiveItem]: {ItemID.Search.GetName(item.type)} (stack {item.stack}, prefix {item.prefix}, favorited {item.favorited}, modData {modData.Length} bytes)");
+			}
 
 			return item;
 		}
@@ -101,7 +109,7 @@ namespace MagicStorage.Common.IO {
 		}
 
 		public static List<Item> ReceiveItems(ValueReader reader, bool readStacks = true, bool readFavorites = true, int? listCountBitSizeOverride = null) {
-			int count = reader.ReadInt32(listCountBitSizeOverride ?? BitBuffer128.MAX_INT);
+			int count = (int)reader.ReadUInt32(listCountBitSizeOverride ?? BitBuffer128.MAX_INT);
 			List<Item> items = new(count);
 			for (int k = 0; k < count; k++)
 				items.Add(ReceiveItem(reader, readStacks, readFavorites));
