@@ -36,11 +36,10 @@ namespace MagicStorage.UI.Shimmer {
 
 				Rectangle frame = _report.GetAnimationFrame();
 
-				Vector2 scale = Vector2.One;
-				if (frame.Width > dims.Width - 4)
-					scale.X = (dims.Width - 4) / frame.Width;
-				if (frame.Height > dims.Height - 4)
-					scale.Y = (dims.Height - 4) / frame.Height;
+				float scale = 1f;
+				float dimensionLimit = Math.Min(dims.Width, dims.Height) - 4;
+				if (frame.Width > dimensionLimit || frame.Height > dimensionLimit)
+					scale = dimensionLimit / Math.Max(frame.Width, frame.Height);
 
 				spriteBatch.Draw(_report.Texture.Value, dims.Center(), frame, Color.White, 0, frame.Size() / 2f, scale, SpriteEffects.None, 0);
 			}
