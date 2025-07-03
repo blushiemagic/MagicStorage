@@ -9,6 +9,7 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent.Drawing;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -180,6 +181,9 @@ namespace MagicStorage.Components
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			Tile tile = Main.tile[i, j];
+			if (!TileDrawing.IsVisible(tile))
+				return;  // Hidden by Echo Coating
+
 			if (!GetGlowmask(i, j, tile.TileType, tile.TileFrameX, tile.TileFrameY, out var asset, out var color))
 				return;
 

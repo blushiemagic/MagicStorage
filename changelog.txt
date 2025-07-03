@@ -2,3 +2,4 @@
 - Fixed a bug that caused items in Storage Units to fail to sync if their max stack was larger than 65,535
 - The logic for checking for Storage Core recipes now happens after [i]AddRecipes[/i], [i]PostAddRecipes[/i] and [i]PostSetupRecipes[/i], allowing for reporting of the mod that caused the problem
 - Fixed the scale of item reports in the Shimmering Results list
+- Fixed the glowmasks for the storage components still rendering even when Echo Coating is hiding the tiles

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent.Drawing;
 using Terraria.GameContent.ObjectInteractions;
 using Terraria.GameInput;
 using Terraria.ID;
@@ -134,12 +135,15 @@ namespace MagicStorage.Components
 		public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
 		{
 			Tile tile = Main.tile[i, j];
+			if (!TileDrawing.IsVisible(tile))
+				return;  // Hidden by Echo Coating
+
 			Vector2 zero = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
 			Vector2 drawPos = zero + 16f * new Vector2(i, j) - Main.screenPosition;
 			Rectangle frame = new(tile.TileFrameX, tile.TileFrameY, 16, 16);
 			Color lightColor = Lighting.GetColor(i, j, Color.White);
 			Color color = Color.Lerp(lightColor, Color.White, Main.essScale);
-			spriteBatch.Draw(Mod.Assets.Request<Texture2D>("Components/" + Name + "_Glow").Value, drawPos, frame, color);
+			spriteBatch.Draw(ModContent.Request<Texture2D>(Texture + "_Glow").Value, drawPos, frame, color);
 		}
 	}
 }
