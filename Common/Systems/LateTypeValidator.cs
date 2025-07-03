@@ -33,18 +33,6 @@ namespace MagicStorage.Common.Systems {
 
 		public override void PostSetupRecipes() {
 			LoaderUtils.ForEachAndAggregateExceptions(ModContent.GetContent<IValidateAtPostSetupRecipes>(), validator => validator.ValidateType());
-
-			// No recipes can be added for any Storage Core item
-			var cores = Main.recipe
-				.Take(Recipe.numRecipes)
-				.Where(r => !r.Disabled)
-				.Select(r => r.createItem.ModItem)
-				.OfType<BaseStorageCore>()
-				.Select(core => core.FullName)
-				.ToList();
-
-			if (cores.Count > 0)
-				throw new Exception($"Recipes cannot have a Storage Core as the result item.\n  {string.Join("\n  ", cores)}");
 		}
 	}
 }

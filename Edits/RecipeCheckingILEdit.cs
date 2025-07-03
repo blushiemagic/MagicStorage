@@ -8,6 +8,7 @@ using System.Reflection;
  using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using MagicStorage.Items;
 
 namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {
@@ -66,14 +67,25 @@ namespace MagicStorage.Edits {
 					continue;  //Ignore since Magic Storage can't use it anyway
 
 				if (recipe.requiredItem.Any(i => i.type <= ItemID.None || i.stack <= 0)) {
-					string result = recipe.createItem.IsAir ? "<result not set>" : $"{Lang.GetItemNameValue(recipe.createItem.type)} ({recipe.createItem.stack})";
-					string tile = recipe.requiredTile.Count == 0 ? "hand" : string.Join(", ", recipe.requiredTile.Select(t => TileID.Search.TryGetName(t, out string s) ? s : "<unknown>"));
+					PrepareRecipeInfo(recipe, out string result, out string tile);
 
 					throw new Exception($"Mod \"{mod.Name}\" added or modified a recipe to be in an invalid state.\n" +
 						"Reason: An ingredient had an invalid ID or a stack size of zero or less.\n" +
 						$"Problem Recipe:  {result} @ {tile}");
 				}
+
+				if (recipe.createItem.ModItem is BaseStorageCore) {
+					PrepareRecipeInfo(recipe, out string result, out string tile);
+
+					throw new Exception($"Mod \"{mod.Name} added or modified a recipe to create a Storage Core item, which is not allowed.\n" +
+						$"Problem Recipe:  {result} @ {tile}");
+				}
 			}
+		}
+
+		private static void PrepareRecipeInfo(Recipe recipe, out string result, out string tile) {
+			result = recipe.createItem.IsAir ? "<result not set>" : $"{Lang.GetItemNameValue(recipe.createItem.type)} ({recipe.createItem.stack})";
+			tile = recipe.requiredTile.Count == 0 ? "hand" : string.Join(", ", recipe.requiredTile.Select(t => TileID.Search.TryGetName(t, out string s) ? s : "<unknown>"));
 		}
 	}
 }
