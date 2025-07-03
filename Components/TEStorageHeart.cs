@@ -160,10 +160,19 @@ namespace MagicStorage.Components
 		}
 
 		protected override void OnConnectComponent(TEStorageComponent component) {
+			base.OnConnectComponent(component);
 			if (component is TERemoteAccess)
 				Obsolete_remoteAccesses().Add(component.Position);
 			else if (component is TEEnvironmentAccess)
 				Obsolete_environmentAccesses().Add(component.Position);
+		}
+
+		protected override void OnDisconnectComponent(TEStorageComponent component) {
+			base.OnDisconnectComponent(component);
+			if (component is TERemoteAccess)
+				Obsolete_remoteAccesses().Remove(component.Position);
+			else if (component is TEEnvironmentAccess)
+				Obsolete_environmentAccesses().Remove(component.Position);
 		}
 
 		public override void Update()

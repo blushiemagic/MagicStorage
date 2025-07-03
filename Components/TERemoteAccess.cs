@@ -74,6 +74,7 @@ namespace MagicStorage.Components
 			message = Language.GetTextValue("Mods.MagicStorage.RemoteAccessSuccess");
 			locator = toLocate;
 			NetHelper.ClientSendTEUpdate(Position);
+			NetHelper.ClientSendTEUpdate(toLocate);
 			return true;
 		}
 

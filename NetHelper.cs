@@ -591,13 +591,13 @@ cleanupContext:
 
 		public static void ClientSendTEUpdate(Point16 position)
 		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
+			if (Main.netMode == NetmodeID.MultiplayerClient && position.ResolveToTileEntity() is TileEntity entity)
 			{
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.ClientSendTEUpdate);
 				packet.Write(position.X);
 				packet.Write(position.Y);
-				TileEntity.Write(packet, TileEntity.ByPosition[position], true);
+				TileEntity.Write(packet, entity, true);
 				packet.Send();
 
 				Report(true, MessageType.ClientSendTEUpdate + " packet sent from client " + Main.myPlayer);

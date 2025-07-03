@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Terraria;
@@ -106,8 +107,10 @@ namespace MagicStorage.Components
 				if (!_knownComponentLocationCache.TryGetValue(type, out var set))
 					_knownComponentLocationCache[type] = set = new HashSet<Point16>();
 				
-				if (set.Add(component.Position))
+				if (set.Add(component.Position)) {
 					_components.Add(new Component(component.Position, type));
+					_center.OnConnectComponent(component);
+				}
 
 				component.Link(_center.Position);
 
@@ -174,16 +177,21 @@ namespace MagicStorage.Components
 					if (component.location == location) {
 						NetHelper.Report(true, $"Unlinking component {component.location} from Center {_center.FullName} at {_center.Position}");
 
-						if (component.location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
-							storageComponent.Unlink();
-							NetHelper.SendTEUpdate(storageComponent.ID, storageComponent.Position);
-						}
-
-						_components.RemoveAt(i);
-
-						MarkIndexAsResolved(i);
+						UnlinkAtIndex(i);
 					}
 				}
+			}
+
+			private void UnlinkAtIndex(int i) {
+				if (_components[i].location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
+					storageComponent.Unlink();
+					_center.OnDisconnectComponent(storageComponent);
+					NetHelper.SendTEUpdate(storageComponent.ID, storageComponent.Position);
+				}
+
+				_components.RemoveAt(i);
+
+				MarkIndexAsResolved(i);
 			}
 
 			private List<Component> ResolveComponents() {
@@ -232,6 +240,37 @@ namespace MagicStorage.Components
 				}
 			}
 
+			public void CheckForRemovedEntities() {
+				List<int> toRemove = new();
+				for (int i = _components.Count - 1; i >= 0; i--) {
+					Component component = _components[i];
+
+					if (component.type == ComponentType.DeferredLoad)
+						continue;
+
+					if (component.location.ResolveToTileEntity() is not TEStorageComponent storageComponent) {
+						NetHelper.Report(true, $"Component at {component.location} no longer exists, unlinking");
+						toRemove.Add(i);
+						continue;
+					}
+
+					if (component.type != GetComponentType(storageComponent)) {
+						NetHelper.Report(true, $"Component at {component.location} had an outdated classification, unlinking");
+						toRemove.Add(i);
+						continue;
+					}
+
+					if (storageComponent.StorageCenter != _center.Position) {
+						NetHelper.Report(true, $"Component at {component.location} no longer belongs to Center {_center.FullName} at {_center.Position}, unlinking");
+						toRemove.Add(i);
+						continue;
+					}
+				}
+
+				foreach (int index in toRemove)
+					UnlinkAtIndex(index);
+			}
+
 			public IEnumerable<Point16> GetStorageUnits() => ResolveComponents().Where(static c => c.type == ComponentType.StorageUnit).Select(static c => c.location);
 
 			public IEnumerable<TEAbstractStorageUnit> GetStorageUnitEntities() => GetStorageUnits().ResolveTileEntities<TEAbstractStorageUnit>();
@@ -266,6 +305,10 @@ namespace MagicStorage.Components
 
 			public IEnumerable<TEStorageComponent> GetAllComponentEntities() => GetAllComponents().ResolveTileEntities<TEStorageComponent>();
 
+			public IEnumerable<Point16> GetDirectlyConnectableComponents() => ResolveComponents().Where(static c => c.type != ComponentType.RemoteAccess).Select(static c => c.location);
+
+			public IEnumerable<TEStorageComponent> GetDirectlyConnectableComponentEntities() => GetDirectlyConnectableComponents().ResolveTileEntities<TEStorageComponent>();
+
 			public TEStorageHeart GetStorageHeart() {
 				// FIX: v0.7.0.5 - Components attached to a Remote Access try to get the heart through the Remote Access, but that would fail
 				ResolveComponents();
@@ -284,17 +327,6 @@ namespace MagicStorage.Components
 				return null;
 			}
 
-			public void CheckForRemovedEntities() {
-				List<Point16> toRemove = new();
-				foreach (Component component in _components) {
-					if (component.location.ResolveToTileEntity() is not TEStorageComponent storageComponent || component.type != GetComponentType(storageComponent) || storageComponent.StorageCenter != _center.Position)
-						toRemove.Add(component.location);
-				}
-
-				foreach (Point16 location in toRemove)
-					Unlink(location);
-			}
-
 			public void Serialize(BinaryWriter writer) {
 				if (_center is not TEStorageHeart)
 					writer.Write(_foundHeart);
@@ -311,10 +343,10 @@ namespace MagicStorage.Components
 
 				// FIX: v0.7.0.5 - Assume that the read coordinate is the heart, and defer linking it
 				if (_center is not TEStorageHeart) {
-					_foundHeart = reader.ReadPoint16();
+					var location = reader.ReadPoint16();
 
-					if (_foundHeart != Point16.NegativeOne)
-						DeferLinking(_foundHeart);
+					if (location != Point16.NegativeOne)
+						DeferLinking(location);
 				}
 
 				int count = reader.ReadInt32();
@@ -360,15 +392,13 @@ namespace MagicStorage.Components
 								Link(component);
 							else
 								_components.Add(new Component(loc, ComponentType.Unknown));
-						} else if (loc != Point16.NegativeOne) {
-							_components.Add(new Component(loc, ComponentType.DeferredLoad));
-							_unresolvedComponents.Add(_components.Count - 1);
-						}
+						} else if (loc != Point16.NegativeOne)
+							DeferLinking(loc);
 					}
 
 					// FIX: v0.7.0.5 - Assume that the read coordinate is the heart, and defer linking it
-					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location))
-						_foundHeart = location;
+					if (_center is not TEStorageHeart && data.TryGet("heart", out Point16 location) && location != Point16.NegativeOne)
+						DeferLinking(location);
 				}
 			}
 		}
@@ -434,14 +464,13 @@ namespace MagicStorage.Components
 		{
 			ConnectedComponentManager manager = ComponentManager;
 
-			List<Point16> oldComponents = manager.GetAllComponents().ToList();
+			// FIX: v0.7.0.8 - GetAllComponents() may contain RemoteAccess components, which can't be linked directly.  This caused them to always be unlinked when ResetAndSearch() was called.
+			List<Point16> oldComponents = manager.GetDirectlyConnectableComponents().ToList();
 			TEStorageHeart assignedHeart = manager.GetStorageHeart();
 
 			NetHelper.Report(true, $"TEStorageCenter.ResetAndSearch invoked for {FullName}.  Current component count: {manager.Count}");
 
 			CheckMapSections();
-
-			List<Point16> obsolete_storageUnits = Obsolete_storageUnits();
 
 			manager.Reset();
 
@@ -465,12 +494,7 @@ namespace MagicStorage.Components
 					if (ByPosition.TryGetValue(explore, out TileEntity te) && te is TEStorageComponent component)
 					{
 						manager.Link(component);
-
-						if (te is TEAbstractStorageUnit)
-							obsolete_storageUnits.Add(explore);
 						hashComponents.Add(explore);
-
-						OnConnectComponent(component);
 
 						NetHelper.Report(false, $" -- Found component {component.FullName} at {explore}");
 					}
@@ -505,7 +529,15 @@ namespace MagicStorage.Components
 			NetHelper.ProcessUpdateQueue();
 		}
 
-		protected virtual void OnConnectComponent(TEStorageComponent component) { }
+		protected virtual void OnConnectComponent(TEStorageComponent component) {
+			if (component is TEAbstractStorageUnit)
+				Obsolete_storageUnits().Add(component.Position);
+		}
+
+		protected virtual void OnDisconnectComponent(TEStorageComponent component) {
+			if (component is TEAbstractStorageUnit)
+				Obsolete_storageUnits().Remove(component.Position);
+		}
 
 		public override void OnPlace()
 		{
