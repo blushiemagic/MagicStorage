@@ -87,7 +87,7 @@ namespace MagicStorage.Common.IO {
 			ModContent.GetInstance<ItemPrefixTracker>().Receive(ref item, reader);
 
 			if (readStack && item.maxStack > 1)
-				item.stack = reader.ReadUInt16(GetBitSize(item.maxStack));
+				item.stack = (int)reader.ReadUInt32(GetBitSize(item.maxStack));
 
 			if (readFavorite)
 				item.favorited = reader.ReadBoolean();

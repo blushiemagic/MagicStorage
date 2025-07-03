@@ -1,14 +1,2 @@
-﻿[h1]v0.7.0.8[/h1]
-- Fixed the "Show all possible ingredients" control in the Crafting UI
-- Fixed a bug that caused recipe recursion to sometimes not recurse through recipes, consuming far fewer materials than were expected
-- Attempted to fix the storage connection issues again
-- Fixed a bug in the UIs which caused the sorting and filtering buttons to reset when opening the UI, even if the [i]Use default filter[/i] config option was disabled
-- Fixed a bug that caused the Storage UI to freeze when trying to deposit items into a Storage Access that's not connected to a Storage Heart
-- Fixed the underlying pylon-checking code for the Portable Remote Access items
-- Fixed a bug that could cause destruction of Storage Hearts and Remote Accesses to partially fail
-- Fixed a bug that caused the Sell Duplicates submenu to only initially select 1 of each item duplicate stack
-- Fixed a bug that caused Item Selling Mode to sometimes not sell items, even if they were selected to be sold
-- Attempted to fix a bug that caused the tabs for the UIs to be significantly misaligned (could not be replicated during testing)
-- Fixed a bug that caused custom Storage Cores to mot be able to display their tooltip correctly
-- Fixed a bug that caused Remote Accesses to not properly connect to linked Storage Hearts in multiplayer
-- Reduced the frequency of the Patreon promotion message
+﻿[h1]v0.7.0.9[/h1]
+- Fixed a bug that caused items in Storage Units to fail to sync if their max stack was larger than 65,535

@@ -1,5 +1,5 @@
 author = absoluteAquarian & Contributors
-version = 0.7.0.8
+version = 0.7.0.9
 displayName = Magic Storage
 homepage = https://github.com/blushiemagic/MagicStorage/wiki
 hideCode = false
