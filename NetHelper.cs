@@ -1242,7 +1242,7 @@ cleanupContext:
 
 			Report(false, MessageType.ServerOpResponse + " packet received by client " + Main.myPlayer);
 
-			Main.NewText("=== ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE/LOG ===", Color.Yellow);
+			Main.NewText(MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ClientKeyText"), Color.Yellow);
 
 			Netcode.RequestingOperatorKey = true;
 		}
