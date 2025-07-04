@@ -3,3 +3,4 @@
 - The logic for checking for Storage Core recipes now happens after [i]AddRecipes[/i], [i]PostAddRecipes[/i] and [i]PostSetupRecipes[/i], allowing for reporting of the mod that caused the problem
 - Fixed the scale of item reports in the Shimmering Results list
 - Fixed the glowmasks for the storage components still rendering even when Echo Coating is hiding the tiles
+- Fixed a bug where the Crafting Interface always thought that the modules in the Configuration Interface were always enabled, even when they visually were not

@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using Terraria;
+﻿using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.ObjectInteractions;
 using Terraria.ModLoader;
@@ -16,7 +15,10 @@ namespace MagicStorage.Components {
 			Tile tile = Main.tile[i, j];
 			Point16 topLeft = new(i - tile.TileFrameX / 18, j - tile.TileFrameY / 18);
 
-			if (TileEntity.ByPosition.TryGetValue(topLeft, out TileEntity entity) && entity is TEEnvironmentAccess access && StoragePlayer.IsStorageEnvironment()) {
+			// FIX: v0.7.0.9 - StoragePlayer.IsStorageEnvironment() was returning false since the storage wasn't technically open yet
+			bool success = base.RightClick(i, j);
+
+			if (success && TileEntity.ByPosition.TryGetValue(topLeft, out TileEntity entity) && entity is TEEnvironmentAccess access && StoragePlayer.IsStorageEnvironment()) {
 				EnvironmentGUI.LoadModules(access);
 
 				/*
@@ -26,7 +28,7 @@ namespace MagicStorage.Components {
 				*/
 			}
 
-			return base.RightClick(i, j);
+			return success;
 		}
 	}
 }
