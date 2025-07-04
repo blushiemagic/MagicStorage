@@ -230,37 +230,40 @@ namespace MagicStorage {
 				// Task count: loading simulator items, 5 tasks from SortAndFilter, adding full item list, adding module items to source, updating source items list, updating counts dictionary
 				thread.InitTaskSchedule(10, "Loading items");
 
+				// IMPORTANT: Ingredient finding should not use any filters nor do any sorting
 				var clone = thread.Clone(
 					newSortMode: SortingOptionLoader.Definitions.ID.Type,
 					newFilterMode: FilteringOptionLoader.Definitions.All.Type,
 					newGeneralFilters: new(),
 					newSearchText: "",
-					newModSearch: ModSearchBox.ModIndexAll);
+					newModSearch: ModSearchBox.ModIndexAll
+				);
 
-				thread.context = clone.context = new(state.simulatorItems);
-				thread.context.uniqueSlotPerItemStack = true;
+				clone.context = new(state.simulatorItems);
+				clone.context.uniqueSlotPerItemStack = true;
 
-				items.AddRange(ItemSorter.SortAndFilter(clone));
+				var simulatorItems = ItemSorter.SortAndFilter(clone).ToList();
 
 				thread.CompleteOneTask();
 
-				numSimulatorItems = items.Count;
+				numSimulatorItems = simulatorItems.Count;
 
-				var evaluatedSimulatorItems = thread.context.sourceItems;
+				var evaluatedSimulatorItems = clone.context.sourceItems;
 
 				// Prepend the heart items before the module items
 				NetHelper.Report(true, "Loading stored items from storage system...");
 
 				clone.context = new(state.heartItems);
 
-				var prependedItems = ItemSorter.SortAndFilter(clone).Concat(items).ToList();
+				var heartItems = ItemSorter.SortAndFilter(clone).ToList();
+
+				numItemsWithoutSimulators = heartItems.Count;
 
 				items.Clear();
-				items.AddRange(prependedItems);
+				items.AddRange(heartItems);
+				items.AddRange(simulatorItems);
 
 				thread.CompleteOneTask();
-
-				numItemsWithoutSimulators = items.Count - numSimulatorItems;
 
 				var moduleItems = evaluatedSimulatorItems.ToList();
 
