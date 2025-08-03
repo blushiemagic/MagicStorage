@@ -159,9 +159,9 @@ namespace MagicStorage {
 		private static void AdjustItemCollectionAndAssignToThread(ThreadContext thread, IEnumerable<Item> source) {
 			// Adjust the thread context based on the filter mode
 			if (thread.filterMode == FilteringOptionLoader.Definitions.Recent.Type) {
-				Dictionary<int, Item> stored = source.GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.First());
+				Dictionary<int, List<Item>> stored = source.GroupBy(x => x.type).ToDictionary(x => x.Key, x => x.ToList());
 
-				IEnumerable<Item> toFilter = thread.heart.UniqueItemsPutHistory.Reverse().Where(x => stored.ContainsKey(x.type)).Select(x => stored[x.type]);
+				IEnumerable<Item> toFilter = thread.heart.UniqueItemsPutHistory.Reverse().SelectMany(x => stored.TryGetValue(x.type, out var list) ? list : []);
 
 				thread.context = new(toFilter);
 			} else {

@@ -281,6 +281,9 @@ namespace MagicStorage.UI.States {
 							MagicUI.SetRefresh(forceFullRefresh: true);
 						}
 					}
+
+					if (!heart.hasDepositHistory && !heart.requestingDepositHistory)
+						NetHelper.RequestStorageDepositHistoryChunks(heart);
 				}
 
 				MagicUI.CheckRefresh();

@@ -4,3 +4,8 @@
 - Fixed the scale of item reports in the Shimmering Results list
 - Fixed the glowmasks for the storage components still rendering even when Echo Coating is hiding the tiles
 - Fixed a bug where the Crafting Interface always thought that the modules in the Configuration Interface were always enabled, even when they visually were not
+- Reverted the memory limit for the "Filter New Recently Added Items" filter that was introduced in v0.7 and implemented better netcode for syncing it to clients
+- The "Filter New Recently Added Items" filter now shows every item of a given type rather than the first item only
+- Split the localization for the Automaton's help tip about Storage Cores across multiple dialogue keys since some of it was being cut off
+- Fixed an oversight where clicking the "Next" and "Previous" buttons in the Automaton's dialogue options would sometimes cause them to disappear
+- Fixed a bug which caused the "Next" and "Previous" buttons in the Automaton's dialogue options to show up on the last and first pages respectively

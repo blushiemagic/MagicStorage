@@ -603,6 +603,7 @@ Mods: {
 					[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
 					[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
 					[i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageUnitTerra]
+					(1/2)
 					'''
 				Help10:
 					'''
@@ -690,6 +691,7 @@ Mods: {
 					[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
 					[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
 					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
+					(2/2)
 					'''
 				Help22:
 					'''
@@ -704,11 +706,7 @@ Mods: {
 					Moving a storage system can be a hassle, especially if you have a lot of items stored.  To make it easier, you can use the Storage Core Wrench to remove the Storage Core from a placed Storage Unit.
 					[i:Wrench] + [i:MagicStorage/StorageComponent] + [i/s10:Wire] + [rg/s5:IronBar] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageExtractor]
 					Removing the Storage Core will turn the Storage Unit into an [i:MagicStorage/StorageUnitEmpty], which can then be picked up and placed elsewhere.
-					To insert the Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
-					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
-					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
-					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
-					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
+					(1/2)
 					'''
 				Help24:
 					'''
@@ -750,6 +748,15 @@ Mods: {
 					While the prompt is not focused:
 					  [c/cccc00:Right Click] the prompt to clear
 					(3/3)
+					'''
+				Help29:
+					'''
+					To insert a Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
+					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
+					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
+					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
+					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
+					(2/2)
 					'''
 			}
 

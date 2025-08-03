@@ -194,7 +194,7 @@ namespace MagicStorage
 					ReceiveStorageHeartName(reader, sender);
 					break;
 				case MessageType.SyncDepositHistory:
-					ReceiveStorageDepositHistory(reader, sender);
+					Obsolete_ReceiveStorageDepositHistory(reader, sender);
 					break;
 				case MessageType.ClientSendCoreRemoval:
 					ReceiveCoreRemoval(reader, sender);
@@ -232,11 +232,23 @@ namespace MagicStorage
 				case MessageType.DefaultAccessibleNetworks:
 					RecieveAccessibleNetworksByDefaultRequest(reader, sender);
 					break;
+				case MessageType.SecurityNetworkPassword:
+					ReceiveNetworkPasswordRequest(reader, sender);
+					break;
 				case MessageType.AuditSystemMessage:
 					AuditSystem.HandlePacket(reader, sender);
 					break;
 				case MessageType.SyncPityDropsPlayer:
 					ReceivePityDropsPlayerSync(reader, sender);
+					break;
+				case MessageType.ClientRequestDepositHistoryChunks:
+					ServerReceiveDepositHistoryChunksRequest(reader, sender);
+					break;
+				case MessageType.ServerResponseDepositHistoryChunks:
+					ClientReceiveDepositHistoryChunk(reader);
+					break;
+				case MessageType.UpdateDepositHistory:
+					ClientReceiveDepositHistoryUpdate(reader);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type));
@@ -1664,6 +1676,7 @@ cleanupContext:
 			Report(true, MessageType.RenameStorageHeart + " packet sent from server from client " + sender);
 		}
 
+		[Obsolete($"Use {nameof(RequestStorageDepositHistoryChunks)} instead", error: true)]
 		public static void SyncStorageDepositHistory(TEStorageHeart heart) {
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				return;
@@ -1677,6 +1690,10 @@ cleanupContext:
 			Report(true, MessageType.SyncDepositHistory + " packet sent to the server");
 		}
 
+		[Obsolete]
+		private static void Obsolete_ReceiveStorageDepositHistory(BinaryReader reader, int sender) => ReceiveStorageDepositHistory(reader, sender);
+
+		[Obsolete("Use ReceiveStorageDepositHistory instead", error: true)]
 		public static void ReceiveStorageDepositHistory(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 
@@ -2351,6 +2368,100 @@ cleanupContext:
 				mp.SyncPlayer(-1, sender, false);
 			}
 		}
+
+		public static void RequestStorageDepositHistoryChunks(TEStorageHeart heart) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			heart.ClearDepositHistory();
+			heart.requestingDepositHistory = true;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientRequestDepositHistoryChunks);
+			packet.Write(heart.Position);
+			packet.Send();
+
+			Report(true, MessageType.ClientRequestDepositHistoryChunks + " packet sent to the server");
+		}
+
+		public static void ServerReceiveDepositHistoryChunksRequest(BinaryReader reader, int sender) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			Point16 position = reader.ReadPoint16();
+			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
+				return;
+
+			heart.SendDepositHistoryChunks();
+
+			Report(true, MessageType.ClientRequestDepositHistoryChunks + " packet received by server from client " + sender);
+		}
+
+		public static void ClientReceiveDepositHistoryChunk(BinaryReader reader) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			Point16 position = reader.ReadPoint16();
+			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
+				return;
+
+			heart.ReceiveDepositHistoryChunk(reader);
+		}
+
+		public static void SendDepositHistoryUpdate(TEStorageHeart heart, int[] additions, int[] removals) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.UpdateDepositHistory);
+			packet.Write(heart.Position);
+
+			if (additions is { Length: >0 }) {
+				packet.Write7BitEncodedInt(additions.Length);
+				foreach (int index in additions)
+					packet.Write7BitEncodedInt(index);
+			} else
+				packet.Write((byte)0);
+
+			if (removals is { Length: >0 }) {
+				packet.Write7BitEncodedInt(removals.Length);
+				foreach (int index in removals)
+					packet.Write7BitEncodedInt(index);
+			} else
+				packet.Write((byte)0);
+
+			packet.Send();
+		}
+
+		public static void ClientReceiveDepositHistoryUpdate(BinaryReader reader) {
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			Point16 position = reader.ReadPoint16();
+			int additionsCount = reader.Read7BitEncodedInt();
+			
+			int[] additions;
+			if (additionsCount > 0) {
+				additions = new int[additionsCount];
+				for (int i = 0; i < additionsCount; i++)
+					additions[i] = reader.Read7BitEncodedInt();
+			} else
+				additions = [];
+
+			int removalsCount = reader.Read7BitEncodedInt();
+			int[] removals;
+			if (removalsCount > 0) {
+				removals = new int[removalsCount];
+				for (int i = 0; i < removalsCount; i++)
+					removals[i] = reader.Read7BitEncodedInt();
+			} else
+				removals = [];
+
+			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
+				return;
+
+			heart.UpdateDepositHistory(additions, removals);
+		}
 	}
 
 	internal enum MessageType : byte
@@ -2406,6 +2517,9 @@ cleanupContext:
 		DefaultAccessibleNetworks,
 		SecurityNetworkPassword,
 		AuditSystemMessage,
-		SyncPityDropsPlayer
+		SyncPityDropsPlayer,
+		ClientRequestDepositHistoryChunks,
+		ServerResponseDepositHistoryChunks,
+		UpdateDepositHistory
 	}
 }

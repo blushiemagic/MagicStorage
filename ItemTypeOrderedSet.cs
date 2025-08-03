@@ -18,9 +18,37 @@ namespace MagicStorage
 		private List<ItemDefinition> _unloadedItems = new();
 		private HashSet<int> _set = new();
 
-		public int Count => _items.Count;
+		private bool _itemListDirty;
+		private HashSet<int> _pendingAdditions = new();
+		private HashSet<int> _pendingRemovals = new();
 
-		public IEnumerable<Item> Items => _items;
+		public int Count
+		{
+			get
+			{
+				if (_itemListDirty)
+				{
+					UpdateCollections();
+					_itemListDirty = false;
+				}
+
+				return _items.Count;
+			}
+		}
+
+		public IEnumerable<Item> Items
+		{
+			get
+			{
+				if (_itemListDirty)
+				{
+					UpdateCollections();
+					_itemListDirty = false;
+				}
+
+				return _items;
+			}
+		}
 
 		public int? MemoryLimit { get; init; }  // Necessary for TEStorageHeart so that it doesn't take up thousands of bytes when syncing in NetSend/NetReceive
 
@@ -29,58 +57,111 @@ namespace MagicStorage
 			_name = name;
 		}
 
+		private void UpdateCollections() {
+			foreach (int type in _pendingRemovals)
+			{
+				_pendingAdditions.Remove(type);
+				_set.Remove(type);
+				_items.RemoveAll(item => item.type == type);
+			}
+
+			_pendingRemovals.Clear();
+
+			foreach (int type in _pendingAdditions)
+			{
+				if (MemoryLimit is { } limit)
+				{
+					while (_set.Count >= limit)
+					{
+						int toRemove = _set.First();
+						_set.Remove(toRemove);
+						_items.RemoveAll(item => item.type == toRemove);
+					}
+				}
+
+				if (_set.Add(type))
+				{
+					// This is the first time we've seen this type, or it was previously removed
+					_items.Add(new Item(type));
+				}
+				else
+				{
+					// Move the item to the end of the list
+					List<Item> matches = _items.Where(item => item.type == type).ToList();
+					_items.RemoveAll(item => item.type == type);
+					_items.AddRange(matches);
+				}
+			}
+
+			_pendingAdditions.Clear();
+		}
+
+		public IEnumerable<int> Get()
+		{
+			if (_itemListDirty)
+			{
+				UpdateCollections();
+				_itemListDirty = false;
+			}
+
+			return [.. _set];
+		}
+
 		public bool Add(Item item) => Add(item.type);
 
 		public bool Add(int type)
 		{
-			if (_set.Add(type))
-			{
-				if (MemoryLimit is int limit)
-				{
-					// Prioritize unloaded items over loaded items
-					while (_unloadedItems.Count > 0 && _set.Count + _unloadedItems.Count >= limit)
-						_unloadedItems.RemoveAt(_unloadedItems.Count - 1);
+			bool wasNotPresent = !Contains(type);
+			_pendingRemovals.Remove(type);
+			_pendingAdditions.Add(type);
 
-					while (_set.Count >= limit)
-					{
-						// The implementation of First() may be inconsistent across .NET versions, but that shouldn't matter
-						Remove(_set.First());
-					}
-				}
+			if (wasNotPresent)
+				_itemListDirty = true;
 
-				_items.Add(new Item(type));
-				return true;
-			}
-
-			return false;
+			return wasNotPresent;
 		}
 
-		public bool Contains(int type) => _set.Contains(type);
+		public bool Contains(int type) => !_pendingRemovals.Contains(type) && (_set.Contains(type) || _pendingAdditions.Contains(type));
 
-		public bool Contains(Item item) => _set.Contains(item.type);
+		public bool Contains(Item item) => Contains(item.type);
 
 		public bool Remove(Item item) => Remove(item.type);
 
 		public bool Remove(int type)
 		{
-			if (_set.Remove(type))
-			{
-				_items.RemoveAll(x => x.type == type);
-				return true;
-			}
+			bool wasPresent = Contains(type);
+			_pendingAdditions.Remove(type);
+			_pendingRemovals.Add(type);
 
-			return false;
+			if (wasPresent)
+				_itemListDirty = true;
+
+			return wasPresent;
 		}
 
 		public void Clear()
 		{
 			_set.Clear();
 			_items.Clear();
+			_unloadedItems.Clear();
+			_pendingAdditions.Clear();
+			_pendingRemovals.Clear();
+			_itemListDirty = false;
 		}
 
 		public void Save(TagCompound c)
 		{
-			List<ItemDefinition> list = _set.Select(x => new ItemDefinition(x)).TakeLastIfLimitExists(MemoryLimit).ToList();
+			HashSet<int> typeSet = new(_set);
+			
+			// Resolve the set to what it would be if the pending changes were applied
+			if (_itemListDirty)
+			{
+				HashSet<int> additions = new(_pendingAdditions);
+				typeSet.UnionWith(additions);
+				typeSet.ExceptWith(_pendingRemovals);
+			}
+
+			List<ItemDefinition> list = typeSet.Select(x => new ItemDefinition(x)).TakeLastIfLimitExists(MemoryLimit).ToList();
 			if (MemoryLimit is int limit && list.Count < limit)
 				list.AddRange(_unloadedItems.TakeLast(limit - list.Count));
 
@@ -89,7 +170,7 @@ namespace MagicStorage
 
 		public void Load(TagCompound tag)
 		{
-			if (tag.GetList<TagCompound>(_name) is { Count: > 0 } listV1) 
+			if (tag.GetList<TagCompound>(_name) is { Count: > 0 } listV1)
 			{
 				_items = listV1
 					.Select(Utility.SafelyLoadItem)
@@ -97,9 +178,10 @@ namespace MagicStorage
 					.TakeLastIfLimitExists(MemoryLimit)
 					.ToList();
 
-				_set = new HashSet<int>(_items.Select(static i => i.type));
+				_pendingAdditions = new HashSet<int>(_items.Select(static i => i.type));
+				_itemListDirty = true;
 			}
-			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2) 
+			else if (tag.GetList<int>(_name + Suffix) is { Count: > 0 } listV2)
 			{
 				_items = listV2
 					.Where(static x => x < ItemLoader.ItemCount)  // Unable to reliably restore invalid IDs; just ignore them
@@ -108,26 +190,23 @@ namespace MagicStorage
 					.TakeLastIfLimitExists(MemoryLimit)
 					.ToList();
 
-				_set = new HashSet<int>(_items.Select(static i => i.type));
+				_pendingAdditions = new HashSet<int>(_items.Select(static i => i.type));
+				_itemListDirty = true;
 			}
-			else if (tag.GetList<ItemDefinition>(_name + Suffix3) is { Count: > 0 } listV3) 
+			else if (tag.GetList<ItemDefinition>(_name + Suffix3) is { Count: > 0 } listV3)
 			{
 				foreach (var def in listV3.TakeLastIfLimitExists(MemoryLimit))
 				{
 					if (!def.IsUnloaded)
-					{
-						_items.Add(new Item(def.Type));
-						_set.Add(def.Type);
-					}
+						_pendingAdditions.Add(def.Type);
 					else
 						_unloadedItems.Add(def);
 				}
+
+				_itemListDirty = true;
 			} 
-			else 
-			{
-				_items = new List<Item>();
-				_set = new HashSet<int>();
-			}
+			else
+				Clear();
 		}
 	}
 }

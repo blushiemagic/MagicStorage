@@ -180,15 +180,15 @@ namespace MagicStorage.NPCs {
 		public override void SetChatButtons(ref string button, ref string button2) {
 			// Ensure that the current option isn't an unavailable one
 			if (helpOption > 0)
-				SkipOverUnavailableTips(false, ref helpOption);
+				SkipOverUnavailableTips(forwards: false, ref helpOption);
 
 			button = helpOption == 0
 				? Language.GetTextValue("LegacyInterface.51")
-				: SkipBackwards(helpOption, out int prevOption) && prevOption > 0
+				: SkipBackwards(helpOption - 1, out int prevOption) && prevOption > 0
 					? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.PrevHelp")
 					: "";
 
-			button2 = helpOption > 0 && SkipForwards(helpOption, out int nextOption) && nextOption > 0
+			button2 = helpOption > 0 && SkipForwards(helpOption + 1, out int nextOption) && nextOption > 0
 				? Language.GetTextValue("Mods.MagicStorage.Dialogue.ChatOptions.Golem.NextHelp")
 				: "";
 		}
@@ -222,8 +222,9 @@ namespace MagicStorage.NPCs {
 			public const int SearchBarControls = 26;
 			public const int SearchBarControls2 = 27;
 			public const int SearchBarControls3 = 28;
+			public const int StorageCores2 = 29;
 
-			public const int Count = 28;
+			public const int Count = 29;
 
 			public static string GetHelpKey(int id) {
 				string key = "Mods.MagicStorage.Dialogue.Golem.Help";
@@ -262,7 +263,8 @@ namespace MagicStorage.NPCs {
 					EvilAltar => ModContent.ItemType<DemonAltar>(),
 					RadiantJewel => ModContent.ItemType<RadiantJewel>(),
 					ConfigurationInterface => ModContent.ItemType<EnvironmentAccess>(),
-					StorageCores => ModContent.ItemType<StorageExtractor>(),
+					StorageCores or
+					StorageCores2 => ModContent.ItemType<StorageExtractor>(),
 					_ => 0
 				};
 			}
@@ -296,6 +298,7 @@ namespace MagicStorage.NPCs {
 			HelpOptionID.StorageUnitUpgrades,
 			HelpOptionID.StorageUnitUpgrades2,
 			HelpOptionID.StorageCores,
+			HelpOptionID.StorageCores2,
 			HelpOptionID.StorageAccess,
 			HelpOptionID.BiomeGlobe,
 			HelpOptionID.RemoteAccess,
@@ -344,7 +347,10 @@ namespace MagicStorage.NPCs {
 		}
 
 		private static void SkipOverUnavailableTips(bool forwards, ref int option) {
-			if (option > 0 && HelpOptionID.IsOptionAvailable(helpOptionsByIndex[option - 1]))
+			// Clamp the option
+			option = Utils.Clamp(option, 1, HelpOptionID.Count);
+
+			if (HelpOptionID.IsOptionAvailable(helpOptionsByIndex[option - 1]))
 				return;  // The current option is available, no need to skip
 
 			int validIndex;

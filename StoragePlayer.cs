@@ -40,11 +40,12 @@ namespace MagicStorage
 		internal bool unlockedTip_MoonLord;
 		internal int automatonHelpTip;
 
-		internal const int SAVE_VERSION = SAVE_VERSION_SEARCH_TIPS;
+		internal const int SAVE_VERSION = SAVE_VERSION_SECOND_CORE_TIP;
 
 		internal const int SAVE_VERSION_SAVED_TIP_INDEX = 1;
 		internal const int SAVE_VERSION_UNIFIED_TIPS = 2;
 		internal const int SAVE_VERSION_SEARCH_TIPS = 3;
+		internal const int SAVE_VERSION_SECOND_CORE_TIP = 4;
 
 		protected override bool CloneNewInstances => false;
 

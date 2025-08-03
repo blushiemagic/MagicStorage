@@ -19,6 +19,9 @@ using System.Runtime.CompilerServices;
 using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems.Auditing;
 using System.Runtime.InteropServices;
+using MagicStorage.UI.States;
+using MagicStorage.CrossMod;
+using MagicStorage.UI;
 
 namespace MagicStorage.Components
 {
@@ -71,8 +74,9 @@ namespace MagicStorage.Components
 
 		ConcurrentQueue<NetOperation> clientOpQ = new ConcurrentQueue<NetOperation>();
 		internal bool compactCoins = false;
-		private const int UNIQUE_ITEM_HISTORY_SIZE = StorageGUI.RECENT_FILTER_ITEM_COUNT + 30;
-		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory") { MemoryLimit = UNIQUE_ITEM_HISTORY_SIZE };
+	//	private const int UNIQUE_ITEM_HISTORY_SIZE = StorageGUI.RECENT_FILTER_ITEM_COUNT + 30;
+	//	private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory") { MemoryLimit = UNIQUE_ITEM_HISTORY_SIZE };
+		private readonly ItemTypeOrderedSet _uniqueItemsPutHistory = new("UniqueItemsPutHistory");
 		private int compactStage;
 
 		[Obsolete("Use ComponentManager.GetRemoteAccesses() instead", true)]
@@ -97,6 +101,10 @@ namespace MagicStorage.Components
 		internal int netDesync;
 
 		public IEnumerable<Item> UniqueItemsPutHistory => _uniqueItemsPutHistory.Items;
+		private int requestingHistory;
+		private List<int[]> _workingHistory;
+		internal bool hasDepositHistory;
+		internal bool requestingDepositHistory;
 
 		public override void OnKill()
 		{
@@ -634,7 +642,10 @@ namespace MagicStorage.Components
 					if (toDeposit.IsAir)
 					{
 						_uniqueItemsPutHistory.Add(remember);
-						NetHelper.SyncStorageDepositHistory(this);
+
+						if (Main.netMode == NetmodeID.Server)
+							NetHelper.SendDepositHistoryUpdate(this, additions: [ remember ], removals: null);
+
 						goto MakeTheUIRefresh;
 					}
 				}
@@ -1030,8 +1041,6 @@ namespace MagicStorage.Components
 			writer.Write((byte)arr.Length);
 			writer.Write(arr);
 
-			SendHistory(writer);
-
 			writer.WriteStringSafely(storageName);
 
 			NetHelper.Report(true, "Sent tile entity data for TEStorageHeart");
@@ -1047,11 +1056,125 @@ namespace MagicStorage.Components
 			bits.Length -= 1;  // Need 255 entries, not 256
 			bits.CopyTo(clientUsingHeart, 0);
 
-			ReceiveHistory(reader);
-
 			storageName = reader.ReadStringSafely();
 
 			NetHelper.Report(true, "Received tile entity data for TEStorageHeart");
+		}
+
+		internal void ClearDepositHistory() => _uniqueItemsPutHistory.Clear();
+
+		internal void SendDepositHistoryChunks() {
+			requestingHistory++;
+
+			// Slice up the history into 1000=count arrays
+			int[] history = _uniqueItemsPutHistory.Get().ToArray();
+
+			const int STRIDE = 1000;
+			int chunkCount = (int)Math.Ceiling(history.Length / (double)STRIDE);
+
+			for (int i = 0; i < history.Length; i += STRIDE) {
+				var packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.ServerResponseDepositHistoryChunks);
+				packet.Write(Position);
+				packet.Write(requestingHistory);
+				packet.Write(chunkCount);
+				packet.Write(i);
+
+				int slice = Math.Min(STRIDE, history.Length - i);
+				packet.Write(slice);
+				for (int j = 0; j < slice; j++)
+					packet.Write(history[i + j]);
+
+				packet.Send();
+			}
+
+			NetHelper.Report(true, $"Sent deposit history in {chunkCount} chunks (total {history.Length} unique items) to all clients");
+		}
+
+		internal void ReceiveDepositHistoryChunk(BinaryReader reader) {
+			_workingHistory ??= new();
+
+			int packetID = reader.ReadInt32();
+			if (requestingHistory < packetID) {
+				// New set of packets, destroy whatever was previously stored
+				_workingHistory.Clear();
+				requestingHistory = packetID;
+
+				NetHelper.Report(true, $"Receiving new deposit history (packet ID {packetID})");
+			}
+
+			int packetCount = reader.ReadInt32();
+			int packetIndex = reader.ReadInt32();
+
+			int count = reader.ReadInt32();
+			int[] chunk = new int[count];
+			for (int i = 0; i < count; i++)
+				chunk[i] = reader.ReadInt32();
+
+			if (packetID < requestingHistory) {
+				// This is an old packet, ignore it
+				NetHelper.Report(true, $"Ignoring old deposit history chunk (packet ID {packetID}, current {requestingHistory})");
+				return;
+			}
+
+			while (_workingHistory.Count <= packetIndex) {
+				// Ensure that the working history has a slot for this packet
+				_workingHistory.Add(null);
+			}
+
+			_workingHistory[packetIndex] = chunk;
+
+			NetHelper.Report(true, $"Received deposit history chunk {packetIndex + 1}/{packetCount} (packet ID {packetID}, {count} items)");
+
+			if (_workingHistory.Count == packetCount) {
+				// All packets have been received, merge them into the history
+				_uniqueItemsPutHistory.Clear();
+
+				foreach (var readChunk in _workingHistory) {
+					if (readChunk is null)
+						continue;  // Shouldn't happen, but ignore it just in case
+
+					foreach (int type in readChunk)
+						_uniqueItemsPutHistory.Add(type);
+				}
+
+				_workingHistory.Clear();
+
+				if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.IsClientViewingHeart(this)) {
+					// Only refresh if the applicable filtering mode is being used
+					if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
+						MagicUI.SetRefresh(forceFullRefresh: true);
+				}
+
+				hasDepositHistory = true;
+				requestingDepositHistory = false;
+
+				NetHelper.Report(true, $"Completed receiving deposit history (total {_uniqueItemsPutHistory.Count} unique items)");
+			}
+		}
+
+		internal void UpdateDepositHistory(int[] additions, int[] removals) {
+			bool changed = false;
+
+			if (additions is { Length: > 0 }) {
+				foreach (int type in additions) {
+					if (_uniqueItemsPutHistory.Add(type))
+						changed = true;
+				}
+			}
+
+			if (removals is { Length: > 0 }) {
+				foreach (int type in removals) {
+					if (_uniqueItemsPutHistory.Remove(type))
+						changed = true;
+				}
+			}
+
+			if (changed && Main.netMode != NetmodeID.Server && StoragePlayer.IsClientViewingHeart(this)) {
+				// Only refresh if the applicable filtering mode is being used
+				if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
+					MagicUI.SetRefresh(forceFullRefresh: true);
+			}
 		}
 
 		public void SendHistory(BinaryWriter writer) {
