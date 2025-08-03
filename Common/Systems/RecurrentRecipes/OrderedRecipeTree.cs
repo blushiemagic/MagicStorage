@@ -224,7 +224,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int ingredientIndex = 0;
 				foreach (Item item in recipe.requiredItem) {
 					// Consume from the excess results first
-					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack);
+					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack * ingredientBatches);
 					ingredientIndex++;
 
 					if (available is not null && available.isItemInfinite.Contains(item.type)) {

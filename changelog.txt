@@ -1,9 +1,13 @@
 ﻿[h1]v0.7.0.9[/h1]
 - Fixed a bug that caused items in Storage Units to fail to sync if their max stack was larger than 65,535
+- Fixed a bug where recursion crafting wasn't using the correct amount of ingredients when processing subrecipes
+- Fixed a bug that caused recursion crafting to fail to craft recipes that use the Alchemy Table
+- Fixed a bug where the Crafting Interface always thought that the modules in the Configuration Interface were always enabled, even when they visually were not
+- Fixed some bugs in how Item Selling Mode handled setting the quantities of items to sell
+- Fixed an oversight where Item Selling Mode was mistakenly using the "buy price" of an item as its sell value, causing items sold to be worth 5x more than intended
 - The logic for checking for Storage Core recipes now happens after [i]AddRecipes[/i], [i]PostAddRecipes[/i] and [i]PostSetupRecipes[/i], allowing for reporting of the mod that caused the problem
 - Fixed the scale of item reports in the Shimmering Results list
 - Fixed the glowmasks for the storage components still rendering even when Echo Coating is hiding the tiles
-- Fixed a bug where the Crafting Interface always thought that the modules in the Configuration Interface were always enabled, even when they visually were not
 - Reverted the memory limit for the "Filter New Recently Added Items" filter that was introduced in v0.7 and implemented better netcode for syncing it to clients
 - The "Filter New Recently Added Items" filter now shows every item of a given type rather than the first item only
 - Split the localization for the Automaton's help tip about Storage Cores across multiple dialogue keys since some of it was being cut off

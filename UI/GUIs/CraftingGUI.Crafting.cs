@@ -199,6 +199,10 @@ namespace MagicStorage {
 							break;
 						}
 					} else {
+						// FIX: v0.7.0.9 - Some recipes (e.g. Alchemy Table) can reduce the ingredient requirement during crafting.  This needs to be respected.
+						if (item.stack < possibleStack)
+							material.UpdateStack(item.stack - possibleStack);
+
 						// Consume the item
 						material.UpdateStack(-stackConsumed);
 						item.stack = stackConsumed;

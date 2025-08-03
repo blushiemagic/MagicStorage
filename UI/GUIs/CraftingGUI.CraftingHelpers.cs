@@ -57,6 +57,9 @@ namespace MagicStorage {
 			foreach (EnvironmentModule module in context.modules)
 				module.ConsumeItemForRecipe(context.sandbox, selectedRecipe, reqItem.type, ref stackConsumed);
 
+			// FIX: v0.7.0.9 - Ingredient reductions from callbacks like the one from using the Alchemy Table weren't respected in the consumption process
+			reqItem.stack = stackConsumed;
+
 			if (stackConsumed <= 0)
 				return false;
 

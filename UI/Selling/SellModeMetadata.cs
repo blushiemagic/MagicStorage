@@ -184,8 +184,11 @@ namespace MagicStorage.UI.Selling {
 				selected = new SelectedItems();
 				_items.Add(selected);
 			}
+
+			var clone = item.Clone();
+			clone.stack = stack;
 			
-			selected.Add(item, data);
+			selected.Add(clone, data);
 			Count += stack;
 			return true;
 		}
@@ -390,7 +393,8 @@ namespace MagicStorage.UI.Selling {
 				if (!allowed)
 					continue;
 
-				sum += (long)selectedItems._fastGetItemValue * selectedItems.totalStack;
+				// NOTE: sell value = buy value / 5
+				sum += (long)(selectedItems._fastGetItemValue / 5) * selectedItems.totalStack;
 				soldItemCount += selectedItems.totalStack;
 
 				if (runSellEvents) {

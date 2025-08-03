@@ -19,7 +19,7 @@ namespace MagicStorage.UI.Selling {
 		private int _quantity = -1;
 		private readonly bool _updatingQuantity;
 
-		public Item PreviewItem => _slot?.StoredItem.Clone();
+		public Item PreviewItem => _slot?.StoredItem;
 
 		public int Quantity => _quantity;
 
@@ -32,6 +32,8 @@ namespace MagicStorage.UI.Selling {
 		public event Action<SellStackPopup> OnCancel;
 
 		public SellStackPopup(Item item, bool updating, int quantity = 1) {
+			_updatingQuantity = updating;
+
 			_panel = new UIPanel();
 			_panel.Width.Set(0, 1f);
 			_panel.Height.Set(0, 1f);
