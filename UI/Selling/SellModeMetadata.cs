@@ -278,7 +278,7 @@ namespace MagicStorage.UI.Selling {
 				return;
 			}
 
-			GetSellValuesWithSellAction(sellingPlayer ?? Main.LocalPlayer, out sellValue, out soldItemCount);
+			GetSellValues(sellingPlayer ?? Main.LocalPlayer, out sellValue, out soldItemCount, runSellEvents: true);
 
 			ConditionalWeakTable<Item, byte[]> savedItemTagIO = new();
 			foreach (var item in _items)
@@ -360,44 +360,9 @@ namespace MagicStorage.UI.Selling {
 
 		private static readonly NPC _dummyNPCForShop = new();
 
-		public static void GetSellValues(Player sellingPlayer, out Coins coins) {
-			ClampedLongArithmetic sum = 0;
-
-			double adjustment = 1.0;
-
-			if (MagicStorageServerConfig.AutomatonHappinessAffectsSellPrices) {
-				foreach (NPC npc in Main.ActiveNPCs) {
-					if (npc.ModNPC is not Golem)
-						continue;
-
-					var settings = Main.ShopHelper.GetShoppingSettings(sellingPlayer, npc);
-					adjustment *= settings.PriceAdjustment;
-				}
-			}
-
-			foreach (var selectedItems in _items) {
-				bool allowed = true;
-				foreach (var item in selectedItems.Items) {
-					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item)) {
-						allowed = false;
-						break;
-					}
-				}
-
-				if (!allowed)
-					continue;
-
-				sum += (long)selectedItems._fastGetItemValue * selectedItems.totalStack;
-			}
-
-			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
-			// Hence, we need to divide instead to make items worth less when happiness is worse
-			sum = (long)(sum / adjustment);
-
-			coins = new Coins(sum);
-		}
-
-		private static void GetSellValuesWithSellAction(Player sellingPlayer, out Coins coins, out int soldItemCount) {
+		public static void GetSellValues(Player sellingPlayer, out Coins coins) => GetSellValues(sellingPlayer, out coins, out _, runSellEvents: false);
+			
+		public static void GetSellValues(Player sellingPlayer, out Coins coins, out int soldItemCount, bool runSellEvents) {
 			ClampedLongArithmetic sum = 0;
 			soldItemCount = 0;
 
@@ -416,7 +381,7 @@ namespace MagicStorage.UI.Selling {
 			foreach (var selectedItems in _items) {
 				bool allowed = true;
 				foreach (var item in selectedItems.Items) {
-					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item)) {
+					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, [], item)) {
 						allowed = false;
 						break;
 					}
@@ -428,8 +393,10 @@ namespace MagicStorage.UI.Selling {
 				sum += (long)selectedItems._fastGetItemValue * selectedItems.totalStack;
 				soldItemCount += selectedItems.totalStack;
 
-				foreach (var item in selectedItems.Items)
-					PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, Array.Empty<Item>(), item);
+				if (runSellEvents) {
+					foreach (var item in selectedItems.Items)
+						PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, [], item);
+				}
 			}
 
 			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
