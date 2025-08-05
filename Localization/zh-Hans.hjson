@@ -1176,7 +1176,7 @@ Mods: {
 
 			Headers: {
 				Storage: "[i:MagicStorage/StorageHeart]  存储界面"
-				Crafting: "[i:MagicStorage/CraftingAccess]  制作界面"
+				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess]  制作界面"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  存储和制作界面"
 				General: 常规配置
 			}
