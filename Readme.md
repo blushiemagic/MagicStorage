@@ -19,7 +19,7 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 * [Microsoft XNA Framework Redistributable 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=20914)
 * tModLoader 1.4.4
 * SerousCommonLib (absoluteAquarian Utilities)
-	- Download from the #commonlib-downloads channel in the Discord
+	- Download the `.dll`, `.pdb` and `.xml` files from [the latest release](https://github.com/absoluteAquarian/SerousCommonLib/releases/latest)
 
 ### Extracting Assembly Files via TML.Patcher (Windows Only)
 1. Open `Command Prompt`
