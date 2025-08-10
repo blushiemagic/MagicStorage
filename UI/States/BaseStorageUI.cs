@@ -209,6 +209,10 @@ namespace MagicStorage.UI.States {
 				// Force the MinWidth to be changed for the tab by reassigning its text
 				tab.SetText(tab._text);
 				tab.Left.Set(left, 0f);
+				
+				// FIX: v0.7.0.10 - The text was being reset correctly, but not the text dimensions
+				tab.Recalculate();
+
 				left += tab.GetDimensions().Width + 10;
 				tab.OnLeftClick += (evt, e) => {
 					SoundEngine.PlaySound(SoundID.MenuTick);
