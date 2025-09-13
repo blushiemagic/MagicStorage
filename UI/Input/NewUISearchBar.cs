@@ -21,19 +21,24 @@ namespace MagicStorage.UI.Input {
 
 		public override void OnActivityLost() {
 			MagicUI.mouseText = "";
+			base.OnActivityLost();
 		}
 
 		public override void OnInputChanged() {
 			if (MagicStorageConfig.SearchBarRefreshOnKey)
 				MagicUI.SetRefresh(forceFullRefresh: true);
+
+			base.OnInputChanged();
 		}
 
 		public override void OnInputCleared() {
 			MagicUI.SetRefresh(forceFullRefresh: true);
+			base.OnInputCleared();
 		}
 
 		public override void OnInputFocusLost() {
 			MagicUI.SetRefresh(forceFullRefresh: true);
+			base.OnInputFocusLost();
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {

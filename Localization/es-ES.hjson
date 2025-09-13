@@ -1014,7 +1014,10 @@ Mods: {
 				}
 			}
 
-			// Popup.Label: Quantity:
+			SellQuantityPopup: {
+				// Label: Quantity:
+				// HintText: "0"
+			}
 
 			ActiveNetwork: {
 				// None: Active security network: Unassigned

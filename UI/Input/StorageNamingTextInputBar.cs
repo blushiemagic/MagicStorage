@@ -20,9 +20,14 @@ namespace MagicStorage.UI.Input {
 		public override void OnActivityGained() {
 			if (GetStorageHeart(out var heart))
 				State.Set(heart.storageName);
+
+			base.OnActivityGained();
 		}
 
-		public override void OnActivityLost() => SetNameToCurrentText();
+		public override void OnActivityLost() {
+			SetNameToCurrentText();
+			base.OnActivityLost();
+		}
 
 		public override void OnInputCleared() {
 			if (GetStorageHeart(out var heart)) {
@@ -35,9 +40,14 @@ namespace MagicStorage.UI.Input {
 					Main.NewText(Language.GetTextValue("Mods.MagicStorage.StorageGUI.NameWasCleared"));
 				}
 			}
+
+			base.OnInputCleared();
 		}
 
-		public override void OnInputFocusLost() => SetNameToCurrentText();
+		public override void OnInputFocusLost() {
+			SetNameToCurrentText();
+			base.OnInputFocusLost();
+		}
 
 		private void SetNameToCurrentText() {
 			if (State.HasChanges && GetStorageHeart(out var heart)) {

@@ -995,7 +995,10 @@ Mods: {
 				}
 			}
 
-			Popup.Label: Количество:
+			SellQuantityPopup: {
+				Label: Количество:
+				// HintText: "0"
+			}
 
 			ActiveNetwork: {
 				None: Активная сеть безопасности: Неназначена

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SerousCommonLib.UI;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -11,9 +12,9 @@ namespace MagicStorage.UI.Selling {
 		private readonly UIPanel _panel;
 		private readonly MagicStorageItemSlot _slot;
 		private readonly UIText _quantityLabel;
-		private readonly UIText _quantityAmount;
 		private readonly UITextPanel<char> _quantityIncrease;
 		private readonly UITextPanel<char> _quantityDecrease;
+		private readonly SellQuantityPrompt _quantityPrompt;
 		private readonly UITextPanel<LocalizedText> _confirm;
 		private readonly UITextPanel<LocalizedText> _cancel;
 		private int _quantity = -1;
@@ -26,7 +27,7 @@ namespace MagicStorage.UI.Selling {
 		public bool UpdatingQuantity => _updatingQuantity;
 
 		private static float? _maxAmountWidth;
-		private static float MaxAmountWidth => _maxAmountWidth ??= FontAssets.MouseText.Value.MeasureString("9999").X;
+		private static float MaxAmountWidth => _maxAmountWidth ??= FontAssets.MouseText.Value.MeasureString("999999").X;
 
 		public event Action<SellStackPopup> OnConfirmAmount;
 		public event Action<SellStackPopup> OnCancel;
@@ -50,30 +51,43 @@ namespace MagicStorage.UI.Selling {
 			_slot.SetBoundItem(item.Clone());
 			_panel.Append(_slot);
 
-			_quantityLabel = new UIText(Language.GetText("Mods.MagicStorage.StorageGUI.Popup.Label"));
+			_quantityLabel = new UIText(Language.GetText("Mods.MagicStorage.StorageGUI.SellQuantityPopup.Label"));
 			_quantityLabel.Left.Set(_slot.Left.Pixels + _slot.Width.Pixels + 4, 0f);
 			_quantityLabel.Top = _slot.Top;
 			_panel.Append(_quantityLabel);
 
+			float left = _quantityLabel.Left.Pixels + _quantityLabel.MinWidth.Pixels + 4;
+
 			_quantityIncrease = new UITextPanel<char>('+');
-			_quantityIncrease.Left.Set(_quantityLabel.Left.Pixels + _quantityLabel.MinWidth.Pixels + 4, 0f);
+			_quantityIncrease.Left.Set(left, 0f);
 			_quantityIncrease.Top = _slot.Top;
 			_quantityIncrease.Height.Set(20, 0f);
 			_quantityIncrease.OnLeftClick += (evt, e) => SetQuantity(_quantity + 1);
 			_panel.Append(_quantityIncrease);
 
+			left += _quantityIncrease.MinWidth.Pixels + 8;
+
+			_quantityPrompt = new SellQuantityPrompt() {
+				MaximumQuantity = item.stack
+			};
+			_quantityPrompt.OnQuantityChanged += self => _quantity = self.Quantity;
+			_quantityPrompt.Left.Set(left, 0f);
+			_quantityPrompt.Top.Set(_slot.Top.Pixels + (_quantityIncrease.MinHeight.Pixels - _quantityPrompt.MinHeight.Pixels) / 2f, 0f);
+			_quantityPrompt.MinWidth.Set(MaxAmountWidth + 8, 0f);
+			_panel.Append(_quantityPrompt);
+
+			left += _quantityPrompt.PaddingLeft + _quantityPrompt.PaddingRight + _quantityPrompt.MinWidth.Pixels + 4;
+
 			_quantityDecrease = new UITextPanel<char>('-');
-			_quantityDecrease.Left.Set(_quantityIncrease.Left.Pixels + _quantityIncrease.MinWidth.Pixels + MaxAmountWidth + 8, 0f);
+			_quantityDecrease.Left.Set(left, 0f);
 			_quantityDecrease.Top = _slot.Top;
 			_quantityDecrease.Height.Set(20, 0f);
 			_quantityDecrease.OnLeftClick += (evt, e) => SetQuantity(_quantity - 1);
 			_panel.Append(_quantityDecrease);
 
-			_quantityAmount = new UIText(string.Empty);
-			_quantityAmount.Height.Set(20, 0f);
-			_quantityAmount.Top.Set(_slot.Top.Pixels + (_quantityIncrease.MinHeight.Pixels - _quantityAmount.Height.Pixels) / 2f, 0f);
+			left += _quantityDecrease.MinWidth.Pixels + 4;
+
 			SetQuantity(quantity);
-			_panel.Append(_quantityAmount);
 
 			_cancel = new UITextPanel<LocalizedText>(Language.GetText("UI.Cancel"));
 			_cancel.Left.Set(-_cancel.MinWidth.Pixels - 4, 1f);
@@ -87,7 +101,7 @@ namespace MagicStorage.UI.Selling {
 			_confirm.OnLeftClick += (evt, e) => OnConfirmAmount?.Invoke(this);
 			_panel.Append(_confirm);
 
-			Width.Set(_slot.Width.Pixels + _quantityLabel.MinWidth.Pixels + _quantityIncrease.MinWidth.Pixels + _quantityDecrease.MinWidth.Pixels + MaxAmountWidth + 20, 0f);
+			Width.Set(left, 0f);
 			Height.Set(_quantityIncrease.MinHeight.Pixels + _confirm.MinHeight.Pixels + 12, 0f);
 		}
 
@@ -97,17 +111,8 @@ namespace MagicStorage.UI.Selling {
 		}
 
 		public void SetQuantity(int quantity) {
-			int oldQuantity = _quantity;
-			_quantity = Utils.Clamp(quantity, 0, _slot.StoredItem.stack);
-
-			if (oldQuantity != _quantity) {
-				string text = _quantity.ToString();
-				float width = FontAssets.MouseText.Value.MeasureString(text).X;
-
-				_quantityAmount.SetText(text);
-				_quantityAmount.Left.Set(_quantityDecrease.Left.Pixels - MaxAmountWidth - 4 + width, 0f);
-				_quantityAmount.Recalculate();
-			}
+			quantity = Utils.Clamp(quantity, 0, _slot.StoredItem.stack);
+			_quantityPrompt.SetQuantity(quantity);
 		}
 	}
 }

@@ -606,6 +606,8 @@ namespace MagicStorage.UI.States {
 					Refresh();
 				};
 
+				popup.Activate();
+
 				_popupBlocker.Append(popup);
 
 				Append(_popupBlocker);
