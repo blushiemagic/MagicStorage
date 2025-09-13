@@ -480,7 +480,7 @@ Mods: {
 				}
 
 				# Census support
-				Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" configuração no "{$$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" definido como Ligado'''
+				Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" configuração no "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" definido como Ligado'''
 			}
 		}
 

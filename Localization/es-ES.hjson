@@ -491,7 +491,7 @@ Mods: {
 				}
 
 				# Census support
-				// Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
+				// Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
 			}
 		}
 
@@ -1194,7 +1194,7 @@ Mods: {
 
 			Headers: {
 				Storage: "[i:MagicStorage/StorageHeart] Configuración de la Interfaz de Almacenamiento"
-				Crafting: "[i:MagicStorage/CraftingAccess] Configuración de la Interfaz de Crafteo"
+				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess] Configuración de la Interfaz de Crafteo"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess] Configuración de las Interfaces de Almacenamiento y Creación"
 				General: Configuraciones Generales
 			}
