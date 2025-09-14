@@ -26,7 +26,10 @@ namespace MagicStorage.UI {
 			OnPageSelected += () => InitOptionButtons(false);
 		}
 
-		public override void OnActivate() => InitOptionButtons(true);
+		public override void OnActivate() {
+			base.OnActivate();
+			InitOptionButtons(true);
+		}
 
 		protected void InvokeOnOptionClicked(UIMouseEvent evt, BaseOptionElement e, int option) => OnOptionClicked?.Invoke(evt, e, option);
 
@@ -51,7 +54,7 @@ namespace MagicStorage.UI {
 
 		public abstract bool IsOptionGeneral(BaseOptionElement element);
 
-		public virtual void SetSelection(int option) { }
+		public virtual void SetSelection(int optionType) { }
 	}
 
 	public abstract class BaseOptionUIPage<TOption, TElement> : BaseOptionUIPage where TElement : BaseOptionElement {
@@ -77,9 +80,21 @@ namespace MagicStorage.UI {
 
 		public abstract void UpdateLoaderSelection(int option, bool generalOption);
 
-		public sealed override void SetSelection(int option) {
-			var element = buttons[option];
-			UpdateLoaderSelection(GetOptionType(element), IsOptionGeneral(element));
+		public sealed override void SetSelection(int optionType) {
+			int actualElement = -1;
+
+			for (int i = 0; i < buttons.Count; i++) {
+				if (GetOptionType(buttons[i]) == optionType) {
+					actualElement = i;
+					break;
+				}
+			}
+
+			if (actualElement < 0)
+				return;
+			
+			var element = buttons[actualElement];
+			UpdateLoaderSelection(optionType, IsOptionGeneral(element));
 		}
 
 		private const int leftOrig = 20, topOrig = 0;

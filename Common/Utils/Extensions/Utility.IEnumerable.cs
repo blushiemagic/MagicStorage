@@ -1,0 +1,49 @@
+﻿using MagicStorage.Common;
+using MagicStorage.Sorting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria;
+using Terraria.DataStructures;
+
+namespace MagicStorage {
+	partial class Utility {
+		/// <summary>
+		/// Forces an enumeration to be evaluated, then returns the result
+		/// </summary>
+		public static IEnumerable<T> Evaluate<T>(this IEnumerable<T> enumerable)
+			=> enumerable.ToArray();
+
+		internal static int ConstrainedSum(this IEnumerable<int> source) {
+			ClampedArithmetic sum = 0;
+
+			foreach (int i in source)
+				sum += i;
+			
+			return sum;
+		}
+
+		internal static IEnumerable<T> Filter<T>(this IEnumerable<T> source, StorageGUI.ThreadContext thread, Func<T, Item> objToItem) {
+			ArgumentNullException.ThrowIfNull(source);
+			ArgumentNullException.ThrowIfNull(thread);
+			ArgumentNullException.ThrowIfNull(objToItem);
+
+			return new ThreadFilterEnumerator<T>(thread, source, objToItem);
+		}
+
+		internal static IEnumerable<Item> Filter(this IEnumerable<Item> source, StorageGUI.ThreadContext thread) {
+			ArgumentNullException.ThrowIfNull(source);
+			ArgumentNullException.ThrowIfNull(thread);
+
+			return new ThreadFilterItemEnumerator(thread, source);
+		}
+
+		public static IEnumerable<T> TakeIfLimitExists<T>(this IEnumerable<T> source, int? limit) => limit is int lim ? source.Take(lim) : source;
+
+		public static IEnumerable<T> TakeLastIfLimitExists<T>(this IEnumerable<T> source, int? limit) => limit is int lim ? source.TakeLast(lim) : source;
+
+		public static IEnumerable<TileEntity> ResolveTileEntities(this IEnumerable<Point16> positions) => positions.Select(ResolveToTileEntity).OfType<TileEntity>();
+
+		public static IEnumerable<T> ResolveTileEntities<T>(this IEnumerable<Point16> position) where T : TileEntity => position.Select(ResolveToTileEntity).OfType<T>();
+	}
+}

@@ -162,13 +162,21 @@ namespace MagicStorage.UI.States {
 
 		public BaseStorageUIPage GetDefaultPage() => GetPage(DefaultPage);
 
-		public T GetPage<T>(string page) where T : BaseStorageUIPage
-			=> pages is null
-				? null
-				: (pages[page] as T ?? throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName));
+		public T GetPage<T>(string page) where T : BaseStorageUIPage {
+			if (pages is null)
+				return null;
+
+			BaseStorageUIPage pageObj = GetPage(page)
+				?? throw new ArgumentException($"Requested page \"{GetType().Name}:{page}\" does not exist");
+
+			if (pageObj is not T typedPageObj)
+				throw new InvalidCastException($"The underlying object for page \"{GetType().Name}:{page}\" cannot be converted to " + typeof(T).FullName);
+
+			return typedPageObj;
+		}
 
 		public bool TryGetPage<T>(string page, [NotNullWhen(true)] out T result) where T : BaseStorageUIPage {
-			if (pages?.TryGetValue(page, out var pageValue) is not true || pageValue is not T typedPageValue) {
+			if (pages is null || !pages.TryGetValue(page, out var pageValue) || pageValue is not T typedPageValue) {
 				result = null;
 				return false;
 			}
@@ -219,6 +227,12 @@ namespace MagicStorage.UI.States {
 					SetPage((e as UIPanelTab).Name);
 				};
 			}
+
+			// FIX: v0.7.0.10 - Some code references UI elements in the Modern pages, so those must be manually initialized
+			if (TryGetPage<BaseOptionUIPage>("Sorting", out var sortingPage))
+				sortingPage.InitOptionButtons(true);
+			if (TryGetPage<BaseOptionUIPage>("Filtering", out var filteringPage))
+				filteringPage.InitOptionButtons(true);
 
 			PostInitializePages();
 
@@ -282,14 +296,14 @@ namespace MagicStorage.UI.States {
 		private void InitConfigPage(string page, BaseOptionUIPage instance) {
 			var configPage = configPages[page] = instance;
 
-			configPage.OnOptionClicked += (evt, e, option) => {
+			configPage.OnOptionClicked += (evt, e, optionType) => {
 				//Clicks from the config panel's buttons
 
 				BaseOptionUIPage obj = e.Parent as BaseOptionUIPage;
 				
 				var optionPage = obj.parentUI.GetPage<BaseOptionUIPage>(obj.Name);
 				
-				optionPage.SetSelection(option);
+				optionPage.SetSelection(optionType);
 
 				//Deselect the option in the main UI
 				if (!optionPage.IsOptionGeneral(e)) {
