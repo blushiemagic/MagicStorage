@@ -263,7 +263,25 @@ namespace MagicStorage.Sorting
 
 			var item = objToItem(value);
 
-			return filterOption.Filter(item) && FilterBySearchText(item, thread.searchText, thread.modSearch);
+			return filterOption.Filter(item) && ItemPassesAllGenericFilters(item, thread) && FilterBySearchText(item, thread.searchText, thread.modSearch);
+		}
+
+		public static bool ItemPassesAllGenericFilters(Item item, StorageGUI.ThreadContext thread) {
+			foreach (var id in thread.generalFilters) {
+				var filterOption = FilteringOptionLoader.Get(id);
+
+				if (filterOption?.Visible is false)
+					continue;  // Skip unavailable filters
+
+				var filter = filterOption?.Filter
+					?? throw new ArgumentOutOfRangeException(nameof(thread) + "." + nameof(thread.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
+
+				if (!filter(item))
+					return false;
+			}
+
+			// If empty, default to allowing the item (general filters are a collective whitelist)
+			return thread.generalFilters.Count == 0;
 		}
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {

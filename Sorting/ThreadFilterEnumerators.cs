@@ -34,27 +34,9 @@ namespace MagicStorage.Sorting {
 
 		protected virtual Item GetItem(T value) => _objToItem(value);
 
-		private bool AllGeneralFiltersPass(Item item) {
-			foreach (var id in _context.generalFilters) {
-				var filterOption = FilteringOptionLoader.Get(id);
-
-				if (filterOption?.Visible is false)
-					continue;  // Skip unavailable filters
-
-				var filter = filterOption?.Filter
-					?? throw new ArgumentOutOfRangeException(nameof(_context) + "." + nameof(_context.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
-
-				if (!filter(item))
-					return false;
-			}
-
-			// Default to allowing the item since no general filters were present
-			return true;
-		}
-
 		private bool Filter(T value) {
 			Item item = GetItem(value);
-			return _filter(item) && AllGeneralFiltersPass(item) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
+			return _filter(item) && ItemSorter.ItemPassesAllGenericFilters(item, _context) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
 		}
 
 		public override Iterator<T> Clone() => new ThreadFilterEnumerator<T>(_context, _filter, _source, _objToItem);
@@ -99,22 +81,9 @@ namespace MagicStorage.Sorting {
 
 		protected virtual Item GetItem(T value) => _objToItem(value);
 
-		private bool AnyGeneralFilterPasses(Item item) {
-			foreach (var id in _context.generalFilters) {
-				var filter = FilteringOptionLoader.Get(id)?.Filter
-					?? throw new ArgumentOutOfRangeException(nameof(_context) + "." + nameof(_context.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
-
-				if (filter(item))
-					return true;
-			}
-
-			// If empty, default to allowing the item (general filters are a collective whitelist)
-			return _context.generalFilters.Count == 0;
-		}
-
 		private bool Filter(T value) {
 			Item item = GetItem(value);
-			return _filter(item) && AnyGeneralFilterPasses(item) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
+			return _filter(item) && ItemSorter.ItemPassesAllGenericFilters(item, _context) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
 		}
 
 		public ParallelQuery<T> GetQuery() => _query;

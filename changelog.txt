@@ -2,5 +2,6 @@
 - Fixed a bug where the tabs in the UIs would be grossly misaligned, causing them to appear outside of the UI bounds and be unclickable (Thanks to @guardboi for helping me debug the issue!)
 - Fixed a typo in the text for the Census housing requirements
 - Fixed a bug that caused certain options in the Configurable layouts to crash the game when clicked
+- Fixed a bug where the general (pink) filter options were ignored in the Crafting UI when the UI was refreshed after crafting an item
 - Added a new text prompt to the popup for setting the quantity of an item to sell via Item Selling Mode
 - Updated the localization files
