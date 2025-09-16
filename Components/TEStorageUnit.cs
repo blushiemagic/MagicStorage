@@ -206,7 +206,7 @@ namespace MagicStorage.Components
 			for (int k = items.Count - 1; k >= 0; k--)
 			{
 				Item item = items[k];
-				if ((checkPrefix && ItemData.Matches(lookFor, item)) || lookFor.type == item.type)
+				if ((checkPrefix && ItemData.Matches(lookFor, item)) || (!checkPrefix && lookFor.type == item.type))
 				{
 					int maxToTake = item.stack;
 					if (item.stack > 0 && item.favorited && keepOneIfFavorite)
