@@ -1008,10 +1008,13 @@ namespace MagicStorage.Common.Systems.Auditing {
 			int requestID = reader.ReadInt32();
 
 			if (_file is not null)
-				new Task(NetPrettifyAuditFile, new PacketIntersceptor(8192, newline, sender, requestID), _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
+				new Task(LoadThenNetPrettifyAuditFile, new PacketIntersceptor(8192, newline, sender, requestID), _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
 		}
 
-		private static void NetPrettifyAuditFile(object state) => PrettifyAuditFile((PacketIntersceptor)state);
+		private static void LoadThenNetPrettifyAuditFile(object state) {
+			LoadAuditFile();
+			PrettifyAuditFile((PacketIntersceptor)state);
+		}
 
 		private static List<char[]> _contentBuffers;
 		private static int _contentRequest;
