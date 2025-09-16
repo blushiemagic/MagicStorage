@@ -29,9 +29,9 @@ Before proceeding further, find your saves directory.  It should be at these loc
 This folder will be indicated by `<saves>` hereon.
 
 Next, follow these instructions to properly downloaded and set up:
-1. Clone the project to `<saves>/ModSources/`.
-2. Create folders to make the folder path to `<saves>/ModSources/references/1.4.4/`
+1. Run `git clone https://github.com/blushiemagic/MagicStorage.git` in `<saves>/ModSources/` to clone the repository.
+2. Create folders to make the folder path to `<saves>/ModSources/references/1.4.4/`.
 3. Download the SerousCommonLib `.dll`, `.pdb` and `.xml` assembly files from the GitHub release and move them to that `1.4.4` folder.
-5. If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
-   Otherwise, open the `ModSources` folder from Step 1 in Command Prompt or Terminal and run `dotnet build`.  
+4. If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
+   Otherwise, run `dotnet build` in `<saves/ModSources/MagicStorage/`.
 5. Click play!
