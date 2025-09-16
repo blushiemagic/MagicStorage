@@ -26,6 +26,6 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 2. Create a folder in `Documents/My Games/Terraria/tModLoader/ModSources/` called `references`, and a `1.4.4` folder in that folder.
 3. Download the SerousCommonLib `.dll`, `.pdb` and `.xml` assembly files from the GitHub release.
 4. Copy SerousCommonLib assembly files into the `references/1.4.4/` folder created by Step 1.  
-5a. If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
-5b. If you aren't, open the folder created in Step 1 in Command Prompt or Terminal and run `dotnet build`.  
-6. Click play!
+-  If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
+-  If you aren't, open the folder created in Step 1 in Command Prompt or Terminal and run `dotnet build`.  
+5. Click play!
