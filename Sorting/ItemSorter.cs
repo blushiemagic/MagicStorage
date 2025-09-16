@@ -268,20 +268,18 @@ namespace MagicStorage.Sorting
 
 		public static bool ItemPassesAllGenericFilters(Item item, StorageGUI.ThreadContext thread) {
 			foreach (var id in thread.generalFilters) {
-				var filterOption = FilteringOptionLoader.Get(id);
-
-				if (filterOption?.Visible is false)
+				if (FilteringOptionLoader.Get(id) is not { } filterOption || !filterOption.Visible)
 					continue;  // Skip unavailable filters
 
-				var filter = filterOption?.Filter
-					?? throw new ArgumentOutOfRangeException(nameof(thread) + "." + nameof(thread.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
+				if (filterOption.Filter is not { } filter)
+					throw new ArgumentOutOfRangeException(nameof(thread) + "." + nameof(thread.generalFilters), "A general filter's ID was invalid or its definition had a null filter");
 
 				if (!filter(item))
 					return false;
 			}
 
-			// If empty, default to allowing the item (general filters are a collective whitelist)
-			return thread.generalFilters.Count == 0;
+			// Either no general filters are currently applied, or all of them passed
+			return true;
 		}
 
 		internal static bool FilterBySearchText(Item item, string filter, int modSearchIndex, bool modSearched = false) {
