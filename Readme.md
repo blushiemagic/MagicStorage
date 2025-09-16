@@ -33,5 +33,6 @@ Next, follow these instructions to properly downloaded and set up:
 2. Create folders to make the folder path to `<saves>/ModSources/references/1.4.4/`.
 3. Download the SerousCommonLib `.dll`, `.pdb` and `.xml` assembly files from the GitHub release and move them to that `1.4.4` folder.
 4. If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
-   Otherwise, run `dotnet build` in `<saves/ModSources/MagicStorage/`.
+   Otherwise, run `dotnet build` in `<saves/ModSources/MagicStorage/`.  
+   If running that command results in an error mentioning an "exit code 150", install the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) as well.
 5. Click play!
