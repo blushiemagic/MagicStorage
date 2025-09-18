@@ -1,4 +1,5 @@
 ﻿using Ionic.Zlib;
+using MagicStorage.Items.ErrorDisplay;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -86,21 +87,49 @@ namespace MagicStorage.Common.IO {
 			ModContent.GetInstance<ItemTypeTracker>().Receive(ref item, reader);
 			ModContent.GetInstance<ItemPrefixTracker>().Receive(ref item, reader);
 
+			int stack = 1;
 			if (readStack && item.maxStack > 1)
-				item.stack = (int)reader.ReadUInt32(GetBitSize(item.maxStack));
+				item.stack = stack = (int)reader.ReadUInt32(GetBitSize(item.maxStack));
 
+			bool favorite = false;
 			if (readFavorite)
-				item.favorited = reader.ReadBoolean();
+				item.favorited = favorite = reader.ReadBoolean();
 
 			using MemoryStream modData = new MemoryStream(reader.ReadBytes());
 			using (BinaryReader modReader = new BinaryReader(modData)) {
-				ItemIO.ReceiveModData(item, modReader);
+				bool failed = false;
+
+				try {
+					Utility.UnsafelyReceiveModData(item, modReader);
+				} catch (Exception ex) {
+					LogThenPrepareErrorItem(ref item, stack, favorite, item.ModItem, ex);
+					failed = true;
+				}
+
+				if (!failed) {
+					GlobalItem lastReadGlobal = null;
+					try {
+						Utility.UnsafelyReceiveGlobalModData(item, modReader, out lastReadGlobal);
+					} catch (Exception ex) {
+						LogThenPrepareErrorItem(ref item, stack, favorite, lastReadGlobal, ex);
+					}
+				}
 
 				if (ValueReader.LogReads)
 					MagicStorageMod.Instance.Logger.Info($"READ FINISH [ReceiveItem]: {ItemID.Search.GetName(item.type)} (stack {item.stack}, prefix {item.prefix}, favorited {item.favorited}, modData {modData.Length} bytes)");
 			}
 
 			return item;
+		}
+
+		private static void LogThenPrepareErrorItem(ref Item item, int stack, bool favorite, ModType errorSource, Exception ex) {
+			if (errorSource is not null)
+				MagicStorageMod.Instance.Logger.Error($"Error reading item from compressed stream caused by {errorSource.Name} from the {errorSource.Mod.Name} mod.", ex);
+			else
+				MagicStorageMod.Instance.Logger.Error("Error reading item from compressed stream caused by unknown object.", ex);
+
+			item = new Item(BaseErrorDummyItem.NetReadFailItemType, stack);
+			item.favorited = favorite;
 		}
 
 		public static List<Item> ReceiveItems(BinaryReader reader, bool readStacks = true, bool readFavorites = true, int? listCountBitSizeOverride = null) {

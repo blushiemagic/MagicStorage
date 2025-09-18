@@ -303,7 +303,7 @@ namespace MagicStorage.Components
 			base.NetSend(writer);
 			writer.Write(stations.Count);
 			foreach (Item item in stations)
-				ItemIO.Send(item, writer, true, true);
+				Utility.SafelyWriteItem(item, writer, true, true);
 		}
 
 		public override void NetReceive(BinaryReader reader)
@@ -312,7 +312,7 @@ namespace MagicStorage.Components
 			int stationsCount = reader.ReadInt32();
 			stations = new List<Item>();
 			for (int k = 0; k < stationsCount; k++)
-				stations.Add(ItemIO.Receive(reader, true, true));
+				stations.Add(Utility.SafelyReadItem(reader, true, true));
 		}
 	}
 }

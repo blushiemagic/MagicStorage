@@ -450,6 +450,16 @@ Mods: {
 					The creator of a Security Network will always have access to it, however.
 					''' */
 			}
+
+			Error_ItemSlotRenderFail: {
+				// DisplayName: Error//ItemRender
+				// Tooltip: ""
+			}
+
+			Error_ItemNetReadFail: {
+				// DisplayName: Error//ItemClientRead
+				// Tooltip: ""
+			}
 		}
 
 		Projectiles.BiomeGlobeThrown.DisplayName: 生态球
@@ -1017,7 +1027,20 @@ Mods: {
 			}
 		}
 
-		// HoverText.Reset: Reset panel position and size
+		HoverText: {
+			// Reset: Reset panel position and size
+
+			Errors: {
+				// RenderFail: This item could not be rendered due to an error.
+				// NetFail: This item failed to load on the current client.
+			}
+
+			TestItems: {
+				// NoTooltip: ""
+				// RenderFail: Error Test: Item Rendering
+				// NetFail: Error Test: Item Loading
+			}
+		}
 
 		EnvironmentGUI: {
 			EntryDisabledDefault: 该模块已被禁用

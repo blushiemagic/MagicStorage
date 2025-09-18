@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.Config;
-using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	public static partial class Utility {
@@ -12,18 +10,6 @@ namespace MagicStorage {
 		public static void SaveModConfig(ModConfig config) => ConfigManager.Save(config);
 
 		public static Item GetItemSample(int item) => ContentSamples.ItemsByType[item];
-
-		public static Item SafelyLoadItem(TagCompound tag) {
-			try {
-				return ItemIO.Load(tag);
-			} catch (KeyNotFoundException) {
-				// Item was malformed
-				return new Item();
-			} catch (Exception ex) {
-				MagicStorageMod.Instance.Logger.Error("Error loading item from tag", ex);
-				return new Item();
-			}
-		}
 
 		/// <summary>
 		/// Generates a hash for a byte array.  This method is <b>NOT</b> optimized for <see cref="object.GetHashCode"/> usage!
