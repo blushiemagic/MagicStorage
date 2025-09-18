@@ -893,7 +893,9 @@ namespace MagicStorage.Components
 			}
 		}
 
-		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, out ReducedItem detectedItem, int itemCountToDelete, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
+		internal bool TryDeleteExactItem(ReadOnlySpan<byte> itemData, out ReducedItem detectedItem, ref int itemCountToDelete, ConditionalWeakTable<Item, byte[]> savedItemTagIO = null) {
+			int origToDelete = itemCountToDelete;
+
 			Item clone = Utility.FromByteSpanNoCompression(itemData);
 			detectedItem = new(clone);
 			if (clone.IsAir)
@@ -950,13 +952,15 @@ namespace MagicStorage.Components
 						else
 							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 
-						if (itemCountToDelete <= 0)
+						if (itemCountToDelete <= 0) {
+							itemCountToDelete = 0;
 							return true;
+						}
 					}
 				}
 			}
 
-			return clone.stack <= 0;
+			return itemCountToDelete < origToDelete;
 		}
 
 		public bool HasItem(Item lookFor, bool ignorePrefix = false)

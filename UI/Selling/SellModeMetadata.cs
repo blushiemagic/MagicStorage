@@ -280,12 +280,22 @@ namespace MagicStorage.UI.Selling {
 				sellValue = default;
 				return;
 			}
-
-			GetSellValues(sellingPlayer ?? Main.LocalPlayer, out sellValue, out soldItemCount, runSellEvents: true);
-
+			
 			ConditionalWeakTable<Item, byte[]> savedItemTagIO = new();
-			foreach (var item in _items)
-				heart.TryDeleteExactItem(item._fastGetData, out _, itemCountToDelete: item.totalStack, savedItemTagIO);
+			TEStorageHeart h = heart;
+			GetSellValues(sellingPlayer ?? Main.LocalPlayer, out sellValue, out soldItemCount, true, (SelectedItems item, ref int sold) => {
+				int toSell = sold;
+
+				if (h.TryDeleteExactItem(item._fastGetData, out _, ref toSell, savedItemTagIO)) {
+					// Some or all of the items could be deleted
+					sold -= toSell;
+					return true;
+				}
+
+				// No items could be deleted
+				sold = 0;
+				return false;
+			});
 
 			if (sellValue.platinum > 0)
 				heart.DepositItem(new Item(ItemID.PlatinumCoin, sellValue.platinum));
@@ -363,12 +373,51 @@ namespace MagicStorage.UI.Selling {
 
 		private static readonly NPC _dummyNPCForShop = new();
 
-		public static void GetSellValues(Player sellingPlayer, out Coins coins) => GetSellValues(sellingPlayer, out coins, out _, runSellEvents: false);
-			
-		public static void GetSellValues(Player sellingPlayer, out Coins coins, out int soldItemCount, bool runSellEvents) {
+		public static void GetSellValues(Player sellingPlayer, out Coins coins) => GetSellValues(sellingPlayer, out coins, out _, false, null);
+		
+		public static void GetSellValues(Player sellingPlayer, out Coins coins, out int soldItemCount, bool runSellEvents) => GetSellValues(sellingPlayer, out coins, out soldItemCount, runSellEvents, null);
+
+		private delegate bool GetSellValueDelegate(SelectedItems selectedItems, ref int soldItemCount);
+
+		private static void GetSellValues(Player sellingPlayer, out Coins coins, out int soldItemCount, bool runSellEvents, GetSellValueDelegate checkSellingFunc) {
 			ClampedLongArithmetic sum = 0;
 			soldItemCount = 0;
 
+			foreach (var selectedItems in _items) {
+				bool allowed = true;
+				
+				foreach (var item in selectedItems.Items) {
+					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, [], item)) {
+						allowed = false;
+						break;
+					}
+				}
+
+				int sold = selectedItems.totalStack;
+				if (checkSellingFunc is not null && !checkSellingFunc(selectedItems, ref sold))
+					allowed = false;
+
+				if (!allowed)
+					continue;
+
+				// NOTE: sell value = buy value / 5
+				sum += (long)(selectedItems._fastGetItemValue / 5) * sold;
+				soldItemCount += sold;
+
+				if (runSellEvents) {
+					foreach (var item in selectedItems.Items)
+						PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, [], item);
+				}
+			}
+
+			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
+			// Hence, we need to divide instead to make items worth less when happiness is worse
+			sum = (long)(sum / GetAutomatonPriceAdjustment(sellingPlayer));
+
+			coins = new Coins(sum);
+		}
+
+		private static double GetAutomatonPriceAdjustment(Player sellingPlayer) {
 			double adjustment = 1.0;
 
 			if (MagicStorageServerConfig.AutomatonHappinessAffectsSellPrices) {
@@ -381,33 +430,7 @@ namespace MagicStorage.UI.Selling {
 				}
 			}
 
-			foreach (var selectedItems in _items) {
-				bool allowed = true;
-				foreach (var item in selectedItems.Items) {
-					if (!PlayerLoader.CanSellItem(sellingPlayer, _dummyNPCForShop, [], item)) {
-						allowed = false;
-						break;
-					}
-				}
-
-				if (!allowed)
-					continue;
-
-				// NOTE: sell value = buy value / 5
-				sum += (long)(selectedItems._fastGetItemValue / 5) * selectedItems.totalStack;
-				soldItemCount += selectedItems.totalStack;
-
-				if (runSellEvents) {
-					foreach (var item in selectedItems.Items)
-						PlayerLoader.PostSellItem(sellingPlayer, _dummyNPCForShop, [], item);
-				}
-			}
-
-			// ShoppingSettings.PriceAdjustment is meant to be a multiplier to increase costs for worse happiness
-			// Hence, we need to divide instead to make items worth less when happiness is worse
-			sum = (long)(sum / adjustment);
-
-			coins = new Coins(sum);
+			return adjustment;
 		}
 	}
 }

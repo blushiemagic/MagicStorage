@@ -1089,7 +1089,7 @@ cleanupContext:
 					int totalItemCount = SellModeMetadata.Count;
 					SellModeMetadata.HandleSell(heart, out int soldItemCount, out var sellValue, Main.player[sender]);
 
-					Report(false, $"{soldItemCount} items were sold for {sellValue.TotalValue} copper coins");
+					Report(false, $"{soldItemCount} / {totalItemCount} items were sold for {sellValue.TotalValue} copper coins");
 
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.MassDuplicateSellResult);
@@ -1578,8 +1578,9 @@ cleanupContext:
 			if (!TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) || entity is not TEStorageHeart heart)
 				return;
 
-			if (heart.TryDeleteExactItem(item, out var netItem, stack))
-				AuditSystem.ReportItemDeletion(sender, heart, netItem);
+			int toRemove = stack;
+			if (heart.TryDeleteExactItem(item, out var netItem, ref toRemove))
+				AuditSystem.ReportItemDeletion(sender, heart, new ReducedItem(netItem.Type, stack - toRemove));
 		}
 
 		public static void RequestItemShimmering(int itemType, int toShimmer, StorageIntermediary storage, List<IShimmerResult> results) {

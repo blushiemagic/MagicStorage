@@ -506,10 +506,14 @@ namespace MagicStorage.UI.States {
 								StorageGUI.actionSlotFocus = -1;
 
 								if (StorageGUI.currentMode is StorageGUI.ActionMode.Deletion) {
-									if (Main.netMode != NetmodeID.SinglePlayer)
+									if (Main.netMode != NetmodeID.SinglePlayer) {
+										// Send a request to the server
 										NetHelper.ClientRequestExactItemDeletion(heart, item);
-									else
-										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _, item.stack);
+									} else {
+										// The client has direct access to the item
+										int stack = item.stack;
+										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _, ref stack);
+									}
 								} else {
 									// If the item wasn't selected, initialize a popup for it
 									if (!SellModeMetadata.Remove(item)) {
