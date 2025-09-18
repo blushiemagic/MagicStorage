@@ -13,6 +13,11 @@ namespace MagicStorage.Items
 			Item.ResearchUnlockCount = 5;
 		}
 
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
+		{
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.Material;
+		}
+
 		public override void SetDefaults()
 		{
 			Item.width = 14;

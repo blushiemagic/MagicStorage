@@ -13,6 +13,10 @@ namespace MagicStorage.Items {
 			Item.ResearchUnlockCount = 10;
 		}
 
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup) {
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.RemainingUseItems;
+		}
+
 		void IValidateAtPostSetupContent.ValidateType() {
 			if (Tier.UpgradeItemType != Type)
 				throw new Exception($"Storage Upgrade item \"{FullName}\" does not match the item ID assigned to its Storage Unit tier \"{Tier.FullName}\"");

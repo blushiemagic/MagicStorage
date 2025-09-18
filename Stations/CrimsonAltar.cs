@@ -11,6 +11,11 @@ namespace MagicStorage.Stations
 			Item.ResearchUnlockCount = 5;
 		}
 
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
+		{
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.CraftingObjects;
+		}
+
 		public override void SetDefaults()
 		{
 			Item.width = 48;

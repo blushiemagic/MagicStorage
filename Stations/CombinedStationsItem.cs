@@ -16,6 +16,11 @@ namespace MagicStorage.Stations
 			Item.ResearchUnlockCount = SacrificeCount;
 		}
 
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
+		{
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.CraftingObjects;
+		}
+
 		public abstract void GetItemDimensions(out int width, out int height);
 
 		public virtual void SafeSetDefaults()

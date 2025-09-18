@@ -10,6 +10,11 @@ namespace MagicStorage.Items
 {
 	public class BiomeGlobe : ModItem
 	{
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
+		{
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.CraftingObjects;
+		}
+
 		public override void SetDefaults()
 		{
 			Item.DefaultToThrownWeapon(ModContent.ProjectileType<BiomeGlobeThrown>(), 20, 6f, false);

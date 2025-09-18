@@ -9,6 +9,10 @@ using Terraria.ModLoader;
 
 namespace MagicStorage.Items {
 	public class StorageSecurity : ModItem {
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup) {
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.Wands;
+		}
+
 		public override void SetDefaults() {
 			Item.width = 36;
 			Item.height = 36;

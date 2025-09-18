@@ -12,6 +12,11 @@ namespace MagicStorage.Items
 			Main.RegisterItemAnimation(Item.type, new DrawAnimationVertical(8, 8));
 		}
 
+		public override void ModifyResearchSorting(ref ContentSamples.CreativeHelper.ItemGroup itemGroup)
+		{
+			itemGroup = ContentSamples.CreativeHelper.ItemGroup.CraftingObjects;
+		}
+
 		public override void SetDefaults()
 		{
 			Item.width = 30;
