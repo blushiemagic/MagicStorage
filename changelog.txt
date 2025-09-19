@@ -1,12 +1,13 @@
 ﻿[h1]v0.7.0.10[/h1]
 - Fixed a bug where the Aether Interface wouldn't consume items from the Configuration Interface's modules
 - Fixed a bug where the tabs in the UIs would be grossly misaligned, causing them to appear outside of the UI bounds and be unclickable (Thanks to @guardboi for helping me debug the issue!)
-- Fixed a typo in the text for the Census housing requirements
+- Fixed a bug in Item Selling Mode where the reported coins and sold item counts didn't match the actual results
+- Fixed a bug in the rendering logic for the "NPC spawn" reports in the Aether Interface
 - Fixed a bug that caused certain options in the Configurable layouts to crash the game when clicked
 - Fixed a bug where the general (pink) filter options were ignored in the Crafting UI when the UI was refreshed after crafting an item
 - Fixed a bug where item prefixes were ignored when withdrawing items from the Storage UI, often resulting in the wrong item being withdrawn
+- Fixed a typo in the text for the Census housing requirements
 - Fixed an oversight that caused the "/msaudit" command to sometimes do nothing
-- Fixed a bug in Item Selling Mode where the reported coins and sold item counts didn't match the actual results
 - Improved compatibility with mods like "Fargo's Dirt Craft" by allowing Storage Cores to be craftable
 - Added a new text prompt to the popup for setting the quantity of an item to sell via Item Selling Mode
 - Added proper sorting order in Journey Mode's research feature for most Magic Storage items

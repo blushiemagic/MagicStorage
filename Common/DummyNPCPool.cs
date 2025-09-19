@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -90,10 +91,20 @@ namespace MagicStorage.Common {
 			var offset = (center * Main.UIScale - center).ToPoint();
 			clip.Offset(offset);
 
+			// Save the SpriteBatch parameters to restore them later
+			var blendState = Main.spriteBatch.GraphicsDevice.BlendState;
+			var samplerState = Main.spriteBatch.GraphicsDevice.SamplerStates[0];
+			var rasterizerState = Main.spriteBatch.GraphicsDevice.RasterizerState;
+
+			// Start a new batch with a smaller ScissorRectangle
+			Main.spriteBatch.End();
+
 			Rectangle oldRect = Main.spriteBatch.GraphicsDevice.ScissorRectangle;
 			var finalRect = Rectangle.Intersect(clip, oldRect);
 
 			Main.spriteBatch.GraphicsDevice.ScissorRectangle = finalRect;
+
+			Main.spriteBatch.Begin(SpriteSortMode.Deferred, blendState, samplerState, DepthStencilState.None, rasterizerState, null, Main.UIScaleMatrix);
 
 			float oldScale = npc.scale;
 
@@ -107,8 +118,13 @@ namespace MagicStorage.Common {
 			}
 
 			npc.scale = oldScale;
+			
+			// Restart the batch with the old ScissorRectangle
+			Main.spriteBatch.End();
 
 			Main.spriteBatch.GraphicsDevice.ScissorRectangle = oldRect;
+
+			Main.spriteBatch.Begin(SpriteSortMode.Deferred, blendState, samplerState, DepthStencilState.None, rasterizerState, null, Main.UIScaleMatrix);
 		}
 	}
 }
