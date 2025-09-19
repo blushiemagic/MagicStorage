@@ -22,7 +22,7 @@ namespace MagicStorage {
 			get => _simulatingCrafts;
 		}
 
-		private static CraftingContext InitCraftingContext(Recipe recipe, int toCraft) {
+		internal static CraftingContext InitCraftingContext(Recipe recipe, int toCraft) {
 			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
 			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
@@ -83,7 +83,7 @@ namespace MagicStorage {
 			return true;
 		}
 
-		private static bool AttemptToConsumeItem(CraftingContext context, int reqType, ref int stack, bool checkRecipeGroup = true) {
+		internal static bool AttemptToConsumeItem(CraftingContext context, int reqType, ref int stack, bool checkRecipeGroup = true) {
 			return CheckContextItemCollection(context, context.results, reqType, ref stack, null, checkRecipeGroup)
 				|| CheckContextItemCollection(context, GetAvailableItems(context), reqType, ref stack, OnAvailableItemConsumed, checkRecipeGroup)
 				|| CheckContextItemCollection(context, GetModuleItems(context), reqType, ref stack, OnModuleItemConsumed, checkRecipeGroup);

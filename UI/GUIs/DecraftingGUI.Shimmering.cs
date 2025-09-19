@@ -56,7 +56,45 @@ namespace MagicStorage {
 				return;
 			}
 
+			// At this point, the items to withdraw consist of the shimmered item(s)
+			// Attempt to actually consume the items by hijacking the CraftingGUI crafting logic ("recipe" and "toCraft" are ignored here)
+			List<Item> consumedItems = [];
+
+			var fakeCraftContext = CraftingGUI.InitCraftingContext(null, 0);
+
+			fakeCraftContext.simulation = true;
+
+			bool success = true;
+			foreach (Item shimmered in context.storage.toWithdraw) {
+				int stack = shimmered.stack;
+				if (!CraftingGUI.AttemptToConsumeItem(fakeCraftContext, shimmered.type, ref stack, checkRecipeGroup: false)) {
+					success = false;
+					break;
+				}
+			}
+
+			if (!success) {
+				NetHelper.Report(false, "Item requirement for shimmering could not be fulfilled, aborting");
+				return;
+			}
+
+			fakeCraftContext.simulation = false;
+
+			// Actually consume the items now
+			// It would be preferable to not call AttemptToConsumeItem again, but I can't be bothered to make a better implementation right now
+			foreach (Item shimmered in context.storage.toWithdraw) {
+				int stack = shimmered.stack;
+				CraftingGUI.AttemptToConsumeItem(fakeCraftContext, shimmered.type, ref stack, checkRecipeGroup: false);
+			}
+
 			NetHelper.Report(true, "Compacting item results list...");
+
+			// Overwrite the withdraw list with the actual items to withdraw from storage
+			// Items withdrawn from Configuration Interface modules are stored in a separate list
+			//   because the server likely doesn't know player-specific information like their
+			//   inventory contents
+			context.storage.toWithdraw.Clear();
+			context.storage.toWithdraw.AddRange(fakeCraftContext.toWithdraw);
 
 			var toWithdraw = CraftingGUI.CompactItemList(context.storage.toWithdraw);
 			

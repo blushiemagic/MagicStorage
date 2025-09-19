@@ -14,7 +14,7 @@ using Terraria.GameContent.Achievements;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		private class CraftingContext {
+		internal class CraftingContext {
 			public List<Item> sourceItems, availableItems, toWithdraw, results;
 
 			public Dictionary<int, int> itemCounts;
