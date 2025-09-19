@@ -74,12 +74,15 @@ namespace MagicStorage.Edits {
 						$"Problem Recipe:  {result} @ {tile}");
 				}
 
+				// v0.7.0.10 - Backtracked design choice to make Storage Cores uncraftable (caused incompatibility with mods like "Fargo's Dirt Craft")
+				/*
 				if (recipe.createItem.ModItem is BaseStorageCore) {
 					PrepareRecipeInfo(recipe, out string result, out string tile);
 
 					throw new Exception($"Mod \"{mod.Name} added or modified a recipe to create a Storage Core item, which is not allowed.\n" +
 						$"Problem Recipe:  {result} @ {tile}");
 				}
+				*/
 			}
 		}
 

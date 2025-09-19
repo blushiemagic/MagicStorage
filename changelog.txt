@@ -7,6 +7,7 @@
 - Fixed a bug where item prefixes were ignored when withdrawing items from the Storage UI, often resulting in the wrong item being withdrawn
 - Fixed an oversight that caused the "/msaudit" command to sometimes do nothing
 - Fixed a bug in Item Selling Mode where the reported coins and sold item counts didn't match the actual results
+- Improved compatibility with mods like "Fargo's Dirt Craft" by allowing Storage Cores to be craftable
 - Added a new text prompt to the popup for setting the quantity of an item to sell via Item Selling Mode
 - Added proper sorting order in Journey Mode's research feature for most Magic Storage items
 - Items that fail to render are now displayed as an "error" item instead of causing the UI to break entirely
