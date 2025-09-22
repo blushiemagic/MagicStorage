@@ -35,7 +35,7 @@ namespace MagicStorage {
 			Item readItem = null;
 
 			try {
-				readItem = ItemIO.Receive(reader, readStack, readFavorite);
+				readItem = ItemIO.Receive(actualReader, readStack, readFavorite);
 			} catch (Exception ex) {
 				// Could not load the item
 				MagicStorageMod.Instance.Logger.Error("Error reading item from stream", ex);
