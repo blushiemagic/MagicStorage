@@ -14,4 +14,4 @@
 - Items that fail to render are now displayed as an "error" item instead of causing the UI to break entirely
 - Items that fail to be read by a multiplayer client are now displayed as an "error" item instead of disappearing
 - Updated the localization files
-- Updated outdated recipes in the Autonaton's dialogue for the Combined Stations (Tier 3) and Combined Furniture Stations (Tier 2) items
+- Updated outdated recipes in the Automaton's dialogue for the Combined Stations (Tier 3) and Combined Furniture Stations (Tier 2) items
