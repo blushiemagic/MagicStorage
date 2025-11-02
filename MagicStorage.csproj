@@ -36,9 +36,13 @@
     <EmbeddedResource Include="Common\Systems\scramble" />
     <EmbeddedResource Include="Common\Systems\unscramble" />
   </ItemGroup>
+  <PropertyGroup>
+    <SerousCommonLibPath Condition="Exists('..\references\SerousCommonLib.dll')">..\references\SerousCommonLib.dll</SerousCommonLibPath>
+    <SerousCommonLibPath Condition="!Exists('..\references\SerousCommonLib.dll') and Exists('..\references\1.4.4\SerousCommonLib.dll')">..\references\1.4.4\SerousCommonLib.dll</SerousCommonLibPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="SerousCommonLib">
-      <HintPath>..\references\1.4.4\SerousCommonLib.dll</HintPath>
+      <HintPath>$(SerousCommonLibPath)</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

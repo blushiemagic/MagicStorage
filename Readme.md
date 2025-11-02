@@ -19,6 +19,7 @@ Are you unable to keep track of the dozens of crafting stations in your base? Th
 * tModLoader 1.4.4
 * SerousCommonLib (absoluteAquarian Utilities)
 	- Download the files from [the latest GitHub release](https://github.com/absoluteAquarian/SerousCommonLib/releases/latest).
+	- You can also clone its GitHub repository and build the solution in Visual Studio or via `dotnet build`.
 
 ### Setting Up the Project Environment
 Before proceeding further, find your saves directory.  It should be at these locations:
@@ -30,8 +31,9 @@ This folder will be indicated by `<saves>` hereon.
 
 Next, follow these instructions to properly downloaded and set up:
 1. Run `git clone https://github.com/blushiemagic/MagicStorage.git` in `<saves>/ModSources/` to clone the repository.
-2. Create folders to make the folder path to `<saves>/ModSources/references/1.4.4/`.
-3. Download the SerousCommonLib `.dll`, `.pdb` and `.xml` assembly files from the GitHub release and move them to that `1.4.4` folder.
+2. Create folders to make the folder path to `<saves>/ModSources/references/`.
+3. Download the SerousCommonLib `.dll`, `.pdb` and `.xml` assembly files from the GitHub release and move them to that `references` folder.
+   Alternatively, if you've cloned SerousCommonLib to `ModSources`, then you can just build its project and the relevant files will be copied to `references` automatically.
 4. If you're using Visual Studio 2022 Community, open the `.sln` file in the folder created by Step 1, then either press F6 or select `Build > Build Solution`.  
    Otherwise, run `dotnet build` in `<saves/ModSources/MagicStorage/`.  
    If running that command results in an error mentioning an "exit code 150", install the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) as well.
