@@ -760,7 +760,7 @@ namespace MagicStorage.UI.States {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 						return;
 
-					heart.WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>(), out _);
+					heart.DestroyUnloadedItems(out _);
 				});
 
 				InitButton(ref deleteUnloadedData, "StorageGUI.DestroyUnloadedDataButton", (evt, e) => {

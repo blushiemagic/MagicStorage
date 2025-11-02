@@ -796,6 +796,11 @@ namespace MagicStorage.Components
 			return TryWithdraw(lookFor, keepOneIfFavorite, toInventory);
 		}
 
+		internal void DestroyUnloadedItems(out int itemsDestroyed)
+		{
+			WithdrawManyAndDestroy(ModContent.ItemType<UnloadedItem>(), out itemsDestroyed);
+		}
+
 		internal void WithdrawManyAndDestroy(int type, out int itemsDestroyed, bool net = false) {
 			itemsDestroyed = 0;
 
@@ -811,6 +816,23 @@ namespace MagicStorage.Components
 			}
 
 			try {
+				// Special case: destroying unloaded items should ignore data
+				if (type == ModContent.ItemType<UnloadedItem>()) {
+					foreach (TEStorageUnit storageUnit in ComponentManager.GetRealStorageUnitEntities()) {
+						for (int i = storageUnit.items.Count - 1; i >= 0; i--) {
+							Item storage = storageUnit.items[i];
+
+							if (storage.ModItem is UnloadedItem) {
+								// Destroy it
+								storageUnit.items.RemoveAt(i);
+								itemsDestroyed++;
+							}
+						}
+					}
+
+					goto SkipToPostLogic;
+				}
+
 				Item lookFor, lookForOrig = new(type) { stack = int.MaxValue }, result = new();
 
 				if (Main.netMode != NetmodeID.SinglePlayer || HasItem(lookForOrig, true)) {
@@ -831,12 +853,16 @@ namespace MagicStorage.Components
 						}
 					}
 
-					if (result.stack > 0) {
-						ResetCompactStage();
+					itemsDestroyed = result.stack;
+				}
 
-						if (StoragePlayer.IsClientViewingHeart(this))
-							MagicUI.SetNextCollectionsToRefresh(type);
-					}
+				SkipToPostLogic:
+
+				if (itemsDestroyed > 0) {
+					ResetCompactStage();
+
+					if (StoragePlayer.IsClientViewingHeart(this))
+						MagicUI.SetNextCollectionsToRefresh(type);
 				}
 			} catch {
 				// Swallow exception and let the user know that something went wrong
