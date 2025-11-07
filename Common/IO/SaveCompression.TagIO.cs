@@ -30,6 +30,7 @@ namespace MagicStorage.Common.IO {
 				if (b <= 1) {
 					// Assume boolean
 					id = ID_BOOL;
+					value = b == 1;
 				}
 			} else if (value is int i) {
 				if (i >= -4096 && i < 4096)
