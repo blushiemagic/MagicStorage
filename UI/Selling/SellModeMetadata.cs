@@ -30,6 +30,19 @@ namespace MagicStorage.UI.Selling {
 			private readonly List<Item> _items = [];
 			public IReadOnlyList<Item> Items => _items.AsReadOnly();
 
+			public static LengthCompressor<uint> _countTiers;
+
+			static SelectedItems() {
+				var tier0 = EncodingTier.CreateZero<uint>  (prefix: 0b_00, 2, size: 16);
+				var tier1 = tier0.CreateSuccessive         (prefix: 0b_01, 2, size: 64);
+				var tier2 = tier1.CreateSuccessive         (prefix: 0b_10, 2, size: 256);
+				var tier3 = tier2.CreateSuccessive         (prefix: 0b_11, 2, size: 16384);
+				var tier4 = tier3.CreateSuccessive         (prefix: 0b011, 3, size: 131072);
+				var tier5 = tier4.CreateSuccessiveUnbounded(prefix: 0b111, 3);
+
+				_countTiers = new LengthCompressor<uint>(tier0, tier1, tier2, tier3, tier4, tier5);
+			}
+
 			public void Add(Item item, ReadOnlySpan<byte> data) {
 				if (_fastGetItemType < 0) {
 					_fastGetItemType = item.type;
@@ -54,32 +67,28 @@ namespace MagicStorage.UI.Selling {
 				return itemData.SequenceEqual(_fastGetData);
 			}
 
-			public void Write(BinaryWriter writer) {
+			public void Write(ValueWriter writer) {
 				if (_iconicItem is null || totalStack < 0) {
 					// Invalid state, cannot write
-					writer.Write(0);
+					_countTiers.WriteTo(writer, 0);
 					return;
 				}
 
-				writer.Write(totalStack);
+				_countTiers.WriteTo(writer, (uint)totalStack);
 
 			//	using var _ = FlagSwitch.Create(ref ValueWriter.LogWrites, true);
 
-				ValueWriter bitWriter = new ValueWriter(writer);
+				SaveCompression.SaveItem(_iconicItem, writer, writeStack: false, writeFavorite: true);
 
-				SaveCompression.SaveItem(_iconicItem, bitWriter, writeStack: false, writeFavorite: true);
+				_countTiers.WriteTo(writer, (uint)_items.Count);
 
-				bitWriter.Write7BitEncodedInt(_items.Count);
-
-				int maxStackBits = _items.Count > 0 ? NetCompression.GetBitSize(ContentSamples.ItemsByType[_fastGetItemType].maxStack) : 0;
+				var stackCompressor = new StackCompressor(ContentSamples.ItemsByType[_fastGetItemType].maxStack);
 
 				foreach (Item item in _items)
-					bitWriter.Write((uint)item.stack, maxStackBits);
-
-				bitWriter.Flush();
+					stackCompressor.WriteTo(writer, item.stack);
 			}
 
-			public void Read(BinaryReader reader) {
+			public void Read(ValueReader reader) {
 				_fastGetItemType = -42069;
 				_fastGetItemValue = 0;
 				_fastGetPrefix = 0;
@@ -87,7 +96,7 @@ namespace MagicStorage.UI.Selling {
 				_iconicItem = null;
 				_items.Clear();
 
-				totalStack = reader.ReadInt32();
+				totalStack = (int)_countTiers.ReadFrom(reader);
 
 				if (totalStack <= 0) {
 					// Nothing to read
@@ -96,20 +105,19 @@ namespace MagicStorage.UI.Selling {
 
 			//	using var _ = FlagSwitch.Create(ref ValueReader.LogReads, true);
 
-				ValueReader bitReader = new ValueReader(reader);
-
-				var item = SaveCompression.LoadItem(bitReader, readStack: false, readFavorite: true);
+				var item = SaveCompression.LoadItem(reader, readStack: false, readFavorite: true);
 
 				// Use Add() to set the fast-get fields
 				Add(item, Utility.ToByteSpanNoCompression(item));
 
 				_items.Clear();
 
-				int itemCount = bitReader.Read7BitEncodedInt();
-				int maxStackBits = itemCount > 0 ? NetCompression.GetBitSize(ContentSamples.ItemsByType[_fastGetItemType].maxStack) : 0;
+				int itemCount = (int)_countTiers.ReadFrom(reader);
+
+				var stackDecompressor = new StackCompressor(ContentSamples.ItemsByType[_fastGetItemType].maxStack);
 
 				for (int i = 0; i < itemCount; i++) {
-					int stack = (int)bitReader.ReadUInt32(maxStackBits);
+					int stack = stackDecompressor.ReadFrom(reader);
 
 					var clone = item.Clone();
 					clone.stack = stack;
@@ -330,9 +338,14 @@ namespace MagicStorage.UI.Selling {
 			MemoryStream ms = new MemoryStream(maximumCapacity);
 			using (BinaryWriter compressedWriter = new BinaryWriter(ms)) {
 				// Write the items
-				compressedWriter.Write7BitEncodedInt(_items.Count);
+				var bitWriter = new ValueWriter(compressedWriter);
+
+				SelectedItems._countTiers.WriteTo(bitWriter, (uint)_items.Count);
+
 				foreach (var item in _items)
-					item.Write(compressedWriter);
+					item.Write(bitWriter);
+
+				bitWriter.Flush();
 			}
 
 			byte[] uncompressedData = ms.ToArray();
@@ -358,11 +371,14 @@ namespace MagicStorage.UI.Selling {
 			using MemoryStream ms = new MemoryStream(uncompressedData);
 			using BinaryReader decompressedReader = new BinaryReader(ms);
 
+			var bitReader = new ValueReader(decompressedReader);
+
 			// Read the items
-			int itemCount = decompressedReader.Read7BitEncodedInt();
+			int itemCount = (int)SelectedItems._countTiers.ReadFrom(bitReader);
+
 			for (int i = 0; i < itemCount; i++) {
 				var item = new SelectedItems();
-				item.Read(decompressedReader);
+				item.Read(bitReader);
 
 				if (item.totalStack > 0) {
 					_items.Add(item);
