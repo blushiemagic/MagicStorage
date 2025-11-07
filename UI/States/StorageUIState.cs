@@ -2,6 +2,7 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
+using MagicStorage.Items.ErrorDisplay;
 using MagicStorage.UI.Input;
 using MagicStorage.UI.Selling;
 using Microsoft.Xna.Framework;
@@ -482,6 +483,11 @@ namespace MagicStorage.UI.States {
 						}
 					} else {
 						if (StorageGUI.currentMode is StorageGUI.ActionMode.Deletion or StorageGUI.ActionMode.Selling) {
+							if (StorageGUI.currentMode is StorageGUI.ActionMode.Selling && item.ModItem is UnloadedItem or BaseErrorDummyItem) {
+								// Ignore interactions with these items
+								goto IgnoreSpecialInteractions;
+							}
+
 							// Items have to be selected, then selected again in order to be deleted
 							if (StorageGUI.actionSlotFocus != objSlot) {
 								StorageGUI.actionSlotFocus = objSlot;
@@ -514,7 +520,7 @@ namespace MagicStorage.UI.States {
 										int stack = item.stack;
 										heart.TryDeleteExactItem(Utility.ToByteSpanNoCompression(item), out _, ref stack);
 									}
-								} else {
+								} else if (StorageGUI.currentMode is StorageGUI.ActionMode.Selling) {
 									// If the item wasn't selected, initialize a popup for it
 									if (!SellModeMetadata.Remove(item)) {
 										// Item is not selected yet
@@ -530,6 +536,8 @@ namespace MagicStorage.UI.States {
 										UpdateCoinMetricAndRefresh();
 								}
 							}
+
+							IgnoreSpecialInteractions: ;
 						} else {
 							Item toWithdraw = item.Clone();
 							type = toWithdraw.type;

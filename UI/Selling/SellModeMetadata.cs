@@ -2,6 +2,7 @@
 using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Components;
+using MagicStorage.Items.ErrorDisplay;
 using MagicStorage.NPCs;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.UI.Selling {
@@ -175,7 +177,7 @@ namespace MagicStorage.UI.Selling {
 
 		public static int Count { get; private set; }
 
-		public static bool IsValidForSelling(Item item) => !item.IsAir && item.type is not (ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin);
+		public static bool IsValidForSelling(Item item) => !item.IsAir && item.type is not (ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin) && item.ModItem is not (UnloadedItem or BaseErrorDummyItem);
 		
 		public static bool? Add(Item item, int stack) {
 			if (stack <= 0)

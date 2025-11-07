@@ -1,9 +1,11 @@
 ﻿using MagicStorage.Components;
 using MagicStorage.CrossMod;
+using MagicStorage.Items.ErrorDisplay;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ModLoader.Default;
 
 namespace MagicStorage.UI.Selling {
 	internal static class DuplicateItemFinder {
@@ -30,6 +32,10 @@ namespace MagicStorage.UI.Selling {
 
 				// Ignore favorited items
 				if (item.favorited)
+					continue;
+
+				// Ignore special items
+				if (item.ModItem is UnloadedItem or BaseErrorDummyItem)
 					continue;
 
 				if (!contextByType.TryGetValue(item.type, out var context)) {
