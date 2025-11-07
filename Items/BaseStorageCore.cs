@@ -90,6 +90,10 @@ namespace MagicStorage.Items {
 		}
 
 		public override void SaveData(TagCompound tag) {
+			// Force the new format
+			if (_serializationVersion == VERSION_SAVE_NET_IO)
+				StoreItems((List<Item>)RetrieveItems());
+
 			tag["data"] = _unitData;
 			tag["count"] = _itemCount;
 			tag["version"] = _serializationVersion;
@@ -132,6 +136,10 @@ namespace MagicStorage.Items {
 			if (unitTier.Type != Tier.Type)
 				throw new InvalidOperationException($"Unit tier ({unitTier.FullName}) does not match core tier ({Tier.FullName})");
 
+			StoreItems(unit.items);
+		}
+
+		private void StoreItems(List<Item> items) {
 			_serializationVersion = VERSION_SAVE_TAG_IO;
 
 			using MemoryStream ms = new(65536);
@@ -140,7 +148,7 @@ namespace MagicStorage.Items {
 			//	using (FlagSwitch.ToggleTrue(ref ValueWriter.LogWrites)) {
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 				//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
-					SaveCompression.SaveItems(unit.items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
+					SaveCompression.SaveItems(items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
 				//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 			//	}
@@ -149,8 +157,7 @@ namespace MagicStorage.Items {
 			byte[] data = NetCompression.Compress(ms.ToArray(), CompressionLevel.BestCompression);
 
 			_unitData = data;
-			_itemCount = unit.items.Count;
-			_serializationVersion = VERSION_SAVE_TAG_IO;
+			_itemCount = items.Count;
 
 			// Calculate a hash of the data
 			_hash = Utility.ComputeDataHash(data);
@@ -175,9 +182,12 @@ namespace MagicStorage.Items {
 			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
 				List<Item> items = null;
 				
-				if (_serializationVersion == VERSION_SAVE_NET_IO)
+				if (_serializationVersion == VERSION_SAVE_NET_IO) {
 					items = NetCompression.ReceiveItems(reader, NetCompression.VERSION_UNCHECKED_STACK_OVERFLOW, true, true, NetCompression.GetBitSize(Tier.Capacity));
-				else if (_serializationVersion == VERSION_SAVE_TAG_IO)
+					
+					// Force the items to be serialized in the new format
+					StoreItems(items);
+				} else if (_serializationVersion == VERSION_SAVE_TAG_IO)
 					items = SaveCompression.LoadItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
 
 				_cachedItemData = items ?? [];
