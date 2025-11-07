@@ -31,6 +31,8 @@
 	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnScrollWheel" />
 	<DoNotPublicize Include="tModLoader:Terraria.UI.UIElement.OnUpdate" />
 	<DoNotPublicize Include="tModLoader:Terraria.WorldBuilding.GenPass" />
+	
+	<Publicize Include="ReLogic" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Common\Systems\scramble" />
