@@ -1,10 +1,10 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.IO;
+using MagicStorage.Common.Systems;
 using MagicStorage.Items.ErrorDisplay;
 using Microsoft.Xna.Framework.Graphics;
 using SerousCommonLib.UI;
 using Terraria;
-using Terraria.Localization;
-using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace MagicStorage.UI {
@@ -59,19 +59,35 @@ namespace MagicStorage.UI {
 		}
 
 		private void HandleAsErrorItem(SpriteBatch spriteBatch, bool silent) {
-			bool hovering = IsMouseHovering;
-			IsMouseHovering = false;  // Prevent both the tooltip from drawing and click actions from being registered
+			Item item = StoredItem;
+			if (item?.ModItem is not BaseErrorDummyItem) {
+				TagCompound data;
+				DeserializedNetItem netData;
 
-			if (StoredItem?.ModItem is not BaseErrorDummyItem)
-				_errorOverrideItem = new Item(BaseErrorDummyItem.RenderFailItemType);
+				if (item is null || !IsMouseHovering) {
+					// There's no item, or there's no need to store (and later retrieve) the item information
+					data = null;
+					netData = new();
+				} else {
+					data = ItemIO.Save(item);
+					netData = DeserializedNetItem.FromTagData(data);
+				}
 
+				_errorOverrideItem = Utility.PrepareFailureItem(BaseErrorDummyItem.RenderFailItemType, data, netData);
+			}
+
+			/*
 			if (hovering) {
-				Item displayedItem = StoredItem;
-				if (displayedItem.type == BaseErrorDummyItem.RenderFailItemType)
+				if (item.type == BaseErrorDummyItem.RenderFailItemType)
 					MagicUI.mouseText = Language.GetTextValue("Mods.MagicStorage.HoverText.Errors.RenderFail");
-				else if (displayedItem.type == BaseErrorDummyItem.NetReadFailItemType)
+				else if (item.type == BaseErrorDummyItem.NetReadFailItemType)
 					MagicUI.mouseText = Language.GetTextValue("Mods.MagicStorage.HoverText.Errors.NetFail");
 			}
+			*/
+
+			bool ignoreClicks = IgnoreClicks;
+			if (StoredItem?.ModItem is BaseErrorDummyItem)
+				IgnoreClicks = true;
 
 			try {
 				base.DrawSelf(spriteBatch);
@@ -80,7 +96,7 @@ namespace MagicStorage.UI {
 					throw;
 			} finally {
 				_errorOverrideItem = null;
-				IsMouseHovering = hovering;
+				IgnoreClicks = ignoreClicks;
 			}
 		}
 	}

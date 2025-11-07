@@ -453,14 +453,36 @@ Mods: {
 					'''
 			}
 
+			ErrorItems: {
+				/* CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					''' */
+				// NameText: Name: {0}/{1}
+				// NameTextUnknown: <unknown>
+				// PrefixText: Prefix: {0}
+				// PrefixTextModded: Prefix: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				// DisplayName: Error//ItemRender
-				// Tooltip: ""
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				// DisplayName: Error//ItemClientRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				// DisplayName: Debug//DataCompressionTest
 				// Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				// DisplayName: Error//NBTRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -1032,6 +1054,7 @@ Mods: {
 			Errors: {
 				// RenderFail: This item could not be rendered due to an error.
 				// NetFail: This item failed to load on the current client.
+				// NBTFail: The NBT data on this item failed to deserialize.
 			}
 
 			TestItems: {
@@ -1303,26 +1326,7 @@ Mods: {
 
 				buttonLayout: {
 					Label: Расположение кнопок сортировки/фильтрации
-					Tooltip:
-						'''
-						Legacy:
-						  Заготовка v0.5.6.5 и предыдущих версий.
-						  Страницы сортировки и фильтрации отключены.
-						ModernPaged:
-						  Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
-						ModernConfigurable:
-						  Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
-						LegacyWithGear:
-						  Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
-						  Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
-						  Страницы сортировки и фильтрации отключены.
-						LegacyBasicWithPaged:
-						  Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
-						  Дополнительные значки находятся на страницах «Сортировка и фильтрация».
-						ModernDropdown:
-						  На главную страницу интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
-						  Страницы сортировки и фильтрации отключены.
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
@@ -1348,12 +1352,53 @@ Mods: {
 
 			ButtonConfigurationMode: {
 				Tooltip: ""
-				Legacy.Label: Старый
-				ModernPaged.Label: Страничный
-				ModernConfigurable.Label: Настраиваемый
-				LegacyWithGear.Label: Старый + Настраиваемый
-				LegacyBasicWithPaged.Label: Старый + Страничный
-				ModernDropdown.Label: Выпадающее меню
+
+				Legacy: {
+					Label: Старый
+					Tooltip:
+						'''
+						Заготовка v0.5.6.5 и предыдущих версий.
+						Страницы сортировки и фильтрации отключены.
+						'''
+				}
+
+				ModernPaged: {
+					Label: Страничный
+					Tooltip: Параметры сортировки и фильтрации перенесены на страницы Сортировка и фильтрация.
+				}
+
+				ModernConfigurable: {
+					Label: Настраиваемый
+					Tooltip: Выберите, какие параметры сортировки и фильтрации на страницах «Сортировка и фильтрация» отображаются на главной странице пользовательского интерфейса.
+				}
+
+				LegacyWithGear: {
+					Label: Старый + Настраиваемый
+					Tooltip:
+						'''
+						Заготовка из v0.5.6.5 и предыдущих версий, если "Отображать дополнительные значки сортировки" было отключено.
+						Добавлен дополнительный значок шестеренки, при нажатии на который открывается панель, содержащая все остальные параметры.
+						Страницы сортировки и фильтрации отключены.
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					Label: Старый + Страничный
+					Tooltip:
+						'''
+						Заготовка v0.5.6.5 и предыдущие версии, если «Отображать дополнительные значки сортировки» было отключено.
+						Дополнительные значки находятся на страницах «Сортировка и фильтрация».
+						'''
+				}
+
+				ModernDropdown: {
+					Label: Выпадающее меню
+					Tooltip:
+						'''
+						На главную страницу интерфейса добавлены два раскрывающихся меню для выбора нужного параметра сортировки и фильтрации.
+						Страницы сортировки и фильтрации отключены.
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {

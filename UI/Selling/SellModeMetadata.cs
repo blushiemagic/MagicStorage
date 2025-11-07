@@ -67,7 +67,7 @@ namespace MagicStorage.UI.Selling {
 
 				ValueWriter bitWriter = new ValueWriter(writer);
 
-				NetCompression.SendItem(_iconicItem, bitWriter, writeStack: false, writeFavorite: true);
+				SaveCompression.SaveItem(_iconicItem, bitWriter, writeStack: false, writeFavorite: true);
 
 				bitWriter.Write7BitEncodedInt(_items.Count);
 
@@ -98,7 +98,7 @@ namespace MagicStorage.UI.Selling {
 
 				ValueReader bitReader = new ValueReader(reader);
 
-				var item = NetCompression.ReceiveItem(bitReader, readStack: false, readFavorite: true);
+				var item = SaveCompression.LoadItem(bitReader, readStack: false, readFavorite: true);
 
 				// Use Add() to set the fast-get fields
 				Add(item, Utility.ToByteSpanNoCompression(item));

@@ -7,7 +7,6 @@ using SerousCommonLib.API;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -16,10 +15,17 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Items {
 	public abstract class BaseStorageCore : ModItem, IValidateAtPostSetupContent {
+		private const int VERSION_SAVE_NET_IO = 0;
+		private const int VERSION_SAVE_TAG_IO = 1;
+
 		[CloneByReference]
 		private byte[] _unitData;
 		private int _hash;
 		private int _itemCount;
+		[CloneByReference]
+		private List<Item> _cachedItemData;
+
+		private int _serializationVersion = VERSION_SAVE_TAG_IO;
 
 		public int DataHash => _hash;
 
@@ -86,17 +92,21 @@ namespace MagicStorage.Items {
 		public override void SaveData(TagCompound tag) {
 			tag["data"] = _unitData;
 			tag["count"] = _itemCount;
+			tag["version"] = _serializationVersion;
 		}
 
 		public override void LoadData(TagCompound tag) {
 			_unitData = tag.GetByteArray("data");
 			_itemCount = tag.GetInt("count");
+			_serializationVersion = tag.GetInt("version");
 			_hash = Utility.ComputeDataHash(_unitData);
+			_cachedItemData = null;
 		}
 
 		public override void NetSend(BinaryWriter writer) {
 			writer.Write(_hash);
 			writer.Write((ushort)_itemCount);
+			writer.Write((byte)_serializationVersion);
 			writer.Write7BitEncodedInt(_unitData?.Length ?? 0);
 			if (_unitData is not null)
 				writer.Write(_unitData);
@@ -105,11 +115,14 @@ namespace MagicStorage.Items {
 		public override void NetReceive(BinaryReader reader) {
 			_hash = reader.ReadInt32();
 			_itemCount = reader.ReadUInt16();
+			_serializationVersion = reader.ReadByte();
 			int length = reader.Read7BitEncodedInt();
 			if (length > 0)
 				_unitData = reader.ReadBytes(length);
 			else
 				_unitData = null;
+
+			_cachedItemData = null;
 		}
 
 		public void SetDataFrom(TEStorageUnit unit) {
@@ -119,13 +132,15 @@ namespace MagicStorage.Items {
 			if (unitTier.Type != Tier.Type)
 				throw new InvalidOperationException($"Unit tier ({unitTier.FullName}) does not match core tier ({Tier.FullName})");
 
+			_serializationVersion = VERSION_SAVE_TAG_IO;
+
 			using MemoryStream ms = new(65536);
 			using (BinaryWriter writer = new(ms)) {
 				// Write the unit's contents to the stream
 			//	using (FlagSwitch.ToggleTrue(ref ValueWriter.LogWrites)) {
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 				//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
-					NetCompression.SendItems(unit.items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
+					SaveCompression.SaveItems(unit.items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
 				//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
 				//	MagicStorageMod.Instance.Logger.Info("==============================");
 			//	}
@@ -133,20 +148,23 @@ namespace MagicStorage.Items {
 
 			byte[] data = NetCompression.Compress(ms.ToArray(), CompressionLevel.BestCompression);
 
-			SetUnitData(data, unit.items.Count);
-		}
-
-		protected void SetUnitData(byte[] data, int itemCount) {
 			_unitData = data;
-			_itemCount = itemCount;
+			_itemCount = unit.items.Count;
+			_serializationVersion = VERSION_SAVE_TAG_IO;
 
 			// Calculate a hash of the data
 			_hash = Utility.ComputeDataHash(data);
+
+			_cachedItemData = null;
 		}
 
 		public IEnumerable<Item> RetrieveItems() {
 			if (_unitData is not { Length: >0 })
 				return Array.Empty<Item>();
+
+			// Optimize repeated calls; only the first one should extract the item objects
+			if (_cachedItemData is not null)
+				return _cachedItemData;
 
 			using MemoryStream ms = new(NetCompression.Decompress(_unitData, CompressionLevel.BestCompression));
 			using BinaryReader reader = new(ms);
@@ -155,9 +173,18 @@ namespace MagicStorage.Items {
 			//	MagicStorageMod.Instance.Logger.Info("==============================");
 			//	MagicStorageMod.Instance.Logger.Info($"Retrieving {_itemCount} items from Storage Core");
 			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
-				var items = NetCompression.ReceiveItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
+				List<Item> items = null;
+				
+				if (_serializationVersion == VERSION_SAVE_NET_IO)
+					items = NetCompression.ReceiveItems(reader, NetCompression.VERSION_UNCHECKED_STACK_OVERFLOW, true, true, NetCompression.GetBitSize(Tier.Capacity));
+				else if (_serializationVersion == VERSION_SAVE_TAG_IO)
+					items = SaveCompression.LoadItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
+
+				_cachedItemData = items ?? [];
+				_itemCount = _cachedItemData.Count;
+				return _cachedItemData;
+			//	MagicStorageMod.Instance.Logger.Info($"Retrieved {_itemCount} items from Storage Core");
 			//	MagicStorageMod.Instance.Logger.Info("==============================");
-				return items;
 		//	}
 		}
 	}

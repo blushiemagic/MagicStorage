@@ -8,6 +8,7 @@ using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
 using Terraria.DataStructures;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.IO;
 
 namespace MagicStorage.Components
 {
@@ -277,7 +278,7 @@ namespace MagicStorage.Components
 		{
 			base.SaveData(tag);
 
-			tag["Stations"] = stations.Select(ItemIO.Save).ToList();
+			tag["Stations"] = stations.Select(Utility.SaveItem).Where(t => t.Count > 0).ToList();
 		}
 
 		public override void LoadData(TagCompound tag)
@@ -292,7 +293,7 @@ namespace MagicStorage.Components
 					Item item = Utility.SafelyLoadItem(stationTag);
 					if (!item.IsAir)
 					{
-						stations.Add(Utility.SafelyLoadItem(stationTag));
+						stations.Add(item);
 					}
 				}
 			}
@@ -301,18 +302,13 @@ namespace MagicStorage.Components
 		public override void NetSend(BinaryWriter writer)
 		{
 			base.NetSend(writer);
-			writer.Write(stations.Count);
-			foreach (Item item in stations)
-				Utility.SafelyWriteItem(item, writer, true, true);
+			NetCompression.SendItems(stations, writer, listCountBitSizeOverride: NetCompression.GetBitSize(Columns * Rows));
 		}
 
 		public override void NetReceive(BinaryReader reader)
 		{
 			base.NetReceive(reader);
-			int stationsCount = reader.ReadInt32();
-			stations = new List<Item>();
-			for (int k = 0; k < stationsCount; k++)
-				stations.Add(Utility.SafelyReadItem(reader, true, true));
+			stations = NetCompression.ReceiveItems(reader, listCountBitSizeOverride: NetCompression.GetBitSize(Columns * Rows));
 		}
 	}
 }

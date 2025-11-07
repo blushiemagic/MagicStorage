@@ -9,6 +9,7 @@ using MagicStorage.NPCs;
 using MagicStorage.Stations;
 using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
+using SerousCommonLib.API.ModCall;
 using System;
 using System.IO;
 using Terraria;
@@ -94,14 +95,6 @@ namespace MagicStorage {
 			NetHelper.HandlePacket(reader, whoAmI);
 		}
 
-		public override object Call(params object[] args) {
-			if (args.Length < 1)
-				throw new ArgumentException("Call requires at least one argument");
-
-			if (args[0] is not string function)
-				throw new ArgumentException("Expected function name");
-
-			return BaseCallFunction.Find(this, function).Call(args.AsSpan(1));
-		}
+		public override object Call(params object[] args) => BaseCallFunction.Call(this, args);
 	}
 }

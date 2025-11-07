@@ -175,6 +175,20 @@ namespace MagicStorage.Common.IO {
 			return bytes;
 		}
 
+		public byte[] ReadBytes(int count) {
+			if (LogReads)
+				MagicStorageMod.Instance.Logger.Info($"READ START [byte[]/c] ({count} bytes)");
+
+			byte[] bytes = GC.AllocateUninitializedArray<byte>(count);
+			for (int i = 0; i < count; i++)
+				bytes[i] = ReadByte(BitBuffer128.MAX_BYTE);
+			
+			if (LogReads)
+				MagicStorageMod.Instance.Logger.Info($"READ FINISH [byte[]/c]");
+			
+			return bytes;
+		}
+
 		public int Read7BitEncodedInt() {
 			int read = 0;
 			int shift = 0;

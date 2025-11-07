@@ -453,14 +453,36 @@ Mods: {
 					''' */
 			}
 
+			ErrorItems: {
+				/* CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					''' */
+				// NameText: Name: {0}/{1}
+				// NameTextUnknown: <unknown>
+				// PrefixText: Prefix: {0}
+				// PrefixTextModded: Prefix: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				// DisplayName: Error//ItemRender
-				// Tooltip: ""
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				// DisplayName: Error//ItemClientRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				// DisplayName: Debug//DataCompressionTest
 				// Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				// DisplayName: Error//NBTRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -1034,6 +1056,7 @@ Mods: {
 			Errors: {
 				// RenderFail: This item could not be rendered due to an error.
 				// NetFail: This item failed to load on the current client.
+				// NBTFail: The NBT data on this item failed to deserialize.
 			}
 
 			TestItems: {
@@ -1305,26 +1328,7 @@ Mods: {
 
 				buttonLayout: {
 					Label: Layout de Botões de Classificação/Filtragem.
-					Tooltip:
-						'''
-						Legacy:
-						  Layout da v0.5.6.5 e versões anteriores.
-						  As páginas Classificação e Filtragem estão desativadas.
-						Paged:
-						  As opções de classificação e filtragem foram movidas para as páginas Classificação e Filtragem.
-						Configurable:
-						  Selecione quais opções de classificação e filtragem nas páginas Classificação e Filtragem aparecem na página principal da IU.
-						Legacy + Configurable:
-						  Layout das versões anteriores a v0.5.6.5 se “Exibir ícones extras de ordenação” estiver desativado.
-						  É adicionado um ícone de engrenagem adicional que, quando clicado, abre um painel contendo todas as outras opções.
-						  As páginas Classificação e Filtragem estão desativadas.
-						Legacy + Paged:
-						  Layout das versões anteriores a v0.5.6.5 se “Exibir ícones extras de ordenação” estiver desativado.
-						  Additional icons are in the Sorting and Filtering pages.
-						Dropdown:
-						  Dois menus suspensos são adicionados à página principal da IU para selecionar a opção de classificação e filtragem desejada.
-						  As páginas Classificação e Filtragem estão desativadas.
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
@@ -1350,12 +1354,53 @@ Mods: {
 
 			ButtonConfigurationMode: {
 				Tooltip: ""
-				Legacy.Label: Legado
-				ModernPaged.Label: Paginada
-				ModernConfigurable.Label: Configurável
-				LegacyWithGear.Label: Legado + Configurável
-				LegacyBasicWithPaged.Label: Legado + Paginada
-				ModernDropdown.Label: Lista Suspensa
+
+				Legacy: {
+					Label: Legado
+					Tooltip:
+						'''
+						Layout da v0.5.6.5 e versões anteriores.
+						As páginas Classificação e Filtragem estão desativadas.
+						'''
+				}
+
+				ModernPaged: {
+					Label: Paginada
+					Tooltip: As opções de classificação e filtragem foram movidas para as páginas Classificação e Filtragem.
+				}
+
+				ModernConfigurable: {
+					Label: Configurável
+					Tooltip: Selecione quais opções de classificação e filtragem nas páginas Classificação e Filtragem aparecem na página principal da IU.
+				}
+
+				LegacyWithGear: {
+					Label: Legado + Configurável
+					Tooltip:
+						'''
+						Layout das versões anteriores a v0.5.6.5 se “Exibir ícones extras de ordenação” estiver desativado.
+						É adicionado um ícone de engrenagem adicional que, quando clicado, abre um painel contendo todas as outras opções.
+						As páginas Classificação e Filtragem estão desativadas.
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					Label: Legado + Paginada
+					Tooltip:
+						'''
+						Layout das versões anteriores a v0.5.6.5 se “Exibir ícones extras de ordenação” estiver desativado.
+						Additional icons are in the Sorting and Filtering pages.
+						'''
+				}
+
+				ModernDropdown: {
+					Label: Lista Suspensa
+					Tooltip:
+						'''
+						Dois menus suspensos são adicionados à página principal da IU para selecionar a opção de classificação e filtragem desejada.
+						As páginas Classificação e Filtragem estão desativadas.
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {

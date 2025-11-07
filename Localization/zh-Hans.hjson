@@ -451,14 +451,36 @@ Mods: {
 					''' */
 			}
 
+			ErrorItems: {
+				/* CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					''' */
+				// NameText: Name: {0}/{1}
+				// NameTextUnknown: <unknown>
+				// PrefixText: Prefix: {0}
+				// PrefixTextModded: Prefix: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				// DisplayName: Error//ItemRender
-				// Tooltip: ""
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				// DisplayName: Error//ItemClientRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				// DisplayName: Debug//DataCompressionTest
 				// Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				// DisplayName: Error//NBTRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -1033,6 +1055,7 @@ Mods: {
 			Errors: {
 				// RenderFail: This item could not be rendered due to an error.
 				// NetFail: This item failed to load on the current client.
+				// NBTFail: The NBT data on this item failed to deserialize.
 			}
 
 			TestItems: {
@@ -1308,26 +1331,7 @@ Mods: {
 
 				buttonLayout: {
 					Label: 排序/筛选按钮布局
-					Tooltip:
-						'''
-						Legacy (主界面按钮):
-						  v0.5.6.5及以前版本的布局
-						  排序和筛选选项不单独分页
-						ModernPaged (独立分页):
-						  排序和筛选按钮单独分页
-						ModernConfigurable (自主配置):
-						  可以单独选择一些排序和筛选按钮使其出现在主界面
-						LegacyWithGear (主界面按钮+小窗按钮):
-						  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
-						  在主界面按钮右侧添加了一个齿轮按钮，点击后将以小窗形式显示额外的排序按钮
-						  排序和筛选选项不单独分页
-						LegacyBasicWithPaged (主界面按钮+独立分页):
-						  如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
-						  额外的排序按钮独立分页
-						ModernDropdown (下拉菜单):
-						  在主界面添加了排序和筛选选项的下拉式菜单
-						  排序和筛选选项不单独分页
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
@@ -1353,12 +1357,53 @@ Mods: {
 
 			ButtonConfigurationMode: {
 				// Tooltip: ""
-				// Legacy.Label: Legacy
-				// ModernPaged.Label: Paged
-				// ModernConfigurable.Label: Configurable
-				// LegacyWithGear.Label: Legacy + Configurable
-				// LegacyBasicWithPaged.Label: Legacy + Paged
-				// ModernDropdown.Label: Dropdown
+
+				Legacy: {
+					Label: 主界面按钮
+					Tooltip:
+						'''
+						v0.5.6.5及以前版本的布局
+						排序和筛选选项不单独分页
+						'''
+				}
+
+				ModernPaged: {
+					Label: 独立分页
+					Tooltip: 排序和筛选按钮单独分页
+				}
+
+				ModernConfigurable: {
+					Label: 自主配置
+					Tooltip: 可以单独选择一些排序和筛选按钮使其出现在主界面
+				}
+
+				LegacyWithGear: {
+					Label: 主界面按钮+小窗按钮
+					Tooltip:
+						'''
+						如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
+						在主界面按钮右侧添加了一个齿轮按钮，点击后将以小窗形式显示额外的排序按钮
+						排序和筛选选项不单独分页
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					Label: 主界面按钮+独立分页
+					Tooltip:
+						'''
+						如果关闭了“更多排序选项”则与v0.5.6.5及以前版本一致
+						额外的排序按钮独立分页
+						'''
+				}
+
+				ModernDropdown: {
+					Label: 下拉菜单
+					Tooltip:
+						'''
+						在主界面添加了排序和筛选选项的下拉式菜单
+						排序和筛选选项不单独分页
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {

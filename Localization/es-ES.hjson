@@ -464,14 +464,36 @@ Mods: {
 					''' */
 			}
 
+			ErrorItems: {
+				/* CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					''' */
+				// NameText: Name: {0}/{1}
+				// NameTextUnknown: <unknown>
+				// PrefixText: Prefix: {0}
+				// PrefixTextModded: Prefix: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				// DisplayName: Error//ItemRender
-				// Tooltip: ""
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				// DisplayName: Error//ItemClientRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				// DisplayName: Debug//DataCompressionTest
 				// Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				// DisplayName: Error//NBTRead
+				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -1051,6 +1073,7 @@ Mods: {
 			Errors: {
 				// RenderFail: This item could not be rendered due to an error.
 				// NetFail: This item failed to load on the current client.
+				// NBTFail: The NBT data on this item failed to deserialize.
 			}
 
 			TestItems: {
@@ -1322,26 +1345,7 @@ Mods: {
 
 				buttonLayout: {
 					Label: Diseño de botones de ordenamiento/filtrado
-					Tooltip:
-						'''
-						Legacy:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores.
-						  Las páginas de ordenamiento y filtrado están deshabilitadas.
-						Paged:
-						  Opciones de ordenamiento y filtrado movidas a las páginas de ordenamiento y filtrado.
-						Configurable:
-						  Permite seleccionar qué opciones de ordenamiento y filtrado de las páginas de ordenamiento y filtrado aparecen en la página principal de la interfaz.
-						Legacy + Configurable:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
-						  Se agrega un icono de engranaje adicional que, al hacer clic en él, abre un panel con todas las demás opciones.
-						  Las páginas de ordenamiento y filtrado están deshabilitadas.
-						Legacy + Paged:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
-						  Iconos adicionales se encuentran en las páginas de ordenamiento y filtrado.
-						Dropdown:
-						  Se agregan dos menús desplegables en la página principal para seleccionar las opciones de ordenamiento y filtrado deseadas.
-						  Las páginas de ordenamiento y filtrado están deshabilitadas.
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
@@ -1367,12 +1371,53 @@ Mods: {
 
 			ButtonConfigurationMode: {
 				// Tooltip: ""
-				// Legacy.Label: Legacy
-				// ModernPaged.Label: Paged
-				// ModernConfigurable.Label: Configurable
-				// LegacyWithGear.Label: Legacy + Configurable
-				// LegacyBasicWithPaged.Label: Legacy + Paged
-				// ModernDropdown.Label: Dropdown
+
+				Legacy: {
+					// Label: Legacy
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores.
+						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						'''
+				}
+
+				ModernPaged: {
+					// Label: Paged
+					Tooltip: Opciones de ordenamiento y filtrado movidas a las páginas de ordenamiento y filtrado.
+				}
+
+				ModernConfigurable: {
+					// Label: Configurable
+					Tooltip: Permite seleccionar qué opciones de ordenamiento y filtrado de las páginas de ordenamiento y filtrado aparecen en la página principal de la interfaz.
+				}
+
+				LegacyWithGear: {
+					// Label: Legacy + Configurable
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
+						Se agrega un icono de engranaje adicional que, al hacer clic en él, abre un panel con todas las demás opciones.
+						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					// Label: Legacy + Paged
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
+						Iconos adicionales se encuentran en las páginas de ordenamiento y filtrado.
+						'''
+				}
+
+				ModernDropdown: {
+					// Label: Dropdown
+					Tooltip:
+						'''
+						Se agregan dos menús desplegables en la página principal para seleccionar las opciones de ordenamiento y filtrado deseadas.
+						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {

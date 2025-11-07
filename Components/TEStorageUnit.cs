@@ -548,7 +548,7 @@ namespace MagicStorage.Components
 		public override void SaveData(TagCompound tag)
 		{
 			base.SaveData(tag);
-			List<TagCompound> tagItems = items.Select(ItemIO.Save).ToList();
+			List<TagCompound> tagItems = items.Select(Utility.SaveItem).Where(t => t.Count > 0).ToList();
 			tag.Set("Items", tagItems);
 		}
 
@@ -612,23 +612,25 @@ namespace MagicStorage.Components
 				bitWriter.Write((byte)netOp.netOperation, numBits: 3);
 				switch (netOp.netOperation)
 				{
+					// FIX: v0.7.0.12 - Item data should use the original tag information, not the netcode data
 					case NetOperations.FullySync:
-						NetCompression.SendItems(items, bitWriter, true, true, listCountBitSizeOverride: capacityBits);
+						SaveCompression.SaveItems(items, bitWriter, true, true, listCountBitSizeOverride: capacityBits);
 						break;
 					case NetOperations.Withdraw:
 						bitWriter.Write(netOp.keepOneInFavorite);
-						NetCompression.SendItem(netOp.item, bitWriter, true, true);
+						SaveCompression.SaveItem(netOp.item, bitWriter, true, true);
 						break;
 					case NetOperations.WithdrawStack:
 						break;
 					case NetOperations.Deposit:
-						NetCompression.SendItem(netOp.item, bitWriter, true, true);
+						SaveCompression.SaveItem(netOp.item, bitWriter, true, true);
 						break;
 					case NetOperations.PackItems:
 						break;
 					case NetOperations.RemoveCore:
 						break;
 					case NetOperations.InsertCore:
+						// SendItem is okay here since the data has already been encoded using SaveCompression.SaveItem()
 						NetCompression.SendItem(netOp.item, bitWriter, false, false);
 						break;
 					default:
@@ -685,10 +687,11 @@ namespace MagicStorage.Components
 					{
 						switch ((NetOperations)netOp)
 						{
+							// FIX: v0.7.0.12 - Item data should use the original tag information, not the netcode data
 							case NetOperations.FullySync:
 								repairMetaData = false;
 								ClearItemsData();
-								List<Item> netItems = NetCompression.ReceiveItems(bitReader, true, true, listCountBitSizeOverride: capacityBits);
+								List<Item> netItems = SaveCompression.LoadItems(bitReader, true, true, listCountBitSizeOverride: capacityBits);
 								for (int j = 0; j < netItems.Count; j++)
 								{
 									Item item = netItems[j];
@@ -702,13 +705,13 @@ namespace MagicStorage.Components
 								break;
 							case NetOperations.Withdraw:
 								bool keepOneIfFavorite = bitReader.ReadBoolean();
-								TryWithdraw(NetCompression.ReceiveItem(bitReader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+								TryWithdraw(SaveCompression.LoadItem(bitReader, true, true), keepOneIfFavorite: keepOneIfFavorite);
 								break;
 							case NetOperations.WithdrawStack:
 								WithdrawStack();
 								break;
 							case NetOperations.Deposit:
-								DepositItem(NetCompression.ReceiveItem(bitReader, true, true));
+								DepositItem(SaveCompression.LoadItem(bitReader, true, true));
 								break;
 							case NetOperations.PackItems:
 								PackItems();
@@ -717,6 +720,7 @@ namespace MagicStorage.Components
 								RemoveItemsAndSpawnCore();
 								break;
 							case NetOperations.InsertCore:
+								// ReceiveItem is okay here since the data has already been encoded using SaveCompression.SaveItem()
 								InsertCore((BaseStorageCore)NetCompression.ReceiveItem(bitReader, false, false).ModItem);
 								break;
 							default:

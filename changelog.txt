@@ -1,2 +1,3 @@
-﻿[h1]v0.7.0.11[/h1]
-- Fixed a bug that caused the Crafting Interface to fail to sync to multiplayer clients, which also caused tile corruptions
+﻿[h1]v0.7.0.12[/h1]
+- Improved the reliability of the [i]Delete Unloaded Mod Items[/i] control
+- The [i]Sorting/Filtering Button Layout[/i] option in the Magic Storage Config now uses the new dropdown panel from the November update

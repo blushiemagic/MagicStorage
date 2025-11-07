@@ -65,7 +65,7 @@ namespace MagicStorage {
 				return retVal;
 			}
 			using MemoryStream memoryStream = new(200);
-			TagCompound saveData = StorageAggregatorLoader.GetItemData(item, out var tag) ? tag : ItemIO.Save(item);
+			TagCompound saveData = StorageAggregatorLoader.GetItemData(item, out var tag) ? tag : SaveItem(item);
 			TagIO.ToStream(saveData, memoryStream, false);
 			retVal = memoryStream.ToArray();
 			savedItemTagIO?.Add(item, retVal);

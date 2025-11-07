@@ -1,16 +1,31 @@
-﻿using MagicStorage.Items.ErrorDisplay;
+﻿using MagicStorage.Common.Global;
+using MagicStorage.Common.IO;
+using MagicStorage.Items.ErrorDisplay;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	partial class Utility {
+		public static TagCompound SaveItem(Item item) {
+			if (item.ModItem is BaseErrorDummyItem errorItem) {
+				if (errorItem.data is not { Count: > 0 })
+					return new TagCompound();
+
+				return errorItem.data;
+			}
+
+			// Use standard saving
+			return ItemIO.Save(item);
+		}
+
 		public static Item SafelyLoadItem(TagCompound tag) {
 			Item loadedItem = null;
+			int failureType = BaseErrorDummyItem.NetReadFailItemType;
 
 			try {
 				loadedItem = ItemIO.Load(tag);
@@ -18,32 +33,59 @@ namespace MagicStorage {
 				// Item was malformed
 			} catch (Exception ex) {
 				MagicStorageMod.Instance.Logger.Error("Error loading item from tag", ex);
+
+				if (ex.Message.Contains("NBT Deserialization"))
+					failureType = BaseErrorDummyItem.NBTFailItemType;
 			} finally {
-				loadedItem ??= new Item(BaseErrorDummyItem.NetReadFailItemType, tag.Get<int?>("stack").GetValueOrDefault(1));
+				loadedItem ??= PrepareFailureItem(failureType, tag, DeserializedNetItem.FromTagData(tag));
 			}
 
 			return loadedItem;
 		}
 
-		public static Item SafelyReadItem(BinaryReader reader, bool readStack = false, bool readFavorite = false) {
-			int numBytes = reader.Read7BitEncodedInt();
-			byte[] data = reader.ReadBytes(numBytes);
+		public static Item PrepareFailureItem(int type, TagCompound data, DeserializedNetItem readData) {
+			// Can't use UnloadedItem.Setup() since that expects the ModItem format, whereas this could be a vanilla item
+			int prefix = readData.prefix;
+			if (prefix == ModContent.PrefixType<UnloadedPrefix>() && (readData.modPrefixMod is null || readData.modPrefixName is null))
+				prefix = 0;
 
-			using MemoryStream ms = new MemoryStream(data);
-			using BinaryReader actualReader = new BinaryReader(ms);
+			Item item = new Item(type, readData.stack, prefix);
 
-			Item readItem = null;
+			if (item.ModItem is not BaseErrorDummyItem errorItem)
+				throw new ArgumentException("Item type must be a " + nameof(BaseErrorDummyItem), nameof(type));
 
-			try {
-				readItem = ItemIO.Receive(actualReader, readStack, readFavorite);
-			} catch (Exception ex) {
-				// Could not load the item
-				MagicStorageMod.Instance.Logger.Error("Error reading item from stream", ex);
-			} finally {
-				readItem ??= new Item(BaseErrorDummyItem.NetReadFailItemType);
+			readData.GetContentNames(out string modName, out string name);
+
+			errorItem.OriginalMod = modName ?? "<unknown>";
+			errorItem.OriginalName = name ?? "<unknown>";
+			errorItem.data = data;
+
+			if (prefix == ModContent.PrefixType<UnloadedPrefix>()) {
+				UnloadedGlobalItem globalItem = item.GetGlobalItem<UnloadedGlobalItem>();
+				globalItem.ModPrefixMod = readData.modPrefixMod;
+				globalItem.ModPrefixName = readData.modPrefixName;
 			}
 
-			return readItem;
+			return item;
+		}
+
+		public static int FindPrefix(TagCompound data, out string modName, out string name) {
+			if (data.TryGet("prefix", out byte vanillaPrefix)) {
+				modName = null;
+				name = null;
+				return vanillaPrefix;
+			}
+
+			if (!data.TryGet("modPrefixMod", out modName) || !data.TryGet("modPrefixName", out name)) {
+				modName = null;
+				name = null;
+				return 0;
+			}
+
+			if (!ModContent.TryFind(modName, name, out ModPrefix modPrefix))
+				return ModContent.PrefixType<UnloadedPrefix>();
+
+			return modPrefix.Type;
 		}
 
 		// Copies of ItemIO.ReceiveModData() that allows the exception to propagate instead of being caught and logged
@@ -56,40 +98,39 @@ namespace MagicStorage {
 			reader.SafeRead(r => i.ModItem?.NetReceive(r));
 		}
 
-		internal static void UnsafelyReceiveGlobalModData(Item item, BinaryReader reader, out GlobalItem lastReadGlobal) {
+		internal static void UnsafelyReceiveGlobalModData(Item item, DeserializedNetItem readData, BinaryReader reader, out GlobalItem lastReadGlobal) {
 			if (item.IsAir) {
 				lastReadGlobal = null;
 				return;
 			}
 
-			foreach (var globalItem in ItemLoader.HookNetReceive.Enumerate(item)) {
-				lastReadGlobal = globalItem;
+			UnloadedGlobalItem unloadedGlobalItem = null;
 
-				// Local capturing
-				Item i = item;
-				GlobalItem g = globalItem;
-				reader.SafeRead(r => g.NetReceive(i, r));
+			try {
+				foreach (var globalItem in ItemLoader.HookNetReceive.Enumerate(item)) {
+					lastReadGlobal = globalItem;
+
+					if (globalItem is UnloadedGlobalItem unloaded)
+						unloadedGlobalItem = unloaded;
+
+					// Local capturing
+					Item i = item;
+					GlobalItem g = globalItem;
+					reader.SafeRead(r => g.NetReceive(i, r));
+				}
+			} finally {
+				if (unloadedGlobalItem is not null) {
+					readData.modPrefixMod = unloadedGlobalItem.ModPrefixMod;
+					readData.modPrefixName = unloadedGlobalItem.ModPrefixName;
+				}
 			}
 
 			lastReadGlobal = null;
 		}
 
-		public static void SafelyWriteItem(Item item, BinaryWriter writer, bool writeStack = false, bool writeFavorite = false) {
-			byte[] data;
-			using (MemoryStream ms = new MemoryStream()) {
-				using (BinaryWriter actualWriter = new BinaryWriter(ms, Encoding.UTF8, leaveOpen: true))
-					ItemIO.Send(item, actualWriter, writeStack, writeFavorite);
-
-				data = ms.ToArray();
-			}
-
-			writer.Write7BitEncodedInt(data.Length);
-			writer.Write(data);
-		}
-
 		public static byte[] ToByteArrayNoCompression(Item item) {
 			MemoryStream ms = new MemoryStream();
-			TagIO.ToStream(ItemIO.Save(item), ms, false);
+			TagIO.ToStream(SaveItem(item), ms, false);
 			return ms.ToArray();
 		}
 

@@ -157,6 +157,20 @@ namespace MagicStorage.Common.IO {
 				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [byte[]]: {bytes.Length} bytes");
 		}
 
+		public void WriteBytesNoLength(byte[] bytes) {
+			if (bytes is null)
+				throw new ArgumentNullException(nameof(bytes), "Value cannot be null");
+
+			if (LogWrites)
+				MagicStorageMod.Instance.Logger.Info($"WRITE START [byte[]/nl]: {bytes.Length} bytes");
+			
+			for (int i = 0; i < bytes.Length; i++)
+				Write(bytes[i], BitBuffer128.MAX_BYTE);
+			
+			if (LogWrites)
+				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [byte[]/nl]: {bytes.Length} bytes");
+		}
+
 		public void Write7BitEncodedInt(int value) {
 			if (LogWrites)
 				MagicStorageMod.Instance.Logger.Info("WRITE START [7BitEncodedInt]");

@@ -453,14 +453,36 @@ Mods: {
 					'''
 			}
 
+			ErrorItems: {
+				CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					'''
+				NameText: Name: {0}/{1}
+				NameTextUnknown: <unknown>
+				PrefixText: Prefix: {0}
+				PrefixTextModded: Prefix: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				DisplayName: Error//ItemRender
-				Tooltip: ""
+				Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				DisplayName: Error//ItemClientRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				DisplayName: Debug//DataCompressionTest
 				Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				DisplayName: Error//NBTRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -1035,6 +1057,7 @@ Mods: {
 			Errors: {
 				RenderFail: This item could not be rendered due to an error.
 				NetFail: This item failed to load on the current client.
+				NBTFail: The NBT data on this item failed to deserialize.
 			}
 
 			TestItems: {
@@ -1306,26 +1329,7 @@ Mods: {
 
 				buttonLayout: {
 					Label: Sorting/Filtering Button Layout
-					Tooltip:
-						'''
-						Legacy:
-						  Layout from v0.5.6.5 and previous versions.
-						  The Sorting and Filtering pages are disabled.
-						Paged:
-						  Sorting and filtering options moved to the Sorting and Filtering pages.
-						Configurable:
-						  Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
-						Legacy + Configurable:
-						  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-						  An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
-						  The Sorting and Filtering pages are disabled.
-						Legacy + Paged:
-						  Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
-						  Additional icons are in the Sorting and Filtering pages.
-						Dropdown:
-						  Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
-						  The Sorting and Filtering pages are disabled.
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
@@ -1351,12 +1355,53 @@ Mods: {
 
 			ButtonConfigurationMode: {
 				Tooltip: ""
-				Legacy.Label: Legacy
-				ModernPaged.Label: Paged
-				ModernConfigurable.Label: Configurable
-				LegacyWithGear.Label: Legacy + Configurable
-				LegacyBasicWithPaged.Label: Legacy + Paged
-				ModernDropdown.Label: Dropdown
+
+				Legacy: {
+					Label: Legacy
+					Tooltip:
+						'''
+						Layout from v0.5.6.5 and previous versions.
+						The Sorting and Filtering pages are disabled.
+						'''
+				}
+
+				ModernPaged: {
+					Label: Paged
+					Tooltip: Sorting and filtering options moved to the Sorting and Filtering pages.
+				}
+
+				ModernConfigurable: {
+					Label: Configurable
+					Tooltip: Select which sorting and filtering options from the Sorting and Filtering pages appear in the main UI page.
+				}
+
+				LegacyWithGear: {
+					Label: Legacy + Configurable
+					Tooltip:
+						'''
+						Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+						An additional gear icon is added which, when clicked, opens a panel containing all of the other options.
+						The Sorting and Filtering pages are disabled.
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					Label: Legacy + Paged
+					Tooltip:
+						'''
+						Layout from v0.5.6.5 and previous versions if "Display extra sorting icons" was disabled.
+						Additional icons are in the Sorting and Filtering pages.
+						'''
+				}
+
+				ModernDropdown: {
+					Label: Dropdown
+					Tooltip:
+						'''
+						Two dropdown menus are added to the main UI page for selecting the desired sorting and filtering option.
+						The Sorting and Filtering pages are disabled.
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {
