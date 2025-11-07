@@ -69,7 +69,7 @@ namespace MagicStorage {
 		public bool extraFilterIcons;
 
 		[DefaultValue(ButtonConfigurationMode.Legacy)]
-		[DrawTicks]
+		[Dropdown]
 		public ButtonConfigurationMode buttonLayout;
 
 		[Header($"$Mods.MagicStorage.Config.Headers.General")]
