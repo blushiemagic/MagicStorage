@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Terraria.ModLoader.IO;
 
@@ -50,7 +49,7 @@ namespace MagicStorage.Common.IO {
 			if (name == "<type>" && value is string tagSerializableType) {
 				List<string> slices = [.. EnumerateSerializedTypeSlices(tagSerializableType).Where(s => !string.IsNullOrEmpty(s))];
 
-				_collectionLengthTiers.WriteTo(writer, (uint)slices.Count);
+				NetCompression.lengthTiers.WriteTo(writer, (uint)slices.Count);
 				foreach (string slice in slices)
 					lookup.WriteKeyIndex(writer, slice);
 
@@ -83,7 +82,7 @@ namespace MagicStorage.Common.IO {
 				if (id != ID_STRING)
 					throw new InvalidOperationException("Expected string payload for \"<type>\" key");
 
-				int sliceCount = (int)_collectionLengthTiers.ReadFrom(reader);
+				int sliceCount = (int)NetCompression.lengthTiers.ReadFrom(reader);
 				StringBuilder sb = new();
 
 				for (int i = 0; i < sliceCount; i++)

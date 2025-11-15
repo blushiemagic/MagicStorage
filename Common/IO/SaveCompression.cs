@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Terraria;
 using Terraria.ID;
@@ -37,9 +38,6 @@ namespace MagicStorage.Common.IO {
 			// This method aims to ensure that no matter the mods loaded or unloaded, the compressed data reads correctly
 			// NetCompression doesn't need to worry about this since mods can't be unloaded during gameplay, but that isn't the case for save data
 
-			if (ValueWriter.LogWrites)
-				MagicStorageMod.Instance.Logger.Info("WRITE START [SaveItemInternal]");
-
 			if (isolated) {
 				maxStackWriter = new();
 				writer.Write((uint)maxStackWriter.CommonMaxStack, BitBuffer128.MAX_INT - 1);
@@ -52,94 +50,98 @@ namespace MagicStorage.Common.IO {
 
 			Debug.Assert(maxStackWriter is not null);
 
-			// Write the ID of the item
-			if (item.ModItem is ModItem modItem) {
-				writer.Write(true);
+			using (writer.CreateScope(NetCompression.lengthTiers, optimizeForBytes: false)) {
+				// Write the ID of the item
+				if (item.ModItem is ModItem modItem) {
+					writer.Write(true);
 
-				if (modItem is UnloadedItem unloadedItem) {
-					contentLookup.WriteModNameIndex(writer, unloadedItem.ModName);
-					contentLookup.WriteContentNameIndex(writer, unloadedItem.ItemName);
-				} else if (modItem is BaseErrorDummyItem errorItem) {
-					contentLookup.WriteModNameIndex(writer, errorItem.OriginalMod);
-					contentLookup.WriteContentNameIndex(writer, errorItem.OriginalName);
-				} else
-					contentLookup.WriteNameIndices(writer, modItem);
-			} else {
-				writer.Write(false);
-
-				// Reminder: netID can be negative!
-				writer.Write(item.netID, NetCompression.GetBitSize(ItemID.Count) + 1);
-			}
-
-			// Write the prefix for the item
-			int prefix = item.prefix;
-			if (item.ModItem is BaseErrorDummyItem errorItemForPrefix)
-				prefix = errorItemForPrefix.OriginalPrefix;
-
-			if (PrefixLoader.GetPrefix(item.prefix) is ModPrefix modPrefix) {
-				writer.Write(true);
-
-				string prefixMod, prefixName;
-
-				if (modPrefix is UnloadedPrefix) {
-					var globalItem = item.GetGlobalItem<UnloadedGlobalItem>();
-					prefixMod = globalItem.ModPrefixMod;
-					prefixName = globalItem.ModPrefixName;
+					if (modItem is UnloadedItem unloadedItem) {
+						contentLookup.WriteModNameIndex(writer, unloadedItem.ModName);
+						contentLookup.WriteContentNameIndex(writer, unloadedItem.ItemName);
+					} else if (modItem is BaseErrorDummyItem errorItem) {
+						contentLookup.WriteModNameIndex(writer, errorItem.OriginalMod);
+						contentLookup.WriteContentNameIndex(writer, errorItem.OriginalName);
+					} else
+						contentLookup.WriteNameIndices(writer, modItem);
 				} else {
-					prefixMod = modPrefix.Mod.Name;
-					prefixName = modPrefix.Name;
+					writer.Write(false);
+
+					// Reminder: netID can be negative!
+					writer.Write(item.netID, NetCompression.GetBitSize(ItemID.Count) + 1);
 				}
 
-				contentLookup.WriteModNameIndex(writer, prefixMod);
-				contentLookup.WriteContentNameIndex(writer, prefixName);
-			} else {
-				writer.Write(false);
+				// Write the prefix for the item
+				int prefix = item.prefix;
+				if (item.ModItem is BaseErrorDummyItem errorItemForPrefix)
+					prefix = errorItemForPrefix.OriginalPrefix;
 
-				if (item.prefix != 0 && item.prefix < PrefixID.Count) {
+				if (PrefixLoader.GetPrefix(item.prefix) is ModPrefix modPrefix) {
 					writer.Write(true);
-					writer.Write((byte)item.prefix, NetCompression.GetBitSize(PrefixID.Count));
-				} else
+
+					string prefixMod, prefixName;
+
+					if (modPrefix is UnloadedPrefix) {
+						var globalItem = item.GetGlobalItem<UnloadedGlobalItem>();
+						prefixMod = globalItem.ModPrefixMod;
+						prefixName = globalItem.ModPrefixName;
+					} else {
+						prefixMod = modPrefix.Mod.Name;
+						prefixName = modPrefix.Name;
+					}
+
+					contentLookup.WriteModNameIndex(writer, prefixMod);
+					contentLookup.WriteContentNameIndex(writer, prefixName);
+				} else {
 					writer.Write(false);
+
+					if (item.prefix != 0 && item.prefix < PrefixID.Count) {
+						writer.Write(true);
+						writer.Write((byte)item.prefix, NetCompression.GetBitSize(PrefixID.Count));
+					} else
+						writer.Write(false);
+				}
+
+				// Write the maximum and current stack of the item
+				if (writeStack) {
+					bool customMaxStack = item.maxStack != maxStackWriter.CommonMaxStack;
+					bool isPartialOrOverflow = item.stack != item.maxStack;
+
+					writer.Write(customMaxStack);
+					writer.Write(isPartialOrOverflow);
+
+					if (customMaxStack)
+						maxStackWriter.WriteTo(writer, item.maxStack);
+					if (isPartialOrOverflow)
+						maxStackWriter.WriteTo(writer, item.stack, maximum: item.maxStack);
+				}
+
+				if (writeFavorite)
+					writer.Write(item.favorited);
 			}
-
-			// Write the maximum and current stack of the item
-			if (writeStack) {
-				bool customMaxStack = item.maxStack != maxStackWriter.CommonMaxStack;
-				bool isPartialOrOverflow = item.stack != item.maxStack;
-
-				writer.Write(customMaxStack);
-				writer.Write(isPartialOrOverflow);
-
-				if (customMaxStack)
-					maxStackWriter.WriteTo(writer, item.maxStack);
-				if (isPartialOrOverflow)
-					maxStackWriter.WriteTo(writer, item.stack, maximum: item.maxStack);
-			}
-
-			if (writeFavorite)
-				writer.Write(item.favorited);
 
 			// Write the modded data for the item
 			if (saveData is { Count: > 0 }) {
 				writer.Write(true);
-				WriteTag(writer, tagKeyLookup, saveData);
+
+				using (writer.CreateScope(NetCompression.lengthTiers, optimizeForBytes: false))
+					WriteTag(writer, tagKeyLookup, saveData);
 			} else
 				writer.Write(false);
 
 			if (globalSaveData is { Count: > 0 }) {
 				writer.Write(true);
 
-				_collectionLengthTiers.WriteTo(writer, (uint)globalSaveData.Count);
+				NetCompression.lengthTiers.WriteTo(writer, (uint)globalSaveData.Count);
+
 				foreach (var globalData in globalSaveData) {
-					contentLookup.WriteModNameIndex(writer, globalData.ModName);
-					contentLookup.WriteContentNameIndex(writer, globalData.Name);
-					WriteTag(writer, tagKeyLookup, globalData.Data);
+					using (writer.CreateScope(NetCompression.lengthTiers, optimizeForBytes: false)) {
+						contentLookup.WriteModNameIndex(writer, globalData.ModName);
+						contentLookup.WriteContentNameIndex(writer, globalData.Name);
+						WriteTag(writer, tagKeyLookup, globalData.Data);
+					}
 				}
 			} else
 				writer.Write(false);
-
-			if (ValueWriter.LogWrites)
-				MagicStorageMod.Instance.Logger.Info($"WRITE FINISH [SaveItemInternal]: {ItemID.Search.GetName(item.type)} (stack {item.stack}, prefix {item.prefix}, favorited {item.favorited})");
 		}
 
 		public static void SaveItems(List<Item> items, BinaryWriter writer, bool writeStacks = true, bool writeFavorites = true, int? listCountBitSizeOverride = null) {
@@ -171,10 +173,12 @@ namespace MagicStorage.Common.IO {
 			if (listCountBitSizeOverride is { } predefinedCount)
 				writer.Write((uint)items.Count, predefinedCount);
 			else
-				_collectionLengthTiers.WriteTo(writer, (uint)items.Count);
+				NetCompression.lengthTiers.WriteTo(writer, (uint)items.Count);
 
-			for (int i = 0; i < items.Count; i++)
-				SaveItemInternal(false, items[i], writer, writeStacks, writeFavorites, contentLookup, tagKeyLookup, maxStackWriter, itemSaveData[i], globalItemSaveData[i]);
+			for (int i = 0; i < items.Count; i++) {
+				using (writer.CreateScope(NetCompression.lengthTiers, optimizeForBytes: false))
+					SaveItemInternal(false, items[i], writer, writeStacks, writeFavorites, contentLookup, tagKeyLookup, maxStackWriter, itemSaveData[i], globalItemSaveData[i]);
+			}
 		}
 
 		public static Item LoadItem(BinaryReader reader, bool readStack = true, bool readFavorite = true) {
@@ -202,12 +206,78 @@ namespace MagicStorage.Common.IO {
 			GenericKeyLookup tagKeyLookup,
 			StackCompressor maxStackReader
 		) {
-			if (ValueReader.LogReads)
-				MagicStorageMod.Instance.Logger.Info("READ START [LoadItemInternal]");
-
-			Item item;
-			bool hasReadError = false;
+			Item? item = null;
 			DeserializedNetItem readData = new();
+
+			Exception? error = null;
+			bool nbtFail = false;
+
+			IDisposable? scope = null;
+
+			try {
+				scope = reader.ReadScope(NetCompression.lengthTiers, optimizeForBytes: false);
+				item = ReadItemMetadata(reader, readStack, readFavorite, contentLookup, maxStackReader, ref readData);
+			} catch (Exception ex) {
+				error = ex;
+			} finally {
+				try {
+					scope?.Dispose();
+				} catch (Exception ex) {
+					error = error is null ? ex : new AggregateException(error, ex);
+				}
+			}
+			
+			TagCompound? saveData = null;
+			List<TagCompound>? globalSaveData = null;
+			bool forcedError = false;
+			if (item is null) {
+				forcedError = true;
+				goto FailImmediately;
+			}
+
+			// Read the modded data for the item
+			bool hasSaveData = reader.ReadBoolean();
+			if (hasSaveData) {
+				// Always read the data if the bit indicated as such, even when it won't actually be used
+				saveData = ReadItemModData(reader, item, tagKeyLookup, ref error, ref nbtFail);
+			}
+
+			bool hasGlobalData = reader.ReadBoolean();
+			if (hasGlobalData) {
+				// Always read the data if the bit indicated as such, even when it won't actually be used
+				globalSaveData = ReadItemGlobalModData(reader, item, contentLookup, tagKeyLookup, ref error, ref nbtFail);
+			}
+
+			FailImmediately:
+
+			if (forcedError || error is not null) {
+				if (!forcedError) {
+					if (item is not null)
+						MagicStorageMod.Instance.Logger.Error($"Error loading item \"{item.IdentifierAndStack()}\" from compressed stream", error);
+					else
+						MagicStorageMod.Instance.Logger.Error($"Error loading unknown item from compressed stream", error);
+				} else
+					MagicStorageMod.Instance.Logger.Error("Error loading unknown item from compressed stream caused by unknown reasons");
+
+				// Replace with an error item
+				TagCompound tag = readData.ToTagData();
+				tag["data"] = saveData;
+				tag["globalData"] = globalSaveData;
+				item = Utility.PrepareFailureItem(nbtFail ? BaseErrorDummyItem.NBTFailItemType : BaseErrorDummyItem.NetReadFailItemType, tag, readData);
+			}
+
+			return item;
+		}
+
+		private static Item ReadItemMetadata(
+			ValueReader reader,
+			bool readStack,
+			bool readFavorite,
+			ItemContentNameLookup contentLookup,
+			StackCompressor maxStackReader,
+			ref DeserializedNetItem readData
+		) {
+			Item item;
 
 			// Read the ID of the item
 			bool isModdedItem = reader.ReadBoolean();
@@ -269,74 +339,114 @@ namespace MagicStorage.Common.IO {
 
 			if (readFavorite)
 				readData.favorite = item.favorited = reader.ReadBoolean();
+			
+			return item;
+		}
 
-			// Read the modded data for the item
-			// If the ModItem fails, turn the item into an UnloadedItem
-			// If the GlobalItem fails, add it to UnloadedGlobalItem
+		private static TagCompound? ReadItemModData(
+			ValueReader reader,
+			Item item,
+			GenericKeyLookup tagKeyLookup,
+			ref Exception? error,
+			ref bool nbtFail
+		) {
+			TagCompound? tagData = null;
+			
+			IDisposable? scope = null;
 
-			bool hasSaveData = reader.ReadBoolean();
-			TagCompound? saveData = null;
-			if (hasSaveData) {
-				// Always read the data if the bit indicated as such, even when it won't actually be used
-				TagCompound tagData = ReadTag(reader, tagKeyLookup);
+			try {
+				tagData = ReadTag(reader, tagKeyLookup);
 
-				if (item.ModItem is not UnloadedItem unloadedItem) {
+				if (item.ModItem is not UnloadedItem) {
 					// Only flag that an error occurred; the remaining data still needs to be read
 					try {
 						item.ModItem?.LoadData(tagData);
-					} catch (KeyNotFoundException) {
-						// Item was malformed
-						hasReadError = true;
 					} catch (Exception ex) {
-						MagicStorageMod.Instance.Logger.Error($"Error loading item from compressed stream caused by {item.ModItem.Name} from the {item.ModItem.Mod.Name} mod.", ex);
-						hasReadError = true;
-					}
-				} else
-					unloadedItem.data = tagData;
+						if (error is null && ex.Message.Contains("NBT Deserialization") || ex.Message.Contains("NBT Serialization"))
+							nbtFail = true;
 
-				saveData = tagData;
+						Exception errorWithReason = new InvalidOperationException($"Error loading mod data for item {item.ModItem.Name} from mod {item.ModItem.Mod.Name}.", ex);
+						error = error is null ? errorWithReason : new AggregateException(error, errorWithReason);
+					}
+				}
+			} catch (Exception ex) {
+				error = error is null ? ex : new AggregateException(error, ex);
+				nbtFail = false;
+			} finally {
+				try {
+					scope?.Dispose();
+				} catch (Exception ex) {
+					error = error is null ? ex : new AggregateException(error, ex);
+					nbtFail = false;
+				}
 			}
 
-			bool hasGlobalData = reader.ReadBoolean();
-			List<TagCompound>? globalSaveData = null;
-			if (hasGlobalData) {
-				List<TagCompound> globalData = [];
-				int globalCount = (int)_collectionLengthTiers.ReadFrom(reader);
-				for (int i = 0; i < globalCount; i++) {
+			if (item.ModItem is UnloadedItem unloadedItem)
+				unloadedItem.data = tagData;
+
+			return tagData;
+		}
+
+		private static List<TagCompound>? ReadItemGlobalModData(
+			ValueReader reader,
+			Item item,
+			ItemContentNameLookup contentLookup,
+			GenericKeyLookup tagKeyLookup,
+			ref Exception? error,
+			ref bool nbtFail
+		) {
+			List<TagCompound>? globalData = [];
+			List<Exception> globalErrors = [];
+
+			IDisposable? scope = null;
+
+			int globalCount = (int)NetCompression.lengthTiers.ReadFrom(reader);
+			for (int i = 0; i < globalCount; i++) {
+				TagCompound? globalTagData = null;
+
+				try {
+					scope = reader.ReadScope(NetCompression.lengthTiers, optimizeForBytes: false);
+
 					(string modName, string name) = contentLookup.ReadNames(reader);
-					TagCompound globalTagData = ReadTag(reader, tagKeyLookup);
+					globalTagData = ReadTag(reader, tagKeyLookup);
 
 					if (ModContent.TryFind(modName, name, out GlobalItem globalItem) && item.TryGetGlobalItem(globalItem, out globalItem)) {
 						// Only flag that an error occurred; the remaining data still needs to be read
 						try {
 							globalItem.LoadData(item, globalTagData);
-						} catch (KeyNotFoundException) {
-							hasReadError = true;
 						} catch (Exception ex) {
-							MagicStorageMod.Instance.Logger.Error($"Error loading item from compressed stream caused by {globalItem.Name} from the {globalItem.Mod.Name} mod.", ex);
-							hasReadError = true;
+							if (error is null && globalErrors.Count == 0 && ex.Message.Contains("NBT Deserialization") || ex.Message.Contains("NBT Serialization"))
+								nbtFail = true;
+
+							globalErrors.Add(new InvalidOperationException($"Error loading global mod data for global item {globalItem.Name} from mod {globalItem.Mod.Name}.", ex));
 						}
 					} else
 						item.GetGlobalItem<UnloadedGlobalItem>().data.Add(globalTagData);
-
-					globalData.Add(globalTagData);
+				} catch (Exception ex) {
+					globalErrors.Add(ex);
+					nbtFail = false;
+				} finally {
+					try {
+						scope?.Dispose();
+					} catch (Exception ex) {
+						globalErrors.Add(ex);
+						nbtFail = false;
+					}
 				}
 
-				globalSaveData = globalData;
+				if (globalTagData is not null)
+					globalData.Add(globalTagData);
 			}
 
-			if (hasReadError) {
-				// Replace with an UnloadedItem
-				TagCompound tag = readData.ToTagData();
-				tag["data"] = saveData;
-				tag["globalData"] = globalSaveData;
-				item = Utility.PrepareFailureItem(BaseErrorDummyItem.NBTFailItemType, tag, readData);
+			if (globalErrors.Count > 0) {
+				if (globalErrors.Count > 1) {
+					var aggregate = new AggregateException(globalErrors);
+					error = error is null ? aggregate : new AggregateException(error, aggregate);
+				} else
+					error = error is null ? globalErrors[0] : new AggregateException(error, globalErrors[0]);
 			}
 
-			if (ValueReader.LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ FINISH [LoadItemInternal]: {ItemID.Search.GetName(item.type)} (stack {item.stack}, prefix {item.prefix}, favorited {item.favorited})");
-
-			return item;
+			return globalData is { Count: > 0 } ? globalData : null;
 		}
 
 		public static List<Item> LoadItems(BinaryReader reader, bool readStacks = true, bool readFavorites = true, int? listCountBitSizeOverride = null) {
@@ -355,7 +465,7 @@ namespace MagicStorage.Common.IO {
 
 			uint read = listCountBitSizeOverride is { } predefinedCount
 				? reader.ReadUInt32(predefinedCount)
-				: _collectionLengthTiers.ReadFrom(reader);
+				: NetCompression.lengthTiers.ReadFrom(reader);
 			int itemCount = (int)read;
 
 			List<Item> items = new();

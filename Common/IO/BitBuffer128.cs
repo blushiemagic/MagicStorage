@@ -45,12 +45,12 @@ namespace MagicStorage.Common.IO {
 				data.Assign(ref _qword0);
 		}
 
-		public void FlushBytes(BinaryWriter writer, ref int head, bool writeLastBits = true) {
+		public void FlushBytes(Stream stream, ref int head, bool writeLastBits = true) {
 			while (head >= MAX_BYTE)
-				writer.Write(GetByte(ref head));
+				stream.WriteByte(GetByte(ref head));
 
 			if (writeLastBits && head > 0)
-				writer.Write(GetByte(ref head, (byte)head));
+				stream.WriteByte(GetByte(ref head, (byte)head));
 		}
 
 		public bool GetBoolean(ref int head) {

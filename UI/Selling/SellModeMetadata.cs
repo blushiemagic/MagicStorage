@@ -78,8 +78,6 @@ namespace MagicStorage.UI.Selling {
 
 				_countTiers.WriteTo(writer, (uint)totalStack);
 
-			//	using var _ = FlagSwitch.Create(ref ValueWriter.LogWrites, true);
-
 				SaveCompression.SaveItem(_iconicItem, writer, writeStack: false, writeFavorite: true);
 
 				_countTiers.WriteTo(writer, (uint)_items.Count);
@@ -104,8 +102,6 @@ namespace MagicStorage.UI.Selling {
 					// Nothing to read
 					return;
 				}
-
-			//	using var _ = FlagSwitch.Create(ref ValueReader.LogReads, true);
 
 				var item = SaveCompression.LoadItem(reader, readStack: false, readFavorite: true);
 

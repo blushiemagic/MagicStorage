@@ -145,13 +145,11 @@ namespace MagicStorage.Items {
 			using MemoryStream ms = new(65536);
 			using (BinaryWriter writer = new(ms)) {
 				// Write the unit's contents to the stream
-			//	using (FlagSwitch.ToggleTrue(ref ValueWriter.LogWrites)) {
-				//	MagicStorageMod.Instance.Logger.Info("==============================");
-				//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
-					SaveCompression.SaveItems(items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
-				//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
-				//	MagicStorageMod.Instance.Logger.Info("==============================");
-			//	}
+			//	MagicStorageMod.Instance.Logger.Info("==============================");
+			//	MagicStorageMod.Instance.Logger.Info($"Writing {unit.items.Count} items to Storage Core");
+				SaveCompression.SaveItems(items, writer, true, true, NetCompression.GetBitSize(Tier.Capacity));
+			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
+			//	MagicStorageMod.Instance.Logger.Info("==============================");
 			}
 
 			byte[] data = NetCompression.Compress(ms.ToArray(), CompressionLevel.BestCompression);
@@ -176,26 +174,24 @@ namespace MagicStorage.Items {
 			using MemoryStream ms = new(NetCompression.Decompress(_unitData, CompressionLevel.BestCompression));
 			using BinaryReader reader = new(ms);
 
-		//	using (FlagSwitch.ToggleTrue(ref ValueReader.LogReads)) {
-			//	MagicStorageMod.Instance.Logger.Info("==============================");
-			//	MagicStorageMod.Instance.Logger.Info($"Retrieving {_itemCount} items from Storage Core");
-			//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
-				List<Item> items = null;
+		//	MagicStorageMod.Instance.Logger.Info("==============================");
+		//	MagicStorageMod.Instance.Logger.Info($"Retrieving {_itemCount} items from Storage Core");
+		//	MagicStorageMod.Instance.Logger.Info($"SERIALIZED BYTES: {string.Join(' ', ms.ToArray().Select(static b => $"{b:X02}"))}");
+			List<Item> items = null;
 				
-				if (_serializationVersion == VERSION_SAVE_NET_IO) {
-					items = NetCompression.ReceiveItems(reader, NetCompression.VERSION_UNCHECKED_STACK_OVERFLOW, true, true, NetCompression.GetBitSize(Tier.Capacity));
+			if (_serializationVersion == VERSION_SAVE_NET_IO) {
+				items = NetCompression.ReceiveItems(reader, NetCompression.VERSION_UNCHECKED_STACK_OVERFLOW, true, true, NetCompression.GetBitSize(Tier.Capacity));
 					
-					// Force the items to be serialized in the new format
-					StoreItems(items);
-				} else if (_serializationVersion == VERSION_SAVE_TAG_IO)
-					items = SaveCompression.LoadItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
+				// Force the items to be serialized in the new format
+				StoreItems(items);
+			} else if (_serializationVersion == VERSION_SAVE_TAG_IO)
+				items = SaveCompression.LoadItems(reader, true, true, NetCompression.GetBitSize(Tier.Capacity));
 
-				_cachedItemData = items ?? [];
-				_itemCount = _cachedItemData.Count;
-				return _cachedItemData;
-			//	MagicStorageMod.Instance.Logger.Info($"Retrieved {_itemCount} items from Storage Core");
-			//	MagicStorageMod.Instance.Logger.Info("==============================");
-		//	}
+			_cachedItemData = items ?? [];
+			_itemCount = _cachedItemData.Count;
+			return _cachedItemData;
+		//	MagicStorageMod.Instance.Logger.Info($"Retrieved {_itemCount} items from Storage Core");
+		//	MagicStorageMod.Instance.Logger.Info("==============================");
 		}
 	}
 }

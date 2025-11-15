@@ -1,28 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Common.IO {
 	partial class SaveCompression {
-		private static readonly LengthCompressor<uint> _collectionLengthTiers;
-
 		private static readonly ConditionalWeakTable<ValueReader, GenericKeyLookup> _tagKeyReaderLookup = [];
 		private static readonly ConditionalWeakTable<ValueWriter, GenericKeyLookup> _tagKeyWriterLookup = [];
 
 		static SaveCompression() {
-			// Many tiers for smaller collections, and fewer for rarer large arrays
-			var tier0 = EncodingTier.CreateZero<uint>  (prefix: 0b_00, 2, size: 16);
-			var tier1 = tier0.CreateSuccessive         (prefix: 0b_01, 2, size: 64);
-			var tier2 = tier1.CreateSuccessive         (prefix: 0b_10, 2, size: 256);
-			var tier3 = tier2.CreateSuccessive         (prefix: 0b_11, 2, size: 4096);
-			var tier4 = tier3.CreateSuccessive         (prefix: 0b011, 3, size: 131072);
-			var tier5 = tier4.CreateSuccessiveUnbounded(prefix: 0b111, 3);
-
-			_collectionLengthTiers = new LengthCompressor<uint>(tier0, tier1, tier2, tier3, tier4, tier5);
-
 			// Since this implementation has handlers which share a PayloadType, the dictionary needs to be created manually
 			_payloadIDs = [];
 			for (int i = 1; i < _payloadHandlers.Length; i++) {
@@ -63,18 +50,15 @@ namespace MagicStorage.Common.IO {
 				}
 			),
 			new PayloadHandler<byte[]>(
-				r => r.ReadBytes((int)_collectionLengthTiers.ReadFrom(r)),
-				(w, v) => {
-					_collectionLengthTiers.WriteTo(w, (uint)v.Length);
-					w.WriteBytesNoLength(v);
-				}
+				r => r.ReadBytes((int)NetCompression.lengthTiers.ReadFrom(r)),
+				(w, v) => w.Write(v, NetCompression.lengthTiers)
 			),
 			new PayloadHandler<string>(
 				StringCompressor.ReadFrom,
 				StringCompressor.WriteTo
 			),
 			new PayloadHandler<IList>(
-				r => GetHandler(r.ReadByte(SIZE_ID)).ReadList(r, (int)_collectionLengthTiers.ReadFrom(r)),
+				r => GetHandler(r.ReadByte(SIZE_ID)).ReadList(r, (int)NetCompression.lengthTiers.ReadFrom(r)),
 				(w, v) => {
 					int id;
 					try {
@@ -83,7 +67,7 @@ namespace MagicStorage.Common.IO {
 						throw new InvalidOperationException($"Invalid list type: {v.GetType()}", ex);
 					}
 					w.Write((byte)id, SIZE_ID);
-					_collectionLengthTiers.WriteTo(w, (uint)v.Count);
+					NetCompression.lengthTiers.WriteTo(w, (uint)v.Count);
 					_payloadHandlers[id].WriteList(w, v);
 				}
 			),
@@ -111,14 +95,14 @@ namespace MagicStorage.Common.IO {
 			),
 			new PayloadHandler<int[]>(
 				r => {
-					int length = (int)_collectionLengthTiers.ReadFrom(r);
+					int length = (int)NetCompression.lengthTiers.ReadFrom(r);
 					int[] array = GC.AllocateUninitializedArray<int>(length);
 					for (int i = 0; i < length; i++)
 						array[i] = r.ReadInt32(BitBuffer128.MAX_INT);
 					return array;
 				},
 				(w, v) => {
-					_collectionLengthTiers.WriteTo(w, (uint)v.Length);
+					NetCompression.lengthTiers.WriteTo(w, (uint)v.Length);
 					for (int i = 0; i < v.Length; i++)
 						w.Write(v[i], BitBuffer128.MAX_INT);
 				}

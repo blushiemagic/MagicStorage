@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
+using Terraria.ModLoader.UI;
 
 namespace MagicStorage.Common.IO {
 	public class ValueReader {
-		internal static bool LogReads = false;
-
 		private BitBuffer128 _bits;
 		private int _head;
 		private readonly BinaryReader _stream;
@@ -20,20 +23,19 @@ namespace MagicStorage.Common.IO {
 		private void CheckBits(int numBits) {
 			// Read bytes from the stream until we have enough bits
 			while (_head < numBits) {
-			//	if (LogReads)
-			//		MagicStorageMod.Instance.Logger.Info($"STREAMED BITS [head = {_head}, numBits = {numBits}]");
-
 				byte b = _stream.ReadByte();
 				_bits.Set(b, ref _head);
 			}
 		}
 
 		public bool ReadBoolean() {
+			CheckScopeOverflow(1);
+
 			CheckBits(1);
+
 			bool ret = _bits.GetBoolean(ref _head);
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ [bool]: {ret}");
+			IncrementScopeBits(1);
 
 			return ret;
 		}
@@ -60,20 +62,13 @@ namespace MagicStorage.Common.IO {
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 
+			CheckScopeOverflow(numBits);
+
 			CheckBits(numBits);
 
 			T ret = _bits.GetVariant<T>(ref _head, (byte)numBits);
 
-			if (LogReads) {
-				if (typeof(T) == typeof(byte))
-					MagicStorageMod.Instance.Logger.Info($"READ [byte]: {ret:X02} ({numBits} bits)");
-				else if (typeof(T) == typeof(ushort))
-					MagicStorageMod.Instance.Logger.Info($"READ [ushort]: {ret:X04} ({numBits} bits)");
-				else if (typeof(T) == typeof(uint))
-					MagicStorageMod.Instance.Logger.Info($"READ [uint]: {ret:X08} ({numBits} bits)");
-				else if (typeof(T) == typeof(ulong))
-					MagicStorageMod.Instance.Logger.Info($"READ [ulong]: {ret:X016} ({numBits} bits)");
-			}
+			IncrementScopeBits(numBits);
 
 			return ret;
 		}
@@ -100,6 +95,8 @@ namespace MagicStorage.Common.IO {
 			if (numBits < 0)
 				throw new ArgumentOutOfRangeException(nameof(numBits), "Bit count must be greater than 0");
 
+			CheckScopeOverflow(numBits);
+
 			CheckBits(numBits);
 
 			T ret = default;
@@ -117,16 +114,7 @@ namespace MagicStorage.Common.IO {
 				ret = Unsafe.As<ulong, T>(ref read);
 			}
 
-			if (LogReads) {
-				if (typeof(T) == typeof(sbyte))
-					MagicStorageMod.Instance.Logger.Info($"READ [sbyte]: {ret:X02} ({numBits} bits)");
-				else if (typeof(T) == typeof(short))
-					MagicStorageMod.Instance.Logger.Info($"READ [short]: {ret:X04} ({numBits} bits)");
-				else if (typeof(T) == typeof(int))
-					MagicStorageMod.Instance.Logger.Info($"READ [int]: {ret:X08} ({numBits} bits)");
-				else if (typeof(T) == typeof(long))
-					MagicStorageMod.Instance.Logger.Info($"READ [long]: {ret:X016} ({numBits} bits)");
-			}
+			IncrementScopeBits(numBits);
 
 			return ret;
 		}
@@ -160,31 +148,19 @@ namespace MagicStorage.Common.IO {
 		public long ReadInt64(int numBits) => ReadSigned<long>(numBits);
 
 		public byte[] ReadBytes() {
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info("READ START [byte[]]");
-
 			int length = Read7BitEncodedInt();
 			byte[] bytes = GC.AllocateUninitializedArray<byte>(length);
 
 			for (int i = 0; i < length; i++)
 				bytes[i] = ReadByte(BitBuffer128.MAX_BYTE);
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ FINISH [byte[]]: {length} bytes");
-
 			return bytes;
 		}
 
 		public byte[] ReadBytes(int count) {
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ START [byte[]/c] ({count} bytes)");
-
 			byte[] bytes = GC.AllocateUninitializedArray<byte>(count);
 			for (int i = 0; i < count; i++)
 				bytes[i] = ReadByte(BitBuffer128.MAX_BYTE);
-			
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info($"READ FINISH [byte[]/c]");
 			
 			return bytes;
 		}
@@ -193,33 +169,185 @@ namespace MagicStorage.Common.IO {
 			int read = 0;
 			int shift = 0;
 
-			if (LogReads)
-				MagicStorageMod.Instance.Logger.Info("READ START [7BitEncodedInt]");
-
 			while (shift < BitBuffer128.MAX_INT) {
 				byte b;
 				bool more;
 
-				using (FlagSwitch.Create(ref LogReads, false)) {
-					b = ReadByte(BitBuffer128.MAX_BYTE - 1);
-					read |= (b & 0x7F) << shift;
-					shift += BitBuffer128.MAX_BYTE - 1;
+				b = ReadByte(BitBuffer128.MAX_BYTE - 1);
+				read |= (b & 0x7F) << shift;
+				shift += BitBuffer128.MAX_BYTE - 1;
 				
-					more = ReadBoolean();
-				}
+				more = ReadBoolean();
 
-				if (!more) {
-					if (LogReads) {
-						MagicStorageMod.Instance.Logger.Info($"READ [7BitEncodedInt/byte]: {b:X02} (final)");
-						MagicStorageMod.Instance.Logger.Info($"READ FINISH [7BitEncodedInt]: {read:X08}");
-					}
-
+				if (!more)
 					return read;
-				} else if (LogReads)
-					MagicStorageMod.Instance.Logger.Info($"READ [7BitEncodedInt/byte]: {b:X02} (continuing)");
 			}
 
 			throw new FormatException("Invalid 7-bit encoded integer");
+		}
+
+		// Specialized methods for handling item data
+
+		internal void ReadModData(Item item, LengthCompressor<uint> lengthReader) {
+			if (ReadBoolean() && item.ModItem is { } modItem) {
+				using (ReadScope(lengthReader, optimizeForBytes: true)) {
+					uint byteCount = _activeScope.ExpectedBitCount / 8;
+					byte[] bytes = ReadBytes((int)byteCount);
+
+					var ms = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);
+					modItem.NetReceive(new BinaryReader(ms));
+
+					if ((uint)ms.Position != byteCount)
+						throw new InvalidOperationException($"Read underflow {ms.Position} of {byteCount} bytes caused by {modItem.Name} from the {modItem.Mod.Name} mod.");
+				}
+			}
+		}
+
+		internal void ReadGlobalModData(Item item, LengthCompressor<uint> lengthReader, DeserializedNetItem readData) {
+			var enumerator = ItemLoader.HookNetReceive.Enumerate(item);
+
+			uint count = ReadBoolean() ? lengthReader.ReadFrom(this) : 0;
+
+			if (count != (uint)enumerator.baseGlobals.Length) {
+				// Skip past all of the data
+				for (uint i = 0; i < count; i++) {
+					using (ReadScope(lengthReader, optimizeForBytes: true))
+						_activeScope.ReadToEnd();
+				}
+
+				throw new InvalidOperationException($"Expected {count} GlobalItem instances, but found {enumerator.baseGlobals.Length}");
+			} else if (count > 0) {
+				UnloadedGlobalItem unloadedGlobalItem = null;
+				List<Exception> errors = [];
+
+				foreach (var globalItem in enumerator) {
+					if (globalItem is UnloadedGlobalItem unloaded)
+						unloadedGlobalItem = unloaded;
+
+					IDisposable scope = null;
+
+					try {
+						scope = ReadScope(lengthReader, optimizeForBytes: true);
+
+						uint byteCount = _activeScope.ExpectedBitCount / 8;
+						byte[] bytes = ReadBytes((int)byteCount);
+
+						var ms = new MemoryStream(bytes, 0, bytes.Length, writable: false, publiclyVisible: true);
+						globalItem.NetReceive(item, new BinaryReader(ms));
+
+						if ((uint)ms.Position != byteCount)
+							throw new InvalidOperationException($"Read underflow {ms.Position} of {byteCount} bytes caused by {globalItem.Name} from the {globalItem.Mod.Name} mod.");
+					} catch (Exception ex) {
+						errors.Add(ex);
+					} finally {
+						try {
+							scope?.Dispose();
+						} catch (Exception ex) {
+							errors.Add(ex);
+						}
+					}
+				}
+
+				if (unloadedGlobalItem is not null) {
+					readData.modPrefixMod = unloadedGlobalItem.ModPrefixMod;
+					readData.modPrefixName = unloadedGlobalItem.ModPrefixName;
+				}
+
+				if (errors.Count > 0) {
+					if (errors.Count == 1)
+						throw errors[0];
+					else
+						throw new AggregateException(errors);
+				}
+			}
+		}
+
+		// Data deserialization safeguards
+
+		private Scope _activeScope;
+
+		public IDisposable ReadScope(LengthCompressor<uint> lengthReader, bool optimizeForBytes) {
+			uint expectedBits = ReadBoolean() ? lengthReader.ReadFrom(this) : 0;
+			if (optimizeForBytes)
+				expectedBits *= 8;
+
+			_activeScope = new Scope(this, _activeScope, expectedBits);
+			return _activeScope;
+		}
+
+		private void IncrementScopeBits(int numBits) {
+			if (_activeScope is { disposed: false } scope)
+				scope.readBitCount += (uint)numBits;
+		}
+
+		private void CheckScopeOverflow(int numBits) {
+			if (_activeScope is { disposed: false } scope)
+				scope.CheckOverflow(numBits);
+		}
+
+		private static readonly string[] _byteSuffixes = [ "", ".125", ".25", ".375", ".5", ".625", ".75", ".875" ];
+
+		private static string GetByteString(uint bits) => $"{bits >> 3}{_byteSuffixes[bits & 0b111]}";
+
+		private class Scope : IDisposable {
+			private readonly ValueReader _baseReader;
+			private readonly Scope _enclosingScope;
+
+			public uint readBitCount;
+			private readonly uint _expectedBitCount;
+
+			internal bool disposed;
+
+			public uint ExpectedBitCount => _expectedBitCount;
+
+			public Scope(ValueReader baseReader, Scope enclosingScope, uint expectedBitCount) {
+				_baseReader = baseReader;
+				_enclosingScope = enclosingScope;
+				_expectedBitCount = expectedBitCount;
+			}
+
+			public void CheckOverflow(int numBits) {
+				uint afterRead = readBitCount + (uint)numBits;
+				if (afterRead > _expectedBitCount)
+					throw new InvalidOperationException($"Read overflow {GetByteString(afterRead)} of {GetByteString(_expectedBitCount)} bytes");
+			}
+
+			public void ReadToEnd() {
+				// Scan until the end of the scope has been reached
+				int bitsToSkip = (int)(_expectedBitCount - readBitCount);
+
+				if (bitsToSkip > 0) {
+					while (bitsToSkip >= 8) {
+						_baseReader.ReadByte(8);
+						bitsToSkip -= 8;
+					}
+
+					if (bitsToSkip > 0)
+						_baseReader.ReadByte(bitsToSkip);
+
+					readBitCount = _expectedBitCount;
+				}
+				
+				if (_enclosingScope is { } scope)
+					scope.readBitCount += readBitCount;
+			}
+
+			public void Dispose() {
+				if (disposed)
+					throw new ObjectDisposedException(nameof(Scope), "Scope has already been closed.");
+
+				disposed = true;
+
+				uint read = readBitCount;
+				bool readToEnd = read == _expectedBitCount;
+
+				ReadToEnd();
+
+				_baseReader._activeScope = _enclosingScope;
+
+				if (!readToEnd)
+					throw new InvalidOperationException($"Read underflow {GetByteString(read)} of {GetByteString(_expectedBitCount)} bytes");
+			}
 		}
 	}
 }

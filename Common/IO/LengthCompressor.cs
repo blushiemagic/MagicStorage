@@ -3,8 +3,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace MagicStorage.Common.IO {
-	internal class LengthCompressor<T> where T : INumberBase<T>, IBinaryNumber<T>, IMinMaxValue<T>
-	{
+	public class LengthCompressor<T> where T : INumberBase<T>, IBinaryNumber<T>, IMinMaxValue<T> {
 		private readonly EncodingTier<T>[] _tiers;
 
 		internal readonly byte _minPrefixBits;
@@ -61,7 +60,7 @@ namespace MagicStorage.Common.IO {
 		}
 	}
 
-	internal readonly record struct EncodingTier<T>(byte Prefix, byte PrefixBitCount, byte BitCount, T Minimum, T Maximum)
+	public readonly record struct EncodingTier<T>(byte Prefix, byte PrefixBitCount, byte BitCount, T Minimum, T Maximum)
 		where T : INumberBase<T>, IBinaryNumber<T>, IMinMaxValue<T>
 	{
 		public EncodingTier<T> CreateSuccessive(byte prefix, byte prefixBitCount, T size) {
