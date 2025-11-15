@@ -195,21 +195,23 @@ namespace MagicStorage.Common.IO {
 			contentLookup.LoadFrom(reader);
 			tagKeyLookup.LoadFrom(reader);
 
-			return LoadItemInternal(reader, readStack, readFavorite, contentLookup, tagKeyLookup, maxStackReader);
+			return LoadItemInternal(reader, readStack, readFavorite, true, contentLookup, tagKeyLookup, maxStackReader, out _);
 		}
 
 		private static Item LoadItemInternal(
 			ValueReader reader,
 			bool readStack,
 			bool readFavorite,
+			bool isolated,
 			ItemContentNameLookup contentLookup,
 			GenericKeyLookup tagKeyLookup,
-			StackCompressor maxStackReader
+			StackCompressor maxStackReader,
+			out Exception? error
 		) {
 			Item? item = null;
 			DeserializedNetItem readData = new();
 
-			Exception? error = null;
+			error = null;
 			bool nbtFail = false;
 
 			IDisposable? scope = null;
@@ -251,13 +253,22 @@ namespace MagicStorage.Common.IO {
 			FailImmediately:
 
 			if (forcedError || error is not null) {
-				if (!forcedError) {
-					if (item is not null)
-						MagicStorageMod.Instance.Logger.Error($"Error loading item \"{item.IdentifierAndStack()}\" from compressed stream", error);
-					else
-						MagicStorageMod.Instance.Logger.Error($"Error loading unknown item from compressed stream", error);
-				} else
-					MagicStorageMod.Instance.Logger.Error("Error loading unknown item from compressed stream caused by unknown reasons");
+				if (isolated) {
+					if (error is AggregateException aggregate)
+						error = aggregate.Flatten();
+
+					if (!forcedError) {
+						if (item is not null)
+							MagicStorageMod.Instance.Logger.Error($"Error loading item \"{item.IdentifierAndStack()}\" from compressed stream", error);
+						else
+							MagicStorageMod.Instance.Logger.Error($"Error loading unknown item from compressed stream", error);
+					} else {
+						if (error is not null)
+							MagicStorageMod.Instance.Logger.Error("Error loading unknown item from compressed stream", error);
+						else
+							MagicStorageMod.Instance.Logger.Error("Error loading unknown item from compressed stream for unknown reason");
+					}
+				}
 
 				// Replace with an error item
 				TagCompound tag = readData.ToTagData();
@@ -265,6 +276,8 @@ namespace MagicStorage.Common.IO {
 				tag["globalData"] = globalSaveData;
 				item = Utility.PrepareFailureItem(nbtFail ? BaseErrorDummyItem.NBTFailItemType : BaseErrorDummyItem.NetReadFailItemType, tag, readData);
 			}
+
+			Debug.Assert(item is not null);
 
 			return item;
 		}
@@ -471,7 +484,32 @@ namespace MagicStorage.Common.IO {
 			List<Item> items = new();
 
 			for (int i = 0; i < itemCount; i++) {
-				items.Add(LoadItemInternal(reader, readStacks, readFavorites, contentLookup, tagKeyLookup, maxStackReader));
+				IDisposable? scope = null;
+				Item? item = null;
+				Exception? error = null;
+
+				try {
+					scope = reader.ReadScope(NetCompression.lengthTiers, optimizeForBytes: false);
+					item = LoadItemInternal(reader, readStacks, readFavorites, false, contentLookup, tagKeyLookup, maxStackReader, out error);
+				} catch (Exception ex) {
+					error = ex;
+				} finally {
+					try {
+						scope?.Dispose();
+					} catch (Exception ex) {
+						error = error is null ? ex : new AggregateException(error, ex);
+					}
+				}
+
+				if (error is not null) {
+					if (error is AggregateException aggregate)
+						error = aggregate.Flatten();
+
+					if (item is not null)
+						MagicStorageMod.Instance.Logger.Error($"Error loading item \"{item.IdentifierAndStack()}\" from compressed stream", error);
+					else
+						MagicStorageMod.Instance.Logger.Error($"Error loading unknown item from compressed stream", error);
+				}
 			}
 
 			return items;
