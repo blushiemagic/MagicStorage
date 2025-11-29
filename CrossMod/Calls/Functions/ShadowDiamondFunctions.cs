@@ -6,7 +6,9 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 
 namespace MagicStorage.CrossMod.Calls.Functions {
-	internal class PreventShadowDiamonDrop : BaseCallFunction<int, bool> {
+	internal class PreventShadowDiamondDrop : BaseCallFunction<int, bool> {
+		// "Prevent Shadow Diamond Drop", int npcID
+
 		protected override bool Handle(int npcID) {
 			if (npcID < 0)
 				ThrowWithMessage("NPC ID must be positive", 0);
@@ -18,6 +20,8 @@ namespace MagicStorage.CrossMod.Calls.Functions {
 	}
 
 	internal class SetShadowDiamondDropRule : BaseCallFunctionNoReturn<int, IItemDropRule> {
+		// "Set Shadow Diamond Drop Rule", IItemDropRule rule
+
 		protected override void Handle(int npcID, IItemDropRule rule) {
 			if (npcID < 0)
 				ThrowWithMessage("NPC ID must be positive", 0);
@@ -32,6 +36,8 @@ namespace MagicStorage.CrossMod.Calls.Functions {
 	}
 
 	internal class GetShadowDiamondDropRule : BaseCallFunction {
+		// "Get Shadow Diamond Drop Rule", int dropNormal, int? dropExpert = null
+
 		public override object Call(ReadOnlySpan<object> args) {
 			ThrowIfNotEnoughArgs(args, 1);
 

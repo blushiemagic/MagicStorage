@@ -5,6 +5,9 @@ using Terraria.GameContent.ItemDropRules;
 
 namespace MagicStorage.CrossMod.Calls.Functions {
 	internal class AddExtraCraftDrop : BaseCallFunction {
+		// "Add Extra Craft Drop", Recipe recipe, IItemDropRule rule
+		// "Add Extra Craft Drop", Func<Recipe, bool> condition, IItemDropRule rule
+
 		public override object Call(ReadOnlySpan<object> args) {
 			ThrowIfNotEnoughArgs(args, 2);
 

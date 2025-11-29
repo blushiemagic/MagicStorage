@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.CrossMod.Calls.Functions {
+	#region Aggregator Definitions
 	[Autoload(false)]
 	internal class DynamicAggregator : StorageAggregator {
 		public string name;
@@ -64,8 +65,11 @@ namespace MagicStorage.CrossMod.Calls.Functions {
 		public Action<GlobalItem, TagCompound> selectGlobalData;
 		public override void SelectGlobalData(GlobalItem item, TagCompound tag) => selectGlobalData(item, tag);
 	}
+	#endregion
 
 	internal class CreateAggregator : BaseCallFunction {
+		// "Create Aggregator", Mod mod, string name, Func<Item, bool> appliesToItem, Func<Item, Item, bool?> canAggregateItems, Action<ModItem, TagCompound> selectData, Action<GlobalItem, TagCompound> selectGlobalData
+
 		public override object Call(ReadOnlySpan<object> args) {
 			ThrowIfNotEnoughArgs(args, 3);
 
