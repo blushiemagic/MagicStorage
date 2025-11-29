@@ -35,11 +35,8 @@ namespace MagicStorage
 		internal static void Unload() => ClearAllCollections();
 
 		internal static void ClearAllCollections() {
-			itemTypesToUpdate?.Clear();
-			itemTypesToUpdate = null;
 			items.Clear();
-			sourceItems.Clear();
-			didMatCheck.Clear();
+			itemToSourceItems.Clear();
 			ResetRefreshCache();
 		}
 
@@ -47,13 +44,15 @@ namespace MagicStorage
 			if (slot < 0 || slot >= items.Count)
 				return;
 
-			//Favorite all of the source items
-			bool doFavorite = !sourceItems[slot][0].favorited;
+			// Favorite all of the source items
+			Item shownItem = items[slot];
+			var sourceItems = itemToSourceItems.TryGetValue(shownItem, out var list) ? list : [];
+			bool doFavorite = !shownItem.favorited;
 
-			foreach (var item in sourceItems[slot])
+			foreach (var item in sourceItems)
 				item.favorited = doFavorite;
 
-			MagicUI.SetNextCollectionsToRefresh(sourceItems[slot][0].type);
+			MagicUI.SetNextCollectionsToRefresh(shownItem.type);
 		}
 
 		/// <summary>

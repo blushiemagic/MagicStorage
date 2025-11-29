@@ -12,9 +12,9 @@ namespace MagicStorage {
 		/// <param name="itemType">An item ID to refresh</param>
 		public static void SetNextDefaultItemCollectionToRefresh(int itemType) {
 			itemsToRefresh ??= new();
-			itemsToRefresh.Add(itemType);
 
-			NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
+			if (itemsToRefresh.Add(itemType))
+				NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
 		}
 
 		/// <summary>
@@ -27,13 +27,17 @@ namespace MagicStorage {
 
 			itemsToRefresh ??= new();
 			
+			#if NETPLAY
+			bool any = false;
+			foreach (int id in itemTypes)
+				any |= itemsToRefresh.Add(id);
+			
+			if (any)
+				NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
+			#else
 			foreach (int id in itemTypes)
 				itemsToRefresh.Add(id);
-
-			if (itemsToRefresh.Count == 0)
-				itemsToRefresh = null;
-			else
-				NetHelper.Report(true, $"Setting next refresh to check {itemsToRefresh.Count} items");
+			#endif
 		}
 
 		/// <summary>

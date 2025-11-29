@@ -220,9 +220,6 @@ namespace MagicStorage.UI.States {
 
 					// Air item should display as an "empty slot" without special contexts
 					if (!item.IsAir) {
-						// Delay cloning
-						item = item.Clone();
-
 						bool selected = object.ReferenceEquals(recipe, CraftingGUI.selectedRecipe);
 
 						if (selected)
@@ -231,8 +228,10 @@ namespace MagicStorage.UI.States {
 						if (!available)
 							context = selected ? MagicSlotContext.SelectedRecipeNotAvailable : MagicSlotContext.RecipeNotAvailable;
 					
-						if (MagicStorageConfig.CraftingFavoritingEnabled && StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item))
+						if (MagicStorageConfig.CraftingFavoritingEnabled && StoragePlayer.LocalPlayer.FavoritedRecipes.Contains(item)) {
+							item = item.Clone();
 							item.favorited = true;
+						}
 					}
 
 					return item;

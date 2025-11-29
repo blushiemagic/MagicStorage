@@ -50,8 +50,8 @@ namespace MagicStorage.UI.Input {
 			if (State.IsActive) {
 				// Update the hover text if any is present
 				if (IsMouseHovering && GetHoverText?.Invoke() is string hoverText) {
-					if (MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
-						hoverText += $"\n[c/ff0000:{MagicUI.lastKnownSearchBarErrorReason}]";
+					if (MagicUI.lastKnownSearchBarErrorReason is string errorText && !MagicUI.CurrentlyRefreshing)
+						Utility.AddErrorTextMultiline(ref hoverText, errorText);
 
 					if (!string.IsNullOrWhiteSpace(hoverText))
 						MagicUI.mouseText = hoverText;

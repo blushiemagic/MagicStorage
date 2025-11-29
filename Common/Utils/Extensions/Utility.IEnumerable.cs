@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common;
+using MagicStorage.Common.Threading.UI;
 using MagicStorage.Sorting;
 using System;
 using System.Collections.Generic;
@@ -21,21 +22,6 @@ namespace MagicStorage {
 				sum += i;
 			
 			return sum;
-		}
-
-		internal static IEnumerable<T> Filter<T>(this IEnumerable<T> source, StorageGUI.ThreadContext thread, Func<T, Item> objToItem) {
-			ArgumentNullException.ThrowIfNull(source);
-			ArgumentNullException.ThrowIfNull(thread);
-			ArgumentNullException.ThrowIfNull(objToItem);
-
-			return new ThreadFilterEnumerator<T>(thread, source, objToItem);
-		}
-
-		internal static IEnumerable<Item> Filter(this IEnumerable<Item> source, StorageGUI.ThreadContext thread) {
-			ArgumentNullException.ThrowIfNull(source);
-			ArgumentNullException.ThrowIfNull(thread);
-
-			return new ThreadFilterItemEnumerator(thread, source);
 		}
 
 		public static IEnumerable<T> TakeIfLimitExists<T>(this IEnumerable<T> source, int? limit) => limit is int lim ? source.Take(lim) : source;

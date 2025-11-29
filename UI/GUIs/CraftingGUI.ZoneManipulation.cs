@@ -75,7 +75,91 @@ namespace MagicStorage {
 		internal static void ExecuteInCraftingGuiEnvironment(Action action)
 		{
 			ArgumentNullException.ThrowIfNull(action);
+			ExecuteInCraftingGuiEnvironment_Inner(new ActionWrapperNoArgs(action));
+		}
 
+		internal static void ExecuteInCraftingGuiEnvironment<T>(T arg, Action<T> action)
+		{
+			ArgumentNullException.ThrowIfNull(action);
+			ExecuteInCraftingGuiEnvironment_Inner(new ActionWrapper<T>(action, arg));
+		}
+
+		internal static void ExecuteInCraftingGuiEnvironment<T1, T2>(T1 arg1, T2 arg2, Action<T1, T2> action)
+		{
+			ArgumentNullException.ThrowIfNull(action);
+			ExecuteInCraftingGuiEnvironment_Inner(new ActionWrapper<T1, T2>(action, arg1, arg2));
+		}
+
+		internal static T ExecuteInCraftingGuiEnvironment<T>(Func<T> func)
+		{
+			ArgumentNullException.ThrowIfNull(func);
+			FuncWrapper<T> wrapper = new(func);
+			ExecuteInCraftingGuiEnvironment_Inner(wrapper);
+			return wrapper.Result;
+		}
+
+		internal static TReturn ExecuteInCraftingGuiEnvironment<TArg, TReturn>(TArg state, Func<TArg, TReturn> func)
+		{
+			ArgumentNullException.ThrowIfNull(func);
+			FunWrapper<TArg, TReturn> wrapper = new(func, state);
+			ExecuteInCraftingGuiEnvironment_Inner(wrapper);
+			return wrapper.Result;
+		}
+
+		internal static TReturn ExecuteInCraftingGuiEnvironment<TArg1, TArg2, TReturn>(TArg1 arg1, TArg2 arg2, Func<TArg1, TArg2, TReturn> func)
+		{
+			ArgumentNullException.ThrowIfNull(func);
+			FunWrapper<TArg1, TArg2, TReturn> wrapper = new(func, arg1, arg2);
+			ExecuteInCraftingGuiEnvironment_Inner(wrapper);
+			return wrapper.Result;
+		}
+
+		#region Nested types
+		private abstract class ActionWrapper {
+			public abstract void RunAction();
+		}
+
+		private class ActionWrapperNoArgs(Action action) : ActionWrapper {
+			private readonly Action _action = action;
+			public override void RunAction() => _action();
+		}
+
+		private class ActionWrapper<T>(Action<T> action, T arg) : ActionWrapper {
+			private readonly Action<T> _action = action;
+			private readonly T _arg = arg;
+			public override void RunAction() => _action(_arg);
+		}
+
+		private class ActionWrapper<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg) : ActionWrapper {
+			private readonly Action<T1, T2> _action = action;
+			private readonly T1 _arg1 = arg1;
+			private readonly T2 _arg2 = arg;
+			public override void RunAction() => _action(_arg1,  _arg2);
+		}
+
+		private class FuncWrapper<T>(Func<T> func) : ActionWrapper {
+			private readonly Func<T> _func = func;
+			public T Result { get; private set; }
+			public override void RunAction() => Result = _func();
+		}
+
+		private class FunWrapper<TArg, TReturn>(Func<TArg, TReturn> func, TArg arg) : ActionWrapper {
+			private readonly Func<TArg, TReturn> _func = func;
+			private readonly TArg _arg = arg;
+			public TReturn Result { get; private set; }
+			public override void RunAction() => Result = _func(_arg);
+		}
+
+		private class FunWrapper<TArg1, TArg2, TReturn>(Func<TArg1, TArg2, TReturn> func, TArg1 arg1, TArg2 arg2) : ActionWrapper {
+			private readonly Func<TArg1, TArg2, TReturn> _func = func;
+			private readonly TArg1 _arg1 = arg1;
+			private readonly TArg2 _arg2 = arg2;
+			public TReturn Result { get; private set; }
+			public override void RunAction() => Result = _func(_arg1, _arg2);
+		}
+		#endregion
+
+		private static void ExecuteInCraftingGuiEnvironment_Inner(ActionWrapper action) {
 			int level = Interlocked.Increment(ref _executingInGuiEnvironment);
 			if (level > 1)
 			{
@@ -88,7 +172,7 @@ namespace MagicStorage {
 						Thread.Yield();
 
 					// Zone flags are already set, so we can just execute the action
-					action();
+					action.RunAction();
 				} finally {
 					if (Interlocked.Decrement(ref _executingInGuiEnvironment) <= 0) {
 						PlayerZoneCache.FreeCache(false);
@@ -116,7 +200,7 @@ namespace MagicStorage {
 
 				_zoneInformationReady = true;
 
-				action();
+				action.RunAction();
 			} finally {
 				if (Interlocked.Decrement(ref _executingInGuiEnvironment) <= 0) {
 					PlayerZoneCache.FreeCache(false);

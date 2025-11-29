@@ -1,4 +1,5 @@
 using Ionic.Zlib;
+using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
@@ -102,8 +103,7 @@ namespace MagicStorage.Components
 
 		public override bool HasSpaceInStackFor(Item check)
 		{
-			ItemData data = new(check);
-			return hasSpaceInStack.Contains(data);
+			return hasSpaceInStack.Contains(check);
 		}
 
 		public bool HasSpaceFor(Item check) => !IsFull || HasSpaceInStackFor(check);
@@ -112,8 +112,7 @@ namespace MagicStorage.Components
 		{
 			if (ignorePrefix)
 				return hasItemNoPrefix.Contains(check.type);
-			ItemData data = new(check);
-			return hasItem.Contains(data);
+			return hasItem.Contains(check);
 		}
 
 		public override IEnumerable<Item> GetItems() => items;
@@ -179,10 +178,6 @@ namespace MagicStorage.Components
 			return finished;
 		}
 
-		// Stupid ugly hack since TryWithdraw is an abstract method, and changing it would break compatibility
-		// The Aether Interface needs to not care about item prefixes, and TryWithdraw doesn't really have anything for that
-		internal static bool ignorePrefixesWhenWithdrawing;
-
 		public override Item TryWithdraw(Item lookFor, bool locked = false, bool keepOneIfFavorite = false)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient && !receiving)
@@ -190,7 +185,7 @@ namespace MagicStorage.Components
 
 			Item original = lookFor.Clone();
 
-			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite, !ignorePrefixesWhenWithdrawing))
+			if (!WithdrawFromItemCollection(items, lookFor, out Item result, keepOneIfFavorite))
 				return result;
 
 			if (Main.netMode == NetmodeID.Server)
@@ -251,7 +246,7 @@ namespace MagicStorage.Components
 			return true;
 		}
 
-		private int _lastKnowFramingTier = -1;
+		private int _lastKnownFramingTier = -1;
 
 		public bool UpdateTileFrame()
 		{
@@ -275,8 +270,8 @@ namespace MagicStorage.Components
 
 			tier.Frame(currentFullness, currentActive, out int targetFrameX, out int targetFrameY);
 
-			if (previousFullness != currentFullness || previousActive != currentActive || _lastKnowFramingTier != tier.Type) {
-				_lastKnowFramingTier = tier.Type;
+			if (previousFullness != currentFullness || previousActive != currentActive || _lastKnownFramingTier != tier.Type) {
+				_lastKnownFramingTier = tier.Type;
 
 				int x = Position.X, y = Position.Y;
 				tile.TileFrameX = (short)targetFrameX;
@@ -297,7 +292,7 @@ namespace MagicStorage.Components
 				return true;
 			}
 
-			_lastKnowFramingTier = tier.Type;
+			_lastKnownFramingTier = tier.Type;
 
 			return false;
 		}
@@ -559,7 +554,7 @@ namespace MagicStorage.Components
 			foreach (Item item in tag.GetList<TagCompound>("Items").Select(Utility.SafelyLoadItem).Where(static i => !i.IsAir))
 			{
 				items.Add(item);
-				ItemData data = new(item);
+				ItemData data = item;
 				if (item.stack < item.maxStack)
 					hasSpaceInStack.Add(data);
 				hasItem.Add(data);
@@ -630,8 +625,7 @@ namespace MagicStorage.Components
 					case NetOperations.RemoveCore:
 						break;
 					case NetOperations.InsertCore:
-						// SendItem is okay here since the data has already been encoded using SaveCompression.SaveItem()
-						NetCompression.SendItem(netOp.item, bitWriter, false, false);
+						SaveCompression.SaveItem(netOp.item, bitWriter, false, false);
 						break;
 					default:
 						break;
@@ -696,7 +690,7 @@ namespace MagicStorage.Components
 								{
 									Item item = netItems[j];
 									items.Add(item);
-									ItemData data = new(item);
+									ItemData data = item;
 									if (item.stack < item.maxStack)
 										hasSpaceInStack.Add(data);
 									hasItem.Add(data);
@@ -705,7 +699,7 @@ namespace MagicStorage.Components
 								break;
 							case NetOperations.Withdraw:
 								bool keepOneIfFavorite = bitReader.ReadBoolean();
-								TryWithdraw(SaveCompression.LoadItem(bitReader, true, true), keepOneIfFavorite: keepOneIfFavorite);
+								TryWithdraw(SaveCompression.LoadItem(bitReader, true, true), keepOneIfFavorite);
 								break;
 							case NetOperations.WithdrawStack:
 								WithdrawStack();
@@ -720,8 +714,7 @@ namespace MagicStorage.Components
 								RemoveItemsAndSpawnCore();
 								break;
 							case NetOperations.InsertCore:
-								// ReceiveItem is okay here since the data has already been encoded using SaveCompression.SaveItem()
-								InsertCore((BaseStorageCore)NetCompression.ReceiveItem(bitReader, false, false).ModItem);
+								InsertCore((BaseStorageCore)SaveCompression.LoadItem(bitReader, false, false).ModItem);
 								break;
 							default:
 								break;
@@ -769,7 +762,7 @@ namespace MagicStorage.Components
 			hasItemNoPrefix.Clear();
 			foreach (Item item in items)
 			{
-				ItemData data = new(item);
+				ItemData data = item;
 				if (item.stack < item.maxStack)
 					hasSpaceInStack.Add(data);
 				hasItem.Add(data);

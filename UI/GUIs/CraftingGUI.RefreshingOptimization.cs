@@ -30,9 +30,16 @@ namespace MagicStorage {
 			var updatedList = recipesToRefresh.Concat(recipes);
 			updatedList = ExpandRecipeCollectionWithPossibleRecursionDependents(updatedList);
 
+			#if NETPLAY
+			int oldLength = recipesToRefresh.Length;
+			#endif
+
 			recipesToRefresh = updatedList.DistinctBy(static r => r, ReferenceEqualityComparer.Instance).ToArray();
 
-			NetHelper.Report(true, $"Setting next refresh to check {recipesToRefresh.Length} recipes");
+			#if NETPLAY
+			if (recipesToRefresh.Length != oldLength)
+				NetHelper.Report(true, $"Setting next refresh to check {recipesToRefresh.Length} recipes");
+			#endif
 		}
 
 		private static IEnumerable<Recipe> ExpandRecipeCollectionWithPossibleRecursionDependents(IEnumerable<Recipe> toRefresh) {

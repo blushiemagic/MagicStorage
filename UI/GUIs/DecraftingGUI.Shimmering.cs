@@ -41,13 +41,13 @@ namespace MagicStorage {
 
 			ShimmerContext context = new() {
 				toShimmer = toShimmer,
-				storage = new StorageIntermediary(heart),
+				storage = new StorageIntermediary(heart) { IgnoreContentChanges = false },
 				results = new List<IShimmerResult>()
 			};
 
 			int target = toShimmer;
 
-			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => Shimmer_DoShimmering(context));
+			CraftingGUI.ExecuteInCraftingGuiEnvironment(context, Shimmer_DoShimmering);
 
 			NetHelper.Report(true, $"Shimmered {target - context.toShimmer} items");
 
@@ -97,13 +97,16 @@ namespace MagicStorage {
 			context.storage.toWithdraw.AddRange(fakeCraftContext.toWithdraw);
 
 			var toWithdraw = CraftingGUI.CompactItemList(context.storage.toWithdraw);
+
+			// The same doesn't need to be done for shimmering
+			// The only thing relevant for result items is prefix rolling, which shimmering
+			//   doesn't do in the first place
 			
 			var toDeposit = CraftingGUI.CompactItemList(context.storage.toDeposit);
 
 			if (Main.netMode == NetmodeID.SinglePlayer) {
 				NetHelper.Report(true, "Handling storage inventory changes and spawning excess results on player...");
 
-				using(FlagSwitch.ToggleTrue(ref TEStorageUnit.ignorePrefixesWhenWithdrawing))  // Stupid fugly hack
 				using(SecuritySystem.CreateAccessContext())
 					foreach (Item item in CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, toDeposit))
 						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);

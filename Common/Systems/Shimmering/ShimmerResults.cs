@@ -15,10 +15,10 @@ namespace MagicStorage.Common.Systems.Shimmering {
 
 			NetHelper.Report(false, $"  TransformItem: {ItemID.Search.GetName(iconicType)} -> {ItemID.Search.GetName(result)}");
 
-			if (!net) {
+			if (!storage.IgnoreContentChanges)
 				storage.Deposit(new Item(result, item.stack));
-				storage.Withdraw(item.type, item.stack);
-			}
+
+			storage.Withdraw(item.type, item.stack);
 			
 			item.stack = 0;
 		}
@@ -41,10 +41,10 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				Main.LocalPlayer.AddCoinLuck(storage.playerCenter, coinValue);  // Add coin luck immediately
 			
-			if (!net) {
+			if (!net)
 				NetMessage.SendData(MessageID.ShimmerActions, number: 1, number2: (int)storage.playerCenter.X, number3: (int)storage.playerCenter.Y, number4: coinValue);
-				storage.Withdraw(item.type, item.stack);
-			}
+
+			storage.Withdraw(item.type, item.stack);
 
 			item.stack = 0;
 		}
@@ -83,8 +83,9 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					}
 
 					WorldGen.CheckAchievement_RealEstateAndTownSlimes();
-					storage.Withdraw(item.type);
 				}
+				
+				storage.Withdraw(item.type);
 
 				item.stack--;
 			} else if (item.makeNPC > NPCID.None) {
@@ -122,8 +123,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					}
 				}
 
-				if (!net)
-					storage.Withdraw(item.type, count);
+				storage.Withdraw(item.type, count);
 			}
 		}
 
@@ -154,12 +154,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			NetHelper.Report(false, $"  Decraft: {ItemID.Search.GetName(iconicType)}");
 
 			foreach (var result in ShimmerMetrics.AttemptDecraft(Main.recipe[decraftingRecipeIndex], iconicType, ref item.stack)) {
-				if (!net)
+				if (!storage.IgnoreContentChanges)
 					storage.Deposit(new Item(result.type, result.stack));
 			}
 
-			if (!net)
-				storage.Withdraw(item.type, oldStack - item.stack);
+			storage.Withdraw(item.type, oldStack - item.stack);
 		}
 
 		void IShimmerResult.Send(BinaryWriter writer) {

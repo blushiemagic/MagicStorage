@@ -1,4 +1,5 @@
-﻿using MagicStorage.CrossMod;
+﻿using MagicStorage.Common.Threading.UI;
+using MagicStorage.CrossMod;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,32 +7,30 @@ using System.Linq;
 using Terraria;
 
 namespace MagicStorage.Sorting {
-	internal class ThreadSortOrderedEnumerable<T> : IOrderedEnumerable<T> {
-		protected readonly StorageGUI.ThreadContext _context;
+	internal abstract class ThreadSortOrderedEnumerable<T> : IOrderedEnumerable<T> {
+		protected readonly RefreshThread _thread;
 		protected readonly IEnumerable<T> _source;
-		protected readonly Func<T, Item> _objToItem;
 		protected readonly IOrderedEnumerable<T> _query;
 
-		public ThreadSortOrderedEnumerable(StorageGUI.ThreadContext context, IEnumerable<T> source, Func<T, Item> objToItem) {
-			_context = context;
+		public ThreadSortOrderedEnumerable(RefreshThread thread, IEnumerable<T> source) {
+			_thread = thread;
 			_source = source;
-			_objToItem = objToItem;
 			_query = CreateQuery();
 		}
 
-		protected virtual Item GetItem(T value) => _objToItem(value);
+		protected abstract Item GetItem(T value);
 
-		protected virtual IOrderedEnumerable<T> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, GetItem, _context.sortMode);
+		protected virtual IOrderedEnumerable<T> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, GetItem, _thread.controls.sortingOption);
 
 		private IOrderedEnumerable<T> CreateQuery() {
 			try {
-				if (_context.sortMode < 0)
+				if (_thread.controls.sortingOption < 0)
 					return new KeepItemsInPlaceEnumerable<T>(_source);
 
 				//Apply "fuzzy" sorting since it's faster, but less accurate
 				IOrderedEnumerable<T> orderedItems = SortFuzzy();
 
-				var sorter = SortingOptionLoader.Get(_context.sortMode);
+				var sorter = SortingOptionLoader.Get(_thread.controls.sortingOption);
 
 				if (!sorter.CacheFuzzySorting || sorter.SortAgainAfterFuzzy) {
 					var sortFunc = sorter.Sorter.AsSafe(x => $"{x.Name} | ID: {x.type} | Mod: {x.ModItem?.Mod.Name ?? "Terraria"}");
@@ -55,11 +54,32 @@ namespace MagicStorage.Sorting {
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}
 
+	internal class ThreadSortOrderedGenericEnumerable<T> : ThreadSortOrderedEnumerable<T> {
+		private readonly Func<T, Item> _converter;
+
+		public ThreadSortOrderedGenericEnumerable(RefreshThread thread, IEnumerable<T> source, Func<T, Item> converter) : base(thread, source) {
+			ArgumentNullException.ThrowIfNull(converter);
+			_converter = converter;
+		}
+
+		protected override Item GetItem(T value) => _converter(value);
+
+		protected override IOrderedEnumerable<T> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, _converter, base._thread.controls.sortingOption);
+	}
+
 	internal class ThreadSortOrderedItemEnumerable : ThreadSortOrderedEnumerable<Item> {
-		public ThreadSortOrderedItemEnumerable(StorageGUI.ThreadContext context, IEnumerable<Item> source) : base(context, source, null) { }
+		public ThreadSortOrderedItemEnumerable(RefreshThread thread, IEnumerable<Item> source) : base(thread, source) { }
 
 		protected override Item GetItem(Item value) => value;
 
-		protected override IOrderedEnumerable<Item> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, _context.sortMode);
+		protected override IOrderedEnumerable<Item> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, base._thread.controls.sortingOption);
+	}
+
+	internal class ThreadSortOrderedRecipeEnumerable : ThreadSortOrderedEnumerable<Recipe> {
+		public ThreadSortOrderedRecipeEnumerable(RefreshThread thread, IEnumerable<Recipe> source) : base(thread, source) { }
+
+		protected override Item GetItem(Recipe value) => value.createItem;
+		
+		protected override IOrderedEnumerable<Recipe> SortFuzzy() => SortingCache.dictionary.SortFuzzy(_source, r => r.createItem, base._thread.controls.sortingOption);
 	}
 }

@@ -26,7 +26,7 @@ namespace MagicStorage.UI {
 
 		private static bool IsValid() {
 			if (MagicUI.IsCraftingUIOpen())
-				return CraftingGUI.IsCurrentRecipeFullyAvailable();
+				return CraftingGUI.IsCurrentRecipeAvailable();
 			else if (MagicUI.IsDecraftingUIOpen())
 				return DecraftingGUI.selectedItem > ItemID.None && DecraftingGUI.IsAvailable(DecraftingGUI.selectedItem);
 			return false;

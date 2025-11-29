@@ -50,7 +50,7 @@ namespace MagicStorage
 			}
 		}
 
-		public int? MemoryLimit { get; init; }  // Necessary for TEStorageHeart so that it doesn't take up thousands of bytes when syncing in NetSend/NetReceive
+		public int? MemoryLimit { get; init; }
 
 		public ItemTypeOrderedSet(string name)
 		{
@@ -147,6 +147,25 @@ namespace MagicStorage
 			_pendingAdditions.Clear();
 			_pendingRemovals.Clear();
 			_itemListDirty = false;
+		}
+
+		public ItemTypeOrderedSet Clone() {
+			if (_itemListDirty) {
+				UpdateCollections();
+				_itemListDirty = false;
+			}
+
+			var clone = new ItemTypeOrderedSet(_name);
+
+			// Only the loaded IDs are relevant
+			foreach (int id in _set) {
+				// Delay generating the item collection until it's requested
+				clone._pendingAdditions.Add(id);
+			}
+
+			clone._itemListDirty = true;
+
+			return clone;
 		}
 
 		public void Save(TagCompound c)

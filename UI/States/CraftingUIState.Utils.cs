@@ -96,7 +96,7 @@ namespace MagicStorage.UI.States {
 
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(scroll.ViewPosition);
 			Item item = index < CraftingGUI.storageItems.Count ? CraftingGUI.storageItems[index] : new Item();
-			if (CraftingGUI.blockStorageItems.Contains(new ItemData(item)))
+			if (CraftingGUI.blockStorageItems.Contains(item))
 				context = MagicSlotContext.IngredientBlocked;
 			return item;
 		}
@@ -111,7 +111,7 @@ namespace MagicStorage.UI.States {
 			if (index >= CraftingGUI.storageItems.Count)
 				return;
 
-			ItemData data = new(slot.StoredItem);
+			ItemData data = slot.StoredItem;
 			if (CraftingGUI.blockStorageItems.Contains(data))
 				CraftingGUI.blockStorageItems.Remove(data);
 			else

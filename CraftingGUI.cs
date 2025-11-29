@@ -1,12 +1,15 @@
-using System;
-using System.Collections.Generic;
+using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Threading.UI;
 using MagicStorage.Components;
+using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using static ReLogic.Peripherals.RGB.Corsair.CorsairDeviceGroup;
 
 namespace MagicStorage
 {
@@ -44,15 +47,18 @@ namespace MagicStorage
 			recipes.Clear();
 			recipeAvailable.Clear();
 			storageItems.Clear();
-			storageItemsFromModules.Clear();
-			sourceItems.Clear();
 			storageItemInfo.Clear();
 			items.Clear();
+			itemGroups.Clear();
 			itemCounts.Clear();
 			itemCountsByPrefix.Clear();
 			sourceItemsFromModules.Clear();
+			wasModuleItem.Clear();
+			moduleItemWasFromInventory.Clear();
 			blockStorageItems.Clear();
+			isItemInfinite.Clear();
 			selectedRecipe = null;
+			result = null;
 			ResetRecentRecipeCache();
 			ResetRefreshCache();
 		}
@@ -95,20 +101,60 @@ namespace MagicStorage
 			return false;
 		}
 
+		public static bool MeetsIngredientRequirement(Recipe recipe, Dictionary<int, int> countsDictionary, int ingredientType, int requiredStack) {
+			if (MeetsIngredientRequirement_CheckCounts(countsDictionary, ingredientType, ref requiredStack))
+				return true;
+
+			foreach (int group in recipe.acceptedGroups) {
+				RecipeGroup recipeGroup = RecipeGroup.recipeGroups[group];
+
+				if (recipeGroup.ContainsItem(ingredientType)) {
+					foreach (int groupItemType in recipeGroup.ValidItems) {
+						if (MeetsIngredientRequirement_CheckCounts(countsDictionary, groupItemType, ref requiredStack))
+							return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private static bool MeetsIngredientRequirement_CheckCounts(Dictionary<int, int> countsDictionary, int itemType, ref int requiredStack) {
+			if (countsDictionary.TryGetValue(itemType, out int quantity)) {
+				if (quantity >= requiredStack)
+					return true;
+
+				requiredStack -= quantity;
+			}
+
+			return false;
+		}
+
 		internal static void SetSelectedRecipe(Recipe recipe)
 		{
 			ArgumentNullException.ThrowIfNull(recipe);
 
-			NetHelper.Report(true, "Reassigning current recipe...");
+			NetHelper.Report(true, "Reassigning current recipe and refreshing recipe panel...");
 
-			selectedRecipe = recipe;
-			RefreshStorageItems();
+			craftAmountTarget = 1;
 			blockStorageItems.Clear();
 
-			// Reset the craft buttons
-			craftAmountTarget = 1;
+			CreateSelectedRecipeRefreshThread(recipe, caller: nameof(SetSelectedRecipe)).Start();
+		}
 
-			NetHelper.Report(true, "Successfully reassigned current recipe!");
+		internal static RecipeInfoPanelRefreshThread CreateSelectedRecipeRefreshThread(Recipe selectedRecipe, string caller) {
+			GetCommonRefreshThreadParameters(out _, out var showAllIngredients, out var blockedStoredIngredients, out var craftAmountTarget);
+
+			var thread = new RecipeInfoPanelRefreshThread(
+				controls: CreateRefreshThreadControls(),
+				selectedRecipe: selectedRecipe,
+				showAllIngredients: showAllIngredients,
+				blockedStoredIngredients: blockedStoredIngredients,
+				craftAmountTarget: craftAmountTarget
+			);
+			thread.SetDebugName($"CraftingGUI.{caller}() thread");
+
+			return thread;
 		}
 
 		/// <summary>
@@ -130,13 +176,30 @@ namespace MagicStorage
 		}
 
 		internal static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) {
-			if (!cloneIfBlockEmpty && blockStorageItems.Count == 0)
-				return itemCounts;
+			Dictionary<int, int> counts;
+			Dictionary<int, Dictionary<int, int>> countsByPrefix;
+			List<ItemData> blockedIngredients;
 
-			Dictionary<int, int> counts = new(itemCounts);
+			if (MagicUI.HasActiveThread(out CommonCraftingThread thread)) {
+				counts = thread.itemCounts;
+				countsByPrefix = thread.itemCountsByPrefix;
+				blockedIngredients = thread.blockStorageItems;
+			} else {
+				counts = itemCounts;
+				countsByPrefix = itemCountsByPrefix;
+				blockedIngredients = blockStorageItems;
+			}
 
-			foreach (var data in blockStorageItems) {
-				if (counts.TryGetValue(data.Type, out int quantity) && itemCountsByPrefix.TryGetValue(data.Type, out var prefixCounts) && prefixCounts.TryGetValue(data.Prefix, out int prefixQuantity) && prefixQuantity > 0) {
+			if (!cloneIfBlockEmpty && blockedIngredients.Count == 0)
+				return counts;
+
+			counts = new(counts);
+
+			foreach (var data in blockedIngredients) {
+				if (counts.TryGetValue(data.Type, out int quantity)
+				&& countsByPrefix.TryGetValue(data.Type, out var prefixCounts)
+				&& prefixCounts.TryGetValue(data.Prefix, out int prefixQuantity)
+				&& prefixQuantity > 0) {
 					quantity -= prefixQuantity;
 					if (quantity <= 0)
 						counts.Remove(data.Type);
@@ -148,20 +211,73 @@ namespace MagicStorage
 			return counts;
 		}
 
-		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
-			var inventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty);
+		internal static bool TryGetIngredientQuantity(Recipe recipe, Dictionary<int, int> storageQuantity, HashSet<int> infiniteItems, int requiredIngredient, out int totalQuantity) {
+			if (infiniteItems.Contains(requiredIngredient)) {
+				totalQuantity = int.MaxValue;
+				return false;
+			}
 
-			if (currentlyThreading) {
-				if (MagicUI.activeThread.state is CommonCraftingState commonState) {
-					if (commonState is ThreadState state)
-						return new AvailableRecipeObjects(adjTiles, inventory, state.recipeConditionsMetSnapshot, commonState.infiniteItems, commonState.creativeUnitPresent);
+			ClampedArithmetic total = 0;
 
-					return new AvailableRecipeObjects(adjTiles, inventory, null, commonState.infiniteItems, commonState.creativeUnitPresent);
+			if (storageQuantity.TryGetValue(requiredIngredient, out int quantity))
+				total += quantity;
+
+			if (recipe is null)
+				goto SkipRecipeGroupsCheck;
+
+			foreach (int group in recipe.acceptedGroups) {
+				RecipeGroup recipeGroup = RecipeGroup.recipeGroups[group];
+
+				if (recipeGroup.ContainsItem(requiredIngredient)) {
+					foreach (int groupItemType in recipeGroup.ValidItems) {
+						if (infiniteItems.Contains(groupItemType)) {
+							totalQuantity = int.MaxValue;
+							return false;
+						}
+
+						if (storageQuantity.TryGetValue(groupItemType, out int groupItemQuantity))
+							total += groupItemQuantity;
+					}
 				}
 			}
 
-			var heart = GetHeart();
-			return new AvailableRecipeObjects(adjTiles, inventory, null, [.. isItemInfinite], allItemsAreInfinite);
+			SkipRecipeGroupsCheck:
+
+			totalQuantity = total;
+			return true;
+		}
+
+		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
+			var inventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty);
+
+			bool[] adjTiles;
+			bool[] recipeConditionsMetSnapshot;
+			HashSet<int> infiniteItems;
+			bool creativeUnitPresent;
+
+			if (MagicUI.HasActiveThread(out CommonCraftingThread commonThread)) {
+				infiniteItems = commonThread.infiniteItems;
+				creativeUnitPresent = commonThread.creativeUnitPresent;
+
+				if (commonThread is CraftingControlsRefreshThread controlsThread) {
+					adjTiles = controlsThread.adjTiles;
+
+					if (controlsThread is CraftingRefreshThread craftingThread)
+						recipeConditionsMetSnapshot = craftingThread.recipeConditionsMetSnapshot;
+					else
+						recipeConditionsMetSnapshot = null;
+				} else {
+					adjTiles = CraftingGUI.adjTiles;
+					recipeConditionsMetSnapshot = null;
+				}
+			} else {
+				adjTiles = CraftingGUI.adjTiles;
+				recipeConditionsMetSnapshot = null;
+				infiniteItems = [.. isItemInfinite];
+				creativeUnitPresent = allItemsAreInfinite;
+			}
+
+			return new AvailableRecipeObjects(adjTiles, inventory, recipeConditionsMetSnapshot, infiniteItems, creativeUnitPresent);
 		}
 
 		internal static List<Item> HandleCraftWithdrawAndDeposit(TEStorageHeart heart, List<Item> toWithdraw, List<Item> results)
@@ -268,18 +384,18 @@ namespace MagicStorage
 
 		internal static Item TryToWithdrawFromModuleItems(Item toWithdraw, bool wasAlreadyCloned) {
 			Item withdrawn;
-			if (items.Count != numItemsWithoutSimulators) {
+			if (sourceItemsFromModules.Count > 0) {
 				//Heart did not contain the item; try to withdraw from the module items
 				Item item = wasAlreadyCloned ? toWithdraw : toWithdraw.Clone();
 
 				TEStorageUnit.WithdrawFromItemCollection(sourceItemsFromModules, item, out withdrawn,
 					onItemRemoved: k => {
-						int index = k + numItemsWithoutSimulators;
+						int index = k + items.Count - sourceItemsFromModules.Count;
 						
 						items.RemoveAt(index);
 					},
 					onItemStackReduced: (k, stack) => {
-						int index = k + numItemsWithoutSimulators;
+						int index = k + items.Count - sourceItemsFromModules.Count;
 
 						Item item = items[index];
 						itemCounts[item.type] -= stack;

@@ -27,23 +27,17 @@ namespace MagicStorage {
 			}
 		}
 
-		private static void SafelyRefreshItems(StorageGUI.ThreadContext thread, ThreadState state) {
-			try {
-				if (state.itemsToRefresh is null)
-					RefreshItemsAvailability(thread, state);  //Refresh all items
-				else
-					RefreshSpecificItemsAvailablity(thread, state);
+		private static void RefreshItemsAvailability(ShimmeringRefreshThread thread) {
+			if (thread.itemsToRefresh is null)
+				RefresAllItemsAvailability(thread);  //Refresh all items
+			else
+				RefreshSpecificItemsAvailablity(thread);
 
-				NetHelper.Report(false, "Visible items: " + viewingItems.Count);
-				NetHelper.Report(false, "Available items: " + itemAvailable.Count(static b => b));
-
-				NetHelper.Report(true, "Item refreshing finished");
-			} catch (Exception e) {
-				Main.QueueMainThreadAction(() => Main.NewTextMultiline(e.ToString(), c: Color.White));
-			}
+			NetHelper.Report(false, "Visible items: " + thread.viewingItems.Count);
+			NetHelper.Report(false, "Available items: " + thread.viewingItemIsAvailable.Count(static b => b));
 		}
 
-		private static void RefreshItemsAvailability(StorageGUI.ThreadContext thread, ThreadState state) {
+		private static void RefresAllItemsAvailability(ShimmeringRefreshThread thread) {
 			NetHelper.Report(true, "Refreshing all items");
 
 			// Each DoFiltering does: GetItems, SortItems, adding items, adding item availability
@@ -52,103 +46,94 @@ namespace MagicStorage {
 
 			thread.InitTaskSchedule(9, "Refreshing items");
 
-			var query = new CraftingGUI.Query<int>(new CraftingGUI.QueryResults<int>(viewingItems, itemAvailable),
-				ItemSorter.GetShimmerItems,
-				SortItems,
-				IsAvailable);
-
-			CraftingGUI.DoFiltering(thread, state, query);
+			PopulateViewingItems(thread, attempt: 0);
 
 			bool didDefault = false;
+			ref string errorText = ref thread.searchBarError;
 
 			// now if nothing found we disable filters one by one
-			if (thread.searchText.Length > 0)
+			if (thread.controls.fullSearchText.Trim().Length > 0)
 			{
-				if (viewingItems.Count == 0 && (state.globalHiddenTypes.Count > 0 || state.hiddenTypes.Count > 0))
+				if (thread.viewingItems.Count == 0 && (thread.globalHiddenTypes.Count > 0 || thread.hiddenTypes.Count > 0))
 				{
 					NetHelper.Report(true, "No items passed the filter.  Attempting filter with no hidden recipes");
 
 					// search hidden recipes too
-					state.globalHiddenTypes = CraftingGUI.CommonCraftingState.EmptyGlobalHiddenTypes;
-					state.hiddenTypes = ItemTypeOrderedSet.Empty;
+					thread.globalHiddenTypes.Clear();
+					thread.hiddenTypes.Clear();
 
-					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.DecraftingNoBlacklist");
+					string error = Language.GetTextValue("Mods.MagicStorage.Warnings.DecraftingNoBlacklist");
+
+					if (errorText.Length > 0)
+						errorText += $"\n{error}";
+					else
+						errorText = error;
+
 					didDefault = true;
 
-					thread.ResetTaskCompletion();
-
-					CraftingGUI.DoFiltering(thread, state, query);
+					PopulateViewingItems(thread, attempt: 1);
 				}
 
-				if (viewingItems.Count == 0 && thread.modSearch != ModSearchBox.ModIndexAll)
+				if (thread.viewingItems.Count == 0 && thread.controls.modSearchOption != ModSearchBox.ModIndexAll)
 				{
 					NetHelper.Report(true, "No items passed the filter.  Attempting filter with All Mods setting");
 
 					// search all mods
-					thread.modSearch = ModSearchBox.ModIndexAll;
+					thread.controls = thread.controls.CreateCopy(
+						modSearchOptionOverride: ModSearchBox.ModIndexAll
+					);
 
-					MagicUI.lastKnownSearchBarErrorReason = Language.GetTextValue("Mods.MagicStorage.Warnings.DecraftingDefaultToAllMods");
+					string error = Language.GetTextValue("Mods.MagicStorage.Warnings.DecraftingDefaultToAllMods");
+
+					if (errorText.Length > 0)
+						errorText += $"\n{error}";
+					else
+						errorText = error;
+
 					didDefault = true;
 
-					thread.ResetTaskCompletion();
-
-					CraftingGUI.DoFiltering(thread, state, query);
+					PopulateViewingItems(thread, attempt: 2);
 				}
 			}
 
-			for (int i = 0; i < viewingItems.Count; i++) {
-				int item = viewingItems[i];
-				bool available = itemAvailable[i];
+			for (int i = 0; i < thread.viewingItems.Count; i++) {
+				int item = thread.viewingItems[i];
+				bool available = thread.viewingItemIsAvailable[i];
 
 				MagicUI.AddRefreshWatchdog(new ItemWatchTarget(item), available);
 			}
 
 			if (!didDefault)
-				MagicUI.lastKnownSearchBarErrorReason = null;
+				errorText = null;
+		}
+
+		internal static void PopulateViewingItems(ShimmeringRefreshThread thread, int attempt) {
+			CraftingGUI.PopulateCollections(
+				thread: thread,
+				sortedAndFilteredObjects: ItemSorter.SortAndFilterShimmerableItems(thread, attempt, provider: thread.shimmerableItemFilterProvider),
+				destination: thread.viewingItems,
+				destinationAvailable: thread.viewingItemIsAvailable,
+				isObjectAvailable: IsAvailable,
+				objectNameForTask: "Shimmerable Items"
+			);
 		}
 
 		internal static bool forceSpecificItemResort;
 
-		private static void RefreshSpecificItemsAvailablity(StorageGUI.ThreadContext thread, ThreadState state) {
-			var query = new CraftingGUI.SpecificQuery<int>(new CraftingGUI.QueryResults<int>(viewingItems, itemAvailable),
-				SortItems,
-				IsAvailable,
-				IsItemValidForQuery,
-				CanBeAdded);
-
-			CraftingGUI.RefreshSpecificQueryItems(thread, state, state.itemsToRefresh, query, forceSpecificItemResort, "items");
-
-			forceSpecificItemResort = false;
-		}
-
-		private static bool IsItemValidForQuery(StorageGUI.ThreadContext thread, int item) => item > ItemID.None && ItemSorter.ItemPassesFilter(item, thread);
-
-		private static bool CanBeAdded(StorageGUI.ThreadContext thread, CraftingGUI.CommonCraftingState state, int item) {
-			var sample = ContentSamples.ItemsByType[item];
-			return FilteringOptionLoader.Get(thread.filterMode).Filter(sample) && CraftingGUI.DoesItemPassFilters(thread, state, sample);
-		}
-
-		private static IEnumerable<int> SortItems(StorageGUI.ThreadContext thread, CraftingGUI.CommonCraftingState state, IEnumerable<int> source) {
-			IEnumerable<int> sortedItems = ItemSorter.DoSorting(thread, source, Utility.GetItemSample);
-
-			thread.CompleteOneTask();
-
-			// show only blacklisted recipes only if choice = 2, otherwise show all other
-			if (MagicStorageConfig.RecipeBlacklistEnabled)
-				sortedItems = sortedItems.Where(x => state.recipeFilterChoice == CraftingGUI.RecipeButtonsBlacklistChoice == state.IsHidden(x));
-
-			thread.CompleteOneTask();
-
-			// favorites first
-			if (MagicStorageConfig.CraftingFavoritingEnabled) {
-				sortedItems = sortedItems.Where(x => state.recipeFilterChoice != CraftingGUI.RecipeButtonsFavoritesChoice || state.favoritedTypes.Contains(ContentSamples.ItemsByType[x]));
-					
-				sortedItems = sortedItems.OrderByDescending(x => state.favoritedTypes.Contains(ContentSamples.ItemsByType[x]) ? 1 : 0);
-			}
-
-			thread.CompleteOneTask();
-
-			return sortedItems;
+		private static void RefreshSpecificItemsAvailablity(ShimmeringRefreshThread thread) {
+			CraftingGUI.RefreshSpecificObjects(
+				thread: thread,
+				provider: thread.shimmerableItemFilterProvider,
+				refreshingObjects: thread.itemsToRefresh,
+				destination: thread.viewingItems,
+				destinationAvailable: thread.viewingItemIsAvailable,
+				getItem: Utility.GetItemSample,
+				getItemType: type => type,
+				canProcessObject: type => type > ItemID.None,
+				isObjectAvailable: IsAvailable,
+				objectNameForTask: "Shimmerable Items",
+				forcedResort: ref forceSpecificItemResort
+			);
 		}
 	}
 }

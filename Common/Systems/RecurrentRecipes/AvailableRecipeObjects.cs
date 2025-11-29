@@ -27,9 +27,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				return recipeToConditionsAvailableCache[recipe.RecipeIndex];
 
 			// Cache is not present; use the Crafting Interface's context to check if the recipe is available
-			bool retVal = false;
-			CraftingGUI.ExecuteInCraftingGuiEnvironment(() => retVal = RecipeLoader.RecipeAvailable(recipe));
-			return retVal;
+			return CraftingGUI.ExecuteInCraftingGuiEnvironment(recipe, RecipeLoader.RecipeAvailable);
 		}
 
 		public bool CanUseRecipe(Recipe recipe) {

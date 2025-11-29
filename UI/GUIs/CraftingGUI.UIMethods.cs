@@ -16,6 +16,14 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
+			if (MagicStorageConfig.UseOldRightClickSlotFocus)
+				SlotFocusLogic_0();
+			else
+				SlotFocusLogic_1();
+		}
+
+		private static void SlotFocusLogic_0()
+		{
 			if (!slotFocus || result == null || result.IsAir || !Main.mouseItem.IsAir && (!StorageAggregator.CanCombineItems(Main.mouseItem, result) || Main.mouseItem.stack >= Main.mouseItem.maxStack))
 			{
 				ResetSlotFocus();
@@ -43,6 +51,21 @@ namespace MagicStorage {
 				}
 
 				rightClickTimer--;
+			}
+		}
+
+		private static void SlotFocusLogic_1()
+		{
+			if (!slotFocus
+			|| result is not { IsAir: false }
+			|| !ItemStackSplitting.TickOneSplitOntoMouse(result, (_, stack) => DoWithdrawResult(stack), out bool waitingForNextSplit)
+			|| !waitingForNextSplit)
+			{
+				ResetSlotFocus();
+			}
+			else
+			{
+				MagicUI.SetRefresh();
 			}
 		}
 

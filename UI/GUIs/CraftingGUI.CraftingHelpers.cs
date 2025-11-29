@@ -23,9 +23,9 @@ namespace MagicStorage {
 		}
 
 		internal static CraftingContext InitCraftingContext(Recipe recipe, int toCraft) {
-			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(new ItemData(item))).ToList();
+			var sourceItems = storageItems.Where(item => !blockStorageItems.Contains(item)).ToList();
 			var availableItems = sourceItems.Select(item => item.Clone()).ToList();
-			var fromModule = storageItemsFromModules.Where((_, n) => !blockStorageItems.Contains(new ItemData(storageItems[n]))).ToList();
+			var fromModule = sourceItemsFromModules.Where(item => !blockStorageItems.Contains(item)).ToList();
 			List<Item> toWithdraw = new(), results = new();
 
 			TEStorageHeart heart = GetHeart();
@@ -40,7 +40,7 @@ namespace MagicStorage {
 				itemCounts = GetItemCountsWithBlockedItemsRemoved(),
 				sandbox = sandbox,
 				consumedItemsFromModules = new(),
-				fromModule = fromModule,
+				sourceItemsFromModules = fromModule,
 				modules = heart?.GetModules().ToArray() ?? Array.Empty<EnvironmentModule>(),
 				toCraft = toCraft,
 				recipe = recipe
@@ -90,10 +90,8 @@ namespace MagicStorage {
 		}
 
 		private static IEnumerable<Item> GetAvailableItems(CraftingContext context) {
-			for (int i = 0; i < context.sourceItems.Count; i++) {
-				if (!context.fromModule[i])
-					yield return context.availableItems[i];
-			}
+			for (int i = 0; i < context.availableItems.Count; i++)
+				yield return context.availableItems[i];
 		}
 
 		private static void OnAvailableItemConsumed(CraftingContext context, int index, Item tryItem, int stackToConsume) {
@@ -106,10 +104,8 @@ namespace MagicStorage {
 		}
 
 		private static IEnumerable<Item> GetModuleItems(CraftingContext context) {
-			for (int i = 0; i < context.sourceItems.Count; i++) {
-				if (context.fromModule[i])
-					yield return context.sourceItems[i];
-			}
+			for (int i = 0; i < context.sourceItemsFromModules.Count; i++)
+				yield return context.sourceItemsFromModules[i];
 		}
 
 		private static void OnModuleItemConsumed(CraftingContext context, int index, Item tryItem, int stackToConsume) {
@@ -198,10 +194,7 @@ namespace MagicStorage {
 					}
 				}
 
-				if (item.IsAir)
-					continue;
-
-				if (!fullyCompacted)
+				if (!item.IsAir && !fullyCompacted)
 					compacted.Add(item);
 			}
 

@@ -550,8 +550,8 @@ namespace MagicStorage.UI.States {
 			}
 
 			if (MagicUI.CurrentlyRefreshing) {
-				waitProgress.DisplayText = MagicUI.activeThread.CurrentTask;
-				waitProgress.UpdateProgress(MagicUI.activeThread.Progress);
+				waitProgress.DisplayText = MagicUI.activeRefreshingThread.CurrentTask;
+				waitProgress.UpdateProgress(MagicUI.activeRefreshingThread.Progress);
 			} else {
 				waitProgress.DisplayText = "";
 				waitProgress.UpdateProgress(0);

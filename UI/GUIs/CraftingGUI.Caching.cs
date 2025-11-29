@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using System;
 using Terraria;
 
 namespace MagicStorage {
@@ -27,18 +28,54 @@ namespace MagicStorage {
 			simulatedCraftForCurrentRecipe = null;
 		}
 
-		public static void ResetCachedBlockedIngredientsCheck() {
-			recentRecipeBlock = null;
-			currentRecipePassesBlock = null;
-		}
+		internal static void SetRecipeAndCraftingCaches(CommonCraftingThread thread) {
+			if (thread.selectedRecipe is not Recipe recipe) {
+				thread.craftAmountTarget = 1;
+				return;
+			}
+			
+			selectedRecipe = recipe;
 
-		public static void ResetCachedCraftingSimulation() {
-			recentRecipeSimulation = null;
-			simulatedCraftForCurrentRecipe = null;
+			thread.InitTaskSchedule(
+				totalTasks: MagicStorageConfig.IsRecursionEnabled && recipe.HasRecursiveRecipe() ? 4 : 3,
+				taskName: "Populating Caches"
+			);
+
+			int maxCraftable;
+			recentRecipeAmountCraftable = recipe;
+			amountCraftableForCurrentRecipe = maxCraftable = AmountCraftable(recipe);
+
+			thread.craftAmountTarget = Utils.Clamp(thread.craftAmountTarget, 1, maxCraftable);
+
+			thread.CompleteOne();
+
+			// IsAvailable() will automatically populate this if the selected recipe was in the recipe list
+			// When it isn't, this result should still be cached
+			if (recentRecipeAvailable is null) {
+				recentRecipeAvailable = recipe;
+				currentRecipeIsAvailable = IsAvailable(recipe);
+			}
+
+			thread.CompleteOne();
+
+			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out var recursiveRecipe)) {
+				recentRecipeSimulation = recipe;
+				CraftingSimulation simulation = new CraftingSimulation();
+				simulation.SimulateCrafts(recursiveRecipe, thread.craftAmountTarget, GetCurrentInventory(cloneIfBlockEmpty: true));
+				simulatedCraftForCurrentRecipe = simulation;
+
+				thread.CompleteOne();
+			}
+
+			// Obsolete, but still needs to be processed
+			recentRecipeBlock = recipe;
+			currentRecipePassesBlock = PassesBlock(recipe);
+
+			thread.CompleteOne();
 		}
 
 		public static int AmountCraftableForCurrentRecipe() {
-			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return 0;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAmountCraftable, selectedRecipe) && amountCraftableForCurrentRecipe is { } amount)
@@ -51,7 +88,7 @@ namespace MagicStorage {
 		}
 
 		public static bool IsCurrentRecipeAvailable() {
-			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAvailable, selectedRecipe) && currentRecipeIsAvailable is { } available)
@@ -59,12 +96,13 @@ namespace MagicStorage {
 
 			// Calculate the value
 			recentRecipeAvailable = selectedRecipe;
-			currentRecipeIsAvailable = available = IsAvailable(selectedRecipe) && PassesBlock(selectedRecipe);
+			currentRecipeIsAvailable = available = IsAvailable(selectedRecipe);
 			return available;
 		}
 
+		[Obsolete("The blocked ingredients check is now part of the recipe availability checks.", error: true)]
 		public static bool DoesCurrentRecipePassIngredientBlock() {
-			if (currentlyThreading || MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeBlock, selectedRecipe) && currentRecipePassesBlock is { } available)

@@ -1,8 +1,11 @@
 ﻿using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.UI;
 using MagicStorage.CrossMod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Localization;
 
@@ -21,9 +24,7 @@ namespace MagicStorage {
 		}
 
 		internal static readonly List<Item> storageItems = new();
-		internal static readonly List<bool> storageItemsFromModules = new();
 		internal static readonly List<ItemInfo> storageItemInfo = new();
-		internal static readonly List<List<Item>> sourceItems = new();
 
 		internal static bool showAllPossibleIngredients;
 		internal static string lastKnownRecursionErrorForStoredItems;
@@ -31,43 +32,30 @@ namespace MagicStorage {
 
 		internal static Item result;
 
-		private static void RefreshStorageItems(StorageGUI.ThreadContext thread = null)
+		private static void RefreshStorageItems(CommonCraftingThread thread)
 		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
-			storageItems.Clear();
-			storageItemInfo.Clear();
-			storageItemsFromModules.Clear();
-			result = null;
-			if (selectedRecipe is null) {
-				thread?.InitAsCompleted("Populating stored ingredients");
+			if (thread.selectedRecipe is null) {
+				thread.InitAsCompleted("Populating Stored Ingredients");
 				NetHelper.Report(true, "Failed.  No recipe is selected.");
 				return;
 			}
 
-			ref string error = ref lastKnownRecursionErrorForStoredItems;
-			if (thread is not null) {
-				if (thread.state is not ThreadState state) {
-					thread?.InitAsCompleted("Populating stored ingredients");
-					NetHelper.Report(true, "Failed.  Thread state is not valid.");
-					return;
-				}
+			ref string error = ref thread.storedItemsError;
 
-				error = ref state.recursionFailReason;
-			}
+			var handler = thread.recipeItemsHandler = new SingleResultItemHandler(thread);
 
-			error = null;
-
-			if (!MagicStorageConfig.IsRecursionEnabled || !selectedRecipe.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation simulation) {
+			if (!MagicStorageConfig.IsRecursionEnabled || !thread.selectedRecipe.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation simulation) {
 				// Show the information for the recipe that was selected
 				RefreshStorageItems_CheckNormalRecipe(thread);
 
 				if (MagicStorageConfig.IsRecursionEnabled)
 					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoRecipe");
 			} else {
-				if (showAllPossibleIngredients) {
+				if (thread.showAllPossibleIngredients) {
 					// Show the information for ALL possible recipes in the tree
-					RefreshStorageItems_CheckRecursionRecipes(thread, selectedRecipe.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
+					RefreshStorageItems_CheckRecursionRecipes(thread, thread.selectedRecipe.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
 				} else if (simulation.AmountCrafted > 0) {
 					// Show the information for the recipes that were used by the simulation
 					RefreshStorageItems_CheckRecursionRecipes(thread, simulation.UsedRecipes);
@@ -79,85 +67,71 @@ namespace MagicStorage {
 				}
 			}
 
-			AttemptListCompact();
+			handler.CompactCollections();
 
-			result ??= new Item(selectedRecipe.createItem.type, 0);
-
-			NetHelper.Report(true, $"Success! Found {storageItems.Count} items and {(result.IsAir ? "no result items" : "a result item")}");
+			NetHelper.Report(true, $"Success! Found {handler.StoredIngredientCount} items and {(handler.FoundStoredResultItem ? "no result items" : "a result item")}");
 		}
 
-		private static void RefreshStorageItems_CheckNormalRecipe(StorageGUI.ThreadContext thread) {
+		private static void RefreshStorageItems_CheckNormalRecipe(CommonCraftingThread thread) {
 			NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
-			thread?.InitTaskSchedule(sourceItems.Count, "Populating stored ingredients");
+			thread.InitTaskSchedule(thread.resultItemGroups.Count, "Populating Stored Ingredients");
 
-			int index = 0;
-			bool hasItemFromStorage = false;
-			foreach (List<Item> itemsFromSource in sourceItems) {
-				CheckStorageItemsForRecipe(selectedRecipe, itemsFromSource, null, checkResultItem: true, index, ref hasItemFromStorage);
-				index++;
+			var handler = thread.recipeItemsHandler;
+			var recipe = thread.selectedRecipe;
 
-				thread?.CompleteOneTask();
-			}
+			foreach (var items in thread.resultItemGroups.NotifyStepsTo(thread))
+				CheckStorageItemsForRecipe(recipe, handler, items, null, checkResultItem: true);
 		}
 
-		private static void RefreshStorageItems_CheckRecursionRecipes(StorageGUI.ThreadContext thread, IEnumerable<Recipe> recipes) {
+		private static void RefreshStorageItems_CheckRecursionRecipes(CommonCraftingThread thread, IEnumerable<Recipe> recipes) {
 			NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
 			// Check each recipe in the tree
 			// Evaluate now so the total task count can be used
 			List<Recipe> usedRecipes = recipes.ToList();
 
-			thread?.InitTaskSchedule(usedRecipes.Count * sourceItems.Count, "Populating stored ingredients");
+			var resultGroups = thread.resultItemGroups;
+			var handler = thread.recipeItemsHandler;
+			var mainRecipe = thread.selectedRecipe;
+
+			thread.InitTaskSchedule(usedRecipes.Count * resultGroups.Count, "Populating Stored Ingredients");
 
 			int index;
-			bool hasItemFromStorage = false;
-			bool checkedHighestRecipe = false;
-			List<bool[]> wasItemAdded = new List<bool[]>();
-			foreach (Recipe recipe in usedRecipes) {
+			List<bool[]> wasItemAdded = [.. resultGroups.Select(list => new bool[list.Count])];
+			foreach (Recipe recipe in usedRecipes.NotifyStepsTo(thread)) {
 				index = 0;
 
-				foreach (List<Item> itemsFromSource in sourceItems) {
-					if (wasItemAdded.Count <= index)
-						wasItemAdded.Add(new bool[itemsFromSource.Count]);
-
+				foreach (List<Item> itemsFromSource in resultGroups.NotifyStepsTo(thread)) {
 					// Only allow the "final recipe" (i.e. the first in the list) to affect the result item
-					CheckStorageItemsForRecipe(recipe, itemsFromSource, wasItemAdded[index], checkResultItem: !checkedHighestRecipe, index, ref hasItemFromStorage);
-
-					index++;
-
-					thread?.CompleteOneTask();
+					CheckStorageItemsForRecipe(recipe, handler, itemsFromSource, wasItemAdded[index++], checkResultItem: object.ReferenceEquals(recipe, mainRecipe));
 				}
-
-				checkedHighestRecipe = true;
 			}
 		}
 
-		private static void CheckStorageItemsForRecipe(Recipe recipe, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem, int index, ref bool hasItemFromStorage) {
+		private static void CheckStorageItemsForRecipe(Recipe recipe, CraftingGUI.IRecipeItemsHandler handler, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem) {
 			int addedIndex = 0;
 
 			foreach (Item item in itemsFromSource) {
-				bool b = false;
-				ref bool added = ref wasItemAdded is null ? ref b : ref wasItemAdded[addedIndex];
-				CheckItemFromSource(null, item, recipe, index, ref added, IsItemValidForRecipe);
+				if (wasItemAdded is not null) {
+					if (!wasItemAdded[addedIndex] && IsItemValidForRecipe(item, recipe))
+						wasItemAdded[addedIndex] = CheckItemFromSource(handler, item, recipe, IsItemValidForRecipe);
 
-				addedIndex++;
+					addedIndex++;
+				} else
+					CheckItemFromSource(handler, item, recipe, IsItemValidForRecipe);
 
-				if (checkResultItem && item.type == recipe.createItem.type) {
-					Item source = itemsFromSource[0];
-
-					if (index < numItemsWithoutSimulators) {
-						result = source;
-						hasItemFromStorage = true;
-					} else if (!hasItemFromStorage)
-						result = source;
-				}
+				if (checkResultItem && item.type == recipe.createItem.type)
+					handler.SetResultItem(item);
 			}
 		}
 
 		private static bool IsItemValidForRecipe(Item item, Recipe recipe) {
+			// CHANGE: v0.7.0.12 - Allow result item to appear as an ingredient in duplication recipes
+			/*
 			if (item.type == selectedRecipe.createItem.type)
 				return false;
+			*/
 
 			foreach (Item reqItem in recipe.requiredItem) {
 				if (item.type == reqItem.type || RecipeGroupMatch(recipe, item.type, reqItem.type))
@@ -167,78 +141,41 @@ namespace MagicStorage {
 			return false;
 		}
 
-		internal static void CheckItemFromSource(StoredItemAggregator aggregator, Item item, int itemIndexInSource, ref bool wasItemAdded, Func<Item, bool> isItemValid) {
-			if (wasItemAdded || !isItemValid(item))
-				return;
+		internal static bool CheckItemFromSource(CraftingGUI.IRecipeItemsHandler handler, Item item, Func<Item, bool> isItemValid) {
+			if (!isItemValid(item))
+				return false;
 
-			AddItemToAggregateCollections(aggregator, item, itemIndexInSource);
+			handler.AddStoredIngredient(item);
 
-			wasItemAdded = true;
+			return true;
 		}
 
-		internal static void CheckItemFromSource<T>(StoredItemAggregator aggregator, Item item, T state, int itemIndexInSource, ref bool wasItemAdded, Func<Item, T, bool> isItemValid) {
-			if (wasItemAdded || !isItemValid(item, state))
-				return;
+		internal static bool CheckItemFromSource<T>(CraftingGUI.IRecipeItemsHandler handler, Item item, T state, Func<Item, T, bool> isItemValid) {
+			if (!isItemValid(item, state))
+				return false;
 
-			AddItemToAggregateCollections(aggregator, item, itemIndexInSource);
+			handler.AddStoredIngredient(item);
 
-			wasItemAdded = true;
+			return true;
 		}
 
-		private static void AddItemToAggregateCollections(StoredItemAggregator aggregator, Item item, int itemIndexInSource) {
-			List<Item> items;
-			List<bool> itemsFromModules;
-			List<ItemInfo> itemInfo;
-
-			if (aggregator is null) {
-				items = storageItems;
-				itemsFromModules = storageItemsFromModules;
-				itemInfo = storageItemInfo;
-			} else {
-				items = aggregator.items;
-				itemsFromModules = aggregator.itemsFromModules;
-				itemInfo = aggregator.itemInfo;
-			}
-
-			// Module items must refer to the original item instances
-			Item clone = itemIndexInSource >= numItemsWithoutSimulators ? item : item.Clone();
-			items.Add(clone);
-			itemInfo.Add(new(clone));
-			itemsFromModules.Add(itemIndexInSource >= numItemsWithoutSimulators);
-		}
-
-		internal static void AttemptListCompact(StorageGUI.ThreadContext thread = null) {
-			var resultItemList = CompactItemListWithModuleData(storageItems, storageItemsFromModules, out var moduleItemsList, thread);
-			if (resultItemList.Count != storageItems.Count) {
-				//Update the lists since items were compacted
-				storageItems.Clear();
-				storageItems.AddRange(resultItemList);
-				storageItemInfo.Clear();
-				storageItemInfo.AddRange(storageItems.Select(static i => new ItemInfo(i)));
-				storageItemsFromModules.Clear();
-				storageItemsFromModules.AddRange(moduleItemsList);
-			}
-		}
-
-		private static List<Item> CompactItemListWithModuleData(List<Item> items, List<bool> moduleItems, out List<bool> moduleItemsResult, StorageGUI.ThreadContext thread = null) {
+		internal static List<Item> CompactItemList(RefreshThread thread, CraftingGUI.IRecipeItemsHandler handler, List<Item> items) {
 			List<Item> compacted = new();
-			List<int> compactedSource = new();
 
-			thread?.InitTaskSchedule(items.Count, "Aggregating stored ingredients (1/2)");
+			thread.InitTaskSchedule(items.Count, "Aggregating Stored Ingredients");
 
-			for (int i = 0; i < items.Count; i++) {
-				Item item = items[i];
-
-				if (item.IsAir) {
-					thread?.CompleteOneTask();
+			foreach (Item item in items.NotifyStepsTo(thread)) {
+				if (item.IsAir)
 					continue;
-				}
 
 				bool fullyCompacted = false;
+				if (handler.IsItemFromModule(item))
+					goto CheckCompactInsertion;
+
 				for (int j = 0; j < compacted.Count; j++) {
 					Item existing = compacted[j];
 
-					if (StorageAggregator.CanCombineItems(item, existing) && moduleItems[i] == moduleItems[compactedSource[j]] && !moduleItems[i]) {
+					if (StorageAggregator.CanCombineItems(item, existing)) {
 						if (existing.stack + item.stack <= existing.maxStack) {
 							existing.stack += item.stack;
 							item.stack = 0;
@@ -256,24 +193,11 @@ namespace MagicStorage {
 					}
 				}
 
-				if (item.IsAir) {
-					thread?.CompleteOneTask();
-					continue;
-				}
+				CheckCompactInsertion:
 
-				if (!fullyCompacted) {
+				if (!item.IsAir && !fullyCompacted)
 					compacted.Add(item);
-					compactedSource.Add(i);
-				}
-
-				thread?.CompleteOneTask();
 			}
-
-			thread?.InitTaskSchedule(1, "Aggregating stored ingredients (2/2)");
-
-			moduleItemsResult = compactedSource.Select(m => moduleItems[m]).ToList();
-
-			thread?.CompleteOneTask();
 
 			return compacted;
 		}

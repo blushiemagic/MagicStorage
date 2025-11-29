@@ -25,6 +25,14 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Delay logic until threading stops
 
+			if (MagicStorageConfig.UseOldRightClickSlotFocus)
+				SlotFocusLogic_0();
+			else
+				SlotFocusLogic_1();
+		}
+
+		private static void SlotFocusLogic_0()
+		{
 			if (!hasSlotFocus || slotFocus == -1 || slotFocus >= resultItems.Count || !Main.mouseItem.IsAir && (!StorageAggregator.CanCombineItems(Main.mouseItem, resultItems[slotFocus]) || Main.mouseItem.stack >= Main.mouseItem.maxStack)) {
 				ResetSlotFocus();
 			} else {
@@ -50,6 +58,27 @@ namespace MagicStorage {
 
 				rightClickTimer--;
 			}
+		}
+
+		private static void SlotFocusLogic_1()
+		{
+			if (slotFocus == -1
+			|| slotFocus >= resultItems.Count
+			|| !ItemStackSplitting.TickOneSplitOntoMouse(resultItems[slotFocus], CloneWithStackOverride, out bool waitingForNextSplit)
+			|| !waitingForNextSplit)
+			{
+				ResetSlotFocus();
+			}
+			else
+			{
+				MagicUI.SetRefresh();
+			}
+		}
+
+		private static Item CloneWithStackOverride(Item original, int stack) {
+			Item clone = original.Clone();
+			clone.stack = stack;
+			return DoWithdraw(clone);
 		}
 	}
 }

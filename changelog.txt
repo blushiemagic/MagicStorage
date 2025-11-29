@@ -1,3 +1,4 @@
 ﻿[h1]v0.7.0.12[/h1]
+- Fixed an oversight that caused Magic Storage tiles without a tile entity to print the "player does not meet the requirements" message
 - Improved the reliability of the [i]Delete Unloaded Mod Items[/i] control
 - The [i]Sorting/Filtering Button Layout[/i] option in the Magic Storage Config now uses the new dropdown panel from the November update

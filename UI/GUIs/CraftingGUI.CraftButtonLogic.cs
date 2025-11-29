@@ -9,8 +9,6 @@ using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		internal static bool clampCraftAmountAllowCacheReset;
-
 		public static int craftAmountTarget;
 
 		internal static int craftTimer;
@@ -53,18 +51,7 @@ namespace MagicStorage {
 			else
 				craftAmountTarget = amount;  //Snap directly to the amount if the amount target was 1 (this makes clicking 10 when at 1 just go to 10 instead of 11)
 
-			using (FlagSwitch.ToggleFalse(ref clampCraftAmountAllowCacheReset))
-				ClampCraftAmount();
-
-			if (craftAmountTarget != oldTarget) {
-				ResetCachedBlockedIngredientsCheck();
-				ResetCachedCraftingSimulation();
-
-				if (MagicStorageConfig.IsRecursionEnabled) {
-					RefreshStorageItems();
-					MagicUI.SetRefresh();
-				}
-			}
+			ClampCraftAmount();
 
 			SoundEngine.PlaySound(SoundID.MenuTick);
 		}
@@ -74,25 +61,22 @@ namespace MagicStorage {
 				return;  // Recipe/ingredient information may not be available
 
 			int oldTarget = craftAmountTarget;
+			int newTarget = craftAmountTarget;
 
-			if (craftAmountTarget < 1 || selectedRecipe is null || selectedRecipe.createItem.maxStack == 1 || !IsCurrentRecipeFullyAvailable())
-				craftAmountTarget = 1;
-			else {
+			if (newTarget >= 1 && selectedRecipe is not null && selectedRecipe.createItem.maxStack != 1 && IsCurrentRecipeAvailable()) {
 				int amountCraftable = AmountCraftableForCurrentRecipe();
 				int max = Utils.Clamp(amountCraftable, 1, selectedRecipe.createItem.maxStack);
 
-				if (craftAmountTarget > max)
-					craftAmountTarget = max;
-			}
+				if (newTarget > max)
+					newTarget = max;
+			} else
+				newTarget = 1;
 
-			if (clampCraftAmountAllowCacheReset && oldTarget != craftAmountTarget) {
-				ResetCachedBlockedIngredientsCheck();
-				ResetCachedCraftingSimulation();
+			if (oldTarget != newTarget) {
+				craftAmountTarget = newTarget;
 
-				if (MagicStorageConfig.IsRecursionEnabled) {
-					RefreshStorageItems();
-					MagicUI.SetRefresh();
-				}
+				if (MagicStorageConfig.IsRecursionEnabled)
+					CreateSelectedRecipeRefreshThread(selectedRecipe, caller: nameof(ClampCraftAmount)).Start();
 			}
 		}
 	}

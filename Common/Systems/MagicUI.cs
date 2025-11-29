@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using MagicStorage.Common.Players;
+using MagicStorage.Common.Threading.UI;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using MagicStorage.UI;
@@ -40,7 +41,21 @@ public class MagicUI : ModSystem
 		set => _refreshUI |= value;
 	}
 
-	public static bool CurrentlyRefreshing { get; internal set; }
+	public static bool CurrentlyRefreshing => activeRefreshingThread is { IsRunning: true };
+
+	public static bool HasActiveThread<T>() where T : RefreshThread => activeRefreshingThread is T { IsRunning: true };
+
+	public static bool HasActiveThread<T>(out T thread)
+		where T : RefreshThread
+	{
+		if (activeRefreshingThread is T { IsRunning: true } activeThread) {
+			thread = activeThread;
+			return true;
+		}
+
+		thread = null;
+		return false;
+	}
 
 	public static event Action OnRefresh;
 		
@@ -50,7 +65,10 @@ public class MagicUI : ModSystem
 		set => forceFullRefresh |= value;
 	}
 
+	[Obsolete("This variable needs to be replaced by MagicUI.activeRefreshingThread", error: true)]
 	internal static StorageGUI.ThreadContext activeThread;
+
+	internal static RefreshThread activeRefreshingThread;
 
 	public static int CurrentThreadingDuration { get; internal set; }
 
@@ -87,7 +105,7 @@ public class MagicUI : ModSystem
 		if (RefreshUI)
 			RefreshItems();
 
-		if (activeThread?.Running is true)
+		if (activeRefreshingThread is { IsRunning: true })
 			CurrentThreadingDuration++;
 		else
 			CurrentThreadingDuration = 0;
@@ -125,11 +143,8 @@ public class MagicUI : ModSystem
 	internal static void StopCurrentThread() {
 		_watchdogs.Clear();
 
-		if (activeThread is not null) {
-			CurrentlyRefreshing = false;
-			activeThread.Stop();
-			activeThread = null;
-		}
+		activeRefreshingThread?.Stop();
+		activeRefreshingThread = null;
 	}
 
 	public static void RefreshItems() {

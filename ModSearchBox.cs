@@ -39,17 +39,12 @@ namespace MagicStorage
 		}
 
 		public static string GetNameFromIndex(int index) {
-			string name = index switch
+			return index switch
 			{
-				ModIndexAll      => Language.GetTextValue("Mods.MagicStorage.FilterAllMods"),
+				ModIndexAll => Language.GetTextValue("Mods.MagicStorage.FilterAllMods"),
 				ModIndexBaseGame => "Terraria",
-				_                => MagicCache.AllMods[index].Name
+				_ => MagicCache.AllMods[index].Name
 			};
-
-			if (name == "ModLoader")
-				name = "tModLoader";
-
-			return name;
 		}
 
 		public void Reset(bool silent)

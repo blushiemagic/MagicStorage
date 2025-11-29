@@ -33,6 +33,8 @@ namespace MagicStorage.Common.Systems {
 		/// </summary>
 		public static bool HideRecipeResult(int resultItem) => _hiddenRecipeResults.Add(resultItem);
 
-		public static bool IsHidden(Recipe recipe) => _hiddenRecipeResults.Contains(recipe.createItem.type) || _hiddenRecipes.Contains(recipe);
+		public static bool IsHidden(Recipe recipe) => recipe is not null && _hiddenRecipeResults.Contains(recipe.createItem.type) || _hiddenRecipes.Contains(recipe);
+
+		internal static bool IsVisible(Recipe recipe) => !IsHidden(recipe);
 	}
 }

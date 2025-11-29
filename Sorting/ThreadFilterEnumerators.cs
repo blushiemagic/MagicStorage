@@ -1,45 +1,40 @@
 ﻿using SerousCommonLib.API.Iterators;
 using System.Collections.Generic;
-using System;
 using Terraria;
-using MagicStorage.CrossMod;
 using System.Linq;
+using MagicStorage.Common.Threading.UI;
+using System;
+using System.Collections;
 
 namespace MagicStorage.Sorting {
-	internal class ThreadFilterEnumerator<T> : Iterator<T> {
-		protected readonly StorageGUI.ThreadContext _context;
-		protected readonly ItemFilter.Filter _filter;
+	internal abstract class ThreadFilterEnumerator<T> : Iterator<T> {
+		protected readonly RefreshThread _thread;
 		protected readonly IEnumerable<T> _source;
 		protected readonly IEnumerator<T> _iterator;
-		protected readonly Func<T, Item> _objToItem;
 
-		public ThreadFilterEnumerator(StorageGUI.ThreadContext context, IEnumerable<T> source, Func<T, Item> objToItem) {
-			var filter = FilteringOptionLoader.Get(context.filterMode)?.Filter
-				?? throw new ArgumentOutOfRangeException(nameof(context) + "." + nameof(context.filterMode), "Filtering ID was invalid or its definition had a null filter");
+		public bool ApplyStaticFilter { get; set; } = true;
 
-			_context = context;
-			_filter = filter;
+		public ThreadFilterEnumerator(RefreshThread thread, IEnumerable<T> source) {
+			ArgumentNullException.ThrowIfNull(thread);
+			ArgumentNullException.ThrowIfNull(source);
+			_thread = thread;
 			_source = source;
 			_iterator = _source.GetEnumerator();
-			_objToItem = objToItem;
 		}
 
-		private ThreadFilterEnumerator(StorageGUI.ThreadContext context, ItemFilter.Filter filter, IEnumerable<T> source, Func<T, Item> objToItem) {
-			_context = context;
-			_filter = filter;
-			_source = source;
-			_iterator = _source.GetEnumerator();
-			_objToItem = objToItem;
+		protected abstract Item GetItem(T value);
+
+		protected virtual bool PassesFavoriteFilter(T value) => !MagicStorageConfig.CraftingFavoritingEnabled || !_thread.controls.showOnlyFavorites || GetItem(value).favorited;
+
+		private bool PassesFilters(T value) => PassesFilters_OptionsAndText(GetItem(value)) && PassesFavoriteFilter(value);
+
+		private bool PassesFilters_OptionsAndText(Item item) {
+			var controls = _thread.controls;
+
+			return ApplyStaticFilter
+				? controls.ItemPassesFilters(item)
+				: controls.ItemPassesGeneralOptionFilters(item) && controls.ItemPassesTextFilter(item);
 		}
-
-		protected virtual Item GetItem(T value) => _objToItem(value);
-
-		private bool Filter(T value) {
-			Item item = GetItem(value);
-			return _filter(item) && ItemSorter.ItemPassesAllGenericFilters(item, _context) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
-		}
-
-		public override Iterator<T> Clone() => new ThreadFilterEnumerator<T>(_context, _filter, _source, _objToItem);
 
 		public override bool MoveNext() {
 			_current = default;
@@ -47,7 +42,7 @@ namespace MagicStorage.Sorting {
 			while (_iterator.MoveNext()) {
 				var current = _iterator.Current;
 
-				if (Filter(current)) {
+				if (PassesFilters(current)) {
 					_current = current;
 					return true;
 				}
@@ -57,41 +52,105 @@ namespace MagicStorage.Sorting {
 		}
 	}
 
+	internal class ThreadFilterGenericEnumerator<T> : ThreadFilterEnumerator<T> {
+		private readonly Func<T, Item> _converter;
+
+		public ThreadFilterGenericEnumerator(RefreshThread thread, IEnumerable<T> source, Func<T, Item> converter) : base(thread, source) {
+			ArgumentNullException.ThrowIfNull(converter);
+			_converter = converter;
+		}
+
+		public override Iterator<T> Clone() => new ThreadFilterGenericEnumerator<T>(_thread, _source, _converter);
+
+		protected override Item GetItem(T value) => _converter(value);
+	}
+
 	internal class ThreadFilterItemEnumerator : ThreadFilterEnumerator<Item> {
-		public ThreadFilterItemEnumerator(StorageGUI.ThreadContext context, IEnumerable<Item> source) : base(context, source, null) { }
+		public ThreadFilterItemEnumerator(RefreshThread thread, IEnumerable<Item> source) : base(thread, source) { }
+
+		public override Iterator<Item> Clone() => new ThreadFilterItemEnumerator(_thread, _source);
 
 		protected override Item GetItem(Item value) => value;
 	}
 
-	internal class ThreadFilterParallelEnumerator<T> {
-		protected readonly StorageGUI.ThreadContext _context;
-		protected readonly ItemFilter.Filter _filter;
+	internal class ThreadFilterRecipeEnumerator : ThreadFilterEnumerator<Recipe> {
+		private readonly CraftingGUI.IFilterProvider<Recipe> _provider;
+
+		public ThreadFilterRecipeEnumerator(RefreshThread thread, IEnumerable<Recipe> source, CraftingGUI.IFilterProvider<Recipe> provider) : base(thread, source) {
+			ArgumentNullException.ThrowIfNull(provider);
+			_provider = provider;
+		}
+		
+		public override Iterator<Recipe> Clone() => new ThreadFilterRecipeEnumerator(_thread, _source, _provider);
+
+		protected override Item GetItem(Recipe value) => value.createItem;
+
+		protected override bool PassesFavoriteFilter(Recipe value)
+			=> !MagicStorageConfig.CraftingFavoritingEnabled || !_thread.controls.showOnlyFavorites || _provider is null || _provider.IsFavorited(value);
+	}
+
+	internal abstract class ThreadFilterParallelEnumerator<T> : IEnumerable<T> {
+		protected readonly RefreshThread _thread;
 		protected readonly ParallelQuery<T> _query;
-		protected readonly Func<T, Item> _objToItem;
 
-		public ThreadFilterParallelEnumerator(StorageGUI.ThreadContext context, ParallelQuery<T> query, Func<T, Item> objToItem) {
-			var filter = FilteringOptionLoader.Get(context.filterMode)?.Filter
-				?? throw new ArgumentOutOfRangeException(nameof(context) + "." + nameof(context.filterMode), "Filtering ID was invalid or its definition had a null filter");
+		public bool ApplyStaticFilter { get; set; } = true;
 
-			_context = context;
-			_filter = filter;
-			_query = query.Where(Filter);
-			_objToItem = objToItem;
+		public ThreadFilterParallelEnumerator(RefreshThread thread, ParallelQuery<T> query) {
+			ArgumentNullException.ThrowIfNull(thread);
+			ArgumentNullException.ThrowIfNull(query);
+			_thread = thread;
+			_query = query.Where(PassesFilters);
 		}
 
-		protected virtual Item GetItem(T value) => _objToItem(value);
+		protected abstract Item GetItem(T value);
 
-		private bool Filter(T value) {
-			Item item = GetItem(value);
-			return _filter(item) && ItemSorter.ItemPassesAllGenericFilters(item, _context) && ItemSorter.FilterBySearchText(item, _context.searchText, _context.modSearch);
+		protected virtual bool PassesFavoriteFilter(T value) => !MagicStorageConfig.CraftingFavoritingEnabled || !_thread.controls.showOnlyFavorites || GetItem(value).favorited;
+
+		private bool PassesFilters(T value) => PassesFilters_OptionsAndText(GetItem(value)) && PassesFavoriteFilter(value);
+
+		private bool PassesFilters_OptionsAndText(Item item) {
+			var controls = _thread.controls;
+
+			return ApplyStaticFilter
+				? controls.ItemPassesFilters(item)
+				: controls.ItemPassesGeneralOptionFilters(item) && controls.ItemPassesTextFilter(item);
 		}
 
 		public ParallelQuery<T> GetQuery() => _query;
+
+		public IEnumerator<T> GetEnumerator() => _query.GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => _query.GetEnumerator();
+	}
+
+	internal class ThreadFilterParallelGenericEnumerator<T> : ThreadFilterParallelEnumerator<T> {
+		private readonly Func<T, Item> _converter;
+
+		public ThreadFilterParallelGenericEnumerator(RefreshThread thread, ParallelQuery<T> query, Func<T, Item> converter) : base(thread, query) {
+			ArgumentNullException.ThrowIfNull(converter);
+			_converter = converter;
+		}
+
+		protected override Item GetItem(T value) => _converter(value);
 	}
 
 	internal class ThreadFilterParallelItemEnumerator : ThreadFilterParallelEnumerator<Item> {
-		public ThreadFilterParallelItemEnumerator(StorageGUI.ThreadContext context, ParallelQuery<Item> query) : base(context, query, null) { }
+		public ThreadFilterParallelItemEnumerator(RefreshThread thread, ParallelQuery<Item> query) : base(thread, query) { }
 
 		protected override Item GetItem(Item value) => value;
+	}
+
+	internal class ThreadFilterParallelRecipeEnumerator : ThreadFilterParallelEnumerator<Recipe> {
+		private readonly CraftingGUI.IFilterProvider<Recipe> _provider;
+
+		public ThreadFilterParallelRecipeEnumerator(RefreshThread thread, ParallelQuery<Recipe> query, CraftingGUI.IFilterProvider<Recipe> provider) : base(thread, query) {
+			ArgumentNullException.ThrowIfNull(provider);
+			_provider = provider;
+		}
+
+		protected override Item GetItem(Recipe value) => value.createItem;
+
+		protected override bool PassesFavoriteFilter(Recipe value)
+			=> !MagicStorageConfig.CraftingFavoritingEnabled || !_thread.controls.showOnlyFavorites || _provider is null || _provider.IsFavorited(value);
 	}
 }

@@ -1,16 +1,80 @@
-﻿using MagicStorage.Components;
-using MagicStorage.Sorting;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
-using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Threading.UI;
+using MagicStorage.Components;
 using MagicStorage.CrossMod;
-using MagicStorage.UI.States;
-using MagicStorage.UI;
+using MagicStorage.Sorting;
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Terraria;
 
 namespace MagicStorage {
 	partial class StorageGUI {
+		private class StorageRefreshThread : RefreshThread {
+			public readonly HashSet<int> targetItemTypes;
+			public List<Item> allStoredItems;
+			public bool uniqueSlotPerItemStack;
+
+			public StorageRefreshThread(
+				StorageViewControls controls,
+				ActionMode currentMode,
+				HashSet<int> itemTypesToUpdate
+			) : base(MagicUI.storageUI, HijackControls(controls, currentMode)) {
+				targetItemTypes = itemTypesToUpdate is null ? null : [.. itemTypesToUpdate];
+				uniqueSlotPerItemStack = currentMode is ActionMode.Deletion;
+			}
+
+			private static StorageViewControls HijackControls(StorageViewControls original, ActionMode currentMode) {
+				if (currentMode is ActionMode.Deletion) {
+					// Item Deletion Mode needs to always show all items
+					return original.CreateCopy(
+						filteringOptionOverride: FilteringOptionLoader.Definitions.All.Type,
+						generalFiltersOverride: []
+					);
+				} else
+					return original;
+			}
+
+			protected override void CollectObjects() {
+				// Get all items now; filtering will be handled in the thread
+				allStoredItems = [.. base.Heart.GetStoredItems()];
+			}
+
+			protected override void Execute() {
+				IEnumerable<Item> items;
+
+				if (targetItemTypes is not { Count: > 0 }) {
+					// Use the items as they are in storage
+					items = allStoredItems;
+				} else {
+					// Order the items to where items that don't need to update will be in the same general order
+					// This should reduce the execution time when sorting
+					items = AdjustToUpdateSet(allStoredItems, targetItemTypes);
+				}
+
+				// Adjust further based on the filter setting
+				if (base.controls.filteringOption == FilteringOptionLoader.Definitions.Recent.Type) {
+					items = AdjustToDepositHistory(this, items);
+					base.workingCounter = RECENT_FILTER_ITEM_COUNT;
+				} else
+					base.workingCounter = allStoredItems.Count;
+
+				base.workingItemList = items;
+				base.workingFlag = uniqueSlotPerItemStack;
+
+				SortAndFilter(this);
+
+				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
+			}
+
+			protected override void Cleanup() { }
+
+			public override void ClearStaticCollections() => StorageGUI.ClearAllCollections();
+		}
+
+		#region ThreadContext
+		[Obsolete("Use " + nameof(RefreshThread) + " instead", error: true)]
 		public class ThreadContext {
 			public ItemSorter.AggregateContext context;
 			private readonly CancellationTokenSource tokenSource;
@@ -92,7 +156,7 @@ namespace MagicStorage {
 
 				MagicUI.activeThread = incoming;
 				MagicUI.activeThread.Running = true;
-				MagicUI.CurrentlyRefreshing = true;
+			//	MagicUI.CurrentlyRefreshing = true;
 
 				// Variable capturing
 				ThreadContext ctx = incoming;
@@ -127,55 +191,6 @@ namespace MagicStorage {
 				NetHelper.Report(true, "Current thread halted");
 			}
 		}
-
-		[Obsolete("Use MagicUI.CurrentThreadingDuration instead", error: true)]
-		public static int CurrentThreadingDuration { get; private set; }
-
-		private static ThreadContext InitializeThreadContext(StorageUIState.StoragePage storagePage, bool clearItemLists) {
-			if (clearItemLists) {
-				didMatCheck.Clear();
-				items.Clear();
-				sourceItems.Clear();
-			}
-
-			TEStorageHeart heart = GetHeart();
-			if (heart == null || !StoragePlayer.IsCurrentLocalNetworkAccessible()) {
-				NetHelper.Report(true, "StorageGUI: InitializeThreadContext invoked with no heart or inaccessible network");
-
-				ClearAllCollections();
-
-				storagePage?.RequestThreadWait(waiting: false);
-
-				MagicUI.InvokeOnRefresh();
-				return null;
-			}
-
-			NetHelper.Report(true, $"Refreshing {(itemTypesToUpdate is null ? "all" : $"{itemTypesToUpdate.Count}")} storage items");
-
-			int sortMode = SortingOptionLoader.Selected;
-			int filterMode = FilteringOptionLoader.Selected;
-			var generalFilters = FilteringOptionLoader.GeneralSelections;
-
-			// Force filtering to specific value to make deleting the bad item stacks easier
-			if (ForciblySeparateItemStacks) {
-				filterMode = FilteringOptionLoader.Definitions.All.Type;
-				generalFilters = null;
-			}
-
-			string searchText = storagePage.searchBar.State.InputText;
-			bool onlyFavorites = storagePage.filterFavorites.Value;
-			int modSearch = storagePage.modSearchBox.ModIndex;
-
-			return new ThreadContext(new CancellationTokenSource(), SortAndFilter, AfterSorting) {
-				heart = heart,
-				sortMode = sortMode,
-				filterMode = filterMode,
-				generalFilters = generalFilters is null ? new() : new(generalFilters),
-				searchText = searchText,
-				onlyFavorites = onlyFavorites,
-				modSearch = modSearch,
-				state = itemTypesToUpdate
-			};
-		}
+		#endregion
 	}
 }

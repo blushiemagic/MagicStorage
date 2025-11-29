@@ -1603,6 +1603,7 @@ cleanupContext:
 			int toShimmer = reader.ReadInt32();
 
 			var storage = StorageIntermediary.Receive(reader);
+			storage.IgnoreContentChanges = true;
 
 			var results = ShimmerMetrics.ReceiveShimmerResults(reader);
 
@@ -1617,12 +1618,11 @@ cleanupContext:
 			Report(false, "Handling shimmer results...");
 
 			foreach (var result in results)
-				result?.OnShimmer(shimmeringItem, iconicItem, storage, false);
+				result?.OnShimmer(shimmeringItem, iconicItem, storage, net: true);
 
 			Report(false, "Handling storage inventory changes and sending excess items...");
 
 			List<Item> items;
-			using (FlagSwitch.ToggleTrue(ref TEStorageUnit.ignorePrefixesWhenWithdrawing))  // Stupid fugly hack
 			using (SecuritySystem.CreateAccessContext(sender))
 				items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
 

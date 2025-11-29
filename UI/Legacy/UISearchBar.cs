@@ -81,8 +81,8 @@ namespace MagicStorage.UI
 			if (!MagicUI.CanUpdateSearchBars || !active) {
 				if (active) {
 					if (mouseOver && GetHoverText?.Invoke() is string s) {
-						if (MagicUI.lastKnownSearchBarErrorReason is not null && !MagicUI.CurrentlyRefreshing)
-							s += $"\n[c/ff0000:{MagicUI.lastKnownSearchBarErrorReason}]";
+						if (MagicUI.lastKnownSearchBarErrorReason is string errorText && !MagicUI.CurrentlyRefreshing)
+							Utility.AddErrorTextMultiline(ref s, errorText);
 
 						if (!string.IsNullOrWhiteSpace(s))
 							MagicUI.mouseText = s;

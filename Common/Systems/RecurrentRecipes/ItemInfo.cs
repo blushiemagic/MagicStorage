@@ -30,5 +30,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public static bool operator !=(ItemInfo left, ItemInfo right) {
 			return !(left == right);
 		}
+
+		public static implicit operator ItemInfo(Item item) {
+			return new(item);
+		}
 	}
 }

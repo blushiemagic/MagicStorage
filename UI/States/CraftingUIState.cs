@@ -49,7 +49,7 @@ namespace MagicStorage.UI.States {
 		protected float ingredientScrollBarMaxViewSize = 2f;
 		protected float storageScrollBarMaxViewSize = 2f;
 
-		protected UIToggleLabel recursionButton;
+		protected internal UIToggleLabel recursionButton;
 
 		protected UICraftButton craftButton;
 		protected UICraftAmountAdjustment craftP1, craftP10, craftP100, craftM1, craftM10, craftM100, craftMax, craftReset;
@@ -248,12 +248,7 @@ namespace MagicStorage.UI.States {
 			recursionButton.mouseOver = Color.White;
 			recursionButton.Left.Set(18, 0f);
 			recursionButton.Width.Set(recursionButton.Text.MinWidth.Pixels + 30, 0f);
-			recursionButton.OnLeftClick += static (evt, e) => {
-				UIToggleLabel label = e as UIToggleLabel;
-				CraftingGUI.showAllPossibleIngredients = label.IsOn;
-
-				MagicUI.SetRefresh(forceFullRefresh: true);
-			};
+			recursionButton.OnLeftClick += static (evt, e) => CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, caller: "CraftingUIState").Start();
 
 			storageZone.Width.Set(0f, 1f);
 			

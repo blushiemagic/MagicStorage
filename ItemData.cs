@@ -33,6 +33,10 @@ namespace MagicStorage
 
 		public static bool operator !=(ItemData left, ItemData right) => !left.Equals(right);
 
+		public static implicit operator ItemData(Item item) => new(item);
+
+		public static implicit operator ItemData(ItemInfo info) => new(info);
+
 		public static bool Matches(Item item1, Item item2) => new ItemData(item1) == new ItemData(item2);
 	}
 }

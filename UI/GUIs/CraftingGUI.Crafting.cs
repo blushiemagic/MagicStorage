@@ -19,7 +19,7 @@ namespace MagicStorage {
 
 			public Dictionary<int, int> itemCounts;
 
-			public List<bool> fromModule;
+			public List<Item> sourceItemsFromModules;
 
 			public EnvironmentSandbox sandbox;
 
@@ -87,7 +87,7 @@ namespace MagicStorage {
 
 				int target = toCraft;
 
-				ExecuteInCraftingGuiEnvironment(() => Craft_DoStandardCraft(context));
+				ExecuteInCraftingGuiEnvironment(context, Craft_DoStandardCraft);
 
 				NetHelper.Report(true, $"Crafted {target - context.toCraft} items");
 
@@ -147,7 +147,7 @@ namespace MagicStorage {
 
 			// Local capturing
 			var ctx = context;
-			ExecuteInCraftingGuiEnvironment(() => Craft_DoRecursionCraft(ctx));
+			ExecuteInCraftingGuiEnvironment(ctx, Craft_DoRecursionCraft);
 
 			// Sanity check
 			selectedRecipe = recursiveRecipe.original;

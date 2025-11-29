@@ -42,18 +42,30 @@ namespace MagicStorage {
 			if (ProcessGroupsForText(selectedRecipe, item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 
-			int totalGroupStack = 0;
-			Item storageItem = storageItems.FirstOrDefault(i => i.type == item.type) ?? new Item();
+			ClampedArithmetic totalGroupStack = 0;
+			// Local capturing
+			Item i = item;
+			Item storageItem = storageItems.FirstOrDefault(stored => stored.type == i.type) ?? new Item();
 
 			foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Select(index => RecipeGroup.recipeGroups[index])) {
-				if (rec.ValidItems.Contains(item.type)) {
-					foreach (int type in rec.ValidItems)
-						totalGroupStack += storageItems.Where(i => i.type == type).Sum(i => i.stack);
+				if (rec.ContainsItem(item.type)) {
+					foreach (int type in rec.ValidItems) {
+						foreach (Item storedItem in storageItems) {
+							if (storedItem.type == type) {
+								totalGroupStack += storedItem.stack;
+
+								if (totalGroupStack >= item.stack)
+									goto StopCheckingRecipeGroups;
+							}
+						}
+					}
 				}
 			}
 
+			StopCheckingRecipeGroups:
+
 			if (!item.IsAir) {
-				if (storageItem.IsAir && totalGroupStack == 0)
+				if (storageItem.IsAir && (int)totalGroupStack == 0)
 					context = MagicSlotContext.IngredientNotCraftable;
 				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
 					context = MagicSlotContext.IngredientPartiallyInStock;
@@ -61,10 +73,8 @@ namespace MagicStorage {
 				if (context != MagicSlotContext.Normal) {
 					bool craftable;
 
-					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable)) {
-						// Forcibly prevent any subrecipes using this item type from being "available"
-						craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe, true, selectedRecipe.createItem.type));
-					}
+					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
+						craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe, true));
 
 					if (craftable)
 						context = MagicSlotContext.IngredientCraftable;

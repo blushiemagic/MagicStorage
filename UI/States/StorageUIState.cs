@@ -390,11 +390,13 @@ namespace MagicStorage.UI.States {
 				int index = slot + StorageGUI.numColumns * (int)Math.Round(scrollBar.ViewPosition);
 				Item item = index < StorageGUI.items.Count ? StorageGUI.items[index] : new Item();
 
+				/*
 				if (!item.IsAir && !StorageGUI.didMatCheck[index]) {
 					// Item.checkMat() no longer exists in 1.4.4
 					item.material = ItemID.Sets.IsAMaterial[item.type];
 					StorageGUI.didMatCheck[index] = true;
 				}
+				*/
 
 				switch (StorageGUI.currentMode) {
 					case StorageGUI.ActionMode.Deletion:
@@ -492,8 +494,11 @@ namespace MagicStorage.UI.States {
 							if (StorageGUI.actionSlotFocus != objSlot) {
 								StorageGUI.actionSlotFocus = objSlot;
 								obj.Context = MagicSlotContext.SelectedActionItem;
+
+								/*
 								for (int i = 0; i < StorageGUI.didMatCheck.Count; i++)
 									StorageGUI.didMatCheck[i] = false;
+								*/
 
 								if (StorageGUI.currentMode is StorageGUI.ActionMode.Selling && ItemSlot.ShiftInUse) {
 									if (!SellModeMetadata.Remove(item)) {

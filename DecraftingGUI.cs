@@ -5,12 +5,16 @@ using Terraria.ModLoader.IO;
 using Terraria.ModLoader;
 using Terraria;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Shimmering;
 
 namespace MagicStorage {
 	public static partial class DecraftingGUI {
 		internal static readonly List<int> viewingItems = new();
 		internal static readonly List<bool> itemAvailable = new();
 		internal static int selectedItem = -1;
+
+		// Used to cache the reports for use by StoredIngredientsRefreshThread
+		internal static readonly List<ItemReport> cachedShimmerReports = [];
 
 		internal static void Unload() => ClearAllCollections(callCraftingClear: true);
 
@@ -22,8 +26,7 @@ namespace MagicStorage {
 			viewingItems.Clear();
 			itemAvailable.Clear();
 			resultItems.Clear();
-			resultItemsFromModules.Clear();
-			resultItemInfo.Clear();
+			resultItemsInfo.Clear();
 			selectedItem = -1;
 		}
 
@@ -54,13 +57,27 @@ namespace MagicStorage {
 		}
 
 		internal static void SetSelectedItem(int item) {
-			NetHelper.Report(true, "Reassigning current item...");
+			NetHelper.Report(true, "Reassigning current item and refreshing recipe panel...");
 
-			selectedItem = item;
-			RefreshStorageItems();
+			CraftingGUI.craftAmountTarget = 1;
 			CraftingGUI.blockStorageItems.Clear();
 
-			NetHelper.Report(true, "Successfully reassigned current item!");
+			CreateSelectedItemRefreshThread(item, caller: nameof(SetSelectedItem)).Start();
+		}
+
+		internal static ShimmerInfoPanelRefreshThread CreateSelectedItemRefreshThread(int selectedItem, string caller) {
+			CraftingGUI.GetCommonRefreshThreadParameters(out _, out var blockedStoredIngredients, out var craftAmountTarget);
+
+			var thread = new ShimmerInfoPanelRefreshThread(
+				controls: CreateRefreshThreadControls(),
+				selectedItem: selectedItem,
+				blockedStoredIngredients: blockedStoredIngredients,
+				craftAmountTarget: craftAmountTarget,
+				cachedShimmerReports: cachedShimmerReports
+			);
+			thread.SetDebugName($"DecraftingGUI.{caller} thread:");
+
+			return thread;
 		}
 	}
 }

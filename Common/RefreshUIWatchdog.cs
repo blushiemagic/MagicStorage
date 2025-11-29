@@ -14,7 +14,7 @@ namespace MagicStorage.Common {
 		/// <summary>
 		/// This method runs when this target's state has changed.  If <paramref name="forceFullRefresh"/> is <see langword="true"/>, then the UI will be fully refreshed.
 		/// </summary>
-		/// <param name="forceFullRefresh">Whether a full refresh (<see langword="true"/>) or a partial refresh (<see langword="false"/>) should be performed if the state has changed
+		/// <param name="forceFullRefresh">Whether a full refresh (<see langword="true"/>) or a partial refresh (<see langword="false"/>) should be performed if the state has changed</param>
 		void OnStateChange(out bool forceFullRefresh);
 	}
 

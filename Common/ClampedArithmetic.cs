@@ -11,6 +11,7 @@ namespace MagicStorage.Common {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		private static int AddWithOverflowCheck(int a, int b, out bool overflowFlag) {
+			// Taken from: https://stackoverflow.com/a/32028967
 			unchecked {
 				int c = a + b;
 				overflowFlag = ((a ^ b) >= 0) & ((a ^ c) < 0);
