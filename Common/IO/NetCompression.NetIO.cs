@@ -112,18 +112,20 @@ namespace MagicStorage.Common.IO {
 				try {
 					Utility.UnsafelyReceiveModData(item, modReader);
 				} catch (Exception ex) {
-					LogThenPrepareErrorItem(ref item, readData, item.ModItem, ex);
+					MagicStorageMod.Instance.Logger.Error($"Error reading item from compressed stream caused by {item.ModItem.Name} from the {item.ModItem.Mod.Name} mod.", ex);
 					failed = true;
 				}
 
-				if (!failed) {
-					GlobalItem lastReadGlobal = null;
-					try {
-						Utility.UnsafelyReceiveGlobalModData(item, readData, modReader, out lastReadGlobal);
-					} catch (Exception ex) {
-						LogThenPrepareErrorItem(ref item, readData, lastReadGlobal, ex);
-					}
+				GlobalItem lastReadGlobal = null;
+				try {
+					Utility.UnsafelyReceiveGlobalModData(item, readData, modReader, out lastReadGlobal);
+				} catch (Exception ex) {
+					MagicStorageMod.Instance.Logger.Error($"Error reading item from compressed stream caused by {lastReadGlobal.Name} from the {lastReadGlobal.Mod.Name} mod.", ex);
+					failed = true;
 				}
+
+				if (failed)
+					item = Utility.PrepareFailureItem(BaseErrorDummyItem.NetReadFailItemType, null, readData);
 			}
 
 			return item;
