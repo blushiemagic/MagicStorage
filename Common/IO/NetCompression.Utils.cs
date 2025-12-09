@@ -73,14 +73,5 @@ namespace MagicStorage.Common.IO {
 			
 			throw new NotSupportedException($"Unsupported type: {typeof(T)}");
 		}
-
-		private static void LogThenPrepareErrorItem(ref Item item, DeserializedNetItem readData, ModType errorSource, Exception ex) {
-			if (errorSource is not null)
-				MagicStorageMod.Instance.Logger.Error($"Error reading item from compressed stream caused by {errorSource.Name} from the {errorSource.Mod.Name} mod.", ex);
-			else
-				MagicStorageMod.Instance.Logger.Error("Error reading item from compressed stream caused by unknown object.", ex);
-
-			item = Utility.PrepareFailureItem(BaseErrorDummyItem.NetReadFailItemType, null, readData);
-		}
 	}
 }
