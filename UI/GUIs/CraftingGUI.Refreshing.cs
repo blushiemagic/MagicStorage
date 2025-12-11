@@ -1,8 +1,7 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Threading;
-using MagicStorage.Common.Threading.UI;
-using MagicStorage.Components;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using MagicStorage.UI.States;
@@ -30,20 +29,17 @@ namespace MagicStorage {
 		// Caches for StoredIngredientsRefreshThread
 		internal static readonly ConditionalWeakTable<Item, object> wasModuleItem = [];
 		internal static readonly ConditionalWeakTable<Item, object> moduleItemWasFromInventory = [];
+
+		internal static bool hasCompleteData;
 		
 		[Obsolete("Use MagicUI.RefreshItems() instead", error: true)]
 		public static void RefreshItems() => MagicUI.RefreshItems();
 
 		internal static void ResetRefreshCache() {
-			recipesToRefresh = null;
+			recipesToRefreshByIndex = null;
 		}
 		
 		internal static void RefreshItems_Inner() {
-			if (MagicUI.ForceNextRefreshToBeFull) {
-				// Force all recipes to be recalculated
-				recipesToRefresh = null;
-			}
-
 			// Always reset the cached values
 			ResetRecentRecipeCache();
 
@@ -51,29 +47,98 @@ namespace MagicStorage {
 
 			NetHelper.Report(true, "CraftingGUI: RefreshItems invoked");
 
-			GetCommonRefreshThreadParameters(out var adjTiles, out var showAllIngredients, out var blockedStoredIngredients, out var craftAmountTarget);
+			if (recipesToRefreshByIndex is { Count: > 0 })
+				NetHelper.Report(false, $"Refreshing {recipesToRefreshByIndex.Count} recipes...");
 
-			var thread = new CraftingRefreshThread(
-				controls: CreateRefreshThreadControls(),
-				adjTiles: adjTiles,
-				selectedRecipe: selectedRecipe,
-				recipesToRefresh: recipesToRefresh,
-				showAllIngredients: showAllIngredients,
-				recipeFilter: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
-				favorited: StoragePlayer.LocalPlayer.FavoritedRecipes,
-				hidden: StoragePlayer.LocalPlayer.HiddenRecipes,
-				configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist,
-				blockedStoredIngredients: blockedStoredIngredients,
-				craftAmountTarget: craftAmountTarget
-			);
-			thread.SetDebugName("CraftingGUI thread");
-			thread.Start();
+			CreateFullRefreshThread(caller: "CraftingGUI.RefreshItems()").Start();
 
 			ResetRefreshCache();
 		}
 
-		private static StorageViewControls CreateRefreshThreadControls() {
-			var craftingPage = MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>();
+		private class FullRefreshBuilder : IRefreshThreadBuilder {
+			public static IRefreshThreadBuilder Instance { get; } = new FullRefreshBuilder();
+
+			public StorageViewControls CreateControls() => CreateRefreshThreadControls(MagicUI.craftingUI);
+
+			public RefreshThread CreateThread(StorageViewControls controls) {
+				// Force all recipes to be recalculated
+				if (MagicUI.ForceNextRefreshToBeFull)
+					recipesToRefreshByIndex = null;
+
+				return new CraftingRefreshThread(
+					controls: controls,
+					processedStorage: new(
+						staticWasModuleItemTable: wasModuleItem,
+						staticModuleItemWasFromInventoryTable: moduleItemWasFromInventory,
+						staticResultItemsList: items,
+						staticResultItemGroupsList: itemGroups,
+						staticResultItemsFromModulesList: sourceItemsFromModules,
+						staticCountsDictionary: itemCounts,
+						staticCountsByPrefixDictionary: itemCountsByPrefix
+					),
+					mainZoneControls: new(
+						zoneObjectFilterChoice: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
+						favorited: StoragePlayer.LocalPlayer.FavoritedRecipes,
+						hidden: StoragePlayer.LocalPlayer.HiddenRecipes,
+						configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist
+					),
+					mainZoneResults: new(
+						objectsToRefresh: CollectRefreshingRecipes(),
+						staticObjectList: recipes,
+						staticAvailableList: recipeAvailable
+					),
+					ingredientControls: new(
+						staticShowAllIngredientsField: new ShowAllIngredientsProvider(((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn),
+						staticInfiniteItemsSet: isItemInfinite,
+						staticBlockedList: blockStorageItems,
+						staticCreativeUnitField: new CreativeUnitPresentProvider()
+					),
+					craftingObject: new(
+						selection: new SelectionProvider(),
+						craftAmountTarget: new CraftAmountTargetProvider()
+					),
+					availableCache: new(
+						staticTable: recipeToAvailableLookup
+					)
+				);
+			}
+		}
+
+		private class ShowAllIngredientsProvider(bool defaultValue) : IReadOnlyValueProvider<bool> {
+			public bool Value { get; private set; } = defaultValue;
+
+			public void ClearStatic() => showAllPossibleIngredients = false;
+			public void CopyFromStatic() => Value = showAllPossibleIngredients;
+			public void CopyToStatic() => showAllPossibleIngredients = Value;
+		}
+
+		private class SelectionProvider : IReadOnlyValueProvider<Recipe> {
+			public Recipe Value { get; private set; }
+			public SelectionProvider() => CopyFromStatic();
+			public SelectionProvider(Recipe defaultValue) => Value = defaultValue;
+			public void ClearStatic() { }
+			public void CopyFromStatic() => Value = selectedRecipe;
+			public void CopyToStatic() => selectedRecipe = Value;
+		}
+
+		internal class CraftAmountTargetProvider : IValueProvider<int> {
+			public int Value { get; set; }
+			public CraftAmountTargetProvider() => CopyFromStatic();
+			public CraftAmountTargetProvider(int defaultValue) => Value = defaultValue;
+			public void ClearStatic() => craftAmountTarget = 1;
+			public void CopyFromStatic() => Value = craftAmountTarget;
+			public void CopyToStatic() => craftAmountTarget = Value;
+		}
+
+		internal class CreativeUnitPresentProvider : IValueProvider<bool> {
+			public bool Value { get; set; }
+			public void ClearStatic() => allItemsAreInfinite = false;
+			public void CopyFromStatic() => Value = allItemsAreInfinite;
+			public void CopyToStatic() => allItemsAreInfinite = Value;
+		}
+
+		internal static StorageViewControls CreateRefreshThreadControls(BaseStorageUI refreshingUI) {
+			var craftingPage = refreshingUI.GetDefaultPage<CraftingUIState.RecipesPage>();
 
 			return new StorageViewControls(
 				sortingOption: SortingOptionLoader.Selected,
@@ -85,47 +150,6 @@ namespace MagicStorage {
 			);
 		}
 
-		internal static void GetCommonRefreshThreadParameters(
-			out IEnumerable<bool> adjTiles,
-			out bool showAllIngredients,
-			out IEnumerable<ItemData> blockedStoredIngredients,
-			out int craftAmountTarget
-		) {
-			adjTiles = CraftingGUI.adjTiles;
-			showAllIngredients = ((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn;
-			blockedStoredIngredients = blockStorageItems;
-			craftAmountTarget = CraftingGUI.craftAmountTarget;
-		}
-
-		internal static void GetCommonRefreshThreadParameters(
-			out IEnumerable<bool> adjTiles,
-			out IEnumerable<ItemData> blockedStoredIngredients,
-			out int craftAmountTarget
-		) {
-			adjTiles = CraftingGUI.adjTiles;
-			blockedStoredIngredients = blockStorageItems;
-			craftAmountTarget = CraftingGUI.craftAmountTarget;
-		}
-
-		private static bool AvailableForSnapshot(Recipe r) => !r.Disabled && RecipeLoader.RecipeAvailable(r);
-
-		internal static bool CheckForCreativeUnit(EnvironmentSandbox sandbox) => sandbox.heart is { } heart && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
-
-		internal static HashSet<int> LoadInfiniteItems(EnvironmentSandbox sandbox) {
-			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
-			
-			if (sandbox.heart is not null) {
-				foreach (var module in sandbox.heart.GetModules()) {
-					var items = module.GetInfiniteItems(sandbox);
-
-					if (items is not null && items.Any())
-						infiniteItems.UnionWith(items);
-				}
-			}
-
-			return infiniteItems;
-		}
-
 		private static void SortAndFilter(CraftingRefreshThread thread) {
 			LoadItemsAndSetDictionaryInfo(thread);
 			RefreshStorageItems(thread);
@@ -133,35 +157,40 @@ namespace MagicStorage {
 		}
 
 		// Moved to internal method for use by DecraftingGUI
-		internal static void LoadItemsAndSetDictionaryInfo(CraftingControlsRefreshThread thread) {
+		internal static void LoadItemsAndSetDictionaryInfo<T>(T thread)
+			where T : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider
+		{
+			var storage = thread.StorageItems;
+			var processed = thread.ProcessedStorageItems;
+
 			// Organize the items from the storage system
-			thread.workingItemList = thread.allStoredItems;
-			thread.workingCounter = thread.allStoredItems.Count;
+			thread.workingItemList = storage.allStoredItems;
+			thread.workingCounter = storage.allStoredItems.Count;
 			thread.workingFlag = false;
 
 			var storedItems = ItemSorter.SortAndFilterItems(thread, 0);
 
-			thread.resultItems.Clear();
-			thread.resultItemGroups.Clear();
+			processed.resultItems.Clear();
+			processed.resultItemGroups.Clear();
 
-			thread.resultItems.AddRange(storedItems);
+			processed.resultItems.AddRange(storedItems);
 
-			thread.aggregateResults.CopyResultGroupsTo(thread.resultItemGroups);
+			thread.aggregateResults.CopyResultGroupsTo(processed.resultItemGroups.Value);
 
 			int numModuleItems = 0;
-			thread.resultItemsFromModules.Clear();
+			processed.resultItemsFromModules.Clear();
 
-			if (thread.allModuleItems is { Count: > 0 }) {
+			if (processed.allModuleItems is { Count: > 0 }) {
 				// Organize the items from the modules
-				thread.workingItemList = thread.allModuleItems;
-				thread.workingCounter = thread.allModuleItems.Count;
+				thread.workingItemList = processed.allModuleItems;
+				thread.workingCounter = processed.allModuleItems.Count;
 				thread.workingFlag = true;  // uniqueSlotPerItemStack
 
 				var moduleItems = ItemSorter.SortAndFilterItems(thread, 0, listClassification: "Module");
 
-				thread.resultItems.AddRange(moduleItems);
+				processed.resultItems.AddRange(moduleItems);
 
-				thread.resultItemsFromModules.AddRange(thread.aggregateResults.GetAllSourceItems());
+				processed.resultItemsFromModules.AddRange(thread.aggregateResults.GetAllSourceItems());
 
 				numModuleItems = moduleItems.Count;
 			}
@@ -172,21 +201,24 @@ namespace MagicStorage {
 			thread.workingCounter = 0;
 			thread.workingFlag = false;
 
-			NetHelper.Report(false, "Total items: " + thread.resultItems.Count);
+			NetHelper.Report(false, "Total items: " + processed.resultItems.Count);
 			NetHelper.Report(false, "Items from modules: " + numModuleItems);
 		}
 
-		internal static void SetCountsDictionaries(CommonCraftingThread thread) {
-			var itemCounts = thread.itemCounts;
-			var itemCountsByPrefix = thread.itemCountsByPrefix;
+		internal static void SetCountsDictionaries<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
+			var processed = thread.ProcessedStorageItems;
+
+			var itemCounts = processed.itemCounts;
+			var itemCountsByPrefix = processed.itemCountsByPrefix;
 
 			itemCounts.Clear();
 			itemCountsByPrefix.Clear();
 
-			thread.InitTaskSchedule(thread.resultItems.Count, "Counting Items");
+			thread.InitTaskSchedule(processed.resultItems.Count, "Counting Items");
 
-			// Previously just used GroupBy, but that doesn't play nice for multiple element data
-			foreach (Item item in thread.resultItems.NotifyStepsTo(thread)) {
+			foreach (Item item in processed.resultItems.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
 				if (itemCounts.TryGetValue(item.type, out int quantity))
 					itemCounts[item.type] = new ClampedArithmetic(quantity) + item.stack;
 				else

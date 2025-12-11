@@ -1,14 +1,19 @@
-﻿using MagicStorage.Components;
-using System.Collections.Generic;
-using Terraria.ID;
-using Terraria.ModLoader.IO;
-using Terraria.ModLoader;
-using Terraria;
-using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.Shimmering;
+using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.Refreshing;
+using MagicStorage.Components;
+using MagicStorage.UI.States;
+using System.Collections.Generic;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	public static partial class DecraftingGUI {
+		internal static readonly ShimmeringRefreshThread NullThread = null;
+
 		internal static readonly List<int> viewingItems = new();
 		internal static readonly List<bool> itemAvailable = new();
 		internal static int selectedItem = -1;
@@ -51,7 +56,7 @@ namespace MagicStorage {
 			Item withdrawn = heart.Withdraw(toWithdraw, false);
 
 			if (withdrawn.IsAir)
-				withdrawn = CraftingGUI.TryToWithdrawFromModuleItems(toWithdraw, false);
+				withdrawn = CraftingGUI.TryToWithdrawFromModuleItems(heart, toWithdraw, false);
 
 			return withdrawn;
 		}
@@ -62,20 +67,81 @@ namespace MagicStorage {
 			CraftingGUI.craftAmountTarget = 1;
 			CraftingGUI.blockStorageItems.Clear();
 
-			CreateSelectedItemRefreshThread(item, caller: nameof(SetSelectedItem)).Start();
+			CreateSelectedItemRefreshThread(item, 1, caller: "DecraftingGUI.SetSelectedItem()").Start();
 		}
 
-		internal static ShimmerInfoPanelRefreshThread CreateSelectedItemRefreshThread(int selectedItem, string caller) {
-			CraftingGUI.GetCommonRefreshThreadParameters(out _, out var blockedStoredIngredients, out var craftAmountTarget);
+		public static RefreshThread CreateFullRefreshThread(string caller) {
+			var thread = FullRefreshBuilder.Instance.CreateThread();
+			thread.SetDebugName($"{caller} thread");
+			return thread;
+		}
 
-			var thread = new ShimmerInfoPanelRefreshThread(
-				controls: CreateRefreshThreadControls(),
-				selectedItem: selectedItem,
-				blockedStoredIngredients: blockedStoredIngredients,
-				craftAmountTarget: craftAmountTarget,
-				cachedShimmerReports: cachedShimmerReports
+		public static RefreshThread CreateItemListRefreshThread(string caller) {
+			// Force all items to be recalculated
+			if (MagicUI.ForceNextRefreshToBeFull)
+				itemsToRefresh = null;
+
+			var thread = new ItemListRefreshThread(
+				controls: CraftingGUI.CreateRefreshThreadControls(MagicUI.decraftingUI),
+				processedStorage: new(
+					staticWasModuleItemTable: CraftingGUI.wasModuleItem,
+					staticModuleItemWasFromInventoryTable: CraftingGUI.moduleItemWasFromInventory,
+					staticResultItemsList: CraftingGUI.items,
+					staticResultItemGroupsList: CraftingGUI.itemGroups,
+					staticResultItemsFromModulesList: CraftingGUI.sourceItemsFromModules,
+					staticCountsDictionary: CraftingGUI.itemCounts,
+					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix
+				),
+				mainZoneControls: new(
+					zoneObjectFilterChoice: MagicUI.decraftingUI.GetDefaultPage<DecraftingUIState.ShimmeringPage>().recipeButtons.Choice,
+					favorited: StoragePlayer.LocalPlayer.FavoritedShimmerItems,
+					hidden: StoragePlayer.LocalPlayer.HiddenShimmerItems,
+					configBlacklist: MagicStorageConfig.GlobalShimmerItemBlacklist
+				),
+				mainZoneResults: new(
+					objectsToRefresh: itemsToRefresh,
+					staticObjectList: viewingItems,
+					staticAvailableList: itemAvailable
+				),
+				ingredientControls: new(
+					staticShowAllIngredientsField: new ConstantValueProvider<bool>(false),
+					staticInfiniteItemsSet: CraftingGUI.isItemInfinite,
+					staticBlockedList:  CraftingGUI.blockStorageItems,
+					staticCreativeUnitField: new CraftingGUI.CreativeUnitPresentProvider()
+				)
 			);
-			thread.SetDebugName($"DecraftingGUI.{caller} thread:");
+
+			thread.SetDebugName($"{caller} thread");
+
+			return thread;
+		}
+
+		public static RefreshThread CreateSelectedItemRefreshThread(int selectedItem, int craftAmountTarget, string caller) {
+			var thread = new ShimmerInfoPanelRefreshThread(
+				controls: CraftingGUI.CreateRefreshThreadControls(MagicUI.decraftingUI),
+				processedStorage: new(
+					staticWasModuleItemTable: CraftingGUI.wasModuleItem,
+					staticModuleItemWasFromInventoryTable: CraftingGUI.moduleItemWasFromInventory,
+					staticResultItemsList: CraftingGUI.items,
+					staticResultItemGroupsList: CraftingGUI.itemGroups,
+					staticResultItemsFromModulesList: CraftingGUI.sourceItemsFromModules,
+					staticCountsDictionary: CraftingGUI.itemCounts,
+					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix
+				),
+				ingredientControls: new(
+					staticShowAllIngredientsField: new ConstantValueProvider<bool>(false),
+					staticInfiniteItemsSet: CraftingGUI.isItemInfinite,
+					staticBlockedList:  CraftingGUI.blockStorageItems,
+					staticCreativeUnitField: new CraftingGUI.CreativeUnitPresentProvider()
+				),
+				craftingObject: new(
+					selection: new SelectionProvider(selectedItem),
+					craftAmountTarget: new CraftingGUI.CraftAmountTargetProvider(craftAmountTarget)
+				),
+				staticReportCacheList: cachedShimmerReports
+			);
+
+			thread.SetDebugName($"{caller} thread");
 
 			return thread;
 		}

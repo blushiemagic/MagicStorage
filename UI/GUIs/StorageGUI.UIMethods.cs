@@ -77,6 +77,7 @@ namespace MagicStorage {
 					}
 
 					MagicUI.SetRefresh();
+					SetNextItemTypeToRefresh(Main.mouseItem.type);
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 
@@ -96,6 +97,7 @@ namespace MagicStorage {
 			else
 			{
 				MagicUI.SetRefresh();
+				SetNextItemTypeToRefresh(Main.mouseItem.type);
 			}
 		}
 

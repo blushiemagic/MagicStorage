@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
@@ -35,6 +36,11 @@ namespace MagicStorage {
 
 			if (start < span.Length)
 				destination += $"[c/ff0000:{span[start..]}";
+		}
+
+		public static Item NullItem(int slot, ref int context) {
+			context = ItemSlot.Context.InventoryItem;
+			return new Item();
 		}
 	}
 }

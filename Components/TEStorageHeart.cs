@@ -394,15 +394,18 @@ namespace MagicStorage.Components
 				if (SecuritySystem.TryGetCurrentAccessContext(out var context))
 					netOp.AccessingPlayer = context.Player;
 
-				clientOpQ.Enqueue(netOp);
+				// CHANGE: v0.7.0.12 - netMode check was moved to here so that NetHelper code is shorter
+				if (Main.netMode == NetmodeID.Server)
+					clientOpQ.Enqueue(netOp);
 			}
 		}
 
-		internal static ModPacket PrepareServerResult(Operation op)
+		internal ModPacket PrepareServerResult(Operation op)
 		{
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerStorageResult);
 			packet.Write((byte)op);
+			packet.Write(Position);
 			return packet;
 		}
 
@@ -933,6 +936,8 @@ namespace MagicStorage.Components
 				itemData = Utility.ToByteSpanNoCompression(clone);
 			}
 
+			bool anyDeleted = false;
+
 			foreach (TEStorageUnit unit in GetStorageUnits().OfType<TEStorageUnit>()) {
 				if (unit.IsEmpty || !unit.HasItem(clone, ignorePrefix: true))
 					continue;
@@ -973,18 +978,22 @@ namespace MagicStorage.Components
 
 						unit.PostChangeContents();
 
-						if (Main.netMode == NetmodeID.SinglePlayer)
-							MagicUI.SetRefresh(forceFullRefresh: true);
-						else
-							NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
+						anyDeleted = true;
 
 						if (itemCountToDelete <= 0) {
 							itemCountToDelete = 0;
-							return true;
+							goto CheckForRefreshing;
 						}
 					}
 				}
 			}
+
+			CheckForRefreshing:
+
+			if (Main.netMode == NetmodeID.SinglePlayer)
+				MagicUI.SetRefresh(forceFullRefresh: true);
+			else
+				NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
 
 			return itemCountToDelete < origToDelete;
 		}
@@ -1170,7 +1179,7 @@ namespace MagicStorage.Components
 
 				_workingHistory.Clear();
 
-				if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.IsClientViewingHeart(this)) {
+				if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.IsClientViewingHeart(this) && MagicUI.IsStorageUIOpen()) {
 					// Only refresh if the applicable filtering mode is being used
 					if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
 						MagicUI.SetRefresh(forceFullRefresh: true);
@@ -1200,7 +1209,7 @@ namespace MagicStorage.Components
 				}
 			}
 
-			if (changed && Main.netMode != NetmodeID.Server && StoragePlayer.IsClientViewingHeart(this)) {
+			if (changed && Main.netMode != NetmodeID.Server && StoragePlayer.IsClientViewingHeart(this) && MagicUI.IsStorageUIOpen()) {
 				// Only refresh if the applicable filtering mode is being used
 				if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
 					MagicUI.SetRefresh(forceFullRefresh: true);

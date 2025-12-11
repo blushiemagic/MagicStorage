@@ -96,12 +96,19 @@ namespace MagicStorage.UI.States {
 
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(scroll.ViewPosition);
 			Item item = index < CraftingGUI.storageItems.Count ? CraftingGUI.storageItems[index] : new Item();
-			if (CraftingGUI.blockStorageItems.Contains(item))
+			if (CraftingGUI.blockStorageItems.Contains(item)) {
 				context = MagicSlotContext.IngredientBlocked;
+
+				// The background for an item being favorited has the highest priority, so disable that
+				if (item.favorited) {
+					item = item.Clone();
+					item.favorited = false;
+				}
+			}
 			return item;
 		}
 
-		protected static void HandleStorageSlotLeftClick(NewUISlotZone zone, NewUIScrollbar scrollbar, MagicStorageItemSlot slot, int setItemCount, UISlotZone.GetItem getItem) {
+		protected static void HandleStorageSlotLeftClick(NewUISlotZone zone, NewUIScrollbar scrollbar, MagicStorageItemSlot slot) {
 			// Prevent actions while refreshing the items
 			if (MagicUI.CurrentlyRefreshing)
 				return;
@@ -117,29 +124,20 @@ namespace MagicStorage.UI.States {
 			else
 				CraftingGUI.blockStorageItems.Add(data);
 
-			// Force the "recipe available" logic to update
-			CraftingGUI.ResetRecentRecipeCache();
-
-			zone.SetItemsAndContexts(setItemCount, getItem);
+			MagicUI.StartSelectedObjectRefreshThread(caller: "CraftingUIState.HandleStorageSlotLeftClick()");
 		}
 
 		protected delegate bool AcceptsItemAsResult(Item existing, Item incoming);
 
-		protected void HandleResultSlotLeftClick(NewUISlotZone zone, MagicStorageItemSlot slot, int setItemCount, UISlotZone.GetItem getItem, AcceptsItemAsResult acceptsItem) {
+		protected void HandleResultSlotLeftClick(NewUISlotZone zone, MagicStorageItemSlot slot, AcceptsItemAsResult acceptsItem) {
 			// Prevent actions while refreshing the items
 			if (MagicUI.CurrentlyRefreshing)
 				return;
 
 			Item item = slot.StoredItem;
 
-			if (Main.mouseItem.IsAir && item is not null && !item.IsAir) {
-				bool shiny = item.newAndShiny;
-
+			if (Main.mouseItem.IsAir && item is not null && !item.IsAir)
 				item.newAndShiny = false;
-
-				if (shiny)
-					zone.SetItemsAndContexts(setItemCount, getItem);
-			}
 
 			Player player = Main.LocalPlayer;
 
@@ -152,8 +150,7 @@ namespace MagicStorage.UI.States {
 			} else if (Main.mouseItem.IsAir && item?.IsAir is false) {
 				if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 					item.favorited = !item.favorited;
-					zone.SetItemsAndContexts(setItemCount, getItem);
-					MagicUI.SetRefresh();
+					MagicUI.StartSelectedObjectRefreshThread(caller: "CraftingUIState.HandleResultSlotLeftClick()");
 				} else {
 					Main.mouseItem = WithdrawItem(item, ItemSlot.ShiftInUse);
 							
@@ -199,11 +196,6 @@ namespace MagicStorage.UI.States {
 			parent.Append(scrollBar);
 		}
 
-		protected static Item NullItem(int slot, ref int context) {
-			context = ItemSlot.Context.InventoryItem;
-			return new Item();
-		}
-
 		private void RightClickIngredient(MagicStorageItemSlot slot) {
 			// Prevent actions while refreshing the items
 			if (MagicUI.CurrentlyRefreshing)
@@ -220,17 +212,18 @@ namespace MagicStorage.UI.States {
 			if (MagicCache.ResultToRecipe.TryGetValue(item.type, out var itemRecipes) && itemRecipes.Length > 0) {
 				Recipe selected = itemRecipes[0];
 
-				using (FlagSwitch.ToggleTrue(ref CraftingGUI.disableNetPrintingForIsAvailable)) {
-					foreach (Recipe r in itemRecipes[1..]) {
-						if (CraftingGUI.IsAvailable(r)) {
-							selected = r;
-							break;
-						}
+			//	using (FlagSwitch.Create(ref CraftingGUI.disableNetPrintingForIsAvailable, true)) {
+				foreach (Recipe r in itemRecipes[1..]) {
+					if (CraftingGUI.IsAvailable(r)) {
+						selected = r;
+						break;
 					}
 				}
+			//	}
 
 				CraftingGUI.SetSelectedRecipe(selected);
-				MagicUI.SetRefresh();
+				// CHANGE: v0.7.0.12 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
+			//	MagicUI.SetRefresh();
 
 				UpdatePanelHeight(PanelHeight);
 

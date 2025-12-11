@@ -1,4 +1,4 @@
-﻿using MagicStorage.Common.Threading.UI;
+﻿using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.CrossMod;
 using System;
 using System.Collections;
@@ -10,12 +10,11 @@ namespace MagicStorage.Sorting {
 	internal abstract class ThreadSortOrderedEnumerable<T> : IOrderedEnumerable<T> {
 		protected readonly RefreshThread _thread;
 		protected readonly IEnumerable<T> _source;
-		protected readonly IOrderedEnumerable<T> _query;
+		protected IOrderedEnumerable<T> _query;
 
 		public ThreadSortOrderedEnumerable(RefreshThread thread, IEnumerable<T> source) {
 			_thread = thread;
 			_source = source;
-			_query = CreateQuery();
 		}
 
 		protected abstract Item GetItem(T value);
@@ -47,9 +46,15 @@ namespace MagicStorage.Sorting {
 			}
 		}
 
-		public IOrderedEnumerable<T> CreateOrderedEnumerable<TKey>(Func<T, TKey> keySelector, IComparer<TKey> comparer, bool descending) => _query.CreateOrderedEnumerable(keySelector, comparer, descending);
+		public IOrderedEnumerable<T> CreateOrderedEnumerable<TKey>(Func<T, TKey> keySelector, IComparer<TKey> comparer, bool descending) {
+			_query ??= CreateQuery();
+			return _query.CreateOrderedEnumerable(keySelector, comparer, descending);
+		}
 
-		public IEnumerator<T> GetEnumerator() => _query.GetEnumerator();
+		public IEnumerator<T> GetEnumerator() {
+			_query ??= CreateQuery();
+			return _query.GetEnumerator();
+		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 	}

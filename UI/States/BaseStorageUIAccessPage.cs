@@ -51,6 +51,8 @@ namespace MagicStorage.UI.States {
 
 		protected float lastKnownScrollBarViewPosition = -1;
 
+		public bool IsReformatting { get; private set; }
+
 		public BaseStorageUIAccessPage(BaseStorageUI parent, string name) : base(parent, name) {
 			topBar = new();
 			searchBar = new NewUISearchBar(Language.GetText("Mods.MagicStorage.SearchName")) {
@@ -81,6 +83,8 @@ namespace MagicStorage.UI.States {
 				//Search bar text is affected by this call
 				modSearchBox.Reset(false);
 
+				searchBar.BlockRefreshThreads = true;
+
 				// Ensure that the UI is refreshed completely
 				MagicUI.SetRefresh(forceFullRefresh: true);
 
@@ -95,7 +99,8 @@ namespace MagicStorage.UI.States {
 
 				slotZone.ClearItems();
 
-				MagicUI.SetRefresh(forceFullRefresh: true);
+				// FIX: v0.7.0.12 - Remove unnecessary refresh call; OnPageSelected already handles this
+			//	MagicUI.SetRefresh(forceFullRefresh: true);
 
 				sortingDropdown.Reset();
 				filteringDropdown.Reset();
@@ -210,7 +215,9 @@ namespace MagicStorage.UI.States {
 			if (oldNeedsMod != needsMod)
 				searchBar.HintText = GetRandomSearchText(needsMod);
 
-			MagicUI.SetRefresh(forceFullRefresh: true);
+			// Opening the page will start a full refresh anyway, so this should be skipped
+			if (!base.IsOpening)
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModSearchChanged()");
 		}
 
 		private static readonly LocalizedText[] searchTextDefaults = new[] {
@@ -227,14 +234,22 @@ namespace MagicStorage.UI.States {
 
 		private void ModernConfigSortingButtonAction() {
 			SortingOptionLoader.Selected = sortingButtons.SelectionType;
-			MagicUI.SetRefresh(forceFullRefresh: true);
+
+			// Opening the page will start a full refresh anyway, so this should be skipped
+			// Reformatting the page will reassign the option buttons, but the thread should only be started when clicking an option
+			if (!base.IsOpening && !IsReformatting)
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigSortingButtonAction()");
 		}
 
 		private void ModernConfigFilteringButtonAction() {
 			FilteringOptionLoader.Selected = filteringButtons.SelectionType;
 			FilteringOptionLoader.GeneralSelections.Clear();
 			FilteringOptionLoader.GeneralSelections.UnionWith(filteringButtons.GeneralSelections);
-			MagicUI.SetRefresh(forceFullRefresh: true);
+
+			// Opening the page will start a full refresh anyway, so this should be skipped
+			// Reformatting the page will reassign the option buttons, but the thread should only be started when clicking an option
+			if (!base.IsOpening && !IsReformatting)
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigFilteringButtonAction()");
 		}
 
 		public abstract void GetZoneDimensions(out float top, out float bottomMargin);
@@ -273,6 +288,8 @@ namespace MagicStorage.UI.States {
 		public void ReformatPage(ButtonConfigurationMode current) {
 			if (Main.gameMenu)
 				return;
+
+			IsReformatting = true;
 
 			//Top bars 2 and 3 might not be visible after reformatting
 			topBar2.Remove();
@@ -405,6 +422,8 @@ namespace MagicStorage.UI.States {
 
 			PostReformatPage(current);
 
+			IsReformatting = false;
+
 			parentUI.UpdatePanelHeight(parentUI.PanelHeight);
 
 			Recalculate();
@@ -506,6 +525,10 @@ namespace MagicStorage.UI.States {
 
 		protected abstract void InitZoneSlotEvents(MagicStorageItemSlot itemSlot);
 
+		protected abstract Item GetMainZoneItem(int slot, ref int context);
+
+		public void PopulateMainZone() => slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
+
 		protected virtual void SetThreadWait(bool waiting) {
 			if (waiting) {
 				if (waitPanel.Parent is null)
@@ -556,6 +579,9 @@ namespace MagicStorage.UI.States {
 				waitProgress.DisplayText = "";
 				waitProgress.UpdateProgress(0);
 			}
+
+			// At this point, any refreshing/reformatting/etc. is done, so it's safe to allow the search bar to start threads
+			searchBar.BlockRefreshThreads = false;
 
 			bool block = MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernDropdown && (sortingDropdown.IsMouseHovering || filteringDropdown.IsMouseHovering);
 			using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !block)) {

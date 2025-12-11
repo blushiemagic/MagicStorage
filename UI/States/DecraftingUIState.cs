@@ -31,6 +31,7 @@ namespace MagicStorage.UI.States {
 		private float resultScrollBarMaxViewPosition = 2f;
 
 		private float lastKnownResultScrollBarViewPosition = -1;
+		private float lastKnownReportScrollBarViewPosition = -1;
 
 		public override string DefaultPage => "Shimmering";
 
@@ -96,7 +97,7 @@ namespace MagicStorage.UI.States {
 					CanShareItemToChat = true
 				};
 
-				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, int.MaxValue, GetResult, (existing, incoming) => DecraftingGUI.IsItemValidForResult(incoming));
+				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, (existing, incoming) => DecraftingGUI.IsItemValidForResult(incoming));
 
 				itemSlot.OnRightMouseDown += (evt, e) => HandleResultSlotRightHold((MagicStorageItemSlot)e);
 
@@ -212,7 +213,7 @@ namespace MagicStorage.UI.States {
 		// GetStorage not overridden since the implementation would be the same here
 
 		protected override bool HaveZonesChangedDueToScrolling() {
-			return base.HaveZonesChangedDueToScrolling() || resultScrollBar.ViewPosition != lastKnownResultScrollBarViewPosition;
+			return base.HaveZonesChangedDueToScrolling() || resultScrollBar.ViewPosition != lastKnownResultScrollBarViewPosition || reportListScrollBar.ViewPosition != lastKnownReportScrollBarViewPosition;
 		}
 
 		protected override bool IsPanelTooShortToContainContents() {
@@ -260,6 +261,7 @@ namespace MagicStorage.UI.States {
 			UpdateZoneAndScroll(resultZone, resultScrollBar, totalRows, displayRows, CraftingGUI.ScrollBar2ViewSize, ref resultScrollBarMaxViewPosition);
 
 			lastKnownResultScrollBarViewPosition = resultScrollBar.ViewPosition;
+			lastKnownReportScrollBarViewPosition = reportListScrollBar.ViewPosition;
 		}
 
 		private void GetResultZoneRows(out int totalRows, out int displayRows) {
@@ -285,7 +287,11 @@ namespace MagicStorage.UI.States {
 		protected override void RefreshZonesFromScrolling() {
 			base.RefreshZonesFromScrolling();
 
-			ResetReportList();
+			if (resultScrollBar.ViewPosition != lastKnownResultScrollBarViewPosition)
+				resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+
+			if (reportListScrollBar.ViewPosition != lastKnownReportScrollBarViewPosition)
+				ResetReportList();
 		}
 
 		protected override void RefreshZonesFromThreadStart() {
@@ -294,10 +300,17 @@ namespace MagicStorage.UI.States {
 			shimmerReportList.Clear();
 		}
 
+		public override void PopulateRecipePanelZones() {
+			base.PopulateRecipePanelZones();
+
+			ResetReportList();
+		}
+
 		protected override void ResetScrollBarMemory() {
 			base.ResetScrollBarMemory();
 
 			lastKnownResultScrollBarViewPosition = -1;
+			lastKnownReportScrollBarViewPosition = -1;
 		}
 
 		protected override void SlotFocus(out RefContainer<bool> flag, out Action updateFocus, out Action resetFocus) {
@@ -424,7 +437,8 @@ namespace MagicStorage.UI.States {
 
 			protected override void OnMainZoneItemLeftClicked(int index) {
 				DecraftingGUI.SetSelectedItem(DecraftingGUI.viewingItems[index]);
-				(parentUI as DecraftingUIState).history.AddHistory(DecraftingGUI.selectedItem);
+				if (DecraftingGUI.selectedItem != -1)
+					(parentUI as DecraftingUIState).history.AddHistory(DecraftingGUI.selectedItem);
 			}
 
 			protected override void UpdateStationElements(out int stationCount) {

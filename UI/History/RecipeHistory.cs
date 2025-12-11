@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using Terraria;
+﻿using Terraria;
 
 namespace MagicStorage.UI.History {
 	public class RecipeHistory : HistoryCollection<RecipeHistoryEntry, Recipe> {
@@ -7,8 +6,9 @@ namespace MagicStorage.UI.History {
 			if (index < 0 || index >= history.Count)
 				return;
 
+			// CHANGE: v0.7.0.12 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
 			CraftingGUI.SetSelectedRecipe(history[index].Value);
-			MagicUI.SetRefresh();
+		//	MagicUI.SetRefresh();
 
 			Current = index;
 			RefreshEntries();

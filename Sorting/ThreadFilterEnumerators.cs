@@ -1,16 +1,16 @@
-﻿using SerousCommonLib.API.Iterators;
-using System.Collections.Generic;
-using Terraria;
-using System.Linq;
-using MagicStorage.Common.Threading.UI;
+﻿using MagicStorage.Common.Threading.Refreshing;
+using SerousCommonLib.API.Iterators;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Terraria;
 
 namespace MagicStorage.Sorting {
 	internal abstract class ThreadFilterEnumerator<T> : Iterator<T> {
 		protected readonly RefreshThread _thread;
 		protected readonly IEnumerable<T> _source;
-		protected readonly IEnumerator<T> _iterator;
+		protected IEnumerator<T> _iterator;
 
 		public bool ApplyStaticFilter { get; set; } = true;
 
@@ -19,7 +19,6 @@ namespace MagicStorage.Sorting {
 			ArgumentNullException.ThrowIfNull(source);
 			_thread = thread;
 			_source = source;
-			_iterator = _source.GetEnumerator();
 		}
 
 		protected abstract Item GetItem(T value);
@@ -36,18 +35,32 @@ namespace MagicStorage.Sorting {
 				: controls.ItemPassesGeneralOptionFilters(item) && controls.ItemPassesTextFilter(item);
 		}
 
+		public override void Dispose() {
+			_iterator?.Dispose();
+			_iterator = null;
+
+			base.Dispose();
+		}
+
 		public override bool MoveNext() {
-			_current = default;
+			switch (base._state) {
+				case 1:
+					_iterator = _source.GetEnumerator();
+					base._state = 2;
+					goto case 2;
+				case 2:
+					while (_iterator.MoveNext()) {
+						var current = _iterator.Current;
 
-			while (_iterator.MoveNext()) {
-				var current = _iterator.Current;
-
-				if (PassesFilters(current)) {
-					_current = current;
-					return true;
-				}
+						if (PassesFilters(current)) {
+							_current = current;
+							return true;
+						}
+					}
+					break;
 			}
 
+			Dispose();
 			return false;
 		}
 	}
@@ -74,9 +87,9 @@ namespace MagicStorage.Sorting {
 	}
 
 	internal class ThreadFilterRecipeEnumerator : ThreadFilterEnumerator<Recipe> {
-		private readonly CraftingGUI.IFilterProvider<Recipe> _provider;
+		private readonly IFilterProvider<Recipe> _provider;
 
-		public ThreadFilterRecipeEnumerator(RefreshThread thread, IEnumerable<Recipe> source, CraftingGUI.IFilterProvider<Recipe> provider) : base(thread, source) {
+		public ThreadFilterRecipeEnumerator(RefreshThread thread, IEnumerable<Recipe> source, IFilterProvider<Recipe> provider) : base(thread, source) {
 			ArgumentNullException.ThrowIfNull(provider);
 			_provider = provider;
 		}
@@ -141,9 +154,9 @@ namespace MagicStorage.Sorting {
 	}
 
 	internal class ThreadFilterParallelRecipeEnumerator : ThreadFilterParallelEnumerator<Recipe> {
-		private readonly CraftingGUI.IFilterProvider<Recipe> _provider;
+		private readonly IFilterProvider<Recipe> _provider;
 
-		public ThreadFilterParallelRecipeEnumerator(RefreshThread thread, ParallelQuery<Recipe> query, CraftingGUI.IFilterProvider<Recipe> provider) : base(thread, query) {
+		public ThreadFilterParallelRecipeEnumerator(RefreshThread thread, ParallelQuery<Recipe> query, IFilterProvider<Recipe> provider) : base(thread, query) {
 			ArgumentNullException.ThrowIfNull(provider);
 			_provider = provider;
 		}

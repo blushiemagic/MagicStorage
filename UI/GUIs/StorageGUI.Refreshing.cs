@@ -7,10 +7,7 @@ using System.Linq;
 using Terraria.Localization;
 using Terraria;
 using System;
-using MagicStorage.Common.Threading.UI;
-using MagicStorage.Components;
-using MagicStorage.Common;
-using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.Refreshing;
 using System.Runtime.CompilerServices;
 
 namespace MagicStorage {
@@ -87,12 +84,18 @@ namespace MagicStorage {
 		}
 
 		internal static void RefreshItems_Inner() {
+			// Prevent inconsistencies after refreshing items
+			actionSlotFocus = -1;
+
+			CreateFullRefreshThread(caller: "StorageGUI.RefreshItems()").Start();
+
+			ResetRefreshCache();
+		}
+
+		public static RefreshThread CreateFullRefreshThread(string caller) {
 			// Force full refresh if item deletion mode is active
 			if (MagicUI.ForceNextRefreshToBeFull || currentMode is ActionMode.Deletion)
 				itemTypesToUpdate = null;
-
-			// Prevent inconsistencies after refreshing items
-			actionSlotFocus = -1;
 
 			var storagePage = MagicUI.storageUI.GetDefaultPage<StorageUIState.StoragePage>();
 
@@ -106,10 +109,8 @@ namespace MagicStorage {
 			);
 
 			var thread = new StorageRefreshThread(controls, currentMode, itemTypesToUpdate);
-			thread.SetDebugName("StorageGUI thread");
-			thread.Start();
-
-			ResetRefreshCache();
+			thread.SetDebugName($"{caller} thread");
+			return thread;
 		}
 
 		private static IEnumerable<Item> AdjustToUpdateSet(IEnumerable<Item> source, HashSet<int> targetItemTypes) {

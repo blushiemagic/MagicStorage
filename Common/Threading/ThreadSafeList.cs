@@ -25,9 +25,6 @@ namespace MagicStorage.Common.Threading {
 		private int _listLock;
 		private int _modificationCheckLock;
 
-		private const int UNLOCKED = 0;
-		private const int LOCKED = 1;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ThreadSafeList{TCollection, TItem}"/> class set to an empty list.
 		/// </summary>
@@ -140,26 +137,6 @@ namespace MagicStorage.Common.Threading {
 			public T value;
 
 			public Boxed(T value) => this.value = value;
-		}
-
-		private ref struct Locker {
-			private ref int _lock;
-			private readonly bool _hasLock;
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public Locker(ref int @lock) {
-				_lock = ref @lock;
-				_hasLock = true;
-
-				while (Interlocked.CompareExchange(ref @lock, LOCKED, UNLOCKED) == LOCKED)
-					Thread.Yield();
-			}
-
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			public void Dispose() {
-				if (_hasLock)
-					Interlocked.Exchange(ref _lock, UNLOCKED);
-			}
 		}
 
 		private abstract class Operation {

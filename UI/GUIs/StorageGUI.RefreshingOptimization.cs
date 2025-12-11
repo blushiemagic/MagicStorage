@@ -14,8 +14,7 @@ namespace MagicStorage {
 		public static void SetNextItemTypeToRefresh(int itemType) {
 			itemTypesToUpdate ??= new();
 			
-			if (itemTypesToUpdate.Add(itemType))
-				NetHelper.Report(true, $"Setting next refresh to check {itemTypesToUpdate.Count} items");
+			itemTypesToUpdate.Add(itemType);
 		}
 
 		/// <summary>
@@ -28,17 +27,8 @@ namespace MagicStorage {
 
 			itemTypesToUpdate ??= new();
 			
-			#if NETPLAY
-			bool any = false;
-			foreach (int id in itemTypes)
-				any |= itemTypesToUpdate.Add(id);
-			
-			if (any)
-				NetHelper.Report(true, $"Setting next refresh to check {itemTypesToUpdate.Count} items");
-			#else
 			foreach (int id in itemTypes)
 				itemTypesToUpdate.Add(id);
-			#endif
 		}
 
 		/// <summary>

@@ -56,38 +56,7 @@ namespace MagicStorage
 		}
 
 		/// <summary>
-		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
-		/// </summary>
-		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
-		/// <param name="item">The item to deposit</param>
-		/// <returns>Whether the deposit was successful</returns>
-		public static bool TryDespoit(TEStorageCenter center, Item item) {
-			if (center is null)
-				return false;
-
-			using var _ = SecuritySystem.CreateAccessContext();
-
-			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
-
-			if (wrapper.Valid) {
-				int oldStack = item.stack;
-				int oldType = item.type;
-				TEStorageHeart heart = wrapper.Heart;
-				heart.TryDeposit(item, accessingPlayer: Main.LocalPlayer);
-
-				if (oldStack != item.stack) {
-					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
-						MagicUI.SetNextCollectionsToRefresh(oldType);
-
-					return true;
-				}
-			}
-			
-			return false;
-		}
-
-		/// <summary>
-		/// Simulates a deposit attempt into the currently assigned Storage Heart.
+		/// Attempts to deposit the provided <paramref name="item"/> into the currently accessed Storage Heart.
 		/// </summary>
 		/// <param name="item">The item to deposit</param>
 		/// <returns>Whether the deposit was successful</returns>
@@ -111,74 +80,7 @@ namespace MagicStorage
 		}
 
 		/// <summary>
-		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
-		/// </summary>
-		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
-		/// <param name="items">The items to deposit</param>
-		/// <returns>Whether the deposit was successful</returns>
-		public static bool TryDeposit(TEStorageCenter center, List<Item> items)
-		{
-			if (center is null)
-				return false;
-
-			using var _ = SecuritySystem.CreateAccessContext();
-
-			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
-
-			if (wrapper.Valid) {
-				TEStorageHeart heart = wrapper.Heart;
-				int[] types = items.Select(static i => i.type).ToArray();
-
-				if (heart.TryDeposit(items, accessingPlayer: Main.LocalPlayer)) {
-					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
-						MagicUI.SetNextCollectionsToRefresh(types);
-					return true;
-				}
-
-				return false;
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Simulates a deposit attempt into a storage center (Storage Heart, Storage Access, etc.).
-		/// </summary>
-		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
-		/// <param name="items">The items to deposit</param>
-		/// <param name="quickStack">Whether the operation is a quick stack</param>
-		/// <returns>Whether the deposit was successful</returns>
-		public static bool TryDeposit(TEStorageCenter center, List<Item> items, bool quickStack = false)
-		{
-			if (center is null)
-				return false;
-
-			using var _ = SecuritySystem.CreateAccessContext();
-
-			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
-
-			if (wrapper.Valid) {
-				TEStorageHeart heart = wrapper.Heart;
-
-				if (quickStack)
-					items = new(items.Where(i => heart.HasItem(i, ignorePrefix: true)));
-
-				int[] types = items.Select(static i => i.type).ToArray();
-
-				if (heart.TryDeposit(items, accessingPlayer: Main.LocalPlayer)) {
-					if (GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
-						MagicUI.SetNextCollectionsToRefresh(types);
-					return true;
-				}
-
-				return false;
-			}
-
-			return false;
-		}
-
-		/// <summary>
-		/// Simulates a deposit attempt into the currently assigned Storage Heart.
+		/// Attempts to deposit the provided <paramref name="items"/> into the currently accessed Storage Heart.
 		/// </summary>
 		/// <param name="items">The items to deposit</param>
 		/// <returns>Whether the deposit was successful</returns>
@@ -208,13 +110,12 @@ namespace MagicStorage
 
 			Player player = Main.LocalPlayer;
 
-			bool filter(Item item) => !item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true));
 			var items = new List<Item>();
 
 			for (int k = 10; k < 50; k++)
 			{
 				Item item = player.inventory[k];
-				if (filter(item))
+				if (!item.IsAir && !item.favorited && (!quickStack || heart.HasItem(item, true)))
 					items.Add(item);
 			}
 
@@ -253,39 +154,6 @@ namespace MagicStorage
 				}
 
 			return changed;
-		}
-
-		/// <summary>
-		/// Attempts to withdraw an item from a storage center (Storage Heart, Storage Access, etc.).
-		/// </summary>
-		/// <param name="center">The tile entity used to attempt to retrieve a Storage Heart</param>
-		/// <param name="item">The item to withdraw</param>
-		/// <param name="toInventory">
-		/// Whether the item goes into the player inventory.
-		/// This parameter is only used if <see cref="Main.netMode"/> is <see cref="NetmodeID.MultiplayerClient"/>
-		/// </param>
-		/// <param name="keepOneIfFavorite">Whether at least one item should remain in the storage if it's favourited</param>
-		/// <returns>A valid item instance if the withdrawal was succesful, an air item otherwise.</returns>
-		public static Item DoWithdraw(TEStorageCenter center, Item item, bool toInventory = false, bool keepOneIfFavorite = false)
-		{
-			if (center is null)
-				return new Item();
-
-			using var _ = SecuritySystem.CreateAccessContext();
-
-			StoragePlayer.StorageHeartAccessWrapper wrapper = new(center);
-
-			if (wrapper.Valid) {
-				TEStorageHeart heart = wrapper.Heart;
-				Item withdrawn = heart.TryWithdraw(item, keepOneIfFavorite, accessingPlayer: Main.LocalPlayer, toInventory);
-
-				if (!withdrawn.IsAir && GetHeart() is TEStorageHeart currentHeart && currentHeart.Position == heart.Position)
-					SetNextItemTypeToRefresh(withdrawn.type);
-
-				return withdrawn;
-			}
-
-			return new Item();
 		}
 
 		/// <summary>

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using MagicStorage.Common.Players;
-using MagicStorage.Common.Threading.UI;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Components;
 using MagicStorage.Edits;
 using MagicStorage.UI;
-using MagicStorage.UI.Input;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -43,17 +43,15 @@ public class MagicUI : ModSystem
 
 	public static bool CurrentlyRefreshing => activeRefreshingThread is { IsRunning: true };
 
-	public static bool HasActiveThread<T>() where T : RefreshThread => activeRefreshingThread is T { IsRunning: true };
+	public static bool HasActiveThread<T>() => activeRefreshingThread is { IsRunning: true } and T;
 
-	public static bool HasActiveThread<T>(out T thread)
-		where T : RefreshThread
-	{
-		if (activeRefreshingThread is T { IsRunning: true } activeThread) {
+	public static bool HasActiveThread<T>(out T thread) {
+		if (activeRefreshingThread is { IsRunning: true } and T activeThread) {
 			thread = activeThread;
 			return true;
 		}
 
-		thread = null;
+		thread = default;
 		return false;
 	}
 
@@ -65,10 +63,8 @@ public class MagicUI : ModSystem
 		set => forceFullRefresh |= value;
 	}
 
-	[Obsolete("This variable needs to be replaced by MagicUI.activeRefreshingThread", error: true)]
-	internal static StorageGUI.ThreadContext activeThread;
-
 	internal static RefreshThread activeRefreshingThread;
+	internal static IRefreshThreadBuilder pendingThread;
 
 	public static int CurrentThreadingDuration { get; internal set; }
 
@@ -144,7 +140,57 @@ public class MagicUI : ModSystem
 		_watchdogs.Clear();
 
 		activeRefreshingThread?.Stop();
-		activeRefreshingThread = null;
+		// NOTE: RefreshThread is responsible for setting this to null when the active thread finishes execution
+	//	activeRefreshingThread = null;
+	}
+
+	public static void StartFullRefreshThread(string caller) {
+		if (IsStorageUIOpen())
+			StorageGUI.CreateFullRefreshThread(caller).Start();
+		else if (IsCraftingUIOpen())
+			CraftingGUI.CreateFullRefreshThread(caller).Start();
+		else if (IsDecraftingUIOpen())
+			DecraftingGUI.CreateFullRefreshThread(caller).Start();
+	}
+
+	public static void StartMainZoneRefreshThread(string caller) {
+		if (IsStorageUIOpen()) {
+			// Start a full refresh thread, since the main zone is the only thing present
+			StorageGUI.CreateFullRefreshThread(caller).Start();
+		} else if (IsCraftingUIOpen()) {
+			// Start a refresh thread that updates the recipe list
+			CraftingGUI.CreateRecipeListRefreshThread(caller).Start();
+		} else if (IsDecraftingUIOpen()) {
+			// Start a refresh thread that updates the item list
+			DecraftingGUI.CreateItemListRefreshThread(caller).Start();
+		}
+	}
+
+	public static void StartSelectedObjectRefreshThread(string caller) {
+		if (IsCraftingUIOpen()) {
+			// Start a refresh thread that updates the stored ingredients for the current recipe
+			CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller).Start();
+		} else if (IsDecraftingUIOpen()) {
+			// Start a refresh thread that updates the stored items for the current shimmering item
+			DecraftingGUI.CreateSelectedItemRefreshThread(DecraftingGUI.selectedItem, CraftingGUI.craftAmountTarget, caller).Start();
+		}
+	}
+
+	public static void StartSelectedObjectRefreshThread<T>(T selectedObject, int amountTarget, string caller) {
+		if (typeof(T) == typeof(Recipe)) {
+			if (IsCraftingUIOpen()) {
+				// Start a refresh thread that updates the stored ingredients list for the provided recipe
+				CraftingGUI.CreateSelectedRecipeRefreshThread(Unsafe.As<T, Recipe>(ref selectedObject), amountTarget, caller);
+			}
+		} else if (typeof(T) == typeof(int)) {
+			if (IsDecraftingUIOpen()) {
+				// Start a refresh thread that updates the stored items for the provided shimmering item
+				DecraftingGUI.CreateSelectedItemRefreshThread(Unsafe.As<T, int>(ref selectedObject), amountTarget, caller);
+			}
+		} else {
+			// Unsupported type
+			throw new ArgumentException("The type of the provided object is not supported by any UIs: " + typeof(T).FullName);
+		}
 	}
 
 	public static void RefreshItems() {
@@ -458,6 +504,8 @@ public class MagicUI : ModSystem
 	}
 
 	internal static void CloseUI() {
+		StopCurrentThread();
+
 		uiInterface.SetState(null);
 
 		mouseText = "";

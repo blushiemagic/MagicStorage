@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Components;
+using MagicStorage.UI;
 using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 
-namespace MagicStorage.Common.Threading.UI {
+namespace MagicStorage.Common.Threading.Refreshing {
 	/// <summary>
 	/// Contains information used when refreshing the UIs for this mod.<br/>
 	/// Only one instance of this object can be "active" at once, and attempting to start a new thread will wait for the current thread to be cancelled.
@@ -30,7 +31,6 @@ namespace MagicStorage.Common.Threading.UI {
 		/// A token that can be used to monitor for cancellation requests.
 		/// </summary>
 		public readonly CancellationToken cancellationToken;
-		private readonly ManualResetEvent _finishedTrigger = new(false);
 
 		private readonly List<IWaitProvider> _externalWork = [];
 
@@ -83,6 +83,24 @@ namespace MagicStorage.Common.Threading.UI {
 		public bool HasSuccessfulCompletion { get; private set; }
 
 		/// <summary>
+		/// Whether this thread only refreshes part of the UI's contents.<br/>
+		/// For example, this is <see langword="true"/> for threads that only refresh the stored ingredients for recipes.
+		/// </summary>
+		public abstract bool IsPartialThread { get; }
+
+		/// <summary>
+		/// If <see cref="IsPartialThread"/> is <see langword="true"/>, this property indicates whether a full refresh has been completed for the target UI.<br/>
+		/// If <see langword="false"/>, <see cref="FullRefreshBuilder"/> will be used to create and execute another thread instead of this thread.
+		/// </summary>
+		public abstract bool HasCompleteData { get; }
+
+		/// <summary>
+		/// If <see cref="IsPartialThread"/> is <see langword="true"/>, this property provides a builder for creating a full refresh thread for the target UI.<br/>
+		/// This property will be used if <see cref="HasCompleteData"/> is <see langword="false"/> before this thread is executed.
+		/// </summary>
+		public abstract IRefreshThreadBuilder FullRefreshBuilder { get; }
+
+		/// <summary>
 		/// Creates a new <see cref="RefreshThread"/> instance.
 		/// </summary>
 		/// <param name="refreshingUI">The <see cref="BaseStorageUI"/> that is being refreshed by this thread.</param>
@@ -98,14 +116,37 @@ namespace MagicStorage.Common.Threading.UI {
 			cancellationToken = _tokenSource.Token;
 		}
 
+		public string DebugName => _debugName ?? GetType().FullName;
 		private string _debugName;
 
 		/// <summary>
-		/// Sets the debug name for this thread.<br/>
-		/// This method does nothing in Release builds.
+		/// Sets the debug name for this thread.
 		/// </summary>
-		[Conditional("NETPLAY")]
 		public void SetDebugName(string name) => _debugName = name;
+
+		private static int _executionLock;
+		private const int UNLOCKED = 0;
+		private const int LOCKED = 1;
+
+		private int _finishLock = LOCKED;
+
+		private static void BlockUntilExecutionAllowed() {
+			while (Interlocked.CompareExchange(ref _executionLock, LOCKED, UNLOCKED) == LOCKED)
+				Thread.Yield();
+		}
+
+		private static void AllowNewThreadToExecute() {
+			Interlocked.Exchange(ref _executionLock, UNLOCKED);
+		}
+
+		private void BlockUntilFinished() {
+			while (Interlocked.CompareExchange(ref _finishLock, UNLOCKED, UNLOCKED) == LOCKED)
+				Thread.Yield();
+		}
+
+		private void MarkAsFinished() {
+			Interlocked.Exchange(ref _finishLock, UNLOCKED);
+		}
 
 		/// <summary>
 		/// Adds a provider that will be waited on after the main work for this thread is complete.
@@ -123,15 +164,6 @@ namespace MagicStorage.Common.Threading.UI {
 		}
 
 		/// <summary>
-		/// Gets the cancellation token for this thread.
-		/// </summary>
-		public CancellationToken GetCancellationToken() => _tokenSource.Token;
-
-		private static int _executionLock;
-		private const int UNLOCKED = 0;
-		private const int LOCKED = 1;
-
-		/// <summary>
 		/// Starts the thread, stopping the currently running <see cref="RefreshThread"/>, if any.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"/>
@@ -141,13 +173,29 @@ namespace MagicStorage.Common.Threading.UI {
 
 			_hasStarted = true;
 
+			if (IsPartialThread && !HasCompleteData) {
+				var name = DebugName;
+
+				var builder = FullRefreshBuilder
+					?? throw new InvalidOperationException($"Partial refresh thread \"{name}\" was requested with incomplete data, but this.{nameof(FullRefreshBuilder)} was null");
+
+				NetHelper.Report(true, name + ": Partial UI state detected, falling back to full refresh thread...");
+
+				var fullThread = builder.CreateThread(controls);
+				fullThread.SetDebugName(name + " (Full Refresh)");
+				fullThread.Start();
+				return;
+			}
+
+			BlockUntilExecutionAllowed();
+
 			if (object.ReferenceEquals(this, MagicUI.activeRefreshingThread))
-				throw new InvalidOperationException("This thread state is already the active refreshing thread");
+				throw new InvalidOperationException($"Thread \"{DebugName}\" is already the active refreshing thread");
 
 			if (!Start_LocateStorageHeart())
 				return;
 
-			NetHelper.Report(true, (_debugName ?? GetType().FullName) + ": Starting refreshing thread...");
+			NetHelper.Report(true, DebugName + ": Starting refreshing thread...");
 
 			if (refreshingUI.currentPage is BaseStorageUIAccessPage accessPage)
 				accessPage.RequestThreadWait(waiting: true);
@@ -163,7 +211,7 @@ namespace MagicStorage.Common.Threading.UI {
 				return true;
 			}
 
-			NetHelper.Report(true, (_debugName ?? GetType().FullName) + ": Start invoked with no heart or inaccessible network");
+			NetHelper.Report(true, DebugName + ": Start invoked with no heart or inaccessible network");
 
 			ClearStaticCollections();
 
@@ -173,7 +221,10 @@ namespace MagicStorage.Common.Threading.UI {
 			if (!MagicUI.CurrentlyRefreshing) {
 				// Any active thread will refresh when it completes
 				// For the case when there isn't one, a refresh needs to be manually called
-				MagicUI.InvokeOnRefresh();
+				if (IsPartialThread)
+					Main.QueueMainThreadAction(PopulateUIZones);
+				else
+					Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
 			}
 
 			Heart = null;
@@ -184,18 +235,15 @@ namespace MagicStorage.Common.Threading.UI {
 		/// Requests the cancellation of this thread.
 		/// </summary>
 		public void Stop() {
-			if (IsRunning)
-				_tokenSource.Cancel();
+			_tokenSource.Cancel();
 		}
 
 		/// <summary>
 		/// Requests the cancellation of this thread and waits for it to stop.
 		/// </summary>
 		public void StopAndWait() {
-			if (IsRunning) {
-				_tokenSource.Cancel();
-				_finishedTrigger.WaitOne();
-			}
+			_tokenSource.Cancel();
+			BlockUntilFinished();
 		}
 
 		private int _targetSteps;
@@ -253,24 +301,23 @@ namespace MagicStorage.Common.Threading.UI {
 		public void CompleteOne() => Interlocked.Increment(ref _currentStep);
 
 		private void Initialize() {
-			while (Interlocked.CompareExchange(ref _executionLock, LOCKED, UNLOCKED) == LOCKED)
-				Thread.Yield();
-
-			StopActiveThread();
+			StopActiveThreadAndWait();
 
 			// The prompt is closed if the old thread was cancelled, so make it appear again
 			if (refreshingUI.currentPage is BaseStorageUIAccessPage accessPage)
 				accessPage.RequestThreadWait(waiting: true);
 
-			ClearStaticCollections();
-
+			// The thread is now ready for reference by external methods
 			IsRunning = true;
 			MagicUI.activeRefreshingThread = this;
 
-			Interlocked.Exchange(ref _executionLock, UNLOCKED);
+			// Since the active thread is now running, the static collections can be safely cleared
+			ClearStaticCollections();
+
+			AllowNewThreadToExecute();
 		}
 
-		private void StopActiveThread() {
+		private void StopActiveThreadAndWait() {
 			if (refreshingUI.currentPage is BaseStorageUIAccessPage accessPage)
 				accessPage.RequestThreadWait(waiting: true);
 
@@ -280,10 +327,15 @@ namespace MagicStorage.Common.Threading.UI {
 			}
 
 			// Always cause the "current UI" to reset its slot zones, etc.
-			refreshingUI?.OnRefreshStart();
+			if (IsPartialThread)
+				PrepareUIZones();
+			else
+				refreshingUI.OnRefreshStart();
 		}
 
 		private void Tick() {
+			bool hasError = false;
+
 			try {
 				Initialize();
 
@@ -291,44 +343,59 @@ namespace MagicStorage.Common.Threading.UI {
 				HasSuccessfulCompletion = true;
 
 				NetHelper.Report(true, "Main work for thread finished");
-			} catch when (cancellationToken.IsCancellationRequested) {
+			} catch (OperationCanceledException) {
 				NetHelper.Report(true, "Thread work was cancelled");
 			} catch (Exception ex) {
-				if (ex is not OperationCanceledException) {
-					MagicStorageMod.Instance.Logger.Error("An exception occurred during a refresh thread's execution:", ex);
+				hasError = true;
+				MagicStorageMod.Instance.Logger.Error("An exception occurred during a refresh thread's execution:", ex);
 
-					if (Main.netMode != NetmodeID.Server)
-						Main.NewTextMultiline("An error occurred while refreshing a UI from Magic Storage.\nCheck your \"tModLoader-Logs/client.log\" file for more information.", c: Color.Red);
-				}
+				if (Main.netMode != NetmodeID.Server)
+					Main.NewTextMultiline("An error occurred while refreshing a UI from Magic Storage.\nCheck your \"tModLoader-Logs/client.log\" file for more information.", c: Color.Red);
 			} finally {
-				Cleanup();
+				try {
+					Cleanup();
 
-				NetHelper.Report(true, "Cleanup for thread finished");
+					NetHelper.Report(true, "Cleanup for thread finished");
 
-				if (HasSuccessfulCompletion) {
-					if (_externalWork.Count > 0)
-						NetHelper.Report(true, "External work for thread finished");
+					if (HasSuccessfulCompletion) {
+						if (_externalWork.Count > 0)
+							NetHelper.Report(true, "External work for thread finished");
 
-					foreach (var provider in _externalWork)
-						provider.Wait();
-				} else
-					ClearStaticCollections();
+						foreach (var provider in _externalWork)
+							provider.Wait();
+					} else
+						ClearStaticCollections();
+				} catch (OperationCanceledException) {
+					NetHelper.Report(true, "Thread cleanup was cancelled");
+				} catch (Exception ex) {
+					MagicStorageMod.Instance.Logger.Error("An exception occurred during a refresh thread's cleanup:", ex);
 
-				IsRunning = false;
+					if (!hasError && Main.netMode != NetmodeID.Server)
+						Main.NewTextMultiline("An error occurred while refreshing a UI from Magic Storage.\nCheck your \"tModLoader-Logs/client.log\" file for more information.", c: Color.Red);
+				} finally {
+					IsRunning = false;
 
-				if (object.ReferenceEquals(this, MagicUI.activeRefreshingThread))
-					MagicUI.activeRefreshingThread = null;
+					if (refreshingUI.currentPage is BaseStorageUIAccessPage accessPage)
+						accessPage.RequestThreadWait(waiting: false);
 
-				if (!cancellationToken.IsCancellationRequested) {
-					// Ensure that race conditions with the UI can't occur
-					// QueueMainThreadAction will execute the logic in a very specific place
-					Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
+					if (object.ReferenceEquals(this, MagicUI.activeRefreshingThread))
+						MagicUI.activeRefreshingThread = null;
+
+					// Always ensure that a new thread can be started if no thread is currently active
+					if (MagicUI.activeRefreshingThread is null)
+						AllowNewThreadToExecute();
+
+					if (!cancellationToken.IsCancellationRequested) {
+						// Ensure that race conditions with the UI can't occur
+						// QueueMainThreadAction will execute the logic in a very specific place
+						if (IsPartialThread)
+							Main.QueueMainThreadAction(PopulateUIZones);
+						else
+							Main.QueueMainThreadAction(MagicUI.InvokeOnRefresh);
+					}
+
+					MarkAsFinished();
 				}
-
-				if (refreshingUI.currentPage is BaseStorageUIAccessPage accessPage)
-					accessPage.RequestThreadWait(waiting: false);
-
-				_finishedTrigger.Set();
 			}
 		}
 
@@ -355,5 +422,17 @@ namespace MagicStorage.Common.Threading.UI {
 		/// Used to clear any static collections used by this thread type.
 		/// </summary>
 		public abstract void ClearStaticCollections();
+
+		/// <summary>
+		/// Prepares the <see cref="NewUISlotZone"/> objects for <see cref="refreshingUI"/> before refreshing starts.<br/>
+		/// This method is only invoked if <see cref="IsPartialThread"/> is <see langword="true"/>.
+		/// </summary>
+		public abstract void PrepareUIZones();
+
+		/// <summary>
+		/// Populates the <see cref="NewUISlotZone"/> objects for <see cref="refreshingUI"/> with their items after refreshing has completed.<br/>
+		/// This method is only invoked if <see cref="IsPartialThread"/> is <see langword="true"/>.
+		/// </summary>
+		public abstract void PopulateUIZones();
 	}
 }

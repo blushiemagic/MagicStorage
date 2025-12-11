@@ -1,5 +1,7 @@
-﻿using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common;
+using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Threading.Refreshing;
 using System;
 using Terraria;
 
@@ -28,9 +30,11 @@ namespace MagicStorage {
 			simulatedCraftForCurrentRecipe = null;
 		}
 
-		internal static void SetRecipeAndCraftingCaches(CommonCraftingThread thread) {
-			if (thread.selectedRecipe is not Recipe recipe) {
-				thread.craftAmountTarget = 1;
+		internal static void SetRecipeAndCraftingCaches<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+		{
+			if (thread.CraftingObject.selection.Value is not Recipe recipe) {
+				thread.CraftingObject.craftAmountTarget.Value = 1;
 				return;
 			}
 			
@@ -43,25 +47,21 @@ namespace MagicStorage {
 
 			int maxCraftable;
 			recentRecipeAmountCraftable = recipe;
-			amountCraftableForCurrentRecipe = maxCraftable = AmountCraftable(recipe);
+			amountCraftableForCurrentRecipe = maxCraftable = AmountCraftable(thread, recipe);
 
-			thread.craftAmountTarget = Utils.Clamp(thread.craftAmountTarget, 1, maxCraftable);
+			thread.CraftingObject.craftAmountTarget.Value = Utils.Clamp(thread.CraftingObject.craftAmountTarget.Value, 1, maxCraftable);
 
 			thread.CompleteOne();
 
-			// IsAvailable() will automatically populate this if the selected recipe was in the recipe list
-			// When it isn't, this result should still be cached
-			if (recentRecipeAvailable is null) {
-				recentRecipeAvailable = recipe;
-				currentRecipeIsAvailable = IsAvailable(recipe);
-			}
+			recentRecipeAvailable = recipe;
+			currentRecipeIsAvailable = IsAvailable(thread, recipe);
 
 			thread.CompleteOne();
 
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out var recursiveRecipe)) {
 				recentRecipeSimulation = recipe;
 				CraftingSimulation simulation = new CraftingSimulation();
-				simulation.SimulateCrafts(recursiveRecipe, thread.craftAmountTarget, GetCurrentInventory(cloneIfBlockEmpty: true));
+				simulation.SimulateCrafts(recursiveRecipe, thread.CraftingObject.craftAmountTarget.Value, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
 				simulatedCraftForCurrentRecipe = simulation;
 
 				thread.CompleteOne();
@@ -69,13 +69,13 @@ namespace MagicStorage {
 
 			// Obsolete, but still needs to be processed
 			recentRecipeBlock = recipe;
-			currentRecipePassesBlock = PassesBlock(recipe);
+			currentRecipePassesBlock = PassesBlock(thread, recipe);
 
 			thread.CompleteOne();
 		}
 
 		public static int AmountCraftableForCurrentRecipe() {
-			if (MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing || selectedRecipe is null)
 				return 0;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAmountCraftable, selectedRecipe) && amountCraftableForCurrentRecipe is { } amount)
@@ -88,7 +88,7 @@ namespace MagicStorage {
 		}
 
 		public static bool IsCurrentRecipeAvailable() {
-			if (MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing || selectedRecipe is null)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeAvailable, selectedRecipe) && currentRecipeIsAvailable is { } available)
@@ -102,7 +102,7 @@ namespace MagicStorage {
 
 		[Obsolete("The blocked ingredients check is now part of the recipe availability checks.", error: true)]
 		public static bool DoesCurrentRecipePassIngredientBlock() {
-			if (MagicUI.CurrentlyRefreshing)
+			if (MagicUI.CurrentlyRefreshing || selectedRecipe is null)
 				return false;  // Delay logic until threading stops
 
 			if (object.ReferenceEquals(recentRecipeBlock, selectedRecipe) && currentRecipePassesBlock is { } available)
@@ -115,6 +115,9 @@ namespace MagicStorage {
 		}
 
 		public static CraftingSimulation GetCraftingSimulationForCurrentRecipe() {
+			if (MagicUI.CurrentlyRefreshing || selectedRecipe is null)
+				return new CraftingSimulation();
+
 			if (object.ReferenceEquals(recentRecipeSimulation, selectedRecipe) && simulatedCraftForCurrentRecipe is not null)
 				return simulatedCraftForCurrentRecipe;
 

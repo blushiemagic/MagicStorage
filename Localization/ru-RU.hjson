@@ -1348,6 +1348,11 @@ Mods: {
 					Label: Глобальный черный список Мерцания
 					Tooltip: Нажмите левый Ctrl + левый Shift, чтобы добавить/удалить из черного списка
 				}
+
+				useOldSlotFocus: {
+					// Label: use Old Slot Focus
+					// Tooltip: ""
+				}
 			}
 
 			ButtonConfigurationMode: {

@@ -1,139 +1,262 @@
-﻿using MagicStorage.Common.Systems.RecurrentRecipes;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
-using MagicStorage.Common.Threading.UI;
+using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.Refreshing;
+using MagicStorage.UI.States;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
-using Terraria.ModLoader.Config;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		#region ShimmeringRefreshThread
-		internal class ShimmeringRefreshThread : CraftingGUI.CraftingControlsRefreshThread {
-			public int selectedItem;
-			public readonly HashSet<int> itemsToRefresh;
-			public bool[] decraftingRecipeAvailableSnapshot;
-			public int[] itemTypeToDecraftRecipeIndexSnapshot;
-			public bool[] itemTransmuteAvailableSnapshot;
-			public List<ItemReport> cachedShimmerReports;
-			public readonly List<int> viewingItems = [];
-			public readonly List<bool> viewingItemIsAvailable = [];
-			public CraftingGUI.IFilterProvider<int> shimmerableItemFilterProvider;
+		public class ShimmeringRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerSnapshotsProvider, IShimmerItemReportsProvider {
+			public override bool IsPartialThread => false;
+
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
+
+			public override IRefreshThreadBuilder FullRefreshBuilder => DecraftingGUI.FullRefreshBuilder.Instance;
+
+			public StorageItems StorageItems { get; } = new();
+
+			public ProcessedStorageItems ProcessedStorageItems { get; }
+
+			public MainZoneObjectsFilterControls<int> MainZoneObjectsFilterControls { get; }
+
+			public MainZoneObjectResults<int> MainZoneObjectsResults { get; }
+
+			public IngredientControls IngredientControls { get; }
+
+			public CraftingObject<int> CraftingObject { get; }
+
+			public ShimmerSnapshots ShimmerSnapshots { get; } = new();
+
+			public ShimmerItemReports ShimmerItemReports { get; }
 
 			public ShimmeringRefreshThread(
 				StorageViewControls controls,
-				IEnumerable<bool> adjTiles,
-				int selectedItem,
-				IEnumerable<int> itemsToRefresh,
-				int recipeFilter,
-				ItemTypeOrderedSet favorited,
-				ItemTypeOrderedSet hidden,
-				HashSet<ItemDefinition> configBlacklist,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget
-			) : base(controls, adjTiles, null, false, recipeFilter, favorited, hidden, configBlacklist, blockedStoredIngredients, craftAmountTarget) {
-				this.selectedItem = selectedItem;
-				this.itemsToRefresh = [.. itemsToRefresh];
+				ProcessedStorageItems processedStorage,
+				MainZoneObjectsFilterControls<int> mainZoneControls,
+				MainZoneObjectResults<int> mainZoneResults,
+				IngredientControls ingredientControls,
+				CraftingObject<int> craftingObject,
+				List<ItemReport> staticReportCacheList
+			) : base(MagicUI.decraftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				MainZoneObjectsFilterControls = mainZoneControls;
+				MainZoneObjectsResults = mainZoneResults;
+				IngredientControls = ingredientControls;
+				CraftingObject = craftingObject;
+				ShimmerItemReports = new(staticReportCacheList);
 			}
 
-			protected override void PostItemsFound() {
+			protected override void CollectObjects() {
+				CraftingGUI.hasCompleteData = false;
+
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
+
+				StorageItems.CollectObjects(this);
+				ProcessedStorageItems.CollectObjects(this);
+				IngredientControls.CollectObjects(this);
+				MainZoneObjectsResults.CollectObjects();
+				ShimmerItemReports.CollectObjects(CraftingObject.selection.Value);
+
 				AnalyzeIngredients();
 
-				recipeFilterProvider = null;
-				shimmerableItemFilterProvider = new StandardShimmerableItemFilterProvider(this);
-			}
+				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.filterProvider = new StandardShimmerableItemFilterProvider(this);
 
-			protected override void CollectSnapshots() => PopulateShimmerSnapshots(this);
-
-			protected override void PostModuleAccess() {
-				if (itemsToRefresh is { Count: > 0 }) {
-					// RefreshSpecificItemsAvailablity() will manipulate the current lists, so they need to be cached
-					viewingItems.AddRange(DecraftingGUI.viewingItems);
-					viewingItemIsAvailable.AddRange(DecraftingGUI.itemAvailable);
-				}
+				ShimmerSnapshots.CollectObjects();
 			}
 
 			protected override void Execute() {
 				DecraftingGUI.SortAndFilter(this);
 
-				base.CopyToStaticCollectionsAndFields();
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				MainZoneObjectsResults.CopyToStaticCollections();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CraftingObject.CopyToStaticFields();
+				ShimmerItemReports.CopyToStaticCollection();
 
-				DecraftingGUI.selectedItem = selectedItem;
+				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 
-				DecraftingGUI.viewingItems.Clear();
-				DecraftingGUI.viewingItems.AddRange(viewingItems);
-
-				DecraftingGUI.itemAvailable.Clear();
-				DecraftingGUI.itemAvailable.AddRange(viewingItemIsAvailable);
-
-				DecraftingGUI.cachedShimmerReports.Clear();
-				DecraftingGUI.cachedShimmerReports.AddRange(cachedShimmerReports);
-
-				base.PostRefreshRecipes();
+				CraftingGUI.hasCompleteData = true;
 			}
+
+			protected override void Cleanup() { }
 
 			public override void ClearStaticCollections() {
-				base.ClearStaticCollections();
-
-				DecraftingGUI.viewingItems.Clear();
-				DecraftingGUI.itemAvailable.Clear();
-				DecraftingGUI.cachedShimmerReports.Clear();
+				ProcessedStorageItems.ClearStaticCollections();
+				MainZoneObjectsResults.ClearStaticCollections();
+				IngredientControls.ClearStaticCollections();
+				ShimmerItemReports.ClearStaticCollection();
 			}
+
+			// Unused due to being a full thread
+			public override void PrepareUIZones() { }
+
+			public override void PopulateUIZones() { }
 		}
-		#endregion
 
-		#region ShimmerInfoPanelRefreshThread
-		internal class ShimmerInfoPanelRefreshThread : CraftingGUI.CommonCraftingThread {
-			public int selectedItem;
-			public List<ItemReport> cachedShimmerReports;
+		public class ItemListRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IIngredientControlsProvider, IShimmerSnapshotsProvider {
+			public override bool IsPartialThread => true;
 
-			public ShimmerInfoPanelRefreshThread(
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
+
+			public override IRefreshThreadBuilder FullRefreshBuilder => DecraftingGUI.FullRefreshBuilder.Instance;
+
+			public ProcessedStorageItems ProcessedStorageItems { get; }
+
+			public MainZoneObjectsFilterControls<int> MainZoneObjectsFilterControls { get; }
+
+			public MainZoneObjectResults<int> MainZoneObjectsResults { get; }
+
+			public IngredientControls IngredientControls { get; }
+
+			public ShimmerSnapshots ShimmerSnapshots { get; } = new();
+
+			public ItemListRefreshThread(
 				StorageViewControls controls,
-				int selectedItem,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget,
-				IEnumerable<ItemReport> cachedShimmerReports
-			) : base(controls, null, false, blockedStoredIngredients, craftAmountTarget)
-			{
-				this.selectedItem = selectedItem;
-				this.cachedShimmerReports = [.. cachedShimmerReports];
+				ProcessedStorageItems processedStorage,
+				MainZoneObjectsFilterControls<int> mainZoneControls,
+				MainZoneObjectResults<int> mainZoneResults,
+				IngredientControls ingredientControls
+			) : base(MagicUI.decraftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				MainZoneObjectsFilterControls = mainZoneControls;
+				MainZoneObjectsResults = mainZoneResults;
+				IngredientControls = ingredientControls;
 			}
 
 			protected override void CollectObjects() {
-				base.CollectObjects();
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
 
-				base.CopyFromStaticCollectionsAndFields();
+				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
+				IngredientControls.CopyFromStaticCollectionsAndFields();
+				MainZoneObjectsResults.CollectObjects();
+
+				AnalyzeIngredients();
+				
+				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.filterProvider = new StandardShimmerableItemFilterProvider(this);
+
+				ShimmerSnapshots.CollectObjects();
+			}
+
+			protected override void Execute() {
+				DecraftingGUI.RefreshItemsAvailability(this);
+
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				MainZoneObjectsResults.CopyToStaticCollections();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+
+				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
+			}
+
+			protected override void Cleanup() { }
+
+			public override void ClearStaticCollections() {
+				ProcessedStorageItems.ClearStaticCollections();
+				MainZoneObjectsResults.ClearStaticCollections();
+				IngredientControls.ClearStaticCollections();
+			}
+
+			public override void PrepareUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().slotZone.ClearContexts();
+
+			public override void PopulateUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+		}
+
+		public class ShimmerInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerItemReportsProvider {
+			public override bool IsPartialThread => true;
+
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
+
+			public override IRefreshThreadBuilder FullRefreshBuilder => DecraftingGUI.FullRefreshBuilder.Instance;
+
+			public ProcessedStorageItems ProcessedStorageItems { get; }
+
+			public IngredientControls IngredientControls { get; }
+
+			public CraftingObject<int> CraftingObject { get; }
+
+			public ShimmerItemReports ShimmerItemReports { get; }
+
+			public ShimmerInfoPanelRefreshThread(
+				StorageViewControls controls,
+				ProcessedStorageItems processedStorage,
+				IngredientControls ingredientControls,
+				CraftingObject<int> craftingObject,
+				List<ItemReport> staticReportCacheList
+			) : base(MagicUI.decraftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				IngredientControls = ingredientControls;
+				CraftingObject = craftingObject;
+				ShimmerItemReports = new(staticReportCacheList);
+			}
+
+			protected override void CollectObjects() {
+				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
+				IngredientControls.CollectObjects(this);
+				ShimmerItemReports.CopyFromStaticCollection();
 			}
 
 			protected override void Execute() {
 				DecraftingGUI.RefreshStorageItems(this);
 
-				base.CopyToStaticCollectionsAndFields();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CraftingObject.CopyToStaticFields();
+				ShimmerItemReports.CopyToStaticCollection();
+			}
 
-				DecraftingGUI.selectedItem = selectedItem;
+			protected override void Cleanup() { }
 
-				DecraftingGUI.cachedShimmerReports.Clear();
-				DecraftingGUI.cachedShimmerReports.AddRange(cachedShimmerReports);
+			public override void ClearStaticCollections() {
+				IngredientControls.ClearStaticCollections();
+				ShimmerItemReports.ClearStaticCollection();
+			}
+
+			public override void PrepareUIZones() {
+				refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+				((DecraftingUIState)refreshingUI).ClearRecipePanelZones();
+			}
+
+			public override void PopulateUIZones() {
+				refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+				((DecraftingUIState)refreshingUI).PopulateRecipePanelZones();
 			}
 		}
-		#endregion
 
-		#region ZoneResultItemsHandler
-		internal class ZoneResultItemsHandler(CraftingGUI.CommonCraftingThread thread) : CraftingGUI.IRecipeItemsHandler {
-			public readonly CraftingGUI.CommonCraftingThread _thread = thread;
-			
-			public List<Item> storedIngredients = [];
-			public List<ItemInfo> storedIngredientsInfo = [];
-			public List<Item> resultItems = [];
-			public List<ItemInfo> resultItemsInfo = [];
+		private class ZoneResultItemsHandler<T> : IRecipeItemsHandler
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
+			public readonly T _thread;
+
+			public readonly ListProvider<Item> storedIngredients;
+			public readonly ListProvider<ItemInfo> storedIngredientsInfo;
+			public readonly ListProvider<Item> resultItems;
+			public readonly ListProvider<ItemInfo> resultItemsInfo;
 
 			public bool FoundStoredResultItem => resultItems.Count > 0;
 
 			public int StoredIngredientCount => storedIngredients.Count;
 
+			public ZoneResultItemsHandler(
+				T thread,
+				List<Item> staticStoredIngredientsList,
+				List<ItemInfo> staticStoredIngredientsInfoList,
+				List<Item> staticResultItemsList,
+				List<ItemInfo> staticResultItemsInfoList
+			) {
+				_thread = thread;
+				storedIngredients = new(staticStoredIngredientsList);
+				storedIngredientsInfo = new(staticStoredIngredientsInfoList);
+				resultItems = new(staticResultItemsList);
+				resultItemsInfo = new(staticResultItemsInfoList);
+			}
+
 			public void AddStoredIngredient(Item item) {
 				// Items from modules need to be referenced directly
-				if (!_thread.wasModuleItem.ContainsKey(item))
+				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item))
 					item = item.Clone();
 
 				storedIngredients.Add(item);
@@ -141,44 +264,45 @@ namespace MagicStorage {
 			}
 
 			public void CompactCollections() {
-				var stored = CraftingGUI.CompactItemList(_thread, this, storedIngredients);
+				var stored = CraftingGUI.CompactItemList(_thread, this, storedIngredients.Value);
 				if (stored.Count != storedIngredients.Count) {
-					storedIngredients = stored;
-					storedIngredientsInfo = [.. stored.Select(x => new ItemInfo(x))];
+					storedIngredients.Clear();
+					storedIngredients.AddRange(stored);
+					storedIngredientsInfo.Clear();
+					storedIngredientsInfo.AddRange(stored.Select(x => new ItemInfo(x)));
 				}
 
-				var results = CraftingGUI.CompactItemList(_thread, this, resultItems);
+				var results = CraftingGUI.CompactItemList(_thread, this, resultItems.Value);
 				if (results.Count != resultItems.Count) {
-					resultItems = results;
-					resultItemsInfo = [.. results.Select(x => new ItemInfo(x))];
+					resultItems.Clear();
+					resultItems.AddRange(results);
+					resultItemsInfo.Clear();
+					resultItemsInfo.AddRange(results.Select(x => new ItemInfo(x)));
 				}
 			}
 
 			public void CopyToStaticCollections() {
-				CraftingGUI.storageItems.AddRange(storedIngredients);
-				CraftingGUI.storageItemInfo.AddRange(storedIngredientsInfo);
-				DecraftingGUI.resultItems.AddRange(resultItems);
-				DecraftingGUI.resultItemsInfo.AddRange(resultItemsInfo);
+				storedIngredients.OverwriteStatic();
+				storedIngredientsInfo.OverwriteStatic();
+				resultItems.OverwriteStatic();
+				resultItemsInfo.OverwriteStatic();
 			}
 
 			public IEnumerable<ItemInfo> GetIngredientsInfo() => storedIngredientsInfo;
 
-			public bool IsItemFromModule(Item item) => _thread.wasModuleItem.ContainsKey(item);
+			public bool IsItemFromModule(Item item) => _thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item);
 
 			public void SetResultItem(Item item) {
-				if (!_thread.wasModuleItem.ContainsKey(item) && !_thread.moduleItemWasFromInventory.ContainsKey(item)) {
+				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item) && !_thread.ProcessedStorageItems.moduleItemWasFromInventory.ContainsKey(item)) {
 					// Items from storage or modules that aren't the Player Inventory modules
 					resultItems.Add(item);
 					resultItemsInfo.Add(item);
 				}
 			}
 		}
-		#endregion
 
-		#region StandardShimmerableItemFilterProvider
-		internal class StandardShimmerableItemFilterProvider(CraftingGUI.CraftingControlsRefreshThread thread) : CraftingGUI.StandardFilterProvider<int>(thread) {
+		private class StandardShimmerableItemFilterProvider(IMainZoneFilterControlsProvider<int> thread) : CraftingGUI.StandardFilterProvider<int>(thread) {
 			protected override int GetObjectType(int value) => value;
 		}
-		#endregion
 	}
 }

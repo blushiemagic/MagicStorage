@@ -2,6 +2,7 @@
 using MagicStorage.Components;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -116,6 +117,23 @@ namespace MagicStorage {
 			this.player = player;
 			this.heart = heart;
 		}
+
+		public bool HeartHasCreativeUnit() => heart is not null && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
+
+		public HashSet<int> LoadInfiniteItems() {
+			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
+			
+			if (heart is not null) {
+				foreach (var module in heart.GetModules()) {
+					var items = module.GetInfiniteItems(this);
+
+					if (items is not null && items.Any())
+						infiniteItems.UnionWith(items);
+				}
+			}
+
+			return infiniteItems;
+		}
 	}
 
 	public struct CraftingInformation {
@@ -132,6 +150,10 @@ namespace MagicStorage {
 			this.alchemyTable = alchemyTable;
 			this.shimmer = shimmer;
 			this.adjTiles = adjTiles;
+		}
+
+		public CraftingInformation Clone() {
+			return new CraftingInformation(campfire, snow, graveyard, water, lava, honey, alchemyTable, shimmer, (bool[])adjTiles.Clone());
 		}
 	}
 }

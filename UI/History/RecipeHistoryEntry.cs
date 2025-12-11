@@ -45,12 +45,12 @@ namespace MagicStorage.UI.History {
 		}
 
 		protected override void GetResultContext(Recipe value, ref int context) {
-			using (FlagSwitch.ToggleTrue(ref CraftingGUI.disableNetPrintingForIsAvailable)) {
-				if (value == CraftingGUI.selectedRecipe)
-					context = ItemSlot.Context.TrashItem;
-				else if (!CraftingGUI.IsAvailable(value))
-					context = ItemSlot.Context.ChestItem;
-			}
+		//	using (FlagSwitch.ToggleTrue(ref CraftingGUI.disableNetPrintingForIsAvailable)) {
+			if (value == CraftingGUI.selectedRecipe)
+				context = ItemSlot.Context.TrashItem;
+			else if (!CraftingGUI.IsAvailable(value))
+				context = ItemSlot.Context.ChestItem;
+		//	}
 		}
 	}
 }

@@ -1347,6 +1347,11 @@ Mods: {
 					// Label: Global Item Shimmering Blacklist
 					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
 				}
+
+				useOldSlotFocus: {
+					// Label: use Old Slot Focus
+					// Tooltip: ""
+				}
 			}
 
 			ButtonConfigurationMode: {

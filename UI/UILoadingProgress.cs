@@ -12,8 +12,13 @@ namespace MagicStorage.UI {
 		public string DisplayText {
 			get => _textPanel?.Text ?? _cachedText;
 			set {
-				if (_textPanel == null) _cachedText = value;
-				else _textPanel.SetText(value ?? _textPanel.Text);
+				value ??= string.Empty;
+
+				if (_textPanel != null) {
+					_textPanel.SetText(value);
+					_textPanel.Recalculate();
+				} else
+					_cachedText = value;
 			}
 		}
 
@@ -30,6 +35,8 @@ namespace MagicStorage.UI {
 				Height = { Pixels = 60 },
 				DrawPanel = false
 			};
+
+			Append(_textPanel);
 		}
 
 		public override void OnInitialize()
@@ -44,6 +51,7 @@ namespace MagicStorage.UI {
 			// Sometimes the element gets initialized before the cache is set
 			if (!string.IsNullOrEmpty(_cachedText) && _textPanel != null) {
 				_textPanel.SetText(_cachedText);
+				_textPanel.Recalculate();
 				_cachedText = string.Empty;
 			}
 		}

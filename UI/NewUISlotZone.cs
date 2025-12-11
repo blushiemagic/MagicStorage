@@ -1,9 +1,11 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.UI;
@@ -35,7 +37,11 @@ namespace MagicStorage.UI {
 			inventoryScale = scale;
 		}
 
+		private int _lock;
+
 		public void SetDimensions(int columns, int rows) {
+			using var _ = new Locker(ref _lock);
+
 			if (NumColumns == columns && NumRows == rows)
 				return;
 
@@ -74,6 +80,8 @@ namespace MagicStorage.UI {
 		}
 
 		public void SetItems(IEnumerable<Item> source) {
+			using var __ = new Locker(ref _lock);
+
 			int oneDimIndex = 0;
 
 			foreach (Item item in source) {
@@ -99,6 +107,8 @@ namespace MagicStorage.UI {
 		}
 
 		public void SetItemsAndContexts(int count, UISlotZone.GetItem getItem) {
+			using var _ = new Locker(ref _lock);
+
 			if (NumColumns < 0 || NumRows < 0)
 				return;
 
@@ -131,6 +141,8 @@ namespace MagicStorage.UI {
 		}
 
 		public void ClearContexts() {
+			using var _ = new Locker(ref _lock);
+
 			for (int r = 0; r < NumRows; r++) {
 				for (int c = 0; c < NumColumns; c++)
 					Slots[r, c].Context = ItemSlot.Context.InventoryItem;
@@ -138,6 +150,8 @@ namespace MagicStorage.UI {
 		}
 
 		public void ClearItems() {
+			using var _ = new Locker(ref _lock);
+
 			foreach (var slot in Slots)
 				slot.SetBoundItem(new Item() { stack = 0 });
 		}
@@ -149,22 +163,38 @@ namespace MagicStorage.UI {
 				return;
 
 			if (HoverSlot >= 0) {
-				if (HoverSlot < NumColumns * NumRows) {
-					var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
-					Item hoverItem = slot.StoredItem;
+				var @lock = new Locker(ref _lock);
+				bool freedLock = false;
 
-					if (!hoverItem.IsAir) {
-						Main.HoverItem = hoverItem.Clone();
-						MagicUI.mouseText = string.Empty;
+				try {
+					if (HoverSlot < NumColumns * NumRows) {
+						var slot = Slots[HoverSlot / NumColumns, HoverSlot % NumColumns];
+						Item hoverItem = slot.StoredItem;
+
+						if (!hoverItem.IsAir) {
+							Main.HoverItem = hoverItem.Clone();
+							MagicUI.mouseText = string.Empty;
+						}
+
+						freedLock = true;
+						@lock.Dispose();
+					} else {
+						freedLock = true;
+						@lock.Dispose();
+
+						//Failsafe
+						SetHoverSlot(-1);
 					}
-				} else {
-					//Failsafe
-					SetHoverSlot(-1);
+				} finally {
+					if (!freedLock)
+						@lock.Dispose();
 				}
 			}
 		}
 
 		public void SetHoverSlot(int slot) {
+			using var _ = new Locker(ref _lock);
+
 			if (HoverSlot != slot) {
 				int oldSlot = HoverSlot;
 				HoverSlot = slot;

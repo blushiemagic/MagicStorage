@@ -1,22 +1,31 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Shimmering;
+using MagicStorage.Common.Threading.Refreshing;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		public static bool IsAvailable(int itemType) => CraftingGUI.GetItemCountsWithBlockedItemsRemoved().TryGetValue(itemType, out int count) && count > 0 && IsAvailable_CheckShimmering(itemType);
+		public static bool IsAvailable(int itemType) => IsAvailable(NullThread, itemType);
 
-		private static bool IsAvailable_CheckShimmering(int itemType) {
-			if (MagicUI.HasActiveThread(out ShimmeringRefreshThread thread)) {
-				// Item transmutation takes priority over decrafting
-				if (thread.itemTransmuteAvailableSnapshot[itemType])
-					return true;
+		public static bool IsAvailable<T>(T thread, int itemType)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IShimmerSnapshotsProvider
+		{
+			if (!CraftingGUI.GetItemCountsWithBlockedItemsRemoved(thread).TryGetValue(itemType, out int count) || count <= 0)
+				return false;
 
-				// The item may have decrafting recipes, but they may not be available, so this needs to be accounted for
-				int decraftingRecipeIndex = thread.itemTypeToDecraftRecipeIndexSnapshot[itemType];
-				return decraftingRecipeIndex >= 0 && thread.decraftingRecipeAvailableSnapshot[decraftingRecipeIndex];
+			if (thread is null) {
+				// Need to manually check the item
+				return MagicCache.ShimmerInfos[itemType].GetAttempt(out _) != ShimmerInfo.ShimmerAttemptResult.None;
 			}
 
-			// Need to manually check the item
-			return MagicCache.ShimmerInfos[itemType].GetAttempt(out _).IsSuccessful();
+			var snapshots = thread.ShimmerSnapshots;
+
+			// Item transmutation takes priority over decrafting
+			if (snapshots.itemTransmuteAvailableSnapshot[itemType])
+				return true;
+
+			// The item may have decrafting recipes, but they may not be available, so this needs to be accounted for
+			int decraftingRecipeIndex = snapshots.itemTypeToDecraftRecipeIndexSnapshot[itemType];
+			return decraftingRecipeIndex >= 0 && snapshots.decraftingRecipeAvailableSnapshot[decraftingRecipeIndex];
 		}
 	}
 }

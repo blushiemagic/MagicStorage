@@ -1,10 +1,8 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
-using MagicStorage.CrossMod;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Sorting;
-using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ID;
@@ -27,17 +25,21 @@ namespace MagicStorage {
 			}
 		}
 
-		private static void RefreshItemsAvailability(ShimmeringRefreshThread thread) {
-			if (thread.itemsToRefresh is null)
-				RefresAllItemsAvailability(thread);  //Refresh all items
+		private static void RefreshItemsAvailability<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
+		{
+			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Length: > 0 })
+				RefreshAllItemsAvailability(thread);  //Refresh all items
 			else
 				RefreshSpecificItemsAvailablity(thread);
 
-			NetHelper.Report(false, "Visible items: " + thread.viewingItems.Count);
-			NetHelper.Report(false, "Available items: " + thread.viewingItemIsAvailable.Count(static b => b));
+			NetHelper.Report(false, "Visible items: " + thread.MainZoneObjectsResults.objects.Count);
+			NetHelper.Report(false, "Available items: " + thread.MainZoneObjectsResults.objectIsAvailable.Count(static b => b));
 		}
 
-		private static void RefresAllItemsAvailability(ShimmeringRefreshThread thread) {
+		private static void RefreshAllItemsAvailability<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
+		{
 			NetHelper.Report(true, "Refreshing all items");
 
 			// Each DoFiltering does: GetItems, SortItems, adding items, adding item availability
@@ -54,13 +56,16 @@ namespace MagicStorage {
 			// now if nothing found we disable filters one by one
 			if (thread.controls.fullSearchText.Trim().Length > 0)
 			{
-				if (thread.viewingItems.Count == 0 && (thread.globalHiddenTypes.Count > 0 || thread.hiddenTypes.Count > 0))
+				var controls = thread.MainZoneObjectsFilterControls;
+				var results = thread.MainZoneObjectsResults.objects;
+
+				if (results.Count == 0 && (controls.globalHiddenTypes.Count > 0 || controls.hiddenTypes.Count > 0))
 				{
 					NetHelper.Report(true, "No items passed the filter.  Attempting filter with no hidden recipes");
 
 					// search hidden recipes too
-					thread.globalHiddenTypes.Clear();
-					thread.hiddenTypes.Clear();
+					controls.globalHiddenTypes.Clear();
+					controls.hiddenTypes.Clear();
 
 					string error = Language.GetTextValue("Mods.MagicStorage.Warnings.DecraftingNoBlacklist");
 
@@ -74,7 +79,7 @@ namespace MagicStorage {
 					PopulateViewingItems(thread, attempt: 1);
 				}
 
-				if (thread.viewingItems.Count == 0 && thread.controls.modSearchOption != ModSearchBox.ModIndexAll)
+				if (results.Count == 0 && thread.controls.modSearchOption != ModSearchBox.ModIndexAll)
 				{
 					NetHelper.Report(true, "No items passed the filter.  Attempting filter with All Mods setting");
 
@@ -96,43 +101,37 @@ namespace MagicStorage {
 				}
 			}
 
-			for (int i = 0; i < thread.viewingItems.Count; i++) {
-				int item = thread.viewingItems[i];
-				bool available = thread.viewingItemIsAvailable[i];
-
+			foreach (var (item, available) in thread.MainZoneObjectsResults.Enumerate())
 				MagicUI.AddRefreshWatchdog(new ItemWatchTarget(item), available);
-			}
 
 			if (!didDefault)
 				errorText = null;
 		}
 
-		internal static void PopulateViewingItems(ShimmeringRefreshThread thread, int attempt) {
+		internal static void PopulateViewingItems<T>(T thread, int attempt)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
+		{
 			CraftingGUI.PopulateCollections(
-				thread: thread,
-				sortedAndFilteredObjects: ItemSorter.SortAndFilterShimmerableItems(thread, attempt, provider: thread.shimmerableItemFilterProvider),
-				destination: thread.viewingItems,
-				destinationAvailable: thread.viewingItemIsAvailable,
-				isObjectAvailable: IsAvailable,
-				objectNameForTask: "Shimmerable Items"
+				thread,
+				ItemSorter.SortAndFilterShimmerableItems(thread, attempt, provider: thread.MainZoneObjectsFilterControls.filterProvider),
+				IsAvailable,
+				"Shimmerable Items"
 			);
 		}
 
 		internal static bool forceSpecificItemResort;
 
-		private static void RefreshSpecificItemsAvailablity(ShimmeringRefreshThread thread) {
+		private static void RefreshSpecificItemsAvailablity<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
+		{
 			CraftingGUI.RefreshSpecificObjects(
-				thread: thread,
-				provider: thread.shimmerableItemFilterProvider,
-				refreshingObjects: thread.itemsToRefresh,
-				destination: thread.viewingItems,
-				destinationAvailable: thread.viewingItemIsAvailable,
-				getItem: Utility.GetItemSample,
-				getItemType: type => type,
-				canProcessObject: type => type > ItemID.None,
-				isObjectAvailable: IsAvailable,
-				objectNameForTask: "Shimmerable Items",
-				forcedResort: ref forceSpecificItemResort
+				thread,
+				Utility.GetItemSample,
+				static (int type) => type,
+				static (int type) => type > ItemID.None,
+				IsAvailable,
+				"Shimmerable Items",
+				ref forceSpecificItemResort
 			);
 		}
 	}

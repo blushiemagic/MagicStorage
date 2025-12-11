@@ -1,21 +1,24 @@
 using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
-using MagicStorage.Common.Threading.UI;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Components;
+using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
-using static ReLogic.Peripherals.RGB.Corsair.CorsairDeviceGroup;
 
 namespace MagicStorage
 {
 	// Method implementations can also be found in UI/GUIs/CraftingGUI.X.cs
 	public static partial class CraftingGUI
 	{
+		internal static readonly CraftingRefreshThread NullThread = null;
+
 		public const int RecipeButtonsAvailableChoice = 0;
 		//Button location could either be the third (2) or fourth (3) option depending on if the favoriting config is enabled
 		public static int RecipeButtonsBlacklistChoice => MagicStorageConfig.CraftingFavoritingEnabled ? 3 : 2;
@@ -57,7 +60,8 @@ namespace MagicStorage
 			moduleItemWasFromInventory.Clear();
 			blockStorageItems.Clear();
 			isItemInfinite.Clear();
-			selectedRecipe = null;
+			// NOTE: updating this during a refresh thread may cause race conditions in UI, so don't set it null here!
+		//	selectedRecipe = null;
 			result = null;
 			ResetRecentRecipeCache();
 			ResetRefreshCache();
@@ -138,59 +142,102 @@ namespace MagicStorage
 
 			craftAmountTarget = 1;
 			blockStorageItems.Clear();
-
-			CreateSelectedRecipeRefreshThread(recipe, caller: nameof(SetSelectedRecipe)).Start();
+			
+			CreateSelectedRecipeRefreshThread(recipe, 1, caller: "CraftingGUI.SetSelectedRecipe()").Start();
 		}
 
-		internal static RecipeInfoPanelRefreshThread CreateSelectedRecipeRefreshThread(Recipe selectedRecipe, string caller) {
-			GetCommonRefreshThreadParameters(out _, out var showAllIngredients, out var blockedStoredIngredients, out var craftAmountTarget);
+		public static RefreshThread CreateFullRefreshThread(string caller) {
+			var thread = FullRefreshBuilder.Instance.CreateThread();
+			thread.SetDebugName($"{caller} thread");
+			return thread;
+		}
 
+		public static RefreshThread CreateSelectedRecipeRefreshThread(Recipe selectedRecipe, int craftAmountTarget, string caller) {
 			var thread = new RecipeInfoPanelRefreshThread(
-				controls: CreateRefreshThreadControls(),
-				selectedRecipe: selectedRecipe,
-				showAllIngredients: showAllIngredients,
-				blockedStoredIngredients: blockedStoredIngredients,
-				craftAmountTarget: craftAmountTarget
+				controls: CreateRefreshThreadControls(MagicUI.craftingUI),
+				processedStorage: new(
+					staticWasModuleItemTable: wasModuleItem,
+					staticModuleItemWasFromInventoryTable: moduleItemWasFromInventory,
+					staticResultItemsList: items,
+					staticResultItemGroupsList: itemGroups,
+					staticResultItemsFromModulesList: sourceItemsFromModules,
+					staticCountsDictionary: itemCounts,
+					staticCountsByPrefixDictionary: itemCountsByPrefix
+				),
+				ingredientControls: new(
+					staticShowAllIngredientsField: new ShowAllIngredientsProvider(((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn),
+					staticInfiniteItemsSet: isItemInfinite,
+					staticBlockedList: blockStorageItems,
+					staticCreativeUnitField: new CreativeUnitPresentProvider()
+				),
+				craftingObject: new(
+					selection: new SelectionProvider(selectedRecipe),
+					craftAmountTarget: new CraftAmountTargetProvider(craftAmountTarget)
+				)
 			);
-			thread.SetDebugName($"CraftingGUI.{caller}() thread");
+
+			thread.SetDebugName($"{caller} thread");
 
 			return thread;
 		}
 
-		/// <summary>
-		/// Attempts to craft a certain amount of items from a Crafting Interface
-		/// </summary>
-		/// <param name="craftingAccess">The tile entity for the Crafting Interface to craft items from</param>
-		/// <param name="toCraft">How many items should be crafted</param>
-		public static void Craft(TECraftingAccess craftingAccess, int toCraft) {
-			if (craftingAccess is null)
-				return;
+		public static RefreshThread CreateRecipeListRefreshThread(string caller) {
+			// Force all recipes to be recalculated
+			if (MagicUI.ForceNextRefreshToBeFull)
+				recipesToRefreshByIndex = null;
 
-			StoragePlayer.StorageHeartAccessWrapper wrapper = new(craftingAccess);
+			var thread = new RecipeListRefreshThread(
+				controls: CreateRefreshThreadControls(MagicUI.craftingUI),
+				processedStorage: new(
+					staticWasModuleItemTable: wasModuleItem,
+					staticModuleItemWasFromInventoryTable: moduleItemWasFromInventory,
+					staticResultItemsList: items,
+					staticResultItemGroupsList: itemGroups,
+					staticResultItemsFromModulesList: sourceItemsFromModules,
+					staticCountsDictionary: itemCounts,
+					staticCountsByPrefixDictionary: itemCountsByPrefix
+				),
+				mainZoneControls: new(
+					zoneObjectFilterChoice: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
+					favorited: StoragePlayer.LocalPlayer.FavoritedRecipes,
+					hidden: StoragePlayer.LocalPlayer.HiddenRecipes,
+					configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist
+				),
+				mainZoneResults: new(
+					objectsToRefresh: CollectRefreshingRecipes(),
+					staticObjectList: recipes,
+					staticAvailableList: recipeAvailable
+				),
+				ingredientControls: new(
+					staticShowAllIngredientsField: new ShowAllIngredientsProvider(((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn),
+					staticInfiniteItemsSet: isItemInfinite,
+					staticBlockedList: blockStorageItems,
+					staticCreativeUnitField: new CreativeUnitPresentProvider()
+				),
+				craftingObject: new(
+					selection: new SelectionProvider(),
+					craftAmountTarget: new CraftAmountTargetProvider()
+				),
+				availableCache: new(
+					staticTable: recipeToAvailableLookup
+				)
+			);
 
-			//OpenStorage() handles setting the CraftingGUI to use the new storage and Dispose()/CloseStorage() handles reverting it back
-			if (wrapper.Valid) {
-				using (wrapper.OpenStorage())
-					Craft(toCraft);
-			}
+			thread.SetDebugName($"{caller} thread");
+
+			return thread;
 		}
 
-		internal static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) {
-			Dictionary<int, int> counts;
-			Dictionary<int, Dictionary<int, int>> countsByPrefix;
-			List<ItemData> blockedIngredients;
+		internal static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved(bool cloneIfBlockEmpty = false) => GetItemCountsWithBlockedItemsRemoved(NullThread, cloneIfBlockEmpty);
 
-			if (MagicUI.HasActiveThread(out CommonCraftingThread thread)) {
-				counts = thread.itemCounts;
-				countsByPrefix = thread.itemCountsByPrefix;
-				blockedIngredients = thread.blockStorageItems;
-			} else {
-				counts = itemCounts;
-				countsByPrefix = itemCountsByPrefix;
-				blockedIngredients = blockStorageItems;
-			}
+		internal static Dictionary<int, int> GetItemCountsWithBlockedItemsRemoved<T>(T thread, bool cloneIfBlockEmpty = false)
+			where T : IProcessedStorageItemsProvider, IIngredientControlsProvider
+		{
+			Dictionary<int, int> counts = thread?.ProcessedStorageItems.itemCounts.Value ?? itemCounts;
+			Dictionary<int, Dictionary<int, int>> countsByPrefix = thread?.ProcessedStorageItems.itemCountsByPrefix.Value ?? itemCountsByPrefix;
+			IEnumerable<ItemData> blockedIngredients = thread?.IngredientControls.blockStorageItems.Value ?? blockStorageItems;
 
-			if (!cloneIfBlockEmpty && blockedIngredients.Count == 0)
+			if (!cloneIfBlockEmpty && !blockedIngredients.Any())
 				return counts;
 
 			counts = new(counts);
@@ -247,35 +294,29 @@ namespace MagicStorage
 			return true;
 		}
 
+		/// <summary>
+		/// Gets an object representing information used to determine if a recipe can be crafted.<br/>
+		/// <b>NOTE:</b> if a <see cref="RefreshThread"/> is currently active, this method will ignore its controls.
+		/// </summary>
+		/// <param name="cloneIfBlockEmpty">If <see langword="true"/>, the returned inventory dictionary will be a clone even if there are no blocked items.</param>
 		public static AvailableRecipeObjects GetCurrentInventory(bool cloneIfBlockEmpty = false) {
-			var inventory = GetItemCountsWithBlockedItemsRemoved(cloneIfBlockEmpty);
+			return GetCurrentInventory(NullThread, cloneIfBlockEmpty);
+		}
 
-			bool[] adjTiles;
-			bool[] recipeConditionsMetSnapshot;
-			HashSet<int> infiniteItems;
-			bool creativeUnitPresent;
+		/// <summary>
+		/// Gets an object representing information used to determine if a recipe can be crafted.
+		/// </summary>
+		/// <param name="thread">The <see cref="RefreshThread"/> from which to gather controls.</param>
+		/// <param name="cloneIfBlockEmpty">If <see langword="true"/>, the returned inventory dictionary will be a clone even if there are no blocked items.</param>
+		public static AvailableRecipeObjects GetCurrentInventory<T>(T thread, bool cloneIfBlockEmpty = false)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, IRecipeSnapshotsProvider
+		{
+			var inventory = GetItemCountsWithBlockedItemsRemoved(thread, cloneIfBlockEmpty);
 
-			if (MagicUI.HasActiveThread(out CommonCraftingThread commonThread)) {
-				infiniteItems = commonThread.infiniteItems;
-				creativeUnitPresent = commonThread.creativeUnitPresent;
-
-				if (commonThread is CraftingControlsRefreshThread controlsThread) {
-					adjTiles = controlsThread.adjTiles;
-
-					if (controlsThread is CraftingRefreshThread craftingThread)
-						recipeConditionsMetSnapshot = craftingThread.recipeConditionsMetSnapshot;
-					else
-						recipeConditionsMetSnapshot = null;
-				} else {
-					adjTiles = CraftingGUI.adjTiles;
-					recipeConditionsMetSnapshot = null;
-				}
-			} else {
-				adjTiles = CraftingGUI.adjTiles;
-				recipeConditionsMetSnapshot = null;
-				infiniteItems = [.. isItemInfinite];
-				creativeUnitPresent = allItemsAreInfinite;
-			}
+			bool[] adjTiles = thread?.MainZoneObjectsFilterControls.adjTiles ?? CraftingGUI.adjTiles;
+			bool[] recipeConditionsMetSnapshot = thread?.RecipeSnapshots.ConditionsMet;
+			HashSet<int> infiniteItems = thread?.IngredientControls.infiniteItems.Value ?? [.. isItemInfinite];
+			bool creativeUnitPresent = thread?.IngredientControls.creativeUnitPresent.Value ?? allItemsAreInfinite;
 
 			return new AvailableRecipeObjects(adjTiles, inventory, recipeConditionsMetSnapshot, infiniteItems, creativeUnitPresent);
 		}
@@ -362,6 +403,9 @@ namespace MagicStorage
 			if (heart is null)
 				return new Item();
 
+			if (result is null)
+				return new Item();
+
 			using var _ = SecuritySystem.CreateAccessContext();
 
 			Item clone = result.Clone();
@@ -377,39 +421,40 @@ namespace MagicStorage
 			Item withdrawn = heart.Withdraw(clone, false);
 
 			if (withdrawn.IsAir)
-				withdrawn = TryToWithdrawFromModuleItems(clone, true);
+				withdrawn = TryToWithdrawFromModuleItems(heart, clone, true);
 
 			return withdrawn;
 		}
 
-		internal static Item TryToWithdrawFromModuleItems(Item toWithdraw, bool wasAlreadyCloned) {
+		internal static Item TryToWithdrawFromModuleItems(TEStorageHeart heart, Item toWithdraw, bool wasAlreadyCloned) {
 			Item withdrawn;
-			if (sourceItemsFromModules.Count > 0) {
-				//Heart did not contain the item; try to withdraw from the module items
+			List<Item> moduleItems = GetModuleItems(heart);
+			if (moduleItems.Count > 0) {
+				// Heart did not contain the item; try to withdraw from the module items
 				Item item = wasAlreadyCloned ? toWithdraw : toWithdraw.Clone();
 
-				TEStorageUnit.WithdrawFromItemCollection(sourceItemsFromModules, item, out withdrawn,
-					onItemRemoved: k => {
-						int index = k + items.Count - sourceItemsFromModules.Count;
-						
-						items.RemoveAt(index);
-					},
-					onItemStackReduced: (k, stack) => {
-						int index = k + items.Count - sourceItemsFromModules.Count;
+				TEStorageUnit.WithdrawFromItemCollection(moduleItems, item, out withdrawn);
 
-						Item item = items[index];
-						itemCounts[item.type] -= stack;
-						itemCountsByPrefix[item.type][item.prefix] -= stack;
-					});
-
-				if (!withdrawn.IsAir) {
-					MagicUI.SetRefresh();
-					SetNextDefaultRecipeCollectionToRefresh(withdrawn.type);
-				}
+				if (!withdrawn.IsAir)
+					MagicUI.SetNextCollectionsToRefresh(withdrawn.type);
 			} else
 				withdrawn = new Item();
 
 			return withdrawn;
+		}
+
+		private static List<Item> GetModuleItems(TEStorageHeart heart) {
+			EnvironmentSandbox sandbox = new(Main.LocalPlayer, heart);
+			List<Item> items = [];
+
+			foreach (var module in heart.GetModules()) {
+				var moduleItems = module.GetAdditionalItems(sandbox);
+
+				if (moduleItems is not null)
+					items.AddRange(moduleItems);
+			}
+
+			return items;
 		}
 	}
 }

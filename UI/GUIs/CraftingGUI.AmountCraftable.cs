@@ -1,17 +1,22 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
-using System;
+using MagicStorage.Common.Threading.Refreshing;
 using System.Collections.Generic;
 using Terraria;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		[ThreadStatic]
-		internal static bool requestingAmountFromUI;
+	//	[ThreadStatic]
+	//	internal static bool requestingAmountFromUI;
 
-		// Calculates how many times a recipe can be crafted using available items
 		internal static int AmountCraftable(Recipe recipe)
+		{
+			return AmountCraftable(NullThread, recipe);
+		}
+
+		internal static int AmountCraftable<T>(T thread, Recipe recipe)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, IRecipeSnapshotsProvider
 		{
 			int maxCrafts;
 
@@ -20,8 +25,8 @@ namespace MagicStorage {
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				NetHelper.Report(false, "Recipe had a recursion tree");
 
-				using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-					maxCrafts = recursiveRecipe.GetMaxCraftable(GetCurrentInventory(cloneIfBlockEmpty: true));
+			//	using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
+				maxCrafts = recursiveRecipe.GetMaxCraftable(GetCurrentInventory(thread, cloneIfBlockEmpty: true));
 
 				goto ReportAndReturn;
 			}
@@ -34,19 +39,9 @@ namespace MagicStorage {
 				goto ReportAndReturn;
 			}
 
-			Dictionary<int, int> storageQuantity;
-			bool hasCreativeUnit;
-			HashSet<int> infiniteItems;
-
-			if (MagicUI.HasActiveThread(out CommonCraftingThread thread)) {
-				storageQuantity = thread.itemCounts;
-				hasCreativeUnit = thread.creativeUnitPresent;
-				infiniteItems = thread.infiniteItems;
-			} else {
-				storageQuantity = itemCounts;
-				hasCreativeUnit = allItemsAreInfinite;
-				infiniteItems = isItemInfinite;
-			}
+			Dictionary<int, int> storageQuantity = thread?.ProcessedStorageItems.itemCounts.Value ?? itemCounts;
+			bool hasCreativeUnit = thread?.IngredientControls.creativeUnitPresent.Value ?? allItemsAreInfinite;
+			HashSet<int> infiniteItems = thread?.IngredientControls.infiniteItems.Value ?? isItemInfinite;
 
 			if (hasCreativeUnit) {
 				// No ingredients would be consumed

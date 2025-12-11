@@ -1,63 +1,66 @@
-﻿using MagicStorage.Common.Threading.UI;
-using System.Collections;
+﻿using MagicStorage.Common.Threading.Refreshing;
+using SerousCommonLib.API.Iterators;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MagicStorage.Common.Threading {
-	internal class IterationIndexWatcher<T> : IEnumerable<T>, IEnumerator<T> {
+	internal class IterationIndexWatcher<T> : Iterator<T> {
 		private readonly RefreshThread _thread;
-		private readonly int _counterStart;
-
 		private readonly IEnumerable<T> _source;
-		private readonly IEnumerator<T> _enumerator;
-
-		private T _current;
-		private bool _completedOneStep;
-		private bool _completedFinalStep;
-
-		public T Current => _current;
-
-		object IEnumerator.Current => Current;
+		private IEnumerator<T> _enumerator;
 
 		public IterationIndexWatcher(RefreshThread thread, IEnumerable<T> source) {
 			_thread = thread;
-			_counterStart = thread.GetCounterReference();
 			_source = source;
-			_enumerator = _source.GetEnumerator();
 		}
 
-		public void Dispose() {
-			_enumerator.Dispose();
-			_current = default;
+		public override Iterator<T> Clone() => new IterationIndexWatcher<T>(_thread, _source);
+
+		public override void Dispose() {
+			_enumerator?.Dispose();
+			_enumerator = null;
+
+			base.Dispose();
 		}
 
-		public IEnumerator<T> GetEnumerator() => this;
+		public override bool MoveNext() {
+			switch (base._state) {
+				case 1:
+					_enumerator = _source.GetEnumerator();
+					base._state = 2;
+					goto case 2;
+				case 2:
+					if (_enumerator.MoveNext()) {
+						// Delay the increment to when the next value is obtained
+						base._current = _enumerator.Current;
+						base._state = 3;
+						return true;
+					}
 
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+					// The enumeration was empty, so just mark one "iteration"
+					ThreadStep();
+					break;
+				case 3:
+					if (_enumerator.MoveNext()) {
+						base._current = _enumerator.Current;
+						ThreadStep();
+						return true;
+					}
 
-		public bool MoveNext() {
-			if (_enumerator.MoveNext()) {
-				// Delay the increment to when the next value is obtained
-				if (_completedOneStep)
-					_thread.CompleteOne();
-
-				_completedOneStep = true;
-				return true;
+					// The enumeration has finished; mark the final iteration
+					ThreadStep();
+					break;
 			}
 
-			// Increment the final step here
-			if (!_completedFinalStep)
-				_thread.CompleteOne();
-
-			_completedFinalStep = true;
+			Dispose();
 			return false;
 		}
 
-		public void Reset() {
-			_thread.GetCounterReference() = _counterStart;
-			_enumerator.Reset();
-			_current = default;
-			_completedOneStep = false;
-			_completedOneStep = false;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void ThreadStep() {
+			Thread.Sleep(1);
+			_thread.CompleteOne();
 		}
 	}
 

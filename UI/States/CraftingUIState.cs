@@ -33,6 +33,8 @@ namespace MagicStorage.UI.States {
 		protected UIPanel recipeWaitPanel;
 		protected UIText recipeWaitText;
 
+		protected bool delayedHistoryJump;
+
 		public IHistoryCollection History => history;
 
 		public IHistoryCollection history;
@@ -211,7 +213,7 @@ namespace MagicStorage.UI.States {
 					IgnoreClicks = true  // Purely visual
 				};
 
-				itemSlot.OnLeftClick += (evt, e) => HandleStorageSlotLeftClick(storageZone, storageScrollBar, (MagicStorageItemSlot)e, int.MaxValue, GetStorage);
+				itemSlot.OnLeftClick += (evt, e) => HandleStorageSlotLeftClick(storageZone, storageScrollBar, (MagicStorageItemSlot)e);
 
 				return itemSlot;
 			};
@@ -248,7 +250,7 @@ namespace MagicStorage.UI.States {
 			recursionButton.mouseOver = Color.White;
 			recursionButton.Left.Set(18, 0f);
 			recursionButton.Width.Set(recursionButton.Text.MinWidth.Pixels + 30, 0f);
-			recursionButton.OnLeftClick += static (evt, e) => CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, caller: "CraftingUIState").Start();
+			recursionButton.OnLeftClick += static (evt, e) => CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller: "CraftingUIState.recursionButton.LeftClick()")?.Start();
 
 			storageZone.Width.Set(0f, 1f);
 			
@@ -268,7 +270,7 @@ namespace MagicStorage.UI.States {
 					CanShareItemToChat = true
 				};
 
-				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, int.MaxValue, GetResult, (existing, incoming) => incoming.type == existing.type);
+				itemSlot.OnLeftClick += (evt, e) => HandleResultSlotLeftClick(resultZone, (MagicStorageItemSlot)e, (existing, incoming) => incoming.type == existing.type);
 
 				itemSlot.OnRightMouseDown += (evt, e) => HandleResultSlotRightHold((MagicStorageItemSlot)e);
 
@@ -408,6 +410,13 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.PlayerZoneCache.Cache();
 
 			try {
+				if (!MagicUI.CurrentlyRefreshing && delayedHistoryJump) {
+					delayedHistoryJump = false;
+
+					if (history.Current >= 0)
+						history.Goto(history.Current);
+				}
+
 				using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !recipeHistoryPanel.IsMouseHovering)) {
 					base.Update(gameTime);
 
@@ -640,8 +649,12 @@ namespace MagicStorage.UI.States {
 			if (MagicStorageConfig.ClearRecipeHistory)
 				history.Clear();
 
+			// CHANGE: v0.7.0.12 - History selection is delayed until after the full refresh has finished
+			/*
 			if (history.Current >= 0)
 				history.Goto(history.Current);
+			*/
+			delayedHistoryJump = true;
 		}
 
 		protected override void OnClose() {
@@ -687,13 +700,7 @@ namespace MagicStorage.UI.States {
 			if (!RecalculateRecipePanelElements(totalRows))
 				return;
 
-			ingredientZone.SetItemsAndContexts(int.MaxValue, GetIngredient);
-
-			storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
-
-			recipeHeaderZone.SetItemsAndContexts(1, GetHeader);
-
-			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+			PopulateRecipePanelZones();
 
 			history.RefreshEntries();
 
@@ -787,7 +794,7 @@ namespace MagicStorage.UI.States {
 			private bool lastKnownConfigBlacklist;
 
 			protected RecipesPage(BaseStorageUI parent, string name) : base(parent, name) {
-				recipeButtons = new(() => MagicUI.SetRefresh(forceFullRefresh: true), 32, 5, forceGearIconToNotBeCreated: true);
+				recipeButtons = new(RecipeFilterChanged, 32, 5, forceGearIconToNotBeCreated: true);
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
@@ -795,6 +802,11 @@ namespace MagicStorage.UI.States {
 			}
 
 			public RecipesPage(BaseStorageUI parent) : this(parent, "Crafting") { }
+
+			private void RecipeFilterChanged() {
+				if (!base.IsOpening)
+					MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.RecipeFilterChanged()");
+			}
 
 			private void DeselectPage() {
 				lastKnownStationsCount = -1;
@@ -851,7 +863,7 @@ namespace MagicStorage.UI.States {
 						}
 
 						if (changed) {
-							MagicUI.SetRefresh();
+							MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.stationZone.LeftClick()");
 							SoundEngine.PlaySound(SoundID.Grab);
 
 							obj.IgnoreNextHandleAction = true;
@@ -964,7 +976,7 @@ namespace MagicStorage.UI.States {
 
 				stationZone.SetItemsAndContexts(int.MaxValue, GetStation);
 
-				slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
+				PopulateMainZone();
 			}
 
 			public override void OnRefreshStart() {
@@ -1004,8 +1016,10 @@ namespace MagicStorage.UI.States {
 						if (!set.Add(item))
 							set.Remove(item);
 
-						MagicUI.SetRefresh();
+						// CHANGE: v0.7.0.12 - Un-/favoriting a recipe will start a shorter refresh thread that skips item collection and info panel updating
+					//	MagicUI.SetRefresh();
 						OnMainZoneItemFavoriteChanged(item);
+
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						bool whitelisting = recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice;
 
@@ -1020,10 +1034,12 @@ namespace MagicStorage.UI.States {
 								HideItem(item);
 						}
 
-						MagicUI.SetRefresh();
+						// CHANGE: v0.7.0.12 - Black-/whitelisting a recipe will start a shorter refresh thread that skips item collection and info panel updating
+					//	MagicUI.SetRefresh();
 						OnMainZoneItemBlacklistChanged(item, !whitelisting);
 					} else {
-						MagicUI.SetRefresh();
+						// CHANGE: v0.7.0.12 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
+					//	MagicUI.SetRefresh();
 						OnMainZoneItemLeftClicked(objSlot);
 
 						parentUI.UpdatePanelHeight(parentUI.PanelHeight);
@@ -1035,7 +1051,6 @@ namespace MagicStorage.UI.States {
 				if (GetHiddenSet(StoragePlayer.LocalPlayer).Remove(item)) {
 					Main.NewText(Language.GetTextValue(GetHiddenSetRevealLocalizationKey(), Lang.GetItemNameValue(item.type)));
 					OnMainZoneItemHiddenSetChanged(item, false);
-					slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
 				}
 			}
 
@@ -1043,7 +1058,6 @@ namespace MagicStorage.UI.States {
 				if (GetHiddenSet(StoragePlayer.LocalPlayer).Add(item)) {
 					Main.NewText(Language.GetTextValue(GetHiddenSetHideLocalizationKey(), Lang.GetItemNameValue(item.type)));
 					OnMainZoneItemHiddenSetChanged(item, true);
-					slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
 				}
 			}
 
@@ -1051,7 +1065,6 @@ namespace MagicStorage.UI.States {
 				if (GetGlobalBlacklistSet().Remove(new(item.type))) {
 					Main.NewText(Language.GetTextValue(GetGlobalBlacklistSetRevealLocalizationKey(), Lang.GetItemNameValue(item.type)));
 					OnMainZoneItemGlobalBlacklistChanged(item, false);
-					slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
 				}
 			}
 
@@ -1059,7 +1072,6 @@ namespace MagicStorage.UI.States {
 				if (GetGlobalBlacklistSet().Add(new(item.type))) {
 					Main.NewText(Language.GetTextValue(GetGlobalBlacklistSetHideLocalizationKey(), Lang.GetItemNameValue(item.type)));
 					OnMainZoneItemGlobalBlacklistChanged(item, true);
-					slotZone.SetItemsAndContexts(int.MaxValue, GetMainZoneItem);
 				}
 			}
 

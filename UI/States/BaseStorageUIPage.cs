@@ -9,6 +9,8 @@ namespace MagicStorage.UI.States {
 
 		public event Action OnPageSelected, OnPageDeselected;
 
+		public bool IsOpening { get; internal set; }
+
 		public BaseStorageUIPage(BaseStorageUI parent, string name) {
 			parentUI = parent;
 			Name = name;

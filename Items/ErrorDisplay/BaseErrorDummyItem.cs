@@ -23,9 +23,6 @@ namespace MagicStorage.Items.ErrorDisplay {
 
 				mod.AddContent(item = new BaseErrorDummyItem("Error_ItemNBTFail"));
 				NBTFailItemType = item.Type;
-
-				// TODO: add "tooltips" mentioning extra information (e.g. the mod and name, if they could be read; what caused the error; etc.)
-				// TODO: use actual tooltips instead of mouse text for better readability
 			}
 
 			public void Unload() {

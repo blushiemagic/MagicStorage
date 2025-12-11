@@ -1350,6 +1350,11 @@ Mods: {
 					Label: Lista Negra Global De Itens Cintilantes
 					Tooltip: Clique com Ctrl esquerdo + Shift esquerdo para adicionar/remover da lista negra.
 				}
+
+				useOldSlotFocus: {
+					// Label: use Old Slot Focus
+					// Tooltip: ""
+				}
 			}
 
 			ButtonConfigurationMode: {

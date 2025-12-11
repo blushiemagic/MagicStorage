@@ -57,7 +57,7 @@ namespace MagicStorage {
 			}
 		}
 
-		private static bool[] adjTiles = new bool[TileLoader.TileCount];
+		internal static bool[] adjTiles = new bool[TileLoader.TileCount];
 		private static bool adjWater;
 		private static bool adjLava;
 		private static bool adjHoney;
@@ -69,8 +69,22 @@ namespace MagicStorage {
 
 		public static CraftingInformation ReadCraftingEnvironment() => new(Campfire, zoneSnow, graveyard, adjWater, adjLava, adjHoney, alchemyTable, adjShimmer, adjTiles);
 
-		private static int _executingInGuiEnvironment;
+		public static void WriteCraftingEnvironment(in CraftingInformation information)
+		{
+			Campfire = information.campfire;
+			zoneSnow = information.snow;
+			graveyard = information.graveyard;
+			adjWater = information.water;
+			adjLava = information.lava;
+			adjHoney = information.honey;
+			alchemyTable = information.alchemyTable;
+			adjShimmer = information.shimmer;
+			adjTiles = [.. information.adjTiles];
+		}
+
+		internal static int _executingInGuiEnvironment;
 		private static bool _zoneInformationReady;
+		internal static bool _blockForStationUpdate;
 
 		internal static void ExecuteInCraftingGuiEnvironment(Action action)
 		{
@@ -160,6 +174,9 @@ namespace MagicStorage {
 		#endregion
 
 		private static void ExecuteInCraftingGuiEnvironment_Inner(ActionWrapper action) {
+			while (_blockForStationUpdate)
+				Thread.Yield();
+
 			int level = Interlocked.Increment(ref _executingInGuiEnvironment);
 			if (level > 1)
 			{

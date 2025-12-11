@@ -41,9 +41,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			while (sum < craftingTarget) {
 				// Get the materials required, then "craft" it and continue checking until no more materials can be used
-				CraftResult craftResult;
-				using (FlagSwitch.Create(ref CraftingGUI.disableNetPrintingForIsAvailable, true))
-					recipe.GetCraftingInformation(1, out craftResult, available, mainResultItem);
+				recipe.GetCraftingInformation(1, out CraftResult craftResult, available, mainResultItem);
 
 				// If there's no possible recursion tree left, bail immediately
 				if (!craftResult.WasAvailable)

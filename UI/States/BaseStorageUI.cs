@@ -314,7 +314,7 @@ namespace MagicStorage.UI.States {
 						defPage.filteringButtons.Choice = -1;
 				}
 				
-				MagicUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUI.configPages[].OptionClicked()");
 			};
 
 			configPage.Width = StyleDimension.Fill;
@@ -362,11 +362,16 @@ namespace MagicStorage.UI.States {
 				if (currentPage is not null) {
 					currentPage.InvokeOnPageDeselected();
 					currentPage.RemoveAndDeactivate();
+
+					// Sanity check
+					currentPage.IsOpening = false;
 				}
 
 				currentPage = newPage;
 
 				panel.viewArea.Append(currentPage);
+
+				currentPage.IsOpening = true;
 				
 				currentPage.Activate();
 
@@ -627,6 +632,9 @@ namespace MagicStorage.UI.States {
 			// Refreshing slots?  prevent resizing
 			if (MagicUI.CurrentlyRefreshing)
 				resize.Dragging = false;
+
+			// At this point, any refreshing/reformatting/etc. is done, so it's safe to allow threads to be started
+			currentPage.IsOpening = false;
 
 			// Prevent item slot interactions immediately after opening the UI
 			if (timeSpentOpen < 60) {

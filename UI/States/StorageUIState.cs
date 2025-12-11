@@ -138,7 +138,7 @@ namespace MagicStorage.UI.States {
 			private float depositButtonRight;
 
 			public StoragePage(BaseStorageUI parent) : base(parent, "Storage") {
-				filterFavorites = new(() => MagicUI.SetRefresh(forceFullRefresh: true),
+				filterFavorites = new(FavoritesFilterChanged,
 					MagicStorageMod.Instance.Assets.Request<Texture2D>("Assets/FilterMisc", AssetRequestMode.ImmediateLoad),
 					Language.GetText("Mods.MagicStorage.ShowOnlyFavorited"),
 					32);
@@ -154,6 +154,11 @@ namespace MagicStorage.UI.States {
 					if (StorageGUI.currentMode is StorageGUI.ActionMode.Selling)
 						UpdateCoinMetricAndRefresh();
 				};
+			}
+
+			private void FavoritesFilterChanged() {
+				if (!base.IsOpening)
+					MagicUI.StartMainZoneRefreshThread(caller: "StorageUIState+StoragePage.FavoritesFilterChanged()");
 			}
 
 			public override void OnInitialize() {
@@ -276,6 +281,11 @@ namespace MagicStorage.UI.States {
 						heart.netDesync++;
 
 						if (heart.netDesync >= 40) {
+							string msg = "Detected possible desync between client and server, forcing a full refresh of the Storage UI";
+
+							Main.NewText(msg, Color.Orange);
+							MagicStorageMod.Instance.Logger.Warn(msg);
+
 							heart.netcodeUpdate = false;
 							heart.netDesync = 0;
 
@@ -373,14 +383,14 @@ namespace MagicStorage.UI.States {
 				if (!UpdateZone())
 					return;
 
-				slotZone.SetItemsAndContexts(int.MaxValue, GetItem);
+				PopulateMainZone();
 			}
 
 			public override void OnRefreshStart() {
 				slotZone.ClearContexts();
 			}
 
-			internal Item GetItem(int slot, ref int context) {
+			protected override Item GetMainZoneItem(int slot, ref int context) {
 				if (StorageGUI.currentMode is StorageGUI.ActionMode.Deletion or StorageGUI.ActionMode.Selling)
 					context = MagicSlotContext.SpecialStorageMode;
 
@@ -755,7 +765,8 @@ namespace MagicStorage.UI.States {
 
 				// NOTE: The Controls page typically can't be accessed if the player doesn't have access to the Storage Heart, so checking for accessibility via SecuritySystem shouldn't be needed
 
-				InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
+				// CHANGE: v0.7.0.12 - Switching to the main page forces a full refresh, so this button is redundant
+			//	InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
 
 				InitButton(ref compactCoins, "StorageGUI.CompactCoinsButton", (evt, e) => {
 					if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
@@ -959,7 +970,8 @@ namespace MagicStorage.UI.States {
 						unit.PostChangeContents();
 					}
 
-					MagicUI.SetRefresh(forceFullRefresh: true);
+					// CHANGE: v0.7.0.12 - Switching to the main page forces a full refresh, so this is redundant
+				//	MagicUI.SetRefresh(forceFullRefresh: true);
 					heart.ResetCompactStage();
 				});
 

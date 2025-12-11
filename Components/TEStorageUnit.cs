@@ -195,7 +195,7 @@ namespace MagicStorage.Components
 			return result;
 		}
 
-		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, bool checkPrefix = true, Action<int> onItemRemoved = null, Action<int, int> onItemStackReduced = null) {
+		internal static bool WithdrawFromItemCollection(List<Item> items, Item lookFor, out Item result, bool keepOneIfFavorite = false, bool checkPrefix = true) {
 			result = null;
 			ConditionalWeakTable<Item, byte[]> cachedItemIO = [];
 			for (int k = items.Count - 1; k >= 0; k--)
@@ -221,10 +221,8 @@ namespace MagicStorage.Components
 						result.stack = withdraw;
 					}
 
-					onItemStackReduced?.Invoke(k, withdraw);
 					item.stack -= withdraw;
 					if (item.stack <= 0) {
-						onItemRemoved?.Invoke(k);
 						items.RemoveAt(k);
 						item.TurnToAir();
 					}

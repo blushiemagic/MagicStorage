@@ -9,7 +9,7 @@ using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		public static int craftAmountTarget;
+		public static int craftAmountTarget = 1;
 
 		internal static int craftTimer;
 		internal static int maxCraftTimer = StartMaxCraftTimer;
@@ -60,12 +60,15 @@ namespace MagicStorage {
 			if (MagicUI.CurrentlyRefreshing)
 				return;  // Recipe/ingredient information may not be available
 
+			// Ensure that multiple accesses use the same object
+			var recipe = selectedRecipe;
+
 			int oldTarget = craftAmountTarget;
 			int newTarget = craftAmountTarget;
 
-			if (newTarget >= 1 && selectedRecipe is not null && selectedRecipe.createItem.maxStack != 1 && IsCurrentRecipeAvailable()) {
+			if (newTarget >= 1 && recipe is not null && recipe.createItem.maxStack != 1 && IsCurrentRecipeAvailable()) {
 				int amountCraftable = AmountCraftableForCurrentRecipe();
-				int max = Utils.Clamp(amountCraftable, 1, selectedRecipe.createItem.maxStack);
+				int max = Utils.Clamp(amountCraftable, 1, recipe.createItem.maxStack);
 
 				if (newTarget > max)
 					newTarget = max;
@@ -75,8 +78,9 @@ namespace MagicStorage {
 			if (oldTarget != newTarget) {
 				craftAmountTarget = newTarget;
 
-				if (MagicStorageConfig.IsRecursionEnabled)
-					CreateSelectedRecipeRefreshThread(selectedRecipe, caller: nameof(ClampCraftAmount)).Start();
+				// If "selectedRecipe" has changed, then the UI would be refreshed anyway; don't start a new thread
+				if (MagicStorageConfig.IsRecursionEnabled && recipe is not null && object.ReferenceEquals(recipe, selectedRecipe))
+					CreateSelectedRecipeRefreshThread(recipe, newTarget, caller: "CraftingGUI.ClampCraftAmount()")?.Start();
 			}
 		}
 	}

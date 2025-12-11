@@ -92,7 +92,7 @@ namespace MagicStorage.Items {
 		public override void SaveData(TagCompound tag) {
 			// Force the new format
 			if (_serializationVersion == VERSION_SAVE_NET_IO)
-				StoreItems((List<Item>)RetrieveItems());
+				StoreItems([.. RetrieveItems()]);
 
 			tag["data"] = _unitData;
 			tag["count"] = _itemCount;

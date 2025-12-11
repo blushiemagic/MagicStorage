@@ -73,8 +73,8 @@ namespace MagicStorage {
 				if (context != MagicSlotContext.Normal) {
 					bool craftable;
 
-					using (FlagSwitch.ToggleTrue(ref disableNetPrintingForIsAvailable))
-						craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe, true));
+				//	using (FlagSwitch.Create(ref disableNetPrintingForIsAvailable, true))
+					craftable = MagicCache.ResultToRecipe.TryGetValue(item.type, out var r) && r.Any(recipe => IsAvailable(recipe, true));
 
 					if (craftable)
 						context = MagicSlotContext.IngredientCraftable;

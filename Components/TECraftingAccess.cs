@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using Terraria.DataStructures;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.IO;
+using System.Threading;
 
 namespace MagicStorage.Components
 {
@@ -111,20 +112,24 @@ namespace MagicStorage.Components
 
 		public void QClientOperation(BinaryReader reader, Operation op, int client)
 		{
+			NetOperation netOp;
 			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
 			{
 				byte slot = reader.ReadByte();
-				clientOpQ.Enqueue(new NetOperation(op, slot, client));
+				netOp = new NetOperation(op, slot, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
 			}
 			else
 			{
 				Item item = ItemIO.Receive(reader, true, true);
-				clientOpQ.Enqueue(new NetOperation(op, item, client));
+				netOp = new NetOperation(op, item, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
+
+			if (netOp is not null && Main.netMode == NetmodeID.Server)
+				clientOpQ.Enqueue(netOp);
 		}
 
 		private static ModPacket PrepareServerResult(Operation op)
@@ -210,6 +215,12 @@ namespace MagicStorage.Components
 		}
 
 		internal static void UpdateRecipesFromStationAction(Item station) {
+			// Ensure that refreshing can't affect this method
+			CraftingGUI._blockForStationUpdate = true;
+			while (CraftingGUI._executingInGuiEnvironment > 0)
+				Thread.Yield();
+
+			/*
 			CraftingGUI.PlayerZoneCache.Cache();
 
 			Player player = Main.LocalPlayer;
@@ -221,30 +232,35 @@ namespace MagicStorage.Components
 			player.adjLava = false;
 			player.adjHoney = false;
 			player.adjShimmer = false;
+			*/
 
 			UpdateRecipes(station);
 
-			CraftingGUI.PlayerZoneCache.FreeCache(destroy: true);
+		//	CraftingGUI.PlayerZoneCache.FreeCache(destroy: true);
+
+			CraftingGUI._blockForStationUpdate = false;
 		}
 
 		private static void UpdateRecipes(Item station) {
-			Utility.SetVanillaAdjTiles(station, out bool hasSnow, out bool hasGraveyard);
+			var information = CraftingGUI.ReadCraftingEnvironment();
+			var oldInformation = information.Clone();
+
+			Utility.AddCraftingZones(station, ref information);
 
 			MagicUI.SetRefresh();
-			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(Main.LocalPlayer.adjTile.Select(static (b, i) => b ? i : -1).Where(static i => i >= 0));
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(GetUpdatedAdjTile(oldInformation.adjTiles, information.adjTiles));
 
-			Player player = Main.LocalPlayer;
-			if (player.adjWater)
+			if (oldInformation.water != information.water)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingWater);
-			if (player.adjLava)
+			if (oldInformation.lava != information.lava)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingLava);
-			if (player.adjHoney)
+			if (oldInformation.honey != information.honey)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingHoney);
-			if (player.adjShimmer)
+			if (oldInformation.shimmer != information.shimmer)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingShimmer);
-			if (hasSnow)
+			if (oldInformation.snow != information.snow)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingSnow);
-			if (hasGraveyard)
+			if (oldInformation.graveyard != information.graveyard)
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(MagicCache.RecipesUsingEctoMist);
 
 			if (CraftingGUI.GetHeart() is TEStorageHeart heart) {
@@ -254,6 +270,15 @@ namespace MagicStorage.Components
 					if (recipes is not null)
 						CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(recipes);
 				}
+			}
+
+			CraftingGUI.WriteCraftingEnvironment(information);
+		}
+
+		private static IEnumerable<int> GetUpdatedAdjTile(bool[] oldAdjTile, bool[] adjTile) {
+			for (int i = 0; i < adjTile.Length; i++) {
+				if (oldAdjTile[i] != adjTile[i])
+					yield return i;
 			}
 		}
 

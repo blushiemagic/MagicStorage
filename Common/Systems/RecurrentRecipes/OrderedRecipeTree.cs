@@ -69,15 +69,19 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// </summary>
 		/// <param name="available"></param>
 		public void TrimBranches(AvailableRecipeObjects available) {
+			/*
 			if (!CraftingGUI.disableNetPrintingForIsAvailable)
 				NetHelper.Report(true, "Trimming branches of recipe tree...");
+			*/
 
 			if (Invalid)
 				return;
 
 			if (available.creativeUnitPresent) {
+				/*
 				if (!CraftingGUI.disableNetPrintingForIsAvailable)
 					NetHelper.Report(false, "Creative unit is present, forcing root to be trimmed.");
+				*/
 
 				Clear();
 				return;
@@ -115,8 +119,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				SkipIngredientChecks:
 
 				if (trimBranch) {
+					/*
 					if (!CraftingGUI.disableNetPrintingForIsAvailable)
 						NetHelper.Report(false, $"Branch trimmed: Depth = {branch.context.depth}, Recipe result = {recipe.createItem.stack} {Lang.GetItemNameValue(result)}");
+					*/
 
 					branch.Clear();
 				} else {
@@ -196,14 +202,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 			EnvironmentSandbox sandbox;
 			IEnumerable<EnvironmentModule> modules;
-			if (CraftingGUI.requestingAmountFromUI) {
-				var heart = CraftingGUI.GetHeart();
-
+			if (CraftingGUI.GetHeart() is { } heart) {
 				sandbox = new EnvironmentSandbox(Main.LocalPlayer, heart);
-				modules = heart?.GetModules().ToArray() ?? Array.Empty<EnvironmentModule>();
+				modules = heart.GetModules();
 			} else {
 				sandbox = default;
-				modules = Array.Empty<EnvironmentModule>();
+				modules = [];
 			}
 
 			// NOTE: [ThreadStatic] only runs the field initializer on one thread

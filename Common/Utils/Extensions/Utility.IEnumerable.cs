@@ -1,5 +1,5 @@
 ﻿using MagicStorage.Common;
-using MagicStorage.Common.Threading.UI;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Sorting;
 using System;
 using System.Collections.Generic;
@@ -14,6 +14,13 @@ namespace MagicStorage {
 		/// </summary>
 		public static IEnumerable<T> Evaluate<T>(this IEnumerable<T> enumerable)
 			=> enumerable.ToArray();
+
+		/// <summary>
+		/// Flattens enumeration of enumerations into a single enumeration
+		/// </summary>
+		public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> @this) => @this.SelectMany(Identity);
+
+		private static IEnumerable<T> Identity<T>(this IEnumerable<T> @this) => @this;
 
 		internal static int ConstrainedSum(this IEnumerable<int> source) {
 			ClampedArithmetic sum = 0;

@@ -1,367 +1,301 @@
 ﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
-using MagicStorage.Common.Threading.UI;
-using MagicStorage.Modules;
+using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.Refreshing;
+using MagicStorage.UI.States;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Terraria;
-using Terraria.ModLoader.Config;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		#region CommonCraftingThread
-		internal abstract class CommonCraftingThread : RefreshThread {
-			public Recipe selectedRecipe;
-			/// <summary>
-			/// <b>NOTE:</b> Value doesn't matter; the item is from a module if, and only if, this table has it as a key
-			/// </summary>
-			public readonly ConditionalWeakTable<Item, object> wasModuleItem = [];
-			/// <summary>
-			/// <b>NOTE:</b> Value doesn't matter; the item is from the player's main inventory if, and only if, this table has it as a key
-			/// </summary>
-			public readonly ConditionalWeakTable<Item, object> moduleItemWasFromInventory = [];
-			public readonly bool showAllPossibleIngredients;
-			public EnvironmentSandbox sandbox;
-			public bool creativeUnitPresent;
-			public HashSet<int> infiniteItems;
-			public readonly List<Item> resultItems = [];
-			public readonly List<List<Item>> resultItemGroups = [];
-			public readonly List<Item> resultItemsFromModules = [];
-			public IRecipeItemsHandler recipeItemsHandler;
-			public readonly Dictionary<int, int> itemCounts = [];
-			public readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = [];
-			public readonly List<ItemData> blockStorageItems = [];
-			public int craftAmountTarget;
+		public class CraftingRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider {
+			public override bool IsPartialThread => false;
 
-			protected CommonCraftingThread(
-				StorageViewControls controls,
-				Recipe selectedRecipe,
-				bool showAllIngredients,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget
-			) : base(MagicUI.craftingUI, controls) {
-				this.selectedRecipe = selectedRecipe;
-				showAllPossibleIngredients = showAllIngredients;
-				blockStorageItems = [.. blockedStoredIngredients];
-				this.craftAmountTarget = craftAmountTarget;
-			}
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
 
-			protected void CopyFromStaticCollectionsAndFields() {
-				resultItems.AddRange(CraftingGUI.items);
+			public override IRefreshThreadBuilder FullRefreshBuilder => CraftingGUI.FullRefreshBuilder.Instance;
 
-				foreach (var group in CraftingGUI.itemGroups)
-					resultItemGroups.Add([.. group]);
+			public StorageItems StorageItems { get; } = new();
 
-				resultItemsFromModules.AddRange(CraftingGUI.sourceItemsFromModules);
+			public ProcessedStorageItems ProcessedStorageItems { get; }
 
-				foreach (var (key, _) in CraftingGUI.wasModuleItem)
-					wasModuleItem.TryAdd(key, null);
+			public MainZoneObjectsFilterControls<Recipe> MainZoneObjectsFilterControls { get; }
 
-				foreach (var (key, _) in CraftingGUI.moduleItemWasFromInventory)
-					moduleItemWasFromInventory.TryAdd(key, null);
+			public MainZoneObjectResults<Recipe> MainZoneObjectsResults { get; }
 
-				foreach (var (key, quantity) in CraftingGUI.itemCounts)
-					itemCounts[key] = quantity;
+			public IngredientControls IngredientControls { get; }
 
-				foreach (var (key, dictionary) in CraftingGUI.itemCountsByPrefix) {
-					Dictionary<int, int> prefixDictionary = [];
+			public CraftingObject<Recipe> CraftingObject { get; }
 
-					itemCountsByPrefix[key] = prefixDictionary;
-					foreach (var (prefixKey, quantity) in dictionary)
-						prefixDictionary[prefixKey] = quantity;
-				}
+			public CraftObjectAvailableCache<Recipe> CraftObjectAvailableCache { get; }
 
-				creativeUnitPresent = CraftingGUI.allItemsAreInfinite;
-				infiniteItems = [.. CraftingGUI.isItemInfinite];
-			}
-
-			protected void CopyToStaticCollectionsAndFields() {
-				CraftingGUI.items.Clear();
-				CraftingGUI.items.AddRange(resultItems);
-
-				CraftingGUI.itemGroups.Clear();
-				CraftingGUI.itemGroups.AddRange(resultItemGroups);
-
-				CraftingGUI.sourceItemsFromModules.Clear();
-				CraftingGUI.sourceItemsFromModules.AddRange(resultItemsFromModules);
-
-				CraftingGUI.blockStorageItems.Clear();
-				CraftingGUI.blockStorageItems.AddRange(blockStorageItems);
-
-				CraftingGUI.wasModuleItem.Clear();
-				foreach (var (key, _) in wasModuleItem)
-					CraftingGUI.wasModuleItem.TryAdd(key, null);
-
-				CraftingGUI.moduleItemWasFromInventory.Clear();
-				foreach (var (key, _) in moduleItemWasFromInventory)
-					CraftingGUI.moduleItemWasFromInventory.TryAdd(key, null);
-
-				CraftingGUI.itemCounts.Clear();
-				foreach (var (key, value) in itemCounts)
-					CraftingGUI.itemCounts[key] = value;
-
-				CraftingGUI.itemCountsByPrefix.Clear();
-				foreach (var (key, value) in itemCountsByPrefix)
-					CraftingGUI.itemCountsByPrefix[key] = value;
-
-				CraftingGUI.isItemInfinite.Clear();
-				CraftingGUI.isItemInfinite.UnionWith(infiniteItems);
-
-				recipeItemsHandler?.CopyToStaticCollections();
-
-				CraftingGUI.selectedRecipe = selectedRecipe;
-				CraftingGUI.craftAmountTarget = craftAmountTarget;
-				CraftingGUI.allItemsAreInfinite = creativeUnitPresent;
-				CraftingGUI.showAllPossibleIngredients = showAllPossibleIngredients;
-				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
-				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
-
-				CraftingGUI.SetRecipeAndCraftingCaches(this);
-			}
-
-			protected override void CollectObjects() {
-				sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
-
-				CraftingGUI.ResetRecentRecipeCache();
-			}
-
-			protected override void Cleanup() {
-				wasModuleItem.Clear();
-				moduleItemWasFromInventory.Clear();
-				recipeItemsHandler = null;
-			}
-
-			public override void ClearStaticCollections() {
-				CraftingGUI.items.Clear();
-				CraftingGUI.itemGroups.Clear();
-				CraftingGUI.sourceItemsFromModules.Clear();
-				CraftingGUI.wasModuleItem.Clear();
-				CraftingGUI.moduleItemWasFromInventory.Clear();
-				CraftingGUI.itemCounts.Clear();
-				CraftingGUI.itemCountsByPrefix.Clear();
-				CraftingGUI.isItemInfinite.Clear();
-				CraftingGUI.selectedRecipe = null;
-				CraftingGUI.showAllPossibleIngredients = false;
-				CraftingGUI.allItemsAreInfinite = false;
-			}
-		}
-		#endregion
-
-		#region CraftingControlsRefreshThread
-		internal abstract class CraftingControlsRefreshThread : CommonCraftingThread {
-			public readonly bool[] adjTiles;
-			public List<Item> allStoredItems;
-			public List<Item> allModuleItems;
-			public readonly ItemTypeOrderedSet favoritedTypes;
-			public readonly ItemTypeOrderedSet hiddenTypes;
-			public readonly HashSet<int> globalHiddenTypes;
-			public readonly int recipeFilterChoice;
-			public IFilterProvider<Recipe> recipeFilterProvider;
-
-			protected CraftingControlsRefreshThread(
-				StorageViewControls controls,
-				IEnumerable<bool> adjTiles,
-				Recipe selectedRecipe,
-				bool showAllIngredients,
-				int recipeFilter,
-				ItemTypeOrderedSet favorited,
-				ItemTypeOrderedSet hidden,
-				HashSet<ItemDefinition> configBlacklist,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget
-			) : base(controls, selectedRecipe, showAllIngredients, blockedStoredIngredients, craftAmountTarget) {
-				this.adjTiles = [.. adjTiles];
-				favoritedTypes = favorited.Clone();
-				hiddenTypes = hidden.Clone();
-				globalHiddenTypes = [.. configBlacklist.Where(x => !x.IsUnloaded).Select(x => x.Type)];
-				recipeFilterChoice = recipeFilter;
-			}
-
-			public bool IsHidden(int item) => globalHiddenTypes.Contains(item) || hiddenTypes.Contains(item);
-
-			public bool IsInfiniteIngredient(int item) => creativeUnitPresent || infiniteItems.Contains(item);
-
-			protected sealed override void CollectObjects() {
-				base.CollectObjects();
-
-				allStoredItems = [.. base.Heart.GetStoredItems()];
-
-				allModuleItems = [];
-
-				foreach (var module in base.Heart.GetModules()) {
-					module.PreRefreshRecipes(sandbox);
-
-					var items = module.GetAdditionalItems(sandbox);
-
-					if (items is null || !items.Any())
-						continue;
-					
-					bool inventoryItems = module is UseInventoryModule or UseInventoryNoFavoritesModule;
-
-					foreach (Item item in items) {
-						if (item is not { IsAir: false })
-							continue;
-
-						if (wasModuleItem.TryAdd(item, null)) {
-							if (!inventoryItems || moduleItemWasFromInventory.TryAdd(item, null))
-								allModuleItems.Add(item);
-						}
-					}
-				}
-
-				base.creativeUnitPresent = CheckForCreativeUnit(sandbox);
-
-				base.infiniteItems = LoadInfiniteItems(sandbox);
-
-				recipeFilterProvider = new StandardRecipeFilterProvider(this);
-
-				PostItemsFound();
-
-				CollectSnapshots();
-
-				foreach (EnvironmentModule module in base.Heart.GetModules())
-					module.ResetPlayer(sandbox);
-
-				PostModuleAccess();
-			}
-
-			protected virtual void PostItemsFound() { }
-
-			protected virtual void CollectSnapshots() { }
-
-			protected virtual void PostModuleAccess() { }
-
-			protected void PostRefreshRecipes() {
-				foreach (var module in base.Heart.GetModules())
-					module.PostRefreshRecipes(sandbox);
-			}
-		}
-		#endregion
-
-		#region CraftingRefreshThread
-		internal class CraftingRefreshThread : CraftingControlsRefreshThread {
-			public Recipe[] recipesToRefresh;
-			public bool[] recipeConditionsMetSnapshot;
-			public readonly List<Recipe> resultRecipes = [];
-			public readonly List<bool> recipeIsAvailable = [];
+			public RecipeSnapshots RecipeSnapshots { get; } = new();
 
 			public CraftingRefreshThread(
 				StorageViewControls controls,
-				IEnumerable<bool> adjTiles,
-				Recipe selectedRecipe,
-				Recipe[] recipesToRefresh,
-				bool showAllIngredients,
-				int recipeFilter,
-				ItemTypeOrderedSet favorited,
-				ItemTypeOrderedSet hidden,
-				HashSet<ItemDefinition> configBlacklist,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget
-			) : base(controls, adjTiles, selectedRecipe, showAllIngredients, recipeFilter, favorited, hidden, configBlacklist, blockedStoredIngredients, craftAmountTarget) {
-				this.recipesToRefresh = recipesToRefresh;
+				ProcessedStorageItems processedStorage,
+				MainZoneObjectsFilterControls<Recipe> mainZoneControls,
+				MainZoneObjectResults<Recipe> mainZoneResults,
+				IngredientControls ingredientControls,
+				CraftingObject<Recipe> craftingObject,
+				CraftObjectAvailableCache<Recipe> availableCache
+			) : base(MagicUI.craftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				MainZoneObjectsFilterControls = mainZoneControls;
+				MainZoneObjectsResults = mainZoneResults;
+				IngredientControls = ingredientControls;
+				CraftingObject = craftingObject;
+				CraftObjectAvailableCache = availableCache;
 			}
 
-			protected override void PostItemsFound() {
+			protected override void CollectObjects() {
+				CraftingGUI.hasCompleteData = false;
+				CraftingGUI.ResetRecentRecipeCache();
+
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
+
+				foreach (var module in base.Heart.GetModules())
+					module.PreRefreshRecipes(sandbox);
+
+				StorageItems.CollectObjects(this);
+				ProcessedStorageItems.CollectObjects(this);
+				IngredientControls.CollectObjects(this);
+				MainZoneObjectsResults.CollectObjects();
+
 				AnalyzeIngredients();
-			}
+				
+				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.filterProvider = new StandardRecipeFilterProvider(this);
 
-			protected override void CollectSnapshots() {
-				recipeConditionsMetSnapshot = ExecuteInCraftingGuiEnvironment<bool[]>(() => [.. Main.recipe.Take(Recipe.numRecipes).Select(AvailableForSnapshot)]);
-			}
+				RecipeSnapshots.CollectObjects();
 
-			protected override void PostModuleAccess() {
-				if (recipesToRefresh is { Length: > 0 }) {
-					// RefreshSpecificRecipes() will manipulate the current lists, so they need to be cached
-					resultRecipes.AddRange(CraftingGUI.recipes);
-					recipeIsAvailable.AddRange(CraftingGUI.recipeAvailable);
-				}
+				foreach (EnvironmentModule module in base.Heart.GetModules())
+					module.ResetPlayer(sandbox);
 			}
 
 			protected override void Execute() {
 				CraftingGUI.SortAndFilter(this);
 
-				base.CopyToStaticCollectionsAndFields();
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
 
-				CraftingGUI.recipes.Clear();
-				CraftingGUI.recipes.AddRange(resultRecipes);
+				foreach (var module in base.Heart.GetModules())
+					module.PostRefreshRecipes(sandbox);
 
-				CraftingGUI.recipeAvailable.Clear();
-				CraftingGUI.recipeAvailable.AddRange(recipeIsAvailable);
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				MainZoneObjectsResults.CopyToStaticCollections();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CraftingObject.CopyToStaticFields();
+				CraftObjectAvailableCache.CopyToStaticCollection();
 
-				base.PostRefreshRecipes();
+				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
+				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
+
+				CraftingGUI.SetRecipeAndCraftingCaches(this);
+
+				CraftingGUI.hasCompleteData = true;
 			}
+
+			protected override void Cleanup() { }
 
 			public override void ClearStaticCollections() {
-				base.ClearStaticCollections();
-				CraftingGUI.recipes.Clear();
-				CraftingGUI.recipeAvailable.Clear();
+				ProcessedStorageItems.ClearStaticCollections();
+				MainZoneObjectsResults.ClearStaticCollections();
+				IngredientControls.ClearStaticCollections();
+				CraftObjectAvailableCache.ClearStaticCollection();
 			}
-		}
-		#endregion
 
-		#region RecipeInfoPanelRefreshThread
-		internal class RecipeInfoPanelRefreshThread : CommonCraftingThread {
-			public RecipeInfoPanelRefreshThread(
+			// Unused due to being a full thread
+			public override void PrepareUIZones() { }
+
+			public override void PopulateUIZones() { }
+		}
+
+		public class RecipeListRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider {
+			public bool[] recipeConditionsMetSnapshot;
+
+			public override bool IsPartialThread => true;
+
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
+
+			public override IRefreshThreadBuilder FullRefreshBuilder => CraftingGUI.FullRefreshBuilder.Instance;
+
+			public ProcessedStorageItems ProcessedStorageItems { get; }
+
+			public MainZoneObjectsFilterControls<Recipe> MainZoneObjectsFilterControls { get; }
+
+			public MainZoneObjectResults<Recipe> MainZoneObjectsResults { get; }
+
+			public IngredientControls IngredientControls { get; }
+
+			public CraftingObject<Recipe> CraftingObject { get; }
+
+			public CraftObjectAvailableCache<Recipe> CraftObjectAvailableCache { get; }
+
+			public RecipeSnapshots RecipeSnapshots { get; } = new();
+
+			public RecipeListRefreshThread(
 				StorageViewControls controls,
-				Recipe selectedRecipe,
-				bool showAllIngredients,
-				IEnumerable<ItemData> blockedStoredIngredients,
-				int craftAmountTarget
-			) : base(controls, selectedRecipe, showAllIngredients, blockedStoredIngredients, craftAmountTarget)
-			{
+				ProcessedStorageItems processedStorage,
+				MainZoneObjectsFilterControls<Recipe> mainZoneControls,
+				MainZoneObjectResults<Recipe> mainZoneResults,
+				IngredientControls ingredientControls,
+				CraftingObject<Recipe> craftingObject,
+				CraftObjectAvailableCache<Recipe> availableCache
+			) : base(MagicUI.craftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				MainZoneObjectsFilterControls = mainZoneControls;
+				MainZoneObjectsResults = mainZoneResults;
+				IngredientControls = ingredientControls;
+				CraftingObject = craftingObject;
+				CraftObjectAvailableCache = availableCache;
 			}
 
 			protected override void CollectObjects() {
-				base.CollectObjects();
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
 
-				base.CopyFromStaticCollectionsAndFields();
+				foreach (var module in base.Heart.GetModules())
+					module.PreRefreshRecipes(sandbox);
+
+				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
+				IngredientControls.CopyFromStaticCollectionsAndFields();
+				MainZoneObjectsResults.CollectObjects();
+
+				AnalyzeIngredients();
+				
+				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.filterProvider = new StandardRecipeFilterProvider(this);
+
+				RecipeSnapshots.CollectObjects();
+
+				foreach (EnvironmentModule module in base.Heart.GetModules())
+					module.ResetPlayer(sandbox);
+
+				CraftingGUI.ResetRecentRecipeCache();
+			}
+
+			protected override void Execute() {
+				CraftingGUI.RefreshRecipes(this);
+
+				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
+
+				foreach (var module in base.Heart.GetModules())
+					module.PostRefreshRecipes(sandbox);
+
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				MainZoneObjectsResults.CopyToStaticCollections();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CraftingObject.CopyToStaticFields();
+				CraftObjectAvailableCache.CopyToStaticCollection();
+
+				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
+			//	CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
+
+				CraftingGUI.SetRecipeAndCraftingCaches(this);
+
+				CraftingGUI.hasCompleteData = true;
+			}
+
+			protected override void Cleanup() { }
+
+			public override void ClearStaticCollections() {
+				ProcessedStorageItems.ClearStaticCollections();
+				MainZoneObjectsResults.ClearStaticCollections();
+				IngredientControls.ClearStaticCollections();
+				CraftObjectAvailableCache.ClearStaticCollection();
+			}
+
+			public override void PrepareUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().slotZone.ClearContexts();
+
+			public override void PopulateUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+		}
+
+		public class RecipeInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe> {
+			public override bool IsPartialThread => true;
+
+			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
+
+			public override IRefreshThreadBuilder FullRefreshBuilder => CraftingGUI.FullRefreshBuilder.Instance;
+
+			public ProcessedStorageItems ProcessedStorageItems { get; }
+
+			public IngredientControls IngredientControls { get; }
+
+			public CraftingObject<Recipe> CraftingObject { get; }
+
+			public RecipeInfoPanelRefreshThread(
+				StorageViewControls controls,
+				ProcessedStorageItems processedStorage,
+				IngredientControls ingredientControls,
+				CraftingObject<Recipe> craftingObject
+			) : base(MagicUI.craftingUI, controls) {
+				ProcessedStorageItems = processedStorage;
+				IngredientControls = ingredientControls;
+				CraftingObject = craftingObject;
+			}
+
+			protected override void CollectObjects() {
+				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
+				IngredientControls.CopyFromStaticCollectionsAndFields();
 			}
 
 			protected override void Execute() {
 				CraftingGUI.RefreshStorageItems(this);
+				
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CraftingObject.CopyToStaticFields();
+				
+				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
+			}
 
-				base.CopyToStaticCollectionsAndFields();
+			protected override void Cleanup() { }
+
+			public override void ClearStaticCollections() {
+				ProcessedStorageItems.ClearStaticCollections();
+				IngredientControls.ClearStaticCollections();
+			}
+
+			public override void PrepareUIZones() {
+				refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().slotZone.ClearContexts();
+				((CraftingUIState)refreshingUI).ClearRecipePanelZones();
+			}
+
+			public override void PopulateUIZones() {
+				refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+				((CraftingUIState)refreshingUI).PopulateRecipePanelZones();
 			}
 		}
-		#endregion
 
-		#region IRecipeItemsHandler
-		public interface IRecipeItemsHandler {
-			bool FoundStoredResultItem { get; }
+		private class SingleResultItemHandler<T> : IRecipeItemsHandler
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
+			public readonly T _thread;
 
-			int StoredIngredientCount { get; }
-
-			void AddStoredIngredient(Item item);
-
-			void CompactCollections();
-
-			void CopyToStaticCollections();
-
-			IEnumerable<ItemInfo> GetIngredientsInfo();
-
-			bool IsItemFromModule(Item item);
-
-			void SetResultItem(Item item);
-		}
-		#endregion
-
-		#region SingleResultItemHandler
-		private class SingleResultItemHandler(CommonCraftingThread thread) : IRecipeItemsHandler {
-			public readonly CommonCraftingThread _thread = thread;
-
-			public List<Item> storedIngredients = [];
-			public List<ItemInfo> storedIngredientsInfo = [];
-			public Item resultItem;
+			public ListProvider<Item> storedIngredients;
+			public ListProvider<ItemInfo> storedIngredientsInfo;
+			public IValueProvider<Item> resultItem;
 			public bool hasStorageResult;
 
-			public bool FoundStoredResultItem => resultItem is { IsAir: false };
+			public bool FoundStoredResultItem => resultItem.Value is { IsAir: false };
 
 			public int StoredIngredientCount => storedIngredients.Count;
 
+			public SingleResultItemHandler(
+				T thread,
+				List<Item> staticStoredIngredientsList,
+				List<ItemInfo> staticStoredIngredientsInfoList,
+				IValueProvider<Item> resultItem
+			) {
+				_thread = thread;
+				storedIngredients = new ListProvider<Item>(staticStoredIngredientsList);
+				storedIngredientsInfo = new ListProvider<ItemInfo>(staticStoredIngredientsInfoList);
+				this.resultItem = resultItem;
+			}
+
 			public void AddStoredIngredient(Item item) {
 				// Items from modules need to be referenced directly
-				if (!_thread.wasModuleItem.ContainsKey(item))
+				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item))
 					item = item.Clone();
 
 				storedIngredients.Add(item);
@@ -369,71 +303,68 @@ namespace MagicStorage {
 			}
 
 			public void CompactCollections() {
-				var stored = CraftingGUI.CompactItemList(_thread, this, storedIngredients);
+				var stored = CraftingGUI.CompactItemList(_thread, this, storedIngredients.Value);
 				if (stored.Count != storedIngredients.Count) {
-					storedIngredients = stored;
-					storedIngredientsInfo = [.. stored.Select(x => new ItemInfo(x))];
+					storedIngredients.Clear();
+					storedIngredients.AddRange(stored);
+					storedIngredientsInfo.Clear();
+					storedIngredientsInfo.AddRange(stored.Select(x => new ItemInfo(x)));
 				}
 			}
 
 			public void CopyToStaticCollections() {
-				CraftingGUI.storageItems.AddRange(storedIngredients);
-				CraftingGUI.storageItemInfo.AddRange(storedIngredientsInfo);
-				CraftingGUI.result = resultItem ?? new Item(selectedRecipe.createItem.type, 0);
+				storedIngredients.OverwriteStatic();
+				storedIngredientsInfo.OverwriteStatic();
+				resultItem.OverwriteStatic();
 			}
 
 			public IEnumerable<ItemInfo> GetIngredientsInfo() => storedIngredientsInfo;
 
-			public bool IsItemFromModule(Item item) => _thread.wasModuleItem.ContainsKey(item);
+			public bool IsItemFromModule(Item item) => _thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item);
 
 			public void SetResultItem(Item item) {
-				if (!_thread.wasModuleItem.ContainsKey(item)) {
+				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item)) {
 					// Items from storage
-					resultItem = item;
+					resultItem.Value = item;
 					hasStorageResult = true;
-				} else if (!hasStorageResult && !_thread.moduleItemWasFromInventory.ContainsKey(item)) {
+				} else if (!hasStorageResult && !_thread.ProcessedStorageItems.moduleItemWasFromInventory.ContainsKey(item)) {
 					// Items from modules that aren't the Player Inventory modules
-					resultItem = item;
+					resultItem.Value = item;
 				}
 			}
 		}
-		#endregion
 
-		#region IRecipeFilterProvider
-		public interface IFilterProvider<T> {
-			bool ShowOnlyBlacklisted { get; }
+		private class CraftResultProvider(IReadOnlyValueProvider<Recipe> selectedRecipe) : IValueProvider<Item> {
+			private readonly IReadOnlyValueProvider<Recipe> _selectedRecipe = selectedRecipe;
 
-			bool IsHidden(T value);
+			public Item Value { get; set; }
 
-			internal bool IsVisible(T value) => !IsHidden(value);
+			public void ClearStatic() => CraftingGUI.result = null;
 
-			bool IsFavorited(T value);
+			public void CopyFromStatic() => Value = CraftingGUI.result;
+
+			public void CopyToStatic() => CraftingGUI.result = Value ?? new Item(_selectedRecipe.Value.createItem.type, 0);
 		}
-		#endregion
 
-		#region StandardFilterProvider
 		internal abstract class StandardFilterProvider<T> : IFilterProvider<T> {
-			private readonly CraftingControlsRefreshThread _thread;
+			private readonly IMainZoneFilterControlsProvider<T> _thread;
 
 			public bool ShowOnlyBlacklisted { get; }
 
-			public StandardFilterProvider(CraftingControlsRefreshThread thread) {
+			public StandardFilterProvider(IMainZoneFilterControlsProvider<T> thread) {
 				_thread = thread;
-				ShowOnlyBlacklisted = MagicStorageConfig.RecipeBlacklistEnabled && thread.recipeFilterChoice == CraftingGUI.RecipeButtonsBlacklistChoice;
+				ShowOnlyBlacklisted = MagicStorageConfig.RecipeBlacklistEnabled && thread.MainZoneObjectsFilterControls.zoneObjectFilterChoice == CraftingGUI.RecipeButtonsBlacklistChoice;
 			}
 
-			public bool IsFavorited(T value) => _thread.favoritedTypes.Contains(GetObjectType(value));
+			public bool IsFavorited(T value) => _thread.MainZoneObjectsFilterControls.IsFavorited(GetObjectType(value));
 
-			public bool IsHidden(T value) => _thread.IsHidden(GetObjectType(value));
+			public bool IsHidden(T value) => _thread.MainZoneObjectsFilterControls.IsHidden(GetObjectType(value));
 
 			protected abstract int GetObjectType(T value);
 		}
-		#endregion
 
-		#region StandardRecipeFilterProvider
-		internal class StandardRecipeFilterProvider(CraftingControlsRefreshThread thread) : StandardFilterProvider<Recipe>(thread) {
+		private class StandardRecipeFilterProvider(IMainZoneFilterControlsProvider<Recipe> thread) : StandardFilterProvider<Recipe>(thread) {
 			protected override int GetObjectType(Recipe value) => value.createItem.type;
 		}
-		#endregion
 	}
 }

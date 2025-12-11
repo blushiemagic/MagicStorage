@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 
-namespace MagicStorage.Common.Threading.UI {
+namespace MagicStorage.Common.Threading.Refreshing {
 	/// <summary>
 	/// Represents the filters, sorting and other controls used to control whether and how items/recipes are displayed in the UIs for this mod.
 	/// </summary>
@@ -120,7 +120,8 @@ namespace MagicStorage.Common.Threading.UI {
 					ref itemTooltipSearchText,
 					allowModSearch: modSearchOption == ModSearchBox.ModIndexAll
 				);
-			}
+			} else
+				this.fullSearchText = string.Empty;
 
 			this.showOnlyFavorites = showOnlyFavorites;
 			this.modSearchOption = modSearchOption;

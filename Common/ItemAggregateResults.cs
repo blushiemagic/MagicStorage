@@ -236,8 +236,12 @@ namespace MagicStorage.Common {
 
 				bool forcedFavorite = false;
 				int resultLimit = ResultCountLimit ?? int.MaxValue;
+				int iteration = 0;
 
 				foreach (var source in _originalSource.OrderBy(static i => i.type).ThenBy(static i => i.prefix)) {
+					if ((++iteration & 0b1111) == 0)
+						token.ThrowIfCancellationRequested();
+
 					if (aggregateDestination is null) {
 						// The first item group is being created
 						aggregateDestination = source.Clone();
@@ -335,13 +339,12 @@ namespace MagicStorage.Common {
 					if (!IncrementCounterOnResult)
 						progressCounter++;
 				}
-			} catch when (token.IsCancellationRequested) {
+			} catch (OperationCanceledException) {
 				Reset();
+				throw;
 			}
 
-			if (!token.IsCancellationRequested)
-				_hasResults = true;
-
+			_hasResults = true;
 			return this;
 		}
 

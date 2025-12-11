@@ -277,30 +277,23 @@ namespace MagicStorage
 				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 
 				if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity tileEntity)) {
-					Report(true, MessageType.ResetCompactStage + " packet had a data mismatch");
+					Report(true, MessageType.SyncStorageUnit + " packet had a data mismatch");
 					Report(false, "  A Tile Entity at location (X: " + position.X + ", Y: " + position.Y + ") does not exist on the server");
 					return;
 				}
 
 				if (tileEntity is not TEStorageUnit storageUnit) {
-					Report(true, MessageType.ResetCompactStage + " received a position for a Tile Entity that isn't a TEStorageUnit: (X: " + position.X + ", Y: " + position.Y + ")");
+					Report(true, MessageType.SyncStorageUnit + " received a position for a Tile Entity that isn't a TEStorageUnit: (X: " + position.X + ", Y: " + position.Y + ")");
 					Report(false, "  Tile Entity type was actually " + tileEntity.GetType().FullName);
 					return;
 				}
 
 				storageUnit.FullySync();
 
-				using (MemoryStream packetStream = new(65536))
-				using (BinaryWriter BWriter = new BinaryWriter(packetStream))
-				{
-					TileEntity.Write(BWriter, tileEntity, true);
-					BWriter.Flush();
-
-					ModPacket packet = MagicStorageMod.Instance.GetPacket();
-					packet.Write((byte)MessageType.SyncStorageUnitToClinet);
-					packet.Write(packetStream.GetBuffer(), 0, (int)packetStream.Length);
-					packet.Send(remoteClient);
-				}
+				ModPacket packet = MagicStorageMod.Instance.GetPacket();
+				packet.Write((byte)MessageType.SyncStorageUnitToClinet);
+				TileEntity.Write(packet, tileEntity, true);
+				packet.Send(remoteClient);
 
 				Report(true, MessageType.SyncStorageUnit + " packet received by server from client " + remoteClient);
 			}
@@ -384,39 +377,10 @@ namespace MagicStorage
 
 			bool hasContext = reader.ReadSecurityAccess(out var context);
 
-			if (Main.netMode != NetmodeID.Server)
-			{
-				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Deposit)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory)
-				{
-					_ = reader.ReadBoolean();
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == TEStorageHeart.Operation.DepositAll)
-				{
-					int count = reader.ReadByte();
-					for (int i = 0; i < count; i++)
-						_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == TEStorageHeart.Operation.WithdrawAllAndDestroy)
-				{
-					_ = reader.ReadInt32();
-				}
-				else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-
-				goto cleanupContext;
-			}
-
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
 				goto cleanupContext;
 
+			// NOTE: If not the server, the data will be read but not enqueued
 			heart.QClientOperation(reader, op, sender);
 
 			Report(true, MessageType.ClinetStorageOperation + " packet recieved by client " + Main.myPlayer);
@@ -431,39 +395,17 @@ cleanupContext:
 		{
 			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-			{
-				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit || op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == TEStorageHeart.Operation.DepositAll)
-				{
-					int count = reader.ReadByte();
-					for (int i = 0; i < count; i++)
-						_ = ItemIO.Receive(reader, true, true);
-				}
-				else if (op == TEStorageHeart.Operation.WithdrawAllAndDestroy)
-				{
-					_ = reader.ReadInt32();
-				}
-				else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-					_ = reader.ReadInt32();
-				}
+			Point16 position = reader.ReadPoint16();
 
-				return;
-			}
-
-			var  heart = StoragePlayer.LocalPlayer.GetStorageHeart();
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
+				goto printReport;
 
 			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 				
-				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventory);
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventory);
 			}
 			else if (op == TEStorageHeart.Operation.DepositAll)
 			{
@@ -471,32 +413,38 @@ cleanupContext:
 				for (int k = 0; k < count; k++)
 				{
 					Item item  = ItemIO.Receive(reader, true, true);
-					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, false);
+					
+					if (Main.netMode == NetmodeID.MultiplayerClient)
+						StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, false);
 				}
 			}
 			else if (op == TEStorageHeart.Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
 
-				heart.WithdrawManyAndDestroy(type, out _, net: true);
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					heart.WithdrawManyAndDestroy(type, out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.DeleteUnloadedGlobalItemData)
 			{
-				heart.DestroyUnloadedGlobalItemData(out _, net: true);
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					heart.DestroyUnloadedGlobalItemData(out _, net: true);
 			}
 			else if (op == TEStorageHeart.Operation.WithdrawThenTryModuleInventory || op == TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 
 				if (item.IsAir)
-					item = CraftingGUI.TryToWithdrawFromModuleItems(item, wasAlreadyCloned: true);
+					item = CraftingGUI.TryToWithdrawFromModuleItems(heart, item, wasAlreadyCloned: true);
 
-				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory);
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventoryThenTryModuleInventory);
 			}
 
 			heart.netcodeUpdate = true;
 			heart.netDesync = 0;
 
+printReport:
 			Report(true, MessageType.ServerStorageResult + " packet received by client " + Main.myPlayer);
 			Report(false, "Operation: " + op);
 		}
@@ -570,10 +518,11 @@ cleanupContext:
 
 		public static void ReceiveClientDeactivate(BinaryReader reader, int sender)
 		{
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+			bool inActive = reader.ReadBoolean();
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
-				bool inActive = reader.ReadBoolean();
 				TileEntity ent = TileEntity.ByPosition[position];
 				if (ent is TEStorageUnit storageUnit)
 				{
@@ -592,11 +541,6 @@ cleanupContext:
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				//Still need to read the data
-				_ = reader.ReadPoint16();
-				// TODO does TileEntity need to be read?
-				//_ = TileEntity.Read(reader, true);
-
 				Report(true, MessageType.ClientSendDeactivate + " packet received by client " + Main.myPlayer);
 			}
 		}
@@ -618,10 +562,11 @@ cleanupContext:
 
 		public static void ReceiveClientSendTEUpdate(BinaryReader reader, int sender)
 		{
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+			TileEntity ent = TileEntity.Read(reader, true);
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
-				TileEntity ent = TileEntity.Read(reader, true);
 				ent.Position = position;
 				TileEntity.ByID[ent.ID] = ent;
 				TileEntity.ByPosition[position] = ent;
@@ -637,11 +582,6 @@ cleanupContext:
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				//Still need to read the data
-				_ = reader.ReadPoint16();
-				// TODO does TileEntity need to be read?
-				//_ = TileEntity.Read(reader, true);
-
 				Report(true, MessageType.ClientSendTEUpdate + " packet received by client " + Main.myPlayer);
 			}
 		}
@@ -693,20 +633,6 @@ cleanupContext:
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 
-			if (Main.netMode != NetmodeID.Server)
-			{
-				//The data still needs to be read for exceptions to not be thrown...
-				if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
-				{
-					_ = reader.ReadByte();
-				}
-				else if (op == TECraftingAccess.Operation.Deposit)
-				{
-					_ = ItemIO.Receive(reader, true, true);
-				}
-				return;
-			}
-
 			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TECraftingAccess craftingAccess)
 				return;
 
@@ -718,30 +644,29 @@ cleanupContext:
 
 		public static void ReceiveServerStationResult(BinaryReader reader)
 		{
-			//Still need to read the data for exceptions to not be thrown...
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 			Item item = ItemIO.Receive(reader, true, true);
-
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				if (op == TECraftingAccess.Operation.Deposit)
-					_ = reader.ReadUInt16();
-
-				return;
-			}
 
 			if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
 			{
 				var heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-				StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
+
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+				{
+					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op == TECraftingAccess.Operation.Withdraw);
 					
-				TECraftingAccess.UpdateRecipesFromStationAction(item);
+					TECraftingAccess.UpdateRecipesFromStationAction(item);
+				}
 			}
 			else // deposit operation
 			{
-				Main.mouseItem = item;
-
 				int oldType = reader.ReadUInt16();
-				TECraftingAccess.UpdateRecipesFromStationAction(new Item(oldType));
+
+				if (Main.netMode == NetmodeID.MultiplayerClient)
+				{
+					Main.mouseItem = item;
+					TECraftingAccess.UpdateRecipesFromStationAction(new Item(oldType));
+				}
 			}
 
 			Report(true, "Station operation " + op + " packet received by client " + Main.myPlayer);
@@ -764,9 +689,10 @@ cleanupContext:
 
 		public static void ReceiveResetCompactStage(BinaryReader reader, int sender)
 		{
+			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
 					heart.ResetCompactStage();
 
@@ -775,8 +701,6 @@ cleanupContext:
 			}
 			else if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
-				reader.ReadPoint16();
-
 				Report(true, MessageType.ResetCompactStage + " packet recevied by client " + Main.myPlayer);
 			}
 		}
@@ -806,23 +730,7 @@ cleanupContext:
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			int withdrawCount = reader.ReadInt32();
 
-			if (Main.netMode != NetmodeID.Server)
-			{
-				//Still need to read the data for exceptions to not be thrown
-				for (int i = 0; i < withdrawCount; i++)
-					_ = ItemIO.Receive(reader, true, true);
-
-				int count = reader.ReadInt32();
-				for (int i = 0; i < count; i++)
-					_ = ItemIO.Receive(reader, true, true);
-
-				return;
-			}
-
 		//	PrintClientRequest(sender, "Craft", position);
-
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
-				return;
 
 			HashSet<int> typesToUpdate = new();
 
@@ -840,6 +748,9 @@ cleanupContext:
 				results.Add(result);
 				typesToUpdate.Add(result.type);
 			}
+
+			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
+				return;
 
 			Report(true, MessageType.CraftRequest + " packet received by server from client " + sender);
 
@@ -900,9 +811,10 @@ cleanupContext:
 
 		public static void ReceiveClientRequestSection(BinaryReader reader, int sender)
 		{
+			Point16 coords = new(reader.ReadInt16(), reader.ReadInt16());
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				Point16 coords = new(reader.ReadInt16(), reader.ReadInt16());
 				RemoteClient.CheckSection(sender, coords.ToWorldCoordinates());
 			}
 		}
@@ -910,6 +822,8 @@ cleanupContext:
 		public static void ClientReciveStorageSync(BinaryReader reader)
 		{
 			TileEntity.Read(reader, true);
+
+			Report(true, MessageType.SyncStorageUnitToClinet + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void ClientRequestForceCraftingGUIRefresh() {
@@ -1037,9 +951,9 @@ cleanupContext:
 		}
 
 		public static void ReceiveCoinCompactRequest(BinaryReader reader, int sender) {
-			if (Main.netMode == NetmodeID.Server) {
-				Point16 position = reader.ReadPoint16();
+			Point16 position = reader.ReadPoint16();
 
+			if (Main.netMode == NetmodeID.Server) {
 				bool hasContext = reader.ReadSecurityAccess(out var context);
 
 				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
@@ -1053,8 +967,6 @@ cleanupContext:
 				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
 				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				reader.ReadPoint16();
-
 				Report(true, MessageType.RequestCoinCompact + " packet recevied by client " + Main.myPlayer);
 			}
 		}
@@ -1154,13 +1066,10 @@ cleanupContext:
 		}
 
 		public static void ReceiveStorageUnitStyle(BinaryReader reader, int sender) {
-			if (Main.netMode != NetmodeID.Server) {
-				_ = reader.ReadPoint16();
-
-				return;
-			}
-
 			Point16 unit = reader.ReadPoint16();
+
+			if (Main.netMode != NetmodeID.Server)
+				return;
 
 			//Safeguard:  Ensure that the map section exists before sending data
 			RemoteClient.CheckSection(sender, unit.ToWorldCoordinates());

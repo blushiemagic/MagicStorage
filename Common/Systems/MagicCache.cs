@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicCache : ModSystem
 {
-	public class LazyRecipe {
+	public class LazyRecipe : IEnumerable<Recipe> {
 		public readonly int itemType;
 
 		private readonly Lazy<Recipe[]> lazy;
@@ -27,16 +28,23 @@ public class MagicCache : ModSystem
 		public LazyRecipe(int itemType) {
 			this.itemType = itemType;
 
-			lazy = new(() => GetRecipes().ToArray(), isThreadSafe: false);
+			lazy = new(() => [.. GetRecipes()], isThreadSafe: false);
 		}
 
 		public Recipe[] Value => lazy.Value;
 
 		private IEnumerable<Recipe> GetRecipes() {
 			foreach (Recipe recipe in EnabledRecipes) {
-				if (recipe.createItem.type == itemType || recipe.requiredItem.Any(i => i.type == itemType)) {
+				if (recipe.createItem.type == itemType) {
 					yield return recipe;
 					continue;
+				}
+
+				foreach (Item requiredItem in recipe.requiredItem) {
+					if (requiredItem.type == itemType) {
+						yield return recipe;
+						continue;
+					}
 				}
 
 				// Check recipe groups
@@ -49,9 +57,13 @@ public class MagicCache : ModSystem
 				}
 			}
 		}
+
+		public IEnumerator<Recipe> GetEnumerator() => ((IEnumerable<Recipe>)Value).GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
 	}
 
-	public class LazyRecipeTile {
+	public class LazyRecipeTile : IEnumerable<Recipe> {
 		public readonly int tileType;
 
 		private readonly Lazy<Recipe[]> lazy;
@@ -59,10 +71,25 @@ public class MagicCache : ModSystem
 		public LazyRecipeTile(int tileType) {
 			this.tileType = tileType;
 
-			lazy = new(() => EnabledRecipes.Where(r => r.requiredTile.Any(t => t == this.tileType)).ToArray(), isThreadSafe: false);
+			lazy = new(() => [.. GetRecipes()], isThreadSafe: false);
 		}
 
 		public Recipe[] Value => lazy.Value;
+
+		private IEnumerable<Recipe> GetRecipes() {
+			foreach (Recipe recipe in EnabledRecipes) {
+				foreach (int requiredTile in recipe.requiredTile) {
+					if (requiredTile == tileType) {
+						yield return recipe;
+						break;
+					}
+				}
+			}
+		}
+
+		public IEnumerator<Recipe> GetEnumerator() => ((IEnumerable<Recipe>)Value).GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
 	}
 
 	public static Recipe[] EnabledRecipes { get; private set; } = null!;

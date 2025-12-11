@@ -10,6 +10,8 @@ namespace MagicStorage.UI.Input {
 	public class NewUISearchBar : TextInputBar {
 		public Func<string> GetHoverText { get; set; }
 
+		internal bool BlockRefreshThreads { get; set; }
+
 		public NewUISearchBar(LocalizedText hintText) : base(hintText) { }
 
 		protected override bool PreDrawText(SpriteBatch spriteBatch, ref Color textColor, ref Color hintColor) {
@@ -25,19 +27,23 @@ namespace MagicStorage.UI.Input {
 		}
 
 		public override void OnInputChanged() {
-			if (MagicStorageConfig.SearchBarRefreshOnKey)
-				MagicUI.SetRefresh(forceFullRefresh: true);
+			if (MagicStorageConfig.SearchBarRefreshOnKey && !BlockRefreshThreads)
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputChanged()");
 
 			base.OnInputChanged();
 		}
 
 		public override void OnInputCleared() {
-			MagicUI.SetRefresh(forceFullRefresh: true);
+			if (!BlockRefreshThreads)
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputCleared()");
+
 			base.OnInputCleared();
 		}
 
 		public override void OnInputFocusLost() {
-			MagicUI.SetRefresh(forceFullRefresh: true);
+			if (!BlockRefreshThreads)
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputFocusLost()");
+
 			base.OnInputFocusLost();
 		}
 

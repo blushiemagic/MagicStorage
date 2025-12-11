@@ -114,20 +114,34 @@ namespace MagicStorage.UI.States {
 		}
 
 		protected virtual void RefreshZonesFromScrolling() {
-			ingredientZone.SetItemsAndContexts(int.MaxValue, GetIngredient);
-			storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
-			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+			if (ingredientScrollBar.ViewPosition != lastKnownIngredientScrollBarViewPosition)
+				ingredientZone.SetItemsAndContexts(int.MaxValue, GetIngredient);
+			if (storageScrollBar.ViewPosition != lastKnownScrollBarViewPosition)
+				storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
+		//	resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
 		}
 
 		protected virtual void RefreshZonesFromThreadStart() {
 			// Clear out the contexts and items
-			ingredientZone.SetItemsAndContexts(int.MaxValue, NullItem);
+			ingredientZone.SetItemsAndContexts(int.MaxValue, Utility.NullItem);
 
-			storageZone.SetItemsAndContexts(int.MaxValue, NullItem);
+			storageZone.SetItemsAndContexts(int.MaxValue, Utility.NullItem);
 
-			recipeHeaderZone.SetItemsAndContexts(1, NullItem);
+			recipeHeaderZone.SetItemsAndContexts(1, Utility.NullItem);
 
-			resultZone.SetItemsAndContexts(int.MaxValue, NullItem);
+			resultZone.SetItemsAndContexts(int.MaxValue, Utility.NullItem);
+		}
+
+		public void ClearRecipePanelZones() => RefreshZonesFromThreadStart();
+
+		public virtual void PopulateRecipePanelZones() {
+			ingredientZone.SetItemsAndContexts(int.MaxValue, GetIngredient);
+
+			storageZone.SetItemsAndContexts(int.MaxValue, GetStorage);
+
+			recipeHeaderZone.SetItemsAndContexts(1, GetHeader);
+
+			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
 		}
 
 		protected virtual void ResetScrollBarMemory() {
@@ -202,7 +216,7 @@ namespace MagicStorage.UI.States {
 
 			protected virtual string GetHiddenSetRevealLocalizationKey() => "Mods.MagicStorage.RecipeRevealed";
 
-			protected virtual Item GetMainZoneItem(int slot, ref int context) {
+			protected override Item GetMainZoneItem(int slot, ref int context) {
 				if (MagicUI.CurrentlyRefreshing)
 					return new Item();
 
@@ -262,7 +276,8 @@ namespace MagicStorage.UI.States {
 
 			protected virtual void OnMainZoneItemLeftClicked(int index) {
 				CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[index]);
-				(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
+				if (CraftingGUI.selectedRecipe is not null)
+					(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
 			}
 
 			protected virtual void UpdateStationElements(out int stationCount) {

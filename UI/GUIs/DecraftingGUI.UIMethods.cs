@@ -53,6 +53,7 @@ namespace MagicStorage {
 					}
 
 					MagicUI.SetRefresh();
+					DecraftingGUI.SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 
@@ -72,6 +73,7 @@ namespace MagicStorage {
 			else
 			{
 				MagicUI.SetRefresh();
+				DecraftingGUI.SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
 			}
 		}
 
