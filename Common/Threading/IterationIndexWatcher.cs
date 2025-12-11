@@ -59,7 +59,8 @@ namespace MagicStorage.Common.Threading {
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ThreadStep() {
-			Thread.Sleep(1);
+			// Uncomment to make loading take longer
+		//	Thread.Sleep(1);
 			_thread.CompleteOne();
 		}
 	}
