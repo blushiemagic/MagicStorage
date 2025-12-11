@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using Terraria;
-using Terraria.ID;
 
 namespace MagicStorage.Common.Systems.Auditing {
 	internal class AuditItem {

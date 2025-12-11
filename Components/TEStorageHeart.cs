@@ -7,7 +7,6 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using System.Collections.Concurrent;
-using System.Reflection;
 using Terraria.ModLoader.Default;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
@@ -16,12 +15,8 @@ using MagicStorage.Common.Systems;
 using System.Collections;
 using MagicStorage.Common;
 using System.Runtime.CompilerServices;
-using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems.Auditing;
-using System.Runtime.InteropServices;
-using MagicStorage.UI.States;
 using MagicStorage.CrossMod;
-using MagicStorage.UI;
 
 namespace MagicStorage.Components
 {

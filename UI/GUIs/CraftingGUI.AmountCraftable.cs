@@ -1,6 +1,4 @@
-﻿using MagicStorage.Common;
-using MagicStorage.Common.Systems;
-using MagicStorage.Common.Systems.RecurrentRecipes;
+﻿using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Threading.Refreshing;
 using System.Collections.Generic;
 using Terraria;

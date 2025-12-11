@@ -1,8 +1,4 @@
-﻿using MagicStorage.Items;
-using System;
-using System.Linq;
-using Terraria;
-using Terraria.ModLoader;
+﻿using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
 
 namespace MagicStorage.Common.Systems {

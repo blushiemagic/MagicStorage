@@ -10,7 +10,6 @@ using Terraria;
 using Terraria.ID;
 using ILPlayer = Terraria.IL_Player;
 using ILChest = Terraria.IL_Chest;
-using System;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Edits {

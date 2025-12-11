@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
-using System.Collections.Concurrent;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI;

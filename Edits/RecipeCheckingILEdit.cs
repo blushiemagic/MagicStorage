@@ -1,14 +1,13 @@
-﻿﻿using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using SerousCommonLib.API;
 using System;
 using System.Linq;
 using System.Reflection;
- using MonoMod.RuntimeDetour;
- using Terraria;
+using MonoMod.RuntimeDetour;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using MagicStorage.Items;
 
 namespace MagicStorage.Edits {
 	internal class RecipeCheckingILEdit : Edit {

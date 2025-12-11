@@ -15,7 +15,6 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
-using Terraria.ModLoader.IO;
 
 namespace MagicStorage.UI.Selling {
 	public static class SellModeMetadata {

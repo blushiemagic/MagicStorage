@@ -9,10 +9,8 @@ using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Common.Threading;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
-using SerousCommonLib.API;
 using SerousCommonLib.API.Helpers;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 

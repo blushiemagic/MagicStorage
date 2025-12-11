@@ -1,4 +1,3 @@
-using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems;
 using System.Collections.Generic;
 using System.IO;

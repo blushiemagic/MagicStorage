@@ -1,6 +1,5 @@
 ﻿using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Items.ErrorDisplay {
 	[Autoload(BaseErrorDummyItem.LoadTestItems)]

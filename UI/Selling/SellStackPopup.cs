@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using SerousCommonLib.UI;
 using System;
 using Terraria;
 using Terraria.GameContent;

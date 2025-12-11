@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Terraria;
 using Terraria.ID;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems.Auditing {
 	internal readonly record struct ReducedItem(int Type, int Stack) : IAlternateAuditSource<ReducedItem, Item, int> {

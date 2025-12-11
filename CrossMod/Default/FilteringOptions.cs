@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using MagicStorage.Sorting;
+﻿using MagicStorage.Sorting;
 using MagicStorage.UI;
 using MagicStorage.UI.States;
 using System;

@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Global;
-using MagicStorage.Common.IO;
+﻿using MagicStorage.Common.IO;
 using MagicStorage.Items.ErrorDisplay;
 using System;
 using System.Collections.Generic;

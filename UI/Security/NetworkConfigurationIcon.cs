@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using SerousCommonLib.UI;
-using SerousCommonLib.UI.Layouts;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 

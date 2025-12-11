@@ -12,7 +12,6 @@ using Microsoft.Xna.Framework;
 using System.Text;
 using System.Linq;
 using Terraria.Audio;
-using MagicStorage.Common.Global;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Players;
 using MagicStorage.UI;
@@ -22,9 +21,7 @@ using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.UI.Selling;
 using Terraria.Localization;
 using MagicStorage.Items;
-using System.Threading.Channels;
 using MagicStorage.Common.Systems.Auditing;
-using System.Runtime.InteropServices;
 using MagicStorage.NPCs;
 using MagicStorage.Common;
 

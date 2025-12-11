@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using System;
+﻿using System;
 
 namespace MagicStorage.Common {
 	/// <summary>

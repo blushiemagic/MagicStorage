@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace MagicStorage.Common.IO {

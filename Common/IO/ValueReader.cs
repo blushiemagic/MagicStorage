@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
-using Terraria.ModLoader.UI;
 
 namespace MagicStorage.Common.IO {
 	public class ValueReader {

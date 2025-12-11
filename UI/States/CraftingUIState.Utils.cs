@@ -1,5 +1,4 @@
 ﻿using MagicStorage.Common.Systems;
-using MagicStorage.Common;
 using SerousCommonLib.UI;
 using Terraria;
 using Terraria.UI;

@@ -2,7 +2,6 @@
 using System;
 using Terraria.GameContent;
 using Terraria.ID;
-using Terraria;
 
 namespace MagicStorage.Common.Systems.Shimmering {
 	public readonly struct ShimmerInfo {

@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Text;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.Map;
 using Terraria.ModLoader.Config;

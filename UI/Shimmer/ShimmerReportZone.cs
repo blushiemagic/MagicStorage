@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common;
-using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.Shimmering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

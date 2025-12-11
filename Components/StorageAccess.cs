@@ -1,6 +1,5 @@
 using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems;
-using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;

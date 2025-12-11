@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using MagicStorage.CrossMod;
+﻿using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;

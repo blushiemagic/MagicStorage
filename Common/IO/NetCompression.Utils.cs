@@ -1,11 +1,8 @@
 ﻿using Ionic.Zlib;
-using MagicStorage.Items.ErrorDisplay;
 using System;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using Terraria;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Common.IO {
 	partial class NetCompression {

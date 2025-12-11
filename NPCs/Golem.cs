@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Global;
-using MagicStorage.Common.Systems;
+﻿using MagicStorage.Common.Systems;
 using MagicStorage.Items;
 using MagicStorage.Stations;
 using Microsoft.Xna.Framework;
@@ -7,9 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.Bestiary;
@@ -17,7 +13,6 @@ using Terraria.GameContent.Personalities;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 
 namespace MagicStorage.NPCs {

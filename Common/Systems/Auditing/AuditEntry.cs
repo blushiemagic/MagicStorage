@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader;
 
 namespace MagicStorage.Common.Systems.Auditing {
 	internal abstract class AuditEntry {

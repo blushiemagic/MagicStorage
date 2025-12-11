@@ -1,5 +1,4 @@
 using Ionic.Zlib;
-using MagicStorage.Common;
 using MagicStorage.Common.IO;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;

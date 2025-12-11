@@ -7,10 +7,8 @@ using MagicStorage.Sorting;
 using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class CraftingGUI {

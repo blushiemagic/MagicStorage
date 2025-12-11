@@ -1,5 +1,4 @@
-﻿using MagicStorage.Common.Systems;
-using Terraria.ID;
+﻿using Terraria.ID;
 
 namespace MagicStorage.UI.History {
 	public class ShimmerHistory : HistoryCollection<ShimmerHistoryEntry, int> {

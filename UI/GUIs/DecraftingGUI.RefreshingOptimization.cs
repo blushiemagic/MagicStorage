@@ -1,6 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {

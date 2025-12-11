@@ -1,9 +1,7 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework;
 using SerousCommonLib.UI;
-using SerousCommonLib.UI.Layouts;
 using System;
-using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.UI;

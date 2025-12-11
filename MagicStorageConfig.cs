@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using MagicStorage.Common.Players;
-using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.UI.States;
 using Newtonsoft.Json;
 using Terraria;

@@ -5,7 +5,6 @@ using MagicStorage.UI.States;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Terraria;

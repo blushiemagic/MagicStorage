@@ -5,7 +5,6 @@ using MagicStorage.CrossMod;
 using MagicStorage.UI.Security;
 using Microsoft.Xna.Framework;
 using SerousCommonLib.UI;
-using SerousCommonLib.UI.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

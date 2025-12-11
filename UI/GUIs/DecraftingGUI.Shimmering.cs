@@ -6,7 +6,6 @@ using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Components;
 using Terraria.DataStructures;
 using System.Collections.Generic;
-using MagicStorage.Common;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {

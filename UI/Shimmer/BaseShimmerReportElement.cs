@@ -1,6 +1,5 @@
 ﻿using MagicStorage.Common.Systems.Shimmering;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
