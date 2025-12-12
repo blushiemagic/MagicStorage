@@ -97,5 +97,15 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			itemCounts.ClearStatic();
 			itemCountsByPrefix.ClearStatic();
 		}
+
+		public IModuleItemResolver CreateItemResolver() => new ItemResolver(this);
+
+		private class ItemResolver(ProcessedStorageItems processedItems) : IModuleItemResolver {
+			private readonly ProcessedStorageItems _processedItems = processedItems;
+
+			bool IModuleItemResolver.IsInventoryModuleItem(Item item) => _processedItems.moduleItemWasFromInventory.ContainsKey(item);
+
+			bool IModuleItemResolver.IsModuleItem(Item item) => _processedItems.wasModuleItem.ContainsKey(item);
+		}
 	}
 }

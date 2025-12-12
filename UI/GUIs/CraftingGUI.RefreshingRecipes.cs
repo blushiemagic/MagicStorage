@@ -36,7 +36,7 @@ namespace MagicStorage {
 		private static void RefreshRecipes<T>(T thread)
 			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
 		{
-			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Length: > 0 }) {
+			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Length: > 0 } refreshingObjects) {
 				// Refresh all recipes
 				RefreshAllRecipes(thread);
 			} else {
@@ -44,15 +44,30 @@ namespace MagicStorage {
 
 				forceSpecificRecipeResort = false;
 
+				// CHANGE: v0.7.0.12 - The second pass is handled by the code that populates "recipesToRefreshByIndex" instead
+				/*
 				// Do a second pass when recursion crafting is enabled
 				if (MagicStorageConfig.IsRecursionEnabled) {
 					thread.MainZoneObjectsResults.objectsToRefresh = [.. thread.MainZoneObjectsResults.objects];
 					RefreshSpecificRecipes(thread);
 				}
+				*/
 			}
+
+			SetRecipeAvailableCache(thread);
 
 			NetHelper.Report(false, "Visible recipes: " + thread.MainZoneObjectsResults.objects.Count);
 			NetHelper.Report(false, "Available recipes: " + thread.MainZoneObjectsResults.objectIsAvailable.Count(static b => b));
+		}
+
+		private static void SetRecipeAvailableCache<T>(T thread)
+			where T : RefreshThread, IMainZoneObjectResultsProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>
+		{
+			var lookup = thread.CraftObjectAvailableCache.lookup;
+			lookup.Clear();
+
+			foreach (var (recipe, available) in thread.MainZoneObjectsResults.Enumerate())
+				lookup.Add(recipe, new Ref<bool>(available));
 		}
 
 		private static void RefreshAllRecipes<T>(T thread)
@@ -141,16 +156,10 @@ namespace MagicStorage {
 		{
 			PopulateCollections(
 				thread,
-				ItemSorter.SortAndFilterRecipes(thread, attempt, provider: thread.MainZoneObjectsFilterControls.filterProvider),
+				ItemSorter.SortAndFilterRecipes(thread, attempt),
 				IsAvailable,
 				"Recipes"
 			);
-
-			var lookup = thread.CraftObjectAvailableCache.lookup;
-			lookup.Clear();
-
-			foreach (var (recipe, available) in thread.MainZoneObjectsResults.Enumerate())
-				lookup.Add(recipe, new Ref<bool>(available));
 		}
 
 		internal static void PopulateCollections<TThread, T>(
@@ -208,12 +217,6 @@ namespace MagicStorage {
 				"Recipes",
 				ref forceSpecificRecipeResort
 			);
-
-			var lookup = thread.CraftObjectAvailableCache.lookup;
-			lookup.Clear();
-
-			foreach (var (recipe, available) in thread.MainZoneObjectsResults.Enumerate())
-				lookup.Add(recipe, new Ref<bool>(available));
 		}
 
 		internal static void RefreshSpecificObjects<TThread, T>(
@@ -297,7 +300,21 @@ namespace MagicStorage {
 				destination.AddRange(sortResults);
 
 				destinationAvailable.Clear();
-				destinationAvailable.AddRange(Enumerable.Repeat(true, destination.Count));
+
+				if (recipeFilterChoice == RecipeButtonsAvailableChoice) {
+					// The remaining recipes are all available, so just ensure that all entries are "true"
+					destinationAvailable.AddRange(Enumerable.Repeat(true, destination.Count));
+				} else {
+					// Check if each recipe is available
+					// If "isObjectAvailable" is using a result lookup, this step is fast
+					thread.InitTaskSchedule(
+						totalTasks: destination.Count,
+						taskName: "Re-evaluating Recipes"
+					);
+
+					foreach (T obj in destination.NotifyStepsTo(thread).WatchForCancellation(thread, 16))
+						destinationAvailable.Add(isObjectAvailable(thread, obj));
+				}
 			}
 
 			forcedResort = false;

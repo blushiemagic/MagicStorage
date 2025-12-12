@@ -72,6 +72,12 @@ namespace MagicStorage {
 						selection: new SelectionProvider(),
 						craftAmountTarget: new CraftingGUI.CraftAmountTargetProvider()
 					),
+					recipeItems: new ZoneResultsRecipeItemsProvider(
+						staticStoredIngredientsList: CraftingGUI.storageItems,
+						staticStoredIngredientsInfoList: CraftingGUI.storageItemInfo,
+						staticResultItemsList: resultItems,
+						staticResultItemsInfoList: resultItemsInfo
+					),
 					staticReportCacheList: cachedShimmerReports
 				);
 			}
@@ -101,7 +107,7 @@ namespace MagicStorage {
 		}
 
 		private static void RefreshStorageItems<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerItemReportsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerItemReportsProvider, IRecipeItemsProvider
 		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
@@ -117,15 +123,7 @@ namespace MagicStorage {
 
 			thread.InitTaskSchedule(resultItemGroups.Count, "Populating Stored Ingredients");
 
-			var handler = new ZoneResultItemsHandler<T>(
-				thread: thread,
-				staticStoredIngredientsList: CraftingGUI.storageItems,
-				staticStoredIngredientsInfoList: CraftingGUI.storageItemInfo,
-				staticResultItemsList: resultItems,
-				staticResultItemsInfoList: resultItemsInfo
-			);
-
-			thread.IngredientControls.recipeItemsHandler = handler;
+			var handler = thread.RecipeItems;
 
 			var reports = thread.ShimmerItemReports.reports.Value;
 
@@ -139,9 +137,9 @@ namespace MagicStorage {
 				}
 			}
 
-			handler.CompactCollections();
+			handler.CompactCollections(thread);
 
-			NetHelper.Report(true, $"Success! Found {handler.StoredIngredientCount} items and {(handler.FoundStoredResultItem ? "no" : $"{handler.resultItems.Count}")} result items");
+			NetHelper.Report(true, $"Success! Found {handler.GetItemCountsReport()}");
 		}
 
 		internal static bool IsItemValidForStorage(Item item, int selectedItem) => item.type == selectedItem && item.stack > 0;

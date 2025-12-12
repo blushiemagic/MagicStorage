@@ -30,47 +30,36 @@ namespace MagicStorage {
 		}
 
 		internal static void SetRecipeAndCraftingCaches<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider
 		{
 			if (thread.CraftingObject.selection.Value is not Recipe recipe) {
 				thread.CraftingObject.craftAmountTarget.Value = 1;
 				return;
 			}
-			
-			selectedRecipe = recipe;
 
 			thread.InitTaskSchedule(
 				totalTasks: MagicStorageConfig.IsRecursionEnabled && recipe.HasRecursiveRecipe() ? 4 : 3,
 				taskName: "Populating Caches"
 			);
 
-			int maxCraftable;
-			recentRecipeAmountCraftable = recipe;
-			amountCraftableForCurrentRecipe = maxCraftable = AmountCraftable(thread, recipe);
-
-			thread.CraftingObject.craftAmountTarget.Value = Utils.Clamp(thread.CraftingObject.craftAmountTarget.Value, 1, maxCraftable);
+			CacheAmountCraftable(thread);
 
 			thread.CompleteOne();
 
-			recentRecipeAvailable = recipe;
-			currentRecipeIsAvailable = IsAvailable(thread, recipe);
+			CacheRecipeAvailable(thread);
 
 			thread.CompleteOne();
 
-			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out var recursiveRecipe)) {
-				recentRecipeSimulation = recipe;
-				CraftingSimulation simulation = new CraftingSimulation();
-				simulation.SimulateCrafts(recursiveRecipe, thread.CraftingObject.craftAmountTarget.Value, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
-				simulatedCraftForCurrentRecipe = simulation;
-
+			if (CacheCraftingSimulation(thread))
 				thread.CompleteOne();
-			}
 
 			// Obsolete, but still needs to be processed
 			recentRecipeBlock = recipe;
 			currentRecipePassesBlock = PassesBlock(thread, recipe);
 
 			thread.CompleteOne();
+
+			thread.CraftingObject.CopyToStaticFields();
 		}
 
 		public static int AmountCraftableForCurrentRecipe() {
@@ -86,6 +75,19 @@ namespace MagicStorage {
 			return amount;
 		}
 
+		private static void CacheAmountCraftable<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider
+		{
+			var recipe = thread.CraftingObject.selection.Value;
+
+			int maxCraftable;
+			recentRecipeAmountCraftable = recipe;
+			amountCraftableForCurrentRecipe = maxCraftable = AmountCraftable(thread, recipe);
+
+			var targetProvider = thread.CraftingObject.craftAmountTarget;
+			targetProvider.Value = Utils.Clamp(targetProvider.Value, 1, maxCraftable);
+		}
+
 		public static bool IsCurrentRecipeAvailable() {
 			if (MagicUI.CurrentlyRefreshing || selectedRecipe is null)
 				return false;  // Delay logic until threading stops
@@ -93,10 +95,25 @@ namespace MagicStorage {
 			if (object.ReferenceEquals(recentRecipeAvailable, selectedRecipe) && currentRecipeIsAvailable is { } available)
 				return available;
 
+			recipeToAvailableLookup.Remove(selectedRecipe);
+
 			// Calculate the value
 			recentRecipeAvailable = selectedRecipe;
 			currentRecipeIsAvailable = available = IsAvailable(selectedRecipe);
+
+			recipeToAvailableLookup.AddOrUpdate(selectedRecipe, new Ref<bool>(available));
+
 			return available;
+		}
+
+		private static void CacheRecipeAvailable<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+		{
+			var recipe = thread.CraftingObject.selection.Value;
+
+			bool available;
+			recentRecipeAvailable = recipe;
+			currentRecipeIsAvailable = available = IsAvailable(thread, recipe);
 		}
 
 		[Obsolete("The blocked ingredients check is now part of the recipe availability checks.", error: true)]
@@ -120,15 +137,35 @@ namespace MagicStorage {
 			if (object.ReferenceEquals(recentRecipeSimulation, selectedRecipe) && simulatedCraftForCurrentRecipe is not null)
 				return simulatedCraftForCurrentRecipe;
 
+			recentRecipeSimulation = selectedRecipe;
+
 			if (!selectedRecipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe))
-				return new CraftingSimulation();
+				return simulatedCraftForCurrentRecipe = new CraftingSimulation();
 
 			// Calculate the value
-			recentRecipeSimulation = selectedRecipe;
 			CraftingSimulation simulation = new CraftingSimulation();
 			simulation.SimulateCrafts(recursiveRecipe, craftAmountTarget, GetCurrentInventory(cloneIfBlockEmpty: true));
 			simulatedCraftForCurrentRecipe = simulation;
 			return simulation;
+		}
+
+		private static bool CacheCraftingSimulation<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider
+		{
+			var recipe = thread.CraftingObject.selection.Value;
+
+			recentRecipeSimulation = recipe;
+
+			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out var recursiveRecipe)) {
+				CraftingSimulation simulation = new CraftingSimulation();
+				simulation.SimulateCrafts(recursiveRecipe, thread.CraftingObject.craftAmountTarget.Value, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
+				simulatedCraftForCurrentRecipe = simulation;
+
+				return true;
+			}
+
+			simulatedCraftForCurrentRecipe = new CraftingSimulation();
+			return false;
 		}
 	}
 }

@@ -72,11 +72,11 @@ namespace MagicStorage {
 				if (MagicUI.CurrentlyRefreshing)
 					available = IsAvailable_CheckRecursiveRecipe(thread, recursiveRecipe);
 				else
-					available = ExecuteInCraftingGuiEnvironment(thread, recursiveRecipe, IsAvailable_CheckRecursiveRecipe<T>);
+					available = ExecuteInCraftingGuiEnvironment(thread, recursiveRecipe, IsAvailable_CheckRecursiveRecipe);
 			} else
 				available = IsAvailable_CheckNormalRecipe(thread, recipe);
 
-			lookup.Add(recipe, new Ref<bool>(available));
+			lookup.AddOrUpdate(recipe, new Ref<bool>(available));
 
 			/*
 			if (!disableNetPrintingForIsAvailable)
@@ -146,7 +146,7 @@ namespace MagicStorage {
 		}
 
 		internal static bool PassesBlock<T>(T thread, Recipe recipe)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider
 		{
 			if (recipe is null)
 				return false;
@@ -169,9 +169,9 @@ namespace MagicStorage {
 		}
 
 		private static bool PassesBlock_CheckRecipe<T>(T thread, Recipe recipe)
-			where T : RefreshThread, IIngredientControlsProvider
+			where T : RefreshThread, IIngredientControlsProvider, IRecipeItemsProvider
 		{
-			IEnumerable<ItemInfo> ingredientsInfo = thread?.IngredientControls.recipeItemsHandler.GetIngredientsInfo() ?? storageItemInfo;
+			IEnumerable<ItemInfo> ingredientsInfo = thread?.RecipeItems.storedIngredients.info.Value ?? storageItemInfo;
 			List<ItemData> blockedIngredients = thread?.IngredientControls.blockStorageItems.Value ?? blockStorageItems;
 
 			foreach (Item ingredient in recipe.requiredItem) {
@@ -209,9 +209,9 @@ namespace MagicStorage {
 		}
 
 		private static bool PassesBlock_CheckSimulation<T>(T thread, CraftingSimulation simulation)
-			where T : RefreshThread, IIngredientControlsProvider
+			where T : RefreshThread, IIngredientControlsProvider, IRecipeItemsProvider
 		{
-			IEnumerable<ItemInfo> ingredientsInfo = thread?.IngredientControls.recipeItemsHandler.GetIngredientsInfo() ?? storageItemInfo;
+			IEnumerable<ItemInfo> ingredientsInfo = thread?.RecipeItems.storedIngredients.info.Value ?? storageItemInfo;
 			List<ItemData> blockedIngredients = thread?.IngredientControls.blockStorageItems.Value ?? blockStorageItems;
 
 			foreach (RequiredMaterialInfo material in simulation.RequiredMaterials) {

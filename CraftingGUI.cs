@@ -1,6 +1,7 @@
 using MagicStorage.Common;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Systems.RecurrentRecipes;
+using MagicStorage.Common.Threading;
 using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Components;
 using MagicStorage.UI.States;
@@ -153,6 +154,8 @@ namespace MagicStorage
 		}
 
 		public static RefreshThread CreateSelectedRecipeRefreshThread(Recipe selectedRecipe, int craftAmountTarget, string caller) {
+			var selectionProvider = new SelectionProvider(selectedRecipe);
+
 			var thread = new RecipeInfoPanelRefreshThread(
 				controls: CreateRefreshThreadControls(MagicUI.craftingUI),
 				processedStorage: new(
@@ -164,6 +167,12 @@ namespace MagicStorage
 					staticCountsDictionary: itemCounts,
 					staticCountsByPrefixDictionary: itemCountsByPrefix
 				),
+				mainZoneControls: new(
+					zoneObjectFilterChoice: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
+					favorited: StoragePlayer.LocalPlayer.FavoritedRecipes,
+					hidden: StoragePlayer.LocalPlayer.HiddenRecipes,
+					configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist
+				),
 				ingredientControls: new(
 					staticShowAllIngredientsField: new ShowAllIngredientsProvider(((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn),
 					staticInfiniteItemsSet: isItemInfinite,
@@ -171,8 +180,18 @@ namespace MagicStorage
 					staticCreativeUnitField: new CreativeUnitPresentProvider()
 				),
 				craftingObject: new(
-					selection: new SelectionProvider(selectedRecipe),
+					selection: selectionProvider,
 					craftAmountTarget: new CraftAmountTargetProvider(craftAmountTarget)
+				),
+				availableCache: new(
+					staticTable: recipeToAvailableLookup
+				),
+				recipeItems: new SingleResultRecipeItemsProvider(
+					staticStoredIngredientsList: storageItems,
+					staticStoredIngredientsInfoList: storageItemInfo,
+					resultItem: new CraftResultProvider(
+						selectedRecipe: selectionProvider
+					)
 				)
 			);
 
@@ -185,6 +204,8 @@ namespace MagicStorage
 			// Force all recipes to be recalculated
 			if (MagicUI.ForceNextRefreshToBeFull)
 				recipesToRefreshByIndex = null;
+
+			var selectionProvider = new SelectionProvider();
 
 			var thread = new RecipeListRefreshThread(
 				controls: CreateRefreshThreadControls(MagicUI.craftingUI),
@@ -215,11 +236,18 @@ namespace MagicStorage
 					staticCreativeUnitField: new CreativeUnitPresentProvider()
 				),
 				craftingObject: new(
-					selection: new SelectionProvider(),
+					selection: selectionProvider,
 					craftAmountTarget: new CraftAmountTargetProvider()
 				),
 				availableCache: new(
 					staticTable: recipeToAvailableLookup
+				),
+				recipeItems: new SingleResultRecipeItemsProvider(
+					staticStoredIngredientsList: storageItems,
+					staticStoredIngredientsInfoList: storageItemInfo,
+					resultItem: new CraftResultProvider(
+						selectedRecipe: selectionProvider
+					)
 				)
 			);
 

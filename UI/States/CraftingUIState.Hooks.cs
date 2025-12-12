@@ -274,9 +274,9 @@ namespace MagicStorage.UI.States {
 			protected virtual void OnMainZoneItemHiddenSetChanged(Item item, bool hidden) { }
 
 			protected virtual void OnMainZoneItemLeftClicked(int index) {
-				CraftingGUI.SetSelectedRecipe(CraftingGUI.recipes[index]);
-				if (CraftingGUI.selectedRecipe is not null)
-					(parentUI as CraftingUIState).history.AddHistory(CraftingGUI.selectedRecipe);
+				var recipe = CraftingGUI.recipes[index];
+				CraftingGUI.SetSelectedRecipe(recipe);
+				(parentUI as CraftingUIState).history.AddHistory(recipe);
 			}
 
 			protected virtual void UpdateStationElements(out int stationCount) {

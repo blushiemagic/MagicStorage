@@ -19,6 +19,8 @@ namespace MagicStorage.Sorting
 		/// <see cref="RefreshThread.workingItemList"/> should contain the item collection.<br/>
 		/// <see cref="RefreshThread.workingCounter"/> should contain the number of items in the item collection.<br/>
 		/// <see cref="RefreshThread.workingFlag"/> should indicate whether aggregation should be ignored (if <see langword="true"/>, the items will only be ordered by type and prefix).
+		/// <para/>
+		/// <see cref="RefreshThread.aggregateResults"/> will contain the ordered result items before sorting, as well as the item "groups" for both source and result items
 		/// </summary>
 		/// <param name="thread">The refresh thread performing the operation.</param>
 		/// <param name="attempt">The current attempt number for the operation (0-based); used to assign the name for the thread's task schedule.</param>
@@ -131,13 +133,14 @@ namespace MagicStorage.Sorting
 		}
 
 		/// <summary>
-		/// Filters then sorts recipes based on the controls assigne do <paramref name="thread"/>
+		/// Filters then sorts recipes based on the controls assigned to <paramref name="thread"/>
 		/// </summary>
 		/// <param name="thread">The refresh thread performing the operation.</param>
 		/// <param name="attempt">The current attempt number for the operation (0-based); used to assign the name for the thread's task schedule.</param>
-		/// <param name="provider">An optional recipe filter provider for additional filtering controls.</param>
 		/// <param name="listClassification">An optional classification string to include in the task schedule name.</param>
-		public static List<Recipe> SortAndFilterRecipes(RefreshThread thread, int attempt, IFilterProvider<Recipe> provider = null, string listClassification = null) {
+		public static List<Recipe> SortAndFilterRecipes<T>(T thread, int attempt, string listClassification = null)
+			where T : RefreshThread, IMainZoneFilterControlsProvider<Recipe>
+		{
 			bool useStaticFilter;
 			Recipe[] allRecipes;
 
@@ -158,6 +161,8 @@ namespace MagicStorage.Sorting
 
 			// NOTE: AsParallel().AsOrdered() is not used here
 			var query = allRecipes.NotifyStepsTo(thread).ToCancellableQuery(thread, 16).Where(HiddenRecipes.IsVisible);
+
+			var provider = thread.MainZoneObjectsFilterControls.filterProvider;
 
 			if (provider is not null) {
 				// Apply additional filters
@@ -186,7 +191,9 @@ namespace MagicStorage.Sorting
 			return [.. sortedRecipes.NotifyStepsTo(thread).WatchForCancellation(thread, 16)];
 		}
 
-		public static List<int> SortAndFilterShimmerableItems(RefreshThread thread, int attempt, IFilterProvider<int> provider = null, string listClassification = null) {
+		public static List<int> SortAndFilterShimmerableItems<T>(T thread, int attempt, string listClassification = null)
+			where T : RefreshThread, IMainZoneFilterControlsProvider<int>
+		{
 			bool useStaticFilter;
 			Item[] allItems;
 
@@ -207,6 +214,8 @@ namespace MagicStorage.Sorting
 
 			// NOTE: AsParallel().AsOrdered() is not used here
 			var query = allItems.NotifyStepsTo(thread).ToCancellableQuery(thread, 16).Select(i => i.type);
+
+			var provider = thread.MainZoneObjectsFilterControls.filterProvider;
 
 			if (provider is not null) {
 				// Apply additional filters

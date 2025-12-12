@@ -15,6 +15,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public ItemInfo(Item item) : this(item.type, item.stack, item.prefix) { }
 
+		public static ItemInfo FromItem(Item item) => new(item);
+
 		public override bool Equals(object obj) {
 			return obj is ItemInfo info && type == info.type && stack == info.stack && prefix == info.prefix;
 		}

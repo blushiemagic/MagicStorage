@@ -63,6 +63,8 @@ namespace MagicStorage {
 				if (MagicUI.ForceNextRefreshToBeFull)
 					recipesToRefreshByIndex = null;
 
+				var selectionProvider = new SelectionProvider();
+
 				return new CraftingRefreshThread(
 					controls: controls,
 					processedStorage: new(
@@ -92,11 +94,18 @@ namespace MagicStorage {
 						staticCreativeUnitField: new CreativeUnitPresentProvider()
 					),
 					craftingObject: new(
-						selection: new SelectionProvider(),
+						selection: selectionProvider,
 						craftAmountTarget: new CraftAmountTargetProvider()
 					),
 					availableCache: new(
 						staticTable: recipeToAvailableLookup
+					),
+					recipeItems: new SingleResultRecipeItemsProvider(
+						staticStoredIngredientsList: storageItems,
+						staticStoredIngredientsInfoList: storageItemInfo,
+						resultItem: new CraftResultProvider(
+							selectedRecipe: selectionProvider
+						)
 					)
 				);
 			}

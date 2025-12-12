@@ -21,7 +21,7 @@ namespace MagicStorage.Common.Threading {
 
 		public void CopyToStatic() {
 			foreach (var (key, value) in Value)
-				_staticTable.TryAdd(key, value);
+				_staticTable.AddOrUpdate(key, value);
 		}
 
 		#region ConditionalWeakTable<TKey, TValue> mirrors

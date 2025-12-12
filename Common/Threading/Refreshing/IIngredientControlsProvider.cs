@@ -11,7 +11,6 @@ namespace MagicStorage.Common.Threading.Refreshing {
 		public readonly HashSetProvider<int> infiniteItems;
 		public readonly ListProvider<ItemData> blockStorageItems;
 		public readonly IValueProvider<bool> creativeUnitPresent;
-		public IRecipeItemsHandler recipeItemsHandler;
 
 		public IngredientControls(
 			IReadOnlyValueProvider<bool> staticShowAllIngredientsField,
@@ -53,8 +52,6 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			infiniteItems.OverwriteStatic();
 			blockStorageItems.OverwriteStatic();
 			creativeUnitPresent.OverwriteStatic();
-
-			recipeItemsHandler?.CopyToStaticCollections();
 		}
 
 		public void ClearStaticCollections() {

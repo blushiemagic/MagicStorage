@@ -138,6 +138,12 @@ namespace MagicStorage {
 					selection: new SelectionProvider(selectedItem),
 					craftAmountTarget: new CraftingGUI.CraftAmountTargetProvider(craftAmountTarget)
 				),
+				recipeItems: new ZoneResultsRecipeItemsProvider(
+					staticStoredIngredientsList: CraftingGUI.storageItems,
+					staticStoredIngredientsInfoList: CraftingGUI.storageItemInfo,
+					staticResultItemsList: resultItems,
+					staticResultItemsInfoList: resultItemsInfo
+				),
 				staticReportCacheList: cachedShimmerReports
 			);
 

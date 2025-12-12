@@ -410,7 +410,7 @@ namespace MagicStorage.UI.States {
 			CraftingGUI.PlayerZoneCache.Cache();
 
 			try {
-				if (!MagicUI.CurrentlyRefreshing && delayedHistoryJump) {
+				if (!currentPage.IsOpening && !MagicUI.CurrentlyRefreshing && delayedHistoryJump) {
 					delayedHistoryJump = false;
 
 					if (history.Current >= 0)
@@ -692,19 +692,25 @@ namespace MagicStorage.UI.States {
 			if (Main.gameMenu || MagicUI.CurrentlyRefreshing)
 				return;
 
+			RefreshRecipePanel();
+
+			GetDefaultPage().Refresh();
+		}
+
+		public bool RefreshRecipePanel() {
 			MoveRecipePanel();
 
 			int itemsNeeded = GetIngredientCount();
 			int totalRows = GetIngredientRows(itemsNeeded);
 
 			if (!RecalculateRecipePanelElements(totalRows))
-				return;
+				return false;
 
 			PopulateRecipePanelZones();
 
 			history.RefreshEntries();
 
-			GetDefaultPage().Refresh();
+			return true;
 		}
 
 		public sealed override void OnRefreshStart() {
@@ -798,6 +804,7 @@ namespace MagicStorage.UI.States {
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
+				OnPageSelected += SelectPage;
 				OnPageDeselected += DeselectPage;
 			}
 
@@ -806,6 +813,11 @@ namespace MagicStorage.UI.States {
 			private void RecipeFilterChanged() {
 				if (!base.IsOpening)
 					MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.RecipeFilterChanged()");
+			}
+
+			private static void SelectPage() {
+				// Ensure that a full refresh happens
+				CraftingGUI.hasCompleteData = false;
 			}
 
 			private void DeselectPage() {
@@ -1019,7 +1031,7 @@ namespace MagicStorage.UI.States {
 						// CHANGE: v0.7.0.12 - Un-/favoriting a recipe will start a shorter refresh thread that skips item collection and info panel updating
 					//	MagicUI.SetRefresh();
 						OnMainZoneItemFavoriteChanged(item);
-
+						MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.InitZoneSlotEvents()+LeftClick()");
 					} else if (MagicStorageConfig.RecipeBlacklistEnabled && Main.keyState.IsKeyDown(Keys.LeftControl)) {
 						bool whitelisting = recipeButtons.Choice == CraftingGUI.RecipeButtonsBlacklistChoice;
 
@@ -1037,6 +1049,7 @@ namespace MagicStorage.UI.States {
 						// CHANGE: v0.7.0.12 - Black-/whitelisting a recipe will start a shorter refresh thread that skips item collection and info panel updating
 					//	MagicUI.SetRefresh();
 						OnMainZoneItemBlacklistChanged(item, !whitelisting);
+						MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.InitZoneSlotEvents()+LeftClick()");
 					} else {
 						// CHANGE: v0.7.0.12 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
 					//	MagicUI.SetRefresh();

@@ -1,23 +1,58 @@
 ﻿using MagicStorage.Common.Systems.RecurrentRecipes;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Terraria;
 
 namespace MagicStorage.Common.Threading.Refreshing {
-	public interface IRecipeItemsHandler {
-		bool FoundStoredResultItem { get; }
+	public interface IRecipeItemsProvider {
+		RecipeItems RecipeItems { get; }
+	}
 
-		int StoredIngredientCount { get; }
+	public abstract class RecipeItems {
+		public readonly ItemInfoListProvider storedIngredients;
+		public IModuleItemResolver itemResolver;
 
-		void AddStoredIngredient(Item item);
+		public RecipeItems(
+			List<Item> staticStoredIngredientsList,
+			List<ItemInfo> staticStoredIngredientsInfoList
+		) {
+			storedIngredients = new(
+				staticItemsList: staticStoredIngredientsList,
+				staticInfoList: staticStoredIngredientsInfoList
+			);
+		}
 
-		void CompactCollections();
+		public abstract string GetItemCountsReport();
 
-		void CopyToStaticCollections();
+		public void AddStoredIngredient(Item item) {
+			storedIngredients.items.Add(item);
+			storedIngredients.info.Add(item);
+		}
 
-		IEnumerable<ItemInfo> GetIngredientsInfo();
+		public virtual void CompactCollections(RefreshThread thread) {
+			CraftingGUI.CompactItemList(
+				thread,
+				storedIngredients,
+				itemResolver.IsModuleItem,
+				"Stored Ingredients"
+			);
+		}
 
-		bool IsItemFromModule(Item item);
+		public virtual void CopyFromStaticCollections() {
+			storedIngredients.items.CopyFromStatic();
+			storedIngredients.info.CopyFromStatic();
+		}
 
-		void SetResultItem(Item item);
+		public virtual void CopyToStaticCollections() {
+			storedIngredients.items.OverwriteStatic();
+			storedIngredients.info.OverwriteStatic();
+		}
+
+		public virtual void ClearStaticCollections() {
+			storedIngredients.items.ClearStatic();
+			storedIngredients.info.ClearStatic();
+		}
+
+		public abstract void SetResultItem(Item item);
 	}
 }

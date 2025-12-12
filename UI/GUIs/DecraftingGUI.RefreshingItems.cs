@@ -113,7 +113,7 @@ namespace MagicStorage {
 		{
 			CraftingGUI.PopulateCollections(
 				thread,
-				ItemSorter.SortAndFilterShimmerableItems(thread, attempt, provider: thread.MainZoneObjectsFilterControls.filterProvider),
+				ItemSorter.SortAndFilterShimmerableItems(thread, attempt),
 				IsAvailable,
 				"Shimmerable Items"
 			);

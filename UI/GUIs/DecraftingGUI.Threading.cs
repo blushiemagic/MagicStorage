@@ -5,12 +5,12 @@ using MagicStorage.Common.Threading;
 using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.UI.States;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using Terraria;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		public class ShimmeringRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerSnapshotsProvider, IShimmerItemReportsProvider {
+		public class ShimmeringRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerSnapshotsProvider, IShimmerItemReportsProvider, IRecipeItemsProvider {
 			public override bool IsPartialThread => false;
 
 			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
@@ -33,6 +33,8 @@ namespace MagicStorage {
 
 			public ShimmerItemReports ShimmerItemReports { get; }
 
+			public RecipeItems RecipeItems { get; }
+
 			public ShimmeringRefreshThread(
 				StorageViewControls controls,
 				ProcessedStorageItems processedStorage,
@@ -40,6 +42,7 @@ namespace MagicStorage {
 				MainZoneObjectResults<int> mainZoneResults,
 				IngredientControls ingredientControls,
 				CraftingObject<int> craftingObject,
+				RecipeItems recipeItems,
 				List<ItemReport> staticReportCacheList
 			) : base(MagicUI.decraftingUI, controls) {
 				ProcessedStorageItems = processedStorage;
@@ -48,6 +51,8 @@ namespace MagicStorage {
 				IngredientControls = ingredientControls;
 				CraftingObject = craftingObject;
 				ShimmerItemReports = new(staticReportCacheList);
+				RecipeItems = recipeItems;
+				RecipeItems.itemResolver = ProcessedStorageItems.CreateItemResolver();
 			}
 
 			protected override void CollectObjects() {
@@ -77,6 +82,7 @@ namespace MagicStorage {
 				IngredientControls.CopyToStaticCollectionsAndFields();
 				CraftingObject.CopyToStaticFields();
 				ShimmerItemReports.CopyToStaticCollection();
+				RecipeItems.CopyToStaticCollections();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 
@@ -90,6 +96,7 @@ namespace MagicStorage {
 				MainZoneObjectsResults.ClearStaticCollections();
 				IngredientControls.ClearStaticCollections();
 				ShimmerItemReports.ClearStaticCollection();
+				RecipeItems.ClearStaticCollections();
 			}
 
 			// Unused due to being a full thread
@@ -129,6 +136,8 @@ namespace MagicStorage {
 			}
 
 			protected override void CollectObjects() {
+				CraftingGUI.hasCompleteData = false;
+
 				var sandbox = new EnvironmentSandbox(Main.LocalPlayer, base.Heart);
 
 				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
@@ -151,6 +160,8 @@ namespace MagicStorage {
 				IngredientControls.CopyToStaticCollectionsAndFields();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
+				
+				CraftingGUI.hasCompleteData = true;
 			}
 
 			protected override void Cleanup() { }
@@ -161,12 +172,12 @@ namespace MagicStorage {
 				IngredientControls.ClearStaticCollections();
 			}
 
-			public override void PrepareUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().slotZone.ClearContexts();
+			public override void PrepareUIZones() => refreshingUI.GetDefaultPage().OnRefreshStart();
 
-			public override void PopulateUIZones() => refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
+			public override void PopulateUIZones() => refreshingUI.GetDefaultPage().Refresh();
 		}
 
-		public class ShimmerInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerItemReportsProvider {
+		public class ShimmerInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<int>, IShimmerItemReportsProvider, IRecipeItemsProvider {
 			public override bool IsPartialThread => true;
 
 			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
@@ -181,20 +192,27 @@ namespace MagicStorage {
 
 			public ShimmerItemReports ShimmerItemReports { get; }
 
+			public RecipeItems RecipeItems { get; }
+
 			public ShimmerInfoPanelRefreshThread(
 				StorageViewControls controls,
 				ProcessedStorageItems processedStorage,
 				IngredientControls ingredientControls,
 				CraftingObject<int> craftingObject,
+				RecipeItems recipeItems,
 				List<ItemReport> staticReportCacheList
 			) : base(MagicUI.decraftingUI, controls) {
 				ProcessedStorageItems = processedStorage;
 				IngredientControls = ingredientControls;
 				CraftingObject = craftingObject;
 				ShimmerItemReports = new(staticReportCacheList);
+				RecipeItems = recipeItems;
+				RecipeItems.itemResolver = ProcessedStorageItems.CreateItemResolver();
 			}
 
 			protected override void CollectObjects() {
+				CraftingGUI.hasCompleteData = false;
+
 				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
 				IngredientControls.CollectObjects(this);
 				ShimmerItemReports.CopyFromStaticCollection();
@@ -206,6 +224,9 @@ namespace MagicStorage {
 				IngredientControls.CopyToStaticCollectionsAndFields();
 				CraftingObject.CopyToStaticFields();
 				ShimmerItemReports.CopyToStaticCollection();
+				RecipeItems.CopyToStaticCollections();
+				
+				CraftingGUI.hasCompleteData = true;
 			}
 
 			protected override void Cleanup() { }
@@ -213,6 +234,7 @@ namespace MagicStorage {
 			public override void ClearStaticCollections() {
 				IngredientControls.ClearStaticCollections();
 				ShimmerItemReports.ClearStaticCollection();
+				RecipeItems.ClearStaticCollections();
 			}
 
 			public override void PrepareUIZones() {
@@ -222,78 +244,66 @@ namespace MagicStorage {
 
 			public override void PopulateUIZones() {
 				refreshingUI.GetDefaultPage<BaseStorageUIAccessPage>().PopulateMainZone();
-				((DecraftingUIState)refreshingUI).PopulateRecipePanelZones();
+				((DecraftingUIState)refreshingUI).RefreshRecipePanel();
 			}
 		}
 
-		private class ZoneResultItemsHandler<T> : IRecipeItemsHandler
-			where T : RefreshThread, IProcessedStorageItemsProvider
-		{
-			public readonly T _thread;
+		private class ZoneResultsRecipeItemsProvider : RecipeItems {
+			public readonly ItemInfoListProvider results;
 
-			public readonly ListProvider<Item> storedIngredients;
-			public readonly ListProvider<ItemInfo> storedIngredientsInfo;
-			public readonly ListProvider<Item> resultItems;
-			public readonly ListProvider<ItemInfo> resultItemsInfo;
-
-			public bool FoundStoredResultItem => resultItems.Count > 0;
-
-			public int StoredIngredientCount => storedIngredients.Count;
-
-			public ZoneResultItemsHandler(
-				T thread,
+			public ZoneResultsRecipeItemsProvider(
 				List<Item> staticStoredIngredientsList,
 				List<ItemInfo> staticStoredIngredientsInfoList,
 				List<Item> staticResultItemsList,
 				List<ItemInfo> staticResultItemsInfoList
+			) : base(
+				staticStoredIngredientsList,
+				staticStoredIngredientsInfoList
 			) {
-				_thread = thread;
-				storedIngredients = new(staticStoredIngredientsList);
-				storedIngredientsInfo = new(staticStoredIngredientsInfoList);
-				resultItems = new(staticResultItemsList);
-				resultItemsInfo = new(staticResultItemsInfoList);
+				results = new(
+					staticItemsList: staticResultItemsList,
+					staticInfoList: staticResultItemsInfoList
+				);
 			}
 
-			public void AddStoredIngredient(Item item) {
-				// Items from modules need to be referenced directly
-				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item))
-					item = item.Clone();
+			public override void CompactCollections(RefreshThread thread) {
+				base.CompactCollections(thread);
 
-				storedIngredients.Add(item);
-				storedIngredientsInfo.Add(item);
+				CraftingGUI.CompactItemList(
+					thread,
+					results,
+					itemResolver.IsModuleItem,
+					"Result Items"
+				);
 			}
 
-			public void CompactCollections() {
-				var stored = CraftingGUI.CompactItemList(_thread, this, storedIngredients.Value);
-				if (stored.Count != storedIngredients.Count) {
-					storedIngredients.Clear();
-					storedIngredients.AddRange(stored);
-					storedIngredientsInfo.Clear();
-					storedIngredientsInfo.AddRange(stored.Select(x => new ItemInfo(x)));
-				}
-
-				var results = CraftingGUI.CompactItemList(_thread, this, resultItems.Value);
-				if (results.Count != resultItems.Count) {
-					resultItems.Clear();
-					resultItems.AddRange(results);
-					resultItemsInfo.Clear();
-					resultItemsInfo.AddRange(results.Select(x => new ItemInfo(x)));
-				}
+			public override void CopyFromStaticCollections() {
+				base.CopyFromStaticCollections();
+				results.items.CopyFromStatic();
+				results.info.CopyFromStatic();
 			}
 
-			public void CopyToStaticCollections() {
-				storedIngredients.OverwriteStatic();
-				storedIngredientsInfo.OverwriteStatic();
-				resultItems.OverwriteStatic();
-				resultItemsInfo.OverwriteStatic();
+			public override void CopyToStaticCollections() {
+				base.CopyToStaticCollections();
+				results.items.CopyToStatic();
+				results.info.CopyToStatic();
 			}
 
-			public IEnumerable<ItemInfo> GetIngredientsInfo() => storedIngredientsInfo;
+			public override void ClearStaticCollections() {
+				base.ClearStaticCollections();
+				results.items.ClearStatic();
+				results.info.ClearStatic();
+			}
 
-			public bool IsItemFromModule(Item item) => _thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item);
+			public override string GetItemCountsReport() {
+				return new StringBuilder()
+					.Append(base.storedIngredients.items.Count).Append(" stored ingredients and ")
+					.Append(results.items.Count > 0 ? results.items.Count.ToString() : "no").Append(" result items")
+					.ToString();
+			}
 
-			public void SetResultItem(Item item) {
-				if (!_thread.ProcessedStorageItems.wasModuleItem.ContainsKey(item) && !_thread.ProcessedStorageItems.moduleItemWasFromInventory.ContainsKey(item)) {
+			public override void SetResultItem(Item item) {
+				if (!base.itemResolver.IsModuleItem(item) || !base.itemResolver.IsInventoryModuleItem(item)) {
 					// Items from storage or modules that aren't the Player Inventory modules
 					resultItems.Add(item);
 					resultItemsInfo.Add(item);

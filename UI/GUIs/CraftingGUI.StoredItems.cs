@@ -5,6 +5,7 @@ using MagicStorage.CrossMod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Localization;
 
@@ -33,7 +34,7 @@ namespace MagicStorage {
 		internal static Item result;
 
 		private static void RefreshStorageItems<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeItemsProvider
 		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
@@ -47,53 +48,50 @@ namespace MagicStorage {
 
 			ref string error = ref thread.storedItemsError;
 
-			var handler = thread.IngredientControls.recipeItemsHandler = new SingleResultItemHandler<T>(
-				thread: thread,
-				staticStoredIngredientsList: storageItems,
-				staticStoredIngredientsInfoList: storageItemInfo,
-				resultItem: new CraftResultProvider(
-					selectedRecipe: thread.CraftingObject.selection
-				)
-			);
-
 			var resultItemGroups = thread.ProcessedStorageItems.resultItemGroups.Value;
 
 			if (!MagicStorageConfig.IsRecursionEnabled || !selection.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation simulation) {
 				// Show the information for the recipe that was selected
-				RefreshStorageItems_CheckNormalRecipe(thread, selection, handler, resultItemGroups);
+				RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
 
 				if (MagicStorageConfig.IsRecursionEnabled)
 					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoRecipe");
 			} else {
 				if (thread.IngredientControls.showAllPossibleIngredients.Value) {
 					// Show the information for ALL possible recipes in the tree
-					RefreshStorageItems_CheckRecursionRecipes(thread, selection, handler, resultItemGroups, selection.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
+					RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, selection.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
 				} else if (simulation.AmountCrafted > 0) {
 					// Show the information for the recipes that were used by the simulation
-					RefreshStorageItems_CheckRecursionRecipes(thread, selection, handler, resultItemGroups, simulation.UsedRecipes);
+					RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, simulation.UsedRecipes);
 				} else {
 					// Show the information for the highest recipe in the tree, since the simulation failed
-					RefreshStorageItems_CheckNormalRecipe(thread, selection, handler, resultItemGroups);
+					RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
 
 					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoIngredients");
 				}
 			}
 
-			handler.CompactCollections();
+			thread.RecipeItems.CompactCollections(thread);
 
-			NetHelper.Report(true, $"Success! Found {handler.StoredIngredientCount} items and {(handler.FoundStoredResultItem ? "no result items" : "a result item")}");
+			NetHelper.Report(true, $"Success! Found {thread.RecipeItems.GetItemCountsReport()}");
 		}
 
-		private static void RefreshStorageItems_CheckNormalRecipe(RefreshThread thread, Recipe recipe, IRecipeItemsHandler handler, List<List<Item>> resultItemGroups) {
+		private static void RefreshStorageItems_CheckNormalRecipe<T>(T thread, Recipe recipe, List<List<Item>> resultItemGroups)
+			where T : RefreshThread, IRecipeItemsProvider
+		{
 			NetHelper.Report(false, "Recursion was disabled or recipe did not have a recursive recipe");
 
 			thread.InitTaskSchedule(resultItemGroups.Count, "Populating Stored Ingredients");
+
+			var handler = thread.RecipeItems;
 
 			foreach (var items in resultItemGroups.NotifyStepsTo(thread).WatchForCancellation(thread, 16))
 				CheckStorageItemsForRecipe(recipe, handler, items, null, checkResultItem: true);
 		}
 
-		private static void RefreshStorageItems_CheckRecursionRecipes(RefreshThread thread, Recipe mainRecipe, IRecipeItemsHandler handler, List<List<Item>> resultGroups, IEnumerable<Recipe> recipes) {
+		private static void RefreshStorageItems_CheckRecursionRecipes<T>(T thread, Recipe mainRecipe, List<List<Item>> resultGroups, IEnumerable<Recipe> recipes)
+			where T : RefreshThread, IRecipeItemsProvider
+		{
 			NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
 			// Check each recipe in the tree
@@ -101,6 +99,8 @@ namespace MagicStorage {
 			List<Recipe> usedRecipes = recipes.ToList();
 
 			thread.InitTaskSchedule(usedRecipes.Count * resultGroups.Count, "Populating Stored Ingredients");
+
+			var handler = thread.RecipeItems;
 
 			int index;
 			List<bool[]> wasItemAdded = [.. resultGroups.Select(list => new bool[list.Count])];
@@ -114,7 +114,7 @@ namespace MagicStorage {
 			}
 		}
 
-		private static void CheckStorageItemsForRecipe(Recipe recipe, IRecipeItemsHandler handler, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem) {
+		private static void CheckStorageItemsForRecipe(Recipe recipe, RecipeItems handler, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem) {
 			int addedIndex = 0;
 
 			foreach (Item item in itemsFromSource) {
@@ -146,7 +146,7 @@ namespace MagicStorage {
 			return false;
 		}
 
-		internal static bool CheckItemFromSource(IRecipeItemsHandler handler, Item item, Func<Item, bool> isItemValid) {
+		internal static bool CheckItemFromSource(RecipeItems handler, Item item, Func<Item, bool> isItemValid) {
 			if (!isItemValid(item))
 				return false;
 
@@ -155,7 +155,7 @@ namespace MagicStorage {
 			return true;
 		}
 
-		internal static bool CheckItemFromSource<T>(IRecipeItemsHandler handler, Item item, T state, Func<Item, T, bool> isItemValid) {
+		internal static bool CheckItemFromSource<T>(RecipeItems handler, Item item, T state, Func<Item, T, bool> isItemValid) {
 			if (!isItemValid(item, state))
 				return false;
 
@@ -164,17 +164,17 @@ namespace MagicStorage {
 			return true;
 		}
 
-		internal static List<Item> CompactItemList(RefreshThread thread, IRecipeItemsHandler handler, List<Item> items) {
+		internal static void CompactItemList(RefreshThread thread, ItemInfoListProvider provider, Func<Item, bool> isModuleItem, string collectionClassification) {
 			List<Item> compacted = new();
 
-			thread.InitTaskSchedule(items.Count, "Aggregating Stored Ingredients");
+			thread.InitTaskSchedule(provider.items.Count, $"Aggregating {collectionClassification}");
 
-			foreach (Item item in items.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+			foreach (Item item in provider.items.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
 				if (item.IsAir)
 					continue;
 
 				bool fullyCompacted = false;
-				if (handler.IsItemFromModule(item))
+				if (isModuleItem(item))
 					goto CheckCompactInsertion;
 
 				for (int j = 0; j < compacted.Count; j++) {
@@ -204,7 +204,12 @@ namespace MagicStorage {
 					compacted.Add(item);
 			}
 
-			return compacted;
+			if (compacted.Count != provider.items.Count) {
+				provider.items.Clear();
+				provider.items.AddRange(compacted);
+				provider.info.Clear();
+				provider.info.AddRange(compacted.Select(ItemInfo.FromItem));
+			}
 		}
 	}
 }

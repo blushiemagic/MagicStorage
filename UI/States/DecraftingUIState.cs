@@ -434,9 +434,9 @@ namespace MagicStorage.UI.States {
 			// OnMainZoneItemHiddenSetChanged not overridden since the implementation would be the same here
 
 			protected override void OnMainZoneItemLeftClicked(int index) {
-				DecraftingGUI.SetSelectedItem(DecraftingGUI.viewingItems[index]);
-				if (DecraftingGUI.selectedItem != -1)
-					(parentUI as DecraftingUIState).history.AddHistory(DecraftingGUI.selectedItem);
+				int item = DecraftingGUI.viewingItems[index];
+				DecraftingGUI.SetSelectedItem(item);
+				(parentUI as DecraftingUIState).history.AddHistory(item);
 			}
 
 			protected override void UpdateStationElements(out int stationCount) {
