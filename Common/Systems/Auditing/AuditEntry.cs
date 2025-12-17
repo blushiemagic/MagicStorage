@@ -543,14 +543,14 @@ namespace MagicStorage.Common.Systems.Auditing {
 		protected override void Stringify(AuditFile source, StringBuilder builder) {
 			base.Stringify(source, builder);
 
-			int[] coins = Utils.CoinsSplit(TotalSellValue);
+			int[] coins = Terraria.Utils.CoinsSplit(TotalSellValue);
 			builder.Append($" on {SoldItemCount} items at price {coins[3]}p {coins[2]}g {coins[1]}s {coins[0]}c");
 		}
 
 		protected override void NetStringify(StringBuilder builder) {
 			base.NetStringify(builder);
 
-			int[] coins = Utils.CoinsSplit(TotalSellValue);
+			int[] coins = Terraria.Utils.CoinsSplit(TotalSellValue);
 			builder.Append($", count {SoldItemCount}, value {coins[3]}p {coins[2]}g {coins[1]}s {coins[0]}c");
 		}
 	}

@@ -1351,6 +1351,11 @@ Mods: {
 					Tooltip: 自动机会记住它最后向用户显示的帮助提示，并在交互时显示该帮助提示。
 				}
 
+				enablePinyinSearch: {
+					Label: 启用拼音搜索
+					Tooltip: 启用后，可以通过拼音全拼或拼音首字母搜索中文物品名称
+				}
+
 				globalShimmerItemBlacklist: {
 					Label: 全局物品微光黑名单
 					Tooltip: 按住左 Ctrl + 左 Shift 点击以添加/移除黑名单

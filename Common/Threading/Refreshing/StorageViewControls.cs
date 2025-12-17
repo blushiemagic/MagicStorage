@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
+using MagicStorage.Common.Utils;
 using MagicStorage.CrossMod;
 using System;
 using System.Collections.Generic;
@@ -327,8 +328,15 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			}
 
 			if (!string.IsNullOrEmpty(itemNameSearchText)) {
-				if (!item.Name.Contains(itemNameSearchText, StringComparison.OrdinalIgnoreCase))
-					return false;
+				// 支持拼音搜索（仅在简体中文环境下启用）
+				if (PinyinHelper.ShouldEnablePinyinSearch()) {
+					if (!PinyinHelper.MatchesSearch(item, itemNameSearchText))
+						return false;
+				} else {
+					// 原有逻辑：直接字符串匹配
+					if (!item.Name.Contains(itemNameSearchText, StringComparison.OrdinalIgnoreCase))
+						return false;
+				}
 			}
 
 			if (!string.IsNullOrEmpty(itemTooltipSearchText)) {

@@ -1346,6 +1346,11 @@ Mods: {
 					Tooltip: O Autômato lembrará qual dica de ajuda foi exibida pela última vez ao usuário e exibirá essa dica de ajuda quando interagir com ele.
 				}
 
+				enablePinyinSearch: {
+					// Label: Enable Pinyin Search
+					// Tooltip: Enable to search Chinese item names using pinyin (full pinyin or initials). This feature only works in Simplified Chinese (zh-Hans) language environment.
+				}
+
 				globalShimmerItemBlacklist: {
 					Label: Lista Negra Global De Itens Cintilantes
 					Tooltip: Clique com Ctrl esquerdo + Shift esquerdo para adicionar/remover da lista negra.

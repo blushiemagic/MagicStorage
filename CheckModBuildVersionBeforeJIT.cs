@@ -7,11 +7,19 @@ namespace MagicStorage {
 		// The GetInstance singleton is only loaded after mod JITing was performed, hence the need for a variable
 		public static MagicStorageMod Mod;
 		public static bool versionChecked;
+		public static bool nPinyinLoaded;
 
 		public override bool ShouldJIT(MemberInfo member) {
 			if (!versionChecked) {
 				CheckBuildVersion();
 				versionChecked = true;
+			}
+
+			// 延迟 JIT ConvertToPinyin 方法，直到 NPinyin.Core.dll 加载完成
+			if (member is MethodInfo method && 
+			    method.DeclaringType?.FullName == "MagicStorage.Common.Utils.PinyinHelper" &&
+			    method.Name == "ConvertToPinyin") {
+				return nPinyinLoaded;
 			}
 
 			return base.ShouldJIT(member);

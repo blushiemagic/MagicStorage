@@ -37,6 +37,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Common\Systems\scramble" />
     <EmbeddedResource Include="Common\Systems\unscramble" />
+    <EmbeddedResource Include="..\references\NPinyin.Core.dll">
+      <LogicalName>NPinyin.Core.dll</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <SerousCommonLibPath Condition="Exists('..\references\SerousCommonLib.dll')">..\references\SerousCommonLib.dll</SerousCommonLibPath>
@@ -45,6 +48,9 @@
   <ItemGroup>
     <Reference Include="SerousCommonLib">
       <HintPath>$(SerousCommonLibPath)</HintPath>
+    </Reference>
+    <Reference Include="NPinyin.Core">
+      <HintPath>..\references\NPinyin.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
