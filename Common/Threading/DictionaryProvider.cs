@@ -6,6 +6,8 @@ namespace MagicStorage.Common.Threading {
 	public class DictionaryProvider<TKey, TValue>(Dictionary<TKey, TValue> staticDictionary) : IReadOnlyValueProvider<Dictionary<TKey, TValue>>, IDictionary<TKey, TValue> {
 		private readonly Dictionary<TKey, TValue> _staticDictionary = staticDictionary;
 
+		public Dictionary<TKey, TValue> StaticSource => _staticDictionary;
+
 		public Dictionary<TKey, TValue> Value { get; } = [];
 
 		public void ClearStatic() => _staticDictionary.Clear();

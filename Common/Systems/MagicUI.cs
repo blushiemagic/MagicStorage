@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using MagicStorage.Common.Players;
 using MagicStorage.Common.Threading.Refreshing;
@@ -13,6 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -25,6 +27,8 @@ public class MagicUI : ModSystem
 
 	public static BaseStorageUI craftingUI, storageUI, environmentUI, decraftingUI, securityUI;
 
+	public static bool HasOpenUI() => uiInterface?.CurrentState is not null;
+
 	public static bool IsStorageUIOpen() => storageUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, storageUI);
 
 	public static bool IsCraftingUIOpen() => craftingUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, craftingUI);
@@ -36,12 +40,18 @@ public class MagicUI : ModSystem
 	public static bool IsSecurityUIOpen() => securityUI is not null && object.ReferenceEquals(uiInterface?.CurrentState, securityUI);
 
 	private static bool _refreshUI;
+	[Obsolete("Use the methods for requesting refresh threads instead", error: true)]
 	public static bool RefreshUI {
 		get => _refreshUI;
 		set => _refreshUI |= value;
 	}
 
-	public static bool CurrentlyRefreshing => activeRefreshingThread is { IsRunning: true };
+	[Obsolete]
+	internal static bool Obsolete_RefreshUI() => RefreshUI;
+
+	// NOTE: Checks RefreshUI because of a delay between the call to SetRefresh() and the thread actually starting, and this property could be checked between them.
+	//       Even though RefreshUI is obsolete, it still needs to be accounted for.
+	public static bool CurrentlyRefreshing => _refreshUI || activeRefreshingThread is { IsRunning: true };
 
 	public static bool HasActiveThread<T>() => activeRefreshingThread is { IsRunning: true } and T;
 
@@ -58,10 +68,27 @@ public class MagicUI : ModSystem
 	public static event Action OnRefresh;
 		
 	private static bool forceFullRefresh;
+	[Obsolete("This property was renamed to " + nameof(IgnoreSpecificZoneRefreshing), error: true)]
 	public static bool ForceNextRefreshToBeFull {
 		get => forceFullRefresh || StorageGUI.Obsolete_needRefresh();
 		set => forceFullRefresh |= value;
 	}
+
+	[Obsolete]
+	private static bool Obsolete_get_ForceNextRefreshToBeFull() => ForceNextRefreshToBeFull;
+
+	[Obsolete]
+	private static void Obsolete_set_ForceNextRefreshToBeFull(bool value) => ForceNextRefreshToBeFull = value;
+
+	/// <summary>
+	/// If <see langword="true"/>, the next main zone refresh will refresh its entire list instead of the specific items from optimization calls like <see cref="SetNextCollectionsToRefresh(int)"/>
+	/// </summary>
+	public static bool IgnoreSpecificZoneRefreshing {
+		get => Obsolete_get_ForceNextRefreshToBeFull();
+		set => Obsolete_set_ForceNextRefreshToBeFull(value);
+	}
+
+	// TODO: replace the above with IgnoreSpecificZoneRefreshing
 
 	internal static RefreshThread activeRefreshingThread;
 	internal static IRefreshThreadBuilder pendingThread;
@@ -71,10 +98,34 @@ public class MagicUI : ModSystem
 	/// <summary>
 	/// Shorthand for setting <see cref="RefreshUI"/> to <see langword="true"/> and also setting <see cref="ForceNextRefreshToBeFull"/>
 	/// </summary>
+	[Obsolete("Use the methods for requesting refresh threads instead", error: true)]
 	public static void SetRefresh(bool forceFullRefresh = false) {
 		RefreshUI = true;
 		ForceNextRefreshToBeFull = forceFullRefresh;
+
+		if (!_hasPrintedObsoleteMessage) {
+			_hasPrintedObsoleteMessage = true;
+			
+			var trace = new StackTrace(1, true);
+
+			string errorMessage = Utility.TryScanStackTraceForMods(trace, out Mod recentModCaller)
+				? $"Mod \"{recentModCaller.Name}\" is using the obsolete MagicUI.SetRefresh() method and needs to update to use the new refresh thread system."
+				: "An unknown mod is using the obsolete MagicUI.SetRefresh() method and needs to update to use the new refresh thread system.";
+
+			MagicStorageMod.Instance.Logger.Error($"{errorMessage}\n{trace}");
+
+			if (Main.netMode != NetmodeID.Server) {
+				var m = errorMessage;
+				Main.QueueMainThreadAction(() => Main.NewTextMultiline(m, c: Color.Red));
+			}
+		}
 	}
+
+	private static bool _hasPrintedObsoleteMessage;
+
+	/// <inheritdoc cref="SetRefresh"/>
+	[Obsolete]
+	internal static void Obsolete_SetRefresh(bool forceFullRefresh = false) => SetRefresh(forceFullRefresh);
 
 	private static bool _pendingWatchdogPulse;
 
@@ -98,10 +149,17 @@ public class MagicUI : ModSystem
 			_pendingWatchdogPulse = false;
 		}
 
-		if (RefreshUI)
-			RefreshItems();
+		if (Obsolete_RefreshItems()) {
+			// Old logic; ignore the thread requests
+		} else if (_requestingFullThread) {
+			StartFullRefreshThread(caller: "MagicUI.CheckRefresh()");
+			ResetThreadRequests();
+		} else if (_requestingZoneThread) {
+			StartMainZoneRefreshThread(caller: "MagicUI.CheckRefresh()");
+			ResetThreadRequests();
+		}
 
-		if (activeRefreshingThread is { IsRunning: true })
+		if (CurrentlyRefreshing)
 			CurrentThreadingDuration++;
 		else
 			CurrentThreadingDuration = 0;
@@ -109,12 +167,8 @@ public class MagicUI : ModSystem
 
 	private static void HandleWatchdogs() {
 		// Check the watchdogs
-		foreach (var watchdog in _watchdogs) {
-			if (watchdog.Observe()) {
-				watchdog.OnStateChange(out bool forceFullRefresh);
-				SetRefresh(forceFullRefresh);
-			}
-		}
+		foreach (var watchdog in _watchdogs)
+			watchdog.Handle();
 	}
 
 	internal static void InvokeOnRefresh() {
@@ -123,17 +177,23 @@ public class MagicUI : ModSystem
 	}
 
 	public static void SetNextCollectionsToRefresh(int itemType) {
-		SetRefresh();
-		StorageGUI.SetNextItemTypeToRefresh(itemType);
-		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
-		DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemType);
+	//	SetRefresh();
+		if (IsStorageUIOpen())
+			StorageGUI.SetNextItemTypeToRefresh(itemType);
+		else if (IsCraftingUIOpen())
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemType);
+		else if (IsDecraftingUIOpen())
+			DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemType);
 	}
 
 	public static void SetNextCollectionsToRefresh(IEnumerable<int> itemTypes) {
-		SetRefresh();
-		StorageGUI.SetNextItemTypesToRefresh(itemTypes);
-		CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemTypes);
-		DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemTypes);
+	//	SetRefresh();
+		if (IsStorageUIOpen())
+			StorageGUI.SetNextItemTypesToRefresh(itemTypes);
+		else if (IsCraftingUIOpen())
+			CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(itemTypes);
+		else if (IsDecraftingUIOpen())
+			DecraftingGUI.SetNextDefaultItemCollectionToRefresh(itemTypes);
 	}
 
 	internal static void StopCurrentThread() {
@@ -142,6 +202,21 @@ public class MagicUI : ModSystem
 		activeRefreshingThread?.Stop();
 		// NOTE: RefreshThread is responsible for setting this to null when the active thread finishes execution
 	//	activeRefreshingThread = null;
+	}
+
+	private static bool _requestingFullThread;
+	private static bool _requestingZoneThread;
+
+	public static void RequestFullRefresh() => _requestingFullThread = true;
+
+	public static void RequestMainZoneThread() => _requestingZoneThread = true;
+
+	private static void ResetThreadRequests() {
+		_refreshUI = false;
+		StorageGUI.Obsolete_needRefresh() = false;
+		_requestingFullThread = false;
+		_requestingZoneThread = false;
+		forceFullRefresh = false;
 	}
 
 	public static void StartFullRefreshThread(string caller) {
@@ -193,10 +268,18 @@ public class MagicUI : ModSystem
 		}
 	}
 
-	public static void RefreshItems() {
-		_refreshUI = false;
-		StorageGUI.Obsolete_needRefresh() = false;
+	[Obsolete]
+	private static bool Obsolete_RefreshItems() {
+		if (RefreshUI) {
+			RefreshItems();
+			return true;
+		}
 
+		return false;
+	}
+
+	[Obsolete("Use " + nameof(RequestFullRefresh) + " or " + nameof(StartFullRefreshThread) + " instead", error: true)]
+	public static void RefreshItems() {
 		if (IsStorageUIOpen()) {
 			CraftingGUI.ClearAllCollections();
 			DecraftingGUI.ClearAllCollections(callCraftingClear: false);
@@ -218,7 +301,7 @@ public class MagicUI : ModSystem
 			DecraftingGUI.ClearAllCollections(callCraftingClear: false);
 		}
 
-		forceFullRefresh = false;
+		ResetThreadRequests();
 	}
 
 	internal static IEntitySource GetShimmeringSpawnSource() => new EntitySource_Parent(Main.LocalPlayer);
@@ -230,6 +313,8 @@ public class MagicUI : ModSystem
 
 		_watchdogs.Add(new RefreshUIWatchdog(target, initialStateOverride ?? target.GetCurrentState()));
 	}
+
+	internal static void ClearRefreshWatchdogs() => _watchdogs.Clear();
 
 	//Assign text to this value instead of using Main.instance.MouseText() in the MouseOver and MouseOut events
 	internal static string mouseText;

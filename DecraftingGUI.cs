@@ -78,7 +78,7 @@ namespace MagicStorage {
 
 		public static RefreshThread CreateItemListRefreshThread(string caller) {
 			// Force all items to be recalculated
-			if (MagicUI.ForceNextRefreshToBeFull)
+			if (MagicUI.IgnoreSpecificZoneRefreshing)
 				itemsToRefresh = null;
 
 			var thread = new ItemListRefreshThread(

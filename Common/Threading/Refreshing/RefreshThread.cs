@@ -274,10 +274,16 @@ namespace MagicStorage.Common.Threading.Refreshing {
 		/// <param name="totalTasks">The total number of actions to be completed.</param>
 		/// <param name="taskName">The name of the first action.</param>
 		public void InitTaskSchedule(int totalTasks, string taskName) {
-			_targetSteps = totalTasks;
+			_targetSteps = int.Max(1, totalTasks);
 			_currentStep = 0;
 			CurrentTask = taskName;
 		}
+
+		/// <summary>
+		/// Sets the total number of actions for the current task.
+		/// </summary>
+		/// <param name="newTotalTasks">The new total number of actions.</param>
+		public void AdjustTaskTarget(int newTotalTasks) => _targetSteps = int.Max(1, newTotalTasks);
 
 		/// <summary>
 		/// Resets the number of completed actions for the current task to zero.

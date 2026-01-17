@@ -5,6 +5,8 @@ namespace MagicStorage.Common.Threading {
 	public class ListProvider<T>(List<T> staticList) : IReadOnlyValueProvider<List<T>>, IList<T> {
 		private readonly List<T> _staticList = staticList;
 
+		public List<T> StaticSource => _staticList;
+
 		public List<T> Value { get; } = [];
 
 		public void ClearStatic() => _staticList.Clear();

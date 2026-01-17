@@ -25,16 +25,19 @@ namespace MagicStorage {
 			if (recipes is null)
 				return;
 
+			// CHANGE: v0.7.0.12 - Affected recursion recipes are instead added during the freshing stage if the availability of the recipe changed
+			/*
 			IEnumerable<Recipe> fullRecipeList = recipes is null
 				? recipes
 				: ExpandRecipeCollectionWithPossibleRecursionDependents(recipes);
+			*/
 
 			if (recipesToRefreshByIndex is null) {
 				// Set the initial collection
 				recipesToRefreshByIndex = [.. recipes.Select(RecipeToRecipeIndex)];
 			} else {
 				// Add to the existing collection
-				foreach (int recipeIndex in fullRecipeList.Select(RecipeToRecipeIndex))
+				foreach (int recipeIndex in recipes.Select(RecipeToRecipeIndex))
 					recipesToRefreshByIndex.Add(recipeIndex);
 			}
 		}
@@ -48,6 +51,15 @@ namespace MagicStorage {
 					.SelectManyByDictionary<int, List<Node>, Node>(MagicCache.RecursiveRecipesUsingRecipeByIndex)
 					.Select(NodeToRecipe)
 			);
+		}
+
+		private static IEnumerable<Recipe> GetPossibleRecursionDependents(Recipe toRefresh) {
+			if (!MagicStorageConfig.IsRecursionEnabled)
+				return [];
+
+			return MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(toRefresh.RecipeIndex, out var nodeList)
+				? nodeList.Select(NodeToRecipe)
+				: [];
 		}
 
 		private static Recipe NodeToRecipe(Node node) => node.info.sourceRecipe;

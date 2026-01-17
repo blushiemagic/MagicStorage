@@ -64,6 +64,9 @@ namespace MagicStorage.UI.States {
 
 		protected float recipeLeft, recipeTop, recipeWidth, recipeHeight;
 
+		protected const int MAX_WATCHDOG_DELAY = 60;
+		protected int recipeWatchdogDelay = MAX_WATCHDOG_DELAY;
+
 		public override string DefaultPage => "Crafting";
 
 		public CraftingUIState() {
@@ -296,7 +299,7 @@ namespace MagicStorage.UI.States {
 			craftM1.SetAmountInformation(-1, true);
 			craftM10.SetAmountInformation(-10, true);
 			craftM100.SetAmountInformation(-100, true);
-			craftMax.SetAmountInformation(9999, false);
+			craftMax.SetAmountInformation(Item.CommonMaxStack, false);
 			craftReset.SetAmountInformation(1, false);
 
 			InitCraftButtonDimensions();
@@ -406,9 +409,9 @@ namespace MagicStorage.UI.States {
 			}
 		}
 
-		public override void Update(GameTime gameTime) {
-			CraftingGUI.PlayerZoneCache.Cache();
-
+		public override void Update(GameTime gameTime) => CraftingGUI.ExecuteInCraftingGuiEnvironment(gameTime, Update_Inner);
+		
+		private void Update_Inner(GameTime gameTime) {
 			try {
 				if (!currentPage.IsOpening && !MagicUI.CurrentlyRefreshing && delayedHistoryJump) {
 					delayedHistoryJump = false;
@@ -416,6 +419,14 @@ namespace MagicStorage.UI.States {
 					if (history.Current >= 0)
 						history.Goto(history.Current);
 				}
+
+				if (!MagicUI.CurrentlyRefreshing) {
+					if (--recipeWatchdogDelay < 0) {
+						recipeWatchdogDelay = MAX_WATCHDOG_DELAY;
+						MagicUI.PulseWatchdogs();
+					}
+				} else
+					recipeWatchdogDelay = MAX_WATCHDOG_DELAY;
 
 				using (FlagSwitch.Create(ref MagicUI.blockItemSlotActionsDetour, !recipeHistoryPanel.IsMouseHovering)) {
 					base.Update(gameTime);
@@ -442,7 +453,8 @@ namespace MagicStorage.UI.States {
 				if (flag.Value)
 					updateFocus();
 
-				ClampCraftAmount();
+				if (!MagicUI.CurrentlyRefreshing)
+					ClampCraftAmount();
 
 				bool config = MagicStorageConfig.UseOldCraftMenu;
 
@@ -465,8 +477,6 @@ namespace MagicStorage.UI.States {
 			} catch (Exception e) {
 				Main.NewTextMultiline(e.ToString(), c: Color.White);
 			}
-
-			CraftingGUI.PlayerZoneCache.FreeCache(true);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
@@ -655,6 +665,8 @@ namespace MagicStorage.UI.States {
 				history.Goto(history.Current);
 			*/
 			delayedHistoryJump = true;
+
+			recipeWatchdogDelay = MAX_WATCHDOG_DELAY;
 		}
 
 		protected override void OnClose() {

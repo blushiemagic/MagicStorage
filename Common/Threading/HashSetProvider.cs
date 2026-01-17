@@ -5,6 +5,8 @@ namespace MagicStorage.Common.Threading {
 	public class HashSetProvider<T>(HashSet<T> staticSet) : IReadOnlyValueProvider<HashSet<T>>, ISet<T> {
 		private readonly HashSet<T> _staticSet = staticSet;
 
+		public HashSet<T> StaticSource => _staticSet;
+
 		public HashSet<T> Value { get; } = [];
 
 		public void ClearStatic() => _staticSet.Clear();

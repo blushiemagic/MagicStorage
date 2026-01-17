@@ -2,9 +2,7 @@
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.Threading;
 using MagicStorage.Common.Threading.Refreshing;
-using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
-using MagicStorage.UI.States;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -51,110 +49,6 @@ namespace MagicStorage {
 			CreateFullRefreshThread(caller: "CraftingGUI.RefreshItems()").Start();
 
 			ResetRefreshCache();
-		}
-
-		private class FullRefreshBuilder : IRefreshThreadBuilder {
-			public static IRefreshThreadBuilder Instance { get; } = new FullRefreshBuilder();
-
-			public StorageViewControls CreateControls() => CreateRefreshThreadControls(MagicUI.craftingUI);
-
-			public RefreshThread CreateThread(StorageViewControls controls) {
-				// Force all recipes to be recalculated
-				if (MagicUI.ForceNextRefreshToBeFull)
-					recipesToRefreshByIndex = null;
-
-				var selectionProvider = new SelectionProvider();
-
-				return new CraftingRefreshThread(
-					controls: controls,
-					processedStorage: new(
-						staticWasModuleItemTable: wasModuleItem,
-						staticModuleItemWasFromInventoryTable: moduleItemWasFromInventory,
-						staticResultItemsList: items,
-						staticResultItemGroupsList: itemGroups,
-						staticResultItemsFromModulesList: sourceItemsFromModules,
-						staticCountsDictionary: itemCounts,
-						staticCountsByPrefixDictionary: itemCountsByPrefix
-					),
-					mainZoneControls: new(
-						zoneObjectFilterChoice: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
-						favorited: StoragePlayer.LocalPlayer.FavoritedRecipes,
-						hidden: StoragePlayer.LocalPlayer.HiddenRecipes,
-						configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist
-					),
-					mainZoneResults: new(
-						objectsToRefresh: CollectRefreshingRecipes(),
-						staticObjectList: recipes,
-						staticAvailableList: recipeAvailable
-					),
-					ingredientControls: new(
-						staticShowAllIngredientsField: new ShowAllIngredientsProvider(((CraftingUIState)MagicUI.craftingUI).recursionButton.IsOn),
-						staticInfiniteItemsSet: isItemInfinite,
-						staticBlockedList: blockStorageItems,
-						staticCreativeUnitField: new CreativeUnitPresentProvider()
-					),
-					craftingObject: new(
-						selection: selectionProvider,
-						craftAmountTarget: new CraftAmountTargetProvider()
-					),
-					availableCache: new(
-						staticTable: recipeToAvailableLookup
-					),
-					recipeItems: new SingleResultRecipeItemsProvider(
-						staticStoredIngredientsList: storageItems,
-						staticStoredIngredientsInfoList: storageItemInfo,
-						resultItem: new CraftResultProvider(
-							selectedRecipe: selectionProvider
-						)
-					)
-				);
-			}
-		}
-
-		private class ShowAllIngredientsProvider(bool defaultValue) : IReadOnlyValueProvider<bool> {
-			public bool Value { get; private set; } = defaultValue;
-
-			public void ClearStatic() => showAllPossibleIngredients = false;
-			public void CopyFromStatic() => Value = showAllPossibleIngredients;
-			public void CopyToStatic() => showAllPossibleIngredients = Value;
-		}
-
-		private class SelectionProvider : IReadOnlyValueProvider<Recipe> {
-			public Recipe Value { get; private set; }
-			public SelectionProvider() => CopyFromStatic();
-			public SelectionProvider(Recipe defaultValue) => Value = defaultValue;
-			public void ClearStatic() { }
-			public void CopyFromStatic() => Value = selectedRecipe;
-			public void CopyToStatic() => selectedRecipe = Value;
-		}
-
-		internal class CraftAmountTargetProvider : IValueProvider<int> {
-			public int Value { get; set; }
-			public CraftAmountTargetProvider() => CopyFromStatic();
-			public CraftAmountTargetProvider(int defaultValue) => Value = defaultValue;
-			public void ClearStatic() => craftAmountTarget = 1;
-			public void CopyFromStatic() => Value = craftAmountTarget;
-			public void CopyToStatic() => craftAmountTarget = Value;
-		}
-
-		internal class CreativeUnitPresentProvider : IValueProvider<bool> {
-			public bool Value { get; set; }
-			public void ClearStatic() => allItemsAreInfinite = false;
-			public void CopyFromStatic() => Value = allItemsAreInfinite;
-			public void CopyToStatic() => allItemsAreInfinite = Value;
-		}
-
-		internal static StorageViewControls CreateRefreshThreadControls(BaseStorageUI refreshingUI) {
-			var craftingPage = refreshingUI.GetDefaultPage<CraftingUIState.RecipesPage>();
-
-			return new StorageViewControls(
-				sortingOption: SortingOptionLoader.Selected,
-				filteringOption: FilteringOptionLoader.Selected,
-				generalFilters: FilteringOptionLoader.GeneralSelections,
-				fullSearchText: craftingPage.searchBar.State.InputText,
-				showOnlyFavorites: MagicStorageConfig.CraftingFavoritingEnabled && craftingPage.recipeButtons.Choice == RecipeButtonsFavoritesChoice,
-				modSearchOption: craftingPage.modSearchBox.ModIndex
-			);
 		}
 
 		private static void SortAndFilter(CraftingRefreshThread thread) {

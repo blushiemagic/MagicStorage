@@ -22,7 +22,7 @@ namespace MagicStorage {
 
 		/// <inheritdoc cref="IsAvailable{T}(T, Recipe, bool)"/>
 		public static bool IsAvailable<T>(T thread, Recipe recipe)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			return IsAvailable(thread, recipe, true);
 		}
@@ -48,7 +48,7 @@ namespace MagicStorage {
 		/// Defaults to <see langword="true"/>.
 		/// </param>
 		public static bool IsAvailable<T>(T thread, Recipe recipe, bool checkRecursive)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			if (recipe is null)
 				return false;
@@ -70,9 +70,9 @@ namespace MagicStorage {
 			bool available = false;
 			if (checkRecursive && MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				if (MagicUI.CurrentlyRefreshing)
-					available = IsAvailable_CheckRecursiveRecipe(thread, recursiveRecipe);
+					available = IsAvailable_CheckRecursiveRecipe(thread, recipe, recursiveRecipe);
 				else
-					available = ExecuteInCraftingGuiEnvironment(thread, recursiveRecipe, IsAvailable_CheckRecursiveRecipe);
+					available = ExecuteInCraftingGuiEnvironment(thread, recipe, recursiveRecipe, IsAvailable_CheckRecursiveRecipe);
 			} else
 				available = IsAvailable_CheckNormalRecipe(thread, recipe);
 
@@ -87,14 +87,18 @@ namespace MagicStorage {
 		}
 
 		// CHANGE: v0.7.0.12 - No longer has an "int ignoreItem" parameter that was used to ignore the recipe's result item
-		private static bool IsAvailable_CheckRecursiveRecipe<T>(T thread, RecursiveRecipe recipe)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider
+		private static bool IsAvailable_CheckRecursiveRecipe<T>(T thread, Recipe recipe, RecursiveRecipe recursiveRecipe)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
+			var lookup = thread?.RecipeSimulations.recipeToAvailableSimulation.Value ?? recursionRecipeToAvailableSimulationLookup;
+			if (lookup.TryGetValue(recipe, out var simulation))
+				return simulation.AmountCrafted > 0;
+
 			var availableObjects = GetCurrentInventory(thread, cloneIfBlockEmpty: true);
 
 		//	using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI)) {
-			CraftingSimulation simulation = new CraftingSimulation();
-			simulation.SimulateCrafts(recipe, 1, availableObjects);  // Recipe is available if at least one craft is possible
+			lookup.AddOrUpdate(recipe, simulation = new());
+			simulation.SimulateCrafts(recursiveRecipe, 1, availableObjects);  // Recipe is available if at least one craft is possible
 			return simulation.AmountCrafted > 0;
 		//	}
 		}
@@ -103,6 +107,13 @@ namespace MagicStorage {
 			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, IRecipeSnapshotsProvider
 		{
 			if (recipe is null)
+				return false;
+
+			// CHANGE: v0.7.0.12 - Condition checks are moved first to better optimize RecipeWatchTarget
+			bool conditionsAvailable = thread?.RecipeSnapshots.ConditionsMet[recipe.RecipeIndex]
+				?? ExecuteInCraftingGuiEnvironment(recipe, RecipeLoader.RecipeAvailable);
+
+			if (!conditionsAvailable)
 				return false;
 
 			bool[] adjTiles = thread?.MainZoneObjectsFilterControls.adjTiles ?? CraftingGUI.adjTiles;
@@ -116,7 +127,7 @@ namespace MagicStorage {
 			HashSet<int> infiniteItems = thread?.IngredientControls.infiniteItems.Value ?? isItemInfinite;
 
 			if (creativeUnitPresent)
-				goto SkipIngredientChecks;
+				return true;
 
 			var itemCountsDictionary = GetItemCountsWithBlockedItemsRemoved(thread);
 
@@ -132,12 +143,7 @@ namespace MagicStorage {
 					return false;
 			}
 
-			// TODO: find all references for blockStorageItems
-
-			SkipIngredientChecks:
-
-			return thread?.RecipeSnapshots.ConditionsMet[recipe.RecipeIndex]
-				?? ExecuteInCraftingGuiEnvironment(recipe, RecipeLoader.RecipeAvailable);
+			return true;
 		}
 
 		internal static bool PassesBlock(Recipe recipe)

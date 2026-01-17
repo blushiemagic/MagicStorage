@@ -492,7 +492,8 @@ namespace MagicStorage.UI.States {
 
 			if (_pendingResult.IsSuccess()) {
 				_clearPopup = true;
-				MagicUI.SetRefresh(forceFullRefresh: true);  // Force the UI to populate the relevant collections
+				MagicUI.RequestFullRefresh();  // Force the UI to populate the relevant collections
+				MagicUI.IgnoreSpecificZoneRefreshing = true;
 			}
 		}
 
@@ -622,8 +623,8 @@ namespace MagicStorage.UI.States {
 				PanelHeight = Main.screenHeight - (top + 2 * UIDragablePanel.cornerPadding);
 				panel.Recalculate();
 
-				//RefreshItems will conveniently update the zone heights
-				MagicUI.RefreshItems();
+				// Zone refreshing will conveniently update the zone heights
+				MagicUI.StartFullRefreshThread(caller: "BaseStorageUI.Update()");
 
 				pendingUIChange = false;
 			}

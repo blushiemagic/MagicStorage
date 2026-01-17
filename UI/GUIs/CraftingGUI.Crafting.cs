@@ -114,7 +114,7 @@ namespace MagicStorage {
 						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 				}
 
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending craft results to server...");
 
@@ -241,6 +241,7 @@ namespace MagicStorage {
 
 			// Inform other mods that the items were crafted
 			using (FlagSwitch.ToggleTrue(ref CatchDroppedItems)) {
+				DroppedItems ??= new();
 				DroppedItems.Clear();
 				foreach (Item item in simulation.ExcessResults.Where(static i => i.Stack > 0).Select(static i => new Item(i.type, i.Stack, i.prefix))) {
 					ctx.results.Add(item);

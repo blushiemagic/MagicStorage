@@ -446,7 +446,7 @@ printReport:
 			Report(false, "Operation: " + op);
 		}
 
-		public static void SendRefreshNetworkItems(Point16 position, bool forceFullRefresh = false, IEnumerable<int> typesToRefresh = null)
+		public static void SendRefreshNetworkItems(Point16 position, bool ignoreSpecificRefreshes = false, IEnumerable<int> typesToRefresh = null)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
@@ -465,7 +465,7 @@ printReport:
 						packet.Write(id);
 				}
 
-				packet.Write(forceFullRefresh);
+				packet.Write(ignoreSpecificRefreshes);
 
 				packet.Send();
 
@@ -482,13 +482,13 @@ printReport:
 			for (int i = 0; i < count; i++)
 				types.Add(reader.ReadInt32());
 
-			bool forceFullRefresh = reader.ReadBoolean();
+			bool ignoreSpecificRefreshes = reader.ReadBoolean();
 
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
 			if (position.ResolveToTileEntity() is TEStorageHeart heart && StoragePlayer.IsClientViewingHeart(heart)) {
-				MagicUI.ForceNextRefreshToBeFull = forceFullRefresh;
+				MagicUI.IgnoreSpecificZoneRefreshing = ignoreSpecificRefreshes;
 				MagicUI.SetNextCollectionsToRefresh(types);
 
 				heart.netcodeUpdate = true;
@@ -855,7 +855,8 @@ printReport:
 			//	PrintClientRequest(sender, "Refresh UI", storage);
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.IsClientViewingHeart(storage) && StoragePlayer.IsStorageCrafting()) {
-					MagicUI.RefreshItems();
+					MagicUI.RequestFullRefresh();
+					MagicUI.IgnoreSpecificZoneRefreshing = true;
 
 					Report(true, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
 				}
@@ -1683,7 +1684,7 @@ printReport:
 
 					if (unit.GetHeart() is TEStorageHeart heart) {
 						heart.ResetCompactStage();
-						SendRefreshNetworkItems(heart.Position, forceFullRefresh: true);
+						SendRefreshNetworkItems(heart.Position, ignoreSpecificRefreshes: true);
 					}
 				}
 

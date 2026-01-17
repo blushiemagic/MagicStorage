@@ -110,7 +110,7 @@ namespace MagicStorage {
 					foreach (Item item in CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, toDeposit))
 						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending shimmer request to server...");
 

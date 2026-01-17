@@ -6,6 +6,8 @@ namespace MagicStorage.Common.Threading {
 	public class ArrayProvider<T>(T[] staticArray) : IReadOnlyValueProvider<T[]>, IList<T> {
 		private readonly T[] _staticArray = staticArray;
 
+		public T[] StaticSource => _staticArray;
+
 		public T[] Value { get; } = [];
 
 		public void ClearStatic() => Array.Clear(_staticArray);

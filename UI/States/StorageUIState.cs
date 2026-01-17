@@ -172,14 +172,14 @@ namespace MagicStorage.UI.States {
 				depositButton.OnLeftClick += (evt, e) => {
 					bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl);
 					if (StorageGUI.TryDepositAll(ctrlDown == MagicStorageConfig.QuickStackDepositMode)) {
-						MagicUI.SetRefresh();
+						MagicUI.RequestFullRefresh();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				};
 
 				depositButton.OnRightClick += (evt, e) => {
 					if (StorageGUI.TryRestock()) {
-						MagicUI.SetRefresh();
+						MagicUI.RequestFullRefresh();
 						SoundEngine.PlaySound(SoundID.Grab);
 					}
 				};
@@ -222,7 +222,8 @@ namespace MagicStorage.UI.States {
 
 						StorageGUI.currentMode = StorageGUI.ActionMode.Normal;
 
-						MagicUI.SetRefresh(forceFullRefresh: true);
+						MagicUI.RequestFullRefresh();
+						MagicUI.IgnoreSpecificZoneRefreshing = true;
 
 						ReformatPage(MagicStorageConfig.ButtonUIMode);
 					} catch (Exception ex) {
@@ -238,7 +239,8 @@ namespace MagicStorage.UI.States {
 
 					StorageGUI.currentMode = StorageGUI.ActionMode.Normal;
 
-					MagicUI.SetRefresh(forceFullRefresh: true);
+					MagicUI.RequestFullRefresh();
+					MagicUI.IgnoreSpecificZoneRefreshing = true;
 
 					ReformatPage(MagicStorageConfig.ButtonUIMode);
 				};
@@ -289,7 +291,8 @@ namespace MagicStorage.UI.States {
 							heart.netcodeUpdate = false;
 							heart.netDesync = 0;
 
-							MagicUI.SetRefresh(forceFullRefresh: true);
+							MagicUI.RequestFullRefresh();
+							MagicUI.IgnoreSpecificZoneRefreshing = true;
 						}
 					}
 
@@ -572,7 +575,7 @@ namespace MagicStorage.UI.States {
 				}
 
 				if (canRefresh) {
-					MagicUI.SetRefresh();
+					MagicUI.RequestFullRefresh();
 					StorageGUI.SetNextItemTypeToRefresh(type);
 
 					obj.IgnoreNextHandleAction = true;
@@ -775,7 +778,7 @@ namespace MagicStorage.UI.States {
 					if (Main.netMode == NetmodeID.SinglePlayer) {
 						using (SecuritySystem.CreateAccessContext())
 							heart.CompactCoins();
-						MagicUI.SetRefresh();
+						MagicUI.RequestFullRefresh();
 					} else
 						NetHelper.SendCoinCompactRequest(heart.Position);
 				});

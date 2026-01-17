@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MagicStorage.Common.Systems;
+using System;
 
 namespace MagicStorage.Common {
 	/// <summary>
@@ -15,6 +16,16 @@ namespace MagicStorage.Common {
 		/// </summary>
 		/// <param name="forceFullRefresh">Whether a full refresh (<see langword="true"/>) or a partial refresh (<see langword="false"/>) should be performed if the state has changed</param>
 		void OnStateChange(out bool forceFullRefresh);
+	}
+
+	/// <inheritdoc cref="IRefreshUIWatchTarget"/>
+	public interface IRefreshUIWatchTarget_2 : IRefreshUIWatchTarget {
+		void IRefreshUIWatchTarget.OnStateChange(out bool forceFullRefresh) { forceFullRefresh = false; }  // Implementation hidden
+
+		/// <summary>
+		/// This method runs when this target's state has changed.
+		/// </summary>
+		void OnStateChange(bool currentState);
 	}
 
 	/// <summary>
@@ -40,7 +51,17 @@ namespace MagicStorage.Common {
 			return _hasStateChanged;
 		}
 
-		internal void OnStateChange(out bool forceFullRefresh) => _target.OnStateChange(out forceFullRefresh);
+		internal void Handle() {
+			if (Observe()) {
+				if (_target is IRefreshUIWatchTarget_2 target2) {
+					// New definition forces the watcher to handle requesting refresh threads
+					target2.OnStateChange(currentState: !_initialState);
+				} else {
+					_target.OnStateChange(out bool forceFullRefresh);
+					MagicUI.Obsolete_SetRefresh(forceFullRefresh);
+				}
+			}
+		}
 	}
 
 	/// <summary>

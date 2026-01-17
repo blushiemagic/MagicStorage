@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MagicStorage.Common.Collections;
+using System.Collections.Generic;
 
 namespace MagicStorage.Common.Threading.Refreshing {
 	public interface IMainZoneObjectResultsProvider<T> {
@@ -6,12 +7,12 @@ namespace MagicStorage.Common.Threading.Refreshing {
 	}
 
 	public class MainZoneObjectResults<T> {
-		public T[] objectsToRefresh;
+		public readonly AdjustableCollectionEnumerator<T> objectsToRefresh;
 		public readonly ListProvider<T> objects;
 		public readonly ListProvider<bool> objectIsAvailable;
 
 		public MainZoneObjectResults(IEnumerable<T> objectsToRefresh, List<T> staticObjectList, List<bool> staticAvailableList) {
-			this.objectsToRefresh = objectsToRefresh is null ? [] : [.. objectsToRefresh];
+			this.objectsToRefresh = objectsToRefresh is null ? new(null) : new([.. objectsToRefresh]);
 			objects = new ListProvider<T>(staticObjectList);
 			objectIsAvailable = new ListProvider<bool>(staticAvailableList);
 		}
@@ -20,7 +21,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			objects.Clear();
 			objectIsAvailable.Clear();
 
-			if (objectsToRefresh is { Length: > 0 }) {
+			if (objectsToRefresh is { Count: > 0 }) {
 				// The current list will be manipulated, so cache them here
 				CopyFromStaticCollections();
 			}

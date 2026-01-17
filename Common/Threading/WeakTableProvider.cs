@@ -9,6 +9,8 @@ namespace MagicStorage.Common.Threading {
 	{
 		private readonly ConditionalWeakTable<TKey, TValue> _staticTable = staticTable;
 
+		public ConditionalWeakTable<TKey, TValue> StaticSource => _staticTable;
+
 		public ConditionalWeakTable<TKey, TValue> Value { get; } = [];
 
 		public void ClearStatic() => _staticTable.Clear();

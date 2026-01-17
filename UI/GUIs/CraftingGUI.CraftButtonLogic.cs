@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using MagicStorage.Common.Systems;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Linq;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
-using Terraria;
-using MagicStorage.Common.Systems;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -14,8 +14,7 @@ namespace MagicStorage {
 		internal static int maxCraftTimer = StartMaxCraftTimer;
 
 		internal static void ClickCraftButton(ref bool stillCrafting) {
-			if (craftTimer <= 0)
-			{
+			if (craftTimer <= 0) {
 				craftTimer = maxCraftTimer;
 				maxCraftTimer = maxCraftTimer * 3 / 4;
 				if (maxCraftTimer <= 0)
@@ -24,7 +23,7 @@ namespace MagicStorage {
 				int amount = craftAmountTarget;
 
 				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
-					amount = 9999;
+					amount = Item.CommonMaxStack;
 
 				Craft(amount);
 
@@ -32,7 +31,7 @@ namespace MagicStorage {
 
 				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calculated Recipe array being empty
 				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 				SoundEngine.PlaySound(SoundID.Grab);
 			}
 

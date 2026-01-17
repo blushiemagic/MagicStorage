@@ -17,12 +17,12 @@ namespace MagicStorage {
 				int amount = CraftingGUI.craftAmountTarget;
 
 				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
-					amount = 9999;
+					amount = Item.CommonMaxStack;
 
 				Shimmer(amount);
 
 				SetNextDefaultItemCollectionToRefresh(selectedItem);
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 
 				var sound = Main.rand.Next(4) switch {
 					0 => SoundID.Shimmer1,

@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Components;
 using MagicStorage.CrossMod;
 using MagicStorage.UI.Input;
@@ -86,7 +87,8 @@ namespace MagicStorage.UI.States {
 				searchBar.BlockRefreshThreads = true;
 
 				// Ensure that the UI is refreshed completely
-				MagicUI.SetRefresh(forceFullRefresh: true);
+				MagicUI.RequestFullRefresh();
+				MagicUI.IgnoreSpecificZoneRefreshing = true;
 
 				// Recalculates which options should appear and increases the panel height if needed
 				ReformatPage(MagicStorageConfig.ButtonUIMode);
@@ -572,9 +574,9 @@ namespace MagicStorage.UI.States {
 				pendingConfiguration = false;
 			}
 
-			if (MagicUI.CurrentlyRefreshing) {
-				waitProgress.DisplayText = MagicUI.activeRefreshingThread.CurrentTask;
-				waitProgress.UpdateProgress(MagicUI.activeRefreshingThread.Progress);
+			if (MagicUI.HasActiveThread(out RefreshThread thread)) {
+				waitProgress.DisplayText = thread.CurrentTask;
+				waitProgress.UpdateProgress(thread.Progress);
 			} else {
 				waitProgress.DisplayText = "";
 				waitProgress.UpdateProgress(0);

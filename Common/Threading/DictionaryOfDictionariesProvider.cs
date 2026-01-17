@@ -5,6 +5,8 @@ namespace MagicStorage.Common.Threading {
 	public class DictionaryOfDictionariesProvider<TKeyOuter, TKeyInner, TValue> : IReadOnlyValueProvider<Dictionary<TKeyOuter, Dictionary<TKeyInner, TValue>>>, IDictionary<TKeyOuter, Dictionary<TKeyInner, TValue>> {
 		private readonly Dictionary<TKeyOuter, Dictionary<TKeyInner, TValue>> _staticDictionary;
 
+		public Dictionary<TKeyOuter, Dictionary<TKeyInner, TValue>> StaticSource => _staticDictionary;
+
 		public Dictionary<TKeyOuter, Dictionary<TKeyInner, TValue>> Value { get; } = new();
 
 		public DictionaryOfDictionariesProvider(Dictionary<TKeyOuter, Dictionary<TKeyInner, TValue>> staticDictionary) {

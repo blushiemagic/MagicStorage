@@ -77,12 +77,20 @@ namespace MagicStorage {
 			protected override void Execute() {
 				DecraftingGUI.SortAndFilter(this);
 
+				InitTaskSchedule(6, "Updating Caches");
+
 				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				MainZoneObjectsResults.CopyToStaticCollections();
+				CompleteOne();
 				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				CraftingObject.CopyToStaticFields();
+				CompleteOne();
 				ShimmerItemReports.CopyToStaticCollection();
+				CompleteOne();
 				RecipeItems.CopyToStaticCollections();
+				CompleteOne();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 
@@ -155,9 +163,14 @@ namespace MagicStorage {
 			protected override void Execute() {
 				DecraftingGUI.RefreshItemsAvailability(this);
 
+				InitTaskSchedule(3, "Updating Caches");
+
 				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				MainZoneObjectsResults.CopyToStaticCollections();
+				CompleteOne();
 				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 				
@@ -221,10 +234,16 @@ namespace MagicStorage {
 			protected override void Execute() {
 				DecraftingGUI.RefreshStorageItems(this);
 
+				InitTaskSchedule(4, "Updating Caches");
+
 				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				CraftingObject.CopyToStaticFields();
+				CompleteOne();
 				ShimmerItemReports.CopyToStaticCollection();
+				CompleteOne();
 				RecipeItems.CopyToStaticCollections();
+				CompleteOne();
 				
 				CraftingGUI.hasCompleteData = true;
 			}

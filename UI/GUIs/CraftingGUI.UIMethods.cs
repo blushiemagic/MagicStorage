@@ -47,7 +47,7 @@ namespace MagicStorage {
 
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
-					MagicUI.SetRefresh();
+					MagicUI.RequestFullRefresh();
 					SetNextDefaultRecipeCollectionToRefresh(Main.mouseItem.type);
 				}
 
@@ -66,7 +66,7 @@ namespace MagicStorage {
 			}
 			else
 			{
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 				SetNextDefaultRecipeCollectionToRefresh(Main.mouseItem.type);
 			}
 		}

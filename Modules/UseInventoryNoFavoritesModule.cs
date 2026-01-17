@@ -10,7 +10,14 @@ namespace MagicStorage.Modules {
 		private int[] stacks = new int[58 + 40];
 		private bool[] favorited = new bool[58 + 40];
 
-		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) => sandbox.player.inventory.Take(58).Concat(sandbox.player.bank4.item).Where(i => !i.favorited);
+		public override IEnumerable<Item> GetAdditionalItems(EnvironmentSandbox sandbox) {
+			var items = sandbox.player.inventory.Take(58);
+
+			if (sandbox.player.useVoidBag())
+				items = items.Concat(sandbox.player.bank4.item);
+
+			return items.Where(i => !i.favorited);
+		}
 
 		public override void PreUpdateUI() {
 			Player player = Main.LocalPlayer;
@@ -23,7 +30,7 @@ namespace MagicStorage.Modules {
 				CheckInventory(player.bank4.item, 40, 58, typesToUpdate, ref needRefresh);
 
 			if (needRefresh && MagicUI.uiInterface.CurrentState is not null) {
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 				MagicUI.SetNextCollectionsToRefresh(typesToUpdate);
 			}
 		}

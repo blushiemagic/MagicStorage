@@ -44,7 +44,6 @@ namespace MagicStorage
 		internal static void Unload()
 		{
 			ClearAllCollections();
-			PlayerZoneCache.FreeCache(true);
 		}
 
 		internal static void ClearAllCollections() {
@@ -186,6 +185,9 @@ namespace MagicStorage
 				availableCache: new(
 					staticTable: recipeToAvailableLookup
 				),
+				simulations: new(
+					staticTable: recursionRecipeToAvailableSimulationLookup
+				),
 				recipeItems: new SingleResultRecipeItemsProvider(
 					staticStoredIngredientsList: storageItems,
 					staticStoredIngredientsInfoList: storageItemInfo,
@@ -202,7 +204,7 @@ namespace MagicStorage
 
 		public static RefreshThread CreateRecipeListRefreshThread(string caller) {
 			// Force all recipes to be recalculated
-			if (MagicUI.ForceNextRefreshToBeFull)
+			if (MagicUI.IgnoreSpecificZoneRefreshing)
 				recipesToRefreshByIndex = null;
 
 			var selectionProvider = new SelectionProvider();
@@ -241,6 +243,10 @@ namespace MagicStorage
 				),
 				availableCache: new(
 					staticTable: recipeToAvailableLookup
+				),
+				simulations: new(
+					staticTable: recursionRecipeToAvailableSimulationLookup,
+					cachedSimulation: simulatedCraftForCurrentRecipe
 				),
 				recipeItems: new SingleResultRecipeItemsProvider(
 					staticStoredIngredientsList: storageItems,

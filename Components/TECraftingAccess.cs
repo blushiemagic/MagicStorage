@@ -106,7 +106,7 @@ namespace MagicStorage.Components
 				StorageAccess modTile = TileLoader.GetTile(Main.tile[pos.X, pos.Y].TileType) as StorageAccess;
 				TEStorageHeart heart = modTile?.GetHeart(pos.X, pos.Y);
 				if (heart is not null)
-					NetHelper.SendRefreshNetworkItems(heart.Position, forceFullRefresh: true);
+					NetHelper.SendRefreshNetworkItems(heart.Position, ignoreSpecificRefreshes: true);
 			}
 		}
 
@@ -247,7 +247,7 @@ namespace MagicStorage.Components
 
 			Utility.AddCraftingZones(station, ref information);
 
-			MagicUI.SetRefresh();
+			MagicUI.RequestMainZoneThread();
 			CraftingGUI.SetNextDefaultRecipeCollectionToRefreshFromTile(GetUpdatedAdjTile(oldInformation.adjTiles, information.adjTiles));
 
 			if (oldInformation.water != information.water)

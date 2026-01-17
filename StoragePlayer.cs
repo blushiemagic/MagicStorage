@@ -212,17 +212,10 @@ namespace MagicStorage
 				MagicUI.securityUI.ResetSearchBars();
 			}
 
-			MagicUI.SetRefresh(forceFullRefresh: true);
+			MagicUI.RequestFullRefresh();
+			MagicUI.IgnoreSpecificZoneRefreshing = true;
 
 			GetStorageHeart()?.LockOnCurrentClient();
-		}
-
-		//Intended to only be used with StorageHeartAccessWrapper
-		internal void OpenStorageUnsafely(Point16 point) {
-			storageAccess = point;
-			remoteAccess = true;
-
-			MagicUI.RefreshItems();
 		}
 
 		public void CloseStorage()

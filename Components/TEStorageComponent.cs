@@ -242,7 +242,7 @@ namespace MagicStorage.Components
 
 				if (Main.netMode != NetmodeID.Server && StoragePlayer.LocalPlayer.ViewingStorage().X >= 0) {
 					if (centerEnt.GetHeart() is TEStorageHeart centerHeart && StoragePlayer.IsClientViewingHeart(centerHeart))
-						MagicUI.SetRefresh(forceFullRefresh: false);
+						MagicUI.RequestFullRefresh();
 				}
 			}
 		}

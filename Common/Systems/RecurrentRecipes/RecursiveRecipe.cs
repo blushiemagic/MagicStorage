@@ -172,10 +172,10 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			ArgumentNullException.ThrowIfNull(available);
 
 			if (available is not null && (available.creativeUnitPresent || available.isItemInfinite.Contains(original.createItem.type)))
-				return 9999;
+				return Item.CommonMaxStack;
 
 			var simulation = new CraftingSimulation();
-			simulation.SimulateCrafts(this, 9999, available);
+			simulation.SimulateCrafts(this, Item.CommonMaxStack, available);
 			return simulation.AmountCrafted;
 		}
 	}

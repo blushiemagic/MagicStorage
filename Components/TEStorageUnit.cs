@@ -365,7 +365,7 @@ namespace MagicStorage.Components
 			PostChangeContents();
 
 			if (GetHeart() is TEStorageHeart storageHeart && StoragePlayer.IsClientViewingHeart(storageHeart)) {
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 				MagicUI.SetNextCollectionsToRefresh(types);
 			}
 
@@ -388,7 +388,7 @@ namespace MagicStorage.Components
 			PostChangeContents();
 
 			if (GetHeart() is TEStorageHeart storageHeart && StoragePlayer.IsClientViewingHeart(storageHeart)) {
-				MagicUI.SetRefresh();
+				MagicUI.RequestFullRefresh();
 				MagicUI.SetNextCollectionsToRefresh(coreItems.Select(static i => i.type).Distinct().ToList());
 			}
 		}

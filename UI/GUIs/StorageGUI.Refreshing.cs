@@ -15,13 +15,13 @@ namespace MagicStorage {
 		#region Obsolete stuff
 
 		// Field included for backwards compatibility, but made Obsolete to encourage modders to use the new API
-		[Obsolete("Use the SetRefresh() method or RefreshUI property in MagicUI instead", error: true)]
+		[Obsolete("Use the methods for requesting refresh threads in MagicUI instead", error: true)]
 		public static bool needRefresh;
 
 		[Obsolete]
 		internal static ref bool Obsolete_needRefresh() => ref needRefresh;
 
-		[Obsolete("Use MagicUI.RefreshUI instead", error: true)]
+		[Obsolete("Use the methods for requesting refresh threads in MagicUI instead", error: true)]
 		public static bool RefreshUI {
 			get => MagicUI.RefreshUI;
 			set => MagicUI.RefreshUI = value;
@@ -33,14 +33,14 @@ namespace MagicStorage {
 		[Obsolete("Use MagicUI.OnRefresh instead", error: true)]
 		public static event Action OnRefresh;
 		
-		[Obsolete("Use MagicUI.ForceNextRefreshToBeFull instead", error: true)]
+		[Obsolete("Use MagicUI.IgnoreSpecificZoneRefreshing instead", error: true)]
 		public static bool ForceNextRefreshToBeFull {
 			get => MagicUI.ForceNextRefreshToBeFull;
 			set => MagicUI.ForceNextRefreshToBeFull = value;
 		}
 
 		/// <inheritdoc cref="MagicUI.SetRefresh"/>
-		[Obsolete("Use MagicUI.SetRefresh() instead", error: true)]
+		[Obsolete("Use the methods for requesting refresh threads in MagicUI instead", error: true)]
 		public static void SetRefresh(bool forceFullRefresh = false) => MagicUI.SetRefresh(forceFullRefresh);
 
 		internal static readonly List<Item> items = new();
@@ -48,7 +48,7 @@ namespace MagicStorage {
 		// NOTE: Removed because ItemID.Sets.IsAMaterial[] will always be read in Item.SetDefaults() for items in storage
 	//	internal static readonly List<bool> didMatCheck = new();
 
-		[Obsolete("Use MagicUI.RefreshItems() instead", error: true)]
+		[Obsolete("Use the methods for requesting refresh threads in MagicUI instead", error: true)]
 		public static void RefreshItems() {
 			// Moved to the start of the logic since CheckRefresh() might be called multiple times during refreshing otherwise
 			MagicUI.RefreshUI = false;
@@ -94,7 +94,7 @@ namespace MagicStorage {
 
 		public static RefreshThread CreateFullRefreshThread(string caller) {
 			// Force full refresh if item deletion mode is active
-			if (MagicUI.ForceNextRefreshToBeFull || currentMode is ActionMode.Deletion)
+			if (MagicUI.IgnoreSpecificZoneRefreshing || currentMode is ActionMode.Deletion)
 				itemTypesToUpdate = null;
 
 			var storagePage = MagicUI.storageUI.GetDefaultPage<StorageUIState.StoragePage>();

@@ -14,7 +14,7 @@ namespace MagicStorage {
 		}
 
 		internal static int AmountCraftable<T>(T thread, Recipe recipe)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			int maxCrafts;
 
@@ -32,7 +32,7 @@ namespace MagicStorage {
 			NetHelper.Report(false, "Recipe did not have a recursion tree or recursion was disabled");
 
 			// Handle the old logic
-			if (!IsAvailable(recipe)) {
+			if (!IsAvailable(thread, recipe)) {
 				maxCrafts = 0;
 				goto ReportAndReturn;
 			}
@@ -43,7 +43,7 @@ namespace MagicStorage {
 
 			if (hasCreativeUnit) {
 				// No ingredients would be consumed
-				maxCrafts = 9999;
+				maxCrafts = Item.CommonMaxStack;
 				goto ReportAndReturn;
 			}
 

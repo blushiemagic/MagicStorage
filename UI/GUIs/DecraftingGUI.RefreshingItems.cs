@@ -28,7 +28,7 @@ namespace MagicStorage {
 		private static void RefreshItemsAvailability<T>(T thread)
 			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
 		{
-			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Length: > 0 })
+			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Count: > 0 })
 				RefreshAllItemsAvailability(thread);  //Refresh all items
 			else
 				RefreshSpecificItemsAvailablity(thread);
@@ -124,12 +124,14 @@ namespace MagicStorage {
 		private static void RefreshSpecificItemsAvailablity<T>(T thread)
 			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<int>, IMainZoneObjectResultsProvider<int>, IShimmerSnapshotsProvider
 		{
-			CraftingGUI.RefreshSpecificObjects(
+			CraftingGUI.RefreshSpecificObjects<T, int>(
 				thread,
 				Utility.GetItemSample,
-				static (int type) => type,
-				static (int type) => type > ItemID.None,
+				x => x,
+				type => type > ItemID.None,
 				IsAvailable,
+				x => x,
+				_ => null,
 				"Shimmerable Items",
 				ref forceSpecificItemResort
 			);

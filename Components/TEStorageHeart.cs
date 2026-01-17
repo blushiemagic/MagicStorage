@@ -601,7 +601,7 @@ namespace MagicStorage.Components
 			}
 
 			NetHelper.ProcessUpdateQueue();
-			NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
+			NetHelper.SendRefreshNetworkItems(Position, ignoreSpecificRefreshes: true);
 
 			compactStage++;
 			return false;
@@ -985,10 +985,11 @@ namespace MagicStorage.Components
 
 			CheckForRefreshing:
 
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				MagicUI.SetRefresh(forceFullRefresh: true);
-			else
-				NetHelper.SendRefreshNetworkItems(Position, forceFullRefresh: true);
+			if (Main.netMode == NetmodeID.SinglePlayer) {
+				MagicUI.RequestMainZoneThread();
+				MagicUI.IgnoreSpecificZoneRefreshing = true;
+			} else
+				NetHelper.SendRefreshNetworkItems(Position, ignoreSpecificRefreshes: true);
 
 			return itemCountToDelete < origToDelete;
 		}
@@ -1176,8 +1177,10 @@ namespace MagicStorage.Components
 
 				if (Main.netMode == NetmodeID.MultiplayerClient && StoragePlayer.IsClientViewingHeart(this) && MagicUI.IsStorageUIOpen()) {
 					// Only refresh if the applicable filtering mode is being used
-					if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
-						MagicUI.SetRefresh(forceFullRefresh: true);
+					if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type) {
+						MagicUI.RequestMainZoneThread();
+						MagicUI.IgnoreSpecificZoneRefreshing = true;
+					}
 				}
 
 				hasDepositHistory = true;
@@ -1206,8 +1209,10 @@ namespace MagicStorage.Components
 
 			if (changed && Main.netMode != NetmodeID.Server && StoragePlayer.IsClientViewingHeart(this) && MagicUI.IsStorageUIOpen()) {
 				// Only refresh if the applicable filtering mode is being used
-				if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type)
-					MagicUI.SetRefresh(forceFullRefresh: true);
+				if (FilteringOptionLoader.Selected == FilteringOptionLoader.Definitions.Recent.Type) {
+					MagicUI.RequestMainZoneThread();
+					MagicUI.IgnoreSpecificZoneRefreshing = true;
+				}
 			}
 		}
 

@@ -1,5 +1,6 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Threading;
 using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Components;
@@ -14,29 +15,46 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		private class RecipeWatchTarget : IRefreshUIWatchTarget {
+		private class RecipeWatchTarget : IRefreshUIWatchTarget_2 {
 			private readonly Recipe _recipe;
 
 			public RecipeWatchTarget(Recipe recipe) {
 				_recipe = recipe;
 			}
 
-			public bool GetCurrentState() => IsAvailable(_recipe);
+			public bool GetCurrentState() {
+				// Any ingredient or station change will cause a UI refresh, so only the conditions need to be checked
+				if (MagicStorageConfig.IsRecursionEnabled && recursionRecipeToAvailableSimulationLookup.TryGetValue(_recipe, out var simulation)) {
+					foreach (var condition in simulation.RequiredConditions) {
+						if (!condition.IsMet())
+							return false;
+					}
+				} else {
+					foreach (var condition in _recipe.Conditions) {
+						if (!condition.IsMet())
+							return false;
+					}
+				}
 
-			public void OnStateChange(out bool forceFullRefresh) {
+				// Either all conditions are met, or there are no conditions.  Until the UI refreshes, this call is effectively constant due to usage of lookups.
+				return IsAvailable(_recipe);
+			}
+
+			public void OnStateChange(bool currentState) {
 				SetNextDefaultRecipeCollectionToRefresh(new Recipe[] { _recipe });
-				forceFullRefresh = false;
+				MagicUI.RequestMainZoneThread();
 			}
 		}
 
 		internal static readonly List<Recipe> recipes = new();
 		internal static readonly List<bool> recipeAvailable = new();
 		internal static readonly ConditionalWeakTable<Recipe, Ref<bool>> recipeToAvailableLookup = new();
+		internal static readonly ConditionalWeakTable<Recipe, CraftingSimulation> recursionRecipeToAvailableSimulationLookup = new();
 
 		private static void RefreshRecipes<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
-			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Length: > 0 } refreshingObjects) {
+			if (thread.MainZoneObjectsResults.objectsToRefresh is not { Count: > 0 } refreshingObjects) {
 				// Refresh all recipes
 				RefreshAllRecipes(thread);
 			} else {
@@ -56,6 +74,13 @@ namespace MagicStorage {
 
 			SetRecipeAvailableCache(thread);
 
+			MagicUI.ClearRefreshWatchdogs();
+
+			foreach (var (recipe, available) in thread.MainZoneObjectsResults.Enumerate()) {
+				if (recipe is not null && recipe.Conditions.Count > 0)
+					MagicUI.AddRefreshWatchdog(new RecipeWatchTarget(recipe), available);
+			}
+
 			NetHelper.Report(false, "Visible recipes: " + thread.MainZoneObjectsResults.objects.Count);
 			NetHelper.Report(false, "Available recipes: " + thread.MainZoneObjectsResults.objectIsAvailable.Count(static b => b));
 		}
@@ -71,7 +96,7 @@ namespace MagicStorage {
 		}
 
 		private static void RefreshAllRecipes<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			NetHelper.Report(true, "Refreshing all recipes");
 
@@ -142,17 +167,12 @@ namespace MagicStorage {
 				}
 			}
 
-			foreach (var (recipe, available) in thread.MainZoneObjectsResults.Enumerate()) {
-				if (recipe?.Conditions.Count > 0)
-					MagicUI.AddRefreshWatchdog(new RecipeWatchTarget(recipe), available);
-			}
-
 			if (!didDefault)
 				errorText = null;
 		}
 
 		internal static void PopulateRecipes<T>(T thread, int attempt)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			PopulateCollections(
 				thread,
@@ -206,14 +226,16 @@ namespace MagicStorage {
 		internal static bool forceSpecificRecipeResort;
 
 		private static void RefreshSpecificRecipes<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
-			RefreshSpecificObjects(
+			RefreshSpecificObjects<T, Recipe>(
 				thread,
-				static (Recipe recipe) => recipe.createItem,
-				static (Recipe recipe) => recipe.createItem.type,
+				recipe => recipe.createItem,
+				recipe => recipe.createItem.type,
 				HiddenRecipes.IsVisible,
 				IsAvailable,
+				RecipeToRecipeIndex,
+				GetPossibleRecursionDependents,
 				"Recipes",
 				ref forceSpecificRecipeResort
 			);
@@ -225,6 +247,8 @@ namespace MagicStorage {
 			Func<T, int> getItemType,
 			Func<T, bool> canProcessObject,
 			Func<TThread, T, bool> isObjectAvailable,
+			Func<T, int> getIdentifier,
+			Func<T, IEnumerable<T>> getAffectedObjects,
 			string objectNameForTask,
 			ref bool forcedResort
 		)
@@ -232,19 +256,23 @@ namespace MagicStorage {
 		{
 			var zoneResults = thread.MainZoneObjectsResults;
 			var toRefresh = zoneResults.objectsToRefresh;
-			var destination = zoneResults.objects;
-			var destinationAvailable = zoneResults.objectIsAvailable;
 
 			var recipeFilterChoice = thread.MainZoneObjectsFilterControls.zoneObjectFilterChoice;
 
-			NetHelper.Report(true, $"Refreshing {toRefresh.Length} objects");
+			var zip = new TupleListProvider<T, bool>(zoneResults.objects, zoneResults.objectIsAvailable);
 
-			thread.InitTaskSchedule(toRefresh.Length, "Processing " + objectNameForTask);
+			NetHelper.Report(true, $"Refreshing {toRefresh.Count} objects");
+
+			thread.InitTaskSchedule(toRefresh.Count, "Processing " + objectNameForTask);
 
 			// Assumes that the recipes are visible in the GUI
 			bool needsResort = forcedResort;
+			var visited = new HashSet<int>();
 
 			foreach (T refreshingObject in toRefresh.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+				if (!visited.Add(getIdentifier(refreshingObject)))
+					continue;
+
 				if (!canProcessObject(refreshingObject))
 					continue;
 
@@ -252,70 +280,67 @@ namespace MagicStorage {
 				if (!thread.controls.ItemPassesFilters(objectAsItemType))
 					continue;
 
-				int indexInResults = destination.IndexOf(refreshingObject);
+				int indexInResults = zip.IndexOf(refreshingObject);
+				bool inList = indexInResults >= 0;
 
-				if (!isObjectAvailable(thread, refreshingObject)) {
-					if (indexInResults >= 0) {
-						if (recipeFilterChoice == RecipeButtonsAvailableChoice) {
+				bool previousAvailable;
+				bool available = isObjectAvailable(thread, refreshingObject);
+
+				if (recipeFilterChoice == RecipeButtonsAvailableChoice) {
+					previousAvailable = inList;
+
+					if (!available) {
+						if (inList) {
 							// Available recipes; remove unavailable recipes
-							destination.RemoveAt(indexInResults);
-							destinationAvailable.RemoveAt(indexInResults);
-						} else {
-							// All recipes; mark as unavailable
-							destinationAvailable[indexInResults] = false;
+							zip.List.RemoveAt(indexInResults);
+						}
+					} else {
+						if (!inList && ItemPassesCraftingFilters<TThread, T>(thread, objectAsItemType)) {
+							// Available recipes; add new recipes
+							zip.Add(refreshingObject, true);
+							needsResort = true;
 						}
 					}
 				} else {
-					if (recipeFilterChoice == RecipeButtonsAvailableChoice) {
-						if (indexInResults < 0 && ItemPassesCraftingFilters<TThread, T>(thread, objectAsItemType)) {
-							// Available recipes; add new recipes
-							destination.Add(refreshingObject);
-							destinationAvailable.Add(true);
+					previousAvailable = inList && zip.List[indexInResults].Item2;
+
+					if (inList) {
+						// All recipes; update the recipe entry in the list
+						zip.List[indexInResults].Item2 = available;
+					} else {
+						if (ItemPassesCraftingFilters<TThread, T>(thread, objectAsItemType)) {
+							// All recipes; add missing recipes
+							zip.Add(refreshingObject, available);
 							needsResort = true;
 						}
-					} else {
-						if (indexInResults >= 0) {
-							// All recipes; mark as available
-							destinationAvailable[indexInResults] = true;
-						}
 					}
+				}
+
+				// The object's availability has changed; add the affected objects to the refreshing list
+				if (previousAvailable != available && getAffectedObjects(refreshingObject) is { } affected) {
+					toRefresh.InsertRangeAfterCurrent(affected);
+					thread.AdjustTaskTarget(toRefresh.Count);
 				}
 			}
 
 			if (needsResort) {
 				// Sort the recipes
 				thread.InitTaskSchedule(
-					totalTasks: destination.Count,
+					totalTasks: zip.List.Count,
 					taskName: "Sorting " + objectNameForTask
 				);
 
-				var sortedObjects = ItemSorter.DoSorting(thread, destination, getItem);
+				var sortedObjects = ItemSorter.DoSorting(thread, zip, zip.WrapFunction(getItem));
 
 				if (!thread.controls.showOnlyFavorites)
-					sortedObjects = ItemSorter.OrderFavoritesFirst(sortedObjects, thread.MainZoneObjectsFilterControls.IsFavorited);
+					sortedObjects = ItemSorter.OrderFavoritesFirst(sortedObjects, zip.WrapFunction(thread.MainZoneObjectsFilterControls.IsFavorited));
 
-				List<T> sortResults = [.. sortedObjects.NotifyStepsTo(thread).WatchForCancellation(thread, 16)];
-
-				destination.Clear();
-				destination.AddRange(sortResults);
-
-				destinationAvailable.Clear();
-
-				if (recipeFilterChoice == RecipeButtonsAvailableChoice) {
-					// The remaining recipes are all available, so just ensure that all entries are "true"
-					destinationAvailable.AddRange(Enumerable.Repeat(true, destination.Count));
-				} else {
-					// Check if each recipe is available
-					// If "isObjectAvailable" is using a result lookup, this step is fast
-					thread.InitTaskSchedule(
-						totalTasks: destination.Count,
-						taskName: "Re-evaluating Recipes"
-					);
-
-					foreach (T obj in destination.NotifyStepsTo(thread).WatchForCancellation(thread, 16))
-						destinationAvailable.Add(isObjectAvailable(thread, obj));
-				}
+				zip.List = [.. sortedObjects.NotifyStepsTo(thread).WatchForCancellation(thread, 16)];
 			}
+
+			zip.CopyToProviders();
+
+			NetHelper.Report(true, $"Refreshing finished.  Checked {visited.Count} objects.");
 
 			forcedResort = false;
 		}

@@ -2,6 +2,8 @@
 	public interface IReadOnlyValueProvider<T> {
 		T Value { get; }
 
+		T StaticSource { get; }
+
 		void ClearStatic();
 
 		void CopyFromStatic();

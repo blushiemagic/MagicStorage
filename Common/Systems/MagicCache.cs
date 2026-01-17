@@ -145,8 +145,10 @@ public class MagicCache : ModSystem
 	public static void RecalculateRecipeCaches() {
 		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
 
-		if (!Main.gameMenu && (MagicUI.IsCraftingUIOpen() || MagicUI.IsDecraftingUIOpen()))
-			MagicUI.SetRefresh(forceFullRefresh: true);
+		if (!Main.gameMenu && (MagicUI.IsCraftingUIOpen() || MagicUI.IsDecraftingUIOpen())) {
+			MagicUI.RequestFullRefresh();
+			MagicUI.IgnoreSpecificZoneRefreshing = true;
+		}
 	}
 
 	public override void Unload()

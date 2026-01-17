@@ -52,8 +52,8 @@ namespace MagicStorage {
 						Main.mouseItem.stack += result.stack;
 					}
 
-					MagicUI.SetRefresh();
-					DecraftingGUI.SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
+					MagicUI.RequestFullRefresh();
+					SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
 					SoundEngine.PlaySound(SoundID.MenuTick);
 				}
 
@@ -72,8 +72,8 @@ namespace MagicStorage {
 			}
 			else
 			{
-				MagicUI.SetRefresh();
-				DecraftingGUI.SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
+				MagicUI.RequestFullRefresh();
+				SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
 			}
 		}
 

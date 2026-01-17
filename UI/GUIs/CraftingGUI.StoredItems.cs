@@ -34,7 +34,7 @@ namespace MagicStorage {
 		internal static Item result;
 
 		private static void RefreshStorageItems<T>(T thread)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeItemsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeItemsProvider, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
@@ -50,7 +50,7 @@ namespace MagicStorage {
 
 			var resultItemGroups = thread.ProcessedStorageItems.resultItemGroups.Value;
 
-			if (!MagicStorageConfig.IsRecursionEnabled || !selection.HasRecursiveRecipe() || GetCraftingSimulationForCurrentRecipe() is not CraftingSimulation simulation) {
+			if (!MagicStorageConfig.IsRecursionEnabled || !selection.TryGetRecursiveRecipe(out var recursiveRecipe)) {
 				// Show the information for the recipe that was selected
 				RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
 
@@ -60,14 +60,21 @@ namespace MagicStorage {
 				if (thread.IngredientControls.showAllPossibleIngredients.Value) {
 					// Show the information for ALL possible recipes in the tree
 					RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, selection.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
-				} else if (simulation.AmountCrafted > 0) {
-					// Show the information for the recipes that were used by the simulation
-					RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, simulation.UsedRecipes);
 				} else {
-					// Show the information for the highest recipe in the tree, since the simulation failed
-					RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
+					CraftingSimulation simulation = new();
+					simulation.SimulateCrafts(recursiveRecipe, thread.CraftingObject.craftAmountTarget.Value, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
 
-					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoIngredients");
+					thread.RecipeSimulations.currentRecipeSimulation.Value = simulation;
+
+					if (simulation.AmountCrafted > 0) {
+						// Show the information for the recipes that were used by the simulation
+						RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, simulation.UsedRecipes);
+					} else {
+						// Show the information for the highest recipe in the tree, since the simulation failed
+						RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
+
+						error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoIngredients");
+					}
 				}
 			}
 

@@ -2,16 +2,28 @@
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Threading;
 using MagicStorage.Common.Threading.Refreshing;
+using MagicStorage.CrossMod;
 using MagicStorage.UI.States;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
 using Terraria;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
-		public class CraftingRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider {
+		internal static StorageViewControls CreateRefreshThreadControls(BaseStorageUI refreshingUI) {
+			var craftingPage = refreshingUI.GetDefaultPage<CraftingUIState.RecipesPage>();
+
+			return new StorageViewControls(
+				sortingOption: SortingOptionLoader.Selected,
+				filteringOption: FilteringOptionLoader.Selected,
+				generalFilters: FilteringOptionLoader.GeneralSelections,
+				fullSearchText: craftingPage.searchBar.State.InputText,
+				showOnlyFavorites: MagicStorageConfig.CraftingFavoritingEnabled && craftingPage.recipeButtons.Choice == RecipeButtonsFavoritesChoice,
+				modSearchOption: craftingPage.modSearchBox.ModIndex
+			);
+		}
+
+		public class CraftingRefreshThread : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider, IRecipeItemsProvider {
 			public override bool IsPartialThread => false;
 
 			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
@@ -32,6 +44,8 @@ namespace MagicStorage {
 
 			public CraftObjectAvailableCache<Recipe> CraftObjectAvailableCache { get; }
 
+			public RecipeSimulations RecipeSimulations { get; }
+
 			public RecipeSnapshots RecipeSnapshots { get; } = new();
 
 			public RecipeItems RecipeItems { get; }
@@ -44,6 +58,7 @@ namespace MagicStorage {
 				IngredientControls ingredientControls,
 				CraftingObject<Recipe> craftingObject,
 				CraftObjectAvailableCache<Recipe> availableCache,
+				RecipeSimulations simulations,
 				RecipeItems recipeItems
 			) : base(MagicUI.craftingUI, controls) {
 				ProcessedStorageItems = processedStorage;
@@ -52,6 +67,7 @@ namespace MagicStorage {
 				IngredientControls = ingredientControls;
 				CraftingObject = craftingObject;
 				CraftObjectAvailableCache = availableCache;
+				RecipeSimulations = simulations;
 				RecipeItems = recipeItems;
 				RecipeItems.itemResolver = ProcessedStorageItems.CreateItemResolver();
 			}
@@ -89,13 +105,23 @@ namespace MagicStorage {
 				foreach (var module in base.Heart.GetModules())
 					module.PostRefreshRecipes(sandbox);
 
+				InitTaskSchedule(7, "Updating Caches");
+
 				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				MainZoneObjectsResults.CopyToStaticCollections();
+				CompleteOne();
 				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				CraftObjectAvailableCache.CopyToStaticCollection();
+				CompleteOne();
+				RecipeSimulations.CopyToStaticCollection();
+				CompleteOne();
 				RecipeItems.CopyToStaticCollections();
+				CompleteOne();
 
 				CraftingGUI.SetRecipeAndCraftingCaches(this);
+				CompleteOne();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
@@ -110,6 +136,7 @@ namespace MagicStorage {
 				MainZoneObjectsResults.ClearStaticCollections();
 				IngredientControls.ClearStaticCollections();
 				CraftObjectAvailableCache.ClearStaticCollection();
+				RecipeSimulations.ClearStaticCollection();
 				RecipeItems.ClearStaticCollections();
 			}
 
@@ -119,7 +146,7 @@ namespace MagicStorage {
 			public override void PopulateUIZones() { }
 		}
 
-		public class RecipeListRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider {
+		public class RecipeListRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider<Recipe>, IMainZoneObjectResultsProvider<Recipe>, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider, IRecipeItemsProvider {
 			public bool[] recipeConditionsMetSnapshot;
 
 			public override bool IsPartialThread => true;
@@ -140,6 +167,8 @@ namespace MagicStorage {
 
 			public CraftObjectAvailableCache<Recipe> CraftObjectAvailableCache { get; }
 
+			public RecipeSimulations RecipeSimulations { get; }
+
 			public RecipeSnapshots RecipeSnapshots { get; } = new();
 
 			public RecipeItems RecipeItems { get; }
@@ -152,6 +181,7 @@ namespace MagicStorage {
 				IngredientControls ingredientControls,
 				CraftingObject<Recipe> craftingObject,
 				CraftObjectAvailableCache<Recipe> availableCache,
+				RecipeSimulations simulations,
 				RecipeItems recipeItems
 			) : base(MagicUI.craftingUI, controls) {
 				ProcessedStorageItems = processedStorage;
@@ -160,6 +190,7 @@ namespace MagicStorage {
 				IngredientControls = ingredientControls;
 				CraftingObject = craftingObject;
 				CraftObjectAvailableCache = availableCache;
+				RecipeSimulations = simulations;
 				RecipeItems = recipeItems;
 				RecipeItems.itemResolver = ProcessedStorageItems.CreateItemResolver();
 			}
@@ -195,10 +226,18 @@ namespace MagicStorage {
 				foreach (var module in base.Heart.GetModules())
 					module.PostRefreshRecipes(sandbox);
 
+				InitTaskSchedule(5, "Updating Caches");
+
 				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				MainZoneObjectsResults.CopyToStaticCollections();
+				CompleteOne();
 				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
 				CraftObjectAvailableCache.CopyToStaticCollection();
+				CompleteOne();
+				RecipeSimulations.CopyToStaticCollection();
+				CompleteOne();
 
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 			//	CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
@@ -213,6 +252,7 @@ namespace MagicStorage {
 				MainZoneObjectsResults.ClearStaticCollections();
 				IngredientControls.ClearStaticCollections();
 				CraftObjectAvailableCache.ClearStaticCollection();
+				RecipeSimulations.ClearStaticCollection();
 			}
 
 			public override void PrepareUIZones() => refreshingUI.GetDefaultPage().OnRefreshStart();
@@ -220,7 +260,7 @@ namespace MagicStorage {
 			public override void PopulateUIZones() => refreshingUI.GetDefaultPage().Refresh();
 		}
 
-		public class RecipeInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider {
+		public class RecipeInfoPanelRefreshThread : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider<Recipe>, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider, IRecipeItemsProvider {
 			public override bool IsPartialThread => true;
 
 			public override bool HasCompleteData => CraftingGUI.hasCompleteData;
@@ -237,6 +277,8 @@ namespace MagicStorage {
 
 			public CraftObjectAvailableCache<Recipe> CraftObjectAvailableCache { get; }
 
+			public RecipeSimulations RecipeSimulations { get; }
+
 			public RecipeSnapshots RecipeSnapshots { get; } = new();
 
 			public RecipeItems RecipeItems { get; }
@@ -248,12 +290,14 @@ namespace MagicStorage {
 				IngredientControls ingredientControls,
 				CraftingObject<Recipe> craftingObject,
 				CraftObjectAvailableCache<Recipe> availableCache,
+				RecipeSimulations simulations,
 				RecipeItems recipeItems
 			) : base(MagicUI.craftingUI, controls) {
 				ProcessedStorageItems = processedStorage;
 				MainZoneObjectsFilterControls = mainZoneControls;
 				IngredientControls = ingredientControls;
 				CraftObjectAvailableCache = availableCache;
+				RecipeSimulations = simulations;
 				CraftingObject = craftingObject;
 				RecipeItems = recipeItems;
 				RecipeItems.itemResolver = ProcessedStorageItems.CreateItemResolver();
@@ -271,6 +315,7 @@ namespace MagicStorage {
 				ProcessedStorageItems.CopyFromStaticCollectionsAndFields();
 				IngredientControls.CopyFromStaticCollectionsAndFields();
 				CraftObjectAvailableCache.CopyFromStaticCollection();
+				RecipeSimulations.CopyFromStaticCollection();
 
 				AnalyzeIngredients();
 				
@@ -290,14 +335,28 @@ namespace MagicStorage {
 
 				foreach (var module in base.Heart.GetModules())
 					module.PostRefreshRecipes(sandbox);
-				
-				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
-				IngredientControls.CopyToStaticCollectionsAndFields();
-				RecipeItems.CopyToStaticCollections();
 
-				CraftObjectAvailableCache.lookup.Remove(CraftingObject.selection.Value);
+				InitTaskSchedule(6, "Updating Caches");
+
+				ProcessedStorageItems.CopyToStaticCollectionsAndFields();
+				CompleteOne();
+				IngredientControls.CopyToStaticCollectionsAndFields();
+				CompleteOne();
+				RecipeItems.CopyToStaticCollections();
+				CompleteOne();
+
+				var recipe = CraftingObject.selection.Value;
+
+				CraftObjectAvailableCache.lookup.Remove(recipe);
+				RecipeSimulations.recipeToAvailableSimulation.Remove(recipe);
+
 				CraftingGUI.SetRecipeAndCraftingCaches(this);
+				CompleteOne();
+
 				CraftObjectAvailableCache.CopyToStaticCollection();
+				CompleteOne();
+				RecipeSimulations.CopyToStaticCollection();
+				CompleteOne();
 				
 				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
 
@@ -310,6 +369,7 @@ namespace MagicStorage {
 				ProcessedStorageItems.ClearStaticCollections();
 				IngredientControls.ClearStaticCollections();
 				CraftObjectAvailableCache.ClearStaticCollection();
+				RecipeSimulations.ClearStaticCollection();
 				RecipeItems.ClearStaticCollections();
 			}
 
@@ -339,7 +399,7 @@ namespace MagicStorage {
 				this.resultItem = resultItem;
 			}
 
-			public void CopyToStaticCollections() {
+			public override void CopyToStaticCollections() {
 				base.CopyToStaticCollections();
 				resultItem.OverwriteStatic();
 			}
@@ -365,6 +425,8 @@ namespace MagicStorage {
 
 		private class CraftResultProvider(IReadOnlyValueProvider<Recipe> selectedRecipe) : IValueProvider<Item> {
 			private readonly IReadOnlyValueProvider<Recipe> _selectedRecipe = selectedRecipe;
+
+			public Item StaticSource => CraftingGUI.result;
 
 			public Item Value { get; set; }
 
