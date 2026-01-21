@@ -260,28 +260,72 @@ namespace MagicStorage.UI {
 				}
 			}
 
+			protected bool allowHoverFade = true;
+			private bool _lastKnownConfigOption;
+
+			private const float ALPHA_LOW = 0.45f;
+			private const float ALPHA_HIGH = 0.925f;
+			private const int ALPHA_TICKS = 12;
+			private float _hoverAlpha = 0.5f;
+
 			protected override void DrawSelf(SpriteBatch spriteBatch) {
 				var buttons = (NewUIButtonChoice)Parent;
 
 				CalculatedStyle dim = GetDimensions();
 
+				bool selected = generalChoice ? buttons.GeneralChoices.Contains(option) : option == buttons.Choice;
+
 				Asset<Texture2D> background;
 				if (generalChoice)
-					background = buttons.GeneralChoices.Contains(option) ? GeneralBackTextureActive : BackTexture;
+					background = selected ? GeneralBackTextureActive : BackTexture;
 				else
-					background = option == buttons.Choice ? BackTextureActive : BackTexture;
+					background = selected ? BackTextureActive : BackTexture;
 				
 				Vector2 drawPos = new(dim.X, dim.Y);
-				Color color = IsMouseHovering ? Color.Silver : Color.White;
+			//	Color color = IsMouseHovering ? Color.Silver : Color.White;
+				
+				bool config = MagicStorageConfig.SortFilterIconsFadeWhenNotSelected;
+
+				if (_lastKnownConfigOption != config) {
+					if (_lastKnownConfigOption) {
+						// True -> False
+						_hoverAlpha = selected ? 1f : ALPHA_HIGH;
+					} else {
+						// False -> True
+						_hoverAlpha = selected ? 1f : ALPHA_LOW;
+					}
+
+					_lastKnownConfigOption = config;
+				}
+
+				if (allowHoverFade) {
+					if (config) {
+						const float TRANSITION_PER_TICK = (ALPHA_HIGH - ALPHA_LOW) / ALPHA_TICKS;
+
+						float nextAlpha = IsMouseHovering
+							? _hoverAlpha + TRANSITION_PER_TICK
+							: _hoverAlpha - TRANSITION_PER_TICK;
+				
+						_hoverAlpha = selected ? 1f : MathHelper.Clamp(nextAlpha, ALPHA_LOW, ALPHA_HIGH);
+					} else {
+						_hoverAlpha = selected ? 1f : ALPHA_HIGH;
+					}
+				} else {
+					// Force the alpha to max
+					_hoverAlpha = 1f;
+				}
+
+				Color color = Color.White * _hoverAlpha;
 
 				Main.spriteBatch.Draw(background.Value, new Rectangle((int) drawPos.X, (int) drawPos.Y, buttonSize, buttonSize), color);
-				Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White);
+				Main.spriteBatch.Draw(texture.Value, new Rectangle((int) drawPos.X + 1, (int) drawPos.Y + 1, buttonSize - 1, buttonSize - 1), Color.White * MathHelper.Clamp(_hoverAlpha * 1.3f, 0f, 1f));
 			}
 		}
 
 		private class GearIconElement : ChoiceElement {
 			public GearIconElement(int buttonSize = 21) : base(-1, "MagicStorage/Assets/Config", "Mods.MagicStorage.ButtonConfigGear", false, buttonSize: buttonSize) {
 				canInvokeAction = false;
+				base.allowHoverFade = false;
 			}
 
 			public override void LeftClick(UIMouseEvent evt) {

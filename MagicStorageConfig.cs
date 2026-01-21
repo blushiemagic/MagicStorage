@@ -73,6 +73,9 @@ namespace MagicStorage {
 		[DefaultValue(false)]
 		public bool useOldSlotFocus;
 
+		[DefaultValue(true)]
+		public bool fadeButtonsNotSelected;
+
 		[Header($"$Mods.MagicStorage.Config.Headers.General")]
 		[DefaultValue(false)]
 		public bool itemDataDebug;  //Previously "allowItemDataDebug"
@@ -108,6 +111,9 @@ namespace MagicStorage {
 
 		[JsonIgnore]
 		public static bool UseOldRightClickSlotFocus => Instance.useOldSlotFocus;
+
+		[JsonIgnore]
+		public static bool SortFilterIconsFadeWhenNotSelected => Instance.fadeButtonsNotSelected;
 
 		[JsonIgnore]
 		public static bool ItemDataDebug => Instance.itemDataDebug;

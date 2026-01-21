@@ -1349,8 +1349,13 @@ Mods: {
 				}
 
 				useOldSlotFocus: {
-					// Label: use Old Slot Focus
-					// Tooltip: ""
+					// Label: Legacy Item Splitting Logic
+					// Tooltip: Enable to use the slower legacy logic for splitting item stacks onto the mouse via right click.
+				}
+
+				fadeButtonsNotSelected: {
+					// Label: Sorting & Filtering Button Fading
+					// Tooltip: Disable to make the icons for sorters and filters in the UIs not fade when not selected.
 				}
 			}
 
