@@ -1057,6 +1057,7 @@ Mods: {
 				// RenderFail: This item could not be rendered due to an error.
 				// NetFail: This item failed to load on the current client.
 				// NBTFail: The NBT data on this item failed to deserialize.
+				// CapacityText: Some items failed to load on the current client.
 			}
 
 			TestItems: {
