@@ -172,7 +172,7 @@ namespace MagicStorage
 			}
 		}
 
-		// FIX: v0.7.0.12 - Tiles without a tile entity would cause this method to return false
+		// FIX: v0.7.1 - Tiles without a tile entity would cause this method to return false
 		public bool CanAccessCurrentNetwork() => GetStorageComponent() is not TEStorageComponent component || SecuritySystem.CanPlayerAccessImmediately(Player, component.assignedNetwork);
 
 		public static bool IsCurrentLocalNetworkAccessible() => LocalPlayer.CanAccessCurrentNetwork();

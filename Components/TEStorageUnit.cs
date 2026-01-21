@@ -604,7 +604,7 @@ namespace MagicStorage.Components
 				bitWriter.Write((byte)netOp.netOperation, numBits: 3);
 				switch (netOp.netOperation)
 				{
-					// FIX: v0.7.0.12 - Item data should use the original tag information, not the netcode data
+					// FIX: v0.7.1 - Item data should use the original tag information, not the netcode data
 					case NetOperations.FullySync:
 						SaveCompression.SaveItems(items, bitWriter, true, true, listCountBitSizeOverride: capacityBits);
 						break;
@@ -678,7 +678,7 @@ namespace MagicStorage.Components
 					{
 						switch ((NetOperations)netOp)
 						{
-							// FIX: v0.7.0.12 - Item data should use the original tag information, not the netcode data
+							// FIX: v0.7.1 - Item data should use the original tag information, not the netcode data
 							case NetOperations.FullySync:
 								repairMetaData = false;
 								ClearItemsData();

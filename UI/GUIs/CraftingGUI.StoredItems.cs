@@ -139,7 +139,7 @@ namespace MagicStorage {
 		}
 
 		private static bool IsItemValidForRecipe(Item item, Recipe recipe) {
-			// CHANGE: v0.7.0.12 - Allow result item to appear as an ingredient in duplication recipes
+			// CHANGE: v0.7.1 - Allow result item to appear as an ingredient in duplication recipes
 			/*
 			if (item.type == selectedRecipe.createItem.type)
 				return false;

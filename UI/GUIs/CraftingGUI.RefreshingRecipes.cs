@@ -62,7 +62,7 @@ namespace MagicStorage {
 
 				forceSpecificRecipeResort = false;
 
-				// CHANGE: v0.7.0.12 - The second pass is handled by the code that populates "recipesToRefreshByIndex" instead
+				// CHANGE: v0.7.1 - The second pass is handled by the code that populates "recipesToRefreshByIndex" instead
 				/*
 				// Do a second pass when recursion crafting is enabled
 				if (MagicStorageConfig.IsRecursionEnabled) {

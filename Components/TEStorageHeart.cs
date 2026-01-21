@@ -389,7 +389,7 @@ namespace MagicStorage.Components
 				if (SecuritySystem.TryGetCurrentAccessContext(out var context))
 					netOp.AccessingPlayer = context.Player;
 
-				// CHANGE: v0.7.0.12 - netMode check was moved to here so that NetHelper code is shorter
+				// CHANGE: v0.7.1 - netMode check was moved to here so that NetHelper code is shorter
 				if (Main.netMode == NetmodeID.Server)
 					clientOpQ.Enqueue(netOp);
 			}

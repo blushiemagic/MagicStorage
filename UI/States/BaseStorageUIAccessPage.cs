@@ -101,7 +101,7 @@ namespace MagicStorage.UI.States {
 
 				slotZone.ClearItems();
 
-				// FIX: v0.7.0.12 - Remove unnecessary refresh call; OnPageSelected already handles this
+				// FIX: v0.7.1 - Remove unnecessary refresh call; OnPageSelected already handles this
 			//	MagicUI.SetRefresh(forceFullRefresh: true);
 
 				sortingDropdown.Reset();

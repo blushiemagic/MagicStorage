@@ -86,7 +86,7 @@ namespace MagicStorage {
 			return available;
 		}
 
-		// CHANGE: v0.7.0.12 - No longer has an "int ignoreItem" parameter that was used to ignore the recipe's result item
+		// CHANGE: v0.7.1 - No longer has an "int ignoreItem" parameter that was used to ignore the recipe's result item
 		private static bool IsAvailable_CheckRecursiveRecipe<T>(T thread, Recipe recipe, RecursiveRecipe recursiveRecipe)
 			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
@@ -109,7 +109,7 @@ namespace MagicStorage {
 			if (recipe is null)
 				return false;
 
-			// CHANGE: v0.7.0.12 - Condition checks are moved first to better optimize RecipeWatchTarget
+			// CHANGE: v0.7.1 - Condition checks are moved first to better optimize RecipeWatchTarget
 			bool conditionsAvailable = thread?.RecipeSnapshots.ConditionsMet[recipe.RecipeIndex]
 				?? ExecuteInCraftingGuiEnvironment(recipe, RecipeLoader.RecipeAvailable);
 

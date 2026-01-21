@@ -161,7 +161,7 @@ namespace MagicStorage.UI {
 		internal void ClickOption(UIMouseEvent evt, UIElement e) {
 			if (MagicStorageConfig.ButtonUIMode == ButtonConfigurationMode.ModernConfigurable) {
 				OnConfigurationClicked(e as TElement);
-				// CHANGE: v0.7.0.12 - Selecting the main page will force a full refresh anyway
+				// CHANGE: v0.7.1 - Selecting the main page will force a full refresh anyway
 			//	MagicUI.SetRefresh(forceFullRefresh: true);
 				SoundEngine.PlaySound(SoundID.MenuTick);
 				return;
@@ -172,7 +172,7 @@ namespace MagicStorage.UI {
 
 			SetSelection(type);
 
-			// CHANGE: v0.7.0.12 - Clicking an option in the config panel now starts a shorter refresh thread for JUST the recipe list
+			// CHANGE: v0.7.1 - Clicking an option in the config panel now starts a shorter refresh thread for JUST the recipe list
 		//	MagicUI.SetRefresh(forceFullRefresh: true);
 			SoundEngine.PlaySound(SoundID.MenuTick);
 

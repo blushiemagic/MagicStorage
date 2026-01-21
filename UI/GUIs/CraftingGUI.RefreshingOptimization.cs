@@ -25,7 +25,7 @@ namespace MagicStorage {
 			if (recipes is null)
 				return;
 
-			// CHANGE: v0.7.0.12 - Affected recursion recipes are instead added during the freshing stage if the availability of the recipe changed
+			// CHANGE: v0.7.1 - Affected recursion recipes are instead added during the freshing stage if the availability of the recipe changed
 			/*
 			IEnumerable<Recipe> fullRecipeList = recipes is null
 				? recipes

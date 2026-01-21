@@ -768,7 +768,7 @@ namespace MagicStorage.UI.States {
 
 				// NOTE: The Controls page typically can't be accessed if the player doesn't have access to the Storage Heart, so checking for accessibility via SecuritySystem shouldn't be needed
 
-				// CHANGE: v0.7.0.12 - Switching to the main page forces a full refresh, so this button is redundant
+				// CHANGE: v0.7.1 - Switching to the main page forces a full refresh, so this button is redundant
 			//	InitButton(ref forceRefresh, "StorageGUI.ForceRefreshButton", (evt, e) => MagicUI.SetRefresh());
 
 				InitButton(ref compactCoins, "StorageGUI.CompactCoinsButton", (evt, e) => {
@@ -973,7 +973,7 @@ namespace MagicStorage.UI.States {
 						unit.PostChangeContents();
 					}
 
-					// CHANGE: v0.7.0.12 - Switching to the main page forces a full refresh, so this is redundant
+					// CHANGE: v0.7.1 - Switching to the main page forces a full refresh, so this is redundant
 				//	MagicUI.SetRefresh(forceFullRefresh: true);
 					heart.ResetCompactStage();
 				});

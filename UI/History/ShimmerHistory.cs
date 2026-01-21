@@ -6,7 +6,7 @@ namespace MagicStorage.UI.History {
 			if (index < 0 || index >= history.Count)
 				return;
 
-			// CHANGE: v0.7.0.12 - Changing the item will start a shorter refresh thread for JUST updating the info panel
+			// CHANGE: v0.7.1 - Changing the item will start a shorter refresh thread for JUST updating the info panel
 			DecraftingGUI.SetSelectedItem(history[index].Value);
 		//	MagicUI.SetRefresh();
 

@@ -659,7 +659,7 @@ namespace MagicStorage.UI.States {
 			if (MagicStorageConfig.ClearRecipeHistory)
 				history.Clear();
 
-			// CHANGE: v0.7.0.12 - History selection is delayed until after the full refresh has finished
+			// CHANGE: v0.7.1 - History selection is delayed until after the full refresh has finished
 			/*
 			if (history.Current >= 0)
 				history.Goto(history.Current);
@@ -1040,7 +1040,7 @@ namespace MagicStorage.UI.States {
 						if (!set.Add(item))
 							set.Remove(item);
 
-						// CHANGE: v0.7.0.12 - Un-/favoriting a recipe will start a shorter refresh thread that skips item collection and info panel updating
+						// CHANGE: v0.7.1 - Un-/favoriting a recipe will start a shorter refresh thread that skips item collection and info panel updating
 					//	MagicUI.SetRefresh();
 						OnMainZoneItemFavoriteChanged(item);
 						MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.InitZoneSlotEvents()+LeftClick()");
@@ -1058,12 +1058,12 @@ namespace MagicStorage.UI.States {
 								HideItem(item);
 						}
 
-						// CHANGE: v0.7.0.12 - Black-/whitelisting a recipe will start a shorter refresh thread that skips item collection and info panel updating
+						// CHANGE: v0.7.1 - Black-/whitelisting a recipe will start a shorter refresh thread that skips item collection and info panel updating
 					//	MagicUI.SetRefresh();
 						OnMainZoneItemBlacklistChanged(item, !whitelisting);
 						MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.InitZoneSlotEvents()+LeftClick()");
 					} else {
-						// CHANGE: v0.7.0.12 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
+						// CHANGE: v0.7.1 - Changing the recipe will start a shorter refresh thread for JUST updating the info panel
 					//	MagicUI.SetRefresh();
 						OnMainZoneItemLeftClicked(objSlot);
 
