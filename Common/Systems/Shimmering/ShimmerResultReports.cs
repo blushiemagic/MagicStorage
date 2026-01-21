@@ -83,7 +83,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			Player player = Main.LocalPlayer;
 
 			float currentLuckValue = player.coinLuck;
-			float adjustedLuckValue = Utils.Clamp(player.coinLuck + coinValue, 0f, 1e6f);
+			float adjustedLuckValue = Terraria.Utils.Clamp(player.coinLuck + coinValue, 0f, 1e6f);
 
 			float luck = player.CalculateCoinLuck(currentLuckValue);
 			float adjustedLuck = player.CalculateCoinLuck(adjustedLuckValue);

@@ -83,6 +83,9 @@ namespace MagicStorage {
 		[DefaultValue(true)]
 		public bool automatonRemembers;
 
+		[DefaultValue(true)]
+		public bool enablePinyinSearch;  // 新增：启用拼音搜索（仅在简体中文环境下生效）
+
 		public static MagicStorageConfig Instance => ModContent.GetInstance<MagicStorageConfig>();
 
 		[JsonIgnore]
@@ -147,6 +150,9 @@ namespace MagicStorage {
 
 		[JsonIgnore]
 		public static bool DisplayLastSeenAutomatonTip => Instance.automatonRemembers;
+
+		[JsonIgnore]
+		public static bool EnablePinyinSearch => Instance.enablePinyinSearch;
 
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 

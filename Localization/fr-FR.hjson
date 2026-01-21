@@ -1343,6 +1343,11 @@ Mods: {
 					// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
 				}
 
+				enablePinyinSearch: {
+					// Label: Enable Pinyin Search
+					// Tooltip: Enable to search Chinese item names using pinyin (full pinyin or initials). This feature only works in Simplified Chinese (zh-Hans) language environment.
+				}
+
 				globalShimmerItemBlacklist: {
 					// Label: Global Item Shimmering Blacklist
 					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist

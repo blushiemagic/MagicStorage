@@ -13,7 +13,7 @@ Mods: {
 					制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
 					放在物品栏或制作存储单元的制作站槽位内即可生效
 					放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
-					可在制作界面直接用棉花糖制作熟棉花糖
+					可在制作单元直接用棉花糖制作熟棉花糖
 					丢出去之后会像沙滩球一样弹弹弹
 					'''
 			}
@@ -25,11 +25,11 @@ Mods: {
 
 			CreativeStorageUnit: {
 				DisplayName: 创造单元
-				/* Tooltip:
+				Tooltip:
 					'''
-					Stores an unlimited amount of every item type.
-					Does not count toward storage limits when in a storage system.
-					''' */
+					可存储无限数量的每种物品类型
+					在存储系统中不计入存储限制
+					'''
 			}
 
 			Locator: {
@@ -332,7 +332,8 @@ Mods: {
 					<right>存储核心以连接
 					暂未连接到任何核心
 					使用以访问相应存储核心
-					访问距离较小
+					连接的核心必须距离任何有效晶塔最多100个方块才能在每个晶塔上获得扩展范围
+					玩家必须距离连接的核心或晶塔最多1000个方块才能访问存储
 					'''
 			}
 
@@ -343,7 +344,8 @@ Mods: {
 					<right>存储核心以连接
 					暂未连接到任何核心
 					使用以访问相应存储核心
-					访问距离较小
+					连接的核心必须距离任何有效晶塔最多200个方块才能在每个晶塔上获得扩展范围
+					玩家必须距离连接的核心或晶塔最多3000个方块才能访问存储
 					'''
 			}
 
@@ -368,32 +370,32 @@ Mods: {
 			}
 
 			PortableCraftingAccessPreHM: {
-				// DisplayName: Basic Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: 基础便携远程制作装置
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 1000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right>制作单元以连接
+					暂未连接到任何单元
+					使用以访问相应制作单元
+					连接的制作单元必须距离任何有效晶塔最多100个方块才能在每个晶塔上获得扩展范围
+					玩家必须距离连接的制作单元或晶塔最多1000个方块才能访问制作功能
+					'''
 			}
 
 			PortableCraftingAccessHM: {
-				// DisplayName: Advanced Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: 进阶便携远程制作装置
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 200' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 3000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right>制作单元以连接
+					暂未连接到任何单元
+					使用以访问相应制作单元
+					连接的制作单元必须距离任何有效晶塔最多200个方块才能在每个晶塔上获得扩展范围
+					玩家必须距离连接的制作单元或晶塔最多3000个方块才能访问制作功能
+					'''
 			}
 
 			DecraftingAccess: {
-				// DisplayName: Storage Aether Interface
-				// Tooltip: Enables shimmering with the items in a storage system
+				DisplayName: 存储以太单元
+				Tooltip: 能够使用存储系统中的物品进行微光分解
 			}
 
 			Shimmer_CoinLuck: {
@@ -402,85 +404,85 @@ Mods: {
 			}
 
 			StorageCore: {
-				// DisplayName: Storage Core (Basic)
-				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
-				/* CommonTooltip:
+				DisplayName: 存储核心（基础）
+				Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+				CommonTooltip:
 					'''
-					Stores the items that were in a Storage Unit
-					<right> an Empty Storage Unit to insert it
+					存储原本在存储单元中的物品
+					<right>空存储单元以插入
 					<CAPACITY>
 					<HASH>
 					<BYTES>
-					''' */
-				// ItemsStored: "[c/{0}:{1} / {2} items]"
-				// Hash: Data hash: {0:x08}
-				// BytesUsed: "[c/{0}:{1} bytes]"
+					'''
+				ItemsStored: "[c/{0}:{1} / {2} 物品]"
+				Hash: 数据哈希: {0:x08}
+				BytesUsed: "[c/{0}:{1} 字节]"
 			}
 
-			// StorageCoreBlueChlorophyte.DisplayName: Storage Core (Blue Chlorophyte)
-			// StorageCoreCrimtane.DisplayName: Storage Core (Crimtane)
-			// StorageCoreDemonite.DisplayName: Storage Core (Demonite)
-			// StorageCoreHallowed.DisplayName: Storage Core (Hallowed)
-			// StorageCoreHellstone.DisplayName: Storage Core (Hellstone)
-			// StorageCoreLuminite.DisplayName: Storage Core (Luminite)
-			// StorageCoreTerra.DisplayName: Storage Core (Terra)
+			StorageCoreBlueChlorophyte.DisplayName: 存储核心（蓝色叶绿）
+			StorageCoreCrimtane.DisplayName: 存储核心（猩红）
+			StorageCoreDemonite.DisplayName: 存储核心（魔金）
+			StorageCoreHallowed.DisplayName: 存储核心（神圣）
+			StorageCoreHellstone.DisplayName: 存储核心（狱岩）
+			StorageCoreLuminite.DisplayName: 存储核心（夜明）
+			StorageCoreTerra.DisplayName: 存储核心（泰拉）
 
 			StorageExtractor: {
-				// DisplayName: Storage Core Wrench
-				// Tooltip: Can remove the Storage Core from a Storage Unit
+				DisplayName: 存储核心扳手
+				Tooltip: 可以从存储单元中移除存储核心
 			}
 
 			StorageUnitEmpty: {
-				// DisplayName: Empty Storage Unit
-				/* Tooltip:
+				DisplayName: 空存储单元
+				Tooltip:
 					'''
-					A component for storing items in a Magic Storage storage system
-					Needs a Storage Core to function
-					Right click while holding a Storage Core to insert it
-					''' */
+					用于在魔法存储系统中存储物品的组件
+					需要存储核心才能运作
+					手持存储核心时右键点击以插入
+					'''
 			}
 
 			StorageSecurity: {
-				// DisplayName: Storage Security Wand
-				/* Tooltip:
+				DisplayName: 存储安全魔杖
+				Tooltip:
 					'''
-					<left> a Storage Heart to open the Security Network
-					Storage components connected to a Storage Heart assigned to a private Security Network
-					  cannot be accessed until the password for the Security Network has been entered.
-					The creator of a Security Network will always have access to it, however.
-					''' */
+					<left>存储核心以打开安全网络
+					连接到已分配给私有安全网络的存储核心的存储组件
+					  在输入安全网络密码之前无法访问
+					但是，安全网络的创建者始终可以访问它
+					'''
 			}
 
 			ErrorItems: {
-				/* CommonTooltip:
+				CommonTooltip:
 					'''
 					<FULLNAME>
 					<PREFIX>
-					''' */
-				// NameText: Name: {0}/{1}
-				// NameTextUnknown: <unknown>
-				// PrefixText: Prefix: {0}
-				// PrefixTextModded: Prefix: {0}/{1}
+					'''
+				NameText: 名称: {0}/{1}
+				NameTextUnknown: <unknown>
+				PrefixText: 词缀: {0}
+				PrefixTextModded: 词缀: {0}/{1}
 			}
 
 			Error_ItemSlotRenderFail: {
-				// DisplayName: Error//ItemRender
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
+				DisplayName: 错误//物品渲染
+				Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
-				// DisplayName: Error//ItemClientRead
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+				DisplayName: 错误//物品客户端读取
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
 			}
 
 			TagIOStressTest: {
-				// DisplayName: Debug//DataCompressionTest
-				// Tooltip: ""
+				DisplayName: 调试//数据压缩测试
+				Tooltip: ""
 			}
 
 			Error_ItemNBTFail: {
-				// DisplayName: Error//NBTRead
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
+				DisplayName: 错误//NBT读取
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -505,24 +507,24 @@ Mods: {
 					LoveNPC: 附近的{NPCName}个体对本单元拥有一切操纵权.
 					DislikeNPC: 本单元不屑于向{NPCName}提及蓝魔法。
 					HateNPC: "{NPCName}需要改变其试图将蓝魔法用于盈利的想法"
-					// LikeNPC_Princess: "{NPCName} is best friends with my creator."
-					// Princess_LovesNPC: "{NPCName} is such an interesting machine, how does it move?"
+					LikeNPC_Princess: "{NPCName}是我创造者最好的朋友。"
+					Princess_LovesNPC: "{NPCName}是一台如此有趣的机器，它是如何移动的？"
 				}
 
 				# Census support
-				// Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
+				Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" 配置在 "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" 中设置为开启'''
 			}
 		}
 
 		EnvironmentModule: {
 			UseInventoryModule: {
 				DisplayName: 制作时采用物品栏内物品
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: 该模块已被禁用
 			}
 
 			UseInventoryNoFavoritesModule: {
 				DisplayName: 制作时采用物品栏内未收藏的物品
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: 该模块已被禁用
 			}
 
 			JourneyInfiniteItems: {
@@ -547,22 +549,22 @@ Mods: {
 			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations3Item.DisplayName}"
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
-			// EvilAltarTile.MapEntry: Evil Altar
-			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
+			EvilAltarTile.MapEntry: 邪恶祭坛
+			DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		GameTips: {
-			// Automaton: The Automaton can teach you all there is to know about Magic Storage.
-			// ShadowDiamonds: Shadow Diamonds are dropped when a boss is defeated for the first time. They can be used as an alternative to Diamonds in Magic Storage recipes.
-			// RadiantJewel: The Moon Lord drops the Radiant Jewel, which can be used to craft Portable Remote Accesses with unlimited access range.
-			// StorageUpgrades: Running out of storage? Upgrade your Storage Units with Storage Upgrades!
-			// RemoteStorage: Access your storage at other locations in the world with a Remote Access after linking it to a Storage Heart with a Locator or Locator Disk.
-			// CombinedStations: Magic Storage provides Combined Crafting Stations to reduce the number of crafting stations you have to put in the Crafting Interface.
-			// EnvironmentAccess: The Storage Configuration Interface allows other mods to add "crafting modules" which can affect how the Crafting Interface functions.
-			// PortableAccess: Craft a Portable Remote Storage Access to access your storage while you're away from home.
-			// StorageCores: Use a Storage Core Wrench to remove the Storage Core from a Storage Unit, which can then be inserted into an Empty Storage Unit.
-			// DisableUnit: Use a Storage Unit Wand to disable a Storage Unit. A disabled Storage Unit cannot store items and will attempt to move its items to connected Storage Units.
-			// BiomeGlobe: The Biome Globe enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars.
+			Automaton: 自动机可以教授你有关魔法存储的一切知识
+			ShadowDiamonds: 暗影钻石在首次击败Boss时掉落。它们可以在魔法存储配方中用作钻石的替代品
+			RadiantJewel: 月球领主掉落璀璨棱晶，可用于制作具有无限访问范围的便携远程存储装置
+			StorageUpgrades: 存储空间不足？使用存储升级珠升级你的存储单元！
+			RemoteStorage: 使用定位器或定位器驱动将远程存储装置连接到存储核心后，可以在世界其他位置访问你的存储
+			CombinedStations: 魔法存储提供组合制作站，以减少你需要放在制作单元中的制作站数量
+			EnvironmentAccess: 存储网络配置单元允许其他模组添加"制作模块"，这些模块可以影响制作单元的功能
+			PortableAccess: 制作便携远程存储装置，以便在离家时访问你的存储
+			StorageCores: 使用存储核心扳手从存储单元中移除存储核心，然后可以将其插入空存储单元
+			DisableUnit: 使用存储单元魔杖禁用存储单元。被禁用的存储单元无法存储物品，并会尝试将其物品移动到连接的存储单元
+			BiomeGlobe: 生态球可为雪地生物群系、灵雾、篝火、水、熔岩、蜂蜜以及恶魔/猩红祭坛启用配方
 		}
 
 		Bestiary.Golem:
@@ -688,13 +690,13 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
-				/* Help19:
+				Help19:
 					'''
-					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
-					These modules can be toggled on and off in the UI for the Configuration Interface.
-					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					存储网络配置单元允许其他模组添加"制作模块"，这些模块可以影响 [i:MagicStorage/CraftingAccess] 的功能
+					这些模块可以在存储网络配置单元的UI中开启或关闭
+					默认情况下，魔法存储提供从玩家物品栏和旅途模式复制菜单读取的模块
 					[rg/s2:MagicStorage:AnyDiamond] [i/s50:DirtBlock] [i/s50:StoneBlock] [i/s50:MudBlock] [i/s50:SnowBlock] [i/s50:SandBlock] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/EnvironmentAccess]
-					''' */
+					'''
 				Help20:
 					'''
 					尽管 [i:MagicStorage/RemoteAccess] 非常方便，但你要是离家远了可就不能方便地访问存储网络了
@@ -723,71 +725,71 @@ Mods: {
 					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
 					(2/2)
 					'''
-				/* Help22:
+				Help22:
 					'''
-					This unit has noticed that you are currently playing in a multiplayer world.  Hence, some features within the [i:MagicStorage/StorageHeart] are locked behind the [c/cccc00:Server Operator] status.
-					To become a [c/cccc00:Server Operator], you must use the [c/ff6a00:/msreqop] command.  Using this command successfully will grant you the [c/cc0000:Server Admin] status.
-					Once you have the [c/cc0000:Server Admin] status, you can use the [c/ff6a00:/msop] command to grant other players the [c/cccc00:Server Operator] status or [c/ff6a00:/msdeop] to remove it.
-					Either status will stay active until you disconnect from the server.
-					The [c/ffff00:Magic Storage Server Config] has an option which forces the host to be a [c/cc0000:Server Admin] when enabled.
-					''' */
-				/* Help23:
+					本单元已注意到你当前正在多人游戏世界中游玩。因此，[i:MagicStorage/StorageHeart] 中的某些功能被锁定在 [c/cccc00:服务器操作员] 状态之后
+					要成为 [c/cccc00:服务器操作员]，你必须使用 [c/ff6a00:/msreqop] 命令。成功使用此命令将授予你 [c/cc0000:服务器管理员] 状态
+					一旦你拥有 [c/cc0000:服务器管理员] 状态，你可以使用 [c/ff6a00:/msop] 命令授予其他玩家 [c/cccc00:服务器操作员] 状态，或使用 [c/ff6a00:/msdeop] 移除它
+					任一状态将保持活动状态，直到你断开与服务器的连接
+					[c/ffff00:魔法存储服务器配置] 有一个选项，启用时会强制主机成为 [c/cc0000:服务器管理员]
 					'''
-					Moving a storage system can be a hassle, especially if you have a lot of items stored.  To make it easier, you can use the Storage Core Wrench to remove the Storage Core from a placed Storage Unit.
+				Help23:
+					'''
+					移动存储系统可能很麻烦，特别是如果你存储了大量物品。为了简化操作，你可以使用存储核心扳手从已放置的存储单元中移除存储核心
 					[i:Wrench] + [i:MagicStorage/StorageComponent] + [i/s10:Wire] + [rg/s5:IronBar] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageExtractor]
-					Removing the Storage Core will turn the Storage Unit into an [i:MagicStorage/StorageUnitEmpty], which can then be picked up and placed elsewhere.
+					移除存储核心会将存储单元转换为 [i:MagicStorage/StorageUnitEmpty]，然后可以拾取并放置在其他地方
 					(1/2)
-					''' */
-				/* Help24:
 					'''
-					Dropping a [i:MagicStorage/CraftingAccess] into Shimmer will transform it into an Aether Interface, which can be used to shimmer items in a storage system.
-					All actions from shimmering are supported: decrafting items into their ingredients, transmuting items into other items, sacrificing coins for Coin Luck, and spawning NPCs from shimmering certain items.
-					''' */
-				/* Help25:
+				Help24:
 					'''
-					By default, all [i:MagicStorage/StorageHeart] (and their components) are accessible to everyone.
-					To make your storage more secure, consider creating a Storage Security Wand. While holding the tool, left click a [i:MagicStorage/StorageHeart] to open the Security system.
-					In this system's UI, you can create a Security Network which, when made private, will cause the [i:MagicStorage/StorageHeart] and its components to require a password to access.
-					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
-					Recipe: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
-					''' */
-				// Help26_Header: Are you finding the text prompts in the UIs cumbersome to use? Here are some helpful controls you can use to help with that:
-				/* Help26:
+					将 [i:MagicStorage/CraftingAccess] 丢入微光会将其转换为以太单元，可用于在存储系统中进行微光分解
+					支持所有微光操作：将物品分解为材料、将物品转换为其他物品、牺牲硬币获得幸运值，以及通过微光某些物品生成NPC
+					'''
+				Help25:
+					'''
+					默认情况下，所有 [i:MagicStorage/StorageHeart]（及其组件）对所有人都是可访问的
+					为了使你的存储更加安全，考虑创建一个存储安全魔杖。手持该工具时，左键点击 [i:MagicStorage/StorageHeart] 以打开安全系统
+					在此系统的UI中，你可以创建一个安全网络，当设置为私有时，将导致 [i:MagicStorage/StorageHeart] 及其组件需要密码才能访问
+					双击安全网络以将其分配给你用于访问安全系统的 [i:MagicStorage/StorageHeart]
+					制作配方: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
+					'''
+				Help26_Header: 你是否觉得UI中的文本提示使用起来很麻烦？以下是一些有用的控制方式可以帮助你：
+				Help26:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					  [c/cccc00:Ctrl + Z] to clear
-					  [c/cccc00:Ctrl + X] or [c/cccc00:Shift + Delete] to copy to clipboard then clear
-					  [c/cccc00:Ctrl + C] to copy to clipboard
-					  [c/cccc00:Ctrl + V] or [c/cccc00:Shift + Insert] to paste from clipboard
+					当提示框获得焦点时:
+					  [c/cccc00:Ctrl + Z] 清除
+					  [c/cccc00:Ctrl + X] 或 [c/cccc00:Shift + Delete] 复制到剪贴板然后清除
+					  [c/cccc00:Ctrl + C] 复制到剪贴板
+					  [c/cccc00:Ctrl + V] 或 [c/cccc00:Shift + Insert] 从剪贴板粘贴
 					(1/3)
-					''' */
-				/* Help27:
+					'''
+				Help27:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					[c/cccc00:Ctrl + Backspace] to delete the last space-separated word
-					  [c/cccc00:Left Arrow] and [c/cccc00:Right Arrow] to move the cursor left and right by one character
-					  [c/cccc00:Home] and [c/cccc00:End] to move the cursor to the start and end
-					  [c/cccc00:Escape] or [c/cccc00:Right Click] the prompt to revert any changes made
+					当提示框获得焦点时:
+					[c/cccc00:Ctrl + Backspace] 删除最后一个空格分隔的单词
+					  [c/cccc00:Left Arrow] 和 [c/cccc00:Right Arrow] 将光标左右移动一个字符
+					  [c/cccc00:Home] 和 [c/cccc00:End] 将光标移动到开头和结尾
+					  [c/cccc00:Escape] 或 [c/cccc00:Right Click] 提示框以撤销所做的任何更改
 					(2/3)
-					''' */
-				/* Help28:
+					'''
+				Help28:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is not focused:
-					  [c/cccc00:Right Click] the prompt to clear
+					当提示框未获得焦点时:
+					  [c/cccc00:Right Click] 提示框以清除
 					(3/3)
-					''' */
-				/* Help29:
 					'''
-					To insert a Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
+				Help29:
+					'''
+					要将存储核心重新插入 [i:MagicStorage/StorageUnitEmpty]，只需在手持存储核心时右键点击它
 					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
 					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
 					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
 					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
 					(2/2)
-					''' */
+					'''
 			}
 
 			ChatOptions: {
@@ -797,7 +799,7 @@ Mods: {
 				}
 			}
 
-			// NewHelpAvailable: The Automaton has new help tips available.
+			NewHelpAvailable: 自动机有新的帮助提示可用
 		}
 
 		Active: 已启用
@@ -811,7 +813,7 @@ Mods: {
 		RemoteAccessSuccess: 已成功连接远程存储装置！
 		RemoteAccessHasLocator: 该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点
 		RemoteAccessUnlocated: 当前定位器尚未设置定位点
-		// RemoteAccessInvalidLocator: The locator is not connected to a Storage Heart
+		RemoteAccessInvalidLocator: 定位器未连接到存储核心
 		StorageUnitActivated: 该存储单元已被启用
 		StorageUnitDeactivated: 该存储单元已被禁用
 		FilterAllMods: 所有物品
@@ -829,12 +831,12 @@ Mods: {
 		CraftTooltipOld: 左键单击以制作（按住Ctrl全部制作）
 
 		Crafting: {
-			// Plus1: +1
-			// Plus10: +10
-			// Plus100: +100
-			// Minus1: "-1"
-			// Minus10: "-10"
-			// Minus100: "-100"
+			Plus1: +1
+			Plus10: +10
+			Plus100: +100
+			Minus1: "-1"
+			Minus10: "-10"
+			Minus100: "-100"
 			MaxStack: 设为最大
 			Reset: 重置
 			Amount: 数量: {0}
@@ -843,15 +845,15 @@ Mods: {
 		Search: 搜索
 		SearchName: 以名称搜索
 		SearchMod: 以模组搜索
-		// SortWaiting: Loading ...
+		SortWaiting: 加载中...
 
 		SearchTips: {
 			SearchName: 以名称搜索
 			SearchMod: @模组名 以模组搜索
 			SearchTooltip: "#物品介绍 以介绍搜索"
 			SearchModAndTooltip: @模组名 #物品介绍
-			// TipModAndTooltip: "[c/ffff00:@ModName] to search by mod, [c/ffff00:#Search Tooltip] to search by tooltip (can be combined in that order)"
-			// TipTooltipOnly: "[c/ffff00:#Search Tooltip] to search by tooltip"
+			TipModAndTooltip: "[c/ffff00:@模组名] 以模组搜索，[c/ffff00:#物品介绍] 以介绍搜索（可按该顺序组合）"
+			TipTooltipOnly: "[c/ffff00:#物品介绍] 以介绍搜索"
 		}
 
 		Recipes: 合成配方
@@ -871,21 +873,21 @@ Mods: {
 			无法打开魔法存储UI，因为游戏面板高度太小了，无法正常显示UI界面
 			请在设置中拉低UI缩放比例或在视频设置中提高游戏分辨率
 			'''
-		/* ForcedLayoutChange:
+		ForcedLayoutChange:
 			'''
-			Current UI layout resulted in a panel that was too short to properly display the UI elements.
-			Forcing the UI layout to "Modern Paged" to allocate more vertical space.
-			''' */
+			当前UI布局导致面板过短，无法正常显示UI元素。
+			强制将UI布局切换为"独立分页"以分配更多垂直空间。
+			'''
 
 		Warnings: {
 			StorageDefaultToAllItems: 当前筛选模式下搜索不到任何物品，即使存储中有相应物品。目前显示的是搜索所有物品的结果
 			StorageDefaultToAllMods: 当前筛选模式下搜索不到任何物品，即使存储中有相应物品。目前显示的是搜索所有物品的结果
 			CraftingNoBlacklist: 由于黑名单设置搜索不到任何配方。目前显示的是搜索所有配方的结果
 			CraftingDefaultToAllMods: 此模组中搜索不到任何配方。目前显示的是搜索所有配方的结果
-			// DeleteItemsFailed: Deletion operation failed for unknown reasons.  Please try again, or delete the items manually if necessary.
-			// DeleteDataFailed: Deletion operation failed for unknown reasons.  Some items may still contain unloaded mod data.
-			// DecraftingNoBlacklist: No items displayed even though blacklisted items exist.  Ignoring item blacklisting.
-			// DecraftingDefaultToAllMods: No items displayed even though items exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
+			DeleteItemsFailed: 删除操作因未知原因失败。请重试，或必要时手动删除物品
+			DeleteDataFailed: 删除操作因未知原因失败。某些物品可能仍包含未加载的模组数据
+			DecraftingNoBlacklist: 即使存在黑名单物品，也未显示任何物品。忽略物品黑名单
+			DecraftingDefaultToAllMods: 即使存在来自其他模组的物品，也未显示任何物品。默认使用 "{$Mods.MagicStorage.FilterAllMods}" 模组过滤器
 		}
 
 		RecipeHidden: 隐藏物品 "{0}" 的制作配方
@@ -902,88 +904,88 @@ Mods: {
 		DepositTooltipAlt: 快速堆叠 - Ctrl+左键 | 存放全部 - 左键 | 补货 - 右键
 
 		ServerOperator: {
-			// ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
-			// ControlRequirement: This control requires the Server Operator status.
+			ConfigChangeDenied: 只有拥有服务器操作员或更高状态的用户才能修改此配置
+			ControlRequirement: 此控件需要服务器操作员状态
 
 			CommandInfo: {
 				Descriptions: {
-					// reqop: Requests the Server Admin status (for Magic Storage) from the server
-					// op: Gives the Server Operator status (for Magic Storage) to client <number>
-					// deop: Removes the Server Operator status (for Magic Storage) from client <number>
-					// whois: Prints what each player's client index is
-					// whoami: Prints this client's player index
+					reqop: 向服务器请求服务器管理员状态（用于魔法存储）
+					op: 授予客户端 <number> 服务器操作员状态（用于魔法存储）
+					deop: 从客户端 <number> 移除服务器操作员状态（用于魔法存储）
+					whois: 打印每个玩家的客户端索引
+					whoami: 打印此客户端的玩家索引
 				}
 
-				// NoArguments: Expected no arguments
-				// MultiplayerOnly: This command can only be used by multiplayer clients
-				// AlreadyAdmin: This player already has the Server Admin status
-				// OneIntArgument: Expected one integer argument
-				// ArgumentNotByte: Argument was not a positive integer between 0 and 255
-				// MultiplayerAdminOnly: This command can only be used by multiplayer clients with the Server Admin status
-				// NotConnected: Client {0} is not connected to the server
-				// ClientAlreadyOp: Client {0} already has the Server Operator status
-				// ClientAlreadyDeop: Client {0} already lacks the Server Operator status
-				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
-				// Players: Players:
-				// YouAreClient: You are client {0}
-				/* ServerKeyText:
+				NoArguments: 预期没有参数
+				MultiplayerOnly: 此命令只能由多人游戏客户端使用
+				AlreadyAdmin: 此玩家已拥有服务器管理员状态
+				OneIntArgument: 预期一个整数参数
+				ArgumentNotByte: 参数不是0到255之间的正整数
+				MultiplayerAdminOnly: 此命令只能由拥有服务器管理员状态的多人游戏客户端使用
+				NotConnected: 客户端 {0} 未连接到服务器
+				ClientAlreadyOp: 客户端 {0} 已拥有服务器操作员状态
+				ClientAlreadyDeop: 客户端 {0} 已缺少服务器操作员状态
+				MultiplayerOperatorOnly: 此命令只能由拥有服务器操作员状态的多人游戏客户端使用
+				Players: 玩家:
+				YouAreClient: 你是客户端 {0}
+				ServerKeyText:
 					'''
 					=====
-					THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!
-					Server Operator/Administrator Key: {0}
+					此消息只会显示一次！
+					服务器操作员/管理员密钥: {0}
 					=====
-					''' */
-				// ClientKeyText: === ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE AND LOG FILE ===
-				// ClientKeyResponseFailed: Inputted key did not match the key stored on the server.
-				// ClientKeyResponseSuccess: Magic Storage Server Operator and Administrator statuses have been successfully added.
+					'''
+				ClientKeyText: === 输入打印到服务器控制台和日志文件的密钥 ===
+				ClientKeyResponseFailed: 输入的密钥与服务器上存储的密钥不匹配
+				ClientKeyResponseSuccess: 魔法存储服务器操作员和管理员状态已成功添加
 			}
 		}
 
 		AuditLogging: {
 			CommandInfo: {
 				Descriptions: {
-					/* msaudit:
+					msaudit:
 						'''
-						Translates the Magic Storage audit log for the world into a human-readable format
-						The name of the resulting file is derived from the world file's name and is placed in the Worlds folder
-						''' */
-					// msauditclear: Clears the Magic Storage audit log for the world
+						将世界的魔法存储审计日志转换为人类可读格式
+						生成的文件名来自世界文件名，并放置在Worlds文件夹中
+						'''
+					msauditclear: 清除世界的魔法存储审计日志
 				}
 
-				// NoArguments: Expected no arguments
-				// MultiplayerOnly: This command can only be used by the server console
-				// NoLogFile: No Magic Storage audit log file found for this world
-				// LoggingDisabled: Magic Storage audit logging is disabled in the config, please enable it first
-				// AdminOnly: This command can only be used by by the server console or multiplayer clients with the Server Administrator status
+				NoArguments: 预期没有参数
+				MultiplayerOnly: 此命令只能由服务器控制台使用
+				NoLogFile: 未找到此世界的魔法存储审计日志文件
+				LoggingDisabled: 魔法存储审计日志记录在配置中已禁用，请先启用
+				AdminOnly: 此命令只能由服务器控制台或拥有服务器管理员状态的多人游戏客户端使用
 			}
 
 			Errors: {
 				Client: {
-					// NoBuffers: Translation audit file couldn't be written due to missing buffers
-					// IncompleteBuffers: Translation audit file couldn't be written due to some sections not being received
-					// MismatchedBufferCount: Translation audit file couldn't be written due to the amount of received sections ({0}) not matching the expected amount ({1})
+					NoBuffers: 由于缺少缓冲区，无法写入翻译审计文件
+					IncompleteBuffers: 由于某些部分未接收，无法写入翻译审计文件
+					MismatchedBufferCount: 由于接收的部分数量 ({0}) 与预期数量 ({1}) 不匹配，无法写入翻译审计文件
 				}
 
-				// LoadFailed: Failed to load audit file
-				// SaveFailed: Failed to save audit file
-				// TranslationFailed: Failed to write translated audit log to file
-				// TranslationAlreadyRunning: The Magic Storage audit log is already being translated, please wait for the action to finish
-				// ClearingAlreadyRunning: The Magic Storage audit log is already being cleared, please wait for the action to finish
+				LoadFailed: 加载审计文件失败
+				SaveFailed: 保存审计文件失败
+				TranslationFailed: 无法将翻译后的审计日志写入文件
+				TranslationAlreadyRunning: 魔法存储审计日志正在翻译中，请等待操作完成
+				ClearingAlreadyRunning: 魔法存储审计日志正在清除中，请等待操作完成
 			}
 
 			Messages: {
 				Client: {
-					// RequestSent: Command request sent to the server, check the server console or log for information
-					// TranslationSuccess: Translation success! Magic Storage audit log was translated to:
+					RequestSent: 命令请求已发送到服务器，请检查服务器控制台或日志以获取信息
+					TranslationSuccess: 翻译成功！魔法存储审计日志已翻译到:
 				}
 
-				// LoadSuccess: Magic Storage audit log was loaded from: {0}
-				// SaveSuccess: Magic Storage audit log was saved to: {0}
-				// TranslationFileNotLoaded: Magic Storage audit log was not loaded yet, forcing load before translation...
-				// TranslationStarted: Translating Magic Storage audit log to a human-readable format...
-				// TranslationSuccess: Magic Storage audit log was translated to: {0}
-				// ClearingStarted: Magic Storage audit log will be cleared...
-				// ClearingSuccess: Magic Storage audit log was cleared, serializing empty file is pending
+				LoadSuccess: 魔法存储审计日志已从以下位置加载: {0}
+				SaveSuccess: 魔法存储审计日志已保存到: {0}
+				TranslationFileNotLoaded: 魔法存储审计日志尚未加载，强制在翻译前加载...
+				TranslationStarted: 正在将魔法存储审计日志转换为人类可读格式...
+				TranslationSuccess: 魔法存储审计日志已翻译到: {0}
+				ClearingStarted: 魔法存储审计日志将被清除...
+				ClearingSuccess: 魔法存储审计日志已清除，序列化空文件待处理
 			}
 		}
 
@@ -996,72 +998,72 @@ Mods: {
 			DepositSafe: 转移保险箱物品
 			DepositForge: 转移护卫熔炉物品
 			DepositVault: 转移虚空保险库物品
-			// InitShowcaseButton: Initialize Showcase
-			// ResetShowcaseButton: Reset Showcase Items
-			// ClearItemsButton: Clear All Items
-			// FillWithGarbage: Fill With Random Items
+			InitShowcaseButton: 初始化展示柜
+			ResetShowcaseButton: 重置展示柜物品
+			ClearItemsButton: 清除所有物品
+			FillWithGarbage: 填充随机物品
 			SellDuplicatesHeader: 出售同种物品
 			SellDuplicatesButton: 出售
-			// SetAStorageName: Enter a name here...
-			// NameWasCleared: Name was cleared
-			// NameWasSetTo: Name was set to: {0}
+			SetAStorageName: 在此输入名称...
+			NameWasCleared: 名称已清除
+			NameWasSetTo: 名称已设置为: {0}
 
 			ItemDeletionMode: {
-				// Label: Item Deletion Mode
-				// Enabled: Item Deletion mode is now [c/00ff00:enabled].  Double click an item to delete it.
-				// Disabled: Item Deletion mode is now [c/ff0000:disabled].
+				Label: 物品删除模式
+				Enabled: 物品删除模式现已 [c/00ff00:启用]。双击物品以删除它。
+				Disabled: 物品删除模式现已 [c/ff0000:禁用]。
 			}
 
 			SellDuplicatesMenu: {
-				// Label: Item Selling Mode
-				// Enabled: Item Selling Mode is now [c/00ff00:enabled].  Click on items to mark them as items to sell.
-				// Disabled: Item Selling Mode is now [c/ff0000:disabled].
+				Label: 物品出售模式
+				Enabled: 物品出售模式现已 [c/00ff00:启用]。点击物品以标记为待出售。
+				Disabled: 物品出售模式现已 [c/ff0000:禁用]。
 				NoPrefix: 出售所有同种无词缀物品
 				KeepMostValue: 保留最值钱的物品
 				KeepLeastValue: 保留最不值钱的物品
 
 				SoldItemsReport: {
-					// GotCoins: "{0}/{1} items were sold for {2}"
-					// NoCoins: "{0}/{1} items were sold, but none had any value"
-					// NoSell: No items were sold
-					// PacketTooLarge: The amount of item stacks to sell was too large to send in one packet.  Please try again with fewer stacks.
+					GotCoins: "{0}/{1} 个物品已出售，获得 {2}"
+					NoCoins: "{0}/{1} 个物品已出售，但没有任何价值"
+					NoSell: 没有物品被出售
+					PacketTooLarge: 要出售的物品堆叠数量太大，无法在一个数据包中发送。请减少堆叠数量后重试。
 				}
 			}
 
 			SellQuantityPopup: {
-				// Label: Quantity:
-				// HintText: "0"
+				Label: 数量:
+				HintText: "0"
 			}
 
 			ActiveNetwork: {
-				// None: Active security network: Unassigned
-				// Assigned: Active security network: {0}
+				None: 活动安全网络: 未分配
+				Assigned: 活动安全网络: {0}
 			}
 		}
 
 		CraftingGUI: {
-			// ShowAllIngredients: Show all possible ingredients
+			ShowAllIngredients: 显示所有可能的材料
 
 			RecursionErrors: {
-				// NoRecipe: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe]"
-				// NoObjects: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's required objects]"
-				// NoIngredients: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's ingredients]"
+				NoRecipe: "[c/ff0000:模拟未能找到有效的递归树，使用原始配方]"
+				NoObjects: "[c/ff0000:模拟未能找到有效的递归树，使用原始配方所需的对象]"
+				NoIngredients: "[c/ff0000:模拟未能找到有效的递归树，使用原始配方的材料]"
 			}
 		}
 
 		HoverText: {
-			// Reset: Reset panel position and size
+			Reset: 重置面板位置和大小
 
 			Errors: {
-				// RenderFail: This item could not be rendered due to an error.
-				// NetFail: This item failed to load on the current client.
-				// NBTFail: The NBT data on this item failed to deserialize.
+				RenderFail: 由于错误，此物品无法渲染
+				NetFail: 此物品在当前客户端上加载失败
+				NBTFail: 此物品的NBT数据反序列化失败
 			}
 
 			TestItems: {
-				// NoTooltip: ""
-				// RenderFail: Error Test: Item Rendering
-				// NetFail: Error Test: Item Loading
+				NoTooltip: ""
+				RenderFail: 错误测试: 物品渲染
+				NetFail: 错误测试: 物品加载
 			}
 		}
 
@@ -1075,24 +1077,24 @@ Mods: {
 		}
 
 		DecraftingGUI: {
-			// StoredResults: Stored Result Items
-			// ShimmeringReports: Shimmering Results
-			// ItemHidden: Item "{0}" was blacklisted.
-			// ItemRevealed: Item "{0}" was whitelisted.
-			// ItemHiddenGlobal: Item "{0}" was global blacklisted.
-			// ItemRevealedGlobal: Item "{0}" was global whitelisted.
-			// ShimmerButton: Shimmer
-			// ShimmerButtonTooltip: Left click to Shimmer item
-			// ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
-			// ShimmerAmount: Shimmering: {0}
+			StoredResults: 存储的结果物品
+			ShimmeringReports: 微光结果
+			ItemHidden: 物品 "{0}" 已被加入黑名单
+			ItemRevealed: 物品 "{0}" 已被加入白名单
+			ItemHiddenGlobal: 物品 "{0}" 已被全局加入黑名单
+			ItemRevealedGlobal: 物品 "{0}" 已被全局加入白名单
+			ShimmerButton: 微光
+			ShimmerButtonTooltip: 左键点击以微光分解物品
+			ShimmerButtonTooltipOld: 左键点击以微光分解物品（按住Ctrl以最大数量分解）
+			ShimmerAmount: 微光分解: {0}
 
 			ShimmerReports: {
-				// DoesNotShimmer: No shimmer results found
-				// CoinLuck: +{0}% Luck (+{1:0.##} value)
+				DoesNotShimmer: 未找到微光结果
+				CoinLuck: +{0}% 幸运值（+{1:0.##} 价值）
 
 				NPCSpawn: {
-					// DirectTransform: "{0}"
-					// IndirectTransform: "{0} (style #{1})"
+					DirectTransform: "{0}"
+					IndirectTransform: "{0}（样式 #{1}）"
 				}
 			}
 		}
@@ -1121,10 +1123,10 @@ Mods: {
 			NotFullyResearched.Tooltip: 未完全研究的物品
 			FullyResearched.Tooltip: 已完全研究的物品
 			Materials.Tooltip: 材料
-			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
-			// Fishing.Tooltip: Filter Fishing Items
-			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
-			// SellingItems.Tooltip: Filter Items Being Sold
+			ToolsAndFishing.Tooltip: 筛选工具和钓鱼物品
+			Fishing.Tooltip: 筛选钓鱼物品
+			MiscGameplayItems.Tooltip: 筛选杂项游戏玩法物品
+			SellingItems.Tooltip: 筛选正在出售的物品
 		}
 
 		SortingOption: {
@@ -1139,82 +1141,82 @@ Mods: {
 		}
 
 		SellingDuplicateFinders: {
-			// SellAllExceptLeastExpensiveFinder.Label: Sell All Except Least Expensive
-			// SellAllExceptMostExpensiveFinder.Label: Sell All Except Most Expensive
-			// SellAllItemsWithNoPrefixFinder.Label: Sell All Items with No Prefix
+			SellAllExceptLeastExpensiveFinder.Label: 出售除最便宜外的所有物品
+			SellAllExceptMostExpensiveFinder.Label: 出售除最昂贵外的所有物品
+			SellAllItemsWithNoPrefixFinder.Label: 出售所有无词缀物品
 		}
 
-		ButtonConfigGear: Open Configuration Panel
+		ButtonConfigGear: 打开配置面板
 
 		UIPages: {
 			Sorting: 排序
 			Filtering: 筛选
 			Crafting: 合成
 			Storage: 存储
-			// Shimmering: Shimmering
+			Shimmering: 微光
 			# StorageGUI page for the extra controls
 			Controls: 控件
 			# EnvironmentGUI page for the modules
 			Modules: 模块
 			History: 历史
-			// Networks: Security Networks
+			Networks: 安全网络
 		}
 
 		Security: {
-			// Creation.Success: "[c/00ff00:Successfully created a new network]"
-			// Join.Success: "[c/00ff00:Successfully joined the network]"
-			// Removal.Success: "[c/00ff00:Successfully deleted the network]"
-			// Modification.Success: "[c/00ff00:Successfully modified the network's settings]"
-			// Access.Success: "[c/00ff00:Successfully granted access to the network]"
-			// NetworkChange.Success: "[c/00ff00:Successfully updated the network for this Storage Heart]"
-			// NetworkNotFound: "[c/ff0000:No network with the given ID was found]"
-			// EmptyPassword: "[c/ff0000:Password cannot be empty for private networks]"
-			// EmptyName: "[c/ff0000:Display name cannot be empty]"
-			// InvalidPassword: "[c/ff0000:Invalid password]"
-			// InvalidPlayer: "[c/ff0000:Player instance did not refer to a valid player]"
-			// UnauthorizedAccess: "[c/ff0000:Player does not meet the requirements to access the network]"
-			// UnauthorizedModification: "[c/ff0000:Player does not meet the requirements to modify the network]"
-			// EntityNotFound: "[c/ff0000:Storage entity could not be found for the request]"
-			// EntityNotAccessible: "[c/ff0000:Player does not meet the requirements to access the storage entity]"
+			Creation.Success: "[c/00ff00:成功创建新网络]"
+			Join.Success: "[c/00ff00:成功加入网络]"
+			Removal.Success: "[c/00ff00:成功删除网络]"
+			Modification.Success: "[c/00ff00:成功修改网络设置]"
+			Access.Success: "[c/00ff00:成功授予网络访问权限]"
+			NetworkChange.Success: "[c/00ff00:成功更新此存储核心的网络]"
+			NetworkNotFound: "[c/ff0000:未找到指定ID的网络]"
+			EmptyPassword: "[c/ff0000:私有网络的密码不能为空]"
+			EmptyName: "[c/ff0000:显示名称不能为空]"
+			InvalidPassword: "[c/ff0000:密码错误]"
+			InvalidPlayer: "[c/ff0000:玩家实例未指向有效玩家]"
+			UnauthorizedAccess: "[c/ff0000:玩家不满足访问网络的要求]"
+			UnauthorizedModification: "[c/ff0000:玩家不满足修改网络的要求]"
+			EntityNotFound: "[c/ff0000:未找到请求的存储实体]"
+			EntityNotAccessible: "[c/ff0000:玩家不满足访问存储实体的要求]"
 
 			UnauthorizedNetmodeContext: {
-				// Singleplayer: "[c/ff0000:Cannot perform this action in singleplayer]"
-				// MultiplayerClient: "[c/ff0000:Cannot perform this action as a client in multiplayer]"
-				// MultiplayerServer: "[c/ff0000:Cannot perform this action as a server in multiplayer]"
+				Singleplayer: "[c/ff0000:无法在单人游戏中执行此操作]"
+				MultiplayerClient: "[c/ff0000:无法在多人游戏中以客户端身份执行此操作]"
+				MultiplayerServer: "[c/ff0000:无法在多人游戏中以服务器身份执行此操作]"
 			}
 
 			UI: {
-				// NameHint: Enter a name for the network
-				// PasswordHint: Enter a password for the network
-				// Private: Private network
-				// Public: Public network
-				// SearchHint: Search for a network
-				// NetworkAccessQuestion: Private network?
-				// Create: Create a new network
-				// ServerWait: Waiting for server response...
-				// RequestingPassword: Enter password for: {0}
-				// AccessPasswordHint: Password...
-				// NoResponse: Security responses will be displayed here
-				// NoHeartAccessDenied: Access Denied
-				// NoHeartMustConnect1: Connect a [i:MagicStorage/StorageHeart] assigned to the security network
-				// NoHeartMustConnect2: with ID {0} to access.
-				// NetworkOwner: Owner: {0}
-				// NetworkID: ID: {0}
+				NameHint: 输入网络名称
+				PasswordHint: 输入网络密码
+				Private: 私有网络
+				Public: 公共网络
+				SearchHint: 搜索网络
+				NetworkAccessQuestion: 私有网络？
+				Create: 创建新网络
+				ServerWait: 等待服务器响应...
+				RequestingPassword: 输入密码: {0}
+				AccessPasswordHint: 密码...
+				NoResponse: 安全响应将显示在此处
+				NoHeartAccessDenied: 访问被拒绝
+				NoHeartMustConnect1: 连接一个分配给安全网络的 [i:MagicStorage/StorageHeart]
+				NoHeartMustConnect2: ID为 {0} 以访问
+				NetworkOwner: 所有者: {0}
+				NetworkID: ID: {0}
 
 				Modes: {
 					Search: {
-						// All: All networks
-						// Restricted: Private networks
-						// Public: Public networks
+						All: 所有网络
+						Restricted: 私有网络
+						Public: 公共网络
 					}
 
 					Sort: {
-						// Name: Name A-Z
-						// NameReverse: Name Z-A
-						// Creator: Owner A-Z
-						// CreatorReverse: Owner Z-A
-						// ID: ID Ascending
-						// IDReverse: ID Descending
+						Name: 名称 A-Z
+						NameReverse: 名称 Z-A
+						Creator: 所有者 A-Z
+						CreatorReverse: 所有者 Z-A
+						ID: ID 升序
+						IDReverse: ID 降序
 					}
 				}
 			}
@@ -1249,7 +1251,7 @@ Mods: {
 			}
 		}
 
-		// Keybinds.PrintItemData.DisplayName: Print Item Data
+		Keybinds.PrintItemData.DisplayName: 输出物品数据
 
 		Configs: {
 			MagicStorageConfig: {
@@ -1291,17 +1293,17 @@ Mods: {
 
 				clearHistory: {
 					Label: "[i:Book]  清除配方历史记录"
-					Tooltip: 在打开制作界面时自动清除配方历史记录
+					Tooltip: 在打开制作单元时自动清除配方历史记录
 				}
 
 				recursionCraftingDepth: {
-					// Label: Recipe Recursion Depth
-					/* Tooltip:
+					Label: 配方递归深度
+					Tooltip:
 						'''
-						How deep the recursion goes for crafting recipes in the Crafting UI.
-						Set to 0 to disable this feature.
-						Set to -1 for infinite depth
-						''' */
+						制作UI中制作配方的递归深度
+						设置为0以禁用此功能
+						设置为-1表示无限深度
+						'''
 				}
 
 				glowNewItems: {
@@ -1321,7 +1323,7 @@ Mods: {
 
 				uiFavorites: {
 					Label: "[i:FallenStar]  收藏物品与配方"
-					Tooltip: 开启后，可在制作界面中收藏物品和配方
+					Tooltip: 开启后，可在制作单元中收藏物品和配方
 				}
 
 				extraFilterIcons: {
@@ -1345,18 +1347,23 @@ Mods: {
 				}
 
 				automatonRemembers: {
-					// Label: Automaton remembers last help tip
-					// Tooltip: The Automaton will remember which help tip it last displayed to the user and display that help tip when interacted with.
+					Label: 自动机记住最后一条帮助提示
+					Tooltip: 自动机会记住它最后向用户显示的帮助提示，并在交互时显示该帮助提示。
+				}
+
+				enablePinyinSearch: {
+					Label: 启用拼音搜索
+					Tooltip: 启用后，可以通过拼音全拼或拼音首字母搜索中文物品名称
 				}
 
 				globalShimmerItemBlacklist: {
-					// Label: Global Item Shimmering Blacklist
-					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
+					Label: 全局物品微光黑名单
+					Tooltip: 按住左 Ctrl + 左 Shift 点击以添加/移除黑名单
 				}
 
 				useOldSlotFocus: {
-					// Label: use Old Slot Focus
-					// Tooltip: ""
+					Label: 使用旧版槽位焦点
+					Tooltip: ""
 				}
 			}
 
@@ -1420,18 +1427,18 @@ Mods: {
 				}
 
 				auditLog: {
-					// Label: Server Audit Log
-					// Tooltip: Enable to make client interactions with any storage system be reported to an audit log
+					Label: 服务器审计日志
+					Tooltip: 启用后，客户端与任何存储系统的交互将被报告到审计日志
 				}
 
 				localHostAdmin: {
-					// Label: Give Server Admin to Local Host
-					// Tooltip: Enable to force the local host to have the Server Administrator status when joining a server
+					Label: 给予本地主机服务器管理员权限
+					Tooltip: 启用后，强制本地主机在加入服务器时拥有服务器管理员状态
 				}
 
 				automatonHappiness: {
-					// Label: Automaton Happiness Affects Sell Prices
-					// Tooltip: Disable to prevent the Automaton from affecting the sell value of items sold via Item Selling Mode
+					Label: 自动机快乐度影响出售价格
+					Tooltip: 禁用以防止自动机影响通过物品出售模式出售的物品的出售价值
 				}
 			}
 

@@ -1344,6 +1344,11 @@ Mods: {
 					Tooltip: Робот запомнит, какую подсказку он в последний раз показывал пользователю, и отобразит эту подсказку при взаимодействии с ней.
 				}
 
+				enablePinyinSearch: {
+					// Label: Enable Pinyin Search
+					// Tooltip: Enable to search Chinese item names using pinyin (full pinyin or initials). This feature only works in Simplified Chinese (zh-Hans) language environment.
+				}
+
 				globalShimmerItemBlacklist: {
 					Label: Глобальный черный список Мерцания
 					Tooltip: Нажмите левый Ctrl + левый Shift, чтобы добавить/удалить из черного списка
