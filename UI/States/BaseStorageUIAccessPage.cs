@@ -75,6 +75,13 @@ namespace MagicStorage.UI.States {
 			scrollBar = new(scrollDividend: 250f);
 			bottomBar = new();
 			capacityText = new UIText("Items");
+			capacityText.OnUpdate += static e => {
+				if (e.IsMouseHovering)
+					MagicUI.mouseText = StorageGUI.hasAnyErrorItems ? Language.GetTextValue("Mods.MagicStorage.HoverText.Errors.CapacityText") : "";
+			};
+			capacityText.OnMouseOut += static (evt, e) => {
+				MagicUI.mouseText = "";
+			};
 			sortingButtons = new(ModernConfigSortingButtonAction, 21, 15, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Sorting"));
 			filteringButtons = new(ModernConfigFilteringButtonAction, 21, 22, onGearChoiceSelected: () => parentUI.OpenModernConfigPanel("Filtering"));
 			sortingDropdown = new(Language.GetText("Mods.MagicStorage.UIPages.Sorting"), 135, 2, 250);
@@ -608,6 +615,7 @@ namespace MagicStorage.UI.States {
 			}
 
 			capacityText.SetText(Language.GetTextValue("Mods.MagicStorage.Capacity", numItems, capacity));
+			capacityText.TextColor = StorageGUI.hasAnyErrorItems ? Color.Red : Color.White;
 
 			if (ShouldHideItemIcons()) {
 				Player player = Main.LocalPlayer;

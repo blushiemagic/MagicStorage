@@ -66,6 +66,7 @@ namespace MagicStorage {
 
 				SortAndFilter(this);
 
+				StorageGUI.hasAnyErrorItems = base.foundErrorItem;
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 			}
 

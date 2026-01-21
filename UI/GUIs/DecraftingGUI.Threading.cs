@@ -92,6 +92,7 @@ namespace MagicStorage {
 				RecipeItems.CopyToStaticCollections();
 				CompleteOne();
 
+				StorageGUI.hasAnyErrorItems = base.foundErrorItem;
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 
 				CraftingGUI.hasCompleteData = true;
@@ -105,6 +106,7 @@ namespace MagicStorage {
 				IngredientControls.ClearStaticCollections();
 				ShimmerItemReports.ClearStaticCollection();
 				RecipeItems.ClearStaticCollections();
+				StorageGUI.hasAnyErrorItems = false;
 			}
 
 			// Unused due to being a full thread

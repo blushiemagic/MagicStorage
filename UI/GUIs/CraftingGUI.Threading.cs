@@ -123,6 +123,7 @@ namespace MagicStorage {
 				CraftingGUI.SetRecipeAndCraftingCaches(this);
 				CompleteOne();
 
+				StorageGUI.hasAnyErrorItems = base.foundErrorItem;
 				MagicUI.lastKnownSearchBarErrorReason = base.searchBarError;
 				CraftingGUI.lastKnownRecursionErrorForStoredItems = base.storedItemsError;
 
@@ -138,6 +139,7 @@ namespace MagicStorage {
 				CraftObjectAvailableCache.ClearStaticCollection();
 				RecipeSimulations.ClearStaticCollection();
 				RecipeItems.ClearStaticCollections();
+				StorageGUI.hasAnyErrorItems = false;
 			}
 
 			// Unused due to being a full thread

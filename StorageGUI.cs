@@ -38,6 +38,7 @@ namespace MagicStorage
 			items.Clear();
 			itemToSourceItems.Clear();
 			ResetRefreshCache();
+			hasAnyErrorItems = false;
 		}
 
 		internal static void FavoriteItem(int slot) {

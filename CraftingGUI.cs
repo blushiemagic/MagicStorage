@@ -65,6 +65,7 @@ namespace MagicStorage
 			result = null;
 			ResetRecentRecipeCache();
 			ResetRefreshCache();
+			StorageGUI.hasAnyErrorItems = false;
 		}
 
 		internal static void Reset() {

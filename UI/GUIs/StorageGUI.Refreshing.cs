@@ -79,6 +79,8 @@ namespace MagicStorage {
 
 		#endregion
 
+		internal static bool hasAnyErrorItems;
+
 		internal static void ResetRefreshCache() {
 			itemTypesToUpdate = null;
 		}

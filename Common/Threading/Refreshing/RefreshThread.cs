@@ -64,6 +64,11 @@ namespace MagicStorage.Common.Threading.Refreshing {
 		public string storedItemsError;
 
 		/// <summary>
+		/// Set to <see langword="true"/> if an error item was found by certain aggregation functions.
+		/// </summary>
+		public bool foundErrorItem;
+
+		/// <summary>
 		/// The <see cref="TEStorageHeart"/> being accessed by the UI being refreshed, if any.<br/>
 		/// This property will only be non-<see langword="null"/> when <see cref="CollectObjects"/> is invoked.
 		/// </summary>

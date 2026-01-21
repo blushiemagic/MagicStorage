@@ -1,9 +1,11 @@
 ﻿using MagicStorage.Common.Threading.Refreshing;
+using MagicStorage.Items.ErrorDisplay;
 using SerousCommonLib.API.Iterators;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 
 namespace MagicStorage.Sorting {
@@ -51,6 +53,11 @@ namespace MagicStorage.Sorting {
 				case 2:
 					while (_iterator.MoveNext()) {
 						var current = _iterator.Current;
+
+						if (typeof(T) == typeof(Item)) {
+							if (Unsafe.As<T, Item>(ref current).ModItem is BaseErrorDummyItem)
+								_thread.foundErrorItem = true;
+						}
 
 						if (PassesFilters(current)) {
 							_current = current;

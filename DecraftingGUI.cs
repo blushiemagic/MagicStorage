@@ -33,6 +33,7 @@ namespace MagicStorage {
 			resultItems.Clear();
 			resultItemsInfo.Clear();
 			selectedItem = -1;
+			StorageGUI.hasAnyErrorItems = false;
 		}
 
 		internal static TEStorageHeart GetHeart() => StoragePlayer.LocalPlayer.GetStorageHeart();
