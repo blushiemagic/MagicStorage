@@ -28,6 +28,8 @@ namespace MagicStorage.UI {
 
 		private readonly bool forceGearIconToNotBeCreated;
 
+		internal bool disableIconFading;
+
 		public bool HasGearIcon { get; private set; }
 
 		public int SelectionType => RemapChoice(Choice);
@@ -84,6 +86,9 @@ namespace MagicStorage.UI {
 			int numChoices = 0;
 			foreach (var choiceInfo in info) {
 				ChoiceElement choice = new(numChoices, choiceInfo.asset, choiceInfo.text, choiceInfo.generalChoice, buttonSize);
+
+				if (disableIconFading)
+					choice.allowHoverFade = false;
 				
 				if (choiceInfo.generalChoice)
 					generalChoices.Add(choice);
@@ -260,7 +265,7 @@ namespace MagicStorage.UI {
 				}
 			}
 
-			protected bool allowHoverFade = true;
+			internal bool allowHoverFade = true;
 			private bool _lastKnownConfigOption;
 
 			private const float ALPHA_LOW = 0.45f;

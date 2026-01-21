@@ -812,7 +812,7 @@ namespace MagicStorage.UI.States {
 			private bool lastKnownConfigBlacklist;
 
 			protected RecipesPage(BaseStorageUI parent, string name) : base(parent, name) {
-				recipeButtons = new(RecipeFilterChanged, 32, 5, forceGearIconToNotBeCreated: true);
+				recipeButtons = new(RecipeFilterChanged, 32, 5, forceGearIconToNotBeCreated: true) { disableIconFading = true };
 				stationText = new UIText(Language.GetText("Mods.MagicStorage.CraftingStations"));
 				stationZone = new(CraftingGUI.InventoryScale / 1.55f);
 
