@@ -17,6 +17,7 @@ using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 using Terraria.UI;
 
 namespace MagicStorage.Common.Systems;
@@ -462,7 +463,7 @@ public class MagicUI : ModSystem
 
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
 						if (CanUpdateMouseText())
-							Main.instance.MouseText(mouseText);
+							UICommon.TooltipMouseText(mouseText);
 
 						blockItemSlotActionsDetour = false;
 					}
