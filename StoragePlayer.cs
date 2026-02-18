@@ -330,13 +330,38 @@ namespace MagicStorage
 
 		public override bool HoverSlot(Item[] inventory, int context, int slot)
 		{
-			if (storageAccess.X < 0 || storageAccess.Y < 0)
+			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
 				return false;
-
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return base.HoverSlot(inventory, context, slot);
 			Item item = inventory[slot];
-
 			if (item.favorited || item.IsAir)
 				return false;
+
+			if (Player.inventory[slot] == inventory[slot])
+			{
+				bool pass = false;
+				using (SecuritySystem.CreateAccessContext())
+				{
+					foreach (TEAbstractStorageUnit storageUnit in GetStorageHeart().GetStorageUnits())
+					{
+						if (!storageUnit.IsFull || storageUnit.HasSpaceInStackFor(item))
+						{
+							pass = true;
+						}
+					}
+				}
+
+				if (pass == false)
+					return false;
+			}
+			else if (Player.inventory[slot] != inventory[slot])
+			{
+				if (!Player.CanAcceptItemIntoInventory(item))
+				{
+					return false;
+				}
+			}
 
 			if (ItemSlot.ShiftInUse)
 				Main.cursorOverride = 9;
