@@ -333,7 +333,7 @@ namespace MagicStorage
 			if (context != ItemSlot.Context.InventoryItem && context != ItemSlot.Context.InventoryCoin && context != ItemSlot.Context.InventoryAmmo)
 				return false;
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
-				return base.HoverSlot(inventory, context, slot);
+				return false;
 			Item item = inventory[slot];
 			if (item.favorited || item.IsAir)
 				return false;
@@ -366,7 +366,7 @@ namespace MagicStorage
 			if (ItemSlot.ShiftInUse)
 				Main.cursorOverride = 9;
 
-			return base.HoverSlot(inventory, context, slot);
+			return false;
 		}
 
 		public TEStorageComponent GetStorageComponent() {
