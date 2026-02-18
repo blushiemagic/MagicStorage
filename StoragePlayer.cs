@@ -328,6 +328,22 @@ namespace MagicStorage
 			return true;
 		}
 
+		public override bool HoverSlot(Item[] inventory, int context, int slot)
+		{
+			if (storageAccess.X < 0 || storageAccess.Y < 0)
+				return false;
+
+			Item item = inventory[slot];
+
+			if (item.favorited || item.IsAir)
+				return false;
+
+			if (ItemSlot.ShiftInUse)
+				Main.cursorOverride = 9;
+
+			return base.HoverSlot(inventory, context, slot);
+		}
+
 		public TEStorageComponent GetStorageComponent() {
 			if (storageAccess.X < 0 || storageAccess.Y < 0)
 				return null;
