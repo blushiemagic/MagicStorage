@@ -4,6 +4,7 @@ using MagicStorage.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -18,6 +19,10 @@ namespace MagicStorage.Examples {
 	//   5. A BaseStorageCoreItem item that is extracted when using a Storage Core Wrench
 	// Most of this is handled automatically for you, and you just have to define the relations between the components and their tier
 	// In this example, the Demonite and Crimtane tiers can be upgraded to the Example tier, which can then be upgraded to the Hellstone tier
+
+	// IMPORTANT NOTE:  As of v0.7.0.11, TEStorageUnit has an oversight which results in custom Storage Units deleting their tile entities
+	//                  due to the entities thinking that the tile they're placed on is invalid.
+	//                  Version 0.7.1 will fix this oversight, but in the meantime, you'll also need to declare and use a custom tile entity.
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
 	internal class ExampleStorageUnitTier : StorageUnitTier {
@@ -74,6 +79,13 @@ namespace MagicStorage.Examples {
 		}
 	}
 
+	// Reminder from the note above: TEStorageUnit is broken in v0.7.0.11 and prior versions, so a custom tile entity that implemnts a band-aid fix is required
+
+	[Autoload(false)]  // Make sure to remove this line when copying this code!
+	internal class ExampleStorageUnitEntity : TEStorageUnit {
+		public override bool ValidTile(in Tile tile) => TileLoader.GetTile(tile.TileType) is ExampleStorageUnitTile && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
+	}
+
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
 	internal class ExampleStorageUnitTile : MagicStorage.Components.StorageUnit {
 		public override void ModifyObjectData() {
@@ -88,7 +100,9 @@ namespace MagicStorage.Examples {
 		public override TEStorageUnit GetTileEntity() {
 			// By default, StorageUnit places a TEStorageUnit tile entity
 			// Use this method to place a custom tile entity if needed
-			return base.GetTileEntity();
+
+			// Reminder from the note above: TEStorageUnit is broken in v0.7.0.11 and prior versions, so a custom tile entity that implemnts a band-aid fix is required
+			return ModContent.GetInstance<ExampleStorageUnitEntity>();
 		}
 
 		protected override bool GetGlowmask(int x, int y, int type, int frameX, int frameY, out Asset<Texture2D> asset, out Color drawColor) {
