@@ -112,30 +112,35 @@ namespace MagicStorage.CrossMod.Control {
 		}
 
 		internal void Initialize() {
-			Directory.CreateDirectory(DestinationFolder);
+			try {
+				Directory.CreateDirectory(DestinationFolder);
 
-			if (!File.Exists(DestinationPath)) {
-				//No file?  Default to a base configuration
-				goto UseDefault;
-			} else {
-				try {
-					TagCompound tag = TagIO.FromFile(DestinationPath);
+				if (!File.Exists(DestinationPath)) {
+					//No file?  Default to a base configuration
+					goto UseDefault;
+				} else {
+					try {
+						TagCompound tag = TagIO.FromFile(DestinationPath);
 
-					if (tag.GetList<TagCompound>("options") is not { Count: >0 } tags) {
+						if (tag.GetList<TagCompound>("options") is not { Count: >0 } tags) {
+							MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
+							goto UseDefault;
+						}
+
+						List<OptionDefinition> options = tags.Select(OptionDefinition.DeserializeData).ToList();
+
+						sortingOptions = BuildArray(options.Where(o => o.DefinesSorter), o => o.GetSortOption().Type, SortingOptionLoader.Count);
+						filteringOptions = BuildArray(options.Where(o => o.DefinesFilter), o => o.GetFilterOption().Type, FilteringOptionLoader.TotalCount);
+						unloadedOptions = options.Where(o => !o.Exists).ToList();
+						return;
+					} catch {
 						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
 						goto UseDefault;
 					}
-
-					List<OptionDefinition> options = tags.Select(OptionDefinition.DeserializeData).ToList();
-
-					sortingOptions = BuildArray(options.Where(o => o.DefinesSorter), o => o.GetSortOption().Type, SortingOptionLoader.Count);
-					filteringOptions = BuildArray(options.Where(o => o.DefinesFilter), o => o.GetFilterOption().Type, FilteringOptionLoader.TotalCount);
-					unloadedOptions = options.Where(o => !o.Exists).ToList();
-					return;
-				} catch {
-					MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
-					goto UseDefault;
 				}
+			} catch {
+				MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" could not be loaded");
+				goto UseDefault;
 			}
 
 			UseDefault:
