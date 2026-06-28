@@ -10,7 +10,7 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			public Entry() { }
 
-			static void IAuditable<Entry>.DeserializeOne<T>(BinaryReader reader, ref T instance) {
+			static void IAuditable<Entry>.DeserializeOne(BinaryReader reader, ref Entry instance) {
 				instance.Type = reader.ReadUInt16();
 				instance.Name = reader.ReadString();
 			}
@@ -39,6 +39,12 @@ namespace MagicStorage.Common.Systems.Auditing {
 			static int IAuditableEntry<Entry, TEStorageComponent, int>.GetKey(TEStorageComponent source) => source.Type;
 
 			static string IAuditableEntry<Entry, TEStorageComponent, int>.GetName(Entry self) => self.Name;
+		}
+
+		// NOTE: ref parameters require exact type matches, so this redirect is needed to simplify caller logic
+		public static void DeserializeOne(BinaryReader reader, ref AuditComponentTable instance) {
+			BaseAuditTable<TEStorageComponent, int, Entry> redirect = instance;
+			DeserializeOne(reader, ref redirect);
 		}
 	}
 }

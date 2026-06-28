@@ -160,7 +160,7 @@ namespace MagicStorage.Edits {
 					// Inform the client of the quick stack result so that their UI can be refreshed
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.ServerQuickStackToStorageResult);
-					packet.Write(playSound);
+				//	packet.Write(playSound);
 					packet.Write(type);
 					packet.Send(toClient: player.whoAmI);
 				}

@@ -462,7 +462,7 @@ public class MagicUI : ModSystem
 						blockItemSlotActionsDetour = true;
 
 						uiInterface.Draw(Main.spriteBatch, new GameTime());
-						if (CanUpdateMouseText())
+						if (CanUpdateMouseText() && !string.IsNullOrWhiteSpace(mouseText))
 							UICommon.TooltipMouseText(mouseText);
 
 						blockItemSlotActionsDetour = false;

@@ -2,7 +2,7 @@
 
 namespace MagicStorage.Common.Systems.Auditing {
 	internal interface IAuditable<TSelf> where TSelf : IAuditable<TSelf> {
-		static abstract void DeserializeOne<T>(BinaryReader reader, ref T instance) where T : TSelf;
+		static abstract void DeserializeOne(BinaryReader reader, ref TSelf instance);
 
 		void Serialize(BinaryWriter writer);
 	}

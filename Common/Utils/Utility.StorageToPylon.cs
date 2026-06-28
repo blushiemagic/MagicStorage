@@ -1,4 +1,5 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.Common;
+using MagicStorage.Components;
 using MagicStorage.Edits;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace MagicStorage {
 			Point16 centerTile = self.Center.ToTileCoordinates16();
 
 			HashSet<Point16> foundAccesses = new();
+			HashSet<Point16> usedCenters = new();
 
 			const int range = 39;
 			int startX = centerTile.X - range, startY = centerTile.Y - range;
@@ -26,17 +28,19 @@ namespace MagicStorage {
 			for (int x = startX; x <= endX; x++) {
 				for (int y = startY; y <= endY; y++) {
 					Tile tile = Main.tile[x, y];
-					if (TileLoader.GetTile(tile.TileType) is StorageAccess access)
-						foundAccesses.Add(new Point16(x - tile.TileFrameX / 18, y - tile.TileFrameY / 18));
+					if (TileLoader.GetTile(tile.TileType) is StorageAccess access) {
+						Point16 topLeft = new Point16(x, y);
+						TileNetworkScanner.AdjustComponentCoordinate(ref topLeft);
+
+						if (foundAccesses.Add(topLeft) && topLeft.ResolveToTileEntity() is TEStorageComponent component && component.GetLocalCenter() is TEStorageCenter localCenter) {
+							// A connection exists, use it
+							usedCenters.Add(localCenter.Position);
+						}
+					}
 				}
 			}
 
-			return foundAccesses
-				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) && entity is TEStorageCenter ? p : TEStorageComponent.FindStorageCenter(p))
-				.Where(static p => p != Point16.NegativeOne)
-				.Distinct()
-				.Select(static p => TileEntity.ByPosition.TryGetValue(p, out TileEntity entity) ? entity : null)
-				.OfType<TEStorageCenter>();
+			return usedCenters.ResolveTileEntities<TEStorageCenter>();
 		}
 
 		public static TEStorageHeart GetHeartFromAccess(Point16 access) {

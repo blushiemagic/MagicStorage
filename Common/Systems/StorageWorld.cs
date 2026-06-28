@@ -137,9 +137,6 @@ namespace MagicStorage.Common.Systems
 			tag["modded"] = moddedDiamonds.Select(i => ModContent.GetModNPC(i)).Where(m => m is not null).Select(m => $"{m.Mod.Name}:{m.Name}").Concat(unloadedModdedDiamonds).ToList();
 
 			tag["migration"] = FIX_STORAGE_DISCONNECTED_2_ELECTRIC_BOOGALOO;
-
-			if (!Main.dedServ)
-				MagicStorageMod.Instance.optionsConfig.Save();
 		}
 
 		public override void LoadWorldData(TagCompound tag)

@@ -10,6 +10,7 @@ using Terraria.DataStructures;
 using MagicStorage.Common.Systems;
 using MagicStorage.Common.IO;
 using System.Threading;
+using MagicStorage.Common.Systems.Debugging;
 
 namespace MagicStorage.Components
 {
@@ -98,7 +99,7 @@ namespace MagicStorage.Components
 								packet.Send(op.client);
 							}
 						}
-						NetHelper.SendTEUpdate(ID, Position);
+						NetHelper.SendTEUpdate(ID);
 					}
 				}
 
@@ -112,10 +113,20 @@ namespace MagicStorage.Components
 
 		public void QClientOperation(BinaryReader reader, Operation op, int client)
 		{
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Set(Main.netMode == NetmodeID.Server)
+					.AndAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingStationSlots)
+			);
+
 			NetOperation netOp;
 			if (op == Operation.Withdraw || op == Operation.WithdrawToInventory)
 			{
 				byte slot = reader.ReadByte();
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Slot: {0}", slot);
+
 				netOp = new NetOperation(op, slot, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Withdraw", Position);
@@ -123,13 +134,24 @@ namespace MagicStorage.Components
 			else
 			{
 				Item item = ItemIO.Receive(reader, true, true);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Item: {0}", item.IdentifierAndStack());
+
 				netOp = new NetOperation(op, item, client);
 
 			//	NetHelper.PrintClientRequest(client, "Item Deposit", Position);
 			}
 
-			if (netOp is not null && Main.netMode == NetmodeID.Server)
+			if (Main.netMode == NetmodeID.Server) {
+				// Only the server should care about the operation queue
 				clientOpQ.Enqueue(netOp);
+			} else {
+				using var clientDebugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingStationSlots);
+
+				if (clientDebugging.IsDebugging)
+					clientDebugging.Report(false, "Operation object has been discarded due to being read on a client");
+			}
 		}
 
 		private static ModPacket PrepareServerResult(Operation op)
@@ -149,7 +171,7 @@ namespace MagicStorage.Components
 			return packet;
 		}
 
-		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<CraftingAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
+		public override bool ValidTile(in Tile tile) => TileLoader.GetTile(tile.TileType) is CraftingAccess && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		private Item DepositStation(Item item)
 		{
@@ -191,6 +213,16 @@ namespace MagicStorage.Components
 				ItemIO.Send(item, packet, true, true);
 				packet.Send();
 				item.SetDefaults(0, true);
+
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CraftingStationSlots);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ClientStationOperation)
+						.Indent()
+						.Report(false, "Operation: {0}", Operation.Deposit)
+						.Report(false, "Item: {0}", item.IdentifierAndStack());
+				}
 			}
 			else
 			{
@@ -289,6 +321,16 @@ namespace MagicStorage.Components
 				ModPacket packet = PrepareClientRequest(toInventory ? Operation.WithdrawToInventory : Operation.Withdraw);
 				packet.Write((byte) slot);
 				packet.Send();
+
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CraftingStationSlots);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ClientStationOperation)
+						.Indent()
+						.Report(false, "Operation: {0}", toInventory ? Operation.WithdrawToInventory : Operation.Withdraw)
+						.Report(false, "Slot: {0}", slot);
+				}
 
 				return new Item();
 			}

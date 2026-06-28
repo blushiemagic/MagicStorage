@@ -25,7 +25,7 @@ namespace MagicStorage.Examples {
 	//                  Version 0.7.1 will fix this oversight, but in the meantime, you'll also need to declare and use a custom tile entity.
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleStorageUnitTier : StorageUnitTier {
+	public class ExampleStorageUnitTier : StorageUnitTier {
 		public override int UpgradeItemType => ModContent.ItemType<ExampleUpgrade>();
 
 		public override int CoreItemType => ModContent.ItemType<ExampleCore>();
@@ -44,6 +44,9 @@ namespace MagicStorage.Examples {
 			this.SetUpgradeableFrom(StorageUnitTier.Demonite);
 			this.SetUpgradeableFrom(StorageUnitTier.Crimtane);
 			this.SetUpgradeableTo(StorageUnitTier.Hellstone);
+
+			// What if you want to use a modded storage tier?  Use ModContent.GetInstance<T>() to get the instance.
+			// this.SetUpgradeableTo(ModContent.GetInstance<ExampleOtherStorageUnitTier>());
 		}
 
 		public override void Frame(StorageUnitFullness fullness, bool active, out int frameX, out int frameY) {
@@ -82,12 +85,16 @@ namespace MagicStorage.Examples {
 	// Reminder from the note above: TEStorageUnit is broken in v0.7.0.11 and prior versions, so a custom tile entity that implemnts a band-aid fix is required
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleStorageUnitEntity : TEStorageUnit {
+	public class ExampleStorageUnitEntity : TEStorageUnit {
+		// This class isn't strictly necessary post-v0.7.0.11 since TEStorageUnit already handles all Storage Unit logic,
+		//   but you can use it to override methods in the base entity.
+		// If you want a non-standard Storage Unit like the Creative Storage Unit, inherit from TEAbstractStorageUnit instead.
+
 		public override bool ValidTile(in Tile tile) => TileLoader.GetTile(tile.TileType) is ExampleStorageUnitTile && tile.TileFrameX % 36 == 0 && tile.TileFrameY % 36 == 0;
 	}
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleStorageUnitTile : MagicStorage.Components.StorageUnit {
+	public class ExampleStorageUnitTile : MagicStorage.Components.StorageUnit {
 		public override void ModifyObjectData() {
 			// By default, StorageUnit expects spritesheets to have 6 style columns per row
 			// If you want to modify this behavior, update:
@@ -114,7 +121,7 @@ namespace MagicStorage.Examples {
 	}
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleStorageUnitItem : BaseStorageUnitItem {
+	public class ExampleStorageUnitItem : BaseStorageUnitItem {
 		public override StorageUnitTier Tier => ModContent.GetInstance<ExampleStorageUnitTier>();
 
 		public override void SetDefaults() {
@@ -124,12 +131,12 @@ namespace MagicStorage.Examples {
 	}
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleUpgrade : BaseStorageUpgradeItem {
+	public class ExampleUpgrade : BaseStorageUpgradeItem {
 		public override StorageUnitTier Tier => ModContent.GetInstance<ExampleStorageUnitTier>();
 	}
 
 	[Autoload(false)]  // Make sure to remove this line when copying this code!
-	internal class ExampleCore : BaseStorageCore {
+	public class ExampleCore : BaseStorageCore {
 		public override StorageUnitTier Tier => ModContent.GetInstance<ExampleStorageUnitTier>();
 
 		// The tooltip will default to the localization at:  Mods.MagicStorage.Items.StorageCore.CommonTooltip

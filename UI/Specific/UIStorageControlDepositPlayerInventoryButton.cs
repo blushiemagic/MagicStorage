@@ -1,5 +1,7 @@
-﻿using MagicStorage.Components;
+﻿using MagicStorage.Common.Systems;
+using MagicStorage.Components;
 using System;
+using System.Collections;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
@@ -9,12 +11,11 @@ using Terraria.UI;
 
 namespace MagicStorage.UI {
 	public class UIStorageControlDepositPlayerInventoryButton : UITextPanel<LocalizedText> {
-		public Func<Player, Item[]> GetInventory;
-		public Action<Player, Item[]> NetReceiveInventoryResult;
+		public int TellerBankID { get; }
 
-		internal static Action<Player, Item[]> PendingResultAction;
-
-		public UIStorageControlDepositPlayerInventoryButton(LocalizedText text, float textScale = 1, bool large = false) : base(text, textScale, large) { }
+		public UIStorageControlDepositPlayerInventoryButton(LocalizedText text, int tellerBankID, float textScale = 1, bool large = false) : base(text, textScale, large) {
+			TellerBankID = tellerBankID;
+		}
 
 		public override void LeftClick(UIMouseEvent evt) {
 			base.LeftClick(evt);
@@ -22,37 +23,24 @@ namespace MagicStorage.UI {
 			if (StoragePlayer.LocalPlayer.GetStorageHeart() is not TEStorageHeart heart)
 				return;
 
-			Item[] inv = GetInventory?.Invoke(Main.LocalPlayer);
-
-			if (inv is null)
-				return;  // Nothing to do
-
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				TryDepositItems(inv, heart, true, out _);
-			else
-				NetHelper.ClientRequestDepositFromBank(inv, heart.Position, NetReceiveInventoryResult);
-		}
-
-		internal static void TryDepositItems(Item[] inv, TEStorageHeart heart, bool playSound, out bool changed) {
-			changed = false;
-
-			// Try to deposit each item manually so that any leftovers stay in the same slots
-			for (int i = 0; i < inv.Length; i++) {
-				Item item = inv[i];
-
-				if (item.IsAir || item.favorited)
-					continue;
-
-				int stack = item.stack;
-
-				heart.DepositItem(item);
-
-				if (stack != item.stack)
-					changed = true;
+			if (!SecuritySystem.CanPlayerAccessImmediately(Main.LocalPlayer, heart.assignedNetwork)) {
+				SecuritySystem.PrintStorageInaccessible();
+				return;
 			}
 
-			if (playSound && changed)
-				SoundEngine.PlaySound(SoundID.Grab);
+			if (Main.netMode == NetmodeID.SinglePlayer) {
+				Item[] inventory = PlayerInventoryTeller.LoadBank(Main.LocalPlayer, TellerBankID);
+				BitArray hasItem = PlayerInventoryTeller.PrepareHandleArray(inventory);
+				bool depositedAny = false;
+
+				// Since the inventory is referenced directly, in-place mutations of it will also affect the player inventory
+				using (SecuritySystem.CreateAccessContext())
+					PlayerInventoryTeller.HandleInventory(inventory, hasItem, heart, ref depositedAny);
+
+				if (depositedAny)
+					SoundEngine.PlaySound(SoundID.Grab);
+			} else
+				PlayerInventoryTeller.SendDepositToStorageRequest(TellerBankID, heart);
 		}
 	}
 }

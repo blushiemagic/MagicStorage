@@ -115,17 +115,16 @@ namespace MagicStorage.CrossMod.Control {
 			try {
 				Directory.CreateDirectory(DestinationFolder);
 
-				if (!File.Exists(DestinationPath)) {
+				string path = DestinationPath;
+				if (!File.Exists(path)) {
 					//No file?  Default to a base configuration
 					goto UseDefault;
 				} else {
 					try {
-						TagCompound tag = TagIO.FromFile(DestinationPath);
+						TagCompound tag = TagIO.FromFile(path);
 
-						if (tag.GetList<TagCompound>("options") is not { Count: >0 } tags) {
-							MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
-							goto UseDefault;
-						}
+						if (tag.GetList<TagCompound>("options") is not { Count: >0 } tags)
+							throw new InvalidDataException("Options file \"" + RelativeDestinationFile + "\" is missing data");
 
 						List<OptionDefinition> options = tags.Select(OptionDefinition.DeserializeData).ToList();
 
@@ -133,13 +132,13 @@ namespace MagicStorage.CrossMod.Control {
 						filteringOptions = BuildArray(options.Where(o => o.DefinesFilter), o => o.GetFilterOption().Type, FilteringOptionLoader.TotalCount);
 						unloadedOptions = options.Where(o => !o.Exists).ToList();
 						return;
-					} catch {
-						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed");
+					} catch (Exception ex) {
+						MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" was malformed", ex);
 						goto UseDefault;
 					}
 				}
-			} catch {
-				MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" could not be loaded");
+			} catch (Exception ex) {
+				MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" could not be loaded", ex);
 				goto UseDefault;
 			}
 
@@ -163,7 +162,11 @@ namespace MagicStorage.CrossMod.Control {
 				["options"] = options.Select(o => o.SerializeData()).ToList()
 			};
 
-			TagIO.ToFile(root, DestinationPath);
+			try {
+				TagIO.ToFile(root, DestinationPath);
+			} catch (Exception ex) {
+				MagicStorageMod.Instance.Logger.Warn("Options file \"" + RelativeDestinationFile + "\" could not be saved", ex);
+			}
 		}
 
 		public IEnumerable<SortingOption> GetSortingOptions(bool craftingGUI) => SortingOptionLoader.GetVisibleOptions(craftingGUI).Where(o => sortingOptions[o.Type] is not null);

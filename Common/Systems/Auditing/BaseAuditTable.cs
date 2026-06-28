@@ -38,7 +38,7 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		public string GetNameFromKey(TKey key) => _keyToIndex.TryGetValue(key, out int index) ? GetNameFromIndex(index) : null;
 
-		public static void DeserializeOne<T>(BinaryReader reader, ref T instance) where T : BaseAuditTable<TSource, TKey, TEntry> {
+		public static void DeserializeOne(BinaryReader reader, ref BaseAuditTable<TSource, TKey, TEntry> instance) {
 			try {
 				int count = reader.ReadUInt16();
 

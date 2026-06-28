@@ -27,26 +27,24 @@ namespace MagicStorage {
 			if (build < first143Preview) {
 				if (current >= first143Preview) {
 					// Attempted to load the 1.4.3 build of Magic Storage on a 1.4.4 client/server
-					throw new OutdatedModBuildException();
+					throw new Outdated143ModBuildException();
 				}
 			} else if (current < first143Preview) {
 				// Attempted to load the 1.4.4 build of Magic Storage on a 1.4.3 client/server
-				throw new IndatedModBuildException();
+				throw new Indated144ModBuildException();
 			}
 		}
 	}
 
-	internal class OutdatedModBuildException : Exception {
-		private const string MESSAGE = "Attempted to load the 1.4.3 build of Magic Storage on a 1.4.4 tModLoader instance\n" +
-			"If you installed the mod manually, get the mod file from the \"Steam/steamapps/workshop/content/1281930/2563309347/2022.9\" directory.";
+	internal class Outdated143ModBuildException : Exception {
+		private const string MESSAGE = "Attempted to load the 1.4.3 build of Magic Storage on a 1.4.4+ tModLoader instance";
 
-		public OutdatedModBuildException(Exception innerException = null) : base(MESSAGE, innerException) { }
+		public Outdated143ModBuildException(Exception innerException = null) : base(MESSAGE, innerException) { }
 	}
 
-	internal class IndatedModBuildException : Exception {
-		private const string MESSAGE = "Attempted to load the 1.4.4 build of Magic Storage on a 1.4.3 tModLoader instance\n" +
-			"If you installed the mod manually, get the mod file from the \"Steam/steamapps/workshop/content/1281930/2563309347/" + MagicStorageMod.build144Version + "\" directory.";
+	internal class Indated144ModBuildException : Exception {
+		private const string MESSAGE = "Attempted to load the 1.4.4 build of Magic Storage on a 1.4.3 tModLoader instance";
 
-		public IndatedModBuildException(Exception innerException = null) : base(MESSAGE, innerException) { }
+		public Indated144ModBuildException(Exception innerException = null) : base(MESSAGE, innerException) { }
 	}
 }

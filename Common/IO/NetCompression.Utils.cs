@@ -34,22 +34,51 @@ namespace MagicStorage.Common.IO {
 			return decompressed.ToArray();
 		}
 
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> over the network
+		/// </summary>
 		public static int GetBitSize(byte value) => BitOperations.Log2(value) + 1;
 
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> as an unsigned value over the network
+		/// </summary>
 		public static int GetBitSize(sbyte value) => BitOperations.Log2((byte)value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> over the network
+		/// </summary>
 		public static int GetBitSize(ushort value) => BitOperations.Log2(value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> as an unsigned value over the network
+		/// </summary>
 		public static int GetBitSize(short value) => BitOperations.Log2((ushort)value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> over the network
+		/// </summary>
 		public static int GetBitSize(uint value) => BitOperations.Log2(value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> as an unsigned value over the network
+		/// </summary>
 		public static int GetBitSize(int value) => BitOperations.Log2((uint)value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> over the network
+		/// </summary>
 		public static int GetBitSize(ulong value) => BitOperations.Log2(value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> as an unsigned value over the network
+		/// </summary>
 		public static int GetBitSize(long value) => BitOperations.Log2((ulong)value) + 1;
-
+		
+		/// <summary>
+		/// Gets the minimum number of bits required to send <paramref name="value"/> as an unsigned value over the network<br/>
+		/// This method assumes that the type argument is one of the primitive integer types; otherwise, an exception is thrown
+		/// </summary>
+		/// <exception cref="NotSupportedException"/>
 		public static int GetBitSize<T>(T value) {
 			if (typeof(T) == typeof(byte))
 				return GetBitSize(Unsafe.As<T, byte>(ref value));
@@ -69,6 +98,22 @@ namespace MagicStorage.Common.IO {
 				return GetBitSize(Unsafe.As<T, long>(ref value));
 			
 			throw new NotSupportedException($"Unsupported type: {typeof(T)}");
+		}
+
+		/// <summary>
+		/// Gets the minimum number of bytes required to send <paramref name="value"/> via <see cref="BinaryWriter.Write7BitEncodedInt(int)"/> over the network
+		/// </summary>
+		public static int GetByteSize(int value) {
+			// BinaryWriter.Write7BitEncodedInt()
+			uint write = (uint)value;
+			int size = 1;
+
+			while (write > 0x7Fu) {
+				write >>= 7;
+				size++;
+			}
+
+			return size;
 		}
 	}
 }

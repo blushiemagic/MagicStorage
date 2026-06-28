@@ -29,7 +29,7 @@ namespace MagicStorage.Common.MapObjects {
 		}
 
 		public override void Draw(ref MapOverlayDrawContext context, ref string text) {
-			if (!Main.mapFullscreen || !PortableAccessAreas.CanDrawAreas(Main.LocalPlayer, out Point16 accessLocation, out float playerToPylonRange))
+			if (!Main.mapFullscreen || !MagicStorageConfig.ShowPylonAccessAreasOnMap || !PortableAccessAreas.CanDrawAreas(Main.LocalPlayer, out Point16 accessLocation, out float playerToPylonRange))
 				return;
 
 			MapOverlayDrawContextCapture capture = MapOverlayDrawContextCapture.Capture(context);

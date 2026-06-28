@@ -17,6 +17,8 @@ namespace MagicStorage.CrossMod.Storage {
 	/// The base class containing information about a Storage Unit tier
 	/// </summary>
 	public abstract class StorageUnitTier : ModType, IValidateAtPostSetupContent {
+		internal string VanillalikeFullName => this is MagicStorageTier ? this.Name : this.FullName;
+
 		public static StorageUnitTier Basic { get; internal set; }
 
 		public static StorageUnitTier Demonite { get; internal set; }
@@ -110,10 +112,8 @@ namespace MagicStorage.CrossMod.Storage {
 		internal static readonly CircularDependencyChecker<StorageUnitTier> circularDependencyChecker = new(
 			static (a, b) => a.Type >= 0 && b.Type >= 0 ? a.Type == b.Type : object.ReferenceEquals(a, b),
 			static upgrade => upgrade._canBeUpgradedBy,
-			FullNameExceptFromMagicStorage
+			static tier => tier.VanillalikeFullName
 		);
-
-		private static string FullNameExceptFromMagicStorage(StorageUnitTier tier) => tier.Mod is MagicStorageMod ? tier.Name : tier.FullName;
 
 		/// <summary>
 		/// A read-only list of tiers which this tier can be upgraded to.
@@ -166,7 +166,7 @@ namespace MagicStorage.CrossMod.Storage {
 				throw new ArgumentException($"Cannot upgrade to a StorageUnitTier with a lower capacity ({nextTier.Capacity} < {Capacity})", nameof(nextTier));
 
 			if (_blacklisted.Contains(nextTier.Type)) {
-				Mod.Logger.Warn($"Attempt to connect upgrade path ({FullNameExceptFromMagicStorage(this)} --> {FullNameExceptFromMagicStorage(nextTier)}) was blocked due to a mod preventing the connection.");
+				Mod.Logger.Warn($"Attempt to connect upgrade path ({this.VanillalikeFullName} --> {nextTier.VanillalikeFullName}) was blocked due to a mod preventing the connection.");
 				return;
 			}
 
@@ -315,6 +315,8 @@ namespace MagicStorage.CrossMod.Storage {
 		}
 
 		public static StorageUnitTier Get(int type) => type < 0 || type >= _tiers.Count ? null : _tiers[type];
+
+		internal static string SafelyGetTierName(int type) => Get(type) is StorageUnitTier tier ? tier.VanillalikeFullName : "Unknown";
 
 		internal static void PostSetupContent() {
 			Loading = false;

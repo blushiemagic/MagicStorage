@@ -1,3 +1,5 @@
+using MagicStorage.Common;
+using MagicStorage.Common.Systems.Debugging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +8,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Components
@@ -20,9 +23,36 @@ namespace MagicStorage.Components
 				EnvironmentAccess,
 				RemoteAccess,
 				DecraftingAccess,
+				StorageHeart,
+				ExternalStorageComponent,  // Third-party entities inheriting from TEStorageComponent
+				ExternalStoragePoint,      // Third-party entities inheriting from TEStoragePoint
+				ExternalStorageCenter,     // Third-party entities inheriting from TEStorageCenter
 				Unknown,
-				DeferredLoad  // In cases where attempting to use ByPosition won't work
+				DeferredLoad               // In cases where attempting to use ByPosition won't work
 			}
+
+			#region Generic Helper Types
+			private interface ITypeResolver<TSelf>
+				where TSelf : ITypeResolver<TSelf>
+			{
+				static abstract ComponentType TypeFilter { get; }
+
+				public static bool Matches(Component component) => component.type == TSelf.TypeFilter;
+			}
+
+			private readonly struct StorageUnitResolver : ITypeResolver<StorageUnitResolver> { public static ComponentType TypeFilter => ComponentType.StorageUnit; }
+			private readonly struct StorageAccessResolver : ITypeResolver<StorageAccessResolver> { public static ComponentType TypeFilter => ComponentType.StorageAccess; }
+			private readonly struct CraftingAccessResolver : ITypeResolver<CraftingAccessResolver> { public static ComponentType TypeFilter => ComponentType.CraftingAccess; }
+			private readonly struct EnvironmentAccessResolver : ITypeResolver<EnvironmentAccessResolver> { public static ComponentType TypeFilter => ComponentType.EnvironmentAccess; }
+			private readonly struct RemoteAccessResolver : ITypeResolver<RemoteAccessResolver> { public static ComponentType TypeFilter => ComponentType.RemoteAccess; }
+			private readonly struct DecraftingAccessResolver : ITypeResolver<DecraftingAccessResolver> { public static ComponentType TypeFilter => ComponentType.DecraftingAccess; }
+			private readonly struct StorageHeartResolver : ITypeResolver<StorageHeartResolver> { public static ComponentType TypeFilter => ComponentType.StorageHeart; }
+			private readonly struct ExternalStorageComponentResolver : ITypeResolver<ExternalStorageComponentResolver> { public static ComponentType TypeFilter => ComponentType.ExternalStorageComponent; }
+			private readonly struct ExternalStoragePointResolver : ITypeResolver<ExternalStoragePointResolver> { public static ComponentType TypeFilter => ComponentType.ExternalStoragePoint; }
+			private readonly struct ExternalStorageCenterResolver : ITypeResolver<ExternalStorageCenterResolver> { public static ComponentType TypeFilter => ComponentType.ExternalStorageCenter; }
+			private readonly struct UnknownResolver : ITypeResolver<UnknownResolver> { public static ComponentType TypeFilter => ComponentType.Unknown; }
+			private readonly struct DeferredLoadResolver : ITypeResolver<DeferredLoadResolver> { public static ComponentType TypeFilter => ComponentType.DeferredLoad; }
+			#endregion
 
 			private readonly struct Component {
 				public readonly Point16 location;
@@ -72,36 +102,75 @@ namespace MagicStorage.Components
 			}
 
 			public void Link(TEStorageComponent component) {
-				NetHelper.Report(true, $"Attempting to link {component.FullName} at {component.Position} to Center ({_center.FullName}) at {_center.Position}");
+				bool debuggingCondition = DebugControls.Get(DebugControls.Names.StorageCenterComponentLinking);
 
 				if (component is TEStorageHeart heart) {
 					// Don't link storage hearts to storage storage hearts
 					if (_center is TEStorageHeart) {
-						NetHelper.Report(false, " -- FAILED: Storage Heart cannot link to another Storage Heart");
-					} else if (_foundHeart == Point16.NegativeOne) {
-						NetHelper.Report(false, " -- SUCCESS: Found Storage Heart at " + heart.Position);
-						_foundHeart = heart.Position;
-						_center.Link(heart.Position);
-						heart.ComponentManager.LinkIfNotExists(_center);
+						using var debuggingFailure = DebugMessage.Create(debuggingCondition);
+
+						if (debuggingFailure.IsDebugging) {
+							debuggingFailure
+								.Report(false, "Attempted to link two Storage Hearts")
+								.Indent()
+								.Report(false, "Linking actor: {0} at {1}", _center.FullName, _center.Position.DebugString())
+								.Report(false, "Linking target: {0} at {1}", heart.FullName, heart.Position.DebugString());
+						}
 					} else {
-						// Normally, I'd throw an exception here, but I'll just have the logic silently return instead
-						NetHelper.Report(false, " -- FAILED: Storage Heart already found at " + _foundHeart);
+						// Redirect so that the Heart is what's handling the link
+						heart.ComponentManager.Link(_center);
 					}
 
 					return;
 				}
 
-				if (component.StorageCenter != Point16.NegativeOne) {
-					if (component.StorageCenter != _center.Position) {
-						NetHelper.Report(false, $"Component has already been assigned to the Center at {component.StorageCenter}, unlinking...");
+				using var debugging = DebugMessage.Create(debuggingCondition);
 
-						if (component.StorageCenter.ResolveToTileEntity() is TEStorageCenter previousCenter)
-							previousCenter.ComponentManager.Unlink(component.Position);
-					} else
-						NetHelper.Report(false, "Component save data has it linked to the Center, adding proper reference connections...");
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Linking component ({0}) to Center ({1})...", component.FullName, _center.FullName)
+						.Indent()
+						.Report(false, "Component location: {0}", component.Position.DebugString())
+						.Report(false, "Center location: {0}", _center.Position.DebugString())
+						.Unindent();
 				}
 
+				if (component.StorageCenter != Point16.NegativeOne) {
+					if (component.StorageCenter != _center.Position) {
+						if (component.StorageCenter.ResolveToTileEntity() is TEStorageCenter previousCenter) {
+							if (debugging.IsDebugging) {
+								debugging
+									.Report(false, "Component already has a connection at (X: {0}, Y: {1}), unlinking...", previousCenter.Position.X, previousCenter.Position.Y)
+									.Indent();
+							}
+
+							previousCenter.ComponentManager.Unlink(component.Position);
+						}
+					} else {
+						if (debugging.IsDebugging)
+							debugging.Report(false, "Connection already exists, enforcing linked states");
+					}
+				}
+
+				ComponentType type = ApplyLink(component);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Success.  Linked component classification was {0}", type);
+
+				if (_center is TEStorageHeart && component is TEStorageCenter otherCenter)
+					otherCenter.ComponentManager.ApplyLink(_center);
+
+				NetHelper.SendTEUpdate(_center.ID);
+				NetHelper.SendTEUpdate(component.ID);
+			}
+
+			private ComponentType ApplyLink(TEStorageComponent component) {
 				ComponentType type = GetComponentType(component);
+
+				if (type == ComponentType.StorageHeart) {
+					_foundHeart = component.Position;
+					return type;
+				}
 
 				if (!_knownComponentLocationCache.TryGetValue(type, out var set))
 					_knownComponentLocationCache[type] = set = new HashSet<Point16>();
@@ -113,13 +182,7 @@ namespace MagicStorage.Components
 
 				component.Link(_center.Position);
 
-				NetHelper.Report(false, " -- SUCCESS: Component classification is " + type);
-
-				if (_center is TEStorageHeart && component is TEStorageCenter otherCenter)
-					otherCenter.ComponentManager.Link(_center);
-
-				NetHelper.SendTEUpdate(_center.ID, _center.Position);
-				NetHelper.SendTEUpdate(component.ID, component.Position);
+				return type;
 			}
 
 			internal void LinkStorageUnit(Point16 location) {
@@ -156,25 +219,53 @@ namespace MagicStorage.Components
 			}
 
 			private static ComponentType GetComponentType(TEStorageComponent component) {
-				return component switch {
-					TEAbstractStorageUnit => ComponentType.StorageUnit,
-					// TECraftingAccess inherits from TEStorageAccess, so it must be checked first
-					TECraftingAccess => ComponentType.CraftingAccess,
-					// TEDecraftingAccess inherits from TEStorageAccess, so it must be checked first
-					TEDecraftingAccess => ComponentType.DecraftingAccess,
-					TEStorageAccess => ComponentType.StorageAccess,
-					TEEnvironmentAccess => ComponentType.EnvironmentAccess,
-					TERemoteAccess => ComponentType.RemoteAccess,
-					_ => ComponentType.Unknown
-				};
+				if (component is TEAbstractStorageUnit)
+					return ComponentType.StorageUnit;
+
+				if (component is TEStorageAccess) {
+					if (component is TECraftingAccess)
+						return ComponentType.CraftingAccess;
+
+					if (component is TEDecraftingAccess)
+						return ComponentType.DecraftingAccess;
+
+					return ComponentType.StorageAccess;
+				}
+
+				if (component is TEStorageCenter) {
+					if (component is TEStorageHeart)
+						return ComponentType.StorageHeart;
+
+					if (component is TERemoteAccess)
+						return ComponentType.RemoteAccess;
+
+					return ComponentType.ExternalStorageCenter;
+				}
+
+				if (component is TEStoragePoint) {
+					if (component is TEEnvironmentAccess)
+						return ComponentType.EnvironmentAccess;
+
+					return ComponentType.ExternalStoragePoint;
+				}
+
+				// Failed to resolve the component to a definite type
+				return ComponentType.ExternalStorageComponent;
 			}
 
 			public void Unlink(Point16 location) {
+				using var debugging = DebugMessage.CreateIfAny(DebugControls.Names.StorageCenterComponentLinking);
+
 				for (int i = _components.Count - 1; i >= 0; i--) {
 					var component = _components[i];
 
 					if (component.location == location) {
-						NetHelper.Report(true, $"Unlinking component {component.location} from Center {_center.FullName} at {_center.Position}");
+						if (debugging.IsDebugging) {
+							debugging.Report(true, "Link between component and Center has been removed")
+								.Indent()
+								.Report(false, "Center: {0} at {1}", _center.FullName, _center.Position.DebugString())
+								.Report(false, "Component: {0} at {1}", component.type, location.DebugString());
+						}
 
 						UnlinkAtIndex(i);
 					}
@@ -185,7 +276,7 @@ namespace MagicStorage.Components
 				if (_components[i].location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
 					storageComponent.Unlink();
 					_center.OnDisconnectComponent(storageComponent);
-					NetHelper.SendTEUpdate(storageComponent.ID, storageComponent.Position);
+					NetHelper.SendTEUpdate(storageComponent.ID);
 				}
 
 				_components.RemoveAt(i);
@@ -194,13 +285,22 @@ namespace MagicStorage.Components
 			}
 
 			private List<Component> ResolveComponents() {
+				using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageCenterComponentLinking);
+
 				if (_unresolvedComponents.Count > 0) {
 					// There are still some components that need to be resolved
 					List<int> toRemove = [];
 					foreach (var index in _unresolvedComponents) {
 						var component = _components[index];
 						if (component.location.ResolveToTileEntity() is TEStorageComponent storageComponent) {
-							NetHelper.Report(true, $"Lazily resolved component {storageComponent.FullName} at {storageComponent.Position} for Center {_center.FullName} at {_center.Position}");
+							if (debugging.IsDebugging) {
+								debugging
+									.Report(true, "Lazily resolved component {0}", storageComponent.FullName)
+									.Indent()
+									.Report(false, "Location: {0}", storageComponent.Position.DebugString())
+									.Report(false, "Linked center: {0} at {1}", _center.FullName, _center.Position.DebugString())
+									.Unindent();
+							}
 
 							Link(storageComponent);
 							toRemove.Add(index);
@@ -240,6 +340,8 @@ namespace MagicStorage.Components
 			}
 
 			public void CheckForRemovedEntities() {
+				using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageCenterComponentLinking);
+
 				List<int> toRemove = new();
 				for (int i = _components.Count - 1; i >= 0; i--) {
 					Component component = _components[i];
@@ -248,19 +350,25 @@ namespace MagicStorage.Components
 						continue;
 
 					if (component.location.ResolveToTileEntity() is not TEStorageComponent storageComponent) {
-						NetHelper.Report(true, $"Component at {component.location} no longer exists, unlinking");
+						if (debugging.IsDebugging)
+							debugging.Report(true, "Component at {0} no longer exists, unlinking", component.location.DebugString());
+
 						toRemove.Add(i);
 						continue;
 					}
 
 					if (component.type != GetComponentType(storageComponent)) {
-						NetHelper.Report(true, $"Component at {component.location} had an outdated classification, unlinking");
+						if (debugging.IsDebugging)
+							debugging.Report(true, "Component at {0} had an outdated classification, unlinking", component.location.DebugString());
+
 						toRemove.Add(i);
 						continue;
 					}
 
 					if (storageComponent.StorageCenter != _center.Position) {
-						NetHelper.Report(true, $"Component at {component.location} no longer belongs to Center {_center.FullName} at {_center.Position}, unlinking");
+						if (debugging.IsDebugging)
+							debugging.Report(true, "Component at {0} has a stale linking reference, unlinking", component.location.DebugString());
+
 						toRemove.Add(i);
 						continue;
 					}
@@ -270,41 +378,88 @@ namespace MagicStorage.Components
 					UnlinkAtIndex(index);
 			}
 
-			public IEnumerable<Point16> GetStorageUnits() => ResolveComponents().Where(static c => c.type == ComponentType.StorageUnit).Select(static c => c.location);
+			#region GetComponents
+			private IEnumerable<Point16> GetComponents<T>()
+				where T : ITypeResolver<T>
+			{
+				return ResolveComponents().Where(ITypeResolver<T>.Matches).Select(static c => c.location);
+			}
+
+			private IEnumerable<Point16> GetComponents<T1, T2>()
+				where T1 : ITypeResolver<T1>
+				where T2 : ITypeResolver<T2>
+			{
+				return ResolveComponents().Where(static c => ITypeResolver<T1>.Matches(c) || ITypeResolver<T2>.Matches(c)).Select(static c => c.location);
+			}
+
+			private IEnumerable<Point16> GetComponents<T1, T2, T3>()
+				where T1 : ITypeResolver<T1>
+				where T2 : ITypeResolver<T2>
+				where T3 : ITypeResolver<T3>
+			{
+				return ResolveComponents().Where(static c => ITypeResolver<T1>.Matches(c) || ITypeResolver<T2>.Matches(c) || ITypeResolver<T3>.Matches(c)).Select(static c => c.location);
+			}
+
+			private IEnumerable<Point16> GetComponentsExcept<T1, T2>()
+				where T1 : ITypeResolver<T1>
+				where T2 : ITypeResolver<T2>
+			{
+				return ResolveComponents().Where(static c => !ITypeResolver<T1>.Matches(c) && !ITypeResolver<T2>.Matches(c)).Select(static c => c.location);
+			}
+
+			private IEnumerable<Point16> GetComponentsExcept<T1, T2, T3, T4>()
+				where T1 : ITypeResolver<T1>
+				where T2 : ITypeResolver<T2>
+				where T3 : ITypeResolver<T3>
+				where T4 : ITypeResolver<T4>
+			{
+				return ResolveComponents().Where(static c => !ITypeResolver<T1>.Matches(c) && !ITypeResolver<T2>.Matches(c) && !ITypeResolver<T3>.Matches(c) && !ITypeResolver<T4>.Matches(c)).Select(static c => c.location);
+			}
+			#endregion
+
+			public IEnumerable<Point16> GetStorageUnits() => GetComponents<StorageUnitResolver>();
 
 			public IEnumerable<TEAbstractStorageUnit> GetStorageUnitEntities() => GetStorageUnits().ResolveTileEntities<TEAbstractStorageUnit>();
 
 			public IEnumerable<TEStorageUnit> GetRealStorageUnitEntities() => GetStorageUnits().ResolveTileEntities<TEStorageUnit>();
 
-			public IEnumerable<Point16> GetStorageAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.StorageAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetStorageAccesses() => GetComponents<StorageAccessResolver>();
 
 			public IEnumerable<TEStorageAccess> GetStorageAccessEntities() => GetStorageAccesses().ResolveTileEntities<TEStorageAccess>();
 
-			public IEnumerable<Point16> GetCraftingAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.CraftingAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetCraftingAccesses() => GetComponents<CraftingAccessResolver>();
 
 			public IEnumerable<TECraftingAccess> GetCraftingAccessEntities() => GetCraftingAccesses().ResolveTileEntities<TECraftingAccess>();
 
-			public IEnumerable<Point16> GetEnvironmentAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.EnvironmentAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetEnvironmentAccesses() => GetComponents<EnvironmentAccessResolver>();
 
 			public IEnumerable<TEEnvironmentAccess> GetEnvironmentAccessEntities() => GetEnvironmentAccesses().ResolveTileEntities<TEEnvironmentAccess>();
 
-			public IEnumerable<Point16> GetRemoteAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.RemoteAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetRemoteAccesses() => GetComponents<RemoteAccessResolver>();
 
 			public IEnumerable<TERemoteAccess> GetRemoteAccessEntities() => GetRemoteAccesses().ResolveTileEntities<TERemoteAccess>();
 
-			public IEnumerable<Point16> GetDecraftingAccesses() => ResolveComponents().Where(static c => c.type == ComponentType.DecraftingAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetDecraftingAccesses() => GetComponents<DecraftingAccessResolver>();
 
 			public IEnumerable<TEDecraftingAccess> GetDecraftingAccessEntities() => GetDecraftingAccesses().ResolveTileEntities<TEDecraftingAccess>();
 
-			public IEnumerable<Point16> GetMiscellaneousComponents() => ResolveComponents().Where(static c => c.type == ComponentType.Unknown).Select(static c => c.location);
+			public IEnumerable<Point16> GetStoragePoints() => GetComponents<EnvironmentAccessResolver, ExternalStoragePointResolver>();
+
+			public IEnumerable<TEStoragePoint> GetStoragePointEntities() => GetStoragePoints().ResolveTileEntities<TEStoragePoint>();
+
+			public IEnumerable<Point16> GetStorageCenters() => GetComponents<RemoteAccessResolver, ExternalStorageCenterResolver>();
+
+			public IEnumerable<TEStorageCenter> GetStorageCenterEntities() => GetStorageCenters().ResolveTileEntities<TEStorageCenter>();
+
+			public IEnumerable<Point16> GetMiscellaneousComponents() => GetComponents<ExternalStorageComponentResolver, ExternalStoragePointResolver, ExternalStorageCenterResolver>();
 
 			public IEnumerable<TEStorageComponent> GetMiscellaneousComponentEntities() => GetMiscellaneousComponents().ResolveTileEntities<TEStorageComponent>();
 
-			public IEnumerable<Point16> GetAllComponents() => ResolveComponents().Select(static c => c.location);
+			public IEnumerable<Point16> GetAllComponents() => GetComponentsExcept<UnknownResolver, DeferredLoadResolver>();
 
 			public IEnumerable<TEStorageComponent> GetAllComponentEntities() => GetAllComponents().ResolveTileEntities<TEStorageComponent>();
 
-			public IEnumerable<Point16> GetDirectlyConnectableComponents() => ResolveComponents().Where(static c => c.type != ComponentType.RemoteAccess).Select(static c => c.location);
+			public IEnumerable<Point16> GetDirectlyConnectableComponents() => GetComponentsExcept<RemoteAccessResolver, ExternalStorageCenterResolver, UnknownResolver, DeferredLoadResolver>();
 
 			public IEnumerable<TEStorageComponent> GetDirectlyConnectableComponentEntities() => GetDirectlyConnectableComponents().ResolveTileEntities<TEStorageComponent>();
 
@@ -334,7 +489,10 @@ namespace MagicStorage.Components
 				foreach (Component component in _components)
 					writer.Write(component.location);
 
-				NetHelper.Report(true, "ConnectedComponentManager.Serialize invoked.  Component count: " + _components.Count);
+				using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageCenterManagerData);
+
+				if (debugging.IsDebugging)
+					debugging.Report(true, "Serialized {0} components for " + nameof(TEStorageCenter) + "." + nameof(ConnectedComponentManager), _components.Count);
 			}
 
 			public void Deserialize(BinaryReader reader) {
@@ -350,20 +508,35 @@ namespace MagicStorage.Components
 
 				int count = reader.ReadInt32();
 
-				NetHelper.Report(true, "ConnectedComponentManager.Deserialize invoked.  Component count: " + count);
+				using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageCenterManagerData);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Deserializing {0} components for " + nameof(TEStorageCenter) + "." + nameof(ConnectedComponentManager), count)
+						.Indent();
+				}
 
 				for (int k = 0; k < count; k++) {
 					Point16 loc = reader.ReadPoint16();
 					if (loc.ResolveToTileEntity() is TileEntity te) {
-						if (te is TEStorageComponent component)
+						if (te is TEStorageComponent component) {
+							// The location was valid
 							Link(component);
-						else {
-							NetHelper.Report(false, "Tile entity at location " + loc + " is not a TEStorageComponent");
+						} else {
+							// The location was invalid or is a component that's no longer loaded
+							if (debugging.IsDebugging) {
+								debugging
+									.Report(false, "Entity at location {0} was not a TEStorageComponent", loc.DebugString())
+									.Indent()
+									.Report(false, "Name: {0}", te is ModTileEntity mte ? mte.FullName : te.GetType().Name)
+									.Unindent();
+							}
 
 							_components.Add(new Component(loc, ComponentType.Unknown));
 						}
 					} else {
-						NetHelper.Report(false, "Tile entity at location " + loc + " could not be found");
+						if (debugging.IsDebugging)
+							debugging.Report(false, "Entity at location {0} could not be found, delaying loading until it can be resolved", loc.DebugString());
 
 						DeferLinking(loc);
 					}
@@ -415,7 +588,7 @@ namespace MagicStorage.Components
 
 		public override Point16 StorageCenter {
 			get => ComponentManager.StorageCenter;
-			set => throw new NotSupportedException();
+			set => throw new NotSupportedException(nameof(TEStorageCenter) + "." + nameof(StorageCenter) + " does not support value assignment.");
 		}
 
 		private int eatingWaitDuration = -1;
@@ -461,46 +634,47 @@ namespace MagicStorage.Components
 
 		public void ResetAndSearch()
 		{
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageNetworkRecalculate);
+
 			ConnectedComponentManager manager = ComponentManager;
 
 			// FIX: v0.7.0.8 - GetAllComponents() may contain RemoteAccess components, which can't be linked directly.  This caused them to always be unlinked when ResetAndSearch() was called.
 			List<Point16> oldComponents = manager.GetDirectlyConnectableComponents().ToList();
+			// FIX: v0.7.1 - Calling ResetAndSearch() on a Storage Heart would result in Remote Accesses briefly losing connection
+			List<Point16> remoteAccess = manager.GetRemoteAccesses().ToList();
 			TEStorageHeart assignedHeart = manager.GetStorageHeart();
 
-			NetHelper.Report(true, $"TEStorageCenter.ResetAndSearch invoked for {FullName}.  Current component count: {manager.Count}");
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "TEStorageCenter.ResetAndSearch(): Scanning for connected components...")
+					.Indent()
+					.Report(false, "Context:")
+					.Indent()
+					.Report(false, "Invoking entity: {0}", FullName)
+					.Report(false, "Pre-recaculate component count: {0}", manager.Count)
+					.Unindent();
+			}
 
 			CheckMapSections();
 
+			// NOTE: For Storage Hearts, this call causes Remote Accesses to be unlinked until they try to access their Storage Heart.
+			//       Their connections will need to be manually reapplied after the directly-connected components have been found.
 			manager.Reset();
-
-			HashSet<Point16> hashComponents = new();
-			HashSet<Point16> explored = new()
-			{
-				Position
-			};
-			Queue<Point16> toExplore = new();
-			foreach (Point16 point in AdjacentComponents())
-				toExplore.Enqueue(point);
 
 			NetHelper.StartUpdateQueue();
 
-			while (toExplore.Count > 0)
-			{
-				Point16 explore = toExplore.Dequeue();
-				if (!explored.Contains(explore) && explore != StorageComponent.killTile)
-				{
-					explored.Add(explore);
-					if (ByPosition.TryGetValue(explore, out TileEntity te) && te is TEStorageComponent component)
-					{
-						manager.Link(component);
-						hashComponents.Add(explore);
+			HashSet<Point16> hashComponents = new();
 
-						NetHelper.Report(false, $" -- Found component {component.FullName} at {explore}");
-					}
+			TileScanSettings scanSettings = new() {
+				InvokingActor = this
+			};
 
-					foreach (Point16 point in AdjacentComponents(explore))
-						toExplore.Enqueue(point);
-				}
+			foreach (var component in TileNetworkScanner.ScanComponents(Position, scanSettings)) {
+				manager.Link(component);
+				hashComponents.Add(component.Position);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Found component {0} at {1}", component.FullName, component.Position.DebugString());
 			}
 
 			foreach (Point16 oldComponent in oldComponents)
@@ -512,18 +686,26 @@ namespace MagicStorage.Components
 				}
 			}
 
+			// Restore the link to any Remote Accesses
+			foreach (Point16 access in remoteAccess)
+				manager.LinkRemoteAccess(access);
+
 			// Restore the link to the Heart
 			if (assignedHeart is not null)
 				manager.Link(assignedHeart);
 
-			NetHelper.Report(true, "TEStorageCenter.ResetAndSearch finished.  New component count: " + manager.Count);
+			if (debugging.IsDebugging) {
+				debugging
+					.Unindent()
+					.Report(true, "Scanning has completed.  New component count: " + manager.Count);
+			}
 
 			TEStorageHeart heart = GetHeart();
 			heart?.ResetCompactStage();
-			NetHelper.SendTEUpdate(ID, Position);
+			NetHelper.SendTEUpdate(ID);
 
 			if (heart is not null)
-				NetHelper.SendTEUpdate(heart.ID, heart.Position);
+				NetHelper.SendTEUpdate(heart.ID);
 
 			NetHelper.ProcessUpdateQueue();
 		}
@@ -547,11 +729,15 @@ namespace MagicStorage.Components
 		{
 			ConnectedComponentManager manager = ComponentManager;
 
+			NetHelper.StartUpdateQueue();
+
 			foreach (var component in manager.GetAllComponentEntities().ToList())
 			{
 				manager.Unlink(component.Position);
-				NetHelper.SendTEUpdate(component.ID, component.Position);
+				NetHelper.SendTEUpdate(component.ID);
 			}
+
+			NetHelper.ProcessUpdateQueue();
 
 			manager.Reset();
 		}

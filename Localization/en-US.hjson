@@ -1231,6 +1231,7 @@ Mods: {
 				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess]  Crafting and Aether GUIs Config"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess]  Storage and Crafting GUIs Config"
 				General: General Configs
+				Debugging: Debugging
 			}
 
 			PrintTextToChat: {
@@ -1361,6 +1362,25 @@ Mods: {
 				fadeButtonsNotSelected: {
 					Label: Sorting & Filtering Button Fading
 					Tooltip: Disable to make the icons for sorters and filters in the UIs not fade when not selected.
+				}
+
+				printTextToChat: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Tooltip}
+				}
+
+				showPylonAreasOnMap: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Tooltip}
+				}
+
+				showPylonAreasInWorld: {
+					Label: Portable Access Range Debug World Overlay
+					Tooltip:
+						'''
+						Enable to show the valid ranges for a Portable Remote Access while the player is holding it as an overlay over the tiles in the world.
+						For accesses with infinite range, nothing is displayed.
+						'''
 				}
 			}
 

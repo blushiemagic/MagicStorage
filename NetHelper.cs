@@ -24,51 +24,19 @@ using MagicStorage.Items;
 using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.NPCs;
 using MagicStorage.Common;
+using MagicStorage.Common.Systems.Debugging;
 
 namespace MagicStorage
 {
-	public static class NetHelper
+	public static partial class NetHelper
 	{
 		private static bool queueUpdates;
 		private static readonly Queue<int> updateQueue = new();
 		private static readonly HashSet<int> updateQueueContains = new();
 
 		[Conditional("NETPLAY")]
-		public static void Report(bool reportTime, string message) {
-			if (!AssetRepository.IsMainThread) {
-				// Local capturing
-				bool report = reportTime;
-				string msg = message;
-				DateTime now = DateTime.Now;
-
-				ServerActionsQueue.QueueActionBasedOnClientPresence(() => Report_Inner(report, msg, now));
-			} else
-				Report_Inner(reportTime, message, DateTime.Now);
-		}
-
-		[Conditional("NETPLAY")]
-		private static void Report_Inner(bool reportTime, string message, DateTime now) {
-			StringBuilder sb = new();
-
-			if (reportTime)
-				sb.Append("Time: " + now.Ticks + " ");
-
-			sb.Append(message);
-
-			if (Main.netMode != NetmodeID.Server) {
-				#if NETPLAY
-				if (MagicStorageBetaConfig.PrintTextToChat)
-				#endif
-					Main.NewTextMultiline(sb.ToString(), c: Color.White);
-			} else if (Main.dedServ) {
-				if (reportTime)
-					Utility.PrettyWriteLineToConsole("Time: " + now.Ticks, ConsoleColor.Red, ConsoleColor.Black);
-
-				Utility.WriteLineSafely(message);
-			}
-
-			MagicStorageMod.Instance.Logger.Debug(sb.ToString());
-		}
+		[Obsolete("This method has been replaced by the DebugMessage APIs", error: true)]
+		public static void Report(bool reportTime, string message) => DebugMessage.Report(reportTime, message);
 
 		public static void HandlePacket(BinaryReader reader, int sender)
 		{
@@ -81,7 +49,16 @@ namespace MagicStorage
 				Console.WriteLine($"Receiving Message Type \"{Enum.GetName(type)}\"");
 			*/
 
-			Report(true, "Received message " + type + " from player " + sender);
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.IncomingNetcodePackets);
+
+			if (debugging.IsDebugging) {
+				if (Main.netMode == NetmodeID.Server)
+					debugging.Report(true, "Handling packet {0} from client {1}", type, sender);
+				else
+					debugging.Report(true, "Handling packet {0} from the server", type);
+
+				debugging.Indent();
+			}
 
 			switch (type) {
 				case MessageType.SearchAndRefreshNetwork:
@@ -166,10 +143,10 @@ namespace MagicStorage
 					ReceivePlayerHasOperator(reader);
 					break;
 				case MessageType.ClientRequestPlayerBankDeposit:
-					ServerReceiveDepositFromBankRequest(reader, sender);
+					PlayerInventoryTeller.ServerReceiveDepositToStorageRequest(reader, sender);
 					break;
 				case MessageType.PlayerBankDepositResult:
-					ClientReceiveDepositFromBankResult(reader);
+					PlayerInventoryTeller.ClientReceiveDepositToStorageResponse(reader);
 					break;
 				case MessageType.ComponentPlacement:
 					ServerReceiveComponentPlacement(reader, sender);
@@ -239,7 +216,7 @@ namespace MagicStorage
 					ReceivePityDropsPlayerSync(reader, sender);
 					break;
 				case MessageType.ClientRequestDepositHistoryChunks:
-					ServerReceiveDepositHistoryChunksRequest(reader, sender);
+					ServerReceiveDepositHistoryChunksRequest(reader);
 					break;
 				case MessageType.ServerResponseDepositHistoryChunks:
 					ClientReceiveDepositHistoryChunk(reader);
@@ -262,46 +239,101 @@ namespace MagicStorage
 				packet.Write(position.Y);
 				packet.Send();
 
-				Report(true, MessageType.SyncStorageUnit + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageSyncingNetcode);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Sent packet {0} to the server", MessageType.SyncStorageUnit);
 			}
 		}
 
-		public static void ServerReciveSyncStorageUnit(BinaryReader reader, int remoteClient)
+		private static void ServerReciveSyncStorageUnit(BinaryReader reader, int remoteClient)
 		{
 			if (Main.netMode == NetmodeID.Server)
 			{
 				//byte remoteClient = reader.ReadByte();
 				Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 
-				if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity tileEntity)) {
-					Report(true, MessageType.SyncStorageUnit + " packet had a data mismatch");
-					Report(false, "  A Tile Entity at location (X: " + position.X + ", Y: " + position.Y + ") does not exist on the server");
-					return;
-				}
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageSyncingNetcode);
 
-				if (tileEntity is not TEStorageUnit storageUnit) {
-					Report(true, MessageType.SyncStorageUnit + " received a position for a Tile Entity that isn't a TEStorageUnit: (X: " + position.X + ", Y: " + position.Y + ")");
-					Report(false, "  Tile Entity type was actually " + tileEntity.GetType().FullName);
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Read position: {0}", position.DebugString());
+
+				if (!TryGetEntityFromLocation(MessageType.SyncStorageUnit, position, out TEStorageUnit storageUnit))
 					return;
-				}
 
 				storageUnit.FullySync();
 
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.SyncStorageUnitToClinet);
-				TileEntity.Write(packet, tileEntity, true);
+				TileEntity.Write(packet, storageUnit, true);
 				packet.Send(remoteClient);
 
-				Report(true, MessageType.SyncStorageUnit + " packet received by server from client " + remoteClient);
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Sent packet {0} to client {1}", MessageType.SyncStorageUnitToClinet, remoteClient);
 			}
 		}
 
-		public static void SendComponentPlace(int i, int j, int type)
+		private static void ClientReciveStorageSync(BinaryReader reader)
+		{
+			// TileEntity.Read(reader, true);
+
+			byte type = reader.ReadByte();
+			int id = reader.ReadInt32();
+
+			Point16 position = reader.ReadPoint16();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageSyncingNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging.Chain()
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read entity type: {0}", type)
+					.Report(false, "Read entity ID: {0}", id);
+			}
+
+			if (!TryGetEntityFromLocation(MessageType.SyncStorageUnitToClinet, position, out TEStorageUnit storageUnit)) {
+				// Use a dummy instance to read the rest of the data
+				TileEntity dummy = TileEntity.manager.GenerateInstance(type);
+				dummy.type = type;
+				dummy.ID = id;
+				dummy.Position = position;
+				dummy.NetReceive(reader);
+				return;
+			}
+
+			storageUnit.NetReceive(reader);
+		}
+
+		[Obsolete("This method has been renamed to " + nameof(SendComponentTilesAndEntityPlacement), error: true)]
+		public static void SendComponentPlace(int i, int j, int type) => SendComponentTilesAndEntityPlacement(i, j, type);
+
+		public static void SendComponentTilesAndEntityPlacement(int i, int j, int type)
 		{
 			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				NetMessage.SendTileSquare(Main.myPlayer, i, j, 2, 2);
+
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageComponentPlacement);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent vanilla method packet SendTileSquare to the server")
+						.Indent()
+						.Report(false, "Coordinates: (X: {0}, Y: {1})", i, j)
+						.Report(false, "Type: {0}", type)
+						.Unindent();
+				}
+
 				NetMessage.SendData(MessageID.TileEntityPlacement, -1, -1, null, i, j, type);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent vanilla ID packet TileEntityPlacement to the server")
+						.Indent()
+						.Report(false, "Coordinates: (X: {0}, Y: {1})", i, j)
+						.Report(false, "Type: {0}", type)
+						.Unindent();
+				}
 			}
 		}
 
@@ -310,7 +342,13 @@ namespace MagicStorage
 			queueUpdates = true;
 		}
 
+		[Obsolete("Tile entity syncing no longer requires a position; use the other overload of this method instead.", error: true)]
 		public static void SendTEUpdate(int id, Point16 position)
+		{
+			SendTEUpdate(id);
+		}
+
+		public static void SendTEUpdate(int id)
 		{
 			if (Main.netMode != NetmodeID.Server)
 				return;
@@ -321,11 +359,25 @@ namespace MagicStorage
 				{
 					updateQueue.Enqueue(id);
 					updateQueueContains.Add(id);
+
+					using var debugging = DebugMessage.CreateIf(DebugControls.Names.TileEntityUpdateQueueNetcode);
+
+					if (debugging.IsDebugging)
+						debugging.Report(true, "Queueing tile entity update (ID: {0})", id);
 				}
 			}
 			else
 			{
-				NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, id, position.X, position.Y);
+				NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, id);
+
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.TileEntityUpdatesNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent vanilla ID packet TileEntitySharing to all clients")
+						.Indent()
+						.Report(false, "ID: {0}", id);
+				}
 			}
 		}
 
@@ -333,13 +385,22 @@ namespace MagicStorage
 		{
 			if (queueUpdates)
 			{
-				if (updateQueue.Count > 0)
-					Report(true, "Tile Entity update queue had " + updateQueue.Count + " values");
+				int count = updateQueue.Count;
 
 				queueUpdates = false;
 				while (updateQueue.Count > 0)
 					NetMessage.SendData(MessageID.TileEntitySharing, -1, -1, null, updateQueue.Dequeue());
 				updateQueueContains.Clear();
+
+				using var debugging = DebugMessage.CreateIf(
+					DebugControls.Combine()
+						.Set(count > 0)
+						.And(DebugControls.Names.OutgoingNetcodePackets)
+						.AndAny(DebugControls.Names.TileEntityUpdatesNetcode, DebugControls.Names.TileEntityUpdateQueueNetcode)
+				);
+
+				if (debugging.IsDebugging)
+					debugging.Report(true, "Sent vanilla ID packet TileEntitySharing for {0} entities to all clients", count);
 			}
 		}
 
@@ -353,53 +414,77 @@ namespace MagicStorage
 				packet.Write((short)j);
 				packet.Send();
 
-				Report(true, MessageType.SearchAndRefreshNetwork + " packet sent from client " + Main.myPlayer);
-				Report(false, "Refresh origin: (" + i + ", " + j + ")");
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageNetworkRecalculate);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Sent packet {0} to the server", MessageType.SearchAndRefreshNetwork)
+						.Indent()
+						.Report(false, "Refresh origin: (X: {0}, Y: {1})", i, j);
+				}
 			}
 		}
 
 		private static void ReceiveSearchAndRefresh(BinaryReader reader)
 		{
 			Point16 point = new(reader.ReadInt16(), reader.ReadInt16());
-			TEStorageComponent.SearchAndRefreshNetwork(point);
 
-			Report(true, MessageType.SearchAndRefreshNetwork + " packet received by client " + Main.myPlayer);
-			Report(false, "Refresh origin: (" + point.X + ", " + point.Y + ")");
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageNetworkRecalculate);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", point.DebugString());
+
+			TEStorageComponent.SearchAndRefreshNetwork(point);
 		}
 
-		public static void ReciveClientStorageOperation(BinaryReader reader, int sender)
+		private static void ReciveClientStorageOperation(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
 			bool hasContext = reader.ReadSecurityAccess(out var context);
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
-				goto cleanupContext;
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHeartClientOperations);
 
-			// NOTE: If not the server, the data will be read but not enqueued
-			heart.QClientOperation(reader, op, sender);
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read operation: {0}", op)
+					.Report(false, "Read accessing player: {0}", context.Player);
+			}
 
-			Report(true, MessageType.ClinetStorageOperation + " packet recieved by client " + Main.myPlayer);
-			Report(false, "Operation: " + op);
+			if (TryGetEntityFromLocation(MessageType.ClinetStorageOperation, position, out TEStorageHeart heart)) {
+				// NOTE: If not the server, the data will be read but not enqueued
+				heart.QClientOperation(reader, op, sender);
+			}
 
-cleanupContext:
 			if (hasContext)
 				context.Dispose();
 		}
 
-		public static void ReciveServerStorageResult(BinaryReader reader)
+		private static void ReciveServerStorageResult(BinaryReader reader)
 		{
 			TEStorageHeart.Operation op = (TEStorageHeart.Operation)reader.ReadByte();
 
 			Point16 position = reader.ReadPoint16();
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
-				goto printReport;
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHeartClientOperations);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read operation: {0}", op);
+			}
+
+			if (!TryGetEntityFromLocation(MessageType.ServerStorageResult, position, out TEStorageHeart heart))
+				return;
 
 			if (op == TEStorageHeart.Operation.Withdraw || op == TEStorageHeart.Operation.WithdrawToInventory || op == TEStorageHeart.Operation.Deposit)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Read item: {0}", item.IdentifierAndStack());
 				
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, op != TEStorageHeart.Operation.WithdrawToInventory);
@@ -407,10 +492,17 @@ cleanupContext:
 			else if (op == TEStorageHeart.Operation.DepositAll)
 			{
 				int count = reader.ReadInt32();
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Read item count: {0}", count);
+
 				for (int k = 0; k < count; k++)
 				{
 					Item item  = ItemIO.Receive(reader, true, true);
-					
+
+					if (debugging.IsDebugging)
+						debugging.Report(false, "Read item: {0}", item.IdentifierAndStack());
+
 					if (Main.netMode == NetmodeID.MultiplayerClient)
 						StoragePlayer.GetItem(new EntitySource_TileEntity(heart), item, false);
 				}
@@ -418,6 +510,9 @@ cleanupContext:
 			else if (op == TEStorageHeart.Operation.WithdrawAllAndDestroy)
 			{
 				int type = reader.ReadInt32();
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Read item type: {0}", type);
 
 				if (Main.netMode == NetmodeID.MultiplayerClient)
 					heart.WithdrawManyAndDestroy(type, out _, net: true);
@@ -431,6 +526,9 @@ cleanupContext:
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
 
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Read item: {0}", item.IdentifierAndStack());
+
 				if (item.IsAir)
 					item = CraftingGUI.TryToWithdrawFromModuleItems(heart, item, wasAlreadyCloned: true);
 
@@ -440,10 +538,6 @@ cleanupContext:
 
 			heart.netcodeUpdate = true;
 			heart.netDesync = 0;
-
-printReport:
-			Report(true, MessageType.ServerStorageResult + " packet received by client " + Main.myPlayer);
-			Report(false, "Operation: " + op);
 		}
 
 		public static void SendRefreshNetworkItems(Point16 position, bool ignoreSpecificRefreshes = false, IEnumerable<int> typesToRefresh = null)
@@ -455,6 +549,8 @@ printReport:
 				packet.Write(position.X);
 				packet.Write(position.Y);
 
+				int numTypes = 0;
+
 				if (typesToRefresh is null || !typesToRefresh.Any())
 					packet.Write((ushort)0);
 				else {
@@ -463,13 +559,26 @@ printReport:
 
 					foreach (int id in types)
 						packet.Write(id);
+
+					numTypes = types.Count;
 				}
 
 				packet.Write(ignoreSpecificRefreshes);
 
 				packet.Send();
 
-				Report(true, MessageType.RefreshNetworkItems + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.RefreshingUI);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to all clients", MessageType.RefreshNetworkItems)
+						.Indent()
+						.Report(false, "Heart position: {0}", position.DebugString())
+						.Report(false, "Force full zone refresh: {0}", ignoreSpecificRefreshes);
+
+					if (numTypes > 0)
+						debugging.Report(false, "Target item count: {0}", numTypes);
+				}
 			}
 		}
 
@@ -484,18 +593,30 @@ printReport:
 
 			bool ignoreSpecificRefreshes = reader.ReadBoolean();
 
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.RefreshingUI);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read forced full refresh: {0}", ignoreSpecificRefreshes);
+
+				if (count > 0)
+					debugging.Report(false, "Read item count: {0}", count);
+			}
+
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (position.ResolveToTileEntity() is TEStorageHeart heart && StoragePlayer.IsClientViewingHeart(heart)) {
+			if (!TryGetEntityFromLocation(MessageType.RefreshNetworkItems, position, out TEStorageHeart heart))
+				return;
+
+			if (StoragePlayer.IsClientViewingHeart(heart)) {
 				MagicUI.IgnoreSpecificZoneRefreshing = ignoreSpecificRefreshes;
 				MagicUI.SetNextCollectionsToRefresh(types);
 
-				heart.netcodeUpdate = true;
+				heart.netcodeUpdate = false;
 				heart.netDesync = 0;
 			}
-
-			Report(true, MessageType.RefreshNetworkItems + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void ClientSendDeactivate(Point16 position, bool inActive)
@@ -509,19 +630,34 @@ printReport:
 				packet.Write(inActive);
 				packet.Send();
 
-				Report(true, MessageType.ClientSendDeactivate + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageUnitActiveState);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ClientSendDeactivate)
+						.Indent()
+						.Report(false, "Position: {0}", position.DebugString())
+						.Report(false, "Inactive: {0}", inActive);
+				}
 			}
 		}
 
-		public static void ReceiveClientDeactivate(BinaryReader reader, int sender)
+		private static void ReceiveClientDeactivate(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			bool inActive = reader.ReadBoolean();
 
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageUnitActiveState);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read activity state: {0}", !inActive);
+			}
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				TileEntity ent = TileEntity.ByPosition[position];
-				if (ent is TEStorageUnit storageUnit)
+				if (TryGetEntityFromLocation(MessageType.ClientSendDeactivate, position, out TEStorageUnit storageUnit))
 				{
 					storageUnit.Inactive = inActive;
 					storageUnit.UpdateTileFrameWithNetSend();
@@ -531,14 +667,6 @@ printReport:
 						heart.ResetCompactStage();
 					}
 				}
-
-				Report(true, MessageType.ClientSendDeactivate + " packet received by server from client " + sender);
-
-			//	PrintClientRequest(sender, $"{(inActive ? "Deactivate" : "Activate")} Unit", position);
-			}
-			else if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				Report(true, MessageType.ClientSendDeactivate + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -553,17 +681,34 @@ printReport:
 				TileEntity.Write(packet, entity, true);
 				packet.Send();
 
-				Report(true, MessageType.ClientSendTEUpdate + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.TileEntityUpdatesNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ClientSendTEUpdate)
+						.Indent()
+						.Report(false, "Position: {0}", position.DebugString())
+						.Report(false, "Entity: {0}", entity.GetType().FullName);
+				}
 			}
 		}
 
-		public static void ReceiveClientSendTEUpdate(BinaryReader reader, int sender)
+		private static void ReceiveClientSendTEUpdate(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TileEntity ent = TileEntity.Read(reader, true);
 
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.TileEntityUpdatesNetcode);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read entity type: {0}", ent.GetType().FullName);
+			}
+
 			if (Main.netMode == NetmodeID.Server)
 			{
+				// NOTE: unlike other packets, this packet can force the existence of the entity
 				ent.Position = position;
 				TileEntity.ByID[ent.ID] = ent;
 				TileEntity.ByPosition[position] = ent;
@@ -573,76 +718,53 @@ printReport:
 					heart?.ResetCompactStage();
 				}
 
-				Report(true, MessageType.ClientSendTEUpdate + " packet received by server from client " + sender);
-
 				NetMessage.SendData(MessageID.TileEntitySharing, -1, sender, null, ent.ID, ent.Position.X, ent.Position.Y);
-			}
-			else if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				Report(true, MessageType.ClientSendTEUpdate + " packet received by client " + Main.myPlayer);
-			}
-		}
 
-		private static ModPacket PrepareStationOperation(Point16 position, byte op)
-		{
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.ClientStationOperation);
-			packet.Write(position.X);
-			packet.Write(position.Y);
-			packet.Write(op);
-			return packet;
-		}
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.TileEntityUpdatesNetcode);
 
-		private static ModPacket PrepareStationResult(byte op)
-		{
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.ServerStationOperationResult);
-			packet.Write(op);
-			return packet;
-		}
-
-		public static void SendDepositStation(Point16 position, Item item)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStationOperation(position, 0);
-				ItemIO.Send(item, packet, true, true);
-				packet.Send();
-
-				Report(true, "SendDepositStation packet sent from client " + Main.myPlayer);
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent vanilla ID packet TileEntitySharing to all clients")
+						.Indent()
+						.Report(false, "ID: {0}", ent.ID)
+						.Report(false, "Position: {0}", ent.Position.DebugString());
+				}
 			}
 		}
 
-		public static void SendWithdrawStation(Point16 position, int slot)
-		{
-			if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				ModPacket packet = PrepareStationOperation(position, 1);
-				packet.Write((byte)slot);
-				packet.Send();
-
-				Report(true, "SendWithdrawStation packet sent from client " + Main.myPlayer);
-			}
-		}
-
-		public static void ReceiveClientStationOperation(BinaryReader reader, int sender)
+		private static void ReceiveClientStationOperation(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TECraftingAccess craftingAccess)
-				return;
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Set(Main.netMode == NetmodeID.Server)
+					.AndAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingStationSlots)
+			);
 
-			craftingAccess.QClientOperation(reader, op, sender);
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read operation: {0}", op);
+			}
 
-			Report(true, MessageType.ClientStationOperation + " packet received by server from client " + sender);
-			Report(false, "Operation: " + op);
+			if (TryGetEntityFromLocation(MessageType.ClientStationOperation, position, out TECraftingAccess craftingAccess))
+				craftingAccess.QClientOperation(reader, op, sender);
 		}
 
-		public static void ReceiveServerStationResult(BinaryReader reader)
+		private static void ReceiveServerStationResult(BinaryReader reader)
 		{
 			TECraftingAccess.Operation op = (TECraftingAccess.Operation)reader.ReadByte();
 			Item item = ItemIO.Receive(reader, true, true);
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingStationSlots);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read operation: {0}", op)
+					.Report(false, "Read item: {0}", item.IdentifierAndStack());
+			}
 
 			if (op == TECraftingAccess.Operation.Withdraw || op == TECraftingAccess.Operation.WithdrawToInventory)
 			{
@@ -665,8 +787,6 @@ printReport:
 					TECraftingAccess.UpdateRecipesFromStationAction(new Item(oldType));
 				}
 			}
-
-			Report(true, "Station operation " + op + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void SendResetCompactStage(Point16 heart)
@@ -679,26 +799,30 @@ printReport:
 				packet.Write(heart.Y);
 				packet.Send();
 
-				Report(true, MessageType.ResetCompactStage + " packet sent from client " + Main.myPlayer);
-				Report(false, "Entity reset: (X: " + heart.X + ", Y: " + heart.Y + ")");
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHeartResetCompactStage);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ResetCompactStage)
+						.Indent()
+						.Report(false, "Heart position: {0}", heart.DebugString());
+				}
 			}
 		}
 
-		public static void ReceiveResetCompactStage(BinaryReader reader, int sender)
+		private static void ReceiveResetCompactStage(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHeartResetCompactStage);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", position.DebugString());
+
 			if (Main.netMode == NetmodeID.Server)
 			{
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart)
+				if (TryGetEntityFromLocation(MessageType.ResetCompactStage, position, out TEStorageHeart heart))
 					heart.ResetCompactStage();
-
-				Report(true, MessageType.ResetCompactStage + " packet received by server from client " + sender);
-				Report(false, "Entity reset: (X: " + position.X + ", Y: " + position.Y + ")");
-			}
-			else if (Main.netMode == NetmodeID.MultiplayerClient)
-			{
-				Report(true, MessageType.ResetCompactStage + " packet recevied by client " + Main.myPlayer);
 			}
 		}
 
@@ -718,16 +842,23 @@ printReport:
 					ItemIO.Send(result, packet, true, true);
 				packet.Send();
 
-				Report(true, MessageType.CraftRequest + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CraftingRequests);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.CraftRequest)
+						.Indent()
+						.Report(false, "Heart position: {0}", heart.DebugString())
+						.Report(false, "Withdrawing {0} item stacks from storage", toWithdraw.Count)
+						.Report(false, "Crafting {0} item stacks", results.Count);
+				}
 			}
 		}
 
-		public static void ReceiveCraftRequest(BinaryReader reader, int sender)
+		private static void ReceiveCraftRequest(BinaryReader reader, int sender)
 		{
 			Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
 			int withdrawCount = reader.ReadInt32();
-
-		//	PrintClientRequest(sender, "Craft", position);
 
 			HashSet<int> typesToUpdate = new();
 
@@ -746,16 +877,27 @@ printReport:
 				typesToUpdate.Add(result.type);
 			}
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity te) || te is not TEStorageHeart heart)
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingRequests);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Withdrawing {0} item stacks from storage", withdrawCount)
+					.Report(false, "Crafting {0} item stacks", resultsCount);
+			}
+
+			if (!TryGetEntityFromLocation(MessageType.CraftRequest, position, out TEStorageHeart heart))
 				return;
 
-			Report(true, MessageType.CraftRequest + " packet received by server from client " + sender);
-
-			Report(false, "Handling storage inventory changes and sending excess items...");
-
 			List<Item> items;
-			using (SecuritySystem.CreateAccessContext(sender))
-				items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
+
+			using (var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.CraftingRequests)) {
+				if (debuggingWork.IsDebugging)
+					debuggingWork.Report(false, "Handling storage inventory changes and sending excess items...");
+
+				using (SecuritySystem.CreateAccessContext(sender))
+					items = CraftingGUI.HandleCraftWithdrawAndDeposit(heart, toWithdraw, results);
+			}
 
 			if (items.Count > 0)
 			{
@@ -766,7 +908,15 @@ printReport:
 					ItemIO.Send(item, packet, true, true);
 				packet.Send(sender);
 
-				Report(false, MessageType.CraftResult + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.ChainIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CraftingRequests);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to client {1}", MessageType.CraftResult, sender)
+						.Indent()
+						.Report(false, "Excess item count: {0}", items.Count)
+						.Unindent();
+				}
 
 				AuditSystem.ReportCraftRequest(sender, heart, [.. results], [.. toWithdraw]);
 			}
@@ -774,10 +924,16 @@ printReport:
 			SendRefreshNetworkItems(position, false, typesToUpdate);
 		}
 
-		public static void ReceiveCraftResult(BinaryReader reader)
+		private static void ReceiveCraftResult(BinaryReader reader)
 		{
 			Player player = Main.LocalPlayer;
 			int count = reader.ReadInt32();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CraftingRequests);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read excess item count: {0}", count);
+
 			for (int k = 0; k < count; k++)
 			{
 				Item item  = ItemIO.Receive(reader, true, true);
@@ -785,9 +941,6 @@ printReport:
 
 				player.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 			}
-
-			Report(true, MessageType.CraftResult + " packet received by client " + Main.myPlayer);
-			Report(false, "Item objects crafted: " + count);
 		}
 
 		public static void ClientRequestSection(Point16 coords)
@@ -802,25 +955,30 @@ printReport:
 
 				packet.Send();
 
-				Report(false, MessageType.SectionRequest + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.TileSectionNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.SectionRequest)
+						.Indent()
+						.Report(false, "Tile coordinates: {0}", coords.DebugString());
+				}
 			}
 		}
 
-		public static void ReceiveClientRequestSection(BinaryReader reader, int sender)
+		private static void ReceiveClientRequestSection(BinaryReader reader, int sender)
 		{
 			Point16 coords = new(reader.ReadInt16(), reader.ReadInt16());
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.TileSectionNetcode);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read tile coordinates: {0}", coords.DebugString());
 
 			if (Main.netMode == NetmodeID.Server)
 			{
 				RemoteClient.CheckSection(sender, coords.ToWorldCoordinates());
 			}
-		}
-
-		public static void ClientReciveStorageSync(BinaryReader reader)
-		{
-			TileEntity.Read(reader, true);
-
-			Report(true, MessageType.SyncStorageUnitToClinet + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void ClientRequestForceCraftingGUIRefresh() {
@@ -833,12 +991,24 @@ printReport:
 
 				packet.Send();
 
-				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.RefreshingUI);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.ForceCraftingGUIRefresh)
+						.Indent()
+						.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				}
 			}
 		}
 
-		public static void ReceiveClientForceCraftingGUIRefresh(BinaryReader reader, int sender) {
+		private static void ReceiveClientForceCraftingGUIRefresh(BinaryReader reader, int sender) {
 			Point16 storage = new(reader.ReadInt16(), reader.ReadInt16());
+
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.RefreshingUI);
+
+			if (debuggingIncoming.IsDebugging)
+				DebugMessage.Report(false, "Read position: {0}", storage.DebugString());
 
 			if (Main.netMode == NetmodeID.Server) {
 				//Forward the packet
@@ -850,15 +1020,18 @@ printReport:
 
 				packet.Send(ignoreClient: sender);
 
-				Report(true, MessageType.ForceCraftingGUIRefresh + " packet sent from server from client " + sender);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.RefreshingUI);
 
-			//	PrintClientRequest(sender, "Refresh UI", storage);
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Forwarded packet {0} from client {1} to all other clients", MessageType.ForceCraftingGUIRefresh, sender)
+						.Indent()
+						.Report(false, "Heart position: {0}", storage.DebugString());
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				if (StoragePlayer.IsClientViewingHeart(storage) && StoragePlayer.IsStorageCrafting()) {
 					MagicUI.RequestFullRefresh();
 					MagicUI.IgnoreSpecificZoneRefreshing = true;
-
-					Report(true, MessageType.ForceCraftingGUIRefresh + " packet received by client " + Main.myPlayer);
 				}
 			}
 		}
@@ -871,51 +1044,85 @@ printReport:
 				packet.Write(source.Position);
 				packet.Send();
 
-				Report(true, MessageType.TransferItems + " packet sent from client " + Main.myPlayer);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageUnitItemTransfer);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.TransferItems)
+						.Indent()
+						.Report(false, "Source unit position: {0}", source.Position.DebugString())
+						.Report(false, "Destination unit position: {0}", destination.Position.DebugString());
+				}
 			}
 		}
 
-		public static void ReceiveClientRequestItemTransfer(BinaryReader reader, int sender) {
+		private static void ReceiveClientRequestItemTransfer(BinaryReader reader, int sender) {
 			Point16 destination = reader.ReadPoint16();
 			Point16 source = reader.ReadPoint16();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageUnitItemTransfer);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read destination unit position: {0}", destination.DebugString())
+					.Report(false, "Read source unit position: {0}", source.DebugString());
+			}
 
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			if (!TileEntity.ByPosition.TryGetValue(destination, out TileEntity tileEntity) || tileEntity is not TEStorageUnit unitDestination) {
-				Report(true, MessageType.TransferItems + " packet failed to read on the server.\n" +
-					"Reason: Destination was not a Storage Unit");
+			if (!TryGetEntityFromLocation(MessageType.TransferItems, destination, out TEStorageUnit unitDestination)) {
+				if (debugging.IsDebugging) {
+					debugging
+						.Indent()
+						.Report(false, "Could not evaluate destination unit");
+				}
+
 				return;
 			}
 
-			if (!TileEntity.ByPosition.TryGetValue(source, out tileEntity) || tileEntity is not TEStorageUnit unitSource) {
-				Report(true, MessageType.TransferItems + " packet failed to read on the server.\n" +
-					"Reason: Source was not a Storage Unit");
+			if (!TryGetEntityFromLocation(MessageType.TransferItems, source, out TEStorageUnit unitSource)) {
+				if (debugging.IsDebugging) {
+					debugging
+						.Indent()
+						.Report(false, "Could not evaluate source unit");
+				}
+
 				return;
 			}
 
-			Report(true, MessageType.TransferItems + " packet was successfully received by server from client " + sender);
-
-			AttemptItemTransferAndSendResult(unitDestination, unitSource, out _);
+			AttemptItemTransferAndSendResult(unitDestination, unitSource, out _, true);
 		}
 
-		public static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems, bool netQueue = true) {
+		internal static bool AttemptItemTransferAndSendResult(TEStorageUnit destination, TEStorageUnit source, out List<Item> transferredItems, bool netQueue = true) {
 			transferredItems = null;
 
 			if (Main.netMode != NetmodeID.Server)
 				return false;
 
-			Report(true, $"Performing AttemptItemTransferAndSendResult on source unit (X: {source.Position.X}, Y: {source.Position.Y}) and destination unit (X: {destination.Position.X}, Y: {destination.Position.Y})...");
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.StorageUnitItemTransfer);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Attempting transfer of items between Storage Units")
+					.Indent()
+					.Report(false, "Destination unit position: {0}", destination.Position.DebugString())
+					.Report(false, "Source unit position: {0}", source.Position.DebugString())
+					.Unindent();
+			}
 
 			TEStorageUnit.AttemptItemTransfer(destination, source, out transferredItems);
 
 			if (transferredItems.Count == 0) {
 				//Nothing to do
-				Report(false, "No items were transferred");
+				if (debugging.IsDebugging)
+					debugging.Report(false, "No items were transferred");
+
 				return false;
 			}
 
-			Report(false, transferredItems.Count + " items were transferred");
+			if (debugging.IsDebugging)
+				debugging.Report(false, "{0} items were transferred", transferredItems.Count);
 
 			if (netQueue) {
 				StartUpdateQueue();
@@ -945,28 +1152,37 @@ printReport:
 			packet.WriteSecurityAccess();
 			packet.Send();
 
-			Report(true, MessageType.RequestCoinCompact + " packet sent to all clients");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CompactCoins);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.RequestCoinCompact)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.DebugString());
+			}
 		}
 
-		public static void ReceiveCoinCompactRequest(BinaryReader reader, int sender) {
+		private static void ReceiveCoinCompactRequest(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
+			bool hasContext = reader.ReadSecurityAccess(out var context);
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CompactCoins);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read accessing player: {0}", context.Player);
+			}
 
 			if (Main.netMode == NetmodeID.Server) {
-				bool hasContext = reader.ReadSecurityAccess(out var context);
-
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
+				if (TryGetEntityFromLocation(MessageType.RequestCoinCompact, position, out TEStorageHeart heart)) {
 					heart.CompactCoins();
 					AuditSystem.ReportControlCoinCompacting(sender, heart);
 				}
-
-				if (hasContext)
-					context.Dispose();
-
-				Report(true, MessageType.RequestCoinCompact + " packet received by server from client " + sender);
-				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
-			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
-				Report(true, MessageType.RequestCoinCompact + " packet recevied by client " + Main.myPlayer);
 			}
+
+			if (hasContext)
+				context.Dispose();
 		}
 
 		public static bool RequestDuplicateSelling(Point16 heart) {
@@ -985,21 +1201,43 @@ printReport:
 			
 			packet.Send();
 
-			Report(true, MessageType.MassDuplicateSellRequest + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SellDuplicatesMenu);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.MassDuplicateSellRequest)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.DebugString());
+			}
 
 			return true;
 		}
 
-		public static void ReceiveDuplicateSellingRequest(BinaryReader reader, int sender) {
+		private static void ReceiveDuplicateSellingRequest(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
+
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SellDuplicatesMenu);
+
+			if (debuggingIncoming.IsDebugging)
+				debuggingIncoming.Report(false, "Read position: {0}", position.DebugString());
+
 			SellModeMetadata.NetReceive(reader);
 
+			using var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.SellDuplicatesMenu);
+
 			if (Main.netMode == NetmodeID.Server) {
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageHeart heart) {
+				if (TryGetEntityFromLocation(MessageType.MassDuplicateSellRequest, position, out TEStorageHeart heart)) {
 					int totalItemCount = SellModeMetadata.Count;
 					SellModeMetadata.HandleSell(heart, out int soldItemCount, out var sellValue, Main.player[sender]);
 
-					Report(false, $"{soldItemCount} / {totalItemCount} items were sold for {sellValue.TotalValue} copper coins");
+					if (debuggingWork.IsDebugging) {
+						debuggingWork
+							.Report(false, "Results:")
+							.Indent()
+							.Report(false, "{0} / {1} items were sold", soldItemCount, totalItemCount)
+							.Report(false, "Sell value: {0} copper coins", sellValue.TotalValue)
+							.Unindent();
+					}
 
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();
 					packet.Write((byte)MessageType.MassDuplicateSellResult);
@@ -1012,21 +1250,27 @@ printReport:
 					packet.Send();
 
 					AuditSystem.ReportMassItemSell(sender, heart, soldItemCount, sellValue.TotalValue);
+
+					using var debuggingOutGoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SellDuplicatesMenu);
+
+					if (debuggingOutGoing.IsDebugging)
+						debuggingOutGoing.Report(true, "Sent packet {0} to client {1}", MessageType.MassDuplicateSellResult, sender);
 				} else {
 					// Invalid request
 					SellModeMetadata.Clear();
-				}
 
-				Report(false, MessageType.MassDuplicateSellRequest + " packet received by server from client " + sender);
-				Report(false, "Entity read: (X: " + position.X + ", Y: " + position.Y + ")");
+					if (debuggingWork.IsDebugging)
+						debuggingWork.Report(false, "Sell request was invalid, clearing metadata without processing");
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				SellModeMetadata.Clear();
 
-				Report(true, MessageType.MassDuplicateSellRequest + " packet recevied by client " + Main.myPlayer);
+				if (debuggingWork.IsDebugging)
+					debuggingWork.Report(false, "Received sell request on client, clearing metadata without processing");
 			}
 		}
 
-		public static void ClientReceiveDuplicateSellingResult(BinaryReader reader) {
+		private static void ClientReceiveDuplicateSellingResult(BinaryReader reader) {
 			short sender = reader.ReadInt16();
 			Point16 heart = reader.ReadPoint16();
 			long coppersEarned = reader.Read7BitEncodedInt64();
@@ -1034,19 +1278,24 @@ printReport:
 			int sold = reader.Read7BitEncodedInt();
 			int totalItemsBeforeSell = reader.Read7BitEncodedInt();
 
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SellDuplicatesMenu);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read player: {0}", sender)
+					.Report(false, "Read position: {0}", heart.DebugString())
+					.Report(false, "Read coppers value: {0}", coppersEarned)
+					.Report(false, "Read sold item count: {0}", sold)
+					.Report(false, "Read total item count: {0}", totalItemsBeforeSell);
+			}
+
 			if (Main.netMode != NetmodeID.MultiplayerClient) {
 				//Read the data, but do nothing with it
 				return;
 			}
 
-			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart) {
-				Report(true, MessageType.MassDuplicateSellResult + " packet was malformed: Storage Heart location did not have a Storage Heart");
+			if (!TryGetEntityFromLocation(MessageType.MassDuplicateSellResult, heart, out TEStorageHeart _))
 				return;
-			}
-
-			Report(true, $"{sold} items were sold/destroyed at heart (X: {heart.X}, Y: {heart.Y}) for {coppersEarned} copper coins");
-
-			Report(false, MessageType.MassDuplicateSellResult + " packet recevied by client " + Main.myPlayer);
 
 			if (sender == Main.myPlayer)
 				SellModeMetadata.ClientReportSell(sold, totalItemsBeforeSell, new SellModeMetadata.Coins(coppersEarned));
@@ -1059,12 +1308,25 @@ printReport:
 				packet.Write(unit);
 				packet.Send();
 
-				Report(true, MessageType.RequestStorageUnitStyle + " packet sent to the server");
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageUnitFrame);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to the server", MessageType.RequestStorageUnitStyle)
+						.Indent()
+						.Report(false, "Unit position: {0}", unit.DebugString())
+						.Unindent();
+				}
 			}
 		}
 
-		public static void ReceiveStorageUnitStyle(BinaryReader reader, int sender) {
+		private static void ReceiveStorageUnitStyle(BinaryReader reader, int sender) {
 			Point16 unit = reader.ReadPoint16();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageUnitFrame);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", unit.DebugString());
 
 			if (Main.netMode != NetmodeID.Server)
 				return;
@@ -1072,21 +1334,21 @@ printReport:
 			//Safeguard:  Ensure that the map section exists before sending data
 			RemoteClient.CheckSection(sender, unit.ToWorldCoordinates());
 
-		//	PrintClientRequest(sender, "Update Unit Type", unit);
-
-			if (!TileEntity.ByPosition.TryGetValue(unit, out TileEntity entity) || entity is not TEStorageUnit storageUnit) {
-				Report(true, MessageType.RequestStorageUnitStyle + " packet was malformed: Storage Unit location did not have a Storage Unit");
-				return;
-			}
-
-			storageUnit.UpdateTileFrameWithNetSend();
-
-			Report(false, MessageType.RequestStorageUnitStyle + " packet received by server from client " + sender);
+			if (TryGetEntityFromLocation(MessageType.RequestStorageUnitStyle, unit, out TEStorageUnit storageUnit))
+				storageUnit.UpdateTileFrameWithNetSend();
 		}
 
-		public static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
-			bool playSound = reader.ReadBoolean();
+		private static void ClientReceiveQuickStackToNearbyStorageResult(BinaryReader reader) {
+		//	bool playSound = reader.ReadBoolean();
 			int origType = reader.ReadInt32();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.QuickStacking);
+
+			if (debugging.IsDebugging) {
+				debugging
+				//	.Report(false, "Read play sound: {0}", playSound)
+					.Report(false, "Read item type: {0}", origType);
+			}
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
@@ -1109,13 +1371,19 @@ printReport:
 			packet.Write((byte)MessageType.GolemHelpTextUpdate);
 			StorageWorld.NetSendHelpTips(packet);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.AutomatonHelpTipUpdate);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Sent packet {0} to all clients", MessageType.GolemHelpTextUpdate);
 		}
 
-		public static void ClientReceiveGolemTextUpdate(BinaryReader reader) {
+		private static void ClientReceiveGolemTextUpdate(BinaryReader reader) {
+			StorageWorld.NetReceiveHelpTips(reader);
+
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			StorageWorld.NetReceiveHelpTips(reader);
 			Golem.ReportNewTipUnlocked();
 		}
 
@@ -1127,39 +1395,31 @@ printReport:
 			packet.Write((byte)MessageType.ClientRequestServerOp);
 			packet.Send();
 
-			Report(true, MessageType.ClientRequestServerOp + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Sent packet {0} to the server", MessageType.ClientRequestServerOp);
 		}
 
-		public static void ServerReceiveOperatorRequest(int sender) {
+		private static void ServerReceiveOperatorRequest(int sender) {
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			bool print = !Netcode.KeyIsGenerated;
-
-			string key = Netcode.ServerOperatorKey;
-
-			Report(false, MessageType.ClientRequestServerOp + " packet received by server from client " + sender);
-
-			if (print) {
-				string keyMsg = MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ServerKeyText").Format(key);
-
-				Utility.WriteLineColoredSafely(keyMsg, ConsoleColor.Yellow, ConsoleColor.Black);
-				// Send the text to the server log as well
-				MagicStorageMod.Instance.Logger.Info("\n" + keyMsg);
-			}
+			Netcode.AttemptKeyGeneration();
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerOpResponse);
 			packet.Send(toClient: sender);
 
-			Report(false, MessageType.ServerOpResponse + " packet sent to client " + sender);
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Sent packet {0} to client {1}", MessageType.ServerOpResponse, sender);
 		}
 
-		public static void ClientReceiveOperatorReponse() {
+		private static void ClientReceiveOperatorReponse() {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-
-			Report(false, MessageType.ServerOpResponse + " packet received by client " + Main.myPlayer);
 
 			Main.NewText(MagicStorageMod.Instance.GetLocalization("ServerOperator.CommandInfo.ClientKeyText"), Color.Yellow);
 
@@ -1172,8 +1432,13 @@ printReport:
 
 			Netcode.RequestingOperatorKey = false;
 
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.CommandGrantAdministrator);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Chat interceptions have been removed.");
+
 			if (!Netcode.IsKeyValidForConfirmationMessage(key)) {
-				//Bail immediately since the key couldn't be valid in the first place
+				// Bail immediately since the key couldn't be valid in the first place
 				Netcode.ClientPrintKeyReponse(valid: false);
 				return;
 			}
@@ -1185,10 +1450,13 @@ printReport:
 			packet.Write(bytes);
 			packet.Send();
 
-			Report(true, MessageType.ClientRequestServerOpConfirmation + " packet sent to the server");
+			using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debuggingOutgoing.IsDebugging)
+				debuggingOutgoing.Report(true, "Sent packet {0} to the server", MessageType.ClientRequestServerOpConfirmation);
 		}
 
-		public static void ServerReceiveOperatorKeyFromClient(BinaryReader reader, int sender) {
+		private static void ServerReceiveOperatorKeyFromClient(BinaryReader reader, int sender) {
 			byte count = reader.ReadByte();
 			byte[] bytes = reader.ReadBytes(count);
 
@@ -1197,26 +1465,45 @@ printReport:
 
 			string key = StringScrambling.Unscramble(bytes);
 
-			bool valid = key == Netcode.ServerOperatorKey;
+			bool valid = key == Netcode.GetOrGenerateOperatorKey();
+
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read key: {0}", key)
+					.Report(false, "Valid key? {0}", valid);
+			}
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ServerOpConfirmationResult);
 			packet.Write(valid);
 			packet.Send(toClient: sender);
 
-			Report(false, MessageType.ServerOpConfirmationResult + " packet sent to client " + sender);
-
 			if (valid)
 				AuditSystem.ReportAdministratorStatusAssignment(sender);
+
+			using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debuggingOutgoing.IsDebugging) {
+				debuggingOutgoing
+					.Report(true, "Sent packet {0} to client {1}", MessageType.ServerOpConfirmationResult, sender)
+					.Indent()
+					.Report(false, "Sent key: {0}", key)
+					.Report(false, "Key was {0}", valid ? "valid" : "invalid");
+			}
 		}
 
-		public static void ClientReceiveOperatorConformationResult(BinaryReader reader) {
+		private static void ClientReceiveOperatorConformationResult(BinaryReader reader) {
 			bool valid = reader.ReadBoolean();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.CommandGrantAdministrator);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Valid key? {0}", valid);
 
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
-
-			Report(false, MessageType.ServerOpConfirmationResult + " packet received by client " + Main.myPlayer);
 
 			Netcode.ClientPrintKeyReponse(valid);
 
@@ -1243,10 +1530,19 @@ printReport:
 			packet.Write(bb);
 			packet.Send();
 
-			Report(true, MessageType.PlayerHasServerOp + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.OperatorStatus);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.PlayerHasServerOp)
+					.Indent()
+					.Report(false, "Player: {0}", plr)
+					.Report(false, "Operator status: {0}", mp.hasOp)
+					.Report(false, "Administrator status: {0}", mp.IsAdministrator);
+			}
 		}
 
-		public static void ReceivePlayerHasOperator(BinaryReader reader) {
+		private static void ReceivePlayerHasOperator(BinaryReader reader) {
 			byte plr = reader.ReadByte();
 			BitsByte opFlags = reader.ReadByte();
 
@@ -1256,19 +1552,29 @@ printReport:
 
 			opFlags.Retrieve(ref mp.hasOp, ref mp.manualOp);
 
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.OperatorStatus);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read player: {0}", plr)
+					.Report(false, "Read Operator status: {0}", mp.hasOp)
+					.Report(false, "Read Administrator status: {0}", mp.IsAdministrator);
+			}
+
 			if (Main.netMode == NetmodeID.MultiplayerClient && plr == Main.myPlayer && mp.IsAdministrator)  // Force a sync of the network information
 				RequestAccessibleNetworksByDefault();
 
-			if (Main.netMode != NetmodeID.Server) {
-				Report(true, MessageType.PlayerHasServerOp + " packet received by client " + Main.myPlayer);
+			if (Main.netMode != NetmodeID.Server)
 				return;
-			}
 
 			//Forward the result
 			ModPacket packet = ServerPreparePlayerHasOperatorPacket(plr, mp);
 			packet.Send(ignoreClient: plr);
 
-			Report(true, MessageType.PlayerHasServerOp + " packet sent to all clients");
+			using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.OperatorStatus);
+
+			if (debuggingOutgoing.IsDebugging)
+				debuggingOutgoing.Report(true, "Forwarded packet {0} from client {1} to all other clients", MessageType.PlayerHasServerOp, plr);
 
 			if (mp.IsAdministrator != wasAdministrator) {
 				if (mp.IsAdministrator)
@@ -1292,88 +1598,11 @@ printReport:
 			return packet;
 		}
 
-		public static void ClientRequestDepositFromBank(Item[] inventory, Point16 heart, Action<Player, Item[]> netResult) {
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-				return;
+		[Obsolete("This method has been renamed to " + nameof(SendNetworkConnectionsUpdateOnPlacement), error: true)]
+		public static void SendComponentPlacement(Point16 position) => SendNetworkConnectionsUpdateOnPlacement(position);
 
-			UIStorageControlDepositPlayerInventoryButton.PendingResultAction = netResult;
-
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.ClientRequestPlayerBankDeposit);
-
-			packet.Write(heart);
-
-			packet.Write((ushort)inventory.Length);
-
-			for (int i = 0; i < inventory.Length; i++)
-				ItemIO.Send(inventory[i], packet, true, true);
-
-			packet.Send();
-
-			Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet sent to the server");
-		}
-
-		public static void ServerReceiveDepositFromBankRequest(BinaryReader reader, int sender) {
-			Point16 heart = reader.ReadPoint16();
-
-			int count = reader.ReadUInt16();
-
-			Item[] inventory = new Item[count];
-
-			for (int i = 0; i < count; i++)
-				inventory[i] = ItemIO.Receive(reader, true, true);
-
-			if (!TileEntity.ByPosition.TryGetValue(heart, out TileEntity heartEntity) || heartEntity is not TEStorageHeart storageHeart) {
-				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet was malformed: Storage Heart location did not have a Storage Heart");
-				return;
-			}
-
-			if (Main.netMode != NetmodeID.Server) {
-				Report(true, MessageType.ClientRequestPlayerBankDeposit + " packet received by client " + Main.myPlayer);
-				return;
-			}
-
-			UIStorageControlDepositPlayerInventoryButton.TryDepositItems(inventory, storageHeart, false, out bool changed);
-
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.PlayerBankDepositResult);
-			packet.Write(changed);
-
-			packet.Write((ushort)inventory.Length);
-
-			for (int i = 0; i < inventory.Length; i++)
-				ItemIO.Send(inventory[i], packet, true, true);
-
-			packet.Send(toClient: sender);
-
-			Report(false, MessageType.PlayerBankDepositResult + " packet sent to client " + sender);
-
-		//	PrintClientRequest(sender, "Deposit Items from Bank/Safe/Forge", heart);
-		}
-
-		public static void ClientReceiveDepositFromBankResult(BinaryReader reader) {
-			bool changed = reader.ReadBoolean();
-			int count = reader.ReadUInt16();
-
-			Item[] inventory = new Item[count];
-
-			for (int i = 0; i < count; i++)
-				inventory[i] = ItemIO.Receive(reader, true, true);
-
-			if (Main.netMode != NetmodeID.MultiplayerClient) {
-				Report(true, MessageType.PlayerBankDepositResult + " packet received by the server");
-				return;
-			}
-
-			Interlocked.Exchange(ref UIStorageControlDepositPlayerInventoryButton.PendingResultAction, null)?.Invoke(Main.LocalPlayer, inventory);
-
-			if (changed)
-				SoundEngine.PlaySound(SoundID.Grab);
-
-			Report(true, MessageType.PlayerBankDepositResult + " packet received by client " + Main.myPlayer);
-		}
-
-		public static void SendComponentPlacement(Point16 position) {
+		public static void SendNetworkConnectionsUpdateOnPlacement(Point16 position)
+		{
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
@@ -1382,39 +1611,73 @@ printReport:
 			packet.Write(position);
 			packet.Send();
 
-			Report(true, MessageType.ComponentPlacement + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageComponentPlacement);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.ComponentPlacement)
+					.Indent()
+					.Report(false, "Component position: {0}", position.DebugString());
+			}
 		}
 
 		public static void ServerReceiveComponentPlacement(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 
-			if (Main.netMode != NetmodeID.Server)
-				return;
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageComponentPlacement);
 
-		//	PrintClientRequest(sender, "Component Placement", position);
-			Report(false, MessageType.ComponentPlacement + " packet received by server from client " + sender);
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", position.DebugString());
+
+			TileNetworkScanner.SmartlyConnectAdjacentNetworks(position);
 		}
 
-		public static void SendComponentDestruction(Point16 position) {
+		[Obsolete("This method has been renamed to " + nameof(SendNetworkConnectionsUpdateOnDestruction), error: true)]
+		public static void SendComponentDestruction(Point16 position) => SendNetworkConnectionsUpdateOnDestruction(position, TileNetworkScanner.GetLocalNeighbors2x2());
+
+		public static void SendNetworkConnectionsUpdateOnDestruction(Point16 position, IEnumerable<Point16> initialLocalNeighbors) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
+
+			if (position.ResolveToTileEntity() is not TEStorageComponent component)
 				return;
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.ComponentDestruction);
-			packet.Write(position);
+			packet.Write(component.Position);
+
+			List<Point16> neighbors = [.. initialLocalNeighbors];
+
+			packet.Write((byte)neighbors.Count);
+			foreach (Point16 neighbor in neighbors)
+				packet.Write(neighbor);
+
 			packet.Send();
 
-			Report(true, MessageType.ComponentDestruction + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageComponentDestruction);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.ComponentDestruction)
+					.Indent()
+					.Report(false, "Component position: {0}", position.DebugString());
+			}
 		}
 
-		public static void ServerReceiveComponentDestruction(BinaryReader reader, int sender) {
+		private static void ServerReceiveComponentDestruction(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 
-			if (Main.netMode != NetmodeID.Server)
-				return;
+			int neighborCount = reader.ReadByte();
+			List<Point16> initialLocalNeighbors = new(neighborCount);
+			for (int i = 0; i < neighborCount; i++)
+				initialLocalNeighbors.Add(reader.ReadPoint16());
 
-		//	PrintClientRequest(sender, "Component Destruction", position);
-			Report(false, MessageType.ComponentDestruction + " packet received by server from client " + sender);
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageComponentDestruction);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", position.DebugString());
+
+			TileNetworkScanner.SmartlyDisconnectComponents(position, initialLocalNeighbors);
 		}
 
 		public static void ClientInformStorageHeartUsage(TEStorageHeart heart) {
@@ -1428,21 +1691,40 @@ printReport:
 			packet.Write((byte)Main.myPlayer);
 			packet.Write(heart.Position);
 			packet.Send();
-			packet.Send();
 
-			Report(true, msg + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHeartUsage);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", msg)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString());
+			}
 		}
 
-		public static void ReceiveStorageHeartUsage(BinaryReader reader, int sender, bool inUse) {
+		private static void ReceiveStorageHeartUsage(BinaryReader reader, int sender, bool inUse) {
 			byte player = reader.ReadByte();
 			Point16 position = reader.ReadPoint16();
 
 			var msg = inUse ? MessageType.ClientLockStorageHeart : MessageType.ClientUnlockStorageHeart;
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHeartUsage);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read player: {0}", player)
+					.Report(false, "Read position: {0}", position.DebugString());
+			}
+
+			if (!TryGetEntityFromLocation(msg, position, out TEStorageHeart heart))
 				return;
 
-			heart.clientUsingHeart[player] = inUse;
+			using (var debuggingWork = DebugMessage.ChainIf(DebugControls.Names.StorageHeartUsage)) {
+				if (debuggingWork.IsDebugging)
+					debuggingWork.Report(false, "Usage state for Storage Heart at {0} has been update to {1}", position.DebugString(), inUse);
+
+				heart.clientUsingHeart[player] = inUse;
+			}
 
 			if (Main.netMode == NetmodeID.Server) {
 				// Forward to other clients
@@ -1452,9 +1734,16 @@ printReport:
 				packet.Write(position);
 				packet.Send(ignoreClient: sender);
 
-				Report(true, msg + " packet sent from server from client " + sender);
-			} else
-				Report(true, msg + " packet received by client " + Main.myPlayer);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHeartUsage);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Forwarded packet {0} from client {1} to all other clients", msg, sender)
+						.Indent()
+						.Report(false, "Interacting player: {0}", player)
+						.Report(false, "Heart position: {0}", position.DebugString());
+				}
+			}
 		}
 
 		public static void ClientRequestExactItemDeletion(TEStorageHeart heart, Item item) {
@@ -1471,18 +1760,38 @@ printReport:
 			packet.Write(data);
 			packet.Write(item.stack);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHeartItemDeletion);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.DeleteSpecificItem)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Item: {0}", item.IdentifierAndStack())
+					.Report(false, "Encoded data length: {0}", data.Length);
+			}
 		}
 
-		public static void ServerReceiveExactItemDeletionRequest(BinaryReader reader, int sender) {
+		private static void ServerReceiveExactItemDeletionRequest(BinaryReader reader, int sender) {
 			Point16 point = reader.ReadPoint16();
 			int dataLength = reader.Read7BitEncodedInt();
 			ReadOnlySpan<byte> item = reader.ReadBytes(dataLength);
 			int stack = reader.ReadInt32();
 
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHeartItemDeletion);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", point.DebugString())
+					.Report(false, "Read item data length: {0}", dataLength)
+					.Report(false, "Read item stack: {0}", stack);
+			}
+
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			if (!TileEntity.ByPosition.TryGetValue(point, out TileEntity entity) || entity is not TEStorageHeart heart)
+			if (!TryGetEntityFromLocation(MessageType.DeleteSpecificItem, point, out TEStorageHeart heart))
 				return;
 
 			int toRemove = stack;
@@ -1502,10 +1811,18 @@ printReport:
 			ShimmerMetrics.SendShimmerResults(packet, results);
 			packet.Send();
 
-			Report(true, MessageType.RequestShimmerItemInStorage + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.ShimmerRequestNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.RequestShimmerItemInStorage)
+					.Indent()
+					.Report(false, "Item type: {0}", itemType)
+					.Report(false, "Item stack to shimmer: {0}", toShimmer);
+			}
 		}
 
-		public static void ServerReceiveItemShimmeringRequest(BinaryReader reader, int sender) {
+		private static void ServerReceiveItemShimmeringRequest(BinaryReader reader, int sender) {
 			int itemType = reader.ReadInt32();
 			int toShimmer = reader.ReadInt32();
 
@@ -1514,24 +1831,49 @@ printReport:
 
 			var results = ShimmerMetrics.ReceiveShimmerResults(reader);
 
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.ShimmerRequestNetcode);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read item type: {0}", itemType)
+					.Report(false, "Read item stack to shimmer: {0}", toShimmer)
+					.Report(false, "Shimmering actions count: {0}", results.Count);
+			}
+
 			if (Main.netMode != NetmodeID.Server || storage is null)
 				return;
-
-			Report(true, MessageType.RequestShimmerItemInStorage + " packet received by server from client " + sender);
 
 			Item shimmeringItem = new Item(itemType, toShimmer);
 			int iconicItem = MagicCache.ShimmerInfos[itemType].iconicItem;
 
-			Report(false, "Handling shimmer results...");
-
-			foreach (var result in results)
-				result?.OnShimmer(shimmeringItem, iconicItem, storage, net: true);
-
-			Report(false, "Handling storage inventory changes and sending excess items...");
-
 			List<Item> items;
-			using (SecuritySystem.CreateAccessContext(sender))
-				items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
+			using(var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.ShimmerRequestNetcode)) {
+				if (debuggingWork.IsDebugging) {
+					debuggingWork
+						.Report(true, "Processing shimmer request")
+						.Indent()
+						.Report(false, "Shimmering item: {0}", shimmeringItem.IdentifierAndStack())
+						.Unindent();
+				}
+
+				foreach (var result in results)
+					result?.OnShimmer(shimmeringItem, iconicItem, storage, net: true);
+
+				if (debuggingWork.IsDebugging) {
+					debuggingWork
+						.Report(false, "Attempting item withdraws/deposits")
+						.Indent()
+						.Report(false, "Withdrawing {0} items", storage.toWithdraw.Count)
+						.Report(false, "Depositing {0} items", storage.toDeposit.Count)
+						.Unindent();
+				}
+
+				using (SecuritySystem.CreateAccessContext(sender))
+					items = CraftingGUI.HandleCraftWithdrawAndDeposit(storage.heart, storage.toWithdraw, storage.toDeposit);
+
+				if (debuggingWork.IsDebugging)
+					debuggingWork.Report(false, "{0} item stacks were leftover", items.Count);
+			}
 
 			if (items.Count > 0) {
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
@@ -1541,7 +1883,14 @@ printReport:
 					ItemIO.Send(item, packet, true, true);
 				packet.Send(sender);
 
-				Report(false, MessageType.CraftResult + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.CreateIf(
+					DebugControls.Combine()
+						.Get(DebugControls.Names.OutgoingNetcodePackets)
+						.AndAny(DebugControls.Names.ShimmerRequestNetcode, DebugControls.Names.StorageOperationsNetcode)
+				);
+
+				if (debuggingOutgoing.IsDebugging)
+					debuggingOutgoing.Report(false, "Sent packet {0} to client {1}", MessageType.CraftResult, sender);
 			}
 
 			SendRefreshNetworkItems(storage.heart.Position, false);
@@ -1557,22 +1906,36 @@ printReport:
 			packet.Write(heart.storageName);
 			packet.Send();
 
-			Report(true, MessageType.RenameStorageHeart + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageOperationsNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.RenameStorageHeart)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "New name: {0}", heart.storageName);
+			}
 		}
 
-		public static void ReceiveStorageHeartName(BinaryReader reader, int sender) {
+		private static void ReceiveStorageHeartName(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 			string name = reader.ReadString();
 
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageOperationsNetcode);
+
+			if (debuggingIncoming.IsDebugging) {
+				debuggingIncoming
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read name: {0}", name);
+			}
+
+			if (!TryGetEntityFromLocation(MessageType.RenameStorageHeart, position, out TEStorageHeart heart))
 				return;
 
 			heart.storageName = name;
 
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				Report(true, MessageType.RenameStorageHeart + " packet received by client " + Main.myPlayer);
+			if (Main.netMode != NetmodeID.Server)
 				return;
-			}
 
 			// Forward the rename to other clients
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
@@ -1581,114 +1944,120 @@ printReport:
 			packet.Write(name);
 			packet.Send(ignoreClient: sender);
 
-			Report(true, MessageType.RenameStorageHeart + " packet sent from server from client " + sender);
+			using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageOperationsNetcode);
+
+			if (debuggingOutgoing.IsDebugging) {
+				debuggingOutgoing
+					.Report(true, "Forwarded packet {0} from client {1} to all other clients", MessageType.RenameStorageHeart, sender)
+					.Indent()
+					.Report(false, "Heart position: {0}", position.DebugString())
+					.Report(false, "New name: {0}", name);
+			}
 		}
 
-		[Obsolete($"Use {nameof(RequestStorageDepositHistoryChunks)} instead", error: true)]
-		public static void SyncStorageDepositHistory(TEStorageHeart heart) {
-			if (Main.netMode == NetmodeID.SinglePlayer)
-				return;
-
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.SyncDepositHistory);
-			packet.Write(heart.Position);
-			heart.SendHistory(packet);
-			packet.Send();
-
-			Report(true, MessageType.SyncDepositHistory + " packet sent to the server");
-		}
+		[Obsolete("This message has been replaced by " + nameof(RequestStorageDepositHistoryChunks), error: true)]
+		public static void SyncStorageDepositHistory(TEStorageHeart heart) => throw new NotSupportedException();
 
 		[Obsolete]
-		private static void Obsolete_ReceiveStorageDepositHistory(BinaryReader reader, int sender) => ReceiveStorageDepositHistory(reader, sender);
+		private static void Obsolete_ReceiveStorageDepositHistory(BinaryReader reader, int sender) => throw new NotSupportedException();
 
-		[Obsolete("Use ReceiveStorageDepositHistory instead", error: true)]
-		public static void ReceiveStorageDepositHistory(BinaryReader reader, int sender) {
-			Point16 position = reader.ReadPoint16();
-
-			if (!TileEntity.ByPosition.TryGetValue(position, out TileEntity entity) || entity is not TEStorageHeart heart)
-				return;
-
-			heart.ReceiveHistory(reader);
-
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				Report(true, MessageType.SyncDepositHistory + " packet received by client " + Main.myPlayer);
-				return;
-			}
-
-			// Forward the history to other clients
-			ModPacket packet = MagicStorageMod.Instance.GetPacket();
-			packet.Write((byte)MessageType.SyncDepositHistory);
-			packet.Write(position);
-			heart.SendHistory(packet);
-			packet.Send(ignoreClient: sender);
-
-			Report(true, MessageType.SyncDepositHistory + " packet sent from server from client " + sender);
-		}
+		[Obsolete("This message has been replaced by " + nameof(ServerReceiveDepositHistoryChunksRequest), error: true)]
+		private static void ReceiveStorageDepositHistory(BinaryReader reader, int sender) => throw new NotSupportedException();
 
 		public static void ClientSendCoreRemoval(Point16 position) {
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorageMod.Instance.GetPacket();
-				packet.Write((byte)MessageType.ClientSendCoreRemoval);
-				packet.Write(position);
-				packet.Send();
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
 
-				Report(true, MessageType.ClientSendCoreRemoval + " packet sent from client " + Main.myPlayer);
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientSendCoreRemoval);
+			packet.Write(position);
+			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageCoreNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.ClientSendCoreRemoval)
+					.Indent()
+					.Report(false, "Unit position: {0}", position.DebugString());
 			}
 		}
 
-		public static void ReceiveCoreRemoval(BinaryReader reader, int sender) {
+		private static void ReceiveCoreRemoval(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 
-			if (Main.netMode == NetmodeID.Server) {
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
-					var types = unit.GetItems().Select(static i => i.type).Distinct().ToList();
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageCoreNetcode);
 
-					Item spawnedItem = unit.RemoveItemsAndSpawnCore();
-					if (spawnedItem is not null)
-						AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", position.DebugString());
 
-					// RemoveItemsAndSpawnCore() already sends the frame change
-				//	unit.UpdateTileFrameWithNetSend();
+			if (Main.netMode != NetmodeID.Server)
+				return;
 
-					if (unit.GetHeart() is TEStorageHeart heart) {
-						heart.ResetCompactStage();
-						SendRefreshNetworkItems(heart.Position, typesToRefresh: types);
-					}
-				}
+			if (!TryGetEntityFromLocation(MessageType.ClientSendCoreRemoval, position, out TEStorageUnit unit))
+				return;
 
-				Report(true, MessageType.ClientSendCoreRemoval + " packet received by server from client " + sender);
+			var types = unit.GetItems().Select(static i => i.type).Distinct().ToList();
+
+			Item spawnedItem = unit.RemoveItemsAndSpawnCore();
+			if (spawnedItem is not null)
+				AuditSystem.ReportStorageUnitCoreRemoval(sender, unit, new ReducedItem(spawnedItem));
+
+			// RemoveItemsAndSpawnCore() already sends the frame change
+			//	unit.UpdateTileFrameWithNetSend();
+
+			if (unit.GetHeart() is TEStorageHeart heart) {
+				heart.ResetCompactStage();
+				SendRefreshNetworkItems(heart.Position, typesToRefresh: types);
 			}
 		}
 
 		public static void ClientSendCoreInsertion(Point16 position, BaseStorageCore core) {
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				ModPacket packet = MagicStorageMod.Instance.GetPacket();
-				packet.Write((byte)MessageType.ClientSendCoreInsertion);
-				packet.Write(position);
-				ItemIO.Send(core.Item, packet, false, false);
-				packet.Send();
+			if (Main.netMode != NetmodeID.MultiplayerClient)
+				return;
 
-				Report(true, MessageType.ClientSendCoreInsertion + " packet sent from client " + Main.myPlayer);
+			ModPacket packet = MagicStorageMod.Instance.GetPacket();
+			packet.Write((byte)MessageType.ClientSendCoreInsertion);
+			packet.Write(position);
+			ItemIO.Send(core.Item, packet, false, false);
+			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageCoreNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.ClientSendCoreInsertion)
+					.Indent()
+					.Report(false, "Unit position: {0}", position.DebugString())
+					.Report(false, "Item: {0}", core.Item.IdentifierAndStack());
 			}
 		}
 
-		public static void ReceiveCoreInsertion(BinaryReader reader, int sender) {
+		private static void ReceiveCoreInsertion(BinaryReader reader, int sender) {
 			Point16 position = reader.ReadPoint16();
 			Item item = ItemIO.Receive(reader, false, false);
 
-			if (Main.netMode == NetmodeID.Server) {
-				if (TileEntity.ByPosition.TryGetValue(position, out var te) && te is TEStorageUnit unit) {
-					unit.InsertCore((BaseStorageCore)item.ModItem);
-					// InsertCore already sends the frame change
-				//	unit.UpdateTileFrameWithNetSend();
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageCoreNetcode);
 
-					if (unit.GetHeart() is TEStorageHeart heart) {
-						heart.ResetCompactStage();
-						SendRefreshNetworkItems(heart.Position, ignoreSpecificRefreshes: true);
-					}
-				}
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", position.DebugString())
+					.Report(false, "Read item: {0}", item.IdentifierAndStack());
+			}
 
-				Report(true, MessageType.ClientSendCoreInsertion + " packet received by server from client " + sender);
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			if (!TryGetEntityFromLocation(MessageType.ClientSendCoreInsertion, position, out TEStorageUnit unit))
+				return;
+
+			unit.InsertCore((BaseStorageCore)item.ModItem);
+			// InsertCore already sends the frame change
+			//	unit.UpdateTileFrameWithNetSend();
+
+			if (unit.GetHeart() is TEStorageHeart heart) {
+				heart.ResetCompactStage();
+				SendRefreshNetworkItems(heart.Position, ignoreSpecificRefreshes: true);
 			}
 		}
 
@@ -1702,15 +2071,35 @@ printReport:
 			packet.Write(restricted);
 			packet.Send();
 
-			Report(true, MessageType.SecurityNetworkCreation + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkCreationNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkCreation)
+					.Indent()
+					.Report(false, "Network name: {0}", name)
+					.Report(false, "Private: {0}", restricted);
+
+				if (!string.IsNullOrWhiteSpace(password))
+					debugging.Report(false, "Password: {0}", password);
+			}
 		}
 
-		public static void ReceiveSecurityNetworkCreation(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkCreation(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				reader.ReadStringsSafely(out string name, out string password);
 				bool restricted = reader.ReadBoolean();
 
-				Report(true, MessageType.SecurityNetworkCreation + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkCreationNetcode);
+
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Network name: {0}", name)
+						.Report(false, "Private: {0}", restricted);
+
+					if (!string.IsNullOrWhiteSpace(password))
+						debuggingIncoming.Report(false, "Password: {0}", password);
+				}
 
 				var result = SecuritySystem.ServerCreateNetwork(sender, name, password, restricted, out int networkID);
 
@@ -1722,20 +2111,42 @@ printReport:
 				packet.Write((byte)sender);
 				packet.Send();
 
-				Report(true, MessageType.SecurityNetworkCreation + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkCreationNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to all clients", MessageType.SecurityNetworkCreation)
+						.Indent()
+						.Report(false, "Result: {0}", result);
+
+					if (result.IsSuccess()) {
+						debuggingOutgoing
+							.Report(false, "Network ID: {0}", networkID)
+							.Report(false, "Creator: {0}", sender);
+					}
+				}
 			} else {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int networkID = reader.ReadInt32();
 				int creator = reader.ReadByte();
 
-				Report(true, MessageType.SecurityNetworkCreation + " packet received by client " + Main.myPlayer);
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkCreationNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result);
+
+					if (result.IsSuccess()) {
+						debugging
+							.Report(false, "Network ID: {0}", networkID)
+							.Report(false, "Creator: {0}", creator);
+					}
+				}
 
 				if (creator == Main.myPlayer)
 					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Creation);
 
 				SecuritySystem.HandleNetworkAccessibilityOnCreation(result, creator, Main.LocalPlayer, networkID);
-
-				Report(false, $"  Result: {result}");
 
 				// Ensure that Administrators always know the password for the network
 				if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
@@ -1755,15 +2166,33 @@ printReport:
 			packet.WriteStringSafely(password);
 			packet.Send();
 
-			Report(true, MessageType.SecurityNetworkRemoval + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkDeletionNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkRemoval)
+					.Indent()
+					.Report(false, "Network ID: {0}", networkID);
+
+				if (!string.IsNullOrWhiteSpace(password))
+					debugging.Report(false, "Provided password: {0}", password);
+			}
 		}
 
-		public static void ReceiveSecurityNetworkRemoval(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkRemoval(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				int networkID = reader.ReadInt32();
 				string password = reader.ReadStringSafely();
 
-				Report(true, MessageType.SecurityNetworkRemoval + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkDeletionNetcode);
+
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Network ID: {0}", networkID);
+
+					if (!string.IsNullOrWhiteSpace(password))
+						debuggingIncoming.Report(false, "Provided password: {0}", password);
+				}
 
 				var result = SecuritySystem.ServerRemoveNetwork(sender, networkID, password);
 
@@ -1775,20 +2204,38 @@ printReport:
 				packet.Write((byte)sender);
 				packet.Send();
 
-				Report(true, MessageType.SecurityNetworkRemoval + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkDeletionNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to all clients", MessageType.SecurityNetworkRemoval)
+						.Indent()
+						.Report(false, "Result: {0}", result);
+
+					if (result.IsSuccess()) {
+						debuggingOutgoing
+							.Report(false, "Network ID: {0}", networkID)
+							.Report(false, "Requester: {0}", sender);
+					}
+				}
 			} else {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int networkID = reader.ReadInt32();
 				int requestingPlayer = reader.ReadByte();
 
-				Report(true, MessageType.SecurityNetworkRemoval + " packet received by client " + Main.myPlayer);
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkDeletionNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID)
+						.Report(false, "Requester: {0}", requestingPlayer);
+				}
 
 				if (requestingPlayer == Main.myPlayer)
 					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Removal);
 
 				SecuritySystem.HandleNetworkAccessibilityOnRemoval(result, Main.LocalPlayer, networkID);
-
-				Report(false, $"  Result: {result}");
 
 				RequestSecurityNetworkList();
 			}
@@ -1808,15 +2255,33 @@ printReport:
 			packet.WriteStringSafely(password);
 			packet.Send();
 
-			Report(true, MessageType.SecurityNetworkJoin + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkJoin)
+					.Indent()
+					.Report(false, "Network ID: {0}", networkID);
+
+				if (!string.IsNullOrWhiteSpace(password))
+					debugging.Report(false, "Provided password: {0}", password);
+			}
 		}
 
-		public static void ReceiveSecurityNetworkJoinAttempt(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkJoinAttempt(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				int networkID = reader.ReadInt32();
 				string password = reader.ReadStringSafely();
 
-				Report(true, MessageType.SecurityNetworkJoin + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Network ID: {0}", networkID);
+
+					if (!string.IsNullOrWhiteSpace(password))
+						debuggingIncoming.Report(false, "Provided password: {0}", password);
+				}
 
 				var result = SecuritySystem.ServerJoinNetwork(sender, networkID, password);
 
@@ -1828,19 +2293,37 @@ printReport:
 				packet.WriteStringSafely(password);
 				packet.Send(toClient: sender);
 
-				Report(true, MessageType.SecurityNetworkJoin + " packet sent to client " + sender);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to client {1}", MessageType.SecurityNetworkJoin, sender)
+						.Indent()
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID);
+
+					if (!string.IsNullOrWhiteSpace(password))
+						debuggingOutgoing.Report(false, "Provided password: {0}", password);
+				}
 			} else {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int networkID = reader.ReadInt32();
 				string password = reader.ReadStringSafely();
 
-				Report(true, MessageType.SecurityNetworkJoin + " packet received by client " + Main.myPlayer);
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID);
+
+					if (!string.IsNullOrWhiteSpace(password))
+						debugging.Report(false, "Provided password: {0}", password);
+				}
 
 				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Join);
 
 				SecuritySystem.HandleNetworkAccessibilityOnJoin(result, Main.LocalPlayer, networkID, password);
-
-				Report(false, $"  Result: {result}");
 			}
 		}
 
@@ -1854,7 +2337,10 @@ printReport:
 
 			// Check for operator status, and immediately give access in that case
 			if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().hasOp) {
-				Report(true, "Granting immediate access to network due to operator status");
+				using var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingWork.IsDebugging)
+					debuggingWork.Report(true, "Local player has Operator status, granting immediate access to network {0}", networkID);
 
 				SecuritySystem.ReportNetworkResult(NetworkActionResult.OperatorForcedSuccess, NetworkReportCategory.Access);
 
@@ -1868,14 +2354,24 @@ printReport:
 			packet.Write(networkID);
 			packet.Send();
 
-			Report(true, MessageType.SecurityNetworkAccessible + " packet sent to the server");
+			using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+			if (debuggingOutgoing.IsDebugging) {
+				debuggingOutgoing
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkAccessible)
+					.Indent()
+					.Report(false, "Network ID: {0}", networkID);
+			}
 		}
 
-		public static void ReceiveSecurityNetworkAccessAttempt(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkAccessAttempt(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				int networkID = reader.ReadInt32();
 
-				Report(true, MessageType.SecurityNetworkAccessible + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingIncoming.IsDebugging)
+					debuggingIncoming.Report(false, "Network ID: {0}", networkID);
 
 				var result = SecuritySystem.ServerAccessNetwork(sender, networkID);
 
@@ -1888,18 +2384,30 @@ printReport:
 				packet.Write(networkID);
 				packet.Send(toClient: sender);
 
-				Report(true, MessageType.SecurityNetworkAccessible + " packet sent to client " + sender);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to client {1}", MessageType.SecurityNetworkAccessible, sender)
+						.Indent()
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID);
+				}
 			} else {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int networkID = reader.ReadInt32();
 
-				Report(true, MessageType.SecurityNetworkAccessible + " packet received by client " + Main.myPlayer);
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID);
+				}
 
 				SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Access);
 
 				SecuritySystem.HandleNetworkAccessibilityOnAccess(result, Main.LocalPlayer, networkID);
-
-				Report(false, $"  Result: {result}");
 			}
 		}
 
@@ -1923,9 +2431,27 @@ printReport:
 				packet.Write(newPassword);
 
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkModificationNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkModification)
+					.Indent()
+					.Report(false, "Network ID: {0}", networkID);
+
+				if (newName is not null)
+					debugging.Report(false, "New name: {0}", newName);
+
+				if (newPassword is not null)
+					debugging.Report(false, "New password: {0}", newPassword);
+
+				if (newRestricted.HasValue)
+					debugging.Report(false, "New private status: {0}", newRestricted.Value);
+			}
 		}
 
-		public static void ReceiveSecurityNetworkChange(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkChange(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				int networkID = reader.ReadInt32();
 				BitsByte flags = reader.ReadByte();
@@ -1934,7 +2460,21 @@ printReport:
 				string newPassword = flags[1] ? reader.ReadString() : null;
 				bool? newRestricted = flags[2] ? flags[3] : null;
 
-				Report(true, MessageType.SecurityNetworkModification + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkModificationNetcode);
+
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Network ID: {0}", networkID);
+
+					if (newName is not null)
+						debuggingIncoming.Report(false, "New name: {0}", newName);
+
+					if (newPassword is not null)
+						debuggingIncoming.Report(false, "New password: {0}", newPassword);
+
+					if (newRestricted is bool restricted)
+						debuggingIncoming.Report(false, "New private status: {0}", restricted);
+				}
 
 				var result = SecuritySystem.ServerModifyNetwork(sender, networkID, newName, newPassword, newRestricted, out bool passwordChanged, out bool privacyChanged);
 
@@ -1955,12 +2495,34 @@ printReport:
 				packet.Write((byte)sender);
 				packet.Send();
 
-				Report(true, MessageType.SecurityNetworkModification + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkModificationNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to all clients", MessageType.SecurityNetworkModification)
+						.Indent()
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID)
+						.Report(false, "Password changed: {0}", passwordChanged)
+						.Report(false, "Privacy changed: {0}", privacyChanged)
+						.Report(false, "Requester: {0}", sender);
+				}
 			} else {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int networkID = reader.ReadInt32();
 				BitsByte flags = reader.ReadByte();
 				int requestingPlayer = reader.ReadByte();
+
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkModificationNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Network ID: {0}", networkID)
+						.Report(false, "Password changed: {0}", flags[0])
+						.Report(false, "Privacy changed: {0}", flags[1])
+						.Report(false, "Requester: {0}", requestingPlayer);
+				}
 
 				if (requestingPlayer == Main.myPlayer)
 					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.Modification);
@@ -1968,10 +2530,6 @@ printReport:
 				// If the password or restricted status was changed, the client's authorization status is outdated
 				var network = SecuritySystem.GetNetwork(networkID);
 				SecuritySystem.HandleNetworkAccessibilityOnModification(result, Main.LocalPlayer, network, flags[0] || flags[1], requestingPlayer == Main.myPlayer);
-
-				Report(true, MessageType.SecurityNetworkModification + " packet received by client " + Main.myPlayer);
-
-				Report(false, $"  Result: {result}");
 
 				// Ensure that Administrators always know the password for the network
 				if (flags[0] && Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
@@ -1989,44 +2547,45 @@ printReport:
 			packet.Write((byte)MessageType.RequestSecurityNetworkList);
 			packet.Send();
 
-			Report(true, MessageType.RequestSecurityNetworkList + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Sent packet {0} to the server", MessageType.RequestSecurityNetworkList);
 		}
 
-		public static void ReceiveSecurityNetworkList(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityNetworkList(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
-				Report(true, MessageType.RequestSecurityNetworkList + " packet received by server from client " + sender);
-
 				// Inform the client of the result
 				ModPacket packet = MagicStorageMod.Instance.GetPacket();
 				packet.Write((byte)MessageType.RequestSecurityNetworkList);
 				SecuritySystem.SyncClientNetworkViews(packet);
 				packet.Send(sender);
 
-				if (sender == -1)
-					Report(true, MessageType.RequestSecurityNetworkList + " packet sent to all clients");
-				else
-					Report(true, MessageType.RequestSecurityNetworkList + " packet sent to client " + sender);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to client {1}", MessageType.RequestSecurityNetworkList, sender)
+						.Indent()
+						.Report(false, "Number of networks sent: {0}", SecuritySystem.NetworkCount);
+				}
 			} else {
 				SecuritySystem.ReceiveClientNetworkViews(reader);
 
-				ReportNetworkList();
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
 
-				Report(false, MessageType.RequestSecurityNetworkList + " packet received by client " + Main.myPlayer);
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Security list updated with {0} networks:", SecuritySystem.NetworkCount)
+						.Indent();
+
+					foreach (var network in SecuritySystem.GetNetworks())
+						debugging.Report(false, "{0} (ID: {1})", network.name, network.id);
+				}
 			}
 		}
 
-		[Conditional("NETPLAY")]
-		private static void ReportNetworkList() {
-			var networks = SecuritySystem.GetNetworks().ToList();
-
-			StringBuilder sb = new($"Security list updated with {networks.Count} networks:\n");
-			foreach (var network in networks)
-				sb.Append("  ").Append(network.name).Append(" (ID: ").Append(network.id).AppendLine(")");
-
-			Report(true, sb.ToString());
-		}
-
-		public static void ReceiveSecurityPlayerSync(BinaryReader reader, int sender) {
+		private static void ReceiveSecurityPlayerSync(BinaryReader reader, int sender) {
 			byte plr = reader.ReadByte();
 			SecurityPlayer mp = Main.player[plr].GetModPlayer<SecurityPlayer>();
 			mp.ReceiveSync(reader);
@@ -2049,20 +2608,33 @@ printReport:
 
 			packet.Send();
 
-			Report(true, MessageType.StorageHeartNetwork + " packet sent to all clients");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to all clients", MessageType.StorageHeartNetwork)
+					.Indent()
+					.Report(false, "Component position: {0}", component.Position.DebugString())
+					.Report(false, "Assigned network ID: {0}", component.assignedNetwork);
+			}
 		}
 
-		public static void ReceiveStorageComponentNetwork(BinaryReader reader, int sender) {
+		private static void ReceiveStorageComponentNetwork(BinaryReader reader, int sender) {
 			Point16 componentPosition = reader.ReadPoint16();
 			int networkID = reader.ReadInt32();
 
-			if (TileEntity.ByPosition.TryGetValue(componentPosition, out TileEntity te) && te is TEStorageComponent component)
-				component.assignedNetwork = networkID;
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
 
-			if (Main.netMode == NetmodeID.Server) {
-				Report(true, MessageType.StorageHeartNetwork + " packet received by server from client " + sender);
-				return;
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read component position: {0}", componentPosition.DebugString())
+					.Report(false, "Read assigned network ID: {0}", networkID);
 			}
+
+			if (!TryGetEntityFromLocation(MessageType.StorageHeartNetwork, componentPosition, out TEStorageComponent component))
+				return;
+
+			component.assignedNetwork = networkID;
 
 			// Checking for the security UI shouldn't be necessary, since components will set to a network either
 			//   via the heart (which is handled by another netcode packet) or when destroying the heart (which would
@@ -2075,24 +2647,41 @@ printReport:
 				SecuritySystem.clientListDirty = true;
 			}
 			*/
-
-			Report(true, $"Component at position {componentPosition} was assigned to network {networkID}");
-
-			Report(false, MessageType.StorageHeartNetwork + " packet received by client " + Main.myPlayer);
 		}
 
 		public static void RequestStorageHeartNetworkAssignment(Player player, TEStorageHeart heart, int networkID) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			if (!player.GetModPlayer<OperatorPlayer>().hasOp && !player.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID))
+			if (!player.GetModPlayer<OperatorPlayer>().hasOp && !player.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID)) {
+				using var debuggingPermissions = DebugMessage.CreateIf(DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+				if (debuggingPermissions.IsDebugging) {
+					debuggingPermissions
+						.Report(true, "Current player lacks the permissions to change the assigned network for a Storage Heart")
+						.Indent()
+						.Report(false, "Heart position: {0}", heart.Position.DebugString())
+						.Report(false, "Requested network ID: {0}", networkID);
+				}
+
 				return;
+			}
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.StorageHeartNetworkAssignment);
 			packet.Write(heart.Position);
 			packet.Write(networkID);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.StorageHeartNetworkAssignment)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Requested network ID: {0}", networkID);
+			}
 		}
 
 		public static void ReceiveStorageHeartNetworkAssignmentRequest(BinaryReader reader, int sender) {
@@ -2100,7 +2689,13 @@ printReport:
 				Point16 heartPosition = reader.ReadPoint16();
 				int networkID = reader.ReadInt32();
 
-				Report(true, MessageType.StorageHeartNetworkAssignment + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Read position: {0}", heartPosition.DebugString())
+						.Report(false, "Read network ID: {0}", networkID);
+				}
 
 				NetworkActionResult result = SecuritySystem.ServerAssignNetwork(sender, heartPosition, networkID);
 
@@ -2112,13 +2707,30 @@ printReport:
 				packet.Write(heartPosition);  // The location of the heart needs to be sent again in case the client is viewing its security list
 				packet.Send();
 
-				Report(true, MessageType.StorageHeartNetworkAssignment + " packet sent to all clients");
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to all clients", MessageType.StorageHeartNetworkAssignment)
+						.Indent()
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Requester: {0}", sender)
+						.Report(false, "Heart position: {0}", heartPosition.DebugString())
+						.Report(false, "Requested network ID: {0}", networkID);
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				int requestingPlayer = reader.ReadByte();
 				Point16 heartPosition = reader.ReadPoint16();
 
-				Report(true, $"Attempted to modify security network for Storage Heart at position {heartPosition} by client {requestingPlayer} (result: {result})");
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAssignmentNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Requester: {0}", requestingPlayer)
+						.Report(false, "Read position: {0}", heartPosition.DebugString());
+				}
 
 				if (requestingPlayer == Main.myPlayer)
 					SecuritySystem.ReportNetworkResult(result, NetworkReportCategory.NetworkChange);
@@ -2130,8 +2742,6 @@ printReport:
 					SecuritySystem.clientListDirty = true;
 				}
 				*/
-
-				Report(false, MessageType.StorageHeartNetworkAssignment + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -2142,12 +2752,15 @@ printReport:
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.DefaultAccessibleNetworks);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
+
+			if (debugging.IsDebugging)
+				debugging.Report(true, "Sent packet {0} to the server", MessageType.DefaultAccessibleNetworks);
 		}
 
-		public static void RecieveAccessibleNetworksByDefaultRequest(BinaryReader reader, int sender) {
+		private static void RecieveAccessibleNetworksByDefaultRequest(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
-				Report(true, MessageType.DefaultAccessibleNetworks + " packet received by server from client " + sender);
-
 				NetworkActionResult result = SecuritySystem.ServerDefaultAccessibleNetworks(sender, out var networks);
 
 				// Inform the client of the result
@@ -2174,16 +2787,36 @@ printReport:
 				
 				packet.Send(toClient: sender);
 
-				Report(true, MessageType.DefaultAccessibleNetworks + " packet sent to client " + sender);
+				using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
+
+				if (debugging.IsDebugging) {
+					debugging
+						.Report(true, "Sent packet {0} to client {1}", MessageType.DefaultAccessibleNetworks, sender)
+						.Indent()
+						.Report(false, "Result: {0}", result)
+						.Report(false, "Number of networks sent: {0}", result.IsSuccess() ? networks.Length : 0);
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
+
+				using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkListNetcode);
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Result: {0}", result);
 
 				if (result.IsSuccess()) {
 					SecurityPlayer securityPlayer = Main.LocalPlayer.GetModPlayer<SecurityPlayer>();
 
 					int count = reader.ReadInt32();
 
-					Report(true, count + " networks were available by default" + (count > 0 ? ":" : ""));
+					if (debugging.IsDebugging) {
+						debugging
+							.Report(false, "Number of networks received: {0}", count)
+							.Report(false, "Networks:");
+
+						if (count > 0)
+							debugging.Indent();
+					}
 
 					for (int i = 0; i < count; i++) {
 						int id = reader.ReadInt32();
@@ -2193,13 +2826,14 @@ printReport:
 						if (password is not null) {
 							securityPlayer.RememberPassword(id, password);
 
-							Report(false, "  ID: " + id + ", Password: " + password);
-						} else
-							Report(false, "  ID: " + id);
+							if (debugging.IsDebugging)
+								debugging.Report(false, "ID: {0}, Password: {1}", id, password);
+						} else {
+							if (debugging.IsDebugging)
+								debugging.Report(false, "ID: {0}, Password: <none>", id);
+						}
 					}
 				}
-
-				Report(!result.IsSuccess(), MessageType.DefaultAccessibleNetworks + " packet received by client " + Main.myPlayer);
 			}
 		}
 
@@ -2208,22 +2842,42 @@ printReport:
 				return;
 
 			// Only Administrators can forcibly request the password
-			if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+			if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator) {
+				using var debuggingPermissions = DebugMessage.CreateIf(DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingPermissions.IsDebugging) {
+					debuggingPermissions
+						.Report(true, "Current player is not an Administrator, cannot request password")
+						.Indent()
+						.Report(false, "Requested network ID: {0}", networkID);
+				}
+
 				return;
+			}
 
 			ModPacket packet = MagicStorageMod.Instance.GetPacket();
 			packet.Write((byte)MessageType.SecurityNetworkPassword);
 			packet.Write(networkID);
 			packet.Send();
 
-			Report(true, MessageType.SecurityNetworkPassword + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.SecurityNetworkPassword)
+					.Indent()
+					.Report(false, "Requested network ID: {0}", networkID);
+			}
 		}
 
-		public static void ReceiveNetworkPasswordRequest(BinaryReader reader, int sender) {
+		private static void ReceiveNetworkPasswordRequest(BinaryReader reader, int sender) {
 			if (Main.netMode == NetmodeID.Server) {
 				int networkID = reader.ReadInt32();
 
-				Report(true, MessageType.SecurityNetworkPassword + " packet received by server from client " + sender);
+				using var debuggingIncoming = DebugMessage.CreateIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingIncoming.IsDebugging)
+					debuggingIncoming.Report(false, "Requested network ID: {0}", networkID);
 
 				NetworkActionResult result = SecuritySystem.TryGetPassword(networkID, out string password);
 
@@ -2241,32 +2895,55 @@ printReport:
 				packet.WriteStringSafely(password);
 				packet.Send(toClient: sender);
 
-				Report(true, MessageType.SecurityNetworkPassword + " packet sent to client " + sender);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
+
+				if (debuggingOutgoing.IsDebugging) {
+					debuggingOutgoing
+						.Report(true, "Sent packet {0} to client {1}", MessageType.SecurityNetworkPassword, sender)
+						.Indent()
+						.Report(false, "Result: {0}", result);
+
+					if (result.IsSuccess())
+						debuggingOutgoing.Report(false, "Password: {0}", password ?? "<none>");
+				}
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				int networkID = reader.ReadInt32();
 				NetworkActionResult result = (NetworkActionResult)reader.ReadByte();
 				string password = reader.ReadStringSafely();
 
+				// NOTE: to prevent exploits, the packet messages should only appear if the local player has the Administrator status
+
+				using var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.SecurityNetworkAccessNetcode);
+
 				// Ensure that only Administrators can receive the password
-				if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+				if (!Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator) {
+					if (debuggingWork.IsDebugging)
+						debuggingWork.Report(false, "Local player is not an Administrator, ignoring received password", networkID);
+
 					return;
+				}
 
-				Report(true, MessageType.SecurityNetworkPassword + " packet received by client " + Main.myPlayer);
+				using var debuggingIncoming = DebugMessage.CreateIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.SecurityNetworkAccessNetcode);
 
-				Report(false, $"  Result: {result}");
+				if (debuggingIncoming.IsDebugging) {
+					debuggingIncoming
+						.Report(false, "Requested network ID: {0}", networkID)
+						.Report(false, "Result: {0}", result);
+
+					if (result.IsSuccess())
+						debuggingIncoming.Report(false, "Password: {0}", password ?? "<none>");
+				}
 
 				if (result.IsSuccess()) {
 					SecurityPlayer securityPlayer = Main.LocalPlayer.GetModPlayer<SecurityPlayer>();
 
 					securityPlayer.JoinNetwork(networkID);
 					securityPlayer.RememberPassword(networkID, password);
-
-					Report(false, "  ID: " + networkID + ", Password: " + password);
 				}
 			}
 		}
 
-		public static void ReceivePityDropsPlayerSync(BinaryReader reader, int sender) {
+		private static void ReceivePityDropsPlayerSync(BinaryReader reader, int sender) {
 			byte plr = reader.ReadByte();
 			PityLootDrops mp = Main.player[plr].GetModPlayer<PityLootDrops>();
 			mp.ReceiveSync(reader);
@@ -2289,31 +2966,44 @@ printReport:
 			packet.Write(heart.Position);
 			packet.Send();
 
-			Report(true, MessageType.ClientRequestDepositHistoryChunks + " packet sent to the server");
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHistoryNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to the server", MessageType.ClientRequestDepositHistoryChunks)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString());
+			}
 		}
 
-		public static void ServerReceiveDepositHistoryChunksRequest(BinaryReader reader, int sender) {
+		private static void ServerReceiveDepositHistoryChunksRequest(BinaryReader reader) {
+			Point16 position = reader.ReadPoint16();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHistoryNetcode);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read heart position: {0}", position.DebugString());
+
 			if (Main.netMode != NetmodeID.Server)
 				return;
 
-			Point16 position = reader.ReadPoint16();
-			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
-				return;
-
-			heart.SendDepositHistoryChunks();
-
-			Report(true, MessageType.ClientRequestDepositHistoryChunks + " packet received by server from client " + sender);
+			if (TryGetEntityFromLocation(MessageType.ClientRequestDepositHistoryChunks, position, out TEStorageHeart heart))
+				heart.SendDepositHistoryChunks();
 		}
 
-		public static void ClientReceiveDepositHistoryChunk(BinaryReader reader) {
+		private static void ClientReceiveDepositHistoryChunk(BinaryReader reader) {
+			Point16 position = reader.ReadPoint16();
+
+			using var debugging = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHistoryNetcode);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read heart position: {0}", position.DebugString());
+
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			Point16 position = reader.ReadPoint16();
-			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
-				return;
-
-			heart.ReceiveDepositHistoryChunk(reader);
+			if (TryGetEntityFromLocation(MessageType.ServerResponseDepositHistoryChunks, position, out TEStorageHeart heart))
+				heart.ReceiveDepositHistoryChunk(reader);
 		}
 
 		public static void SendDepositHistoryUpdate(TEStorageHeart heart, int[] additions, int[] removals) {
@@ -2339,12 +3029,20 @@ printReport:
 				packet.Write((byte)0);
 
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.StorageHistoryNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent packet {0} to all clients", MessageType.UpdateDepositHistory)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "New entry count: {0}", additions is null ? 0 : additions.Length)
+					.Report(false, "Removed entry count: {0}", removals is null ? 0 : removals.Length);
+			}
 		}
 
-		public static void ClientReceiveDepositHistoryUpdate(BinaryReader reader) {
-			if (Main.netMode != NetmodeID.MultiplayerClient)
-				return;
-
+		private static void ClientReceiveDepositHistoryUpdate(BinaryReader reader) {
 			Point16 position = reader.ReadPoint16();
 			int additionsCount = reader.Read7BitEncodedInt();
 			
@@ -2365,10 +3063,20 @@ printReport:
 			} else
 				removals = [];
 
-			if (position.ResolveToTileEntity() is not TEStorageHeart heart)
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.StorageHistoryNetcode);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read heart position: {0}", position.DebugString())
+					.Report(false, "New entry count: {0}", additionsCount)
+					.Report(false, "Removed entry count: {0}", removalsCount);
+			}
+
+			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
 
-			heart.UpdateDepositHistory(additions, removals);
+			if (TryGetEntityFromLocation(MessageType.UpdateDepositHistory, position, out TEStorageHeart heart))
+				heart.UpdateDepositHistory(additions, removals);
 		}
 	}
 

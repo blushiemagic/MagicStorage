@@ -1,6 +1,7 @@
 ﻿using MagicStorage.Common.Players;
 using MagicStorage.Common.Systems.Auditing;
 using MagicStorage.Components;
+using MagicStorage.Edits;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -183,6 +184,57 @@ namespace MagicStorage.Common.Systems {
 
 		public static bool CanPlayerAccessImmediately(Player player, int networkID)
 			=> !Main.gameMenu && (networkID < 0 || player.GetModPlayer<OperatorPlayer>().hasOp || (player.GetModPlayer<SecurityPlayer>().HasJoinedNetwork(networkID) && NetworkExists(networkID)));
+
+		public static bool CanPlayerAccessImmediately(Player player, Point16 component) {
+			int x = component.X, y = component.Y;
+			
+			if (!WorldGen.InWorld(x, y))
+				return false;
+
+			// The target tile must be a storage component
+			if (TileLoader.GetTile(Main.tile[x, y].TileType) is not StorageComponent)
+				return false;
+
+			if (Main.tile[x, y].TileFrameX % 36 == 18)
+				x--;
+			if (Main.tile[x, y].TileFrameY % 36 == 18)
+				y--;
+
+			// ... and the component's top-left corner must also be a storage component
+			if (TileLoader.GetTile(Main.tile[x, y].TileType) is not StorageComponent tile)
+				return false;
+
+			// ... and must also have an entity if its tile says so
+			if (tile.GetTileEntity() is null)
+				return true;
+			else if (new Point16(x, y).ResolveToTileEntity() is TEStorageComponent entity)
+				return CanPlayerAccessImmediately(player, entity.assignedNetwork);
+
+			return false;
+		}
+
+		public static bool CanDestroyTile(int x, int y) => CanDestroyTile(new Point16(x, y));
+
+		public static bool CanDestroyTile(Point16 position) {
+			TileNetworkScanner.AdjustComponentCoordinate(ref position);
+
+			return position.ResolveToTileEntity() is not TEStorageComponent component || CanDestroyTile(component);
+		}
+
+		internal static bool CanDestroyTile(TEStorageComponent component) => IsSecureTileMineableFromContext(component) || CanPlayerAccessImmediately(Main.LocalPlayer, component.assignedNetwork);
+
+		internal static bool IsSecureTileMineableFromContext(TEStorageComponent tileEntity) {
+			int miningPlayer = PlayerPickTileListenerDetour.PickTilePlayer;
+			if (miningPlayer >= 0)
+				return CanPlayerAccessImmediately(Main.player[miningPlayer], tileEntity.assignedNetwork);
+
+			int explodingProjectileOwner = ProjectileExplodeTilesListenerDetours.ExplodeTilesPlayer;
+			if (explodingProjectileOwner >= 0)
+				return CanPlayerAccessImmediately(Main.player[explodingProjectileOwner], tileEntity.assignedNetwork);
+
+			// No context available, assume true
+			return true;
+		}
 
 		public static void PrintStorageInaccessible() => Main.NewText(Language.GetText("Mods.MagicStorage.Security.EntityNotAccessible"));
 

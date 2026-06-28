@@ -38,7 +38,7 @@ namespace MagicStorage.Components {
 
 		public bool Enabled(EnvironmentModule module) => Enabled(module.Type);
 
-		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<EnvironmentAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
+		public override bool ValidTile(in Tile tile) => TileLoader.GetTile(tile.TileType) is EnvironmentAccess && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override void SaveData(TagCompound tag) {
 			base.SaveData(tag);

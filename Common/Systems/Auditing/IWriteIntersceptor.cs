@@ -2,6 +2,7 @@
 using System;
 using Terraria.ModLoader;
 using Terraria;
+using MagicStorage.Common.Systems.Debugging;
 
 namespace MagicStorage.Common.Systems.Auditing {
 	internal interface IWriteIntersceptor {
@@ -37,8 +38,19 @@ namespace MagicStorage.Common.Systems.Auditing {
 			// Send a special packet saying that the content has ended
 			InitPacket(AuditSystem.COMMAND_FILE_CONTENT_END);
 			_activePacket.Write((ushort)_currentBuffer);
-			_activePacket.Write(Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path));
+			string worldFile = Path.GetFileNameWithoutExtension(Main.ActiveWorldFileData.Path);
+			_activePacket.Write(worldFile);
 			_activePacket.Send(toClient: _toClient);
+
+			if (DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit command packet {0} to client {1}", AuditSystem.GetByteCommandName(AuditSystem.COMMAND_FILE_CONTENT_END), _toClient);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Request ID: {0}", _requestID);
+				DebugMessage.Report(false, "Buffer Index: {0}", _currentBuffer);
+				DebugMessage.Report(false, "World file name: {0}", worldFile);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		void IWriteIntersceptor.WriteLine() => AddToBuffer(_newline);
@@ -86,6 +98,16 @@ namespace MagicStorage.Common.Systems.Auditing {
 			_activePacket.Write((ushort)_head);
 			_activePacket.Write(_buffer.AsSpan()[.._head]);
 			_activePacket.Send(toClient: _toClient);
+
+			if (DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit command packet {0} to client {1}", AuditSystem.GetByteCommandName(AuditSystem.COMMAND_FILE_CONTENT), _toClient);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Request ID: {0}", _requestID);
+				DebugMessage.Report(false, "Buffer Index: {0}", _currentBuffer);
+				DebugMessage.Report(false, "Written characters: {0}", _head);
+				DebugMessage.EndReportGroup();
+			}
 			
 			// Reset the parameters
 			_activePacket = null;

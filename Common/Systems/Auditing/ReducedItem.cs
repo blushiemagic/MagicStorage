@@ -8,6 +8,8 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		public ReducedItem WithStack(int stack) => new(Type, stack);
 
+		public string IdentifierAndStack() => Type <= ItemID.None ? "None" : $"{ItemID.Search.GetName(Type)}{(Stack > 1 ? $" ({Stack})" : "")}";
+
 		static string IAlternateAuditSource<ReducedItem, Item, int>.GetName(ReducedItem self) => ItemID.Search.GetName(self.Type);
 
 		static int IAlternateAuditSource<ReducedItem, Item, int>.GetValue(ReducedItem self) => self.Type;

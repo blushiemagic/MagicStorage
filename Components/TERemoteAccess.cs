@@ -24,7 +24,7 @@ namespace MagicStorage.Components
 			set => locator = value;
 		}
 
-		public override bool ValidTile(in Tile tile) => tile.TileType == ModContent.TileType<RemoteAccess>() && tile.TileFrameX == 0 && tile.TileFrameY == 0;
+		public override bool ValidTile(in Tile tile) => TileLoader.GetTile(tile.TileType) is RemoteAccess && tile.TileFrameX == 0 && tile.TileFrameY == 0;
 
 		public override TEStorageHeart GetHeart()
 		{

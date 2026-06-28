@@ -1,4 +1,5 @@
 ﻿using MagicStorage.Common.Players;
+using MagicStorage.Common.Systems.Debugging;
 using MagicStorage.Components;
 using MagicStorage.Items;
 using Microsoft.Xna.Framework;
@@ -62,14 +63,22 @@ namespace MagicStorage.Common.Systems.Auditing {
 			if (Main.netMode != NetmodeID.Server || _loading || _writing || _printing || _clearing || _file is null)
 				return;
 
-			if (_queue.Count > 0)
-				NetHelper.Report(true, $"{_queue.Count} audit entries have been queued, adding to file object now...");
+			bool debug = _queue.Count > 0;
+
+			if (debug) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "[AUDIT] {0} audit entries have been queued, adding to file object now...", _queue.Count);
+				DebugMessage.Indent();
+			}
 
 			while (_queue.TryDequeue(out var entry)) {
 				_file.AddEntry(entry);
 
-				NetHelper.Report(false, $"  {entry.NetRepresentation()}");
+				DebugMessage.Report(false, entry.NetRepresentation());
 			}
+
+			if (debug)
+				DebugMessage.EndReportGroup();
 
 			CheckSave();
 		}
@@ -81,18 +90,35 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		private const int NUM_COMMANDS = 4;
 
-		[Conditional("NETPLAY")]
 		private static void ReportByteCommand(byte msg, int sender) {
-			string name = msg switch {
-				COMMAND_FILE_CONTENT_END => nameof(COMMAND_FILE_CONTENT_END),
-				COMMAND_FILE_CONTENT => nameof(COMMAND_FILE_CONTENT),
-				COMMAND_CLEAR => nameof(COMMAND_CLEAR),
-				COMMAND_TRANSLATE => nameof(COMMAND_TRANSLATE),
-				_ => $"Unknown command {msg}"
-			};
-
-			NetHelper.Report(true, $"Received command {name} ({msg}) from player {sender}");
+			if (TryGetByteCommandName(msg, out string name))
+				DebugMessage.Report(false, "Received command: {0}", name);
+			else
+				DebugMessage.Report(false, "Received unknown command {0}", msg);
 		}
+
+		internal static bool TryGetByteCommandName(byte msg, out string name) {
+			switch (msg) {
+				case COMMAND_FILE_CONTENT_END:
+					name = nameof(COMMAND_FILE_CONTENT_END);
+					return true;
+				case COMMAND_FILE_CONTENT:
+					name = nameof(COMMAND_FILE_CONTENT);
+					return true;
+				case COMMAND_CLEAR:
+					name = nameof(COMMAND_CLEAR);
+					return true;
+				case COMMAND_TRANSLATE:
+					name = nameof(COMMAND_TRANSLATE);
+					return true;
+				default:
+					name = null;
+					return false;
+			}
+		}
+
+		internal static string GetByteCommandName(byte msg)
+			=> TryGetByteCommandName(msg, out string name) ? name : throw new ArgumentOutOfRangeException(nameof(msg), $"Byte command ID ({msg}) was outside the range of expected values");
 
 		internal static void HandlePacket(BinaryReader reader, int sender) {
 			byte msg = reader.ReadByte();
@@ -123,7 +149,14 @@ namespace MagicStorage.Common.Systems.Auditing {
 			AuditAction action = (AuditAction)msg;
 			int playerWhoAmI = reader.ReadByte();
 
-			NetHelper.Report(true, $"Received action {action} ({(byte)action}) from player {sender} with target player {playerWhoAmI}");
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.IncomingNetcodePackets);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Action: {0} ({1})", action, (byte)action)
+					.Report(false, "Actor player: {0}", playerWhoAmI)
+					.Indent();
+			}
 
 			switch (action) {
 				case AuditAction.DepositOne:
@@ -222,13 +255,39 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(item);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemDepositAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.DepositOne)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Item: {0}", item.IdentifierAndStack());
+			}
 		}
 
 		private static void ReceiveItemDepositOne(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemDepositAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", location.DebugString())
+					.Report(false, "Read item: {0}", item.IdentifierAndStack());
+			}
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.DepositOne}", location, out TEStorageHeart heart))
 				ReportItemDeposit(playerWhoAmI, heart, item);
 		}
 
@@ -249,6 +308,20 @@ namespace MagicStorage.Common.Systems.Auditing {
 				packet.Write(item);
 
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemDepositAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.DepositMany)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Item count: {0}", items.Length);
+			}
 		}
 
 		private static void ReceiveItemDepositMany(BinaryReader reader, int playerWhoAmI) {
@@ -259,7 +332,19 @@ namespace MagicStorage.Common.Systems.Auditing {
 			for (int i = 0; i < count; i++)
 				items[i] = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemDepositAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", location.DebugString())
+					.Report(false, "Read item count: {0}", count);
+			}
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.DepositMany}", location, out TEStorageHeart heart))
 				ReportItemDeposit(playerWhoAmI, heart, items);
 		}
 
@@ -276,13 +361,39 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(item);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemWithdrawalAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.WithdrawOne)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Item: {0}", item.IdentifierAndStack());
+			}
 		}
 
 		private static void ReceiveItemWithdrawOne(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemWithdrawalAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", location.DebugString())
+					.Report(false, "Read item: {0}", item.IdentifierAndStack());
+			}
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.WithdrawOne}", location, out TEStorageHeart heart))
 				ReportItemWithdraw(playerWhoAmI, heart, item);
 		}
 
@@ -303,6 +414,20 @@ namespace MagicStorage.Common.Systems.Auditing {
 				packet.Write(item);
 
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemWithdrawalAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.WithdrawMany)
+					.Indent()
+					.Report(false, "Heart position: {0}", heart.Position.DebugString())
+					.Report(false, "Item count: {0}", items.Length);
+			}
 		}
 
 		private static void ReceiveItemWithdrawMany(BinaryReader reader, int playerWhoAmI) {
@@ -313,7 +438,19 @@ namespace MagicStorage.Common.Systems.Auditing {
 			for (int i = 0; i < count; i++)
 				items[i] = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.ItemWithdrawalAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, "Read position: {0}", location.DebugString())
+					.Report(false, "Read item count: {0}", count);
+			}
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.WithdrawMany}", location, out TEStorageHeart heart))
 				ReportItemWithdraw(playerWhoAmI, heart, items);
 		}
 
@@ -327,12 +464,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			var packet = PreparePacket(AuditAction.UnitDeactivate, playerWhoAmI);
 			packet.Write(unit.Position);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.UnitActivationAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.UnitDeactivate)
+					.Indent()
+					.Report(false, "Unit position: (X: {0}, Y: {1})", unit.Position.X, unit.Position.Y);
+			}
 		}
 
 		private static void ReceiveStorageUnitDeactivation(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 
-			if (location.ResolveToTileEntity() is TEStorageUnit unit)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.UnitActivationAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", location.DebugString());
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.UnitDeactivate}", location, out TEStorageUnit unit))
 				ReportStorageUnitDeactivation(playerWhoAmI, unit);
 		}
 
@@ -346,12 +505,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			var packet = PreparePacket(AuditAction.UnitActivate, playerWhoAmI);
 			packet.Write(unit.Position);
 			packet.Send();
+
+			using var debugging = DebugMessage.CreateIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.OutgoingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.UnitActivationAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(true, "Sent audit packet {0} to the server", AuditAction.UnitActivate)
+					.Indent()
+					.Report(false, "Unit position: (X: {0}, Y: {1})", unit.Position.X, unit.Position.Y);
+			}
 		}
 
 		private static void ReceiveStorageUnitActivation(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 
-			if (location.ResolveToTileEntity() is TEStorageUnit unit)
+			using var debugging = DebugMessage.ChainIf(
+				DebugControls.Combine()
+					.Get(DebugControls.Names.IncomingNetcodePackets)
+					.AndAny(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.UnitActivationAuditsNetcode)
+			);
+
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Read position: {0}", location.DebugString());
+
+			if (NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.UnitActivate}", location, out TEStorageUnit unit))
 				ReportStorageUnitActivation(playerWhoAmI, unit);
 		}
 
@@ -363,18 +544,39 @@ namespace MagicStorage.Common.Systems.Auditing {
 		public static void NetReportStorageUnitCoreRemoval(int playerWhoAmI, TEStorageUnit unit, BaseStorageCore core) {
 			if (Main.netMode != NetmodeID.MultiplayerClient)
 				return;
+
 			var packet = PreparePacket(AuditAction.UnitCoreRemove, playerWhoAmI);
 			packet.Write(unit.Position);
 			packet.Write(new ReducedItem(core.Item));
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageCoreAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.UnitCoreRemove);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Unit position: (X: {0}, Y: {1})", unit.Position.X, unit.Position.Y);
+				DebugMessage.Report(false, "Item: {0}", core.Item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveStorageUnitCoreRemoval(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageUnit unit)
-				ReportStorageUnitCoreRemoval(playerWhoAmI, unit, item);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageCoreAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.UnitCoreRemove}", location, out TEStorageUnit unit)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportStorageUnitCoreRemoval(playerWhoAmI, unit, item);
 		}
 
 		public static void ReportStorageUnitCoreInsertion(Player player, TEStorageUnit unit, BaseStorageCore core) => Report(new StorageUnitCoreInsertion(player, unit, core));
@@ -390,14 +592,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(unit.Position);
 			packet.Write(new ReducedItem(core.Item));
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageCoreAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.UnitCoreInsert);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Unit position: (X: {0}, Y: {1})", unit.Position.X, unit.Position.Y);
+				DebugMessage.Report(false, "Item: {0}", core.Item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveStorageUnitCoreInsertion(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageUnit unit)
-				ReportStorageUnitCoreInsertion(playerWhoAmI, unit, item);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageCoreAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.UnitCoreInsert}", location, out TEStorageUnit unit)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportStorageUnitCoreInsertion(playerWhoAmI, unit, item);
 		}
 
 		public static void ReportMassItemSell(Player player, TEStorageHeart heart, int soldItemCount, long totalSellValue) => Report(new StorageControlSellItems(player, heart, soldItemCount, totalSellValue));
@@ -412,6 +634,16 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write7BitEncodedInt(soldItemCount);
 			packet.Write7BitEncodedInt64(totalSellValue);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SellDuplicatesMenuAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.SellItems);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Sold item count: {0}", soldItemCount);
+				DebugMessage.Report(false, "Total sell value: {0} copper coins", totalSellValue);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveMassItemSell(BinaryReader reader, int playerWhoAmI) {
@@ -419,8 +651,20 @@ namespace MagicStorage.Common.Systems.Auditing {
 			int soldItemCount = reader.Read7BitEncodedInt();
 			long totalSellValue = reader.Read7BitEncodedInt64();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportMassItemSell(playerWhoAmI, heart, soldItemCount, totalSellValue);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SellDuplicatesMenuAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read sold item count: {0}", soldItemCount);
+				DebugMessage.Report(false, "Read total sell value: {0} copper coins", totalSellValue);
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.SellItems}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportMassItemSell(playerWhoAmI, heart, soldItemCount, totalSellValue);
 		}
 
 		public static void ReportItemDeletion(Player player, TEStorageHeart heart, ReducedItem item) => Report(new StorageControlDeleteItem(player, heart, item));
@@ -434,14 +678,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(item);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.DestroyItem);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveItemDeletion(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportItemDeletion(playerWhoAmI, heart, item);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.DestroyItem}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportItemDeletion(playerWhoAmI, heart, item);
 		}
 
 		public static void ReportCraftRequest(Player player, TEStorageHeart heart, Item[] results, Item[] consumedMaterials) => Report(new CraftRequest(player, heart, results, consumedMaterials));
@@ -465,6 +729,16 @@ namespace MagicStorage.Common.Systems.Auditing {
 				packet.Write(item);
 
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CraftRequestAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.CraftRequest);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Results count: {0}", results.Length);
+				DebugMessage.Report(false, "Consumed materials count: {0}", consumedMaterials.Length);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void NetReceiveCraftRequest(BinaryReader reader, int playerWhoAmI) {
@@ -480,8 +754,20 @@ namespace MagicStorage.Common.Systems.Auditing {
 			for (int i = 0; i < materialsCount; i++)
 				materials[i] = reader.ReadReducedItem();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportCraftRequest(playerWhoAmI, heart, results, materials);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CraftRequestAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read results count: {0}", resultsCount);
+				DebugMessage.Report(false, "Read consumed materials count: {0}", materialsCount);
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.CraftRequest}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportCraftRequest(playerWhoAmI, heart, results, materials);
 		}
 
 		public static void ReportControlDeleteUnloadedItems(Player player, TEStorageHeart heart, int itemsAffected) => Report(new StorageControlDeleteUnloadedItems(player, heart, itemsAffected));
@@ -495,14 +781,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write7BitEncodedInt(itemsAffected);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.ControlDeleteUnloadedItems);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Number of affected items: {0}", itemsAffected);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveControlDeleteUnloadedItems(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			int itemsAffected = reader.Read7BitEncodedInt();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportControlDeleteUnloadedItems(playerWhoAmI, heart, itemsAffected);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read number of affected items: {0}", itemsAffected);
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.ControlDeleteUnloadedItems}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportControlDeleteUnloadedItems(playerWhoAmI, heart, itemsAffected);
 		}
 
 		public static void ReportControlDeleteUnloadedData(Player player, TEStorageHeart heart, int itemsAffected) => Report(new StorageControlDeleteUnloadedData(player, heart, itemsAffected));
@@ -516,14 +822,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write7BitEncodedInt(itemsAffected);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.ControlDeleteUnloadedData);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Number of affected items: {0}", itemsAffected);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveControlDeleteUnloadedData(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			int itemsAffected = reader.Read7BitEncodedInt();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportControlDeleteUnloadedData(playerWhoAmI, heart, itemsAffected);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read number of affected items: {0}", itemsAffected);
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.ControlDeleteUnloadedData}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportControlDeleteUnloadedData(playerWhoAmI, heart, itemsAffected);
 		}
 
 		public static void ReportControlCoinCompacting(Player player, TEStorageHeart heart) => Report(new StorageControlCompactCoins(player, heart));
@@ -536,13 +862,28 @@ namespace MagicStorage.Common.Systems.Auditing {
 			var packet = PreparePacket(AuditAction.ControlCompactCoins, playerWhoAmI);
 			packet.Write(heart.Position);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.ControlCompactCoins);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveControlCoinCompacting(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportControlCoinCompacting(playerWhoAmI, heart);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode))
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.ControlCompactCoins}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportControlCoinCompacting(playerWhoAmI, heart);
 		}
 
 		public static void ReportRemoteAccessLink(Player player, TEStorageHeart heart, TERemoteAccess access) => Report(new LinkRemoteAccess(player, heart, access));
@@ -556,14 +897,41 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(access.Position);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.LinkRemoteAccess);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Linking component position: {0}", access.Position.DebugString());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveRemoteAccessLink(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			Point16 accessLocation = reader.ReadPoint16();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart && accessLocation.ResolveToTileEntity() is TERemoteAccess access)
-				ReportRemoteAccessLink(playerWhoAmI, heart, access);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read heart position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read linking component position: {0}", accessLocation.DebugString());
+				DebugMessage.EndReportGroup();
+			}
+
+			var packetSource = $"{MessageType.AuditSystemMessage}.{AuditAction.LinkRemoteAccess}";
+
+			if (!NetHelper.TryGetEntityFromLocation(packetSource, location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation(packetSource, accessLocation, out TERemoteAccess access)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportRemoteAccessLink(playerWhoAmI, heart, access);
 		}
 
 		public static void ReportPortableAccessLink(Player player, TEStorageHeart heart, PortableAccess item) => Report(new LinkPortableAccess(player, heart, item));
@@ -583,6 +951,15 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(item);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.LinkPortableAccess);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		public static void NetReportPortableAccessLink(int playerWhoAmI, TECraftingAccess access, ReducedItem item) {
@@ -593,17 +970,46 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(access.Position);
 			packet.Write(item);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.LinkPortableAccess);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Crafting Interface position: {0}", access.Position.DebugString());
+				DebugMessage.Report(false, "Item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceivePortableAccessLink(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			ReducedItem item = reader.ReadReducedItem();
 
-			var entity = location.ResolveToTileEntity();
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.StorageHeartOperationsAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read item: {0}", item.IdentifierAndStack());
+				DebugMessage.EndReportGroup();
+			}
+
+			var packetSource = $"{MessageType.AuditSystemMessage}.{AuditAction.LinkPortableAccess}";
+
+			if (!NetHelper.TryFindEntity(packetSource, location, out TileEntity entity))
+			{
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
 			if (entity is TEStorageHeart heart)
 				ReportPortableAccessLink(playerWhoAmI, heart, item);
 			else if (entity is TECraftingAccess access)
 				ReportPortableAccessLink(playerWhoAmI, access, item);
+			else {
+				if (DebugControls.Get(DebugControls.Names.InvalidNetcodeValues))
+					NetHelper.PrintInvalidTileEntityReport<TEStorageHeart, TECraftingAccess>(packetSource, entity, location);
+				else
+					NetHelper.PrintBadArgsFallback();
+			}
 		}
 
 		public static void ReportSecurityNetworkAssignment(Player player, TEStorageHeart heart, int assignedNetworkID) => Report(new SecurityNetworkAssignment(player, heart, assignedNetworkID));
@@ -617,14 +1023,34 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(heart.Position);
 			packet.Write(assignedNetworkID);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.SecurityNetworkAssignment);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Heart position: {0}", heart.Position.DebugString());
+				DebugMessage.Report(false, "Assigned network ID: {0}", assignedNetworkID);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveSecurityNetworkAssignment(BinaryReader reader, int playerWhoAmI) {
 			Point16 location = reader.ReadPoint16();
 			int assignedNetworkID = reader.ReadInt32();
 
-			if (location.ResolveToTileEntity() is TEStorageHeart heart)
-				ReportSecurityNetworkAssignment(playerWhoAmI, heart, assignedNetworkID);
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read position: {0}", location.DebugString());
+				DebugMessage.Report(false, "Read network ID: {0}", assignedNetworkID);
+				DebugMessage.EndReportGroup();
+			}
+
+			if (!NetHelper.TryGetEntityFromLocation($"{MessageType.AuditSystemMessage}.{AuditAction.SecurityNetworkAssignment}", location, out TEStorageHeart heart)) {
+				NetHelper.PrintBadArgsFallback();
+				return;
+			}
+
+			ReportSecurityNetworkAssignment(playerWhoAmI, heart, assignedNetworkID);
 		}
 
 		public static void ReportSecurityNetworkModification(Player player, int networkID, string oldPassword, bool oldRestricted, string newPassword, bool newRestricted) => Report(new SecurityNetworkModification(player, networkID, oldPassword, newPassword, oldRestricted, newRestricted));
@@ -653,6 +1079,23 @@ namespace MagicStorage.Common.Systems.Auditing {
 			}
 
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.SecurityNetworkModification);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Network ID: {0}", networkID);
+
+				if (Main.LocalPlayer.GetModPlayer<OperatorPlayer>().IsAdministrator)
+				{
+					DebugMessage.Report(false, "Old password: {0}", oldPassword ?? "<null>");
+					DebugMessage.Report(false, "Old restricted status: {0}", oldRestricted);
+					DebugMessage.Report(false, "New password: {0}", newPassword ?? "<null>");
+					DebugMessage.Report(false, "New restricted status: {0}", newRestricted);
+				}
+
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveSecurityNetworkModification(BinaryReader reader, int playerWhoAmI) {
@@ -669,6 +1112,16 @@ namespace MagicStorage.Common.Systems.Auditing {
 			if (hasNewPassword)
 				newPassword = StringScrambling.Unscramble(reader.ReadBytes(reader.Read7BitEncodedInt()));
 
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read network ID: {0}", networkID);
+				DebugMessage.Report(false, "Read old password: {0}", oldPassword ?? "<null>");
+				DebugMessage.Report(false, "Read old restricted status: {0}", oldRestricted);
+				DebugMessage.Report(false, "Read new password: {0}", newPassword ?? "<null>");
+				DebugMessage.Report(false, "Read new restricted status: {0}", newRestricted);
+				DebugMessage.EndReportGroup();
+			}
+
 			ReportSecurityNetworkModification(playerWhoAmI, networkID, oldPassword, oldRestricted, newPassword, newRestricted);
 		}
 
@@ -682,10 +1135,21 @@ namespace MagicStorage.Common.Systems.Auditing {
 			var packet = PreparePacket(AuditAction.SecurityNetworkDelete, playerWhoAmI);
 			packet.Write(networkID);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.SecurityNetworkDelete);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Network ID: {0}", networkID);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveSecurityNetworkDeletion(BinaryReader reader, int playerWhoAmI) {
 			int networkID = reader.ReadInt32();
+
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode))
+				DebugMessage.Report(false, "Read network ID: {0}", networkID);
 
 			ReportSecurityNetworkDeletion(playerWhoAmI, networkID);
 		}
@@ -700,10 +1164,21 @@ namespace MagicStorage.Common.Systems.Auditing {
 			var packet = PreparePacket(AuditAction.SecurityNetworkJoin, playerWhoAmI);
 			packet.Write(networkID);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.SecurityNetworkJoin);
+				DebugMessage.Indent();
+				DebugMessage.Report(false, "Network ID: {0}", networkID);
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static void ReceiveSecurityNetworkJoin(BinaryReader reader, int playerWhoAmI) {
 			int networkID = reader.ReadInt32();
+
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.SecurityNetworkAuditsNetcode))
+				DebugMessage.Report(false, "Read network ID: {0}", networkID);
 
 			ReportSecurityNetworkJoin(playerWhoAmI, networkID);
 		}
@@ -717,6 +1192,9 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			var packet = PreparePacket(AuditAction.StatusServerAdmin, playerWhoAmI);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode))
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.StatusServerAdmin);
 		}
 
 		private static void ReceiveAdministratorStatusAssignment(BinaryReader reader, int playerWhoAmI) => ReportAdministratorStatusAssignment(playerWhoAmI);
@@ -730,6 +1208,9 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			var packet = PreparePacket(AuditAction.StatusServerOperatorGranted, playerWhoAmI);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode))
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.StatusServerOperatorGranted);
 		}
 
 		private static void ReceiveOperatorStatusAssignment(BinaryReader reader, int playerWhoAmI) => ReportOperatorStatusAssignment(playerWhoAmI);
@@ -743,6 +1224,9 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			var packet = PreparePacket(AuditAction.StatusServerOperatorRemoved, playerWhoAmI);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode))
+				DebugMessage.Report(true, "Sent audit packet {0} to the server", AuditAction.StatusServerOperatorRemoved);
 		}
 
 		private static void ReceiveOperatorStatusRemoval(BinaryReader reader, int playerWhoAmI) => ReportOperatorStatusRemoval(playerWhoAmI);
@@ -802,7 +1286,8 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 		private static void CheckLoad() {
 			if (_file is null && !_loading) {
-				NetHelper.Report(true, "[AUDIT] Audit file not loaded, attempting to load...");
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Audit file is not loaded, attempting to load...");
 
 				_loading = true;
 				new Task(LoadAuditFile, _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
@@ -821,11 +1306,23 @@ namespace MagicStorage.Common.Systems.Auditing {
 			string path = AuditPath;
 			AuditFile file = null;
 
-			NetHelper.Report(true, $"[AUDIT] Loading audit file from: {path}");
+			bool debug = DebugControls.Get(DebugControls.Names.AuditFile);
+
+			if (debug) {
+				DebugMessage.ReserveThreadContext();
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "[AUDIT] Loading audit file from: {0}", path);
+				DebugMessage.Indent();
+				DebugMessage.RememberCurrentGroup();
+			}
 
 			try {
 				if (File.Exists(path)) {
-					NetHelper.Report(false, "[AUDIT] File exists, attempting to load...");
+					if (debug) {
+						DebugMessage.BeginReportGroup();
+						DebugMessage.Report(false, "File exists, attempting to load...");
+						DebugMessage.Indent();
+					}
 
 					// Attempt to load the file
 					using FileStream stream = File.OpenRead(path);
@@ -834,15 +1331,37 @@ namespace MagicStorage.Common.Systems.Auditing {
 					file = new();
 					AuditFile.DeserializeOne(reader, ref file);
 
+					if (debug)
+						DebugMessage.EndReportGroup();
+
 					PrintSuccess("Messages.LoadSuccess", path);
-				} else
-					NetHelper.Report(false, "[AUDIT] File does not exist, skipping load with new AuditFile object");
+				} else {
+					if (debug)
+						DebugMessage.Report(false, "File does not exist, skipping load with new AuditFile object");
+				}
 			} catch when (localSource.IsCancellationRequested) {
 				// File loading was cancelled due to the file being cleared, ignore this exception
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "File loading was cancelled");
+					DebugMessage.RememberCurrentGroup();
+				}
 			} catch (Exception ex) {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "Exception occurred while loading audit file, audit data will be cleared");
+					DebugMessage.RememberCurrentGroup();
+				}
+
 				PrintError("Errors.LoadFailed", ex);
 				file = null;
 			} finally {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.EndReportGroup();
+					DebugMessage.FreeThreadContext();
+				}
+
 				_lastKnownAuditPath = path;
 				_loading = false;
 
@@ -859,7 +1378,8 @@ namespace MagicStorage.Common.Systems.Auditing {
 			DateTime now = DateTime.UtcNow;
 
 			if (_file is not null && !_loading && _file.HasChanges && !_writing && !_printing && now - _lastSaveTime >= SaveInterval) {
-				NetHelper.Report(true, "[AUDIT] Audit file has changes, saving...");
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Audit file has changes, saving...");
 
 				_writing = true;
 				_lastSaveTime = now;
@@ -878,7 +1398,15 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			string oldName = SetCurrentThreadName("MagicStorage Auditing");
 
-			NetHelper.Report(true, $"[AUDIT] Saving audit file to: {_lastKnownAuditPath}");
+			bool debug = DebugControls.Get(DebugControls.Names.AuditFile);
+
+			if (debug) {
+				DebugMessage.ReserveThreadContext();
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "[AUDIT] Saving audit file to: {0}", _lastKnownAuditPath);
+				DebugMessage.Indent();
+				DebugMessage.RememberCurrentGroup();
+			}
 
 			try {
 				using FileStream stream = File.Create(_lastKnownAuditPath);
@@ -889,10 +1417,27 @@ namespace MagicStorage.Common.Systems.Auditing {
 				PrintSuccess("Messages.SaveSuccess", _lastKnownAuditPath);
 			} catch when (localSource.IsCancellationRequested) {
 				// Saving was cancelled due to the file being cleared, ignore this exception
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "File saving was cancelled");
+					DebugMessage.RememberCurrentGroup();
+				}
 			} catch (Exception ex) {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "Exception occurred while saving audit file, any pending changes will be ignored");
+					DebugMessage.RememberCurrentGroup();
+				}
+
 				PrintError("Errors.SaveFailed", ex);
 				_file.ForceNoChanges();
 			} finally {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.EndReportGroup();
+					DebugMessage.FreeThreadContext();
+				}
+
 				_writing = false;
 
 				SetCurrentThreadName(oldName);
@@ -900,20 +1445,33 @@ namespace MagicStorage.Common.Systems.Auditing {
 		}
 
 		public static void TranslateAuditFile() {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
 			if (_file is null && !_printing) {
 				// Force the file to load
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Audit file translation was requested, but the file is not loaded");
+
 				PrintInfo("Messages.TranslationFileNotLoaded");
 
 				_loading = true;
 				_printing = true;
 				new Task(LoadThenPrettifyAuditFile, _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
 			} else if (!_printing) {
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Audit file translation was requested, starting translation...");
+
 				PrintInfo("Messages.TranslationStarted");
 
 				_printing = true;
 				new Task(ServerPrettifyAuditFile, _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
-			} else
+			} else {
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Audit file translation was requested, but a translation is already running");
+
 				PrintError("Errors.TranslationAlreadyRunning");
+			}
 		}
 
 		private static void LoadThenPrettifyAuditFile() {
@@ -937,10 +1495,13 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write(_contentRequest);
 			packet.Send();
 
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode))
+				DebugMessage.Report(true, "Sent audit command packet {0} to the server with request ID {1}", GetByteCommandName(COMMAND_TRANSLATE), _contentRequest);
+
 			Main.NewText(GetLocalizedMessage("Messages.Client.RequestSent"), Color.Yellow);
 		}
 
-		private static void PrettifyAuditFile<T>(in T writer) where T : IWriteIntersceptor {
+		private static bool PrettifyAuditFile<T>(in T writer) where T : IWriteIntersceptor {
 			// Since CancellationTokenSource can only be cancelled once, the variable is reset after cancelling
 			// Copying the reference here allows for monitoring the object even after the variable has been reassigned
 			var localSource = _cancelSource;
@@ -952,7 +1513,15 @@ namespace MagicStorage.Common.Systems.Auditing {
 			while (_loading || _writing || _clearing)
 				Thread.Yield();
 
-			NetHelper.Report(true, $"[AUDIT] Translating audit file to text format to: {alternatePath}");
+			bool debug = DebugControls.Get(DebugControls.Names.AuditFile);
+
+			if (debug) {
+				DebugMessage.ReserveThreadContext();
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(true, "[AUDIT] Starting translation of audit file with {0} entries", _file?.EntryCount ?? 0);
+				DebugMessage.Indent();
+				DebugMessage.RememberCurrentGroup();
+			}
 
 			try {
 				writer.WriteLine("Magic Storage Audit Log");
@@ -961,12 +1530,27 @@ namespace MagicStorage.Common.Systems.Auditing {
 				writer.WriteLine("=========================================================");
 				writer.WriteLine();
 
-				NetHelper.Report(false, $"[AUDIT] Writing {_file.EntryCount} entries...");
+				if (debug) {
+					DebugMessage.Report(false, "Translating entries...");
+					DebugMessage.Indent();
+				}
+
+				int i = 0;
+				string align = null;
+				string format = null;
+
+				if (debug) {
+					align = $"{{0,{_file.EntryCount.ToString().Length}}}";
+					format = $"{align}: {{1}}";
+				}
 
 				foreach (var entry in _file.Entries) {
 					entry.EvaluateParameters();
 
-					NetHelper.Report(false, $"[AUDIT]   {entry.NetRepresentation()}");
+					if (debug) {
+						DebugMessage.Report(false, format, i, entry.NetRepresentation());
+						i++;
+					}
 
 					writer.WriteLine(entry.ToString());
 				}
@@ -975,14 +1559,38 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 				// Translation has finished
 				PrintSuccess("Messages.TranslationSuccess", alternatePath);
+
+				return true;
 			} catch when (localSource.IsCancellationRequested) {
 				// Translating was cancelled due to the file being cleared
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "Audit file translation was cancelled");
+					DebugMessage.RememberCurrentGroup();
+				}
+
 				try {
 					File.Delete(alternatePath);
 				} catch { }
+
+				return false;
 			} catch (Exception ex) {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.Report(true, "Exception occurred while translating audit file, translation failed will not be generated");
+					DebugMessage.RememberCurrentGroup();
+				}
+
 				PrintError("Errors.TranslationFailed", ex);
+
+				return false;
 			} finally {
+				if (debug) {
+					DebugMessage.RecallSavedGroup();
+					DebugMessage.EndReportGroup();
+					DebugMessage.FreeThreadContext();
+				}
+
 				_printing = false;
 
 				SetCurrentThreadName(oldName);
@@ -994,7 +1602,12 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			try {
 				writer = new StreamWriter(_lastKnownAuditPath + ".txt", false, Encoding.UTF8);
-				PrettifyAuditFile(new StreamWriterIntersceptor(writer));
+				bool success = PrettifyAuditFile(new StreamWriterIntersceptor(writer));
+
+				if (success && DebugControls.Get(DebugControls.Names.AuditFile)) {
+					DebugMessage.Report(false, "Translated file is located at: {0}", _lastKnownAuditPath + ".txt");
+					DebugMessage.EndReportGroup();
+				}
 			} finally {
 				writer?.Dispose();
 			}
@@ -1007,13 +1620,25 @@ namespace MagicStorage.Common.Systems.Auditing {
 			string newline = reader.ReadString();
 			int requestID = reader.ReadInt32();
 
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read environment newline: {0}", newline.Replace("\n", "LF").Replace("\r", "CR"));
+				DebugMessage.Report(false, "Read request ID: {0}", requestID);
+				DebugMessage.EndReportGroup();
+			}
+
 			if (_file is not null)
 				new Task(LoadThenNetPrettifyAuditFile, new PacketIntersceptor(8192, newline, sender, requestID), _cancelSource.Token, TaskCreationOptions.LongRunning).Start();
 		}
 
 		private static void LoadThenNetPrettifyAuditFile(object state) {
 			LoadAuditFile();
-			PrettifyAuditFile((PacketIntersceptor)state);
+			bool success = PrettifyAuditFile((PacketIntersceptor)state);
+
+			if (success && DebugControls.Get(DebugControls.Names.AuditFile)) {
+				DebugMessage.Report(false, "Finished translating audit file for network transmission");
+				DebugMessage.EndReportGroup();
+			}
 		}
 
 		private static List<char[]> _contentBuffers;
@@ -1028,16 +1653,27 @@ namespace MagicStorage.Common.Systems.Auditing {
 			int length = reader.ReadUInt16();
 			char[] buffer = reader.ReadChars(length);
 
+			bool debug = NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandsNetcode);
+
 			// Only use the data if no other request has been made since this packet's request
 			if (_contentRequest == incomingRequest) {
+				if (debug) {
+					DebugMessage.BeginReportGroup();
+					DebugMessage.Report(false, "Read request ID: {0}", incomingRequest);
+					DebugMessage.Report(false, "Read buffer index: {0}", bufferIndex);
+					DebugMessage.Report(false, "Read character count: {0}", length);
+					DebugMessage.EndReportGroup();
+				}
+
 				_contentBuffers ??= [];
 
 				while (_contentBuffers.Count <= bufferIndex)
 					_contentBuffers.Add(null);  // Pad the list to ensure the index exists
 
 				_contentBuffers[bufferIndex] = buffer;
-
-				NetHelper.Report(true, $"[AUDIT] Received buffer {bufferIndex} with length {length} for request {incomingRequest}.");
+			} else {
+				if (debug)
+					DebugMessage.Report(false, "Incoming buffer ID ({0}) does not match current request ID ({1}), ignoring buffer", incomingRequest, _contentRequest);
 			}
 		}
 
@@ -1047,6 +1683,13 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			int expectedBuffers = reader.ReadUInt16();
 			string sourceWorldFile = reader.ReadString();
+
+			if (NetHelper.CanDebugIncomingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandsNetcode)) {
+				DebugMessage.BeginReportGroup();
+				DebugMessage.Report(false, "Read expected buffer count: {0}", expectedBuffers);
+				DebugMessage.Report(false, "Read source world file name: {0}", sourceWorldFile);
+				DebugMessage.EndReportGroup();
+			}
 
 			// The buffers have to exist and contain data
 			if (_contentBuffers is null)
@@ -1075,17 +1718,18 @@ namespace MagicStorage.Common.Systems.Auditing {
 		}
 
 		public static void ClearAudits() {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
 			if (!_clearing) {
 				PrintInfo("Messages.ClearingStarted");
+
+				if (DebugControls.Get(DebugControls.Names.AuditFile))
+					DebugMessage.Report(true, "[AUDIT] Clearing audit file...");
 
 				_clearing = true;
 				_cancelSource.Cancel();
 				_cancelSource = new CancellationTokenSource();  // Reassign the source to allow it to be potentially cancelled again
-				
-				if (_file is null) {
-					NetHelper.Report(true, "[AUDIT] Audit file not loaded, forcing file to new AuditFile object...");
-					_file = new();
-				}
 
 				new Task(ClearAuditFile, TaskCreationOptions.LongRunning).Start();
 			} else
@@ -1096,6 +1740,8 @@ namespace MagicStorage.Common.Systems.Auditing {
 			// Wait for any ongoing operations to finish
 			while (_loading || _writing || _printing)
 				Thread.Yield();
+
+			_file ??= new();
 
 			string oldName = SetCurrentThreadName("MagicStorage Auditing");
 
@@ -1125,6 +1771,9 @@ namespace MagicStorage.Common.Systems.Auditing {
 			packet.Write((byte)MessageType.AuditSystemMessage);
 			packet.Write(COMMAND_CLEAR);
 			packet.Send();
+
+			if (NetHelper.CanDebugOutgoingPackets() && DebugControls.Any(DebugControls.Names.AnyAuditsNetcode, DebugControls.Names.CommandAuditsNetcode))
+				DebugMessage.Report(true, "Sent audit command packet {0} to the server", GetByteCommandName(COMMAND_CLEAR));
 
 			_contentBuffers = null;
 			_contentRequest++;

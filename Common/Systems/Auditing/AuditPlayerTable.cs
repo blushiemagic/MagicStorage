@@ -11,7 +11,7 @@ namespace MagicStorage.Common.Systems.Auditing {
 
 			public Entry() { }
 
-			static void IAuditable<Entry>.DeserializeOne<T>(BinaryReader reader, ref T instance) {
+			static void IAuditable<Entry>.DeserializeOne(BinaryReader reader, ref Entry instance) {
 				instance.Guid = new Guid(reader.ReadBytes(16));
 				instance.Name = StringScrambling.Unscramble(reader.ReadBytes(reader.Read7BitEncodedInt()));
 			}
@@ -43,6 +43,12 @@ namespace MagicStorage.Common.Systems.Auditing {
 			static Guid IAuditableEntry<Entry, Player, Guid>.GetKey(Player source) => source.GetModPlayer<SecurityPlayer>().UniqueID;
 
 			static string IAuditableEntry<Entry, Player, Guid>.GetName(Entry self) => self.Name;
+		}
+
+		// NOTE: ref parameters require exact type matches, so this redirect is needed to simplify caller logic
+		public static void DeserializeOne(BinaryReader reader, ref AuditPlayerTable instance) {
+			BaseAuditTable<Player, Guid, Entry> redirect = instance;
+			DeserializeOne(reader, ref redirect);
 		}
 	}
 }

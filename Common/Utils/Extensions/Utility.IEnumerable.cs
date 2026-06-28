@@ -34,5 +34,7 @@ namespace MagicStorage {
 		public static IEnumerable<TileEntity> ResolveTileEntities(this IEnumerable<Point16> positions) => positions.Select(ResolveToTileEntity).OfType<TileEntity>();
 
 		public static IEnumerable<T> ResolveTileEntities<T>(this IEnumerable<Point16> position) where T : TileEntity => position.Select(ResolveToTileEntity).OfType<T>();
+
+		public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T> @this) where T : class => @this.Where(static x => x is not null);
 	}
 }

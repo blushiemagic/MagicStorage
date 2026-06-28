@@ -1,4 +1,5 @@
-﻿using MagicStorage.CrossMod;
+﻿using MagicStorage.Common.Systems.Debugging;
+using MagicStorage.CrossMod;
 using MagicStorage.CrossMod.Control;
 using MagicStorage.CrossMod.Storage;
 using SerousCommonLib.API.Helpers;
@@ -21,16 +22,18 @@ namespace MagicStorage {
 		public static readonly Condition HasCampfire = new(Language.GetText("Mods.MagicStorage.CookedMarshmallowCondition"), () => CraftingGUI.Campfire);
 
 		public UIOptionConfigurationManager optionsConfig;
+		internal DebuggingConfigurationManager debugConfig;
 
 		public MagicStorageMod() {
 			PreJITFilter = new CheckModBuildVersionBeforeJIT();
 			CheckModBuildVersionBeforeJIT.Mod = this;
 		}
 
-		internal const string build144Version = "2023.8";
-
 		public override void Load()
 		{
+			debugConfig = new();
+			debugConfig.LoadConfigurations();
+
 			UsingPrivateBeta = DisplayName.Contains("BETA");
 
 			LocalizationHelper.ForceLoadModHJsonLocalization(this);
@@ -57,6 +60,7 @@ namespace MagicStorage {
 			FilteringOptionLoader.Unload();
 
 			optionsConfig = null;
+			debugConfig = null;
 
 			CheckModBuildVersionBeforeJIT.Mod = null;
 			CheckModBuildVersionBeforeJIT.versionChecked = false;
@@ -70,8 +74,9 @@ namespace MagicStorage {
 
 			SortingOptionLoader.InitializeOrder();
 			FilteringOptionLoader.InitializeOrder();
-			StorageUnitTierLoader.PostSetupContent();
 			StorageTierModifierLoader.PostSetupContent();
+			// NOTE: StorageTierModifier will not work properly after this call, hence why its loader's method is called first
+			StorageUnitTierLoader.PostSetupContent();
 		}
 
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {

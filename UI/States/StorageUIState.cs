@@ -797,26 +797,10 @@ namespace MagicStorage.UI.States {
 					heart.DestroyUnloadedGlobalItemData(out _);
 				});
 
-				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", p => p.bank.item,
-					(p, inv) => {
-						for (int i = 0; i < inv.Length && i < p.bank.item.Length; i++)
-							p.bank.item[i] = inv[i];
-					});
-				InitSubInventoryDepositButton(ref depositFromSafe, "StorageGUI.DepositSafe", p => p.bank2.item,
-					(p, inv) => {
-						for (int i = 0; i < inv.Length && i < p.bank2.item.Length; i++)
-							p.bank2.item[i] = inv[i];
-					});
-				InitSubInventoryDepositButton(ref depositFromForge, "StorageGUI.DepositForge", p => p.bank3.item,
-					(p, inv) => {
-						for (int i = 0; i < inv.Length && i < p.bank3.item.Length; i++)
-							p.bank3.item[i] = inv[i];
-					});
-				InitSubInventoryDepositButton(ref depositFromVault, "StorageGUI.DepositVault", p => p.bank4.item,
-					(p, inv) => {
-						for (int i = 0; i < inv.Length && i < p.bank4.item.Length; i++)
-							p.bank4.item[i] = inv[i];
-					});
+				InitSubInventoryDepositButton(ref depositFromPiggyBank, "StorageGUI.DepositPiggyBank", PlayerInventoryTeller.PiggyBank);
+				InitSubInventoryDepositButton(ref depositFromSafe, "StorageGUI.DepositSafe", PlayerInventoryTeller.Safe);
+				InitSubInventoryDepositButton(ref depositFromForge, "StorageGUI.DepositForge", PlayerInventoryTeller.DefendersForge);
+				InitSubInventoryDepositButton(ref depositFromVault, "StorageGUI.DepositVault", PlayerInventoryTeller.VoidVault);
 
 				setItemDeletionMode.SetPadding(0);
 				setItemDeletionMode.Width.Set(setItemDeletionMode.Text.MinWidth.Pixels + 30, 0);
@@ -1023,11 +1007,8 @@ namespace MagicStorage.UI.States {
 				});
 			}
 
-			private void InitSubInventoryDepositButton(ref UIStorageControlDepositPlayerInventoryButton button, string localizationKey, Func<Player, Item[]> getInventory, Action<Player, Item[]> netFunc) {
-				button = new(Language.GetText("Mods.MagicStorage." + localizationKey)) {
-					GetInventory = getInventory,
-					NetReceiveInventoryResult = netFunc
-				};
+			private void InitSubInventoryDepositButton(ref UIStorageControlDepositPlayerInventoryButton button, string localizationKey, int tellerBankID) {
+				button = new(Language.GetText("Mods.MagicStorage." + localizationKey), tellerBankID);
 
 				button.OnLeftClick += static (evt, e) => SoundEngine.PlaySound(SoundID.MenuTick);
 
