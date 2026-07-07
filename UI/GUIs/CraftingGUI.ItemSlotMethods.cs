@@ -41,21 +41,21 @@ namespace MagicStorage {
 			if (ProcessGroupsForText(selectedRecipe, item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 
+			// OPTIMIZATION: Use itemCounts dictionary for O(1) lookups instead of O(n*m*k*p) nested loops through storageItems
+			// This fixes severe lag when player has multiple stacks of certain items (stone, mud, etc.)
+			
+			int directItemCount = itemCounts.TryGetValue(item.type, out int count) ? count : 0;
+			
 			ClampedArithmetic totalGroupStack = 0;
-			// Local capturing
-			Item i = item;
-			Item storageItem = storageItems.FirstOrDefault(stored => stored.type == i.type) ?? new Item();
-
+			// Calculate recipe group totals by dictionary lookup instead of iterating storageItems
 			foreach (RecipeGroup rec in selectedRecipe.acceptedGroups.Select(index => RecipeGroup.recipeGroups[index])) {
 				if (rec.ContainsItem(item.type)) {
 					foreach (int type in rec.ValidItems) {
-						foreach (Item storedItem in storageItems) {
-							if (storedItem.type == type) {
-								totalGroupStack += storedItem.stack;
+						if (itemCounts.TryGetValue(type, out int groupItemCount)) {
+							totalGroupStack += groupItemCount;
 
-								if (totalGroupStack >= item.stack)
-									goto StopCheckingRecipeGroups;
-							}
+							if (totalGroupStack >= item.stack)
+								goto StopCheckingRecipeGroups;
 						}
 					}
 				}
@@ -64,9 +64,9 @@ namespace MagicStorage {
 			StopCheckingRecipeGroups:
 
 			if (!item.IsAir) {
-				if (storageItem.IsAir && (int)totalGroupStack == 0)
+				if (directItemCount == 0 && (int)totalGroupStack == 0)
 					context = MagicSlotContext.IngredientNotCraftable;
-				else if (storageItem.stack < item.stack && totalGroupStack < item.stack)
+				else if (directItemCount < item.stack && totalGroupStack < item.stack)
 					context = MagicSlotContext.IngredientPartiallyInStock;
 
 				if (context != MagicSlotContext.Normal) {
