@@ -10,9 +10,8 @@ namespace MagicStorage {
 			public StorageViewControls CreateControls() => CreateRefreshThreadControls(MagicUI.craftingUI);
 
 			public RefreshThread CreateThread(StorageViewControls controls) {
-				// Force all recipes to be recalculated
-				if (MagicUI.IgnoreSpecificZoneRefreshing)
-					recipesToRefreshByIndex = null;
+				// Full refresh threads must not inherit a pending partial recipe set.
+				ClearRecipeRefreshOptimizationState();
 
 				var selectionProvider = new SelectionProvider();
 
@@ -25,7 +24,8 @@ namespace MagicStorage {
 						staticResultItemGroupsList: itemGroups,
 						staticResultItemsFromModulesList: sourceItemsFromModules,
 						staticCountsDictionary: itemCounts,
-						staticCountsByPrefixDictionary: itemCountsByPrefix
+						staticCountsByPrefixDictionary: itemCountsByPrefix,
+						staticCountsHash: itemCountsHash
 					),
 					mainZoneControls: new(
 						zoneObjectFilterChoice: MagicUI.craftingUI.GetDefaultPage<CraftingUIState.RecipesPage>().recipeButtons.Choice,
@@ -34,7 +34,7 @@ namespace MagicStorage {
 						configBlacklist: MagicStorageConfig.GlobalRecipeBlacklist
 					),
 					mainZoneResults: new(
-						objectsToRefresh: CollectRefreshingRecipes(),
+						objectsToRefresh: [],
 						staticObjectList: recipes,
 						staticAvailableList: recipeAvailable
 					),
@@ -52,8 +52,7 @@ namespace MagicStorage {
 						staticTable: recipeToAvailableLookup
 					),
 					simulations: new(
-						staticTable: recursionRecipeToAvailableSimulationLookup,
-						cachedSimulation: simulatedCraftForCurrentRecipe
+						staticTable: recursionRecipeToAvailableSimulationLookup
 					),
 					recipeItems: new SingleResultRecipeItemsProvider(
 						staticStoredIngredientsList: storageItems,

@@ -43,7 +43,8 @@ namespace MagicStorage
 			{
 				ModIndexAll => Language.GetTextValue("Mods.MagicStorage.FilterAllMods"),
 				ModIndexBaseGame => "Terraria",
-				_ => MagicCache.AllMods[index].Name
+				_ when (uint)index < (uint)MagicCache.AllMods.Length => MagicCache.AllMods[index].Name,
+				_ => Language.GetTextValue("Mods.MagicStorage.FilterAllMods")
 			};
 		}
 

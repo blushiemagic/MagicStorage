@@ -300,8 +300,6 @@ namespace MagicStorage.UI.States {
 						NetHelper.RequestStorageDepositHistoryChunks(heart);
 				}
 
-				MagicUI.CheckRefresh();
-
 				if (!Main.mouseRight)
 					StorageGUI.ResetSlotFocus();
 

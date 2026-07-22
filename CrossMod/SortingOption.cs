@@ -10,15 +10,31 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
+	/// <summary>
+	/// Defines a storage UI item sorter that can be registered by Magic Storage or by another mod.
+	/// </summary>
 	public abstract partial class SortingOption : ModTexturedType, ILocalizedModType {
+		/// <summary>
+		/// Gets the loader-assigned numeric identifier for this sorting option.
+		/// </summary>
 		public int Type { get; private set; }
 
+		/// <inheritdoc/>
 		public string LocalizationCategory => "SortingOption";
 
+		/// <summary>
+		/// Gets the localized tooltip shown while hovering this option in the UI.
+		/// </summary>
 		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
 
+		/// <summary>
+		/// Gets the texture asset used for this option button.
+		/// </summary>
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
+		/// <summary>
+		/// Gets the comparer used to order matching items.
+		/// </summary>
 		public abstract IComparer<Item> Sorter { get; }
 
 		/// <summary>
@@ -37,12 +53,14 @@ namespace MagicStorage.CrossMod {
 		/// </summary>
 		public virtual bool SortInDescendingOrder => false;
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<SortingOption>.Register(this);
 
 			Type = SortingOptionLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
 
@@ -50,6 +68,9 @@ namespace MagicStorage.CrossMod {
 			_ = Tooltip;
 		}
 
+		/// <summary>
+		/// Gets whether this option is currently visible in the option list.
+		/// </summary>
 		public bool Visible { get; private set; } = true;
 
 		/// <summary>
@@ -60,11 +81,20 @@ namespace MagicStorage.CrossMod {
 		public virtual void OnSelected(NewUIButtonChoice source, int choiceIndex) { }
 
 		private readonly List<SortingOption> childrenBefore = new();
+		/// <summary>
+		/// Gets options that should be placed before this option after ordering is resolved.
+		/// </summary>
 		public IReadOnlyList<SortingOption> ChildrenBefore => childrenBefore;
 
 		private readonly List<SortingOption> childrenAfter = new();
+		/// <summary>
+		/// Gets options that should be placed after this option after ordering is resolved.
+		/// </summary>
 		public IReadOnlyList<SortingOption> ChildrenAfter => childrenAfter;
 
+		/// <summary>
+		/// Hides this option until visibility is reset from its default visibility rule.
+		/// </summary>
 		public void Hide() => Visible = false;
 
 		internal void AddChildBefore(SortingOption child) => childrenBefore.Add(child);
@@ -76,6 +106,7 @@ namespace MagicStorage.CrossMod {
 		}
 
 		/// <summary> Returns the option's default visibility. This is usually called as an option is read for refreshing logic, but modders can call it too for information. </summary>
+		/// <param name="craftingGUI">Whether the option is being queried for the crafting UI instead of the storage UI.</param>
 		/// <returns> Whether or not this option will be visible by default. Modders can hide options later, if needed.</returns>
 		public virtual bool GetDefaultVisibility(bool craftingGUI) => true;
 
@@ -95,18 +126,31 @@ namespace MagicStorage.CrossMod {
 				child.ResetVisibility(craftingGUI);
 		}
 
+		/// <inheritdoc/>
 		public override string ToString() => Name;
 	}
 
+	/// <summary>
+	/// Runtime wrapper used when one sorting option needs to appear in multiple ordered slots.
+	/// </summary>
 	[Autoload(false)]
 	public class SortingOptionSlot : SortingOption {
+		/// <summary>
+		/// Gets the original sorting option represented by this slot.
+		/// </summary>
 		public SortingOption Option { get; }
+
+		/// <summary>
+		/// Gets the visibility condition for this slot.
+		/// </summary>
 		public Multiple.Condition Condition { get; }
 
+		/// <inheritdoc/>
 		public override IComparer<Item> Sorter => Option.Sorter;
 
 		private readonly int _slot;
 
+		/// <inheritdoc/>
 		public override string Name => $"{Option.Name}_slot{_slot}";
 
 		internal SortingOptionSlot(SortingOption option, Multiple.Condition cond, int slot) {
@@ -116,8 +160,10 @@ namespace MagicStorage.CrossMod {
 			AddChildAfter(Option);
 		}
 
+		/// <inheritdoc/>
 		public override Position GetDefaultPosition() => throw new NotImplementedException();
 
+		/// <inheritdoc/>
 		public override bool GetDefaultVisibility(bool craftingGUI) => Condition(craftingGUI);
 	}
 
@@ -146,28 +192,53 @@ namespace MagicStorage.CrossMod {
 		}
 	}
 
+	/// <summary>
+	/// Provides access to registered sorting options and their resolved UI order.
+	/// </summary>
 	public static class SortingOptionLoader {
+		/// <summary>
+		/// Stores references to Magic Storage's built-in sorting options after they are loaded.
+		/// </summary>
 		public static class Definitions {
+			/// <summary>The built-in default sorter.</summary>
 			public static SortingOption Default { get; internal set; }
+			/// <summary>The built-in item ID sorter.</summary>
 			public static SortingOption ID { get; internal set; }
+			/// <summary>The built-in item name sorter.</summary>
 			public static SortingOption Name { get; internal set; }
+			/// <summary>The built-in item value sorter.</summary>
 			public static SortingOption Value { get; internal set; }
+			/// <summary>The built-in stack quantity sorter.</summary>
 			public static SortingOption Quantity { get; internal set; }
+			/// <summary>The built-in stack fill-ratio sorter.</summary>
 			public static SortingOption QuantityRatio { get; internal set; }
+			/// <summary>The built-in damage sorter.</summary>
 			public static SortingOption Damage { get; internal set; }
 		}
 
 		private static readonly List<SortingOption> options = new();
 		internal static readonly Dictionary<string, HashSet<string>> optionNames = new();
 
+		/// <summary>
+		/// Gets all registered sorting options.
+		/// </summary>
 		public static IReadOnlyList<SortingOption> Options => options.AsReadOnly();
 
 		private static SortingOption[] order;
 
+		/// <summary>
+		/// Gets the resolved sorting option order.
+		/// </summary>
 		public static IReadOnlyList<SortingOption> Order => order;
 
+		/// <summary>
+		/// Gets the currently selected sorting option type.
+		/// </summary>
 		public static int Selected { get; internal set; }
 
+		/// <summary>
+		/// Gets the number of registered sorting options.
+		/// </summary>
 		public static int Count => options.Count;
 
 		internal static int Add(SortingOption option) {
@@ -189,8 +260,16 @@ namespace MagicStorage.CrossMod {
 			return count;
 		}
 
+		/// <summary>
+		/// Gets a registered sorting option by loader index.
+		/// </summary>
+		/// <param name="index">The loader index to query.</param>
+		/// <returns>The matching option, or <see langword="null"/> when <paramref name="index"/> is out of range.</returns>
 		public static SortingOption Get(int index) => index < 0 || index >= options.Count ? null : options[index];
 
+		/// <summary>
+		/// Gets the built-in sorting options shown as the base configurable choices.
+		/// </summary>
 		public static IEnumerable<SortingOption> BaseOptions
 			=> new SortingOption[] {
 				Definitions.Default,
@@ -255,6 +334,11 @@ namespace MagicStorage.CrossMod {
 			order = sort.Sort().ToArray();
 		}
 
+		/// <summary>
+		/// Gets all sorting options after recalculating visibility for the requested UI.
+		/// </summary>
+		/// <param name="craftingGUI">Whether options are being queried for the crafting UI instead of the storage UI.</param>
+		/// <returns>The ordered sorting options.</returns>
 		public static SortingOption[] GetOptions(bool craftingGUI) {
 			foreach (var option in order)
 				option.ResetVisibility(craftingGUI);
@@ -262,6 +346,11 @@ namespace MagicStorage.CrossMod {
 			return order;
 		}
 
+		/// <summary>
+		/// Gets visible sorting options for the requested UI.
+		/// </summary>
+		/// <param name="craftingGUI">Whether options are being queried for the crafting UI instead of the storage UI.</param>
+		/// <returns>The ordered sorting options whose current visibility is enabled.</returns>
 		public static IEnumerable<SortingOption> GetVisibleOptions(bool craftingGUI) => GetOptions(craftingGUI).Where(o => o.Visible);
 	}
 }

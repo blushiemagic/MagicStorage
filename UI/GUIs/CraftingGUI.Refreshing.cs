@@ -5,6 +5,7 @@ using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Sorting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria;
 
@@ -15,6 +16,7 @@ namespace MagicStorage {
 
 		internal static readonly Dictionary<int, int> itemCounts = new();
 		internal static readonly Dictionary<int, Dictionary<int, int>> itemCountsByPrefix = new();
+		internal static readonly StaticValue<int> itemCountsHash = new();
 
 		internal static readonly HashSet<int> isItemInfinite = [];
 		internal static bool allItemsAreInfinite;
@@ -31,9 +33,7 @@ namespace MagicStorage {
 		[Obsolete("Use MagicUI.RefreshItems() instead", error: true)]
 		public static void RefreshItems() => MagicUI.RefreshItems();
 
-		internal static void ResetRefreshCache() {
-			recipesToRefreshByIndex = null;
-		}
+		internal static void ResetRefreshCache() => ClearRecipeRefreshOptimizationState();
 		
 		internal static void RefreshItems_Inner() {
 			// Always reset the cached values
@@ -53,6 +53,7 @@ namespace MagicStorage {
 
 		private static void SortAndFilter(CraftingRefreshThread thread) {
 			LoadItemsAndSetDictionaryInfo(thread);
+			PrepareInventoryCraftabilityGraph(thread, buildIfCacheMiss: true);
 			RefreshStorageItems(thread);
 			RefreshRecipes(thread);
 		}
@@ -61,7 +62,12 @@ namespace MagicStorage {
 		internal static void LoadItemsAndSetDictionaryInfo<T>(T thread)
 			where T : RefreshThread, IStorageItemsPovider, IProcessedStorageItemsProvider
 		{
-			var storage = thread.StorageItems;
+			LoadItemsAndSetDictionaryInfo(thread, thread.StorageItems);
+		}
+
+		internal static void LoadItemsAndSetDictionaryInfo<T>(T thread, StorageItems storage)
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
 			var processed = thread.ProcessedStorageItems;
 
 			// Organize the items from the storage system
@@ -96,7 +102,7 @@ namespace MagicStorage {
 				numModuleItems = moduleItems.Count;
 			}
 
-			SetCountsDictionaries(thread);
+			SetCountsDictionaries(thread, storage.allStoredItems.Concat(processed.allModuleItems ?? []));
 
 			thread.workingItemList = null;
 			thread.workingCounter = 0;
@@ -106,7 +112,19 @@ namespace MagicStorage {
 			NetHelper.Report(false, "Items from modules: " + numModuleItems);
 		}
 
+		internal static void LoadInventoryCountsOnly<T>(T thread, StorageItems storage)
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
+			SetCountsDictionaries(thread, storage.allStoredItems.Concat(thread.ProcessedStorageItems.allModuleItems ?? []));
+		}
+
 		internal static void SetCountsDictionaries<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider
+		{
+			SetCountsDictionaries(thread, thread.ProcessedStorageItems.resultItems.Value);
+		}
+
+		internal static void SetCountsDictionaries<T>(T thread, IEnumerable<Item> sourceItems)
 			where T : RefreshThread, IProcessedStorageItemsProvider
 		{
 			var processed = thread.ProcessedStorageItems;
@@ -116,10 +134,15 @@ namespace MagicStorage {
 
 			itemCounts.Clear();
 			itemCountsByPrefix.Clear();
+			processed.itemCountsHash.Value = 0;
 
-			thread.InitTaskSchedule(processed.resultItems.Count, "Counting Items");
+			int totalItems = sourceItems.TryGetNonEnumeratedCount(out int count) ? count : 0;
+			thread.InitTaskSchedule(totalItems, "Counting Items");
 
-			foreach (Item item in processed.resultItems.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+			foreach (Item item in sourceItems.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+				if (item is not { IsAir: false })
+					continue;
+
 				if (itemCounts.TryGetValue(item.type, out int quantity))
 					itemCounts[item.type] = new ClampedArithmetic(quantity) + item.stack;
 				else
@@ -133,6 +156,8 @@ namespace MagicStorage {
 				} else
 					itemCountsByPrefix[item.type] = new Dictionary<int, int>() { [item.prefix] = item.stack };
 			}
+
+			processed.itemCountsHash.Value = GetCountsHash(itemCounts.Value);
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
@@ -42,7 +43,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			leaves.Clear();
 		}
 
-		public Stack<OrderedRecipeContext> GetProcessingOrder() {
+		public Stack<OrderedRecipeContext> GetProcessingOrder(CancellationToken cancellationToken = default) {
 			if (Invalid)
 				return new();
 
@@ -51,6 +52,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			treeQueue.Enqueue(this);
 
 			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (branch.Invalid)
 					continue;  // Invalid branch
 
@@ -68,7 +71,12 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// Use <see cref="GetProcessingOrder"/> to get the updated order of the recipe contexts.
 		/// </summary>
 		/// <param name="available"></param>
-		public void TrimBranches(AvailableRecipeObjects available) {
+		/// <param name="cancellationToken">The cancellation token for refresh-thread callers.</param>
+		public void TrimBranches(AvailableRecipeObjects available, CancellationToken cancellationToken = default) {
+			TrimBranches(available, cancellationToken, trace: null);
+		}
+
+		internal void TrimBranches(AvailableRecipeObjects available, CancellationToken cancellationToken, ExactCraftingTrace trace) {
 			/*
 			if (!CraftingGUI.disableNetPrintingForIsAvailable)
 				NetHelper.Report(true, "Trimming branches of recipe tree...");
@@ -93,6 +101,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				queue.Enqueue(leaf);
 
 			while (queue.TryDequeue(out OrderedRecipeTree branch)) {
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (branch.Invalid)
 					continue;  // Invalid branch, ignore
 
@@ -114,7 +124,9 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 				count = available.GetTotalIngredientQuantity(parentRecipe, result);
 				Item ingredient = parentRecipe.requiredItem[branch.parentLeafIndex];
-				trimBranch = available.isItemInfinite.Contains(ingredient.type) || count >= ingredient.stack || !available.CanUseRecipe(recipe);
+				int requiredAmount = branch.context.amountToCraft;
+				trimBranch = available.isItemInfinite.Contains(ingredient.type) || count >= requiredAmount || !available.CanUseRecipe(recipe);
+				trace?.Add(branch.context.depth, $"trim-check {DemandPlanningTrace.DescribeRecipe(recipe)} parent={DemandPlanningTrace.DescribeRecipe(parentRecipe)} ingredient={DemandPlanningTrace.DescribeItem(result)} count={count} required={requiredAmount} canUse={available.CanUseRecipe(recipe)} trim={trimBranch}");
 
 				SkipIngredientChecks:
 
@@ -125,12 +137,14 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					*/
 
 					branch.Clear();
+					trace?.Add(branch.context.depth, $"trimmed exact branch {DemandPlanningTrace.DescribeRecipe(recipe)}");
 				} else {
 					SharedCounter remaining = branch.context.amountToCraft;
 
 					remaining -= count;
 
 					remaining.EnsureNotNegative();
+					trace?.Add(branch.context.depth, $"keep exact branch {DemandPlanningTrace.DescribeRecipe(recipe)} remaining={remaining}");
 
 					// Check the leaves
 					foreach (var leaf in branch.Leaves)
@@ -142,7 +156,7 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		/// <summary>
 		/// Returns an enumeration of every recipe used in this recursion tree
 		/// </summary>
-		public IEnumerable<Recipe> GetAllRecipes() {
+		public IEnumerable<Recipe> GetAllRecipes(CancellationToken cancellationToken = default) {
 			if (Invalid)
 				yield break;
 
@@ -151,6 +165,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			treeQueue.Enqueue(this);
 
 			while (treeQueue.TryDequeue(out OrderedRecipeTree branch)) {
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (branch.Invalid || branch.context.amountToCraft <= 0)
 					continue;
 
@@ -172,18 +188,27 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			return GetAllRecipes().Any(r => r.HasCondition(condition));
 		}
 
-		public void GetCraftingInformation(AvailableRecipeObjects available, out CraftResult result) {
+		public void GetCraftingInformation(AvailableRecipeObjects available, out CraftResult result, CancellationToken cancellationToken = default) {
+			GetCraftingInformation(available, out result, cancellationToken, trace: null);
+		}
+
+		internal void GetCraftingInformation(AvailableRecipeObjects available, out CraftResult result, CancellationToken cancellationToken, ExactCraftingTrace trace) {
 			if (Invalid) {
+				trace?.Add(0, "exact result unavailable: invalid tree");
 				result = default;
 				return;
 			}
 
 			// Get the info for one craft, then multiply the contents by how many batches would be needed
-			var recipeStack = GetProcessingOrder();
+			var recipeStack = GetProcessingOrder(cancellationToken);
+			trace?.Add(0, $"exact processing order count={recipeStack.Count}");
 
 			// Check each context in the stack and bail immediately if any were invalid
 			foreach (OrderedRecipeContext context in recipeStack) {
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (context is null) {
+					trace?.Add(0, "exact result unavailable: null context in processing order");
 					result = default;
 					return;
 				}
@@ -214,6 +239,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 			CraftingGUI.DroppedItems ??= new();
 
 			foreach (OrderedRecipeContext context in recipeStack) {
+				cancellationToken.ThrowIfCancellationRequested();
+
 				// Trimmed branch?  Ignore
 				if (context.amountToCraft <= 0)
 					continue;
@@ -221,12 +248,15 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				int ingredientBatches = (int)Math.Ceiling(context.amountToCraft / (double)context.recipe.createItem.stack);
 				
 				Recipe recipe = context.recipe;
+				trace?.Add(context.depth, $"process exact context {DemandPlanningTrace.DescribeRecipe(recipe)} amount={context.amountToCraft} batches={ingredientBatches}");
 
 				if (available is not null && available.creativeUnitPresent)
 					goto SkipIngredientChecks;
 
 				int ingredientIndex = 0;
 				foreach (Item item in recipe.requiredItem) {
+					cancellationToken.ThrowIfCancellationRequested();
+
 					// Consume from the excess results first
 					SharedCounter stack = context.RentIngredientCounter(ingredientIndex, item.stack * ingredientBatches);
 					ingredientIndex++;
@@ -334,6 +364,8 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 				requiredTiles.UnionWith(recipe.requiredTile);
 				requiredConditions.UnionWith(recipe.Conditions);
 			}
+
+			trace?.Add(0, $"exact result materials={materials.Count} excess={excessResults.Count} recipes={recipes.Count}");
 		}
 	}
 }

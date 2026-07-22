@@ -6,18 +6,27 @@ using Terraria.Localization;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Converts a world position to Terraria compass and depth coordinate values.
+		/// </summary>
 		public static void ConvertToGPSCoordinates(Vector2 worldCoordinate, out int compassCoordinate, out int depthCoordinate) {
 			// Copy/paste of logic from the info accessories
 			compassCoordinate = (int)(worldCoordinate.X * 2f / 16f - Main.maxTilesX);
 			depthCoordinate = (int)(worldCoordinate.Y * 2f / 16f - Main.worldSurface * 2.0);
 		}
 
+		/// <summary>
+		/// Converts a tile position to Terraria compass and depth coordinate values.
+		/// </summary>
 		public static void ConvertToGPSCoordinates(Point16 tileCoordinate, out int compassCoordinate, out int depthCoordinate) {
 			// Copy/paste of logic from the info accessories
 			compassCoordinate = (int)(tileCoordinate.X * 2f - Main.maxTilesX);
 			depthCoordinate = (int)(tileCoordinate.Y * 2f - Main.worldSurface * 2.0);
 		}
 
+		/// <summary>
+		/// Converts a world position to localized compass and depth text.
+		/// </summary>
 		public static void ConvertToGPSCoordinates(Vector2 worldCoordinate, out string compassText, out string depthText) {
 			// Copy/paste of logic from the info accessories
 			ConvertToGPSCoordinates(worldCoordinate, out int compass, out int depth);
@@ -25,6 +34,9 @@ namespace MagicStorage {
 			GetGPSText(compass, depth, out compassText, out depthText);
 		}
 
+		/// <summary>
+		/// Converts Terraria compass and depth coordinate values to localized display text.
+		/// </summary>
 		public static void GetGPSText(int compass, int depth, out string compassText, out string depthText) {
 			// Reverse the depth conversion
 			float worldCoordinateY = (float)(depth + Main.worldSurface * 2.0f) / 2f * 16f;

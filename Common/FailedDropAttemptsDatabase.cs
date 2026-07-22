@@ -5,15 +5,24 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace MagicStorage.Common {
+	/// <summary>
+	/// Stores failed drop attempt counts by item type for pity-drop calculations.
+	/// </summary>
 	public class FailedDropAttemptsDatabase {
 		private readonly Dictionary<int, int> _failedAttempts = [];
 		private readonly List<TagCompound> _unloaded = [];
 
+		/// <summary>
+		/// Clears all loaded and unloaded attempt data.
+		/// </summary>
 		public void Clear() {
 			_failedAttempts.Clear();
 			_unloaded.Clear();
 		}
 
+		/// <summary>
+		/// Saves failed drop attempt counts to a tag.
+		/// </summary>
 		public void Save(TagCompound tag) {
 			List<TagCompound> list = [];
 			
@@ -43,6 +52,9 @@ namespace MagicStorage.Common {
 				tag["attemptList"] = list;
 		}
 
+		/// <summary>
+		/// Loads failed drop attempt counts from a tag, preserving entries for unloaded modded items.
+		/// </summary>
 		public void Load(TagCompound tag) {
 			_failedAttempts.Clear();
 			_unloaded.Clear();
@@ -67,6 +79,9 @@ namespace MagicStorage.Common {
 			}
 		}
 
+		/// <summary>
+		/// Writes loaded failed drop attempt counts for network sync.
+		/// </summary>
 		public void NetSend(BinaryWriter writer) {
 			writer.Write(_failedAttempts.Count);
 			foreach (var (type, attempts) in _failedAttempts) {
@@ -75,6 +90,9 @@ namespace MagicStorage.Common {
 			}
 		}
 
+		/// <summary>
+		/// Reads loaded failed drop attempt counts from network sync data.
+		/// </summary>
 		public void NetReceive(BinaryReader reader) {
 			_failedAttempts.Clear();
 
@@ -87,8 +105,14 @@ namespace MagicStorage.Common {
 			}
 		}
 
+		/// <summary>
+		/// Gets the number of consecutive failed drop attempts for an item type.
+		/// </summary>
 		public int GetFailedAttempts(int type) => _failedAttempts.TryGetValue(type, out int attempts) ? attempts : 0;
 
+		/// <summary>
+		/// Records a failed drop attempt for an item type.
+		/// </summary>
 		public void OnFailedDrop(int type) {
 			if (_failedAttempts.TryGetValue(type, out int attempts))
 				_failedAttempts[type] = attempts + 1;
@@ -96,8 +120,14 @@ namespace MagicStorage.Common {
 				_failedAttempts[type] = 1;
 		}
 
+		/// <summary>
+		/// Resets failed drop attempts for an item type after a successful drop.
+		/// </summary>
 		public void OnSuccessfulDrop(int type) => _failedAttempts[type] = 0;
 
+		/// <summary>
+		/// Compares loaded attempt counts with another database.
+		/// </summary>
 		public bool IsEquivalentTo(FailedDropAttemptsDatabase other) {
 			if (_failedAttempts.Count != other._failedAttempts.Count)
 				return false;
@@ -110,6 +140,9 @@ namespace MagicStorage.Common {
 			return true;
 		}
 
+		/// <summary>
+		/// Copies loaded network-synchronized attempt counts to another database.
+		/// </summary>
 		public void NetCopyTo(FailedDropAttemptsDatabase other) {
 			other._failedAttempts.Clear();
 			foreach (var (type, attempts) in _failedAttempts)

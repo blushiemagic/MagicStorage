@@ -9,33 +9,54 @@ namespace MagicStorage.Common.Collections {
 	public class AdjustableCollectionEnumerator<T> : Iterator<T> {
 		private readonly IEnumerable<T> _sourceEnumeration;
 		private readonly int _startingIndex;
-		private readonly List<T> _source;
+		private readonly List<T> _source = [];
 		private int _index;
 
+		/// <summary>
+		/// Gets the current number of buffered items.
+		/// </summary>
 		public int Count => _source is null ? 0 : _source.Count;
 
+		/// <summary>
+		/// Creates an adjustable enumerator starting at the first item.
+		/// </summary>
 		public AdjustableCollectionEnumerator(IEnumerable<T> source) : this(source, 0) { }
 
+		/// <summary>
+		/// Creates an adjustable enumerator starting at <paramref name="startingIndex"/>.
+		/// </summary>
 		public AdjustableCollectionEnumerator(IEnumerable<T> source, int startingIndex) {
 			_sourceEnumeration = source;
 			_startingIndex = startingIndex;
 			_index = -1;
 		}
 
+		/// <summary>
+		/// Appends an item to the end of the buffered collection.
+		/// </summary>
 		public void Append(T item) {
 			_source.Add(item);
 		}
 
+		/// <summary>
+		/// Appends items to the end of the buffered collection.
+		/// </summary>
 		public void AppendRange(IEnumerable<T> items) {
 			ThrowIfInvalidState();
 			_source.AddRange(items);
 		}
 
+		/// <summary>
+		/// Inserts an item immediately after the current enumeration position.
+		/// </summary>
 		public void InsertAfterCurrent(T item) {
 			ThrowIfInvalidState();
 			_source.Insert(_index + 1, item);
 		}
 
+		/// <summary>
+		/// Inserts items immediately after the current enumeration position.
+		/// </summary>
 		public void InsertRangeAfterCurrent(IEnumerable<T> items) {
 			ThrowIfInvalidState();
 			_source.InsertRange(_index + 1, items);
@@ -48,8 +69,10 @@ namespace MagicStorage.Common.Collections {
 				throw new InvalidOperationException("The current operation is invalid because enumeration has not started.");
 		}
 
+		/// <inheritdoc/>
 		public override Iterator<T> Clone() => new AdjustableCollectionEnumerator<T>(_sourceEnumeration, _startingIndex);
 
+		/// <inheritdoc/>
 		public override void Dispose() {
 			_source.Clear();
 			_index = -1;
@@ -57,6 +80,7 @@ namespace MagicStorage.Common.Collections {
 			base.Dispose();
 		}
 
+		/// <inheritdoc/>
 		public override bool MoveNext() {
 			switch (base._state) {
 				case 1:

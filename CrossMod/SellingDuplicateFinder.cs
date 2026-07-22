@@ -8,8 +8,12 @@ namespace MagicStorage.CrossMod {
 	/// This class is used to detect whether an item is a duplicate of another item when selling items via Item Selling Mode in the Storage UI
 	/// </summary>
 	public abstract class SellingDuplicateFinder : ModType, ILocalizedModType {
+		/// <summary>
+		/// The loader-assigned ID of this duplicate finder.
+		/// </summary>
 		public int Type { get; private set; }
 
+		/// <inheritdoc/>
 		public string LocalizationCategory => "SellingDuplicateFinders";
 
 		/// <summary>
@@ -17,12 +21,14 @@ namespace MagicStorage.CrossMod {
 		/// </summary>
 		public virtual LocalizedText Label => this.GetLocalization(nameof(Label), PrettyPrintName);
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<SellingDuplicateFinder>.Register(this);
 
 			Type = SellingDuplicateFinderLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
 

@@ -16,6 +16,12 @@ namespace MagicStorage.Common {
 		private WalkNode _throwingNode;
 		private bool _hasResult;
 
+		/// <summary>
+		/// Creates a checker for directed dependency graphs.
+		/// </summary>
+		/// <param name="areEqual">Compares two items for identity within the graph.</param>
+		/// <param name="getDependencies">Gets direct dependencies for an item.</param>
+		/// <param name="getName">Gets a display name for reporting dependency paths.</param>
 		public CircularDependencyChecker(Func<T, T, bool> areEqual, Func<T, IEnumerable<T>> getDependencies, Func<T, string> getName) {
 			ArgumentNullException.ThrowIfNull(areEqual);
 			ArgumentNullException.ThrowIfNull(getDependencies);

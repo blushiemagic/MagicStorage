@@ -226,7 +226,7 @@ namespace MagicStorage.UI.States {
 
 			// Opening the page will start a full refresh anyway, so this should be skipped
 			if (!base.IsOpening)
-				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModSearchChanged()");
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModSearchChanged()", forceMainZoneRebuild: true);
 		}
 
 		private static readonly LocalizedText[] searchTextDefaults = new[] {
@@ -247,7 +247,7 @@ namespace MagicStorage.UI.States {
 			// Opening the page will start a full refresh anyway, so this should be skipped
 			// Reformatting the page will reassign the option buttons, but the thread should only be started when clicking an option
 			if (!base.IsOpening && !IsReformatting)
-				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigSortingButtonAction()");
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigSortingButtonAction()", forceMainZoneRebuild: true);
 		}
 
 		private void ModernConfigFilteringButtonAction() {
@@ -258,7 +258,7 @@ namespace MagicStorage.UI.States {
 			// Opening the page will start a full refresh anyway, so this should be skipped
 			// Reformatting the page will reassign the option buttons, but the thread should only be started when clicking an option
 			if (!base.IsOpening && !IsReformatting)
-				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigFilteringButtonAction()");
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUIAccessPage.ModernConfigFilteringButtonAction()", forceMainZoneRebuild: true);
 		}
 
 		public abstract void GetZoneDimensions(out float top, out float bottomMargin);

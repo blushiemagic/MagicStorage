@@ -76,6 +76,7 @@ namespace MagicStorage.Common.Systems {
 
 				if (oldType != item.type || oldStack != item.stack) {
 					playSound = true;
+					CraftingGUI.NotifyStorageInventoryChanged(oldType);
 					Chest.VisualizeChestTransfer(depositOrigin, center.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
 				}
 

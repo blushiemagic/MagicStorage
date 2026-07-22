@@ -185,7 +185,7 @@ namespace MagicStorage.Common {
 		/// <summary>
 		/// Copies all resulting aggregated item groups to a target list of groups, in the order they were created.
 		/// </summary>
-		/// <param name="destination"></param>
+		/// <param name="destination">The target list of groups to copy item groups to.</param>
 		public void CopyResultGroupsTo(List<List<Item>> destination) {
 			ArgumentNullException.ThrowIfNull(destination);
 

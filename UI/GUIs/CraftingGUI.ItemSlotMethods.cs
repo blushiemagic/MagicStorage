@@ -41,6 +41,9 @@ namespace MagicStorage {
 			if (ProcessGroupsForText(selectedRecipe, item.type, out string nameOverride))
 				item.SetNameOverride(nameOverride);
 
+			if (!hasCompleteData)
+				return item;
+
 			ClampedArithmetic totalGroupStack = 0;
 			// Local capturing
 			Item i = item;

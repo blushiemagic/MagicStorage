@@ -1,7 +1,5 @@
 ﻿using MagicStorage.Common.Systems;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -25,14 +23,18 @@ namespace MagicStorage {
 				if (MagicStorageConfig.UseOldCraftMenu && Main.keyState.IsKeyDown(Keys.LeftControl))
 					amount = Item.CommonMaxStack;
 
-				Craft(amount);
+				bool crafted = Craft(amount);
 
-				IEnumerable<int> allItemTypes = selectedRecipe.requiredItem.Select(i => i.type).Prepend(selectedRecipe.createItem.type);
+				if (crafted && Main.netMode == NetmodeID.MultiplayerClient) {
+					InvalidateSelectedRecipePreviewAfterInventoryChange();
+					ForceNextRecipeRefreshToBeFull();
+					RequestSelectedRecipeSnapshotForNextRecipeRefresh();
+					PublishSelectedRecipeResultShell();
+					MagicUI.RequestMainZoneThread();
+				}
 
-				//If no recipes were affected, that's fine, none of the recipes will be touched due to the calculated Recipe array being empty
-				SetNextDefaultRecipeCollectionToRefresh(allItemTypes);
-				MagicUI.RequestFullRefresh();
-				SoundEngine.PlaySound(SoundID.Grab);
+				if (crafted)
+					SoundEngine.PlaySound(SoundID.Grab);
 			}
 
 			craftTimer--;
@@ -65,6 +67,9 @@ namespace MagicStorage {
 			int newTarget = craftAmountTarget;
 
 			if (newTarget >= 1 && recipe is not null && recipe.createItem.maxStack != 1 && IsCurrentRecipeAvailable()) {
+				if (newTarget > (amountCraftableForCurrentRecipe ?? 0))
+					amountCraftableForCurrentRecipe = null;
+
 				int amountCraftable = AmountCraftableForCurrentRecipe();
 				int max = Utils.Clamp(amountCraftable, 1, recipe.createItem.maxStack);
 
@@ -78,7 +83,7 @@ namespace MagicStorage {
 
 				// If "selectedRecipe" has changed, then the UI would be refreshed anyway; don't start a new thread
 				if (MagicStorageConfig.IsRecursionEnabled && recipe is not null && object.ReferenceEquals(recipe, selectedRecipe))
-					CreateSelectedRecipeRefreshThread(recipe, newTarget, caller: "CraftingGUI.ClampCraftAmount()")?.Start();
+					StartSelectedRecipeRefreshThread(recipe, newTarget, caller: "CraftingGUI.ClampCraftAmount()");
 			}
 		}
 	}

@@ -7,6 +7,7 @@ using System.Linq;
 using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Common.Threading;
+using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.CrossMod;
 using MagicStorage.Sorting;
 using SerousCommonLib.API.Helpers;
@@ -18,49 +19,6 @@ namespace MagicStorage.Common.Systems;
 
 public class MagicCache : ModSystem
 {
-	public class LazyRecipe : IEnumerable<Recipe> {
-		public readonly int itemType;
-
-		private readonly Lazy<Recipe[]> lazy;
-
-		public LazyRecipe(int itemType) {
-			this.itemType = itemType;
-
-			lazy = new(() => [.. GetRecipes()], isThreadSafe: false);
-		}
-
-		public Recipe[] Value => lazy.Value;
-
-		private IEnumerable<Recipe> GetRecipes() {
-			foreach (Recipe recipe in EnabledRecipes) {
-				if (recipe.createItem.type == itemType) {
-					yield return recipe;
-					continue;
-				}
-
-				foreach (Item requiredItem in recipe.requiredItem) {
-					if (requiredItem.type == itemType) {
-						yield return recipe;
-						continue;
-					}
-				}
-
-				// Check recipe groups
-				foreach (int id in recipe.acceptedGroups) {
-					RecipeGroup group = RecipeGroup.recipeGroups[id];
-					if (group.ContainsItem(itemType)) {
-						yield return recipe;
-						break;
-					}
-				}
-			}
-		}
-
-		public IEnumerator<Recipe> GetEnumerator() => ((IEnumerable<Recipe>)Value).GetEnumerator();
-
-		IEnumerator IEnumerable.GetEnumerator() => Value.GetEnumerator();
-	}
-
 	public class LazyRecipeTile : IEnumerable<Recipe> {
 		public readonly int tileType;
 
@@ -104,7 +62,7 @@ public class MagicCache : ModSystem
 	public static Dictionary<Mod, Recipe[]> RecipesByMod { get; private set; } = null!;
 	public static Recipe[] VanillaRecipes { get; private set; } = null!;
 
-	public static Dictionary<int, LazyRecipe> RecipesUsingItemType { get; private set; } = null!;
+	public static Dictionary<int, Recipe[]> RecipesUsingItemType { get; private set; } = null!;
 
 	public static Dictionary<int, LazyRecipeTile> RecipesUsingTileType { get; private set; } = null!;
 
@@ -122,20 +80,22 @@ public class MagicCache : ModSystem
 
 	public static ShimmerInfo[] ShimmerInfos { get; private set; } = null!;
 
-	public static Dictionary<int, List<Node>> RecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
+	public static Dictionary<int, HashSet<Node>> RecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
-	internal static ConcurrentDictionary<int, List<Node>> concurrentRecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
+	internal static ConcurrentDictionary<int, HashSet<Node>> concurrentRecursiveRecipesUsingRecipeByIndex { get; private set; } = null!;
 
-	private static List<Recipe> blockedRecipeRecursion = null!;
+	public static Dictionary<int, HashSet<int>> DirectRecursiveRecipeParentsByRecipeIndex { get; private set; } = null!;
+
+	internal static ConcurrentDictionary<int, HashSet<int>> concurrentDirectRecursiveRecipeParentsByRecipeIndex { get; private set; } = null!;
+
+	private static HashSet<Recipe> blockedRecipeRecursion = null!;
 
 	public static void BlockRecipeRecursionFor(Recipe recipe) {
-		if (!IsRecipeBlocked(recipe))
-			blockedRecipeRecursion.Add(recipe);
+		blockedRecipeRecursion.Add(recipe);
 	}
 
 	internal static bool IsRecipeBlocked(Recipe recipe) {
-		var comparer = ReferenceEqualityComparer.Instance;
-		return blockedRecipeRecursion.Any(r => comparer.Equals(r, recipe));
+		return blockedRecipeRecursion.Contains(recipe);
 	}
 
 	/// <summary>
@@ -143,6 +103,9 @@ public class MagicCache : ModSystem
 	/// Also forces the active crafting UI to refresh if applicable.
 	/// </summary>
 	public static void RecalculateRecipeCaches() {
+		InventoryCraftabilityGraph.ClearRecipeIndexCache();
+		CraftingGUI.ClearSelectedRecipePreviewCache();
+		RecipeSnapshots.ClearCachedConditions();
 		ModContent.GetInstance<MagicCache>().PostSetupRecipes();
 
 		if (!Main.gameMenu && (MagicUI.IsCraftingUIOpen() || MagicUI.IsDecraftingUIOpen())) {
@@ -153,6 +116,9 @@ public class MagicCache : ModSystem
 
 	public override void Unload()
 	{
+		InventoryCraftabilityGraph.ClearRecipeIndexCache();
+		CraftingGUI.ClearSelectedRecipePreviewCache();
+		RecipeSnapshots.ClearCachedConditions();
 		EnabledRecipes = null!;
 		ItemSamples = null!;
 		ResultToRecipe?.Clear();
@@ -187,12 +153,16 @@ public class MagicCache : ModSystem
 		RecursiveRecipesUsingRecipeByIndex = null!;
 		concurrentRecursiveRecipesUsingRecipeByIndex?.Clear();
 		concurrentRecursiveRecipesUsingRecipeByIndex = null!;
+		DirectRecursiveRecipeParentsByRecipeIndex?.Clear();
+		DirectRecursiveRecipeParentsByRecipeIndex = null!;
+		concurrentDirectRecursiveRecipeParentsByRecipeIndex?.Clear();
+		concurrentDirectRecursiveRecipeParentsByRecipeIndex = null!;
 		blockedRecipeRecursion?.Clear();
 		blockedRecipeRecursion = null!;
 	}
 
 	public override void PostSetupContent() {
-		blockedRecipeRecursion = new();
+		blockedRecipeRecursion = new(ReferenceEqualityComparer.Instance);
 	}
 
 	public override void PostSetupRecipes()
@@ -281,7 +251,7 @@ public class MagicCache : ModSystem
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingItemType");
 
 		// Using ItemSamples here would remove type information, since some samples don't have the same ID as their index into the dictionary
-		RecipesUsingItemType = ContentSamples.ItemsByType.Keys.ToDictionary(key => key, key => new LazyRecipe(key));
+		RecipesUsingItemType = BuildRecipesUsingItemTypeCache();
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("MagicStorage.MagicCache::RecipesUsingTileType");
 
@@ -304,12 +274,15 @@ public class MagicCache : ModSystem
 
 		SetupShimmerCaches();
 
-		concurrentRecursiveRecipesUsingRecipeByIndex = new();
+		concurrentRecursiveRecipesUsingRecipeByIndex = new(Environment.ProcessorCount, EnabledRecipes.Length);
+		concurrentDirectRecursiveRecipeParentsByRecipeIndex = new(Environment.ProcessorCount, EnabledRecipes.Length);
 		ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - 0 / {EnabledRecipes.Length}");
 		WorkManager.ForEach(EnabledRecipes, InitRecursiveTree, ReportRecursiveTreeInitProgress);
 
 		RecursiveRecipesUsingRecipeByIndex = new(concurrentRecursiveRecipesUsingRecipeByIndex);
 		concurrentRecursiveRecipesUsingRecipeByIndex = null!;
+		DirectRecursiveRecipeParentsByRecipeIndex = new(concurrentDirectRecursiveRecipeParentsByRecipeIndex);
+		concurrentDirectRecursiveRecipeParentsByRecipeIndex = null!;
 
 		ModLoadingProgressHelper.SetLoadingSubProgressText("");
 	}
@@ -321,8 +294,41 @@ public class MagicCache : ModSystem
 	}
 
 	private static void ReportRecursiveTreeInitProgress(int currentDone, int total) {
-		// Report the progres
+		// Report the progress
 		ModLoadingProgressHelper.SetLoadingSubProgressText($"MagicStorage.MagicCache::InitRecursiveTrees - {currentDone} / {total}");
+	}
+
+	private static Dictionary<int, Recipe[]> BuildRecipesUsingItemTypeCache() {
+		Dictionary<int, HashSet<Recipe>> lookup = new();
+
+		foreach (Recipe recipe in EnabledRecipes) {
+			AddRecipeUsingItemType(lookup, recipe.createItem.type, recipe);
+
+			foreach (Item requiredItem in recipe.requiredItem)
+				AddRecipeUsingItemType(lookup, requiredItem.type, recipe);
+
+			foreach (int id in recipe.acceptedGroups) {
+				RecipeGroup group = RecipeGroup.recipeGroups[id];
+				foreach (int itemType in group.ValidItems)
+					AddRecipeUsingItemType(lookup, itemType, recipe);
+			}
+		}
+
+		Dictionary<int, Recipe[]> result = new(ContentSamples.ItemsByType.Count);
+		foreach (int itemType in ContentSamples.ItemsByType.Keys) {
+			result[itemType] = lookup.TryGetValue(itemType, out HashSet<Recipe>? recipes)
+				? [.. recipes]
+				: [];
+		}
+
+		return result;
+	}
+
+	private static void AddRecipeUsingItemType(Dictionary<int, HashSet<Recipe>> lookup, int itemType, Recipe recipe) {
+		if (!lookup.TryGetValue(itemType, out HashSet<Recipe>? recipes))
+			lookup[itemType] = recipes = new(ReferenceEqualityComparer.Instance);
+
+		recipes.Add(recipe);
 	}
 
 	private static void SetupSortFilterRecipeCache()

@@ -31,6 +31,11 @@ namespace MagicStorage.UI {
 
 		public int HoverSlot { get; private set; } = -1;
 
+		private int _cachedHoverSlot = -1;
+		private Item _cachedHoverSource;
+		private HoverItemSignature _cachedHoverSignature;
+		private Item _cachedHoverItem;
+
 		public NewUISlotZone(float scale) {
 			inventoryScale = scale;
 		}
@@ -170,7 +175,7 @@ namespace MagicStorage.UI {
 						Item hoverItem = slot.StoredItem;
 
 						if (!hoverItem.IsAir) {
-							Main.HoverItem = hoverItem.Clone();
+							Main.HoverItem = GetHoverItemClone(HoverSlot, hoverItem);
 							MagicUI.mouseText = string.Empty;
 						}
 
@@ -200,6 +205,23 @@ namespace MagicStorage.UI {
 				if (slot >= 0 && slot < NumColumns * NumRows)
 					OnHoverSlotChanged?.Invoke(this, oldSlot, slot);
 			}
+		}
+
+		private Item GetHoverItemClone(int slot, Item source) {
+			HoverItemSignature signature = new(source);
+
+			if (_cachedHoverSlot != slot || !ReferenceEquals(_cachedHoverSource, source) || _cachedHoverSignature != signature) {
+				_cachedHoverSlot = slot;
+				_cachedHoverSource = source;
+				_cachedHoverSignature = signature;
+				_cachedHoverItem = source.Clone();
+			}
+
+			return _cachedHoverItem;
+		}
+
+		private readonly record struct HoverItemSignature(int Type, int Stack, int Prefix, bool Favorited) {
+			public HoverItemSignature(Item item) : this(item.type, item.stack, item.prefix, item.favorited) { }
 		}
 	}
 }

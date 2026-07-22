@@ -7,10 +7,19 @@ using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.ItemDropRules;
 
 namespace MagicStorage.Common.DropRules {
+	/// <summary>
+	/// Wraps a common drop rule so repeated failed rolls increase the chance of a later success.
+	/// </summary>
 	public class PityDropsRule : IItemDropRule {
 		private readonly CommonDrop _wrappedRule;
+		/// <summary>
+		/// Multiplier applied to the failed-attempt count when calculating extra drop attempts.
+		/// </summary>
 		public float strength;
 
+		/// <summary>
+		/// The item type dropped by the wrapped rule.
+		/// </summary>
 		public int Item => _wrappedRule.itemId;
 
 		internal PityDropsRule(CommonDrop wrappedRule, float strength) {
@@ -19,10 +28,13 @@ namespace MagicStorage.Common.DropRules {
 			this.strength = strength;
 		}
 
+		/// <inheritdoc/>
 		public List<IItemDropRuleChainAttempt> ChainedRules { get; } = [];
 
+		/// <inheritdoc/>
 		public bool CanDrop(DropAttemptInfo info) => _wrappedRule.CanDrop(info);
 
+		/// <inheritdoc/>
 		public ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info) {
 			int loops = 1 + (int)(info.player.GetModPlayer<PityLootDrops>().Attempts.GetFailedAttempts(_wrappedRule.itemId) * strength);
 
@@ -54,6 +66,7 @@ namespace MagicStorage.Common.DropRules {
 			return fail;
 		}
 
+		/// <inheritdoc/>
 		public void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
 			// Unfortunately, ReportDroprates is called during mod loading and not gameplay
 			// Hence, rate adjustment has to be done when the corresponding UI elements are created instead
@@ -61,7 +74,13 @@ namespace MagicStorage.Common.DropRules {
 		}
 	}
 
+	/// <summary>
+	/// Helper methods for applying and displaying pity-drop adjustments.
+	/// </summary>
 	public static class PityDropsHandler {
+		/// <summary>
+		/// Wraps a common drop rule with pity-drop behavior.
+		/// </summary>
 		public static IItemDropRule WithPityDrops(this IItemDropRule rule, float strength = 1f) {
 			if (rule is not CommonDrop commonDrop)
 				throw new ArgumentException($"{nameof(WithPityDrops)} can only be used with rules that derive from {typeof(CommonDrop).FullName}", nameof(rule));
@@ -71,6 +90,9 @@ namespace MagicStorage.Common.DropRules {
 			return new PityDropsRule(commonDrop, strength);
 		}
 
+		/// <summary>
+		/// Calculates the effective drop rate after applying failed-attempt pity rolls.
+		/// </summary>
 		public static float GetModifiedRate(Player player, int itemID, float baseRate, float ruleStrength) {
 			ArgumentNullException.ThrowIfNull(player);
 
@@ -83,6 +105,9 @@ namespace MagicStorage.Common.DropRules {
 			return 1 - (float)Math.Pow(1 - X, N);
 		}
 
+		/// <summary>
+		/// Calculates the multiplier between the base rate and pity-adjusted rate.
+		/// </summary>
 		public static float GetRateMultiplier(Player player, int itemID, float baseRate, float ruleStrength) {
 			float modifiedRate = GetModifiedRate(player, itemID, baseRate, ruleStrength);
 

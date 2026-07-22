@@ -307,20 +307,24 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			if (item is not { IsAir: false })
 				return false;
 
-			if (string.IsNullOrEmpty(fullSearchText))
-				return true;
-
 			if (modSearchOption != ModSearchBox.ModIndexAll) {
 				if (modSearchOption == ModSearchBox.ModIndexBaseGame) {
 					// Terraria items
 					if (item.ModItem is not null)
 						return false;
+				} else if ((uint)modSearchOption >= (uint)MagicCache.AllMods.Length) {
+					// Treat stale or corrupted mod indexes as "All Mods" instead of hiding modded content.
 				} else {
 					// Modded items
-					if (!object.ReferenceEquals(item.ModItem.Mod, MagicCache.AllMods[modSearchOption]))
+					if (item.ModItem is null || !object.ReferenceEquals(item.ModItem.Mod, MagicCache.AllMods[modSearchOption]))
 						return false;
 				}
-			} else if (!string.IsNullOrEmpty(modSearchText)) {
+			}
+
+			if (string.IsNullOrEmpty(fullSearchText))
+				return true;
+
+			if (modSearchOption == ModSearchBox.ModIndexAll && !string.IsNullOrEmpty(modSearchText)) {
 				string expectedMod = item.ModItem?.Mod.Name ?? "Terraria";
 				if (!expectedMod.Contains(modSearchText, StringComparison.OrdinalIgnoreCase))
 					return false;

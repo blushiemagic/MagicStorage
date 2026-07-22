@@ -12,11 +12,13 @@ namespace MagicStorage.CrossMod.Storage {
 		/// </summary>
 		public int Type { get; private set; }
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<StorageTierModifier>.Register(this);
 			Type = StorageTierModifierLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() => SetStaticDefaults();
 
 		/// <summary>
@@ -27,6 +29,9 @@ namespace MagicStorage.CrossMod.Storage {
 		public virtual void ModifyUpgradeConnections(StorageUnitTier tier) { }
 	}
 
+	/// <summary>
+	/// Registry and post-setup dispatcher for loaded <see cref="StorageTierModifier"/> instances.
+	/// </summary>
 	public static class StorageTierModifierLoader {
 		private class Loadable : ILoadable {
 			void ILoadable.Load(Mod mod) { }
@@ -37,6 +42,9 @@ namespace MagicStorage.CrossMod.Storage {
 
 		private static readonly List<StorageTierModifier> _modifiers = [];
 
+		/// <summary>
+		/// The number of registered storage tier modifiers.
+		/// </summary>
 		public static int Count => _modifiers.Count;
 
 		internal static int Add(StorageTierModifier modifier) {
@@ -44,6 +52,9 @@ namespace MagicStorage.CrossMod.Storage {
 			return _modifiers.Count - 1;
 		}
 
+		/// <summary>
+		/// Gets the modifier registered for <paramref name="type"/>, or <see langword="null"/> if the ID is outside the registry.
+		/// </summary>
 		public static StorageTierModifier Get(int type) => type < 0 || type >= _modifiers.Count ? null : _modifiers[type];
 
 		internal static void PostSetupContent() {

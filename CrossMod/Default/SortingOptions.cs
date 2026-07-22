@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
+#pragma warning disable CS1591
+// Built-in sorting options are self-describing ModType declarations.  The public extension API is documented in SortingOption.cs.
+
 namespace MagicStorage.CrossMod {
 	[Autoload(false)]
 	public sealed class SortDefault : SortingOption {

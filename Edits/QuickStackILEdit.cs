@@ -153,9 +153,7 @@ namespace MagicStorage.Edits {
 
 			if (success) {
 				if (Main.netMode == NetmodeID.SinglePlayer) {
-					// Refresh the UI since the item was quick stacked
-					if (MagicUI.uiInterface.CurrentState is not null)
-						MagicUI.SetNextCollectionsToRefresh(type);
+					// The local deposit path already notified the crafting UI.
 				} else if (Main.netMode == NetmodeID.Server) {
 					// Inform the client of the quick stack result so that their UI can be refreshed
 					ModPacket packet = MagicStorageMod.Instance.GetPacket();

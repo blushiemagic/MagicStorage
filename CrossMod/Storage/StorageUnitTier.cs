@@ -7,9 +7,21 @@ using Terraria;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod.Storage {
+	/// <summary>
+	/// Describes how full a placed Storage Unit is for tile framing.
+	/// </summary>
 	public enum StorageUnitFullness {
+		/// <summary>
+		/// The Storage Unit has no stored items.
+		/// </summary>
 		Empty,
+		/// <summary>
+		/// The Storage Unit has at least one stored item but still has free slots.
+		/// </summary>
 		PartiallyFull,
+		/// <summary>
+		/// The Storage Unit has no free storage slots.
+		/// </summary>
 		Full
 	}
 
@@ -17,24 +29,51 @@ namespace MagicStorage.CrossMod.Storage {
 	/// The base class containing information about a Storage Unit tier
 	/// </summary>
 	public abstract class StorageUnitTier : ModType, IValidateAtPostSetupContent {
+		/// <summary>
+		/// The built-in basic Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Basic { get; internal set; }
 
+		/// <summary>
+		/// The built-in demonite Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Demonite { get; internal set; }
 
+		/// <summary>
+		/// The built-in crimtane Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Crimtane { get; internal set; }
 
+		/// <summary>
+		/// The built-in hellstone Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Hellstone { get; internal set; }
 
+		/// <summary>
+		/// The built-in hallowed Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Hallowed { get; internal set; }
 
+		/// <summary>
+		/// The built-in blue chlorophyte Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier BlueChlorophyte { get; internal set; }
 
+		/// <summary>
+		/// The built-in luminite Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Luminite { get; internal set; }
 
+		/// <summary>
+		/// The built-in terra Storage Unit tier.
+		/// </summary>
 		public static StorageUnitTier Terra { get; internal set; }
 
 		internal static StorageUnitTier Tiny { get; set; }
 
+		/// <summary>
+		/// The built-in empty Storage Unit tier used when a unit has no storage capacity.
+		/// </summary>
 		public static StorageUnitTier Empty { get; internal set; }
 
 		/// <summary>
@@ -73,11 +112,13 @@ namespace MagicStorage.CrossMod.Storage {
 		/// </summary>
 		public virtual int ItemPlaceStyle => 0;
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<StorageUnitTier>.Register(this);
 			Type = StorageUnitTierLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() => SetStaticDefaults();
 
 		void IValidateAtPostSetupContent.ValidateType() {
@@ -281,6 +322,9 @@ namespace MagicStorage.CrossMod.Storage {
 		public abstract void GetState(int frameX, int frameY, out StorageUnitFullness fullness, out bool active);
 	}
 
+	/// <summary>
+	/// Registry and lookup helpers for loaded <see cref="StorageUnitTier"/> instances.
+	/// </summary>
 	public static class StorageUnitTierLoader {
 		private class Loadable : ILoadable {
 			public void Load(Mod mod) {
@@ -307,6 +351,9 @@ namespace MagicStorage.CrossMod.Storage {
 
 		private static readonly List<StorageUnitTier> _tiers = [];
 
+		/// <summary>
+		/// The number of registered Storage Unit tiers.
+		/// </summary>
 		public static int Count => _tiers.Count;
 
 		internal static int Add(StorageUnitTier upgrade) {
@@ -314,12 +361,18 @@ namespace MagicStorage.CrossMod.Storage {
 			return _tiers.Count - 1;
 		}
 
+		/// <summary>
+		/// Gets the registered tier for <paramref name="type"/>, or <see langword="null"/> if the ID is outside the registry.
+		/// </summary>
 		public static StorageUnitTier Get(int type) => type < 0 || type >= _tiers.Count ? null : _tiers[type];
 
 		internal static void PostSetupContent() {
 			Loading = false;
 		}
 
+		/// <summary>
+		/// Finds the tier represented by a Storage Core item.
+		/// </summary>
 		public static StorageUnitTier FindFromCoreItem(Items.BaseStorageCore core) {
 			ArgumentNullException.ThrowIfNull(core);
 
@@ -331,6 +384,9 @@ namespace MagicStorage.CrossMod.Storage {
 			return null;
 		}
 
+		/// <summary>
+		/// Finds the tier applied by a Storage Unit upgrade item.
+		/// </summary>
 		public static StorageUnitTier FindFromUpgradeItem(Items.BaseStorageUpgradeItem upgradeItem) {
 			ArgumentNullException.ThrowIfNull(upgradeItem);
 
@@ -342,11 +398,17 @@ namespace MagicStorage.CrossMod.Storage {
 			return null;
 		}
 
+		/// <summary>
+		/// Finds the tier represented by the Storage Unit tile at world coordinates <paramref name="x"/> and <paramref name="y"/>.
+		/// </summary>
 		public static StorageUnitTier FindFromTile(int x, int y) {
 			Tile tile = Main.tile[x, y];
 			return FindFromTileFrame(tile.TileType, tile.TileFrameX, tile.TileFrameY);
 		}
 
+		/// <summary>
+		/// Finds the tier represented by a Storage Unit tile type and frame coordinates.
+		/// </summary>
 		public static StorageUnitTier FindFromTileFrame(int type, int frameX, int frameY) {
 			if (TileLoader.GetTile(type) is not Components.StorageUnit)
 				return null;

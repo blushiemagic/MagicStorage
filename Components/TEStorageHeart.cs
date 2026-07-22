@@ -159,7 +159,12 @@ namespace MagicStorage.Components
 
 		public IEnumerable<Item> GetStoredItems()
 		{
-			return GetStorageUnits().SelectMany(storageUnit => storageUnit.GetItems()).Where(static i => !i.IsAir);
+			foreach (TEAbstractStorageUnit storageUnit in GetStorageUnits()) {
+				foreach (Item item in storageUnit.GetItems()) {
+					if (!item.IsAir)
+						yield return item;
+				}
+			}
 		}
 
 		protected override void OnConnectComponent(TEStorageComponent component) {

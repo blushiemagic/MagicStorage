@@ -3,6 +3,7 @@ using Terraria.ID;
 using Terraria;
 using MagicStorage.Common.Systems;
 using MagicStorage.CrossMod;
+using MagicStorage.UI.States;
 
 namespace MagicStorage {
 	partial class CraftingGUI {
@@ -37,6 +38,11 @@ namespace MagicStorage {
 					if (maxRightClickTimer <= 0)
 						maxRightClickTimer = 1;
 					Item withdrawn = DoWithdrawResult(1);
+					if (withdrawn is null || withdrawn.IsAir) {
+						ResetSlotFocus();
+						return;
+					}
+
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = withdrawn;
 					else {
@@ -45,10 +51,11 @@ namespace MagicStorage {
 						Main.mouseItem.stack += withdrawn.stack;
 					}
 
+					CraftingUIState.ConsumeSlotFocusResultPreview(withdrawn.stack);
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					
+					ForceNextRecipeRefreshToBeFull();
 					MagicUI.RequestFullRefresh();
-					SetNextDefaultRecipeCollectionToRefresh(Main.mouseItem.type);
 				}
 
 				rightClickTimer--;
@@ -59,15 +66,15 @@ namespace MagicStorage {
 		{
 			if (!slotFocus
 			|| result is not { IsAir: false }
-			|| !ItemStackSplitting.TickOneSplitOntoMouse(result, (_, stack) => DoWithdrawResult(stack), out bool waitingForNextSplit)
+			|| !ItemStackSplitting.TickOneSplitOntoMouse(result, (_, stack) => DoWithdrawResult(stack), out bool waitingForNextSplit, withdrawn => CraftingUIState.ConsumeSlotFocusResultPreview(withdrawn.stack))
 			|| !waitingForNextSplit)
 			{
 				ResetSlotFocus();
 			}
 			else
 			{
+				ForceNextRecipeRefreshToBeFull();
 				MagicUI.RequestFullRefresh();
-				SetNextDefaultRecipeCollectionToRefresh(Main.mouseItem.type);
 			}
 		}
 
@@ -76,6 +83,7 @@ namespace MagicStorage {
 			slotFocus = false;
 			rightClickTimer = 0;
 			maxRightClickTimer = StartMaxRightClickTimer;
+			CraftingUIState.ClearSlotFocusSourceSlot();
 		}
 	}
 }

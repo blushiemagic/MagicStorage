@@ -12,14 +12,25 @@ namespace MagicStorage {
 	/// A module of information for use in a Storage Configuration Interface. Only one instance is assumed to be active at once.
 	/// </summary>
 	public abstract class EnvironmentModule : ModType, ILocalizedModType {
+		/// <summary>
+		/// The loader-assigned ID of this environment module.
+		/// </summary>
 		public int Type { get; private set; }
 
+		/// <inheritdoc/>
 		public string LocalizationCategory => "EnvironmentModule";
 
+		/// <summary>
+		/// The localized display name shown in the Environment Access UI.
+		/// </summary>
 		public LocalizedText DisplayName => this.GetLocalization(nameof(DisplayName), PrettyPrintName);
 
+		/// <summary>
+		/// The localized tooltip shown when this module is disabled or unavailable.
+		/// </summary>
 		public LocalizedText DisabledTooltip => this.GetLocalization(nameof(DisabledTooltip), GetDisabledTooltipDefault);
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<EnvironmentModule>.Register(this);
 			Type = EnvironmentModuleLoader.Add(this);
@@ -27,10 +38,14 @@ namespace MagicStorage {
 			MagicStorageMod.Instance.Logger.Debug($"EnvironmentModule \"{FullName}\" added by mod \"{Mod.Name}\"");
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
 		}
 
+		/// <summary>
+		/// Gets the fallback disabled tooltip text for environment modules.
+		/// </summary>
 		public static string GetDisabledTooltipDefault() => Language.GetTextValue("Mods.MagicStorage.EnvironmentGUI.EntryDisabledDefault");
 
 		/// <summary>
@@ -58,6 +73,7 @@ namespace MagicStorage {
 		/// <summary>
 		/// Allows you to specify what happens when an item is consumed for a recipe
 		/// </summary>
+		/// <param name="sandbox">The crafting environment sandbox that is consuming the item.</param>
 		/// <param name="item">The original item instance retrieved from <see cref="GetAdditionalItems(EnvironmentSandbox)"/> or the storage system</param>
 		/// <param name="stack">How many items were consumed</param>
 		[Obsolete("Use OnconsumeItemsForRecipe instead", true)]
@@ -66,6 +82,7 @@ namespace MagicStorage {
 		/// <summary>
 		/// Allows you to specify what happens when items are consumed for a recipe
 		/// </summary>
+		/// <param name="sandbox">The crafting environment sandbox that is consuming the items.</param>
 		/// <param name="recipe">The recipe used</param>
 		/// <param name="items">The items consumed for the recipe</param>
 		public virtual void OnConsumeItemsForRecipe(EnvironmentSandbox sandbox, Recipe recipe, List<Item> items) { }
@@ -73,6 +90,7 @@ namespace MagicStorage {
 		/// <summary>
 		/// Allows you to modify how much of an item is consumed when it is used in a recipe
 		/// </summary>
+		/// <param name="sandbox">The crafting environment sandbox used for the recipe.</param>
 		/// <param name="recipe">The recipe used</param>
 		/// <param name="type">The ID of the required item from the recipe</param>
 		/// <param name="stack">The quantity of the item that should be consumed</param>
@@ -109,8 +127,17 @@ namespace MagicStorage {
 		public virtual void PostUpdateUI() { }
 	}
 
+	/// <summary>
+	/// Context passed to environment modules while Magic Storage simulates crafting conditions.
+	/// </summary>
 	public readonly struct EnvironmentSandbox {
+		/// <summary>
+		/// The player whose crafting environment is being simulated.
+		/// </summary>
 		public readonly Player player;
+		/// <summary>
+		/// The storage heart currently providing crafting access, or <see langword="null"/> when no network is active.
+		/// </summary>
 		public readonly TEStorageHeart heart;
 
 		internal EnvironmentSandbox(Player player, TEStorageHeart heart) {
@@ -118,8 +145,14 @@ namespace MagicStorage {
 			this.heart = heart;
 		}
 
+		/// <summary>
+		/// Returns whether the active storage network contains a creative storage unit.
+		/// </summary>
 		public bool HeartHasCreativeUnit() => heart is not null && heart.GetStorageUnits().OfType<TECreativeStorageUnit>().Any();
 
+		/// <summary>
+		/// Loads the item type IDs that should be treated as infinite while crafting in this sandbox.
+		/// </summary>
 		public HashSet<int> LoadInfiniteItems() {
 			var infiniteItems = InfiniteItemsForCrafting.GetInfiniteItems();
 			
@@ -136,8 +169,45 @@ namespace MagicStorage {
 		}
 	}
 
+	/// <summary>
+	/// Snapshot of crafting station, liquid, and biome flags used by recipe availability checks.
+	/// </summary>
 	public struct CraftingInformation {
-		public bool campfire, snow, graveyard, water, lava, honey, alchemyTable, shimmer;
+		/// <summary>
+		/// Whether campfire crafting conditions are active.
+		/// </summary>
+		public bool campfire;
+		/// <summary>
+		/// Whether snow biome crafting conditions are active.
+		/// </summary>
+		public bool snow;
+		/// <summary>
+		/// Whether graveyard biome crafting conditions are active.
+		/// </summary>
+		public bool graveyard;
+		/// <summary>
+		/// Whether water crafting conditions are active.
+		/// </summary>
+		public bool water;
+		/// <summary>
+		/// Whether lava crafting conditions are active.
+		/// </summary>
+		public bool lava;
+		/// <summary>
+		/// Whether honey crafting conditions are active.
+		/// </summary>
+		public bool honey;
+		/// <summary>
+		/// Whether alchemy table crafting conditions are active.
+		/// </summary>
+		public bool alchemyTable;
+		/// <summary>
+		/// Whether shimmer crafting conditions are active.
+		/// </summary>
+		public bool shimmer;
+		/// <summary>
+		/// The active adjacent tile flags indexed by tile type.
+		/// </summary>
 		public bool[] adjTiles;
 
 		internal CraftingInformation(bool campfire, bool snow, bool graveyard, bool water, bool lava, bool honey, bool alchemyTable, bool shimmer, bool[] adjTiles) {
@@ -152,6 +222,9 @@ namespace MagicStorage {
 			this.adjTiles = adjTiles;
 		}
 
+		/// <summary>
+		/// Creates a copy of this crafting information, including a cloned adjacent tile array.
+		/// </summary>
 		public CraftingInformation Clone() {
 			return new CraftingInformation(campfire, snow, graveyard, water, lava, honey, alchemyTable, shimmer, (bool[])adjTiles.Clone());
 		}

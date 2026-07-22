@@ -6,6 +6,9 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
+#pragma warning disable CS1591
+// Built-in filtering options are self-describing ModType declarations.  The public extension API is documented in FilteringOption.cs.
+
 namespace MagicStorage.CrossMod {
 	[Autoload(false)]
 	public sealed class FilterAll : FilteringOption {

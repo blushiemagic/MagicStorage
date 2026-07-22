@@ -24,6 +24,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 		public readonly ListProvider<Item> resultItemsFromModules;
 		public readonly DictionaryProvider<int, int> itemCounts;
 		public readonly DictionaryOfDictionariesProvider<int, int, int> itemCountsByPrefix;
+		public readonly IValueProvider<int> itemCountsHash;
 
 		public ProcessedStorageItems(
 			ConditionalWeakTable<Item, object> staticWasModuleItemTable,
@@ -32,7 +33,8 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			List<List<Item>> staticResultItemGroupsList,
 			List<Item> staticResultItemsFromModulesList,
 			Dictionary<int, int> staticCountsDictionary,
-			Dictionary<int, Dictionary<int, int>> staticCountsByPrefixDictionary
+			Dictionary<int, Dictionary<int, int>> staticCountsByPrefixDictionary,
+			StaticValue<int> staticCountsHash
 		) {
 			wasModuleItem = new(staticWasModuleItemTable);
 			moduleItemWasFromInventory = new(staticModuleItemWasFromInventoryTable);
@@ -41,6 +43,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			resultItemsFromModules = new(staticResultItemsFromModulesList);
 			itemCounts = new(staticCountsDictionary);
 			itemCountsByPrefix = new(staticCountsByPrefixDictionary);
+			itemCountsHash = new ValueProvider<int>(staticCountsHash);
 		}
 
 		public void CollectObjects(RefreshThread thread) {
@@ -76,6 +79,13 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			resultItemsFromModules.CopyFromStatic();
 			itemCounts.CopyFromStatic();
 			itemCountsByPrefix.CopyFromStatic();
+			itemCountsHash.CopyFromStatic();
+		}
+
+		public void CopyDisplayCollectionsFromStatic() {
+			resultItems.CopyFromStatic();
+			resultItemGroups.CopyFromStatic();
+			resultItemsFromModules.CopyFromStatic();
 		}
 
 		public void CopyToStaticCollectionsAndFields() {
@@ -86,6 +96,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			resultItemsFromModules.OverwriteStatic();
 			itemCounts.OverwriteStatic();
 			itemCountsByPrefix.OverwriteStatic();
+			itemCountsHash.CopyToStatic();
 		}
 
 		public void ClearStaticCollections() {
@@ -96,6 +107,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			resultItemsFromModules.ClearStatic();
 			itemCounts.ClearStatic();
 			itemCountsByPrefix.ClearStatic();
+			itemCountsHash.ClearStatic();
 		}
 
 		public IModuleItemResolver CreateItemResolver() => new ItemResolver(this);

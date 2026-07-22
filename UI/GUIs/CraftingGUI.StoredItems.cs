@@ -36,6 +36,18 @@ namespace MagicStorage {
 		private static void RefreshStorageItems<T>(T thread)
 			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeItemsProvider, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
+			var timing = GetRefreshTiming(thread);
+			if (timing is not null) {
+				timing.Measure(CraftingRefreshTimingPhase.StoredItems, () => RefreshStorageItemsInner(thread));
+				return;
+			}
+
+			RefreshStorageItemsInner(thread);
+		}
+
+		private static void RefreshStorageItemsInner<T>(T thread)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeItemsProvider, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
+		{
 			NetHelper.Report(true, "Updating stored ingredients collection and result item...");
 
 			var selection = thread.CraftingObject.selection.Value;
@@ -58,17 +70,32 @@ namespace MagicStorage {
 					error = Language.GetTextValue("Mods.MagicStorage.CraftingGUI.RecursionErrors.NoRecipe");
 			} else {
 				if (thread.IngredientControls.showAllPossibleIngredients.Value) {
-					// Show the information for ALL possible recipes in the tree
-					RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, selection.GetRecursiveRecipe().GetCraftingTree().GetAllRecipes());
-				} else {
-					CraftingSimulation simulation = new();
-					simulation.SimulateCrafts(recursiveRecipe, thread.CraftingObject.craftAmountTarget.Value, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
+					// Prefer the ledger-backed planner's concrete recipe path when it is available.
+					int amountToCraft = thread.CraftingObject.craftAmountTarget.Value;
+					var context = CreateCraftingSimulationContext(thread, amountToCraft);
+					CraftingSimulation simulation = CreateCraftingSimulation(thread, recursiveRecipe, amountToCraft, GetCurrentInventory(thread), context);
 
 					thread.RecipeSimulations.currentRecipeSimulation.Value = simulation;
 
 					if (simulation.AmountCrafted > 0) {
-						// Show the information for the recipes that were used by the simulation
+						error = null;
 						RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, simulation.UsedRecipes);
+					} else {
+						// Show the information for ALL possible recipes in the tree
+						RefreshStorageItems_CheckRecursionRecipes(thread, selection, resultItemGroups, selection.GetRecursiveRecipe().GetCraftingTree(cancellationToken: thread.cancellationToken).GetAllRecipes(thread.cancellationToken));
+					}
+				} else {
+					int amountToCraft = thread.CraftingObject.craftAmountTarget.Value;
+					var context = CreateCraftingSimulationContext(thread, amountToCraft);
+					CraftingSimulation simulation = CreateCraftingSimulation(thread, recursiveRecipe, amountToCraft, GetCurrentInventory(thread), context);
+
+					thread.RecipeSimulations.currentRecipeSimulation.Value = simulation;
+
+					if (simulation.AmountCrafted > 0) {
+						error = null;
+
+						// Show the information for the materials that the exact simulation actually needs.
+						RefreshStorageItems_CheckRequiredMaterials(thread, selection, resultItemGroups, simulation.RequiredMaterials);
 					} else {
 						// Show the information for the highest recipe in the tree, since the simulation failed
 						RefreshStorageItems_CheckNormalRecipe(thread, selection, resultItemGroups);
@@ -101,24 +128,77 @@ namespace MagicStorage {
 		{
 			NetHelper.Report(false, "Recipe had a recursive recipe, processing recursion tree...");
 
-			// Check each recipe in the tree
-			// Evaluate now so the total task count can be used
+			// Evaluate now so the material type index can be shared across all storage sources.
 			List<Recipe> usedRecipes = recipes.ToList();
+			HashSet<int> validIngredientTypes = BuildValidIngredientTypeSet(usedRecipes);
 
-			thread.InitTaskSchedule(usedRecipes.Count * resultGroups.Count, "Populating Stored Ingredients");
+			thread.InitTaskSchedule(resultGroups.Count, "Populating Stored Ingredients");
 
 			var handler = thread.RecipeItems;
 
-			int index;
-			List<bool[]> wasItemAdded = [.. resultGroups.Select(list => new bool[list.Count])];
-			foreach (Recipe recipe in usedRecipes.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
-				index = 0;
+			foreach (List<Item> itemsFromSource in resultGroups.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+				foreach (Item item in itemsFromSource) {
+					if (validIngredientTypes.Contains(item.type))
+						handler.AddStoredIngredient(item);
 
-				foreach (List<Item> itemsFromSource in resultGroups.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
-					// Only allow the "final recipe" (i.e. the first in the list) to affect the result item
-					CheckStorageItemsForRecipe(recipe, handler, itemsFromSource, wasItemAdded[index++], checkResultItem: object.ReferenceEquals(recipe, mainRecipe));
+					if (item.type == mainRecipe.createItem.type)
+						handler.SetResultItem(item);
 				}
 			}
+		}
+
+		private static void RefreshStorageItems_CheckRequiredMaterials<T>(T thread, Recipe mainRecipe, List<List<Item>> resultGroups, IReadOnlyList<RequiredMaterialInfo> materials)
+			where T : RefreshThread, IRecipeItemsProvider
+		{
+			NetHelper.Report(false, "Recipe had a recursive recipe, processing simulated required materials...");
+
+			HashSet<int> validIngredientTypes = BuildValidIngredientTypeSet(materials);
+
+			thread.InitTaskSchedule(resultGroups.Count, "Populating Stored Ingredients");
+
+			var handler = thread.RecipeItems;
+
+			foreach (List<Item> itemsFromSource in resultGroups.NotifyStepsTo(thread).WatchForCancellation(thread, 16)) {
+				foreach (Item item in itemsFromSource) {
+					if (validIngredientTypes.Contains(item.type))
+						handler.AddStoredIngredient(item);
+
+					if (item.type == mainRecipe.createItem.type)
+						handler.SetResultItem(item);
+				}
+			}
+		}
+
+		private static HashSet<int> BuildValidIngredientTypeSet(List<Recipe> recipes) {
+			HashSet<int> validTypes = new();
+
+			foreach (Recipe recipe in recipes) {
+				foreach (Item reqItem in recipe.requiredItem) {
+					validTypes.Add(reqItem.type);
+
+					foreach (int groupID in recipe.acceptedGroups) {
+						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
+						if (!group.ContainsItem(reqItem.type))
+							continue;
+
+						foreach (int groupItemType in group.ValidItems)
+							validTypes.Add(groupItemType);
+					}
+				}
+			}
+
+			return validTypes;
+		}
+
+		private static HashSet<int> BuildValidIngredientTypeSet(IReadOnlyList<RequiredMaterialInfo> materials) {
+			HashSet<int> validTypes = new();
+
+			foreach (RequiredMaterialInfo material in materials) {
+				foreach (int type in material.GetValidItems())
+					validTypes.Add(type);
+			}
+
+			return validTypes;
 		}
 
 		private static void CheckStorageItemsForRecipe(Recipe recipe, RecipeItems handler, List<Item> itemsFromSource, bool[] wasItemAdded, bool checkResultItem) {

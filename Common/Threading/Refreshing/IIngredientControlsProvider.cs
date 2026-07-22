@@ -11,6 +11,8 @@ namespace MagicStorage.Common.Threading.Refreshing {
 		public readonly HashSetProvider<int> infiniteItems;
 		public readonly ListProvider<ItemData> blockStorageItems;
 		public readonly IValueProvider<bool> creativeUnitPresent;
+		public int InfiniteItemsHash { get; private set; }
+		public int BlockedItemsHash { get; private set; }
 
 		public IngredientControls(
 			IReadOnlyValueProvider<bool> staticShowAllIngredientsField,
@@ -22,6 +24,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			infiniteItems = new HashSetProvider<int>(staticInfiniteItemsSet);
 			blockStorageItems = new ListProvider<ItemData>(staticBlockedList);
 			creativeUnitPresent = staticCreativeUnitField;
+			RefreshHashes();
 		}
 
 		public bool IsInfiniteIngredient(int item) => creativeUnitPresent.Value || infiniteItems.Contains(item);
@@ -38,6 +41,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 				infiniteItems.Add(item);
 
 			blockStorageItems.CopyFromStatic();  // Always copy
+			RefreshHashes();
 		}
 
 		public void CopyFromStaticCollectionsAndFields() {
@@ -45,6 +49,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			infiniteItems.CopyFromStatic();
 			blockStorageItems.CopyFromStatic();
 			creativeUnitPresent.CopyFromStatic();
+			RefreshHashes();
 		}
 
 		public void CopyToStaticCollectionsAndFields() {
@@ -52,6 +57,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			infiniteItems.OverwriteStatic();
 			blockStorageItems.OverwriteStatic();
 			creativeUnitPresent.OverwriteStatic();
+			RefreshHashes();
 		}
 
 		public void ClearStaticCollections() {
@@ -59,6 +65,21 @@ namespace MagicStorage.Common.Threading.Refreshing {
 			infiniteItems.ClearStatic();
 		//	blockStorageItems.ClearStatic();
 			creativeUnitPresent.ClearStatic();
+			InfiniteItemsHash = 0;
+			BlockedItemsHash = 0;
+		}
+
+		private void RefreshHashes() {
+			int infiniteHash = 0;
+			foreach (int value in infiniteItems.Value)
+				infiniteHash ^= System.HashCode.Combine(value);
+
+			int blockedHash = 0;
+			foreach (ItemData item in blockStorageItems.Value)
+				blockedHash ^= System.HashCode.Combine(item.Type, item.Prefix);
+
+			InfiniteItemsHash = infiniteHash;
+			BlockedItemsHash = blockedHash;
 		}
 	}
 }

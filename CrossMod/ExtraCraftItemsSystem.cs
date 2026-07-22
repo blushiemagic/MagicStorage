@@ -7,6 +7,9 @@ using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
+	/// <summary>
+	/// Registers and simulates extra item drops that should be returned when recipes are crafted through Magic Storage.
+	/// </summary>
 	public static class ExtraCraftItemsSystem {
 		private class Loadable : ILoadable {
 			public void Load(Mod mod) { }
@@ -55,6 +58,9 @@ namespace MagicStorage.CrossMod {
 			_conditionalRecipeItems.Add(new ConditionalItemDrop(condition, rule));
 		}
 
+		/// <summary>
+		/// Simulates the extra drops registered for <paramref name="recipe"/> and returns the generated item instances.
+		/// </summary>
 		public static List<Item> GetSimulatedItemDrops(Recipe recipe) {
 			List<Item> droppedItems = new();
 

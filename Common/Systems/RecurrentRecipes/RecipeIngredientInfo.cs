@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
@@ -9,12 +7,16 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 
 		public readonly int recipeIngredientIndex;
 
-		internal readonly List<RecursionTree> trees;
+		internal readonly Recipe[] recipes;
+
+		private readonly object nodesLock = new();
+
+		private Node[] nodes;
 
 		/// <summary>
 		/// How many recipes can create this ingredient
 		/// </summary>
-		public int RecipeCount => trees.Count;
+		public int RecipeCount => recipes.Length;
 
 		internal RecipeIngredientInfo(RecipeInfo recipeInfo, int index) {
 			parent = recipeInfo;
@@ -30,14 +32,44 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 					types.UnionWith(group.ValidItems);
 			}
 
-			trees = types.SelectMany(static type => MagicCache.ResultToRecipe.TryGetValue(type, out Recipe[] recipes) ? recipes : Array.Empty<Recipe>())
-				.Where(static r => !r.Disabled && !MagicCache.IsRecipeBlocked(r))
-				.Select(static r => new RecursionTree(r))
-				.ToList();
+			List<Recipe> matchingRecipes = new();
+			HashSet<Recipe> seenRecipes = new(ReferenceEqualityComparer.Instance);
+
+			foreach (int type in types) {
+				if (!MagicCache.ResultToRecipe.TryGetValue(type, out Recipe[] recipesForType))
+					continue;
+
+				foreach (Recipe recipe in recipesForType) {
+					if (!recipe.Disabled && !MagicCache.IsRecipeBlocked(recipe) && seenRecipes.Add(recipe))
+						matchingRecipes.Add(recipe);
+				}
+			}
+
+			recipes = matchingRecipes.ToArray();
 		}
 
 		internal void ClearTrees() {
-			trees.Clear();
+			nodes = null;
+		}
+
+		internal Node[] GetOrCreateNodes() {
+			if (nodes is not null)
+				return nodes;
+
+			lock (nodesLock) {
+				if (nodes is not null)
+					return nodes;
+
+				List<Node> matchingNodes = new(recipes.Length);
+				foreach (Recipe recipe in recipes) {
+					Node node = NodePool.FindOrCreate(recipe);
+					if (node is not null)
+						matchingNodes.Add(node);
+				}
+
+				nodes = matchingNodes.ToArray();
+				return nodes;
+			}
 		}
 
 		/// <summary>
@@ -54,75 +86,104 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		public IEnumerable<Recipe> EnumerateValidRecipes(AvailableRecipeObjects available, int blockedRecipeIngredient = 0) {
 			if (available is null) {
 				// Assume that the caller handles null inventory and use all recipes
-				foreach (var tree in trees)
-					yield return tree.originalRecipe;
+				foreach (Recipe recipe in recipes)
+					yield return recipe;
 
 				yield break;
 			}
 
-			if (trees.Count < 2) {
-				if (trees.Count > 0 && available.CanUseRecipe(trees[0].originalRecipe))
-					yield return trees[0].originalRecipe;
+			if (recipes.Length < 2) {
+				if (recipes.Length > 0 && available.CanUseRecipe(recipes[0]))
+					yield return recipes[0];
 
 				yield break;
 			}
 
-			for (int i = 0; i < trees.Count; i++) {
-				Recipe subrecipe = trees[i].originalRecipe;
+			bool anyDirectlyAvailable = false;
+			List<Recipe> recursiveFallbacks = null;
+
+			for (int i = 0; i < recipes.Length; i++) {
+				Recipe subrecipe = recipes[i];
 
 				// Not enough stations or conditions met?  Skip this recipe
 				if (!available.CanUseRecipe(subrecipe))
 					goto checkNextTree;
 
-				foreach (Item item in subrecipe.requiredItem) {
-					bool usedRecipeGroup = false;
-					ClampedArithmetic stack = item.stack;
+				if (RecipeUsesBlockedIngredient(subrecipe, blockedRecipeIngredient))
+					goto checkNextTree;
 
-					int count;
-					foreach (int groupID in subrecipe.acceptedGroups) {
-						RecipeGroup group = RecipeGroup.recipeGroups[groupID];
-
-						// Attempt to use items that are valid in the group
-						if (group.ContainsItem(item.type)) {
-							foreach (int groupItem in group.ValidItems) {
-								if (blockedRecipeIngredient > 0 && groupItem == blockedRecipeIngredient)
-									goto checkNextTree;
-
-								if (available.TryGetIngredientQuantity(item.type, out count)) {
-									usedRecipeGroup = true;
-									stack -= count;
-
-									if (stack <= 0)
-										goto checkNonRecipeGroup;
-								}
-							}
-						}
-					}
-
-					checkNonRecipeGroup:
-
-					if (!usedRecipeGroup) {
-						if (blockedRecipeIngredient > 0 && item.type == blockedRecipeIngredient)
-							goto checkNextTree;
-
-						if (available.TryGetIngredientQuantity(item.type, out count))
-							stack -= count;
-					}
-
-					if (stack > 0) {
-						// Recipe ingredient requirement could not be met
-						goto checkNextTree;
-					}
-
-					if (stack < 0)
-						stack = 0;
+				if (AreRecipeIngredientsDirectlyAvailable(subrecipe, available)) {
+					anyDirectlyAvailable = true;
+					yield return subrecipe;
+				} else if (RecursiveRecipe.recipeToRecursiveRecipe.TryGetValue(subrecipe, out _)) {
+					recursiveFallbacks ??= [];
+					recursiveFallbacks.Add(subrecipe);
 				}
-
-				// Recipe was fully available
-				yield return subrecipe;
 
 				checkNextTree: ;
 			}
+
+			if (!anyDirectlyAvailable && recursiveFallbacks is not null) {
+				foreach (Recipe recipe in recursiveFallbacks)
+					yield return recipe;
+			}
+		}
+
+		private static bool RecipeUsesBlockedIngredient(Recipe recipe, int blockedRecipeIngredient) {
+			if (blockedRecipeIngredient <= 0)
+				return false;
+
+			foreach (Item item in recipe.requiredItem) {
+				if (item.type == blockedRecipeIngredient)
+					return true;
+
+				foreach (int groupID in recipe.acceptedGroups) {
+					RecipeGroup group = RecipeGroup.recipeGroups[groupID];
+					if (!group.ContainsItem(item.type))
+						continue;
+
+					foreach (int groupItem in group.ValidItems) {
+						if (groupItem == blockedRecipeIngredient)
+							return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private static bool AreRecipeIngredientsDirectlyAvailable(Recipe recipe, AvailableRecipeObjects available) {
+			foreach (Item item in recipe.requiredItem) {
+				bool usedRecipeGroup = false;
+				ClampedArithmetic stack = item.stack;
+
+				int count;
+				foreach (int groupID in recipe.acceptedGroups) {
+					RecipeGroup group = RecipeGroup.recipeGroups[groupID];
+
+					if (group.ContainsItem(item.type)) {
+						foreach (int groupItem in group.ValidItems) {
+							if (available.TryGetIngredientQuantity(groupItem, out count)) {
+								usedRecipeGroup = true;
+								stack -= count;
+
+								if (stack <= 0)
+									goto checkNonRecipeGroup;
+							}
+						}
+					}
+				}
+
+				checkNonRecipeGroup:
+
+				if (!usedRecipeGroup && available.TryGetIngredientQuantity(item.type, out count))
+					stack -= count;
+
+				if (stack > 0)
+					return false;
+			}
+
+			return true;
 		}
 	}
 }

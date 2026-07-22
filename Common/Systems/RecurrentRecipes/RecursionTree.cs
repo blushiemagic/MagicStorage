@@ -1,6 +1,5 @@
 ﻿using MagicStorage.Common.Threading;
 using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 
 namespace MagicStorage.Common.Systems.RecurrentRecipes {
@@ -20,60 +19,103 @@ namespace MagicStorage.Common.Systems.RecurrentRecipes {
 		}
 
 		public void CalculateTree() {
-			HashSet<int> processedNodes = new();
-			Stack<int> nodeStack = new();
-			CalculateTree(processedNodes, nodeStack);
+			Stack<Node> nodeStack = new();
+			HashSet<int> activeNodes = new();
+			Root = NodePool.FindOrCreate(originalRecipe);
+			CalculateTree(Root, nodeStack, activeNodes, out _);
 		}
 
-		private void CalculateTree(HashSet<int> processedNodes, Stack<int> nodeStack) {
-			if (Root is not null || originalRecipe.Disabled)
+		private static void CalculateTree(Node root, Stack<Node> nodeStack, HashSet<int> activeNodes, out int[] dependencyIndexes) {
+			dependencyIndexes = [];
+
+			if (root is null)
 				return;
 
-			Root = NodePool.FindOrCreate(originalRecipe);
+			Recipe recipe = root.info.sourceRecipe;
+			if (recipe.Disabled)
+				return;
 			
-			// Prevent recursion by not checking nodes multiple times
-			if (!processedNodes.Add(Root.poolIndex))
+			// Prevent cycles only on the active path. Shared subtrees still need
+			// to register every current ancestor in the reverse dependency index.
+			if (!activeNodes.Add(root.poolIndex))
 				return;
 
 			// Block recipes that should be blocked
-			if (MagicCache.IsRecipeBlocked(originalRecipe))
+			if (MagicCache.IsRecipeBlocked(recipe)) {
+				activeNodes.Remove(root.poolIndex);
 				return;
+			}
 
-			nodeStack.Push(Root.poolIndex);
+			nodeStack.Push(root);
+
+			if (root.DependenciesInitialized) {
+				dependencyIndexes = root.DependencyRecipeIndexes;
+				RegisterReverseDependencies(dependencyIndexes, nodeStack);
+
+				nodeStack.Pop();
+				activeNodes.Remove(root.poolIndex);
+				return;
+			}
+
+			HashSet<int> dependencyRecipeIndexes = new();
 
 			// Process the nodes for each child
-			foreach (var ingredientInfo in Root.info.ingredientTrees) {
-				foreach (var ingredientRecipe in ingredientInfo.trees) {
-					ingredientRecipe.CalculateTree(processedNodes, nodeStack);
+			foreach (RecipeIngredientInfo ingredientInfo in root.info.ingredientTrees) {
+				foreach (Node ingredientNode in ingredientInfo.GetOrCreateNodes()) {
+					int recipeIndex = ingredientNode.info.sourceRecipe.RecipeIndex;
+					dependencyRecipeIndexes.Add(recipeIndex);
+					RegisterDirectParent(recipeIndex, recipe.RecipeIndex);
 
-					int recipeIndex = ingredientRecipe.originalRecipe.RecipeIndex;
-
-					List<Node> list;
-					if (WorkManager.IsWorking) {
-						list = MagicCache.concurrentRecursiveRecipesUsingRecipeByIndex.GetOrAdd(recipeIndex, static _ => new());
-					} else {
-						if (!MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(recipeIndex, out list))
-							MagicCache.RecursiveRecipesUsingRecipeByIndex[recipeIndex] = list = new();
-					}
-
-					lock (list) {
-						// Work up the current tree
-						foreach (int index in nodeStack) {
-							// Local capturing
-							int rootIndex = index;
-							if (!list.Any(node => rootIndex == node.poolIndex))
-								list.Add(NodePool.Get(index));
-						}
-					}
+					CalculateTree(ingredientNode, nodeStack, activeNodes, out int[] nestedDependencyIndexes);
+					foreach (int nestedRecipeIndex in nestedDependencyIndexes)
+						dependencyRecipeIndexes.Add(nestedRecipeIndex);
 				}
 			}
 
+			dependencyIndexes = [.. dependencyRecipeIndexes];
+			root.InitializeDependencyRecipeIndexes(dependencyRecipeIndexes);
+
+			RegisterReverseDependencies(dependencyIndexes, nodeStack);
+
 			nodeStack.Pop();
+			activeNodes.Remove(root.poolIndex);
 		}
 
 		internal void Reset() {
 			Root?.ClearTrees();
 			Root = null;
+		}
+
+		private static void RegisterDirectParent(int childRecipeIndex, int parentRecipeIndex) {
+			HashSet<int> set;
+			if (WorkManager.IsWorking) {
+				set = MagicCache.concurrentDirectRecursiveRecipeParentsByRecipeIndex.GetOrAdd(childRecipeIndex, static _ => new());
+			} else {
+				if (!MagicCache.DirectRecursiveRecipeParentsByRecipeIndex.TryGetValue(childRecipeIndex, out set))
+					MagicCache.DirectRecursiveRecipeParentsByRecipeIndex[childRecipeIndex] = set = new();
+			}
+
+			lock (set) {
+				set.Add(parentRecipeIndex);
+			}
+		}
+
+		private static void RegisterReverseDependencies(int[] recipeIndexes, Stack<Node> nodeStack) {
+			foreach (int recipeIndex in recipeIndexes) {
+				HashSet<Node> set;
+				if (WorkManager.IsWorking) {
+					set = MagicCache.concurrentRecursiveRecipesUsingRecipeByIndex.GetOrAdd(recipeIndex, static _ => new(ReferenceEqualityComparer.Instance));
+				} else {
+					if (!MagicCache.RecursiveRecipesUsingRecipeByIndex.TryGetValue(recipeIndex, out set))
+						MagicCache.RecursiveRecipesUsingRecipeByIndex[recipeIndex] = set = new(ReferenceEqualityComparer.Instance);
+				}
+
+				lock (set) {
+					// Work up the current tree
+					foreach (Node node in nodeStack)
+						set.Add(node);
+				}
+			}
 		}
 	}
 }

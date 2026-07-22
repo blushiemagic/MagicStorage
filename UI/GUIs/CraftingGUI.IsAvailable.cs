@@ -3,6 +3,7 @@ using MagicStorage.Common.Systems.RecurrentRecipes;
 using MagicStorage.Common.Threading.Refreshing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -91,16 +92,139 @@ namespace MagicStorage {
 			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
 		{
 			var lookup = thread?.RecipeSimulations.recipeToAvailableSimulation.Value ?? recursionRecipeToAvailableSimulationLookup;
-			if (lookup.TryGetValue(recipe, out var simulation))
+			var context = CreateCraftingSimulationContext(thread, 1);
+			if (lookup.TryGetValue(recipe, out var simulation)
+			&& object.ReferenceEquals(simulation.Recipe, recipe)
+			&& simulation.RequestedAmount == 1
+			&& simulation.Context == context)
 				return simulation.AmountCrafted > 0;
 
-			var availableObjects = GetCurrentInventory(thread, cloneIfBlockEmpty: true);
+			var probe = ProbeRecursiveAvailability(thread, recipe);
+			if (probe.Kind == RecursiveAvailabilityProbeKind.DirectAvailable)
+				return true;
+
+			if (probe.Kind == RecursiveAvailabilityProbeKind.GraphRejected)
+				return false;
 
 		//	using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI)) {
-			lookup.AddOrUpdate(recipe, simulation = new());
-			simulation.SimulateCrafts(recursiveRecipe, 1, availableObjects);  // Recipe is available if at least one craft is possible
+			var availableObjects = GetCurrentInventory(thread);
+			simulation = CreateCraftingSimulation(thread, recursiveRecipe, 1, availableObjects, context);
+			lookup.AddOrUpdate(recipe, simulation);
 			return simulation.AmountCrafted > 0;
 		//	}
+		}
+
+		private static RecursiveAvailabilityProbeResult ProbeRecursiveAvailability<T>(T thread, Recipe recipe)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
+		{
+			if (thread?.RecipeSimulations.inventoryCraftabilityGraph.Value is { } graph) {
+				var graphProbe = graph.ProbeRecipe(recipe);
+				if (!graphProbe.HasCandidate && graph.CanRejectMissingRecipes)
+					return RecursiveAvailabilityProbeResult.GraphRejected;
+
+				if (graphProbe.IsDirectRecipeAuthority)
+					return RecursiveAvailabilityProbeResult.DirectAvailable;
+
+				if (IsAvailable_CheckNormalRecipe(thread, recipe))
+					return RecursiveAvailabilityProbeResult.DirectAvailable;
+
+				return RecursiveAvailabilityProbeResult.NeedsExactSimulation(graphProbe);
+			}
+
+			if (IsAvailable_CheckNormalRecipe(thread, recipe))
+				return RecursiveAvailabilityProbeResult.DirectAvailable;
+
+			return RecursiveAvailabilityProbeResult.NeedsExactSimulation(default);
+		}
+
+		private static RecipeListAvailabilityResult IsAvailableForRecipeList<T>(T thread, Recipe recipe)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IIngredientControlsProvider, IMainZoneFilterControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
+		{
+			if (recipe is null)
+				return RecipeListAvailabilityResult.Exact(false);
+
+			if (!MagicStorageConfig.IsRecursionEnabled || !recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
+				bool available = IsAvailable_CheckNormalRecipe(thread, recipe);
+				return RecipeListAvailabilityResult.Exact(available, GetConditionsToWatch(null, recipe));
+			}
+
+			var probe = ProbeRecursiveAvailability(thread, recipe);
+			if (probe.Kind == RecursiveAvailabilityProbeKind.DirectAvailable)
+				return RecipeListAvailabilityResult.Exact(true, GetConditionsToWatch(null, recipe));
+
+			if (probe.Kind == RecursiveAvailabilityProbeKind.GraphRejected)
+				return RecipeListAvailabilityResult.Exact(false, GetConditionsToWatch(null, recipe));
+
+			if (probe.GraphProbe.HasCandidate) {
+				var context = CreateCraftingSimulationContext(thread, 1);
+				var availableObjects = GetCurrentInventory(thread);
+				var simulation = new CraftingSimulation();
+				if (thread.RecipeSimulations.inventoryCraftabilityGraph.Value is { } graph
+				&& IsSameCraftingSnapshotIgnoringAmount(thread.RecipeSimulations.inventoryCraftabilityGraphContext.Value, context)
+				&& simulation.TryPlanCraftsWithGraph(recursiveRecipe, 1, availableObjects, graph, context, thread.cancellationToken))
+					return RecipeListAvailabilityResult.Exact(true, GetConditionsToWatch(simulation, recipe));
+
+				return RecipeListAvailabilityResult.Exact(false, GetConditionsToWatch(null, recipe));
+			}
+
+			return RecipeListAvailabilityResult.UnknownUnavailable;
+		}
+
+		private readonly struct RecipeListAvailabilityResult {
+			public static RecipeListAvailabilityResult UnknownUnavailable { get; } = new(false, canCacheExact: false, shouldApplyToList: false, conditionsToWatch: null);
+
+			public bool IsAvailable { get; }
+
+			public bool CanCacheExact { get; }
+
+			public bool ShouldApplyToList { get; }
+
+			public Condition[] ConditionsToWatch { get; }
+
+			private RecipeListAvailabilityResult(bool isAvailable, bool canCacheExact, bool shouldApplyToList, Condition[] conditionsToWatch) {
+				IsAvailable = isAvailable;
+				CanCacheExact = canCacheExact;
+				ShouldApplyToList = shouldApplyToList;
+				ConditionsToWatch = conditionsToWatch;
+			}
+
+			public static RecipeListAvailabilityResult Exact(bool isAvailable, Condition[] conditionsToWatch = null) => new(isAvailable, canCacheExact: true, shouldApplyToList: true, conditionsToWatch);
+		}
+
+		private static Condition[] GetConditionsToWatch(CraftingSimulation simulation, Recipe fallbackRecipe) {
+			if (simulation is not null) {
+				var conditions = simulation.RequiredConditions.ToArray();
+				if (conditions.Length > 0)
+					return conditions;
+			}
+
+			return fallbackRecipe.Conditions.Count > 0 ? fallbackRecipe.Conditions.ToArray() : null;
+		}
+
+		private readonly struct RecursiveAvailabilityProbeResult {
+			public static RecursiveAvailabilityProbeResult DirectAvailable { get; } = new(RecursiveAvailabilityProbeKind.DirectAvailable, default);
+
+			public static RecursiveAvailabilityProbeResult GraphRejected { get; } = new(RecursiveAvailabilityProbeKind.GraphRejected, default);
+
+			public RecursiveAvailabilityProbeKind Kind { get; }
+
+			public InventoryCraftabilityRecipeProbe GraphProbe { get; }
+
+			public InventoryCraftabilityProbeFlags GraphFlags => GraphProbe.Flags;
+
+			private RecursiveAvailabilityProbeResult(RecursiveAvailabilityProbeKind kind, InventoryCraftabilityRecipeProbe graphProbe) {
+				Kind = kind;
+				GraphProbe = graphProbe;
+			}
+
+			public static RecursiveAvailabilityProbeResult NeedsExactSimulation(InventoryCraftabilityRecipeProbe graphProbe)
+				=> new(RecursiveAvailabilityProbeKind.NeedsExactSimulation, graphProbe);
+		}
+
+		private enum RecursiveAvailabilityProbeKind {
+			DirectAvailable,
+			GraphRejected,
+			NeedsExactSimulation
 		}
 
 		private static bool IsAvailable_CheckNormalRecipe<T>(T thread, Recipe recipe)
@@ -152,7 +276,7 @@ namespace MagicStorage {
 		}
 
 		internal static bool PassesBlock<T>(T thread, Recipe recipe)
-			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, IRecipeSnapshotsProvider, IRecipeItemsProvider, IRecipeSimulationsProvider
 		{
 			if (recipe is null)
 				return false;
@@ -162,9 +286,10 @@ namespace MagicStorage {
 			bool success;
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				int amountToCraft = thread?.CraftingObject.craftAmountTarget.Value ?? craftAmountTarget;
+				var context = CreateCraftingSimulationContext(thread, amountToCraft);
 
 				var simulation = new CraftingSimulation();
-				simulation.SimulateCrafts(recursiveRecipe, amountToCraft, GetCurrentInventory(thread, cloneIfBlockEmpty: true));
+				simulation = CreateCraftingSimulation(thread, recursiveRecipe, amountToCraft, GetCurrentInventory(thread), context);
 
 				success = PassesBlock_CheckSimulation(thread, simulation);
 			} else
@@ -172,6 +297,15 @@ namespace MagicStorage {
 
 		//	NetHelper.Report(true, $"Recipe {(success ? "passed" : "failed")} the ingredients check");
 			return success;
+		}
+
+		internal static bool PassesBlock<T>(T thread, CraftingSimulation simulation)
+			where T : RefreshThread, IIngredientControlsProvider, IRecipeItemsProvider
+		{
+			if (simulation is null)
+				return false;
+
+			return PassesBlock_CheckSimulation(thread, simulation);
 		}
 
 		private static bool PassesBlock_CheckRecipe<T>(T thread, Recipe recipe)

@@ -23,8 +23,31 @@ namespace MagicStorage {
 			if (MagicStorageConfig.IsRecursionEnabled && recipe.TryGetRecursiveRecipe(out RecursiveRecipe recursiveRecipe)) {
 				NetHelper.Report(false, "Recipe had a recursion tree");
 
+				if (TryGetCachedAmountCraftable(thread, recipe, out maxCrafts))
+					goto ReportAndReturn;
+
+				if (thread?.RecipeSimulations.inventoryCraftabilityGraph.Value is { } graph
+				&& graph.CanRejectMissingRecipes
+				&& !graph.ProbeRecipe(recipe).HasCandidate) {
+					maxCrafts = 0;
+					StoreCachedAmountCraftable(thread, recipe, maxCrafts);
+					goto ReportAndReturn;
+				}
+
+				if (!IsAvailable(thread, recipe)) {
+					maxCrafts = 0;
+					StoreCachedAmountCraftable(thread, recipe, maxCrafts);
+					goto ReportAndReturn;
+				}
+
+				if (TryGetGraphBackedMaxCraftable(thread, recursiveRecipe, GetCurrentInventory(thread), out maxCrafts)) {
+					StoreCachedAmountCraftable(thread, recipe, maxCrafts);
+					goto ReportAndReturn;
+				}
+
 			//	using (FlagSwitch.ToggleTrue(ref requestingAmountFromUI))
-				maxCrafts = recursiveRecipe.GetMaxCraftable(GetCurrentInventory(thread, cloneIfBlockEmpty: true));
+				maxCrafts = recursiveRecipe.GetMaxCraftable(GetCurrentInventory(thread), thread?.cancellationToken ?? default);
+				StoreCachedAmountCraftable(thread, recipe, maxCrafts);
 
 				goto ReportAndReturn;
 			}
@@ -88,6 +111,40 @@ namespace MagicStorage {
 			NetHelper.Report(false, $"Possible crafts = {maxCrafts}");
 
 			return maxCrafts;
+		}
+
+		private static bool TryGetGraphBackedMaxCraftable<T>(T thread, RecursiveRecipe recursiveRecipe, AvailableRecipeObjects available, out int maxCraftable)
+			where T : RefreshThread, IProcessedStorageItemsProvider, IMainZoneFilterControlsProvider, IIngredientControlsProvider, ICraftingObjectProvider<Recipe>, ICraftObjectAvailableCacheProvider<Recipe>, IRecipeSimulationsProvider, IRecipeSnapshotsProvider
+		{
+			maxCraftable = 0;
+
+			int high = Item.CommonMaxStack;
+			var highContext = CreateCraftingSimulationContext(thread, high);
+			if (TryRunGraphBackedSimulation(thread, recursiveRecipe, high, available, highContext, out var highSimulation)) {
+				maxCraftable = highSimulation.AmountCrafted;
+				return true;
+			}
+
+			var oneContext = CreateCraftingSimulationContext(thread, 1);
+			if (!TryRunGraphBackedSimulation(thread, recursiveRecipe, 1, available, oneContext, out var oneSimulation)
+			|| oneSimulation.AmountCrafted <= 0)
+				return false;
+
+			int low = oneSimulation.AmountCrafted;
+			while (low + 1 < high) {
+				thread?.cancellationToken.ThrowIfCancellationRequested();
+
+				int mid = low + (high - low) / 2;
+				var midContext = CreateCraftingSimulationContext(thread, mid);
+				if (TryRunGraphBackedSimulation(thread, recursiveRecipe, mid, available, midContext, out var midSimulation)
+				&& midSimulation.AmountCrafted > 0)
+					low = midSimulation.AmountCrafted;
+				else
+					high = mid;
+			}
+
+			maxCraftable = low;
+			return true;
 		}
 	}
 }

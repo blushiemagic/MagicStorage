@@ -6,7 +6,13 @@ namespace MagicStorage.Common {
 	/// A wrapper structure over an integer used to facilitate overflow checks when calculating a sum or difference
 	/// </summary>
 	public readonly record struct ClampedArithmetic(int Value) : IEquatable<ClampedArithmetic>, IComparable<ClampedArithmetic> {
+		/// <summary>
+		/// The minimum clamped integer value.
+		/// </summary>
 		public static readonly ClampedArithmetic Min = new ClampedArithmetic(int.MinValue);
+		/// <summary>
+		/// The maximum clamped integer value.
+		/// </summary>
 		public static readonly ClampedArithmetic Max = new ClampedArithmetic(int.MaxValue);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -19,10 +25,14 @@ namespace MagicStorage.Common {
 			}
 		}
 
+		/// <inheritdoc/>
 		public int CompareTo(ClampedArithmetic other) {
 			return Value.CompareTo(other.Value);
 		}
 
+		/// <summary>
+		/// Adds two values and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator+(ClampedArithmetic a, ClampedArithmetic b) {
 			int newValue = AddWithOverflowCheck(a.Value, b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -30,6 +40,9 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Adds an integer value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator+(ClampedArithmetic a, int b) {
 			int newValue = AddWithOverflowCheck(a.Value, b, out bool overflowFlag);
 			if (overflowFlag)
@@ -37,6 +50,9 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Adds an integer value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator+(int a, ClampedArithmetic b) {
 			int newValue = AddWithOverflowCheck(a, b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -44,6 +60,9 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts two values and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator-(ClampedArithmetic a, ClampedArithmetic b) {
 			int newValue = AddWithOverflowCheck(a.Value, -b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -51,6 +70,9 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts an integer value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator-(ClampedArithmetic a, int b) {
 			int newValue = AddWithOverflowCheck(a.Value, -b, out bool overflowFlag);
 			if (overflowFlag)
@@ -58,6 +80,9 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts a clamped value from an integer and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedArithmetic operator-(int a, ClampedArithmetic b) {
 			int newValue = AddWithOverflowCheck(a, -b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -65,17 +90,29 @@ namespace MagicStorage.Common {
 			return new ClampedArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Converts an integer to a clamped arithmetic value.
+		/// </summary>
 		public static implicit operator ClampedArithmetic(int value) => new ClampedArithmetic(value);
 
+		/// <summary>
+		/// Converts a clamped arithmetic value to its underlying integer.
+		/// </summary>
 		public static implicit operator int(ClampedArithmetic sum) => sum.Value;
 	}
 
 	/// <summary>
 	/// A wrapper structure over a long integer used to facilitate overflow checks when calculating a sum or difference
 	/// </summary>
-	/// <param name="Value"></param>
+	/// <param name="Value">The wrapped long value.</param>
 	public readonly record struct ClampedLongArithmetic(long Value) : IEquatable<ClampedLongArithmetic>, IComparable<ClampedLongArithmetic> {
+		/// <summary>
+		/// The minimum clamped long value.
+		/// </summary>
 		public static readonly ClampedLongArithmetic Min = new ClampedLongArithmetic(long.MinValue);
+		/// <summary>
+		/// The maximum clamped long value.
+		/// </summary>
 		public static readonly ClampedLongArithmetic Max = new ClampedLongArithmetic(long.MaxValue);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -87,10 +124,14 @@ namespace MagicStorage.Common {
 			}
 		}
 
+		/// <inheritdoc/>
 		public int CompareTo(ClampedLongArithmetic other) {
 			return Value.CompareTo(other.Value);
 		}
 
+		/// <summary>
+		/// Adds two values and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator+(ClampedLongArithmetic a, ClampedLongArithmetic b) {
 			long newValue = AddWithOverflowCheck(a.Value, b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -98,6 +139,9 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Adds a long value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator+(ClampedLongArithmetic a, long b) {
 			long newValue = AddWithOverflowCheck(a.Value, b, out bool overflowFlag);
 			if (overflowFlag)
@@ -105,6 +149,9 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Adds a long value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator+(long a, ClampedLongArithmetic b) {
 			long newValue = AddWithOverflowCheck(a, b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -112,6 +159,9 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts two values and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator-(ClampedLongArithmetic a, ClampedLongArithmetic b) {
 			long newValue = AddWithOverflowCheck(a.Value, -b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -119,6 +169,9 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts a long value and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator-(ClampedLongArithmetic a, long b) {
 			long newValue = AddWithOverflowCheck(a.Value, -b, out bool overflowFlag);
 			if (overflowFlag)
@@ -126,6 +179,9 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Subtracts a clamped value from a long and clamps overflow to <see cref="Min"/> or <see cref="Max"/>.
+		/// </summary>
 		public static ClampedLongArithmetic operator-(long a, ClampedLongArithmetic b) {
 			long newValue = AddWithOverflowCheck(a, -b.Value, out bool overflowFlag);
 			if (overflowFlag)
@@ -133,8 +189,14 @@ namespace MagicStorage.Common {
 			return new ClampedLongArithmetic(newValue);
 		}
 
+		/// <summary>
+		/// Converts a long to a clamped arithmetic value.
+		/// </summary>
 		public static implicit operator ClampedLongArithmetic(long value) => new ClampedLongArithmetic(value);
 
+		/// <summary>
+		/// Converts a clamped arithmetic value to its underlying long.
+		/// </summary>
 		public static implicit operator long(ClampedLongArithmetic sum) => sum.Value;
 	}
 }

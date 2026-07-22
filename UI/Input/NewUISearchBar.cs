@@ -28,21 +28,21 @@ namespace MagicStorage.UI.Input {
 
 		public override void OnInputChanged() {
 			if (MagicStorageConfig.SearchBarRefreshOnKey && !BlockRefreshThreads)
-				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputChanged()");
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputChanged()", forceMainZoneRebuild: true);
 
 			base.OnInputChanged();
 		}
 
 		public override void OnInputCleared() {
 			if (!BlockRefreshThreads)
-				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputCleared()");
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputCleared()", forceMainZoneRebuild: true);
 
 			base.OnInputCleared();
 		}
 
 		public override void OnInputFocusLost() {
 			if (!BlockRefreshThreads)
-				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputFocusLost()");
+				MagicUI.StartMainZoneRefreshThread(caller: "NewUISearchBar.OnInputFocusLost()", forceMainZoneRebuild: true);
 
 			base.OnInputFocusLost();
 		}

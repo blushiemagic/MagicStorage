@@ -90,7 +90,7 @@ namespace MagicStorage.UI.States {
 		}
 
 		protected static Item GetStorageItem(NewUIScrollbar scroll, int slot, ref int context) {
-			if (MagicUI.CurrentlyRefreshing)
+			if (!CraftingGUI.hasCompleteData)
 				return new Item();
 
 			int index = slot + CraftingGUI.IngredientColumns * (int)Math.Round(scroll.ViewPosition);
@@ -142,27 +142,39 @@ namespace MagicStorage.UI.States {
 
 			bool changed = false;
 			int type = 0;
-			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && item is not null && acceptsItem(item, Main.mouseItem)) {
+			if (!Main.mouseItem.IsAir && player.itemAnimation == 0 && player.itemTime == 0 && AcceptsResultSlotDeposit(item, Main.mouseItem, acceptsItem)) {
 				type = Main.mouseItem.type;
-				if (DepositItem(Main.mouseItem))
+				int oldStack = Main.mouseItem.stack;
+				if (DepositItem(Main.mouseItem)) {
 					changed = true;
+					RestoreLocalResultPreview(slot, type, oldStack - Main.mouseItem.stack);
+				}
 			} else if (Main.mouseItem.IsAir && item?.IsAir is false) {
 				if (Main.keyState.IsKeyDown(Keys.LeftAlt)) {
 					item.favorited = !item.favorited;
 					MagicUI.StartSelectedObjectRefreshThread(caller: "CraftingUIState.HandleResultSlotLeftClick()");
 				} else {
-					Main.mouseItem = WithdrawItem(item, ItemSlot.ShiftInUse);
+					Item withdrawn = WithdrawItem(item, ItemSlot.ShiftInUse);
+					if (withdrawn is null || withdrawn.IsAir)
+						return;
+
+					Main.mouseItem = withdrawn;
 							
 					if (ItemSlot.ShiftInUse)
 						Main.mouseItem = player.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryEntityToPlayerInventorySettings);
 
 					changed = true;
 					type = item.type;
+					ConsumeLocalResultPreview(slot, withdrawn.stack);
 				}
 			}
 
 			if (changed) {
+				CraftingGUI.InvalidateSelectedRecipePreviewAfterInventoryChange();
+				CraftingGUI.ForceNextRecipeRefreshToBeFull();
+				CraftingGUI.RequestSelectedRecipeSnapshotForNextRecipeRefresh();
 				MagicUI.SetNextCollectionsToRefresh(type);
+				MagicUI.RequestMainZoneThread();
 
 				SoundEngine.PlaySound(SoundID.Grab);
 
@@ -183,6 +195,7 @@ namespace MagicStorage.UI.States {
 				flag.Value = true;
 
 			if (flag.Value) {
+				SlotFocusSourceSlot = slot;
 				updateFocus();
 				slot.IgnoreNextHandleAction = true;
 			}

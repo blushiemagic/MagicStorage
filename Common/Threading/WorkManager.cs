@@ -81,11 +81,15 @@ namespace MagicStorage.Common.Threading {
 
 			ForEachState.Initialize(collection);
 
+			int lastReported = -1;
 			TaskCompletionWaitingEvent = () => {
 				int current = ForEachState.currentWorkDone;
 				int total = ForEachState.collectionLength;
 
-				reportWork(current, total);
+				if (current != lastReported) {
+					lastReported = current;
+					reportWork(current, total);
+				}
 			};
 
 			TickLoop();

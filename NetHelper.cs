@@ -48,6 +48,9 @@ namespace MagicStorage
 
 		[Conditional("NETPLAY")]
 		private static void Report_Inner(bool reportTime, string message, DateTime now) {
+			if (!MagicStorageBetaConfig.PrintTextToChat)
+				return;
+
 			StringBuilder sb = new();
 
 			if (reportTime)
@@ -56,10 +59,7 @@ namespace MagicStorage
 			sb.Append(message);
 
 			if (Main.netMode != NetmodeID.Server) {
-				#if NETPLAY
-				if (MagicStorageBetaConfig.PrintTextToChat)
-				#endif
-					Main.NewTextMultiline(sb.ToString(), c: Color.White);
+				Main.NewTextMultiline(sb.ToString(), c: Color.White);
 			} else if (Main.dedServ) {
 				if (reportTime)
 					Utility.PrettyWriteLineToConsole("Time: " + now.Ticks, ConsoleColor.Red, ConsoleColor.Black);
@@ -1097,8 +1097,7 @@ printReport:
 				SoundEngine.PlaySound(SoundID.Grab);
 			*/
 
-			if (origType > 0 && MagicUI.uiInterface.CurrentState is not null)
-				MagicUI.SetNextCollectionsToRefresh(origType);
+			CraftingGUI.NotifyStorageInventoryChanged(origType);
 		}
 
 		public static void SendGolemTextUpdate() {

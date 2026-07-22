@@ -2,11 +2,17 @@
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Gets Journey Mode research progress for an item type.
+		/// </summary>
 		public static void GetResearchStats(int itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal) {
 			// NOTE: 1.4.4 adds this handy method which does all of the work for me.  cool!
 			canBeResearched = Main.LocalPlayerCreativeTracker.ItemSacrifices.TryGetSacrificeNumbers(itemType, out currentSacrificeTotal, out sacrificesNeeded);
 		}
 
+		/// <summary>
+		/// Returns whether an item type has enough sacrifices to be considered fully researched.
+		/// </summary>
 		public static bool IsFullyResearched(int itemType, bool mustBeResearchable) {
 			GetResearchStats(itemType, out bool canBeResearched, out int sacrificesNeeded, out int currentSacrificeTotal);
 

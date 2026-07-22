@@ -13,6 +13,9 @@ namespace MagicStorage.CrossMod {
 	/// A singleton type that allows hooking into the logic responsible for aggregating items in storage.
 	/// </summary>
 	public abstract class StorageAggregator : ModType {
+		/// <summary>
+		/// The loader-assigned ID of this storage aggregator.
+		/// </summary>
 		public int Type { get; private set; }
 
 		private bool? _selectsData;
@@ -27,12 +30,14 @@ namespace MagicStorage.CrossMod {
 			get => _selectGlobalData ??= LoaderUtils.HasOverride(this, m => m.SelectGlobalData);
 		}
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<StorageAggregator>.Register(this);
 
 			Type = StorageAggregatorLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() => SetStaticDefaults();
 
 		/// <summary>
@@ -96,15 +101,22 @@ namespace MagicStorage.CrossMod {
 
 			void ILoadable.Unload() {
 				_aggregators.Clear();
+				_itemDataAggregators = null;
+				_globalDataAggregators = null;
+				_dataAggregatorCacheDirty = true;
 			}
 		}
 
 		private static readonly List<StorageAggregator> _aggregators = new();
+		private static StorageAggregator[] _itemDataAggregators;
+		private static StorageAggregator[] _globalDataAggregators;
+		private static bool _dataAggregatorCacheDirty = true;
 
 		public static int Count => _aggregators.Count;
 
 		internal static int Add(StorageAggregator aggregator) {
 			_aggregators.Add(aggregator);
+			_dataAggregatorCacheDirty = true;
 			return _aggregators.Count - 1;
 		}
 
@@ -170,9 +182,10 @@ namespace MagicStorage.CrossMod {
 
 		internal static bool GetItemData(Item item, out TagCompound tag) {
 			try {
-				var instanceAggregators = _aggregators.Where(static a => a.SelectsItemData).ToList();
-				var globalAggregators = _aggregators.Where(static a => a.SelectsGlobalData).ToList();
-				if (instanceAggregators.Count == 0 && globalAggregators.Count == 0) {
+				RefreshDataAggregatorCache();
+				var instanceAggregators = _itemDataAggregators;
+				var globalAggregators = _globalDataAggregators;
+				if (instanceAggregators.Length == 0 && globalAggregators.Length == 0) {
 					// Use default behavior if no aggregator selects item data
 					tag = null;
 					return false;
@@ -227,7 +240,16 @@ namespace MagicStorage.CrossMod {
 			}
 		}
 
-		private static List<TagCompound> GetGlobalItemData(Item item, List<StorageAggregator> aggregators) {
+		private static void RefreshDataAggregatorCache() {
+			if (!_dataAggregatorCacheDirty)
+				return;
+
+			_itemDataAggregators = [.. _aggregators.Where(static a => a.SelectsItemData)];
+			_globalDataAggregators = [.. _aggregators.Where(static a => a.SelectsGlobalData)];
+			_dataAggregatorCacheDirty = false;
+		}
+
+		private static List<TagCompound> GetGlobalItemData(Item item, StorageAggregator[] aggregators) {
 			if (item.ModItem is UnloadedItem)
 				return null;  // UnloadedItems cannot have global data
 

@@ -12,7 +12,7 @@ namespace MagicStorage.Common.Systems {
 		public static bool CanSplitOntoMouse(Item target)
 			=> Main.mouseItem.IsAir || (Main.mouseItem.stack < Main.mouseItem.maxStack && StorageAggregator.CanCombineItems(Main.mouseItem, target));
 
-		public static bool TickOneSplitOntoMouse(Item target, Func<Item, int, Item> withdrawFunc, out bool waitingForNextSplit) {
+		public static bool TickOneSplitOntoMouse(Item target, Func<Item, int, Item> withdrawFunc, out bool waitingForNextSplit, Action<Item> onWithdrawn = null) {
 			if (!CanSplitOntoMouse(target)) {
 				waitingForNextSplit = false;
 				return false;
@@ -24,6 +24,10 @@ namespace MagicStorage.Common.Systems {
 			}
 
 			Item result = withdrawFunc(target, int.Min(target.maxStack, Main.superFastStack + 1));
+			if (result is null || result.IsAir) {
+				waitingForNextSplit = false;
+				return false;
+			}
 
 			if (Main.mouseItem.IsAir) {
 				// Simply set the mouse item
@@ -33,6 +37,8 @@ namespace MagicStorage.Common.Systems {
 				Utility.CallOnStackHooks(Main.mouseItem, result, result.stack);
 				Main.mouseItem.stack += result.stack;
 			}
+
+			onWithdrawn?.Invoke(result);
 
 			SoundEngine.PlaySound(SoundID.MenuTick);
 

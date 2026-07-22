@@ -91,7 +91,8 @@ namespace MagicStorage {
 					staticResultItemGroupsList: CraftingGUI.itemGroups,
 					staticResultItemsFromModulesList: CraftingGUI.sourceItemsFromModules,
 					staticCountsDictionary: CraftingGUI.itemCounts,
-					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix
+					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix,
+					staticCountsHash: CraftingGUI.itemCountsHash
 				),
 				mainZoneControls: new(
 					zoneObjectFilterChoice: MagicUI.decraftingUI.GetDefaultPage<DecraftingUIState.ShimmeringPage>().recipeButtons.Choice,
@@ -127,7 +128,8 @@ namespace MagicStorage {
 					staticResultItemGroupsList: CraftingGUI.itemGroups,
 					staticResultItemsFromModulesList: CraftingGUI.sourceItemsFromModules,
 					staticCountsDictionary: CraftingGUI.itemCounts,
-					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix
+					staticCountsByPrefixDictionary: CraftingGUI.itemCountsByPrefix,
+					staticCountsHash: CraftingGUI.itemCountsHash
 				),
 				ingredientControls: new(
 					staticShowAllIngredientsField: new ConstantValueProvider<bool>(false),

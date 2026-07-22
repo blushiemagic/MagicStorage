@@ -208,6 +208,32 @@ namespace MagicStorage.UI.States {
 			return item;
 		}
 
+		protected override void ConsumeLocalResultPreview(MagicStorageItemSlot slot, int stack) {
+			if (stack <= 0)
+				return;
+
+			int index = slot.id + CraftingGUI.IngredientColumns * (int)Math.Round(resultScrollBar.ViewPosition);
+			if (index < 0 || index >= DecraftingGUI.resultItems.Count)
+				return;
+
+			Item item = DecraftingGUI.resultItems[index];
+			item.stack -= stack;
+
+			if (item.stack <= 0) {
+				DecraftingGUI.resultItems.RemoveAt(index);
+
+				if (index < DecraftingGUI.resultItemsInfo.Count)
+					DecraftingGUI.resultItemsInfo.RemoveAt(index);
+			} else if (index < DecraftingGUI.resultItemsInfo.Count)
+				DecraftingGUI.resultItemsInfo[index] = item;
+
+			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+		}
+
+		protected override bool AcceptsResultSlotDeposit(Item existing, Item incoming, AcceptsItemAsResult acceptsItem) {
+			return existing is not null && !existing.IsAir && base.AcceptsResultSlotDeposit(existing, incoming, acceptsItem);
+		}
+
 		// GetStorage not overridden since the implementation would be the same here
 
 		protected override bool HaveZonesChangedDueToScrolling() {

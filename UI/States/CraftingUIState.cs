@@ -253,7 +253,7 @@ namespace MagicStorage.UI.States {
 			recursionButton.mouseOver = Color.White;
 			recursionButton.Left.Set(18, 0f);
 			recursionButton.Width.Set(recursionButton.Text.MinWidth.Pixels + 30, 0f);
-			recursionButton.OnLeftClick += static (evt, e) => CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller: "CraftingUIState.recursionButton.LeftClick()")?.Start();
+			recursionButton.OnLeftClick += static (evt, e) => CraftingGUI.StartSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller: "CraftingUIState.recursionButton.LeftClick()", force: true);
 
 			storageZone.Width.Set(0f, 1f);
 			
@@ -667,6 +667,12 @@ namespace MagicStorage.UI.States {
 			delayedHistoryJump = true;
 
 			recipeWatchdogDelay = MAX_WATCHDOG_DELAY;
+			CraftingGUI.ResetRefreshCache();
+			CraftingGUI.lastKnownRecursionErrorForStoredItems = null;
+			CraftingGUI.lastKnownRecursionErrorForObjects = null;
+
+			MagicUI.IgnoreSpecificZoneRefreshing = true;
+			MagicUI.RequestFullRefresh();
 		}
 
 		protected override void OnClose() {
@@ -824,7 +830,7 @@ namespace MagicStorage.UI.States {
 
 			private void RecipeFilterChanged() {
 				if (!base.IsOpening)
-					MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.RecipeFilterChanged()");
+					MagicUI.StartMainZoneRefreshThread(caller: "CraftingUIState+RecipesPage.RecipeFilterChanged()", forceMainZoneRebuild: true);
 			}
 
 			private static void SelectPage() {
@@ -938,8 +944,6 @@ namespace MagicStorage.UI.States {
 			public override void Update(GameTime gameTime) {
 				base.Update(gameTime);
 
-				MagicUI.CheckRefresh();
-
 				if (GetStationCount() != lastKnownStationsCount || PendingZoneRefresh)
 					parentUI.Refresh();
 
@@ -1007,6 +1011,10 @@ namespace MagicStorage.UI.States {
 				stationZone.ClearContexts();
 
 				slotZone.ClearContexts();
+			}
+
+			public void ClearStationContexts() {
+				stationZone.ClearContexts();
 			}
 
 			public override void GetZoneDimensions(out float top, out float bottomMargin) {

@@ -12,13 +12,26 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace MagicStorage.CrossMod {
+	/// <summary>
+	/// Defines a storage UI item filter that can be registered by Magic Storage or by another mod.
+	/// </summary>
 	public abstract partial class FilteringOption : ModTexturedType, ILocalizedModType {
+		/// <summary>
+		/// Gets the loader-assigned numeric identifier for this filtering option.
+		/// </summary>
 		public int Type { get; private set; }
 
+		/// <inheritdoc/>
 		public string LocalizationCategory => "FilteringOption";
 
+		/// <summary>
+		/// Gets the localized tooltip shown while hovering this option in the UI.
+		/// </summary>
 		public LocalizedText Tooltip => this.GetLocalization(nameof(Tooltip), PrettyPrintName);
 
+		/// <summary>
+		/// Gets the texture asset used for this option button.
+		/// </summary>
 		public Asset<Texture2D> TextureAsset => ModContent.Request<Texture2D>(Texture);
 
 		/// <summary>
@@ -43,12 +56,14 @@ namespace MagicStorage.CrossMod {
 		/// </summary>
 		public virtual bool IsGeneralFilter => false;
 
+		/// <inheritdoc/>
 		protected sealed override void Register() {
 			ModTypeLookup<FilteringOption>.Register(this);
 
 			Type = FilteringOptionLoader.Add(this);
 		}
 
+		/// <inheritdoc/>
 		public sealed override void SetupContent() {
 			SetStaticDefaults();
 
@@ -56,6 +71,9 @@ namespace MagicStorage.CrossMod {
 			_ = Tooltip;
 		}
 
+		/// <summary>
+		/// Gets whether this option is currently visible in the option list.
+		/// </summary>
 		public bool Visible { get; private set; } = true;
 
 		/// <summary>
@@ -66,11 +84,20 @@ namespace MagicStorage.CrossMod {
 		public virtual void OnSelected(NewUIButtonChoice source, int choiceIndex) { }
 
 		private readonly List<FilteringOption> childrenBefore = new();
+		/// <summary>
+		/// Gets options that should be placed before this option after ordering is resolved.
+		/// </summary>
 		public IReadOnlyList<FilteringOption> ChildrenBefore => childrenBefore;
 
 		private readonly List<FilteringOption> childrenAfter = new();
+		/// <summary>
+		/// Gets options that should be placed after this option after ordering is resolved.
+		/// </summary>
 		public IReadOnlyList<FilteringOption> ChildrenAfter => childrenAfter;
 
+		/// <summary>
+		/// Hides this option until visibility is reset from its default visibility rule.
+		/// </summary>
 		public void Hide() => Visible = false;
 
 		internal void AddChildBefore(FilteringOption child) => childrenBefore.Add(child);
@@ -82,6 +109,7 @@ namespace MagicStorage.CrossMod {
 		}
 
 		/// <summary> Returns the option's default visibility. This is usually called as an option is read for refreshing logic, but modders can call it too for information. </summary>
+		/// <param name="craftingGUI">Whether the option is being queried for the crafting UI instead of the storage UI.</param>
 		/// <returns> Whether or not this option will be visible by default. Modders can hide options later, if needed.</returns>
 		public virtual bool GetDefaultVisibility(bool craftingGUI) => true;
 
@@ -101,18 +129,31 @@ namespace MagicStorage.CrossMod {
 				child.ResetVisibility(craftingGUI);
 		}
 
+		/// <inheritdoc/>
 		public override string ToString() => Name;
 	}
 
+	/// <summary>
+	/// Runtime wrapper used when one filtering option needs to appear in multiple ordered slots.
+	/// </summary>
 	[Autoload(false)]
 	public class FilteringOptionSlot : FilteringOption {
+		/// <summary>
+		/// Gets the original filtering option represented by this slot.
+		/// </summary>
 		public FilteringOption Option { get; }
+
+		/// <summary>
+		/// Gets the visibility condition for this slot.
+		/// </summary>
 		public Multiple.Condition Condition { get; }
 
+		/// <inheritdoc/>
 		public override ItemFilter.Filter Filter => Option.Filter;
 
 		private readonly int _slot;
 
+		/// <inheritdoc/>
 		public override string Name => $"{Option.Name}_slot{_slot}";
 
 		internal FilteringOptionSlot(FilteringOption option, Multiple.Condition cond, int slot) {
@@ -122,8 +163,10 @@ namespace MagicStorage.CrossMod {
 			AddChildAfter(Option);
 		}
 
+		/// <inheritdoc/>
 		public override Position GetDefaultPosition() => throw new NotImplementedException();
 
+		/// <inheritdoc/>
 		public override bool GetDefaultVisibility(bool craftingGUI) => Condition(craftingGUI);
 	}
 
@@ -152,34 +195,67 @@ namespace MagicStorage.CrossMod {
 		}
 	}
 
+	/// <summary>
+	/// Provides access to registered filtering options and their resolved UI order.
+	/// </summary>
 	public static class FilteringOptionLoader {
+		/// <summary>
+		/// Stores references to Magic Storage's built-in filtering options after they are loaded.
+		/// </summary>
 		public static class Definitions {
+			/// <summary>The built-in all-items filter.</summary>
 			public static FilteringOption All { get; internal set; }
+			/// <summary>The built-in weapon filter group.</summary>
 			public static FilteringOption Weapon { get; internal set; }
+			/// <summary>The built-in melee weapon filter.</summary>
 			public static FilteringOption Melee { get; internal set; }
+			/// <summary>The built-in ranged weapon filter.</summary>
 			public static FilteringOption Ranged { get; internal set; }
+			/// <summary>The built-in magic weapon filter.</summary>
 			public static FilteringOption Magic { get; internal set; }
+			/// <summary>The built-in summon weapon filter.</summary>
 			public static FilteringOption Summon { get; internal set; }
+			/// <summary>The built-in throwing weapon filter.</summary>
 			public static FilteringOption Throwing { get; internal set; }
+			/// <summary>The built-in ammunition filter.</summary>
 			public static FilteringOption Ammo { get; internal set; }
+			/// <summary>The built-in tools and fishing filter group.</summary>
 			public static FilteringOption ToolsAndFishing { get; internal set; }
+			/// <summary>The built-in tools filter.</summary>
 			public static FilteringOption Tools { get; internal set; }
+			/// <summary>The built-in fishing filter.</summary>
 			public static FilteringOption Fishing { get; internal set; }
+			/// <summary>The built-in armor and equipment filter group.</summary>
 			public static FilteringOption ArmorAndEquips { get; internal set; }
+			/// <summary>The built-in armor filter.</summary>
 			public static FilteringOption Armor { get; internal set; }
+			/// <summary>The built-in equipment filter.</summary>
 			public static FilteringOption Equips { get; internal set; }
+			/// <summary>The built-in vanity filter.</summary>
 			public static FilteringOption Vanity { get; internal set; }
+			/// <summary>The built-in potion filter.</summary>
 			public static FilteringOption Potion { get; internal set; }
+			/// <summary>The built-in placeable tile filter.</summary>
 			public static FilteringOption Tiles { get; internal set; }
+			/// <summary>The built-in miscellaneous gameplay item filter.</summary>
 			public static FilteringOption MiscGameplayItems { get; internal set; }
+			/// <summary>The built-in miscellaneous item filter.</summary>
 			public static FilteringOption Misc { get; internal set; }
+			/// <summary>The built-in recent-items filter.</summary>
 			public static FilteringOption Recent { get; internal set; }
+			/// <summary>The built-in non-standard weapon class filter.</summary>
 			public static FilteringOption OtherWeapons { get; internal set; }
+			/// <summary>The built-in unstackable-items general filter.</summary>
 			public static FilteringOption Unstackables { get; internal set; }
+			/// <summary>The built-in stackable-items general filter.</summary>
 			public static FilteringOption Stackables { get; internal set; }
+			/// <summary>The built-in not-fully-researched general filter.</summary>
 			public static FilteringOption NotFullyResearched { get; internal set; }
+			/// <summary>The built-in fully-researched general filter.</summary>
 			public static FilteringOption FullyResearched { get; internal set; }
+			/// <summary>The built-in material filter.</summary>
 			public static FilteringOption Material { get; internal set; }
+			/// <summary>The built-in selling-items general filter.</summary>
 			public static FilteringOption SellingItems { get; internal set; }
 		}
 
@@ -188,25 +264,52 @@ namespace MagicStorage.CrossMod {
 		private static readonly List<FilteringOption> generalOptions = new();
 		internal static readonly Dictionary<string, HashSet<string>> optionNames = new();
 
+		/// <summary>
+		/// Gets registered non-general filtering options.
+		/// </summary>
 		public static IReadOnlyList<FilteringOption> Options => options.AsReadOnly();
 
+		/// <summary>
+		/// Gets registered general filtering options.
+		/// </summary>
 		public static IReadOnlyList<FilteringOption> GeneralOptions => generalOptions.AsReadOnly();
 
 		private static FilteringOption[] order;
 		private static FilteringOption[] generalOrder;
 
+		/// <summary>
+		/// Gets the resolved non-general option order.
+		/// </summary>
 		public static IReadOnlyList<FilteringOption> Order => order;
 
+		/// <summary>
+		/// Gets the resolved general option order.
+		/// </summary>
 		public static IReadOnlyList<FilteringOption> GeneralOrder => generalOrder;
 
+		/// <summary>
+		/// Gets the currently selected non-general filtering option type.
+		/// </summary>
 		public static int Selected { get; internal set; }
 
+		/// <summary>
+		/// Gets the selected general filtering option types.
+		/// </summary>
 		public static HashSet<int> GeneralSelections { get; } = new();
 
+		/// <summary>
+		/// Gets the number of registered non-general filtering options.
+		/// </summary>
 		public static int Count => options.Count;
 
+		/// <summary>
+		/// Gets the number of registered general filtering options.
+		/// </summary>
 		public static int GeneralCount => generalOptions.Count;
 
+		/// <summary>
+		/// Gets the total number of registered filtering options.
+		/// </summary>
 		public static int TotalCount => allOptions.Count;
 
 		internal static int Add(FilteringOption option) {
@@ -234,8 +337,16 @@ namespace MagicStorage.CrossMod {
 			return count;
 		}
 
+		/// <summary>
+		/// Gets a registered filtering option by loader index.
+		/// </summary>
+		/// <param name="index">The loader index to query.</param>
+		/// <returns>The matching option, or <see langword="null"/> when <paramref name="index"/> is out of range.</returns>
 		public static FilteringOption Get(int index) => index < 0 || index >= allOptions.Count ? null : allOptions[index];
 
+		/// <summary>
+		/// Gets the built-in filtering options shown as the base configurable choices.
+		/// </summary>
 		public static IEnumerable<FilteringOption> BaseOptions
 			=> new FilteringOption[] {
 				// Standard filters
@@ -352,6 +463,11 @@ namespace MagicStorage.CrossMod {
 			order = sort.Sort().ToArray();
 		}
 
+		/// <summary>
+		/// Gets all filtering options after recalculating visibility for the requested UI.
+		/// </summary>
+		/// <param name="craftingGUI">Whether options are being queried for the crafting UI instead of the storage UI.</param>
+		/// <returns>The ordered visible and hidden filtering options.</returns>
 		public static IEnumerable<FilteringOption> GetOptions(bool craftingGUI) {
 			foreach (var option in order)
 				option.ResetVisibility(craftingGUI);
@@ -361,6 +477,11 @@ namespace MagicStorage.CrossMod {
 			return order.Concat(generalOrder);
 		}
 
+		/// <summary>
+		/// Gets visible filtering options for the requested UI.
+		/// </summary>
+		/// <param name="craftingGUI">Whether options are being queried for the crafting UI instead of the storage UI.</param>
+		/// <returns>The ordered filtering options whose current visibility is enabled.</returns>
 		public static IEnumerable<FilteringOption> GetVisibleOptions(bool craftingGUI) => GetOptions(craftingGUI).Where(o => o.Visible);
 	}
 }

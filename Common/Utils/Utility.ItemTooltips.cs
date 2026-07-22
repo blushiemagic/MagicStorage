@@ -8,6 +8,9 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Gets the tooltip text lines Terraria would render for <paramref name="item"/>.
+		/// </summary>
 		public static List<string> GetItemTooltipLines(Item item) {
 			Item hoverItem = item;
 			int yoyoLogo = -1;

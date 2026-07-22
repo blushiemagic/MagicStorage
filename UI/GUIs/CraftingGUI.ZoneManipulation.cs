@@ -19,6 +19,28 @@ namespace MagicStorage {
 
 		public static CraftingInformation ReadCraftingEnvironmentFrom(Player player) => new(false, player.ZoneSnow, player.ZoneGraveyard, player.adjWater, player.adjLava, player.adjHoney, player.alchemyTable, player.adjShimmer, (bool[])player.adjTile.Clone());
 
+		internal static int GetCraftingEnvironmentHash() {
+			var hash = new HashCode();
+			hash.Add(Campfire);
+			hash.Add(zoneSnow);
+			hash.Add(graveyard);
+			hash.Add(adjWater);
+			hash.Add(adjLava);
+			hash.Add(adjHoney);
+			hash.Add(alchemyTable);
+			hash.Add(adjShimmer);
+			hash.Add(adjTiles?.Length ?? 0);
+
+			if (adjTiles is not null) {
+				for (int i = 0; i < adjTiles.Length; i++) {
+					if (adjTiles[i])
+						hash.Add(i);
+				}
+			}
+
+			return hash.ToHashCode();
+		}
+
 		public static void WriteCraftingEnvironment(in CraftingInformation information)
 		{
 			Campfire = information.campfire;

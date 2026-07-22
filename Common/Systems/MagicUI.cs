@@ -229,7 +229,16 @@ public class MagicUI : ModSystem
 			DecraftingGUI.CreateFullRefreshThread(caller).Start();
 	}
 
-	public static void StartMainZoneRefreshThread(string caller) {
+	public static void StartMainZoneRefreshThread(string caller, bool forceMainZoneRebuild = false) {
+		if (forceMainZoneRebuild) {
+			if (IsStorageUIOpen())
+				StorageGUI.ResetRefreshCache();
+			else if (IsCraftingUIOpen())
+				CraftingGUI.ResetRefreshCache();
+			else if (IsDecraftingUIOpen())
+				DecraftingGUI.ResetRefreshCache();
+		}
+
 		if (IsStorageUIOpen()) {
 			// Start a full refresh thread, since the main zone is the only thing present
 			StorageGUI.CreateFullRefreshThread(caller).Start();
@@ -245,7 +254,7 @@ public class MagicUI : ModSystem
 	public static void StartSelectedObjectRefreshThread(string caller) {
 		if (IsCraftingUIOpen()) {
 			// Start a refresh thread that updates the stored ingredients for the current recipe
-			CraftingGUI.CreateSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller).Start();
+			CraftingGUI.StartSelectedRecipeRefreshThread(CraftingGUI.selectedRecipe, CraftingGUI.craftAmountTarget, caller, force: true);
 		} else if (IsDecraftingUIOpen()) {
 			// Start a refresh thread that updates the stored items for the current shimmering item
 			DecraftingGUI.CreateSelectedItemRefreshThread(DecraftingGUI.selectedItem, CraftingGUI.craftAmountTarget, caller).Start();
@@ -256,7 +265,7 @@ public class MagicUI : ModSystem
 		if (typeof(T) == typeof(Recipe)) {
 			if (IsCraftingUIOpen()) {
 				// Start a refresh thread that updates the stored ingredients list for the provided recipe
-				CraftingGUI.CreateSelectedRecipeRefreshThread(Unsafe.As<T, Recipe>(ref selectedObject), amountTarget, caller);
+				CraftingGUI.StartSelectedRecipeRefreshThread(Unsafe.As<T, Recipe>(ref selectedObject), amountTarget, caller, force: true);
 			}
 		} else if (typeof(T) == typeof(int)) {
 			if (IsDecraftingUIOpen()) {
@@ -512,7 +521,7 @@ public class MagicUI : ModSystem
 		}
 
 		TEStorageHeart heart = StoragePlayer.LocalPlayer.GetStorageHeart();
-		bool viewingStorage = heart is not null;
+		bool viewingStorage = uiInterface?.CurrentState is not null && heart is not null;
 
 		if (viewingStorage) {
 			foreach (var module in heart.GetModules())
@@ -521,7 +530,12 @@ public class MagicUI : ModSystem
 
 		DummyNPCPool.ResetUpdates();  // Need to enforce at most one update, otherwise the NPCs start ZOOMING
 
-		uiInterface?.Update(gameTime);
+		try {
+			uiInterface?.Update(gameTime);
+		} finally {
+			if (uiInterface?.CurrentState is not null)
+				CheckRefresh();
+		}
 
 		if (viewingStorage) {
 			foreach (var module in heart.GetModules())
@@ -542,7 +556,9 @@ public class MagicUI : ModSystem
 	}
 
 	private static bool CanUpdateMouseText()
-		=> uiInterface.CurrentState is not null && !object.ReferenceEquals(uiInterface.CurrentState.GetElementAt(new Vector2(Main.mouseX, Main.mouseY)), uiInterface.CurrentState);
+		=> !string.IsNullOrWhiteSpace(mouseText)
+		&& uiInterface.CurrentState is not null
+		&& !object.ReferenceEquals(uiInterface.CurrentState.GetElementAt(new Vector2(Main.mouseX, Main.mouseY)), uiInterface.CurrentState);
 
 	public override void PostUpdateInput() {
 		CanUpdateSearchBars = true;

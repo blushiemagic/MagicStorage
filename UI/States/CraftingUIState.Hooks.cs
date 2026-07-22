@@ -14,6 +14,15 @@ using Terraria.ModLoader.Config;
 
 namespace MagicStorage.UI.States {
 	partial class CraftingUIState {
+		protected static MagicStorageItemSlot SlotFocusSourceSlot { get; private set; }
+
+		internal static void ConsumeSlotFocusResultPreview(int stack) {
+			if (MagicUI.uiInterface?.CurrentState is CraftingUIState state && SlotFocusSourceSlot is not null)
+				state.ConsumeLocalResultPreview(SlotFocusSourceSlot, stack);
+		}
+
+		internal static void ClearSlotFocusSourceSlot() => SlotFocusSourceSlot = null;
+
 		protected virtual bool CanShowAllIngredientsToggle() => true;
 
 		protected virtual void ClampCraftAmount() => CraftingGUI.ClampCraftAmount();
@@ -23,6 +32,16 @@ namespace MagicStorage.UI.States {
 		protected virtual IHistoryCollection CreateHistory() => new RecipeHistory();
 
 		protected virtual bool DepositItem(Item item) => CraftingGUI.TryDepositResult(item);
+
+		protected virtual bool AcceptsResultSlotDeposit(Item existing, Item incoming, AcceptsItemAsResult acceptsItem) {
+			if (incoming is null || incoming.IsAir)
+				return false;
+
+			if (existing is not null && !existing.IsAir)
+				return acceptsItem(existing, incoming);
+
+			return CraftingGUI.selectedRecipe?.createItem.type == incoming.type;
+		}
 
 		protected virtual string GetCraftAmountLocalizationKey() => "Mods.MagicStorage.Crafting.Amount";
 
@@ -57,6 +76,47 @@ namespace MagicStorage.UI.States {
 		protected virtual Item GetResult(int slot, ref int context) => CraftingGUI.GetResult(slot, ref context);
 
 		protected virtual Item GetStorage(int slot, ref int context) => GetStorageItem(storageScrollBar, slot, ref context);
+
+		protected virtual void ConsumeLocalResultPreview(MagicStorageItemSlot slot, int stack) {
+			if (CraftingGUI.result is null || stack <= 0)
+				return;
+
+			if (CraftingGUI.result.maxStack <= 1) {
+				CraftingGUI.PublishSelectedRecipeResultShell();
+				return;
+			}
+
+			CraftingGUI.result.stack -= stack;
+			if (CraftingGUI.result.stack <= 0)
+				CraftingGUI.result = new Item();
+
+			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+		}
+
+		protected virtual void RestoreLocalResultPreview(MagicStorageItemSlot slot, int type, int stack) {
+			if (stack <= 0)
+				return;
+
+			if (CraftingGUI.result is { IsAir: false, maxStack: <= 1 }) {
+				CraftingGUI.PublishSelectedRecipeResultShell();
+				return;
+			}
+
+			if (CraftingGUI.result is null || CraftingGUI.result.IsAir) {
+				if (CraftingGUI.selectedRecipe?.createItem.type != type)
+					return;
+
+				CraftingGUI.result = CraftingGUI.selectedRecipe.createItem.Clone();
+				CraftingGUI.result.stack = 0;
+			}
+
+			if (CraftingGUI.result.type != type)
+				return;
+
+			CraftingGUI.result.stack += stack;
+
+			resultZone.SetItemsAndContexts(int.MaxValue, GetResult);
+		}
 
 		protected virtual bool HaveZonesChangedDueToScrolling() => storageScrollBar.ViewPosition != lastKnownScrollBarViewPosition || ingredientScrollBar.ViewPosition != lastKnownIngredientScrollBarViewPosition;
 
@@ -161,6 +221,11 @@ namespace MagicStorage.UI.States {
 
 			ClearObjectText();
 
+			if (!CraftingGUI.hasCompleteData) {
+				AppendNoneObjectText();
+				return;
+			}
+
 			if (CraftingGUI.selectedRecipe is not null) {
 				bool isEmpty = true;
 				StringBuilder text = new();
@@ -169,6 +234,7 @@ namespace MagicStorage.UI.States {
 				IEnumerable<Condition> conditions;
 				bool useRecursion = MagicStorageConfig.IsRecursionEnabled && CraftingGUI.selectedRecipe.HasRecursiveRecipe();
 				if (useRecursion && CraftingGUI.GetCraftingSimulationForCurrentRecipe() is CraftingSimulation { AmountCrafted: > 0 } simulation) {
+					CraftingGUI.lastKnownRecursionErrorForObjects = null;
 					requiredTiles = simulation.RequiredTiles;
 					conditions = simulation.RequiredConditions;
 				} else {
@@ -216,7 +282,7 @@ namespace MagicStorage.UI.States {
 			protected virtual string GetHiddenSetRevealLocalizationKey() => "Mods.MagicStorage.RecipeRevealed";
 
 			protected override Item GetMainZoneItem(int slot, ref int context) {
-				if (MagicUI.CurrentlyRefreshing)
+				if (!CraftingGUI.hasCompleteData)
 					return new Item();
 
 				int index = slot + CraftingGUI.RecipeColumns * (int)Math.Round(scrollBar.ViewPosition);
@@ -258,7 +324,7 @@ namespace MagicStorage.UI.States {
 
 			protected virtual int GetStationCount() => CraftingGUI.GetCraftingStations().Count;
 
-			protected virtual int GetZoneItemCount() => MagicUI.CurrentlyRefreshing ? 0 : CraftingGUI.recipes?.Count ?? 0;
+			protected virtual int GetZoneItemCount() => CraftingGUI.hasCompleteData ? CraftingGUI.recipes?.Count ?? 0 : 0;
 
 			protected virtual void OnMainZoneItemBlacklistChanged(Item item, bool blacklisted) {
 				CraftingGUI.SetNextDefaultRecipeCollectionToRefresh(item.type);

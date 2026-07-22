@@ -56,15 +56,19 @@ namespace MagicStorage {
 		/// Attempts to craft a certain amount of items from the currently assigned Crafting Interface.
 		/// </summary>
 		/// <param name="toCraft">How many items should be crafted</param>
-		public static void Craft(int toCraft) {
+		/// <returns><see langword="true"/> when at least one item was crafted or a multiplayer craft request was sent; otherwise, <see langword="false"/>.</returns>
+		public static bool Craft(int toCraft) {
 			TEStorageHeart heart = GetHeart();
 			if (heart is null)
-				return;  // Bail
+				return false;  // Bail
 
 			NetHelper.Report(true, $"Attempting to craft {toCraft} {Lang.GetItemNameValue(selectedRecipe.createItem.type)}");
 
 			// Additional safeguard against absurdly high craft targets
 			int origCraftRequest = toCraft;
+			if (toCraft > (amountCraftableForCurrentRecipe ?? 0))
+				amountCraftableForCurrentRecipe = null;
+
 			toCraft = Math.Min(toCraft, AmountCraftableForCurrentRecipe());
 
 			if (toCraft != origCraftRequest)
@@ -72,7 +76,7 @@ namespace MagicStorage {
 
 			if (toCraft <= 0) {
 				NetHelper.Report(false, "Amount to craft was less than 1, aborting");
-				return;
+				return false;
 			}
 
 			CraftingContext context;
@@ -81,7 +85,17 @@ namespace MagicStorage {
 				context = Craft_WithRecursion(toCraft);
 
 				if (context is null)
-					return;  // Bail
+					return false;  // Bail
+
+				if (context.toCraft >= toCraft) {
+					NetHelper.Report(false, "Recursive crafting did not craft any items, aborting");
+					return false;
+				}
+
+				if (context.results.Count <= 0) {
+					NetHelper.Report(false, "Recursive crafting did not produce any results, aborting");
+					return false;
+				}
 			} else {
 				context = InitCraftingContext(selectedRecipe, toCraft);
 
@@ -93,7 +107,7 @@ namespace MagicStorage {
 
 				if (target == context.toCraft) {
 					//Could not craft anything, bail
-					return;
+					return false;
 				}
 			}
 
@@ -114,12 +128,24 @@ namespace MagicStorage {
 						Main.LocalPlayer.QuickSpawnItem(new EntitySource_TileEntity(heart), item, item.stack);
 				}
 
-				MagicUI.RequestFullRefresh();
+				RequestRefreshAfterCraft(context);
+				return true;
 			} else if (Main.netMode == NetmodeID.MultiplayerClient) {
 				NetHelper.Report(true, "Sending craft results to server...");
 
 				NetHelper.SendCraftRequest(heart.Position, context.toWithdraw, context.results);
+				return true;
 			}
+
+			return false;
+		}
+
+		private static void RequestRefreshAfterCraft(CraftingContext context) {
+			InvalidateSelectedRecipePreviewAfterInventoryChange();
+			ForceNextRecipeRefreshToBeFull();
+			RequestSelectedRecipeSnapshotForNextRecipeRefresh();
+			PublishSelectedRecipeResultShell();
+			MagicUI.RequestMainZoneThread();
 		}
 
 		private static void Craft_DoStandardCraft(CraftingContext context) {
@@ -156,7 +182,7 @@ namespace MagicStorage {
 		}
 
 		private static void Craft_DoRecursionCraft(CraftingContext ctx) {
-			var simulation = GetCraftingSimulationForCurrentRecipe();
+			var simulation = GetCraftingSimulationForCurrentRecipe(ctx.toCraft);
 
 			if (simulation.AmountCrafted <= 0) {
 				NetHelper.Report(false, "Crafting simulation resulted in zero crafts, aborting");
@@ -169,7 +195,8 @@ namespace MagicStorage {
 
 			ctx.simulation = true;
 
-			foreach (var m in simulation.RequiredMaterials) {
+			List<RequiredMaterialInfo> requiredMaterials = CloneRequiredMaterials(simulation.RequiredMaterials);
+			foreach (var m in requiredMaterials) {
 				if (m.Stack <= 0)
 					continue;  // Safeguard: material was already "used up" by higher up recipes
 
@@ -249,7 +276,22 @@ namespace MagicStorage {
 				}
 			}
 
+			ctx.toCraft -= simulation.AmountCrafted;
+
 			NetHelper.Report(true, $"Success! Crafted {simulation.AmountCrafted} items and {simulation.ExcessResults.Count - 1} extra item types");
+		}
+
+		private static List<RequiredMaterialInfo> CloneRequiredMaterials(IReadOnlyList<RequiredMaterialInfo> materials) {
+			List<RequiredMaterialInfo> result = new(materials.Count);
+
+			foreach (RequiredMaterialInfo material in materials) {
+				SharedCounter stack = new(material.Stack);
+				result.Add(material.recipeGroup
+					? RequiredMaterialInfo.FromGroup(material.itemOrGroupID, stack)
+					: RequiredMaterialInfo.FromItem(material.itemOrGroupID, stack));
+			}
+
+			return result;
 		}
 
 		private static void AttemptCraft(Func<CraftingContext, bool> func, CraftingContext context) {

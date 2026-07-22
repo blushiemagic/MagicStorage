@@ -5,6 +5,9 @@ using System;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Writes a console line directly on the main thread or queues it safely from another thread.
+		/// </summary>
 		public static void WriteLineSafely(string text) {
 			if (!AssetRepository.IsMainThread) {
 				// Local capturing
@@ -20,6 +23,9 @@ namespace MagicStorage {
 				Console.WriteLine(text);
 		}
 
+		/// <summary>
+		/// Writes a colored console line directly on the main thread or queues it safely from another thread.
+		/// </summary>
 		public static void WriteLineColoredSafely(string text, ConsoleColor fg, ConsoleColor bg) {
 			if (!AssetRepository.IsMainThread) {
 				// Local capturing
@@ -36,6 +42,9 @@ namespace MagicStorage {
 				Console.WriteLine(text);
 		}
 
+		/// <summary>
+		/// Writes a colored console line using the thread-safe console writer.
+		/// </summary>
 		public static void PrettyWriteLineToConsole(string text, ConsoleColor foregroundColor, ConsoleColor backgroundColor) => WriteLineColoredSafely(text, foregroundColor, backgroundColor);
 	}
 }

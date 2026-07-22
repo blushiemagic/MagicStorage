@@ -68,7 +68,7 @@ namespace MagicStorage {
 
 				AnalyzeIngredients();
 
-				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.SetAdjTiles([.. CraftingGUI.adjTiles]);
 				MainZoneObjectsFilterControls.filterProvider = new StandardShimmerableItemFilterProvider(this);
 
 				ShimmerSnapshots.CollectObjects();
@@ -156,7 +156,7 @@ namespace MagicStorage {
 
 				AnalyzeIngredients();
 				
-				MainZoneObjectsFilterControls.adjTiles = [.. CraftingGUI.adjTiles];
+				MainZoneObjectsFilterControls.SetAdjTiles([.. CraftingGUI.adjTiles]);
 				MainZoneObjectsFilterControls.filterProvider = new StandardShimmerableItemFilterProvider(this);
 
 				ShimmerSnapshots.CollectObjects();

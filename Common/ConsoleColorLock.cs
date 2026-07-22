@@ -19,6 +19,9 @@ namespace MagicStorage.Common {
 			_valid = true;
 		}
 
+		/// <summary>
+		/// Acquires the console color lock and applies the requested colors until disposal.
+		/// </summary>
 		public static ConsoleColorLock Acquire(ConsoleColor fg, ConsoleColor bg) {
 			int localLock = Interlocked.Increment(ref _lock);
 
@@ -35,6 +38,9 @@ namespace MagicStorage.Common {
 			return new ConsoleColorLock(oldFG, oldBG, false);
 		}
 
+		/// <summary>
+		/// Acquires the console color lock and resets console colors until disposal.
+		/// </summary>
 		public static ConsoleColorLock Acquire() {
 			int localLock = Interlocked.Increment(ref _lock);
 
@@ -48,6 +54,9 @@ namespace MagicStorage.Common {
 			return new ConsoleColorLock(default, default, true);
 		}
 
+		/// <summary>
+		/// Restores the previous console colors and releases the lock.
+		/// </summary>
 		public void Dispose() {
 			if (!_valid)
 				return;

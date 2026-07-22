@@ -9,8 +9,25 @@ using Terraria.ModLoader.IO;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Checks whether two items are equal for strict stacking purposes.
+		/// </summary>
+		/// <param name="item1">The first item to compare.</param>
+		/// <param name="item2">The second item to compare.</param>
+		/// <param name="checkStack">Whether stack size must match.</param>
+		/// <param name="checkPrefix">Whether prefix must match.</param>
+		/// <returns><see langword="true" /> if the items are strictly equal; otherwise, <see langword="false" />.</returns>
 		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack = false, bool checkPrefix = true) => AreStrictlyEqual(item1, item2, checkStack, checkPrefix, null);
 
+		/// <summary>
+		/// Checks whether two items are equal for strict stacking purposes, using optional cached serialized data.
+		/// </summary>
+		/// <param name="item1">The first item to compare.</param>
+		/// <param name="item2">The second item to compare.</param>
+		/// <param name="checkStack">Whether stack size must match.</param>
+		/// <param name="checkPrefix">Whether prefix must match.</param>
+		/// <param name="savedItemTagIO">An optional cache of serialized item data.</param>
+		/// <returns><see langword="true" /> if the items are strictly equal; otherwise, <see langword="false" />.</returns>
 		public static bool AreStrictlyEqual(Item item1, Item item2, bool checkStack, bool checkPrefix, ConditionalWeakTable<Item, byte[]> savedItemTagIO) {
 			int stack1 = item1.stack;
 			int stack2 = item2.stack;
@@ -72,6 +89,12 @@ namespace MagicStorage {
 			return retVal;
 		}
 
+		/// <summary>
+		/// Invokes tModLoader stack hooks after items have been stacked.
+		/// </summary>
+		/// <param name="destination">The destination item stack.</param>
+		/// <param name="source">The source item stack.</param>
+		/// <param name="numTransfered">The number of items transferred.</param>
 		public static void CallOnStackHooks(Item destination, Item source, int numTransfered) {
 			ItemLoader.OnStack(destination, source, numTransfered);
 		}

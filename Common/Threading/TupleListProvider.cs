@@ -3,12 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MagicStorage.Common.Threading {
+	/// <summary>
+	/// Combines two list providers into a local list of paired records.
+	/// </summary>
 	public class TupleListProvider<T1, T2> : IEnumerable<GenericRecord<T1, T2>> {
 		private readonly ListProvider<T1> _provider1;
 		private readonly ListProvider<T2> _provider2;
 
+		/// <summary>
+		/// The local paired-record list.
+		/// </summary>
 		public List<GenericRecord<T1, T2>> List { get; set; } = [];
 
+		/// <summary>
+		/// Creates a paired list from the overlapping entries of two source providers.
+		/// </summary>
 		public TupleListProvider(ListProvider<T1> provider1, ListProvider<T2> provider2) {
 			_provider1 = provider1;
 			_provider2 = provider2;
@@ -18,6 +27,9 @@ namespace MagicStorage.Common.Threading {
 				List.Add(new GenericRecord<T1, T2>(provider1[i], provider2[i]));
 		}
 
+		/// <summary>
+		/// Copies the paired list values back to the source providers.
+		/// </summary>
 		public void CopyToProviders() {
 			_provider1.Clear();
 			_provider2.Clear();
@@ -28,20 +40,32 @@ namespace MagicStorage.Common.Threading {
 			}
 		}
 
+		/// <summary>
+		/// Wraps a function that reads the first item in a pair so it can consume paired records.
+		/// </summary>
 		public Func<GenericRecord<T1, T2>, TOut> WrapFunction<TOut>(Func<T1, TOut> function) => new Wrapper1<TOut>(function).Unwrap;
 
 		private record class Wrapper1<TOut>(Func<T1, TOut> Function) {
 			public TOut Unwrap(GenericRecord<T1, T2> @record) => Function(@record.Item1);
 		}
 
+		/// <summary>
+		/// Wraps a function that reads the second item in a pair so it can consume paired records.
+		/// </summary>
 		public Func<GenericRecord<T1, T2>, TOut> WrapFunction<TOut>(Func<T2, TOut> function) => new Wrapper2<TOut>(function).Unwrap;
 
 		private record class Wrapper2<TOut>(Func<T2, TOut> Function) {
 			public TOut Unwrap(GenericRecord<T1, T2> @record) => Function(@record.Item2);
 		}
 
+		/// <summary>
+		/// Adds a paired value to the local list.
+		/// </summary>
 		public void Add(T1 item1, T2 item2) => List.Add(new GenericRecord<T1, T2>(item1, item2));
 
+		/// <summary>
+		/// Adds paired values from two enumerables until either enumerable ends.
+		/// </summary>
 		public void AddRange(IEnumerable<T1> items1, IEnumerable<T2> items2) {
 			var enumerator1 = items1.GetEnumerator();
 			var enumerator2 = items2.GetEnumerator();
@@ -50,8 +74,14 @@ namespace MagicStorage.Common.Threading {
 				List.Add(new GenericRecord<T1, T2>(enumerator1.Current, enumerator2.Current));
 		}
 
+		/// <summary>
+		/// Returns whether the first position of any pair matches <paramref name="item"/>.
+		/// </summary>
 		public bool Contains(T1 item) => Contains(item, EqualityComparer<T1>.Default);
 
+		/// <summary>
+		/// Returns whether the first position of any pair matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public bool Contains(T1 item, IEqualityComparer<T1> comparer) {
 			foreach (var items in List) {
 				if (comparer.Equals(items.Item1, item))
@@ -61,8 +91,14 @@ namespace MagicStorage.Common.Threading {
 			return false;
 		}
 
+		/// <summary>
+		/// Returns whether the second position of any pair matches <paramref name="item"/>.
+		/// </summary>
 		public bool Contains(T2 item) => Contains(item, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Returns whether the second position of any pair matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public bool Contains(T2 item, IEqualityComparer<T2> comparer) {
 			foreach (var items in List) {
 				if (comparer.Equals(items.Item2, item))
@@ -72,8 +108,14 @@ namespace MagicStorage.Common.Threading {
 			return false;
 		}
 
+		/// <summary>
+		/// Returns whether any pair matches both values.
+		/// </summary>
 		public bool Contains(T1 item1, T2 item2) => Contains(item1, EqualityComparer<T1>.Default, item2, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Returns whether any pair matches both values using the provided comparers.
+		/// </summary>
 		public bool Contains(T1 item1, IEqualityComparer<T1> comparer1, T2 item2, IEqualityComparer<T2> comparer2) {
 			foreach (var items in List) {
 				if (comparer1.Equals(items.Item1, item1) && comparer2.Equals(items.Item2, item2))
@@ -82,8 +124,14 @@ namespace MagicStorage.Common.Threading {
 			return false;
 		}
 
+		/// <summary>
+		/// Finds the first pair whose first value matches <paramref name="item"/>.
+		/// </summary>
 		public int IndexOf(T1 item) => IndexOf(item, EqualityComparer<T1>.Default);
 
+		/// <summary>
+		/// Finds the first pair whose first value matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public int IndexOf(T1 item, IEqualityComparer<T1> comparer) {
 			for (int i = 0; i < List.Count; i++) {
 				if (comparer.Equals(List[i].Item1, item))
@@ -93,8 +141,14 @@ namespace MagicStorage.Common.Threading {
 			return -1;
 		}
 
+		/// <summary>
+		/// Finds the first pair whose second value matches <paramref name="item"/>.
+		/// </summary>
 		public int IndexOf(T2 item) => IndexOf(item, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Finds the first pair whose second value matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public int IndexOf(T2 item, IEqualityComparer<T2> comparer) {
 			for (int i = 0; i < List.Count; i++) {
 				if (comparer.Equals(List[i].Item2, item))
@@ -103,8 +157,14 @@ namespace MagicStorage.Common.Threading {
 			return -1;
 		}
 
+		/// <summary>
+		/// Finds the first pair that matches both values.
+		/// </summary>
 		public int IndexOf(T1 item1, T2 item2) => IndexOf(item1, EqualityComparer<T1>.Default, item2, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Finds the first pair that matches both values using the provided comparers.
+		/// </summary>
 		public int IndexOf(T1 item1, IEqualityComparer<T1> comparer1, T2 item2, IEqualityComparer<T2> comparer2) {
 			for (int i = 0; i < List.Count; i++) {
 				if (comparer1.Equals(List[i].Item1, item1) && comparer2.Equals(List[i].Item2, item2))
@@ -114,10 +174,19 @@ namespace MagicStorage.Common.Threading {
 			return -1;
 		}
 
+		/// <summary>
+		/// Inserts a paired value at <paramref name="index"/>.
+		/// </summary>
 		public void Insert(int index, T1 item1, T2 item2) => List.Insert(index, new GenericRecord<T1, T2>(item1, item2));
 
+		/// <summary>
+		/// Removes the first pair whose first value matches <paramref name="item"/>.
+		/// </summary>
 		public bool Remove(T1 item) => Remove(item, EqualityComparer<T1>.Default);
 
+		/// <summary>
+		/// Removes the first pair whose first value matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public bool Remove(T1 item, IEqualityComparer<T1> comparer) {
 			for (int i = 0; i < List.Count; i++) {
 				if (comparer.Equals(List[i].Item1, item)) {
@@ -129,8 +198,14 @@ namespace MagicStorage.Common.Threading {
 			return false;
 		}
 
+		/// <summary>
+		/// Removes the first pair whose second value matches <paramref name="item"/>.
+		/// </summary>
 		public bool Remove(T2 item) => Remove(item, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Removes the first pair whose second value matches <paramref name="item"/> using <paramref name="comparer"/>.
+		/// </summary>
 		public bool Remove(T2 item, IEqualityComparer<T2> comparer) {
 			for (int i = 0; i < List.Count; i++) {
 				if (comparer.Equals(List[i].Item2, item)) {
@@ -142,8 +217,14 @@ namespace MagicStorage.Common.Threading {
 			return false;
 		}
 
+		/// <summary>
+		/// Removes the first pair that matches both values.
+		/// </summary>
 		public bool Remove(T1 item1, T2 item2) => Remove(item1, EqualityComparer<T1>.Default, item2, EqualityComparer<T2>.Default);
 
+		/// <summary>
+		/// Removes the first pair that matches both values using the provided comparers.
+		/// </summary>
 		public bool Remove(T1 item1, IEqualityComparer<T1> comparer1, T2 item2, IEqualityComparer<T2> comparer2) {
 			for (int i = 0; i < List.Count; i++) {
 				var value = List[i];
@@ -157,6 +238,7 @@ namespace MagicStorage.Common.Threading {
 		}
 
 		#region IEnumerable
+		/// <inheritdoc/>
 		public List<GenericRecord<T1, T2>>.Enumerator GetEnumerator() => List.GetEnumerator();
 
 		IEnumerator<GenericRecord<T1, T2>> IEnumerable<GenericRecord<T1, T2>>.GetEnumerator() => GetEnumerator();

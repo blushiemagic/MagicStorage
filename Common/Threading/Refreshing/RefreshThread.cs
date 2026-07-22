@@ -353,7 +353,7 @@ namespace MagicStorage.Common.Threading.Refreshing {
 				HasSuccessfulCompletion = true;
 
 				NetHelper.Report(true, "Main work for thread finished");
-			} catch (OperationCanceledException) {
+			} catch (Exception ex) when (IsCancellationException(ex)) {
 				NetHelper.Report(true, "Thread work was cancelled");
 			} catch (Exception ex) {
 				hasError = true;
@@ -407,6 +407,25 @@ namespace MagicStorage.Common.Threading.Refreshing {
 					MarkAsFinished();
 				}
 			}
+		}
+
+		internal static bool IsCancellationException(Exception ex) {
+			if (ex is OperationCanceledException)
+				return true;
+
+			if (ex is not AggregateException aggregate)
+				return false;
+
+			var flattened = aggregate.Flatten();
+			if (flattened.InnerExceptions.Count <= 0)
+				return false;
+
+			foreach (Exception inner in flattened.InnerExceptions) {
+				if (!IsCancellationException(inner))
+					return false;
+			}
+
+			return true;
 		}
 
 		/// <summary>

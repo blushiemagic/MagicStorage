@@ -5,6 +5,9 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Adds the crafting stations, liquids, and biome effects provided by <paramref name="item"/> to <paramref name="information"/>.
+		/// </summary>
 		public static void AddCraftingZones(Item item, ref CraftingInformation information) {
 			if (item.IsAir)
 				return;

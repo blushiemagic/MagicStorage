@@ -313,7 +313,7 @@ namespace MagicStorage.UI.States {
 						defPage.filteringButtons.Choice = -1;
 				}
 				
-				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUI.configPages[].OptionClicked()");
+				MagicUI.StartMainZoneRefreshThread(caller: "BaseStorageUI.configPages[].OptionClicked()", forceMainZoneRebuild: true);
 			};
 
 			configPage.Width = StyleDimension.Fill;

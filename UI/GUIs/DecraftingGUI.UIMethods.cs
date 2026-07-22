@@ -3,6 +3,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria;
 using MagicStorage.CrossMod;
+using MagicStorage.UI.States;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
@@ -18,6 +19,7 @@ namespace MagicStorage {
 			slotFocus = -1;
 			rightClickTimer = 0;
 			maxRightClickTimer = CraftingGUI.StartMaxRightClickTimer;
+			CraftingUIState.ClearSlotFocusSourceSlot();
 		}
 
 		internal static void SlotFocusLogic()
@@ -44,6 +46,11 @@ namespace MagicStorage {
 					Item toWithdraw = resultItems[slotFocus].Clone();
 					toWithdraw.stack = 1;
 					Item result = DoWithdraw(toWithdraw);
+					if (result is null || result.IsAir) {
+						ResetSlotFocus();
+						return;
+					}
+
 					if (Main.mouseItem.IsAir)
 						Main.mouseItem = result;
 					else {
@@ -52,6 +59,7 @@ namespace MagicStorage {
 						Main.mouseItem.stack += result.stack;
 					}
 
+					CraftingUIState.ConsumeSlotFocusResultPreview(result.stack);
 					MagicUI.RequestFullRefresh();
 					SetNextDefaultItemCollectionToRefresh(Main.mouseItem.type);
 					SoundEngine.PlaySound(SoundID.MenuTick);
@@ -65,7 +73,7 @@ namespace MagicStorage {
 		{
 			if (slotFocus == -1
 			|| slotFocus >= resultItems.Count
-			|| !ItemStackSplitting.TickOneSplitOntoMouse(resultItems[slotFocus], CloneWithStackOverride, out bool waitingForNextSplit)
+			|| !ItemStackSplitting.TickOneSplitOntoMouse(resultItems[slotFocus], CloneWithStackOverride, out bool waitingForNextSplit, withdrawn => CraftingUIState.ConsumeSlotFocusResultPreview(withdrawn.stack))
 			|| !waitingForNextSplit)
 			{
 				ResetSlotFocus();

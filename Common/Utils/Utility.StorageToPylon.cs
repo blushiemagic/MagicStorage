@@ -9,6 +9,11 @@ using Terraria.ModLoader;
 
 namespace MagicStorage {
 	partial class Utility {
+		/// <summary>
+		/// Finds storage centers reachable from storage accesses near the player.
+		/// </summary>
+		/// <param name="self">The player to search around.</param>
+		/// <returns>The nearby storage centers connected to access tiles.</returns>
 		public static IEnumerable<TEStorageCenter> GetNearbyCenters(this Player self) {
 			Point16 centerTile = self.Center.ToTileCoordinates16();
 
@@ -39,6 +44,11 @@ namespace MagicStorage {
 				.OfType<TEStorageCenter>();
 		}
 
+		/// <summary>
+		/// Gets the storage heart connected to a storage access tile.
+		/// </summary>
+		/// <param name="access">The access tile position.</param>
+		/// <returns>The connected storage heart, or <see langword="null" /> when none exists.</returns>
 		public static TEStorageHeart GetHeartFromAccess(Point16 access) {
 			if (access.X < 0 || access.Y < 0)
 				return null;
@@ -51,6 +61,12 @@ namespace MagicStorage {
 			return storage.GetHeart(access.X, access.Y);
 		}
 
+		/// <summary>
+		/// Enumerates valid pylons near a player for remote access linking.
+		/// </summary>
+		/// <param name="player">The player to search around.</param>
+		/// <param name="range">The search range in pixels, or a negative value for unlimited range.</param>
+		/// <returns>The valid nearby pylons.</returns>
 		public static IEnumerable<TeleportPylonInfo> NearbyPylons(Player player, float range) {
 			if (!Main.PylonSystem.HasAnyPylon() || range == 0)
 				yield break;
@@ -77,6 +93,13 @@ namespace MagicStorage {
 			}
 		}
 
+		/// <summary>
+		/// Checks whether a storage system has a valid pylon near one of its centers.
+		/// </summary>
+		/// <param name="player">The player used for pylon validity checks.</param>
+		/// <param name="heart">The storage heart identifying the storage system.</param>
+		/// <param name="tileRange">The tile search range, or a negative value for unlimited range.</param>
+		/// <returns><see langword="true" /> when a valid pylon is within range; otherwise, <see langword="false" />.</returns>
 		public static bool StorageSystemHasNearbyPylon(Player player, TEStorageHeart heart, int tileRange) {
 			if (!Main.PylonSystem.HasAnyPylon() || heart is null || tileRange == 0)
 				return false;
@@ -108,6 +131,13 @@ namespace MagicStorage {
 			return false;
 		}
 
+		/// <summary>
+		/// Checks whether a player is near any center in a storage system.
+		/// </summary>
+		/// <param name="player">The player to check.</param>
+		/// <param name="heart">The storage heart identifying the storage system.</param>
+		/// <param name="range">The range in pixels, or a negative value for unlimited range.</param>
+		/// <returns><see langword="true" /> when the player is within range; otherwise, <see langword="false" />.</returns>
 		public static bool PlayerIsNearStorageSystem(Player player, TEStorageHeart heart, float range) {
 			if (heart is null || range == 0)
 				return false;
@@ -134,6 +164,13 @@ namespace MagicStorage {
 			return false;
 		}
 
+		/// <summary>
+		/// Checks whether a player is near a storage access tile.
+		/// </summary>
+		/// <param name="player">The player to check.</param>
+		/// <param name="access">The storage access tile position.</param>
+		/// <param name="range">The range in pixels, or a negative value for unlimited range.</param>
+		/// <returns><see langword="true" /> when the player is within range; otherwise, <see langword="false" />.</returns>
 		public static bool PlayerIsNearAccess(Player player, Point16 access, float range) {
 			if (range == 0)
 				return false;
@@ -152,6 +189,13 @@ namespace MagicStorage {
 			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
 		}
 
+		/// <summary>
+		/// Checks whether a player is near a valid pylon.
+		/// </summary>
+		/// <param name="player">The player to check.</param>
+		/// <param name="pylon">The pylon to check.</param>
+		/// <param name="range">The range in pixels, or a negative value for unlimited range.</param>
+		/// <returns><see langword="true" /> when the player is within range of a valid pylon; otherwise, <see langword="false" />.</returns>
 		public static bool PlayerIsNearPylon(Player player, TeleportPylonInfo pylon, float range) {
 			if (range == 0)
 				return false;
@@ -192,6 +236,13 @@ namespace MagicStorage {
 			return xMin <= pX && pX <= xMax && yMin <= pY && pY <= yMax;
 		}
 
+		/// <summary>
+		/// Checks whether a pylon is valid for remote access linking.
+		/// </summary>
+		/// <param name="player">The player used for biome and destination checks.</param>
+		/// <param name="info">The pylon to validate.</param>
+		/// <param name="checkNPCDanger">Whether nearby NPC danger should block linking.</param>
+		/// <returns><see langword="true" /> when the pylon is valid; otherwise, <see langword="false" />.</returns>
 		public static bool IsPylonValidForRemoteAccessLinking(Player player, TeleportPylonInfo info, bool checkNPCDanger) {
 			string key = null;
 
