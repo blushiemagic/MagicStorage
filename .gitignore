@@ -367,3 +367,5 @@ FodyWeavers.xsd
 
 #Jetbrains crap
 .idea/
+
+docs/
