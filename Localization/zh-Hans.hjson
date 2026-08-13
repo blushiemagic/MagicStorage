@@ -1,17 +1,17 @@
-# I recommend using the hjson key to translate all future text additions
-# Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
+# 我建议使用 hjson 键来翻译今后的所有文本新增内容
+# 同时也将它们添加到其他 hjson 文件中，但用 "//" 标记，并等待译者完成文本翻译
 # -Crapsky233
 
-Mods: {
-	MagicStorage: {
-		Items: {
-			BiomeGlobe: {
-				DisplayName: 生态球
-				Tooltip:
+模组：{
+	MagicStorage：{
+		物品：{
+			生物群系球：{
+				显示名称：生态球
+				提示：
 					'''
 					“世界的力量凝聚环绕在你的指尖”
-					制作时算作处于水、熔岩、蜂蜜、雪原环境、灵雾、恶魔/猩红祭坛旁
-					放在物品栏或制作存储单元的制作站槽位内即可生效
+					制作时算作处于雪原环境、灵雾环境、水、熔岩、蜂蜜、、恶魔/猩红祭坛旁
+					放在物品栏或制作存储接口的制作站槽位内即可生效
 					放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
 					可在制作界面直接用棉花糖制作熟棉花糖
 					丢出去之后会像沙滩球一样弹弹弹
@@ -19,56 +19,56 @@ Mods: {
 			}
 
 			CraftingAccess: {
-				DisplayName: 制作单元
+				DisplayName: 制作接口
 				Tooltip: 能够使用存储系统中的物品进行制作
 			}
 
 			CreativeStorageUnit: {
-				DisplayName: 创造单元
-				/* Tooltip:
+				显示名称：创造单元
+				提示信息：
 					'''
-					Stores an unlimited amount of every item type.
-					Does not count toward storage limits when in a storage system.
-					''' */
+					存储了无限量的所有物品。
+					不影响存储系统的存储上限。
+					'''
 			}
 
-			Locator: {
-				DisplayName: 定位器
-				Tooltip:
+			定位器: {
+				显示名称：定位器
+				提示：
 					'''
-					<right>存储核心以定位
-					<right>远程存储装置以设置定位
+					<right>存储中枢以定位
+					<right>远程中枢以设置定位
 					'''
 			}
 
 			LocatorDisk: {
 				DisplayName: 定位器驱动
-				Tooltip:
+				提示：
 					'''
-					<right>存储核心以定位
-					<right>远程存储装置以设置定位
+					<right>存储中枢以定位
+					<right>远程中枢以设置定位
 					可无限使用
 					'''
 			}
 
 			PortableAccess: {
-				DisplayName: 终极便携远程存储装置
+				DisplayName: 便携远程存储装置(终极)
 				Tooltip:
 					'''
-					<right>存储核心以连接
-					暂未连接到任何核心
-					使用以访问相应存储核心
+					<right>存储中枢以连接
+					暂未连接到任何存储中枢
+					使用以访问相应存储中枢
 					无距离限制
 					'''
 			}
 
 			PortableCraftingAccess: {
-				DisplayName: 便携远程制作装置
+				DisplayName: 便携远程制作装置(终极)
 				Tooltip:
 					'''
-					<right>制作单元以连接
-					暂未连接到任何单元
-					使用以访问相应制作单元
+					<right>制作接口以连接
+					暂未连接到任何制作接口
+					使用以访问相应制作接口
 					无距离限制
 					'''
 			}
@@ -79,11 +79,11 @@ Mods: {
 			}
 
 			RemoteAccess: {
-				DisplayName: 远程存储装置
+				DisplayName: 远程中枢
 				Tooltip:
 					'''
-					可远程访问某个存储核心
-					对于制作单元之类的组件来说与存储核心无异
+					可远程访问某个存储中枢
+					对于制作接口之类的元件来说与存储中枢无异
 					'''
 			}
 
@@ -94,39 +94,39 @@ Mods: {
 
 			SnowBiomeEmulator: {
 				DisplayName: 破损雪花球
-				Tooltip: 允许制作单元拥有雪地环境
+				Tooltip: 允许制作接口拥有雪地环境
 			}
 
 			StorageAccess: {
-				DisplayName: 存储装置
+				DisplayName: 存储访问器
 				Tooltip: 可作为对存储系统中存有物品的一个访问点
 			}
 
 			StorageComponent: {
 				DisplayName: 存储组件
-				Tooltip: 一切魔法存储组件的合成基础材料
+				Tooltip: 一切魔法存储元件的合成基础材料
 			}
 
 			StorageConnector: {
 				DisplayName: 存储连接器
-				Tooltip: 可用于连接不同的魔法存储组件，使其并入存储网络内
+				Tooltip: 可用于连接不同的魔法存储元件，使其并入存储系统内
 			}
 
 			StorageDeactivator: {
 				DisplayName: 存储单元魔杖
 				Tooltip:
 					'''
-					禁用/启用相应的存储单元
-					被禁用的存储单元会试图将其原存有物品移动到其他启用的存储单元内
+					停用/启用相应的存储单元
+					存储中枢会尝试将停用的存储单元内的物品转移到其他存储单元内
 					'''
 			}
 
 			StorageHeart: {
-				DisplayName: 存储核心
+				DisplayName: 存储中枢
 				Tooltip:
 					'''
-					魔法存储系统的核心
-					你需要建立一个存储系统以使其运作（通过将其与存储单元相邻放置）
+					魔法存储系统的中枢
+					一个存储系统需要存储中枢来运作（通过将其与存储单元相邻放置来构建一个最简单的存储系统）
 					'''
 			}
 
@@ -285,40 +285,40 @@ Mods: {
 			}
 
 			CombinedFurnitureStations1Item: {
-				DisplayName: 基础家具制作站
-				Tooltip: 基础组合家具制作站
+				DisplayName: 综合家具制作站(一级)
+				Tooltip: 结合了部分原版家具制作站的功能
 			}
 
 			CombinedFurnitureStations2Item: {
-				DisplayName: 进阶家具制作站
-				Tooltip: 结合了部分进阶家具制作站的功能
+				DisplayName: 综合家具制作站(二级)
+				Tooltip: 结合了部分原版家具制作站的功能
 			}
 
 			CombinedStations1Item: {
-				DisplayName: 基础制作站
-				Tooltip: 结合了部分基础制作站的功能
+				DisplayName: 综合制作站(一级)
+				Tooltip: 结合了部分原版制作站的功能
 			}
 
 			CombinedStations2Item: {
-				DisplayName: 进阶制作站
-				Tooltip: 结合了部分进阶制作站的功能
+				DisplayName: 综合制作站(二级)
+				Tooltip: 结合了部分原版制作站的功能
 			}
 
 			CombinedStations3Item: {
-				DisplayName: 高级制作站
-				Tooltip: 结合了部分高级制作站的功能
+				DisplayName: 综合制作站(三级)
+				Tooltip: 结合了部分原版制作站的功能
 			}
 
 			CombinedStations4Item: {
-				DisplayName: 终极制作站
-				Tooltip: 结合了一切制作站和液体需求
+				DisplayName: 综合制作站(终级)
+				Tooltip: 结合了一切原版制作站和液体需求
 			}
 
 			EnvironmentAccess: {
-				DisplayName: 存储网络配置单元
+				DisplayName: 配置接口
 				Tooltip:
 					'''
-					一个用于供其他模组与魔法存储系统进行跨模组访问的组件
+					一个用于供其他模组与魔法存储系统进行跨模组访问的元件
 					显示由其他模组添加的可开关的一系列跨模组模块，如果没有模块则不显示
 					可用模块:
 					<MODULES>
@@ -326,24 +326,26 @@ Mods: {
 			}
 
 			PortableAccessPreHM: {
-				DisplayName: 基础便携远程存储装置
+				DisplayName: 便携远程存储装置(基础)
 				Tooltip:
 					'''
-					<right>存储核心以连接
-					暂未连接到任何核心
-					使用以访问相应存储核心
+					<right>存储中枢以保存定位，当前暂未定位到任何存储中枢
+					使用以访问定位的存储中枢
+					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在100格以内。
+					玩家只能在距离晶塔或定位的制作接口1000格范围内访问相应的存储中枢
 					访问距离较小
 					'''
 			}
 
 			PortableAccessHM: {
-				DisplayName: 进阶便携远程存储装置
+				DisplayName: 便携远程存储装置(进阶)
 				Tooltip:
 					'''
-					<right>存储核心以连接
-					暂未连接到任何核心
-					使用以访问相应存储核心
-					访问距离较小
+					<right>存储中枢以保存定位，当前暂未定位到任何存储中枢
+					使用以访问定位的存储中枢
+					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在200格以内。
+					玩家只能在距离晶塔或定位的制作接口3000格范围内访问相应的存储中枢
+					访问距离适中
 					'''
 			}
 
@@ -368,87 +370,87 @@ Mods: {
 			}
 
 			PortableCraftingAccessPreHM: {
-				// DisplayName: Basic Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: 便携远程制作装置(基础)
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 100' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 1000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right>制作接口以保存定位，当前暂未定位到任何制作接口
+					使用以访问定位的制作接口
+					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在100格以内。
+					玩家只能在距离晶塔或定位的制作接口1000格范围内访问相应的制作接口
+					访问距离较小
+					'''
 			}
 
 			PortableCraftingAccessHM: {
-				// DisplayName: Advanced Portable Remote Crafting Access
-				/* Tooltip:
+				DisplayName: 便携远程制作装置(进阶)
+				Tooltip:
 					'''
-					<right> Crafting Interface to store location
-					Currently not set to any location
-					Use item to access your crafting
-					Linked Interface must be at most 200' from any valid pylon to gain extended reach on each pylon
-					Player must be at most 3000' away from the linked Interface or pylon to access crafting
-					''' */
+					<right>制作接口以保存定位，当前暂未定位到任何制作接口
+					使用以访问定位的制作接口
+					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在200格以内。
+					玩家只能在距离晶塔或定位的制作接口3000格范围内访问相应的制作接口
+					访问距离适中
+					'''
 			}
 
 			DecraftingAccess: {
-				// DisplayName: Storage Aether Interface
-				// Tooltip: Enables shimmering with the items in a storage system
+				DisplayName: 微光接口
+				Tooltip: 能够使用存储系统中的物品进行微光嬗变
 			}
 
 			Shimmer_CoinLuck: {
-				// DisplayName: Meta//Shimmer/Coin_Luck
-				// Tooltip: ""
+				DisplayName: Meta//Shimmer/Coin_Luck
+				Tooltip: ""
 			}
 
 			StorageCore: {
-				// DisplayName: Storage Core (Basic)
-				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
-				/* CommonTooltip:
+				DisplayName: 存储核心(基础)
+				Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+				CommonTooltip:
 					'''
-					Stores the items that were in a Storage Unit
-					<right> an Empty Storage Unit to insert it
+					存储了原本在存储单元中的物品
+					<right> 一个空存储单元以插入
 					<CAPACITY>
 					<HASH>
 					<BYTES>
-					''' */
+					'''
 				// ItemsStored: "[c/{0}:{1} / {2} items]"
 				// Hash: Data hash: {0:x08}
 				// BytesUsed: "[c/{0}:{1} bytes]"
 			}
 
-			// StorageCoreBlueChlorophyte.DisplayName: Storage Core (Blue Chlorophyte)
-			// StorageCoreCrimtane.DisplayName: Storage Core (Crimtane)
-			// StorageCoreDemonite.DisplayName: Storage Core (Demonite)
-			// StorageCoreHallowed.DisplayName: Storage Core (Hallowed)
-			// StorageCoreHellstone.DisplayName: Storage Core (Hellstone)
-			// StorageCoreLuminite.DisplayName: Storage Core (Luminite)
-			// StorageCoreTerra.DisplayName: Storage Core (Terra)
+			StorageCoreBlueChlorophyte.DisplayName: 存储核心(蓝色叶绿)
+			StorageCoreCrimtane.DisplayName: 存储核心(猩红)
+			StorageCoreDemonite.DisplayName: 存储核心(魔金)
+			StorageCoreHallowed.DisplayName: 存储核心(神圣)
+			StorageCoreHellstone.DisplayName: 存储核心(狱岩)
+			StorageCoreLuminite.DisplayName: 存储核心(夜明)
+			StorageCoreTerra.DisplayName: 存储核心(泰拉)
 
 			StorageExtractor: {
-				// DisplayName: Storage Core Wrench
-				// Tooltip: Can remove the Storage Core from a Storage Unit
+				DisplayName: 存储核心扳手
+				Tooltip: 可将存储核心从存储单元中提取出来
 			}
 
 			StorageUnitEmpty: {
-				// DisplayName: Empty Storage Unit
-				/* Tooltip:
+				DisplayName: 空存储单元
+				Tooltip:
 					'''
-					A component for storing items in a Magic Storage storage system
-					Needs a Storage Core to function
-					Right click while holding a Storage Core to insert it
-					''' */
+					在魔法存储系统中存储物品的元件
+					需要一个存储核心才能运作
+					手持存储核心右键单击即可将其插入
+					'''
 			}
 
 			StorageSecurity: {
-				// DisplayName: Storage Security Wand
-				/* Tooltip:
+				DisplayName: 存储安全魔杖
+				Tooltip:
 					'''
-					<left> a Storage Heart to open the Security Network
-					Storage components connected to a Storage Heart assigned to a private Security Network
-					  cannot be accessed until the password for the Security Network has been entered.
-					The creator of a Security Network will always have access to it, however.
-					''' */
+					<left> 存储中枢以打开安全网络
+					可将私人网络分配给该存储中枢
+					    设置了私人网络的存储中枢只能通过密码来访问
+						(该私人网络创建者无需输入密码即可访问)
+					'''
 			}
 
 			ErrorItems: {
@@ -505,29 +507,29 @@ Mods: {
 					LoveNPC: 附近的{NPCName}个体对本单元拥有一切操纵权.
 					DislikeNPC: 本单元不屑于向{NPCName}提及蓝魔法。
 					HateNPC: "{NPCName}需要改变其试图将蓝魔法用于盈利的想法"
-					// LikeNPC_Princess: "{NPCName} is best friends with my creator."
-					// Princess_LovesNPC: "{NPCName} is such an interesting machine, how does it move?"
+					LikeNPC_Princess: "{NPCName}是我的创造者最好的朋友。"
+					Princess_LovesNPC: "{NPCName}是如此有趣的机器，它是如何运作的？"
 				}
 
 				# Census support
-				// Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
+				Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}"配置在"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}"设置在'''
 			}
 		}
 
 		EnvironmentModule: {
 			UseInventoryModule: {
-				DisplayName: 制作时采用物品栏内物品
-				// DisabledTooltip: This module is currently disabled.
+				DisplayName: 使用制作接口/微光接口时，可直接使用物品栏内物品
+				DisabledTooltip: 该功能当前已禁用。
 			}
 
 			UseInventoryNoFavoritesModule: {
-				DisplayName: 制作时采用物品栏内未收藏的物品
-				// DisabledTooltip: This module is currently disabled.
+				DisplayName: 使用制作接口/微光接口时，可直接使用物品栏内未收藏的物品
+				DisabledTooltip: 该功能当前已禁用。
 			}
 
 			JourneyInfiniteItems: {
-				DisplayName: 制作时采用旅途模式研究过的物品
-				DisabledTooltip: 该模块仅供旅途模式人物使用
+				DisplayName: 使用制作接口/微光接口时，可直接使用旅途模式研究过的物品
+				DisabledTooltip: 该功能仅供旅途模式人物使用。
 			}
 		}
 
@@ -547,22 +549,22 @@ Mods: {
 			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations3Item.DisplayName}"
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
-			// EvilAltarTile.MapEntry: Evil Altar
+			EvilAltarTile.MapEntry: 恶魔祭坛
 			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		GameTips: {
-			// Automaton: The Automaton can teach you all there is to know about Magic Storage.
-			// ShadowDiamonds: Shadow Diamonds are dropped when a boss is defeated for the first time. They can be used as an alternative to Diamonds in Magic Storage recipes.
-			// RadiantJewel: The Moon Lord drops the Radiant Jewel, which can be used to craft Portable Remote Accesses with unlimited access range.
-			// StorageUpgrades: Running out of storage? Upgrade your Storage Units with Storage Upgrades!
-			// RemoteStorage: Access your storage at other locations in the world with a Remote Access after linking it to a Storage Heart with a Locator or Locator Disk.
-			// CombinedStations: Magic Storage provides Combined Crafting Stations to reduce the number of crafting stations you have to put in the Crafting Interface.
-			// EnvironmentAccess: The Storage Configuration Interface allows other mods to add "crafting modules" which can affect how the Crafting Interface functions.
-			// PortableAccess: Craft a Portable Remote Storage Access to access your storage while you're away from home.
-			// StorageCores: Use a Storage Core Wrench to remove the Storage Core from a Storage Unit, which can then be inserted into an Empty Storage Unit.
-			// DisableUnit: Use a Storage Unit Wand to disable a Storage Unit. A disabled Storage Unit cannot store items and will attempt to move its items to connected Storage Units.
-			// BiomeGlobe: The Biome Globe enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars.
+			Automaton: 自动机可以教你魔法存储的所有知识。
+			ShadowDiamonds: 暗影钻石会在 Boss 被首次击败时掉落，可替代钻石制作魔法存储物品。
+			RadiantJewel: 璀璨棱晶掉落自月球领主, 用于制作 便携远程存储装置(终极) 与 存储升级珠(泰拉)。
+			StorageUpgrades: 存储空间不足？使用存储升级珠来升级你的存储单元！
+			RemoteStorage: 用定位器或定位磁盘保存一个存储中枢定位并将其导入到远程中枢，使你能在世界的其它位置远程访问这个存储中枢。
+			CombinedStations: 魔法存储提供了综合制作站来减少你放进制作接口中的制作站数量。
+			EnvironmentAccess: 配置接口允许其他模组给制作接口、微光接口添加新的“制作功能模块”，来扩展其原本的功能。
+			PortableAccess: 制作一个便携远程存储装置，可以让你在离家很远的情况下访问你的存储中枢。
+			StorageCores: 使用一个存储核心扳手来将存储核心从存储单元内提取出来，存储核心可再被插入进一个空存储单元。
+			DisableUnit: 使用一个存储单元魔杖来停用一个存储单元。停用的存储单元无法存储物品，并会在存储中枢的作用下将物品转移到其它启用的存储单元。
+			BiomeGlobe: 生态球可让你制作需要位于雪地环境、灵雾环境、篝火旁、水、熔岩、蜂蜜旁以及恶魔/猩红祭坛旁的配方。
 		}
 
 		Bestiary.Golem:
@@ -574,39 +576,39 @@ Mods: {
 		Dialogue: {
 			Golem: {
 				Greeting: 用户{0}您好。请问您是否想要了解一些关于魔法存储的信息？
-				Wizard: 尽管{0}看上去精通魔法，他仍不能理解蓝魔法的工作方式。因为实际上这并不能算作纯粹的魔法。
+				Wizard: 尽管{0}看上去精通魔法，他仍不能理解蓝魔法的工作方式。实际上这并不能算纯粹的魔法。
 				NotLihzahrd: 请停止询问，本单元并非由丛林神庙砖构成。
-				Bluemagic: 蓝魔法是一种惊人的力量来源，你不会想要低估它的能力的。
-				// Violence: Hello {0}. My creator had forgotten to install my viole- I mean, my self-defense chip. I have been upgraded and am now ready for combat.
-				// NoPlant: This unit does not possses any organic matter of plantae origin. You must be thinking of someone else.
-				// NeedPlant: "[c/ff0000:GIVE ME THE PLANT.] *beep* Apologies, {0}. This unit appears to have executed an unauthorized routine."
-				// NewTextAvailable: Hello {0}. This unit has prepared some new help tips for you.
+				Bluemagic: 蓝魔法是一种惊人的力量来源，低估它的能力是不明智的。
+				Violence: 你好 {0}。我的创造者忘记安装我的暴- 啊不，是自我防卫芯片。我已完成升级，现在可以投入战斗。
+				NoPlant: 本单元不含任何植物来源的有机物质。你肯定是认错对象了。
+				NeedPlant: "[c/ff0000:把那株植物给我。] *哔* 抱歉，{0}。本单元似乎执行了一个未授权的进程。"
+				NewTextAvailable: 你好 {0}。本单元已为你准备了一些新的帮助提示。
 				Help1:
 					'''
-					首先，你需要合成一些存储组件。存储组件是组件存储网络的基础，你可以在{0}那里询问存储单元的用途。
+					首先，你需要合成一些存储组件。这个物品是所有存储系统元件的基础物件，你可以在{0}那里了解到它能制作的配方。
 					制作配方: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
 					'''
 				Help2:
 					'''
-					如果你已经获得了 [i:MagicStorage/StorageComponent] ，你现在可以去合成存储核心。存储核心可以将你的各种存储组件接连，构成存储网络。
+					如果你已经获得了 [i:MagicStorage/StorageComponent] ，你现在需要制作一个存储中枢。存储中枢可以构建一个运行的存储系统，同时你可以用它来存取其中的物品。
 					制作配方: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
 					'''
 				Help3:
 					'''
-					放下 [i:MagicStorage/StorageHeart] 之后，是时候制作存储单元了。将存储核心连接上存储单元，就可以存储你的物品了。
+					放置一个 [i:MagicStorage/StorageHeart] 之后，你需要制作存储单元来为你的存储中枢存储物品。
 					制作配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
 					'''
 				Help4:
 					'''
-					如果你想要通过你的存储网络合成物品，你就需要做一个制作单元。
+					如果你想直接用你的存储系统制作物品，你需要做一个制作接口。
 					制作配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
 					'''
 				Help5:
 					'''
-					某些制作站存储于制作单元会发挥更大的效果，一些物品可以一次性满足不同的制作条件。
+					某些制作站在放进制作接口的制作站槽位内会发挥更多的效果，一些物品可以一次性满足多种制作条件。
 					[i:GlassKiln] 算作 [i:Furnace]
 					[i:BewitchingTable] 算作 [i:WoodenTable]
-					[rg:MagicStorage:AnyTombstone] 可满足灵雾制作需求
+					[rg:MagicStorage:AnyTombstone] 可满足灵雾环境的制作需求
 					[i:AlchemyTable] 算作 [i:WoodenTable] [i:Bottle]
 					[rg:MagicStorage:AnyTable] 算作 [i:WoodenChair]
 					'''
@@ -621,13 +623,13 @@ Mods: {
 					'''
 				Help7:
 					'''
-					存储网络的一切元件都必须连接在一起，如果你想要从 [i:MagicStorage/StorageHeart] 中扩散你的 [i:MagicStorage/StorageUnit]，你可以用存储连接器将它们相连
+					存储系统的一切元件都必须连接在一起，如果你想令 [i:MagicStorage/StorageUnit] 远离你的 [i:MagicStorage/StorageHeart] ，你可以用存储连接器来连接它们
 					制作配方: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
 					'''
 				Help8: 有一颗暗影钻石隐藏于所有原版Boss的核心部位，这种被诅咒的宝石可以用来替代所有魔法储存配方中的[i:Diamond]。一旦你从某个Boss那里得到了暗影钻石，你就不能再从它那里获得了。然而，有些Boss会掉落不止一颗。
 				Help9:
 					'''
-					存储网络被物品塞满了？用升级珠升级你的存储单元吧！某个级别的存储升级珠可以升级前一级别的存储单元，以下是级别表。
+					存储系统被物品塞满了？用升级珠升级你的存储单元吧！某个级别的存储升级珠可以升级前一级别的存储单元，以下是级别表。
 					[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
 					[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
 					[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
@@ -636,34 +638,34 @@ Mods: {
 					'''
 				Help10:
 					'''
-					如果你不想要移动你的存储核心，试试用存储装置吧！如果将其连接上存储核心，你就可以直接从存储装置打开你的存储核心。
+					如果你不想要移动你的存储中枢，试试用存储访问器吧！如果将其连接上存储中枢，你就可以直接从存储访问器打开你的存储中枢。
 					制作配方: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
 					'''
 				Help11:
 					'''
-					以防面临制作单元里存了太多制作站的问题，魔法存储提供了生态球。这个物品可以为雪地生物群落、灵雾、篝火、水、熔岩、蜂蜜、恶魔/猩红祭坛提供配方。如果把它放在物品栏内，还可以直接制作烤棉花糖，而不需要站在篝火旁边等它烤熟。
+					以防面临制作接口里存了太多制作站的问题，魔法存储提供了生态球。这个物品可以为雪地生物群落、灵雾、篝火、水、熔岩、蜂蜜、恶魔/猩红祭坛提供配方。如果把它放在物品栏内，还可以直接制作烤棉花糖，而不需要站在篝火旁边等它烤熟。
 					制作配方: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] = [i:MagicStorage/BiomeGlobe] (无合成条件需求)
 					'''
 				Help12:
 					'''
-					有些时候，你想要在世界的其他地区访问你的存储核心，但要用存储连接器一路接过去既麻烦又昂贵。这时候你可以制作一个远程存储装置，并用定位器 [i:MagicStorage/Locator] 或定位器驱动 [i:MagicStorage/LocatorDisk] 将其连上。
+					有些时候，你想要在世界的其他地区访问你的存储中枢，但要用存储连接器一路接过去既麻烦又昂贵。这时候你可以制作一个远程中枢，并用定位器 [i:MagicStorage/Locator] 或定位磁盘 [i:MagicStorage/LocatorDisk] 将其连上。
 					制作配方:
 					[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
 					[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
 					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 					'''
-				Help13: 你可以将存储组件连接到远程存储装置上，这些组件也能够访问主存储网络，这对于拥有一个远离存储核心的制作单元来说非常有用。
+				Help13: 你可以将存储元件连接到远程中枢上，这些元件也能够访问主存储系统，这对于拥有一个远离存储中枢的制作接口来说非常有用。
 				Help14: 存储单元魔杖可以禁用 [i:MagicStorage/StorageUnit]。被禁用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
 				Help15:
 					'''
-					为了方便制作，魔法存储增加了可放置的恶魔祭坛和猩红祭坛。开采它们不会给你带来矿石，尽可用于制作。
+					为了方便制作，魔法存储增加了可放置的恶魔祭坛和猩红祭坛。开采它们不会给你带来矿石，仅可用于制作。
 					制作配方:
 					[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
 					[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
 					'''
 				Help16:
 					'''
-					以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合制作站。每个组合制作站都继承其制作材料满足的制作条件。
+					以防面临制作接口里存了太多制作站的问题，魔法存储提供了一系列综合制作站。每个综合制作站都继承其制作材料满足的制作条件。
 					制作配方:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ 空手 = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 空手 = [i:MagicStorage/CombinedStations2Item]
@@ -671,7 +673,7 @@ Mods: {
 					'''
 				Help17:
 					'''
-					以防面临制作单元里存了太多制作站的问题，魔法存储提供了一系列组合家具制作站。每个组合家具制作站都继承其制作材料满足的制作条件。
+					以防面临制作接口里存了太多制作站的问题，魔法存储提供了一系列综合家具制作站。每个综合家具制作站都继承其制作材料满足的制作条件。
 					制作配方:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 空手 = [i:MagicStorage/CombinedFurnitureStations1Item]
 					[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
@@ -688,17 +690,17 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
-				/* Help19:
+				Help19:
 					'''
-					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
-					These modules can be toggled on and off in the UI for the Configuration Interface.
-					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					配置接口允许其他模组添加能够影响 [i:MagicStorage/CraftingAccess] 功能的“制作功能模块”。
+					这些功能模块可以在配置接口的 UI 中开启关闭。
+					默认情况下，魔法存储的配置接口提供了能读取玩家物品栏和旅途模式复制菜单中物品的功能模块。
 					[rg/s2:MagicStorage:AnyDiamond] [i/s50:DirtBlock] [i/s50:StoneBlock] [i/s50:MudBlock] [i/s50:SnowBlock] [i/s50:SandBlock] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/EnvironmentAccess]
-					''' */
+					'''
 				Help20:
 					'''
-					尽管 [i:MagicStorage/RemoteAccess] 非常方便，但你要是离家远了可就不能方便地访问存储网络了
-					如果你想远程访问存储网络，可以制作一个便携远程存储装置
+					尽管 [i:MagicStorage/RemoteAccess] 非常方便，但你要是离家远了可就不能方便地访问存储系统了
+					如果你想远程访问存储系统，可以制作一个便携远程存储装置
 					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
 					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableCraftingAccessPreHM]
 					'''
@@ -723,71 +725,71 @@ Mods: {
 					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
 					(2/2)
 					'''
-				/* Help22:
+				Help22:
 					'''
-					This unit has noticed that you are currently playing in a multiplayer world.  Hence, some features within the [i:MagicStorage/StorageHeart] are locked behind the [c/cccc00:Server Operator] status.
-					To become a [c/cccc00:Server Operator], you must use the [c/ff6a00:/msreqop] command.  Using this command successfully will grant you the [c/cc0000:Server Admin] status.
-					Once you have the [c/cc0000:Server Admin] status, you can use the [c/ff6a00:/msop] command to grant other players the [c/cccc00:Server Operator] status or [c/ff6a00:/msdeop] to remove it.
-					Either status will stay active until you disconnect from the server.
-					The [c/ffff00:Magic Storage Server Config] has an option which forces the host to be a [c/cc0000:Server Admin] when enabled.
-					''' */
-				/* Help23:
+					本单元检测到你目前处在多人游戏世界中，因此，[i:MagicStorage/StorageHeart] 中的一些功能被锁定在 [c/cccc00:服务器操作者] 权限后。
+					要成为 [c/cccc00:服务器操作者]，必须使用 [c/ff6a00:/msreqop] 指令。成功使用此指令将授予你 [c/cc0000:服务器管理员] 权限。
+					一旦拥有 [c/cc0000:服务器管理员] 权限，你可以使用 [c/ff6a00:/msop] 指令授予其他玩家 [c/cccc00:服务器操作者] 权限，或使用 [c/ff6a00:/msdeop] 移除其权限。
+					这两个权限会在你断开服务器时失效。
+					[c/ffff00:魔法存储服务器配置] 中有一个选项可以在启用时强制房主为 [c/cc0000:服务器管理员]。
 					'''
-					Moving a storage system can be a hassle, especially if you have a lot of items stored.  To make it easier, you can use the Storage Core Wrench to remove the Storage Core from a placed Storage Unit.
+				Help23:
+					'''
+					移动一个存储系统很麻烦，特别是当你存储了大量物品的时候。你可以使用存储核心扳手来将存储核心从已放置的存储单元内取出。
 					[i:Wrench] + [i:MagicStorage/StorageComponent] + [i/s10:Wire] + [rg/s5:IronBar] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageExtractor]
-					Removing the Storage Core will turn the Storage Unit into an [i:MagicStorage/StorageUnitEmpty], which can then be picked up and placed elsewhere.
+					取出存储核心的存储单元会变为可以被挖掘掉落的 [i:MagicStorage/StorageUnitEmpty]，这样你就可以挖掉它并重新放置了。
 					(1/2)
-					''' */
-				/* Help24:
 					'''
-					Dropping a [i:MagicStorage/CraftingAccess] into Shimmer will transform it into an Aether Interface, which can be used to shimmer items in a storage system.
-					All actions from shimmering are supported: decrafting items into their ingredients, transmuting items into other items, sacrificing coins for Coin Luck, and spawning NPCs from shimmering certain items.
-					''' */
-				/* Help25:
+				Help24:
 					'''
-					By default, all [i:MagicStorage/StorageHeart] (and their components) are accessible to everyone.
-					To make your storage more secure, consider creating a Storage Security Wand. While holding the tool, left click a [i:MagicStorage/StorageHeart] to open the Security system.
-					In this system's UI, you can create a Security Network which, when made private, will cause the [i:MagicStorage/StorageHeart] and its components to require a password to access.
-					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
-					Recipe: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
-					''' */
-				// Help26_Header: Are you finding the text prompts in the UIs cumbersome to use? Here are some helpful controls you can use to help with that:
-				/* Help26:
+					将一个 [i:MagicStorage/CraftingAccess] 丢入微光中来将其转化为一个微光接口，该接口可以用来微光嬗变存储系统中的物品。
+					所有微光嬗变都是可行的: 分解物品，将物品转化为其他物品，消耗钱币来获取钱币幸运值，以及通过微光嬗变特定物品来生成 NPC。
+					'''
+				Help25:
+					'''
+					默认情况下，所有 [i:MagicStorage/StorageHeart] （及与其相连的元件）允许任何人访问。
+					为了让你的存储系统更安全，可以制作一个存储安全魔杖。手持它左键点击 [i:MagicStorage/StorageHeart] 可打开安全网络系统。
+					在安全网络系统的UI界面中，你可以创建一个安全网络，当其被设置为私人网络时， [i:MagicStorage/StorageHeart] 及与其相连元件将需要玩家输入密码来访问。
+					在安全网络系统的UI界面中左键双击一个安全网络来将其分配给当前用来访问存储系统的 [i:MagicStorage/StorageHeart] 。
+					配方: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
+					'''
+				Help26_Header: 觉得 UI 界面的文本输入提示不好用？这里有一些实用操作可以帮你：
+				Help26:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					  [c/cccc00:Ctrl + Z] to clear
-					  [c/cccc00:Ctrl + X] or [c/cccc00:Shift + Delete] to copy to clipboard then clear
-					  [c/cccc00:Ctrl + C] to copy to clipboard
-					  [c/cccc00:Ctrl + V] or [c/cccc00:Shift + Insert] to paste from clipboard
+					当提示框处于焦点时：
+					  [c/cccc00:Ctrl + Z] 清空
+					  [c/cccc00:Ctrl + X] 或 [c/cccc00:Shift + Delete] 复制到剪贴板并清空
+					  [c/cccc00:Ctrl + C] 复制到剪贴板
+					  [c/cccc00:Ctrl + V] 或 [c/cccc00:Shift + Insert] 从剪贴板粘贴
 					(1/3)
-					''' */
-				/* Help27:
+					'''
+				Help27:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					[c/cccc00:Ctrl + Backspace] to delete the last space-separated word
-					  [c/cccc00:Left Arrow] and [c/cccc00:Right Arrow] to move the cursor left and right by one character
-					  [c/cccc00:Home] and [c/cccc00:End] to move the cursor to the start and end
-					  [c/cccc00:Escape] or [c/cccc00:Right Click] the prompt to revert any changes made
+					当提示框处于焦点时：
+					[c/cccc00:Ctrl + Backspace] 删除上一个以空格分隔的单词
+					  [c/cccc00:Left Arrow] and [c/cccc00:Right Arrow] 将光标左右移动一个字符的距离
+					  [c/cccc00:Home] and [c/cccc00:End] 将光标移动到句首和句尾
+					  [c/cccc00:Escape] or [c/cccc00:Right Click] 提示框 来恢复已更改内容
 					(2/3)
-					''' */
-				/* Help28:
+					'''
+				Help28:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is not focused:
-					  [c/cccc00:Right Click] the prompt to clear
+					当提示框未处于焦点时：
+					  [c/cccc00:Right Click] 提示框 来清空
 					(3/3)
-					''' */
-				/* Help29:
 					'''
-					To insert a Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
+				Help29:
+					'''
+					手持存储核心右键 [i:MagicStorage/StorageUnitEmpty], 来将其插入。
 					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
 					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
 					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
 					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
 					(2/2)
-					''' */
+					'''
 			}
 
 			ChatOptions: {
@@ -802,25 +804,25 @@ Mods: {
 
 		Active: 已启用
 		Inactive: 已禁用
-		PortableAccessUnlocated: 尚未设置到任何存储核心
-		PortableAccessMissing: 目标坐标没有存储核心
-		PortableAccessOutOfRange: 无法连接到相应存储网络
-		PortableAccessNoPylons: 相应存储网络旁没有晶塔
-		PortableCraftingUnlocated: 定位器尚未设置到任何制作单元
-		PortableCraftingMissing: 定位器目标点没有制作单元！
-		RemoteAccessSuccess: 已成功连接远程存储装置！
-		RemoteAccessHasLocator: 该远程存储装置已经定位到了一个存储核心，请挖掉并重新放置来重置定位点
+		PortableAccessUnlocated: 尚未设置到任何存储中枢
+		PortableAccessMissing: 目标坐标没有存储中枢
+		PortableAccessOutOfRange: 无法连接到相应存储系统
+		PortableAccessNoPylons: 相应存储系统旁没有晶塔
+		PortableCraftingUnlocated: 定位器尚未设置到任何制作接口
+		PortableCraftingMissing: 定位器目标点没有制作接口！
+		RemoteAccessSuccess: 已成功连接远程中枢！
+		RemoteAccessHasLocator: 该远程中枢已经定位到了一个存储中枢，请挖掉并重新放置来重置定位点
 		RemoteAccessUnlocated: 当前定位器尚未设置定位点
-		// RemoteAccessInvalidLocator: The locator is not connected to a Storage Heart
+		RemoteAccessInvalidLocator: 定位器的目标定位没有存储中枢
 		StorageUnitActivated: 该存储单元已被启用
-		StorageUnitDeactivated: 该存储单元已被禁用
+		StorageUnitDeactivated: 该存储单元已被停用
 		FilterAllMods: 所有物品
 		Capacity: 容量: {0} / {1}
 		LocatorSet: 已连接至 [{0}, {1}]
-		StorageAccessFail: 无法加载存储核心！
-		StorageAccessFailAlt: 该存储装置没有与存储核心连接！
-		StorageAccessFailLoad: 存储核心区域未加载！请再试一次
-		// TestItemSuffix: " !UNTIL RESPAWN!"
+		StorageAccessFail: 无法加载存储中枢！
+		StorageAccessFailAlt: 该存储访问器没有与存储中枢连接！
+		StorageAccessFailLoad: 存储中枢区域未加载！请再试一次
+		TestItemSuffix: " !直到重生!"
 		SetTo: 已连接至 [{0}, {1}]
 		SnowBiomeBlock: 雪地环境方块
 		DepositAll: 全部存入
