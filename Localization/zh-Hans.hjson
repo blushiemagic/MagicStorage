@@ -1,13 +1,13 @@
-# 我建议使用 hjson 键来翻译今后的所有文本新增内容
-# 同时也将它们添加到其他 hjson 文件中，但用 "//" 标记，并等待译者完成文本翻译
+# I recommend using the hjson key to translate all future text additions
+# Also add them into other hjsons, but mark them with "//", and wait for translators to translate the text
 # -Crapsky233
 
-模组：{
-	MagicStorage：{
-		物品：{
-			生物群系球：{
-				显示名称：生态球
-				提示：
+Mods: {
+	MagicStorage: {
+		Items: {
+			BiomeGlobe: {
+				DisplayName: 生态球
+				Tooltip:
 					'''
 					“世界的力量凝聚环绕在你的指尖”
 					制作时算作处于雪原环境、灵雾环境、水、熔岩、蜂蜜、、恶魔/猩红祭坛旁
@@ -18,12 +18,12 @@
 					'''
 			}
 
-			CraftingAccess: {
-				DisplayName: 制作接口
-				Tooltip: 能够使用存储系统中的物品进行制作
+			制作访问权限: {
+				显示名称：制作接口
+				工具提示：能够使用存储系统中的物品进行制作
 			}
 
-			CreativeStorageUnit: {
+			创意存储单元：{
 				显示名称：创造单元
 				提示信息：
 					'''
