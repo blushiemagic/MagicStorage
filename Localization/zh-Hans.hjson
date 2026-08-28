@@ -10,7 +10,7 @@ Mods: {
 				Tooltip:
 					'''
 					“世界的力量凝聚环绕在你的指尖”
-					制作时算作处于雪原环境、灵雾环境、水、熔岩、蜂蜜、、恶魔/猩红祭坛旁
+					制作时算作处于雪原环境、灵雾环境、水、熔岩、蜂蜜、恶魔/猩红祭坛旁
 					放在物品栏或制作存储接口的制作站槽位内即可生效
 					放在物品栏时，不需要处在篝火旁即可将棒棒棉花糖烤熟
 					可在制作界面直接用棉花糖制作熟棉花糖
@@ -18,32 +18,32 @@ Mods: {
 					'''
 			}
 
-			制作访问权限: {
-				显示名称：制作接口
-				工具提示：能够使用存储系统中的物品进行制作
+			CraftingAccess: {
+				DisplayName: 制作接口
+				Tooltip: 能够使用存储系统中的物品进行制作
 			}
 
-			创意存储单元：{
-				显示名称：创造单元
-				提示信息：
+			CreativeStorageUnit: {
+				DisplayName: 创造存储单元
+				    Tooltip:
 					'''
 					存储了无限量的所有物品。
-					不影响存储系统的存储上限。
-					'''
+					不会影响所属存储系统的存储上限
+					''' 
 			}
 
-			定位器: {
-				显示名称：定位器
-				提示：
+			Locator: {
+				DisplayName: 定位器
+				Tooltip:
 					'''
-					<right>存储中枢以定位
+					<right>存储中枢以保存定位
 					<right>远程中枢以设置定位
 					'''
 			}
 
 			LocatorDisk: {
-				DisplayName: 定位器驱动
-				提示：
+				DisplayName: 定位磁盘
+				Tooltip:
 					'''
 					<right>存储中枢以定位
 					<right>远程中枢以设置定位
@@ -55,9 +55,8 @@ Mods: {
 				DisplayName: 便携远程存储装置(终极)
 				Tooltip:
 					'''
-					<right>存储中枢以连接
-					暂未连接到任何存储中枢
-					使用以访问相应存储中枢
+					<right>存储中枢以保存定位
+					使用以访问定位的存储中枢
 					无距离限制
 					'''
 			}
@@ -66,9 +65,8 @@ Mods: {
 				DisplayName: 便携远程制作装置(终极)
 				Tooltip:
 					'''
-					<right>制作接口以连接
-					暂未连接到任何制作接口
-					使用以访问相应制作接口
+					<right>制作接口以保存定位
+					使用以访问定位的制作接口
 					无距离限制
 					'''
 			}
@@ -216,7 +214,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至240容量
-					<right>一个存储单元(神圣)可镶嵌
+					<right>一个存储单元(神圣)来使用
 					'''
 			}
 
@@ -225,7 +223,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至80容量
-					<right>一个存储单元可镶嵌
+					<right>一个存储单元来使用
 					'''
 			}
 
@@ -234,7 +232,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至80容量
-					<right>一个存储单元可镶嵌
+					<right>一个存储单元来使用
 					'''
 			}
 
@@ -243,7 +241,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至160容量
-					<right>一个存储单元(狱岩)可镶嵌
+					<right>一个存储单元(狱岩)来使用
 					'''
 			}
 
@@ -252,7 +250,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至120容量
-					<right>一个存储单元(猩红/魔金)可镶嵌
+					<right>一个存储单元(猩红/魔金)来使用
 					'''
 			}
 
@@ -261,7 +259,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至320容量
-					<right>一个存储单元(蓝色叶绿)可镶嵌
+					<right>一个存储单元(蓝色叶绿)来使用
 					'''
 			}
 
@@ -270,7 +268,7 @@ Mods: {
 				Tooltip:
 					'''
 					将存储单元升级至640容量
-					<right>一个存储单元(夜明)可镶嵌
+					<right>一个存储单元(夜明)来使用
 					'''
 			}
 
@@ -331,8 +329,8 @@ Mods: {
 					'''
 					<right>存储中枢以保存定位，当前暂未定位到任何存储中枢
 					使用以访问定位的存储中枢
-					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在100格以内。
-					玩家只能在距离晶塔或定位的制作接口1000格范围内访问相应的存储中枢
+					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在100英尺以内。
+					玩家只能在距离晶塔或定位的制作接口1000英尺范围内访问相应的存储中枢
 					访问距离较小
 					'''
 			}
@@ -343,8 +341,8 @@ Mods: {
 					'''
 					<right>存储中枢以保存定位，当前暂未定位到任何存储中枢
 					使用以访问定位的存储中枢
-					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在200格以内。
-					玩家只能在距离晶塔或定位的制作接口3000格范围内访问相应的存储中枢
+					要使该物品能在晶塔附近使用，目标定位的存储中枢与任何有效晶塔的距离须在200英尺以内。
+					玩家只能在距离晶塔或定位的制作接口3000英尺范围内访问相应的存储中枢
 					访问距离适中
 					'''
 			}
@@ -375,8 +373,8 @@ Mods: {
 					'''
 					<right>制作接口以保存定位，当前暂未定位到任何制作接口
 					使用以访问定位的制作接口
-					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在100格以内。
-					玩家只能在距离晶塔或定位的制作接口1000格范围内访问相应的制作接口
+					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在100英尺以内。
+					玩家只能在距离晶塔或定位的制作接口1000英尺范围内访问相应的制作接口
 					访问距离较小
 					'''
 			}
@@ -387,8 +385,8 @@ Mods: {
 					'''
 					<right>制作接口以保存定位，当前暂未定位到任何制作接口
 					使用以访问定位的制作接口
-					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在200格以内。
-					玩家只能在距离晶塔或定位的制作接口3000格范围内访问相应的制作接口
+					要使该物品能在晶塔附近使用，目标定位的制作接口与任何有效晶塔的距离须在200英尺以内。
+					玩家只能在距离晶塔或定位的制作接口3000英尺范围内访问相应的制作接口
 					访问距离适中
 					'''
 			}
@@ -438,7 +436,7 @@ Mods: {
 					'''
 					在魔法存储系统中存储物品的元件
 					需要一个存储核心才能运作
-					手持存储核心右键单击即可将其插入
+					手持存储核心<right>即可将其插入
 					'''
 			}
 
@@ -518,17 +516,17 @@ Mods: {
 
 		EnvironmentModule: {
 			UseInventoryModule: {
-				DisplayName: 使用制作接口/微光接口时，可直接使用物品栏内物品
+				DisplayName: 使用制作/微光接口时，可使用物品栏内物品
 				DisabledTooltip: 该功能当前已禁用。
 			}
 
 			UseInventoryNoFavoritesModule: {
-				DisplayName: 使用制作接口/微光接口时，可直接使用物品栏内未收藏的物品
+				DisplayName: 使用制作/微光接口时，可使用物品栏内未收藏的物品
 				DisabledTooltip: 该功能当前已禁用。
 			}
 
 			JourneyInfiniteItems: {
-				DisplayName: 使用制作接口/微光接口时，可直接使用旅途模式研究过的物品
+				DisplayName: 使用制作/微光接口时，可使用旅途模式已研究物品
 				DisabledTooltip: 该功能仅供旅途模式人物使用。
 			}
 		}
@@ -550,7 +548,7 @@ Mods: {
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
 			EvilAltarTile.MapEntry: 恶魔祭坛
-			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
+			DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		GameTips: {
@@ -560,7 +558,7 @@ Mods: {
 			StorageUpgrades: 存储空间不足？使用存储升级珠来升级你的存储单元！
 			RemoteStorage: 用定位器或定位磁盘保存一个存储中枢定位并将其导入到远程中枢，使你能在世界的其它位置远程访问这个存储中枢。
 			CombinedStations: 魔法存储提供了综合制作站来减少你放进制作接口中的制作站数量。
-			EnvironmentAccess: 配置接口允许其他模组给制作接口、微光接口添加新的“制作功能模块”，来扩展其原本的功能。
+			EnvironmentAccess: 配置接口允许其他模组给制作接口、微光接口添加新的“制作模块”，来扩展其原本的功能。
 			PortableAccess: 制作一个便携远程存储装置，可以让你在离家很远的情况下访问你的存储中枢。
 			StorageCores: 使用一个存储核心扳手来将存储核心从存储单元内提取出来，存储核心可再被插入进一个空存储单元。
 			DisableUnit: 使用一个存储单元魔杖来停用一个存储单元。停用的存储单元无法存储物品，并会在存储中枢的作用下将物品转移到其它启用的存储单元。
@@ -655,10 +653,10 @@ Mods: {
 					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 					'''
 				Help13: 你可以将存储元件连接到远程中枢上，这些元件也能够访问主存储系统，这对于拥有一个远离存储中枢的制作接口来说非常有用。
-				Help14: 存储单元魔杖可以禁用 [i:MagicStorage/StorageUnit]。被禁用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
+				Help14: 存储单元魔杖可以停用 [i:MagicStorage/StorageUnit]。被停用的 [i:MagicStorage/StorageUnit] 不再能够存储物品，原先存储于其的物品会被移动到与其相连的其他 [i:MagicStorage/StorageUnit] 中。如果它无法移动存储于里面的物品，物品就会被存在已禁用的 [i:MagicStorage/StorageUnit] 内。
 				Help15:
 					'''
-					为了方便制作，魔法存储增加了可放置的恶魔祭坛和猩红祭坛。开采它们不会给你带来矿石，仅可用于制作。
+					为了方便制作，魔法存储增加了可放置的恶魔祭坛和猩红祭坛。破坏它们不会给你带来矿石，仅可用于制作。
 					制作配方:
 					[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
 					[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
@@ -669,15 +667,14 @@ Mods: {
 					制作配方:
 					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ 空手 = [i:MagicStorage/CombinedStations1Item]
 					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ 空手 = [i:MagicStorage/CombinedStations2Item]
-					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] [i:MeatGrinder] @ 空手 = [i:MagicStorage/CombinedStations3Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ 空手 = [i:MagicStorage/CombinedStations3Item]
 					'''
 				Help17:
 					'''
 					以防面临制作接口里存了太多制作站的问题，魔法存储提供了一系列综合家具制作站。每个综合家具制作站都继承其制作材料满足的制作条件。
 					制作配方:
 					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ 空手 = [i:MagicStorage/CombinedFurnitureStations1Item]
-					[i:MagicStorage/CombinedFurnitureStations1Item] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ 空手 = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ 空手 = [i:MagicStorage/CombinedFurnitureStations2Item]
 					'''
 				Help17_NoFargo:
 					'''
@@ -692,7 +689,7 @@ Mods: {
 				Help18: 月球领主守护着璀璨棱晶，这颗宝石具有不可思议的力量。它的力量可以激发所有储存核心中蓝魔法的潜在潜力——无线存储。
 				Help19:
 					'''
-					配置接口允许其他模组添加能够影响 [i:MagicStorage/CraftingAccess] 功能的“制作功能模块”。
+					配置接口允许其他模组添加能够影响 [i:MagicStorage/CraftingAccess] 功能的“制作模块”。
 					这些功能模块可以在配置接口的 UI 中开启关闭。
 					默认情况下，魔法存储的配置接口提供了能读取玩家物品栏和旅途模式复制菜单中物品的功能模块。
 					[rg/s2:MagicStorage:AnyDiamond] [i/s50:DirtBlock] [i/s50:StoneBlock] [i/s50:MudBlock] [i/s50:SnowBlock] [i/s50:SandBlock] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/EnvironmentAccess]
@@ -852,8 +849,8 @@ Mods: {
 			SearchMod: @模组名 以模组搜索
 			SearchTooltip: "#物品介绍 以介绍搜索"
 			SearchModAndTooltip: @模组名 #物品介绍
-			// TipModAndTooltip: "[c/ffff00:@ModName] to search by mod, [c/ffff00:#Search Tooltip] to search by tooltip (can be combined in that order)"
-			// TipTooltipOnly: "[c/ffff00:#Search Tooltip] to search by tooltip"
+			TipModAndTooltip: "[c/ffff00:@ModName]按模组名称搜索, [c/ffff00:#Search Tooltip]按物品介绍查找 (可按该顺序组合)"
+			TipTooltipOnly: "[c/ffff00:#Search Tooltip]仅按物品介绍搜索"
 		}
 
 		Recipes: 合成配方
@@ -1212,12 +1209,12 @@ Mods: {
 					}
 
 					Sort: {
-						// Name: Name A-Z
-						// NameReverse: Name Z-A
-						// Creator: Owner A-Z
-						// CreatorReverse: Owner Z-A
-						// ID: ID Ascending
-						// IDReverse: ID Descending
+						Name: 名称 A-Z
+						NameReverse: 名称 Z-A
+						Creator: 拥有者 A-Z
+						CreatorReverse: 拥有者 Z-A
+						ID: ID 升序
+						IDReverse: ID 降序
 					}
 				}
 			}
@@ -1252,7 +1249,7 @@ Mods: {
 			}
 		}
 
-		// Keybinds.PrintItemData.DisplayName: Print Item Data
+		Keybinds.PrintItemData.DisplayName: 输出物品数据
 
 		Configs: {
 			MagicStorageConfig: {
