@@ -6,502 +6,520 @@ Mods: {
 	MagicStorage: {
 		Items: {
 			BiomeGlobe: {
-				DisplayName: Bioma Global
+				DisplayName: Bioma global
 				Tooltip:
 					'''
 					'El poder del mundo está al alcance de tus dedos'
-					Permite la creación de recetas que requieren el bioma de la Nieve, Cementerio, el Altar Demoníaco/Carmesí y Agua/Lava/Miel
-					Puede estar en el inventario o en la ranura de una estación de la Interfaz de Creación
-					Mientras está en el inventario, se puede cocinar Nube dulce sin necesidad de estar cerca de una Hoguera
-					Permite la creación de Nube dulce bien hecha en la Interfaz de Creación
-					Se comporta como una Pelota de Playa cuando se lanza
+					Permite elaborar recetas que se necesiten estar en el bioma de la nieve/cementerio o
+					cerca de una hoguera, agua, lava, miel, altar demoníaco/carmesí.
+					Puede estar en el inventario o en la ranura de [c/f4d58d:estaciones de elaboración], en la [c/0098ff:interfaz de creación].
+					Mientras está en el inventario, se puede cocinar [c/f4d58d:nube dulce] sin necesidad de estar cerca de una [c/f4d58d:hoguera].
+					Permite la creación de [c/f4d58d:nube dulce bien hecha] en la [c/0098ff:interfaz de creación].
+					Se comporta como una balón de playa cuando se lanza.
 					'''
 			}
 
 			CraftingAccess: {
-				DisplayName: Interfaz de Creación de Almacenamiento
-				Tooltip: Permite elaborar objetos con los ítems que esten en un sistema de almacenamiento
+				DisplayName: Interfaz de creación de almacenamiento
+				Tooltip:
+					'''
+					Permite elaborar objetos a partir de los que
+					ya tengas guardados en el sistema de almacenamiento.
+					'''
 			}
 
 			CreativeStorageUnit: {
-				DisplayName: Unidad de Almacenamiento Creativa
-				/* Tooltip:
+				DisplayName: Unidad de almacenamiento creativo
+				Tooltip:
 					'''
-					Stores an unlimited amount of every item type.
-					Does not count toward storage limits when in a storage system.
-					''' */
+					Almacena una cantidad ilimitada de cada tipo de objeto.
+					El límite de almacenamiento ignora el contenido de este objeto.
+					'''
 			}
 
 			Locator: {
 				DisplayName: Localizador
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					<right> al Acceso de Almacenamiento Remoto para establecerlo
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación
+					<right> al [c/ff1c1e:acceso remoto de almacenamiento] para establecerlo
 					'''
 			}
 
 			LocatorDisk: {
-				DisplayName: Disco Localizador
+				DisplayName: Disco localizador
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					<right> al Acceso de Almacenamiento Remoto para establecerlo
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación
+					<right> al [c/ff1c1e:acceso remoto de almacenamiento] para establecerlo
 					No se destruye cuando se usa
 					'''
 			}
 
 			PortableAccess: {
-				DisplayName: Acceso Remoto de Almacenamiento Definitivo Portátil
+				DisplayName: Acceso remoto de almacenamiento definitivo portátil
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para almacenar ubicación
+					<right> al [c/0ecb75:corazón de almacenamiento] para almacenar ubicación
 					Actualmente no configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento de creación
+					Usa el objeto para acceder a tu almacenamiento
 					Tiene un rango de uso ilimitado
 					'''
 			}
 
 			PortableCraftingAccess: {
-				DisplayName: Acceso Remoto de Creación Definitivo Portátil
+				DisplayName: Acceso remoto de creación definitivo portátil
 				Tooltip:
 					'''
-					<right> a la Interfaz de Creación para registrar su ubicación
+					<right> a la [c/0098ff:interfaz de creación] para registrar su ubicación
 					Actualmente no configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento de creación
+					Usa el objeto para acceder a tu [c/0098ff:almacenamiento de creación]
 					Tiene un rango de uso ilimitado
 					'''
 			}
 
 			RadiantJewel: {
-				DisplayName: Joya Radiante
+				DisplayName: Joya radiante
 				Tooltip: "'Brilla con una luz deslumbrante'"
 			}
 
 			RemoteAccess: {
-				DisplayName: Acceso Remoto de Almacenamiento
+				DisplayName: Acceso remoto de almacenamiento
 				Tooltip:
 					'''
-					Permite el acceso remoto a un Corazón de Almacenamiento
-					Actúa como un "centro de almacenamiento" para componentes como el Acceso Remoto
+					Permite el acceso remoto a un [c/0ecb75:corazón de almacenamiento]
+					Actúa como un [c/f4d58d:centro de almacenamiento] para componentes como la [c/0098ff:interfaz de creación]
 					'''
 			}
 
 			ShadowDiamond: {
-				DisplayName: Diamante Sombreado
-				Tooltip: Sigue habiendo huellas de luz en el interior
+				DisplayName: Diamante sombrío
+				Tooltip: Sigue habiendo rastros de luz en el interior
 			}
 
 			SnowBiomeEmulator: {
-				DisplayName: Emulador de Bioma de la Nieve
-				Tooltip: Permite la Interfaz de Creación de almacenamiento a hacer de recetas de bioma de la nieve
+				DisplayName: Emulador de bioma de la nieve
+				Tooltip:
+					'''
+					Permite que la [c/0098ff:interfaz de creación de almacenamiento],
+					pueda hacer recetas en las cuales se necesiten estar en el bioma de la nieve.
+					'''
 			}
 
 			StorageAccess: {
-				DisplayName: Acceso de Almacenamiento
+				DisplayName: Acceso de almacenamiento
 				Tooltip: Actúa como otro punto de acceso para ver los objetos almacenados en un sistema de almacenamiento
 			}
 
 			StorageComponent: {
-				DisplayName: Componente de Almacenamiento
-				Tooltip: El elemento base para crear cualquier componente del sistema de almacenamiento
+				DisplayName: Componente de almacenamiento
+				Tooltip:
+					'''
+					A partir de este objeto, se puede crear cualquier componente del sistema de almacenamiento.
+					También se puede usar para conectar componentes al sistema de almacenamiento.
+					'''
 			}
 
 			StorageConnector: {
-				DisplayName: Conector de Almacenamiento
+				DisplayName: Conector de almacenamiento
 				Tooltip: Actúa como un puente para conectar componentes del sistema de almacenamiento
 			}
 
 			StorageDeactivator: {
-				DisplayName: Varita de Unidad de Almacenamiento
+				DisplayName: Varita de unidad de almacenamiento
 				Tooltip:
 					'''
 					Habilita/deshabilita una unidad de almacenamiento.
-					Las unidades de almacenamiento deshabilitadas intentarán transferir sus objetos a unidades de almacenamiento habilitadas en un sistema de almacenamiento.
+					Las unidades de almacenamiento deshabilitadas intentarán transferir su contenido,
+					a las otras unidades más cercanas, siempre y cuando estén habilitadas y conectadas.
 					'''
 			}
 
 			StorageHeart: {
-				DisplayName: Corazón de Almacenamiento
+				DisplayName: Corazón de almacenamiento
 				Tooltip:
 					'''
-					El componente principal para cualquier sistema de almacenamiento mágico.
-					Requerido para que funcione un sistema de almacenamiento.
+					El componente principal para cualquier sistema de [c/7cb518:Magic Storage].
+					Necesario para que un sistema de almacenamiento funcione.
 					'''
 			}
 
 			StorageUnit: {
-				DisplayName: Unidad de Almacenamiento
+				DisplayName: Unidad de almacenamiento
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento mágico.
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
 					Puede almacenar hasta 40 objetos.
 					'''
 			}
 
 			StorageUnitBlueChlorophyte: {
-				DisplayName: Unidad de Almacenamiento (Clorofita Azul)
+				DisplayName: Unidad de almacenamiento (clorofita azul)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 240 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 240 objetos.
 					'''
 			}
 
 			StorageUnitCrimtane: {
-				DisplayName: Unidad de Almacenamiento (Carmesí)
+				DisplayName: Unidad de almacenamiento (carmesí)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 80 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 80 objetos.
 					'''
 			}
 
 			StorageUnitDemonite: {
-				DisplayName: Unidad de Almacenamiento (Endemoniado)
+				DisplayName: Unidad de almacenamiento (endemoniado)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 80 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 80 objetos.
 					'''
 			}
 
 			StorageUnitHallowed: {
-				DisplayName: Unidad de Almacenamiento (Sagrado)
+				DisplayName: Unidad de almacenamiento (sagrado)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 160 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 160 objetos.
 					'''
 			}
 
 			StorageUnitHellstone: {
-				DisplayName: Unidad de Almacenamiento (Piedra Infernal)
+				DisplayName: Unidad de almacenamiento (piedra infernal)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 120 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 120 objetos.
 					'''
 			}
 
 			StorageUnitLuminite: {
-				DisplayName: Unidad de Almacenamiento (Luminita)
+				DisplayName: Unidad de almacenamiento (luminita)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 320 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 320 objetos.
 					'''
 			}
 
 			StorageUnitTerra: {
-				DisplayName: Unidad de Almacenamiento (Mundial)
+				DisplayName: Unidad de almacenamiento (mundial)
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 640 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 640 objetos.
 					'''
 			}
 
 			StorageUnitTiny: {
-				DisplayName: Unidad de Almacenamiento Pequeño
+				DisplayName: Unidad de almacenamiento pequeño
 				Tooltip:
 					'''
-					Un componente para almacenar objetos en un sistema de almacenamiento
-					Puede almacenar hasta 4 objetos
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Puede almacenar hasta 4 objetos.
 					'''
 			}
 
 			UpgradeBlueChlorophyte: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Clorofita Azul)
+				DisplayName: Actualización de unidad de almacenamiento (clorofita azul)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 240
-					<right> en la unidad de almacenamiento (Sagrado) para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 240.
+					<right> en la unidad de almacenamiento (sagrado) para utilizar.
 					'''
 			}
 
 			UpgradeCrimtane: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Carmesí)
+				DisplayName: Actualización de unidad de almacenamiento (carmesí)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 80
-					<right> en la unidad de almacenamiento para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 80.
+					<right> en la unidad de almacenamiento para utilizar.
 					'''
 			}
 
 			UpgradeDemonite: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Endemoniado)
+				DisplayName: Actualización de unidad de almacenamiento (endemoniado)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 80
-					<right> en la unidad de almacenamiento para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 80.
+					<right> en la unidad de almacenamiento para utilizar.
 					'''
 			}
 
 			UpgradeHallowed: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Sagrado)
+				DisplayName: Actualización de unidad de almacenamiento (sagrado)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 160
-					<right> en la unidad de almacenamiento (Piedra Infernal) para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 160.
+					<right> en la unidad de almacenamiento (piedra infernal) para utilizar.
 					'''
 			}
 
 			UpgradeHellstone: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Piedra Infernal)
+				DisplayName: Actualización de unidad de almacenamiento (piedra infernal)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 120
-					<right> en la unidad de almacenamiento (Endemoniado/Carmesí) para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 120.
+					<right> en la unidad de almacenamiento (endemoniado/carmesí) para utilizar.
 					'''
 			}
 
 			UpgradeLuminite: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Luminita)
+				DisplayName: Actualización de unidad de almacenamiento (luminita)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 320
-					<right> en la unidad de almacenamiento (Clorofita Azul) para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 320.
+					<right> en la unidad de almacenamiento (clorofita azul) para utilizar.
 					'''
 			}
 
 			UpgradeTerra: {
-				DisplayName: Actualización de Unidad de Almacenamiento (Mundial)
+				DisplayName: Actualización de unidad de almacenamiento (mundial)
 				Tooltip:
 					'''
-					Capacidad de unidad de almacenamiento mejorada a 640
-					<right> en la unidad de almacenamiento (Luminita) para utilizar
+					Capacidad de unidad de almacenamiento mejorada a 640.
+					<right> en la unidad de almacenamiento (luminita) para utilizar.
 					'''
 			}
 
 			CrimsonAltar: {
-				DisplayName: Altar Carmesí
+				DisplayName: Altar carmesí
 				Tooltip:
 					'''
-					Un Altar Carmesí que puede ser colocado
-					No se puede extraer para obtener minerales de modo difícil
-					Se puede colocar en las estaciones de creación
+					Un [c/d84237:altar carmesí] artificial que puede ser colocado y
+					usado para elaborar recetas que necesite dicho altar.
+					Al romperse, no bendice el mundo con minerales del modo dificil.
+					Se puede colocar en las [c/0098ff:estaciones de elaboración].
 					'''
 			}
 
 			DemonAltar: {
-				DisplayName: Altar Demoníaco
+				DisplayName: Altar demoníaco
 				Tooltip:
 					'''
-					Un Altar Demoníaco que puede ser colocado
-					No se puede extraer para obtener minerales de modo difícil
-					Se puede colocar en las estaciones de creación
+					Un [c/9666a2:altar demoníaco] que puede ser colocado y
+					usado para elaborar recetas que necesite dicho altar.
+					Al romperse, no bendice el mundo con minerales del modo dificil.
+					Se puede colocar en las [c/0098ff:estaciones de elaboración].
 					'''
 			}
 
 			CombinedFurnitureStations1Item: {
-				DisplayName: Estación de Muebles Combinados (Nivel 1)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación para muebles
+				DisplayName: Estación de muebles combinados (nivel 1)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración para muebles
 			}
 
 			CombinedFurnitureStations2Item: {
-				DisplayName: Estación de Muebles Combinados (Nivel 2)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación para muebles
+				DisplayName: Estación de muebles combinados (nivel 2)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración para muebles
 			}
 
 			CombinedStations1Item: {
-				DisplayName: Estación Combinada (Nivel 1)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación
+				DisplayName: Estación combinada (nivel 1)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración
 			}
 
 			CombinedStations2Item: {
-				DisplayName: Estación Combinada (Nivel 2)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación
+				DisplayName: Estación combinada (nivel 2)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración
 			}
 
 			CombinedStations3Item: {
-				DisplayName: Estación Combinada (Nivel 3)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación
+				DisplayName: Estación combinada (nivel 3)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración
 			}
 
 			CombinedStations4Item: {
-				DisplayName: Estación Combinada (Nivel Final)
-				Tooltip: Combina la funcionalidad de varias estaciones de creación
+				DisplayName: Estación combinada (nivel final)
+				Tooltip: Combina la funcionalidad de varias estaciones de elaboración
 			}
 
 			EnvironmentAccess: {
-				DisplayName: Interfaz de Configuración de Almacenamiento
+				DisplayName: Interfaz de configuración de almacenamiento
 				Tooltip:
 					'''
-					Un componente para la accesibilidad entre mods con el sistema de almacenamiento "Magic Storage"
-					Muestra una lista de módulos de entorno conmutables agregados por otros mods
-					(No mostrara nada si no hay módulos disponibles)
-					Módulos Disponibles:
+					Un componente para la accesibilidad entre mods con el sistema de almacenamiento [c/7cb518:Magic Storage].
+					Muestra una lista de módulos de entorno conmutables agregados por otros mods.
+					[c/f4d58d:No mostrara nada si no hay módulos disponibles].
+
+					[c/f4d58d:Módulos disponibles:]
 					<MODULES>
 					'''
 			}
 
 			PortableAccessPreHM: {
-				DisplayName: Acceso Remoto de Almacenamiento Básico Portátil
+				DisplayName: Acceso remoto de almacenamiento básico portátil
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					Actualmente no configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento
-					El Corazón enlazado debe estar a un máximo de 100 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 1000 pies del Corazón enlazado o pilar para acceder al almacenamiento
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación.
+					Actualmente no configurado en ninguna ubicación.
+					Usa el objeto para acceder a tu almacenamiento.
+					El [c/0ecb75:corazón] enlazado debe estar a un máximo de 100 bloques de distancia, de cualquier [c/f4d58d:torre] válida para obtener un alcance extendido en cada [c/f4d58d:torre].
+					El jugador debe estar a un máximo de 1000 bloques de distancia del [c/0ecb75:corazón] enlazado o [c/f4d58d:torre], para acceder al almacenamiento.
 					'''
 			}
 
 			PortableAccessHM: {
-				DisplayName: Acceso Remoto de Almacenamiento Avanzado Portátil
+				DisplayName: Acceso remoto de almacenamiento avanzado portátil
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					Actualmente no está configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento
-					El Corazón enlazado debe estar a un máximo de 200 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 3000 pies del Corazón enlazado o pilar para acceder al almacenamiento
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación.
+					Actualmente no está configurado en ninguna ubicación.
+					Usa el objeto para acceder a tu almacenamiento.
+					El [c/0ecb75:corazón] enlazado debe estar a un máximo de 200 bloques de distancia, de cualquier [c/f4d58d:torre] válida para obtener un alcance extendido en cada [c/f4d58d:torre].
+					El jugador debe estar a un máximo de 3000 bloques de distancia del [c/0ecb75:corazón] enlazado o [c/f4d58d:torre], para acceder al almacenamiento.
 					'''
 			}
 
 			Config_GlowItemGlowing: {
-				// DisplayName: Config//GlowItemGlowing
-				// Tooltip: ""
+				DisplayName: Config//GlowItemGlowing
+				Tooltip: ""
 			}
 
 			Config_GlowItemNotGlowing: {
-				// DisplayName: Config//GlowItemNotGlowing
-				// Tooltip: ""
+				DisplayName: Config//GlowItemNotGlowing
+				Tooltip: ""
 			}
 
 			Config_RecipeFilterAvailable: {
-				// DisplayName: Config//RecipeFilterAvailable
-				// Tooltip: ""
+				DisplayName: Config//RecipeFilterAvailable
+				Tooltip: ""
 			}
 
 			Config_RecipeFilterAll: {
-				// DisplayName: Config//RecipeFilterAll
-				// Tooltip: ""
+				DisplayName: Config//RecipeFilterAll
+				Tooltip: ""
 			}
 
 			PortableCraftingAccessPreHM: {
-				DisplayName: Acceso Remoto de Creación Básica Portátil
+				DisplayName: Acceso remoto de creación básica portátil
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					Actualmente no está configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento de creación
-					El Corazón enlazado debe estar a un máximo de 100 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 1000 pies del Corazón enlazado o pilar para acceder al almacenamiento de creación
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación.
+					Actualmente no está configurado en ninguna ubicación.
+					Usa el objeto para acceder a tu [c/0098ff:almacenamiento de creación].
+					El [c/0ecb75:corazón] enlazado debe estar a un máximo de 100 bloques de distancia, de cualquier [c/f4d58d:torre] válida para obtener un alcance extendido en cada [c/f4d58d:torre].
+					El jugador debe estar a un máximo de 1000 bloques de distancia del [c/0ecb75:corazón] enlazado o [c/f4d58d:torre], para acceder al [c/0098ff:almacenamiento de creación].
 					'''
 			}
 
 			PortableCraftingAccessHM: {
-				DisplayName: Acceso Remoto de Creación Avanzada Portátil
+				DisplayName: Acceso remoto de creación avanzada portátil
 				Tooltip:
 					'''
-					<right> al Corazón de Almacenamiento para registrar su ubicación
-					Actualmente no está configurado en ninguna ubicación
-					Usa el objeto para acceder a tu almacenamiento de creación
-					El Corazón enlazado debe estar a un máximo de 200 pies de cualquier pilar válido para obtener un alcance extendido en cada pilar
-					El jugador debe estar a un máximo de 3000 pies del Corazón enlazado o pilar para acceder al almacenamiento de creación
+					<right> al [c/0ecb75:corazón de almacenamiento] para registrar su ubicación.
+					Actualmente no está configurado en ninguna ubicación.
+					Usa el objeto para acceder a tu [c/0098ff:almacenamiento de creación].
+					El [c/0ecb75:corazón] enlazado debe estar a un máximo de 200 bloques de distancia de cualquier [c/f4d58d:torre] válida para obtener un alcance extendido en cada [c/f4d58d:torre].
+					El jugador debe estar a un máximo de 3000 bloques de distancia del [c/0ecb75:corazón] enlazado o [c/f4d58d:torre], para acceder al [c/0098ff:almacenamiento de creación].
 					'''
 			}
 
 			DecraftingAccess: {
-				// DisplayName: Storage Aether Interface
-				// Tooltip: Enables shimmering with the items in a storage system
+				DisplayName: Interfaz etérea de almacenamiento
+				Tooltip: "Permite imbuir en [c/ed00ff:fulgor] los objetos que quieras, en el sistema de almacenamiento"
 			}
 
 			Shimmer_CoinLuck: {
-				// DisplayName: Meta//Shimmer/Coin_Luck
-				// Tooltip: ""
+				DisplayName: Meta//Shimmer/Coin_Luck
+				Tooltip: ""
 			}
 
 			StorageCore: {
-				// DisplayName: Storage Core (Basic)
-				// Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
-				/* CommonTooltip:
+				DisplayName: Núcleo de almacenamiento (básico)
+				Tooltip: "{$Mods.MagicStorage.Items.StorageCore.CommonTooltip}"
+				CommonTooltip:
 					'''
-					Stores the items that were in a Storage Unit
-					<right> an Empty Storage Unit to insert it
+					Almacena los objetos que estaban en una unidad de almacenamiento.
+					<right> en la [c/f4d58d:unidad de almacenamiento vacía], para colocarle este núcleo.
 					<CAPACITY>
 					<HASH>
 					<BYTES>
-					''' */
-				// ItemsStored: "[c/{0}:{1} / {2} items]"
-				// Hash: Data hash: {0:x08}
-				// BytesUsed: "[c/{0}:{1} bytes]"
+					'''
+				ItemsStored: "[c/{0}:{1} / {2} objetos]"
+				Hash: datos hast: {0:x08}
+				BytesUsed: "[c/{0}:{1} bytes]"
 			}
 
-			// StorageCoreBlueChlorophyte.DisplayName: Storage Core (Blue Chlorophyte)
-			// StorageCoreCrimtane.DisplayName: Storage Core (Crimtane)
-			// StorageCoreDemonite.DisplayName: Storage Core (Demonite)
-			// StorageCoreHallowed.DisplayName: Storage Core (Hallowed)
-			// StorageCoreHellstone.DisplayName: Storage Core (Hellstone)
-			// StorageCoreLuminite.DisplayName: Storage Core (Luminite)
-			// StorageCoreTerra.DisplayName: Storage Core (Terra)
+			StorageCoreBlueChlorophyte.DisplayName: Núcleo de almacenamiento (clorofita azul)
+			StorageCoreCrimtane.DisplayName: Núcleo de almacenamiento (carmesí)
+			StorageCoreDemonite.DisplayName: Núcleo de almacenamiento (endemoniado)
+			StorageCoreHallowed.DisplayName: Núcleo de almacenamiento (sagrado)
+			StorageCoreHellstone.DisplayName: Núcleo de almacenamiento (piedra infernal)
+			StorageCoreLuminite.DisplayName: Núcleo de almacenamiento (luminita)
+			StorageCoreTerra.DisplayName: Núcleo de almacenamiento (mundial)
 
 			StorageExtractor: {
-				// DisplayName: Storage Core Wrench
-				// Tooltip: Can remove the Storage Core from a Storage Unit
+				DisplayName: Llave inglesa del núcleo de almacenamiento
+				Tooltip: Puede extraer el núcleo de almacenamiento sin perder el contenido de la unidad de almacenamiento
 			}
 
 			StorageUnitEmpty: {
-				// DisplayName: Empty Storage Unit
-				/* Tooltip:
+				DisplayName: Unidad de almacenamiento vacía
+				Tooltip:
 					'''
-					A component for storing items in a Magic Storage storage system
-					Needs a Storage Core to function
-					Right click while holding a Storage Core to insert it
-					''' */
+					Un componente para almacenar objetos usando el sistema de [c/7cb518:Magic Storage].
+					Necesita un [c/f4d58d:núcleo de almacenamiento] para funcionar.
+					<right> mientras mantienes en tu mano un [c/f4d58d:núcleo de almacenamiento].
+					'''
 			}
 
 			StorageSecurity: {
-				// DisplayName: Storage Security Wand
-				/* Tooltip:
+				DisplayName: Varita de seguridad de almacenamiento
+				Tooltip:
 					'''
-					<left> a Storage Heart to open the Security Network
-					Storage components connected to a Storage Heart assigned to a private Security Network
-					  cannot be accessed until the password for the Security Network has been entered.
-					The creator of a Security Network will always have access to it, however.
-					''' */
+					<left> en el [c/0ecb75:corazón de almacenamiento] para abrir la red de seguridad.
+					No se puede acceder a los componentes de almacenamiento conectados a
+					un [c/0ecb75:corazón de almacenamiento] asignado a una red de seguridad privada,
+					hasta que se ingrese la contraseña de la red de seguridad. 
+					Sin embargo, el creador de una red de seguridad siempre tendrá acceso a ella.
+					'''
 			}
 
 			ErrorItems: {
-				/* CommonTooltip:
+				CommonTooltip:
 					'''
 					<FULLNAME>
 					<PREFIX>
-					''' */
-				// NameText: Name: {0}/{1}
-				// NameTextUnknown: <unknown>
-				// PrefixText: Prefix: {0}
-				// PrefixTextModded: Prefix: {0}/{1}
+					'''
+				NameText: Nombre: {0}/{1}
+				NameTextUnknown: <unknown>
+				PrefixText: Prefijo: {0}
+				PrefixTextModded: Prefijo: {0}/{1}
 			}
 
 			Error_ItemSlotRenderFail: {
-				// DisplayName: Error//ItemRender
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
+				DisplayName: Error//ItemRender
+				Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
-				// DisplayName: Error//ItemClientRead
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+				DisplayName: Error//ItemClientRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
 			}
 
 			TagIOStressTest: {
-				// DisplayName: Debug//DataCompressionTest
-				// Tooltip: ""
+				DisplayName: Debug//DataCompressionTest
+				Tooltip: ""
 			}
 
 			Error_ItemNBTFail: {
-				// DisplayName: Error//NBTRead
-				// Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
+				DisplayName: Error//NBTRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
-		Projectiles.BiomeGlobeThrown.DisplayName: Bioma Global
+		Projectiles.BiomeGlobeThrown.DisplayName: Bioma global
 
 		NPCs: {
 			Golem: {
-				DisplayName: Automaton
+				DisplayName: Autómata
 
 				TownNPCMood: {
 					Content: Los sistemas están operativos.
@@ -523,24 +541,28 @@ Mods: {
 				}
 
 				# Census support
-				// Census.SpawnCondition: '''"{$Mods.MagicStorage.Configs.MagicStorageServerConfig.allowAutomatonToMoveIn.Label}" config in the "{$Mods.MagicStorage.Configs.MagicStorageServerConfig.DisplayName}" set to On'''
+				Census.SpawnCondition:
+					'''
+					Para habilitar su aparición natural, ve a configurar mods [c/00dc00:->] magic storage [c/00dc00:--]
+					[c/00dc00:-->] Config. de Magic Storage en el servidor [c/00dc00:->] y habilita la opcion [c/f4d58d:vivienda del autómata]
+					'''
 			}
 		}
 
 		EnvironmentModule: {
 			UseInventoryModule: {
 				DisplayName: Usar objetos del inventario
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: Este módulo está actualmente deshabilitado.
 			}
 
 			UseInventoryNoFavoritesModule: {
 				DisplayName: Usar objetos no favoritos de su inventario
-				// DisabledTooltip: This module is currently disabled.
+				DisabledTooltip: Este módulo está actualmente deshabilitado.
 			}
 
 			JourneyInfiniteItems: {
-				DisplayName: Usar Jorney Mode(Modo-Viaje) para objetos infinitos
-				DisabledTooltip: Este módulo solo puede ser utilizado por personajes del Modo Viaje.
+				DisplayName: "Usa los objetos infinitos del [c/ff78bb:modo viaje]"
+				DisabledTooltip: Este módulo solo puede ser utilizado por personajes del [c/ff78bb:modo viaje].
 			}
 		}
 
@@ -560,22 +582,30 @@ Mods: {
 			CombinedStations3Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations3Item.DisplayName}"
 			CombinedStations4Tile.MapEntry: "{$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
 			EnvironmentAccess.MapEntry: "{$Mods.MagicStorage.Items.EnvironmentAccess.DisplayName}"
-			EvilAltarTile.MapEntry: Altar Malvado
-			// DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
+			EvilAltarTile.MapEntry: Altar maligno
+			DecraftingAccess.MapEntry: "{$Mods.MagicStorage.Items.DecraftingAccess.DisplayName}"
 		}
 
 		GameTips: {
-			// Automaton: The Automaton can teach you all there is to know about Magic Storage.
-			// ShadowDiamonds: Shadow Diamonds are dropped when a boss is defeated for the first time. They can be used as an alternative to Diamonds in Magic Storage recipes.
-			// RadiantJewel: The Moon Lord drops the Radiant Jewel, which can be used to craft Portable Remote Accesses with unlimited access range.
-			// StorageUpgrades: Running out of storage? Upgrade your Storage Units with Storage Upgrades!
-			// RemoteStorage: Access your storage at other locations in the world with a Remote Access after linking it to a Storage Heart with a Locator or Locator Disk.
-			// CombinedStations: Magic Storage provides Combined Crafting Stations to reduce the number of crafting stations you have to put in the Crafting Interface.
-			// EnvironmentAccess: The Storage Configuration Interface allows other mods to add "crafting modules" which can affect how the Crafting Interface functions.
-			// PortableAccess: Craft a Portable Remote Storage Access to access your storage while you're away from home.
-			// StorageCores: Use a Storage Core Wrench to remove the Storage Core from a Storage Unit, which can then be inserted into an Empty Storage Unit.
-			// DisableUnit: Use a Storage Unit Wand to disable a Storage Unit. A disabled Storage Unit cannot store items and will attempt to move its items to connected Storage Units.
-			// BiomeGlobe: The Biome Globe enables recipes for the Snow biome, Ecto Mist, the Campfire, Water, Lava, Honey and the Demon/Crimson Altars.
+			Automaton: El autómata puede enseñarte todo lo que hay que saber sobre Magic Storage.
+			ShadowDiamonds: El [c/b093b7:diamante sombrío] se obtiene al derrotar a un jefe por primera vez. Se pueden usar como alternativa a los diamantes normales, en las recetas de Magic Storage.
+			RadiantJewel: Al derrotar al Señor de la luna, este puede soltar la [c/00FFFF:joya radiante], la cual puede usarse para fabricar [c/f4d58d:accesos remotos portátiles] con un rango de acceso ilimitado.
+			StorageUpgrades: ¿Te estás quedando sin espacio de almacenamiento? ¡Mejora tus unidades de almacenamiento con una [c/f4d58d:actualización de unidad de almacenamiento]!
+			RemoteStorage:
+				'''
+				Accede a tu almacenamiento desde otras ubicaciones del mundo, vinculando el corazón de almacenamiento a un acceso remoto.
+				Para vincular el acceso al corazón, necesitas un localizador o un disco localizador.
+				'''
+			CombinedStations: Magic Storage proporciona estaciones de elaboración combinadas para reducir la cantidad de estaciones de elaboración que debes colocar en la [c/a4ceeb:interfaz de elaboración].
+			EnvironmentAccess: La [c/f4d58d:interfaz de configuración de almacenamiento] permite que otros mods agreguen [c/f4d58d:módulos de elaboración] que pueden afectar el funcionamiento de la [c/a4ceeb:interfaz de elaboración].
+			PortableAccess: Cree un [c/f4d58d:acceso remoto de almacenamiento portátil] para acceder a su almacenamiento mientras está fuera de casa.
+			StorageCores: Utilice una [c/f4d58d:llave inglesa del núcleo de almacenamiento] para quitar el [c/f4d58d:núcleo de almacenamiento], de una unidad de almacenamiento, que luego se puede insertar a una [c/f4d58d:unidad de almacenamiento vacía].
+			DisableUnit:
+				'''
+				Usa una [c/f4d58d:varita de unidad de almacenamiento] para desactivar la unidad de almacenamiento.
+				Una [c/f4d58d:unidad de almacenamiento] desactivada no puede almacenar objetos e intentará moverlos a las [c/f4d58d:unidades de almacenamiento] conectadas.
+				'''
+			BiomeGlobe: El objeto bioma global te permite elaborar recetas que se necesiten estar en el bioma de la nieve/cementerio o cerca de una hoguera, agua, lava, miel, altar demoníaco/carmesí.
 		}
 
 		Bestiary.Golem:
@@ -586,62 +616,83 @@ Mods: {
 
 		Dialogue: {
 			Golem: {
-				Greeting: Hola {0}. ¿Te gustaría que esta unidad te enseñe algo?
+				Greeting: Hola {0}, ¿te gustaría que esta unidad te enseñe algo?
 				Wizard: A pesar de tener conocimientos en magia, {0} no puede comprender cómo funciona Bluemagic. Para ser justos, no es realmente magia.
-				NotLihzahrd: Esta unidad no está construida con Lihzahrd Bricks. Por favor, deja de preguntar.
+				NotLihzahrd: Esta unidad no está construida con ladrillos de Lihzahrd. Por favor, deja de preguntar.
 				Bluemagic: Bluemagic es una fuente asombrosa de poder. Sería sabio no subestimar sus capacidades.
-				Violence: Hola {0}. Mi creador olvidó instalar mi chi... quiero decir, mi chip de autodefensa. He sido mejorado y ahora estoy listo para el combate.
+				Violence:
+					'''
+					Hola {0}, mi creador olvidó instalar mi chip de violen... quiero decir, de autodefensa.
+					He sido mejorado y ahora estoy listo para el combate.
+					'''
 				NoPlant: Esta unidad no posee ninguna materia orgánica de origen vegetal. Debes estar pensando en otra persona.
-				NeedPlant: "[c/ff0000:DAME LA PLANTA.] beep Disculpas, {0}. Parece que esta unidad ha ejecutado una rutina no autorizada."
-				// NewTextAvailable: Hello {0}. This unit has prepared some new help tips for you.
+				NeedPlant:
+					'''
+					[c/ff0000:DAME LA PLANTA.] *beep*
+					Disculpas, {0}, parece que esta unidad ha ejecutado una rutina no autorizada.
+					'''
+				NewTextAvailable: Hola {0}, esta unidad ha preparado nuevos consejos que pueden ser de tu ayuda.
 				Help1:
 					'''
-					Para empezar, necesitarás crear algunos Componentes de Almacenamiento. Este objeto es la base para todos los componentes del sistema de almacenamiento. Dale uno al Guía para ver para qué se puede usar.
+					Para empezar.
+					Necesitarás crear algunos componentes de almacenamiento. Este objeto es la base para todos los componentes del sistema de almacenamiento.
+					Dale uno al [c/f4d58d:Guía] para ver las recetas que usan este objeto.
 					Receta: [rg/s10:Wood] [rg/s2:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageComponent]
 					'''
 				Help2:
 					'''
-					Una vez que tengas un [i:MagicStorage/StorageComponent], necesitarás crear un Corazón de Almacenamiento. El Corazón de Almacenamiento es donde puedes acceder a los objetos almacenados y es necesario para que el sistema de almacenamiento funcione.
+					Una vez que tengas un [i:MagicStorage/StorageComponent], lo usaremos para crear un [c/0ecb75:corazón de almacenamiento], el cual se usa para acceder a los objetos almacenados y es necesario para que el sistema de almacenamiento funcione.
 					Receta: [i:MagicStorage/StorageComponent] [rg/s2:MagicStorage:AnyDiamond] [i/s3:Emerald] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageHeart]
 					'''
 				Help3:
 					'''
-					Después de colocar el [i:MagicStorage/StorageHeart], necesitarás crear Unidades de Almacenamiento para almacenar los objetos del Corazón de Almacenamiento.
+					Después de colocar el [i:MagicStorage/StorageHeart], necesitarás crear [c/f4d58d:unidades de almacenamiento] para almacenar los objetos usando el [c/0ecb75:corazón de almacenamiento].
 					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyChest] [rg/s10:MagicStorage:AnySilverBar] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageUnit]
 					'''
 				Help4:
 					'''
-					Para fabricar objetos en el sistema de almacenamiento, necesitarás hacer un Acceso de Creación.
+					Para fabricar objetos desde el sistema de almacenamiento, necesitarás elaborar una [c/a4ceeb:interfaz de creación de almacenamiento].
 					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/CraftingAccess]
 					'''
 				Help5:
 					'''
-					Los espacios de estación del Acceso de Creación son más poderosos de lo que parecen. ¡Algunos objetos pueden heredar múltiples requisitos de fabricación a la vez!
-					[i:GlassKiln] funciona como un [i:Furnace]
+					Los espacios de estación de la [c/a4ceeb:interfaz de creación], son más poderosos de lo que parecen.
+					¡Algunos objetos pueden heredar múltiples requisitos de fabricación a la vez!
+					[i:GlassKiln] funciona como una [i:Furnace]
 					[i:BewitchingTable] funciona como una [i:WoodenTable]
-					[rg:MagicStorage:AnyTombstone] habilita las recetas del bioma del Cementerio
-					[i:AlchemyTable] funciona como una [i:WoodenTable] y un [i:Bottle]
-					[rg:MagicStorage:AnyTable] funciona como una [i:WoodenChair]
+					[rg:MagicStorage:AnyTombstone] habilita las recetas del bioma del cementerio
+					[i:AlchemyTable] funciona como una [i:WoodenTable] que tiene encima de una [i:Bottle]
+					[rg:MagicStorage:AnyTable] funciona como si estuviera la [i:WoodenTable] y la [i:WoodenChair] juntos
 					'''
 				Help6:
 					'''
-					El [i:AlchemyTable] conserva su 33% de probabilidad de no consumir ingredientes de pociones.
-					[i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] y cualquier otro objeto que coloque un bloque que cuente como fuente de agua habilita recetas de Agua.
-					[i:LavaBucket] habilita recetas de Lava.
-					[i:HoneyBucket] habilita recetas de Miel.
-					[i:MagicStorage/DemonAltar] y [i:MagicStorage/CrimsonAltar] habilitan recetas de Altar Demoníaco/Carmesí.
-					[i:MagicStorage/SnowBiomeEmulator] habilita recetas del bioma de Nieve.
+					La [i:AlchemyTable] conserva su probabilidad del 33% de no consumir los ingredientes al crear una poción.
+					El [i:WaterBucket], [i:BottomlessBucket], [rg:MagicStorage:AnySink] o cualquier otro objeto que cuente
+					como fuente de agua, habilita recetas que necesiten agua.
+					[i:LavaBucket] recetas que requieran estar cerca de la lava.
+					[i:HoneyBucket] recetas que requieran estar cerca de la miel.
+					[i:MagicStorage/DemonAltar]/[i:MagicStorage/CrimsonAltar] recetas que requieran estar cerca de un altar demoníaco/carmesí.
+					[i:MagicStorage/SnowBiomeEmulator] recetas que requieran estar en el bioma de la nieve.
 					'''
 				Help7:
 					'''
-					Todos los componentes de un sistema de almacenamiento deben estar conectados entre sí. Si quieres separar tus [i:MagicStorage/StorageUnit] de tu
-					[i:MagicStorage/StorageHeart], puedes usar Conectores para conectarlos.
+					Todos los componentes de un sistema de almacenamiento
+					deben estar conectados entre sí.
+					Si quieres separar las [i:MagicStorage/StorageUnit] de tu [i:MagicStorage/StorageHeart], y aun así siga funcionando el sistema, puedes usar [c/f4d58d:conectores] para conectarlos.
 					Receta: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
 					'''
-				Help8: Oculto en el núcleo de todos los jefes se encuentra un Diamante Sombrío. Esta joya maldita se puede utilizar como alternativa a un [i:Diamond] para todas las recetas de Magic Storage. Una vez que obtienes un Diamante Sombrío de un jefe, ¡no puedes obtener más de él! Por otro lado, algunos jefes sueltan más de uno.
+				Help8:
+					'''
+					Oculto en el núcleo de todos los jefes se encuentra un [c/b093b7:diamante sombrío]. Esta joya maldita se puede utilizar como alternativa al [i:Diamond] para todas las recetas de
+					Magic Storage.
+					Una vez que obtienes el [c/b093b7:diamante sombrío] de un jefe, ¡no puedes obtener más de él!
+					Por otro lado, algunos jefes sueltan más de uno.
+					'''
 				Help9:
 					'''
-					¿Te quedaste sin espacio de almacenamiento? ¡Mejora tus Unidades de Almacenamiento con Mejoras de Almacenamiento! Una Mejora de Almacenamiento para un cierto nivel solo se puede aplicar a una Unidad de Almacenamiento de un nivel anterior.
+					¿Te quedaste sin espacio de almacenamiento? ¡Mejora tus unidades de almacenamiento aplicándole
+					una [c/f4d58d:actualización de unidad de almacenamiento]!
+					Dichas actualizaciones, solo se pueden aplicar a una unidad de almacenamiento de un nivel anterior.
 					[i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageUnitDemonite] / [i:MagicStorage/StorageUnitCrimtane]
 					[i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageUnitHellstone]
 					[i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
@@ -650,73 +701,97 @@ Mods: {
 					'''
 				Help10:
 					'''
-					Si no quieres mover tu Corazón de Almacenamiento usa un Acceso de Remoto en su lugar! Este componente se puede usar al igual que el Corazón de Almacenamiento para ver los objetos en tu almacenamiento.
+					Si no quieres mover el [c/0ecb75:corazón de almacenamiento] usa
+					un [c/ffa900:acceso de almacenamiento] en su lugar!
+					Este componente se puede usar igual, que el
+					[c/0ecb75:corazón de almacenamiento] para ver los objetos almacenados, siendo una buena manera de tener un segundo acceso sin necesidad de mover el principal.
 					Receta: [i:MagicStorage/StorageComponent] [rg:MagicStorage:AnyDiamond] [i/s3:Topaz] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/StorageAccess]
 					'''
 				Help11:
 					'''
-					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona el objeto Globo de Bioma. Este objeto habilita recetas para el bioma de Nieve, Niebla de Ecto, la Hoguera, Agua, Lava, Miel y los Altares Demoníaco/Carmesí. ¡Incluso puedes llevarlo en tu inventario y cocinar Malvaviscos sin necesidad de estar junto a una Hoguera!
-					Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ hand = [i:MagicStorage/BiomeGlobe]
+					Como una de las muchas características para reducir el número de estaciones de elaboración que tienes que poner dentro de la [c/a4ceeb:interfaz de creación], Magic Storage
+					proporciona el objeto [c/f4d58d:bioma global]. Este objeto te permite elaborar recetas que se necesiten estar en el bioma de la nieve/cementerio o cerca de una hoguera,
+					agua, lava, miel, altar demoníaco/carmesí.
+					¡Incluso puedes llevarlo en tu inventario y cocinar
+					[c/f4d58d:nube dulce] sin necesidad de estar junto a una [c/f4d58d:hoguera]!
+					Receta: [rg/s5:MagicStorage:AnyTombstone] [i:MagicStorage/SnowBiomeEmulator] [i/s5:WaterBucket] [i/s5:LavaBucket] [i/s5:HoneyBucket] [rg/s3:MagicStorage:AnyCampfire] [rg:MagicStorage:AnyDemonAltar] @ a mano = [i:MagicStorage/BiomeGlobe]
 					'''
 				Help12:
 					'''
-					A veces quieres poder acceder a tu almacenamiento en otras ubicaciones del mundo, pero tener que conectar el almacenamiento con Conectores es molesto y costoso. ¿La solución? Crea un Acceso Remoto y enlázalo al Corazón de Almacenamiento con un [i:MagicStorage/Locator] o [i:MagicStorage/LocatorDisk].
+					A veces quieres poder acceder a tu almacenamiento desde otras ubicaciones del mundo, pero tener que conectar el almacenamiento con [c/f4d58d:conectores] es molesto y costoso.
+					¿La solución? Crea un [c/ef7273:acceso remoto de almacenamiento]
+					y enlázalo al [c/0ecb75:corazón de almacenamiento] con un [i:MagicStorage/Locator] o [i:MagicStorage/LocatorDisk]
 					Recetas:
 					[i:MagicStorage/StorageComponent] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/RemoteAccess]
 					[i/s10:MeteoriteBar] [i/s2:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/Locator]
 					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 					'''
-				Help13: Puedes adjuntar componentes de almacenamiento a un Acceso de Creación y aún así poder acceder al sistema de almacenamiento principal. Es muy útil para tener un Acceso de Creación lejos del Corazón de Almacenamiento.
+				Help13:
+					'''
+					Puedes adjuntar componentes de almacenamiento a un [c/ef7273:acceso remoto] y aún así poder acceder al sistema de almacenamiento principal.
+					Es muy útil para tener la [c/a4ceeb:interfaz de creación] lejos del [c/0ecb75:corazón de almacenamiento].
+					'''
 				Help14:
 					'''
-					El Desactivador de Almacenamiento te permite desactivar una [i:MagicStorage/StorageUnit]. Una [i:MagicStorage/StorageUnit] desactivada no puede almacenar objetos y rápidamente intentará mover sus objetos a las [i:MagicStorage/StorageUnit] conectadas. Si no puede mover sus objetos, los objetos permanecen en la [i:MagicStorage/UnidadAlmacenamiento] desactivada.
-					H
+					La [c/f4d58d:varita de unidad de almacenamiento] te permite desactivar cualquier [i:MagicStorage/StorageUnit]. Al estar desactivada, no puede
+					almacenar objetos y rápidamente intentará moverlo a las
+					otras [i:MagicStorage/StorageUnit] conectadas.
+					Si no puede mover los objetos que contiene, estos permanecerán dentro de la [i:MagicStorage/StorageUnit] desactivada.
 					'''
 				Help15:
 					'''
-					Por conveniencia del usuario, Magic Storage agrega recetas para Altares Demoníaco/Carmesí coloquiales. Aunque extraerlos no te da menas, aún puedes usarlos como estaciones de creación.
+					Para conveniencia del jugador, Magic Storage agrega una receta para crear el altar demoníaco/carmesí.
+					Aunque al romperlos no bendicen tu mundo con minerales, como si sucede con los altares generados naturalmente, aún puedes usarlos como estaciones de elaboración o decoración.
 					Recetas:
 					[i/s10:DemoniteBar] [i/s15:ShadowScale] @ [i:MagicStorage/DemonAltar] = [i:MagicStorage/DemonAltar]
 					[i/s10:CrimtaneBar] [i/s15:TissueSample] @ [i:MagicStorage/CrimsonAltar] = [i:MagicStorage/CrimsonAltar]
 					'''
 				Help16:
 					'''
-					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de creación de materiales.
+					Como una de las muchas características para reducir el número de estaciones de elaboración que tienes que poner en la [c/a4ceeb:interfaz de creación], Magic Storage proporciona varias estaciones de elaboración combinadas. Cada una de ellas hereda todas las propiedades de cada mesa de elaboración que se necesitó
+					para crearla.
 					Recetas:
-					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ hand = [i:MagicStorage/CombinedStations1Item]
-					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ hand = [i:MagicStorage/CombinedStations2Item]
-					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedStations3Item]
+					[rg:MagicStorage:AnyWorkBench] [i:Furnace] [rg:MagicStorage:AnyPreHmAnvil] [rg:MagicStorage:AnyBottle] [rg:MagicStorage:AnySink] [i:Sawmill] [i:Loom] [rg:MagicStorage:AnyTable] @ a mano = [i:MagicStorage/CombinedStations1Item]
+					[i:MagicStorage/CombinedStations1Item] [i:Hellforge] [i:AlchemyTable] [rg:MagicStorage:AnyCookingPot] [i:TinkerersWorkshop] [i:DyeVat] [i:HeavyWorkBench] [i:Keg] [i:TeaKettle] @ a mano = [i:MagicStorage/CombinedStations2Item]
+					[i:MagicStorage/CombinedStations2Item] [i:ImbuingStation] [rg:MagicStorage:AnyHmAnvil] [rg:MagicStorage:AnyHmFurnace] [rg:MagicStorage:AnyBookcase] [i:CrystalBall] [i:BlendOMatic] @ a mano = [i:MagicStorage/CombinedStations3Item]
 					'''
 				Help17:
 					'''
-					Como una de las muchas características para reducir el número de estaciones de creación que tienes que poner en el Acceso de Creación, Magic Storage proporciona varias Estaciones de Creación Combinadas. Cada Estación de Creación Combinada hereda las propiedades de sus estaciones de Creación de materiales.
+					Como una de las muchas características para reducir el número de estaciones de elaboración que tienes que poner en la [c/a4ceeb:interfaz de creación], Magic Storage proporciona varias estaciones de elaboración combinadas. Cada una de ellas hereda todas las propiedades de cada mesa de elaboración que se necesitó
+					para crearla.
 					Recetas:
-					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ hand = [i:MagicStorage/CombinedFurnitureStations1Item]
-					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] [i:BlendOMatic] @ hand = [i:MagicStorage/CombinedFurnitureStations2Item]
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					[i:BoneWelder] [i:GlassKiln] [i:HoneyDispenser] [i:IceMachine] [i:LivingLoom] [i:SkyMill] [i:Solidifier] @ a mano = [i:MagicStorage/CombinedFurnitureStations1Item]
+					[i:MagicStorage/CombinedFurnitureStations1Item] [i:MeatGrinder] [i:LesionStation] [i:FleshCloningVaat] [i:SteampunkBoiler] [i:LihzahrdFurnace] @ a mano = [i:MagicStorage/CombinedFurnitureStations2Item]
 					'''
 				Help17_NoFargo:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ a mano = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help17_WithFargo:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help17}
-					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ hand = [i:MagicStorage/CombinedStations4Item]
+					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ a mano = [i:MagicStorage/CombinedStations4Item]
 					'''
-				Help18: El Señor de la Luna protege la Joya Radiante, una gema de poder increíble. ¡Puedes usarla para fabricar Accesos Remotos Portátiles con alcance de acceso ilimitado!
-				/* Help19:
+				Help18:
 					'''
-					The Configuration Interface allows other mods to add "crafting modules" which can affect how the [i:MagicStorage/CraftingAccess] functions.
-					These modules can be toggled on and off in the UI for the Configuration Interface.
-					By default, Magic Storage provides modules for reading from the player's inventory and Journey Mode duplication menu.
+					El Señor de la luna protege la [c/00ff00:joya radiante],
+					una gema que contiene un poder increíble.
+					¡Puedes usarla para fabricar [c/f4d58d:accesos remotos portátiles],
+					con un alcance de acceso ilimitado!
+					'''
+				Help19:
+					'''
+					La [c/f4d58d:interfaz de configuración], permite que otros mods agreguen [c/f4d58d:módulos de elaboración] que pueden afectar el funcionamiento de la [i:MagicStorage/CraftingAccess].
+					Estos módulos se pueden activar y desactivar desde la UI
+					de configuración.
+					De forma predeterminada, Magic Storage proporciona módulos para leer desde el inventario del jugador y el menú de duplicación del [c/ff78bb:modo viaje].
 					[rg/s2:MagicStorage:AnyDiamond] [i/s50:DirtBlock] [i/s50:StoneBlock] [i/s50:MudBlock] [i/s50:SnowBlock] [i/s50:SandBlock] @ [rg:MagicStorage:AnyWorkBench] = [i:MagicStorage/EnvironmentAccess]
-					''' */
+					'''
 				Help20:
 					'''
 					Aunque el [i:MagicStorage/RemoteAccess] es muy útil, a veces necesitas poder acceder a tu almacenamiento mientras estás lejos de casa.
-					Para hacerlo, fabrica un Acceso Remoto Portátil.
+					Para hacerlo, fabrica un [c/f4d58d:acceso remoto portátil].
 					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Ruby] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableAccessPreHM]
 					[i:MagicStorage/Locator] [rg/s20:Wood] [rg/s15:IronBar] [rg/s10:MagicStorage:AnyDemoniteBar] [rg/s3:MagicStorage:AnyDiamond] [i/s3:Sapphire] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/PortableCraftingAccessPreHM]
 					'''
@@ -734,78 +809,83 @@ Mods: {
 					'''
 				Help21:
 					'''
-					También puedes mejorar una Unidad de Almacenamiento a la siguiente categoría haciendo clic derecho con el objeto de mejora correspondiente.
+					También puedes mejorar una unidad de almacenamiento
+					a la siguiente categoría haciendo [c/f4d58d:clic derecho] con el objeto de mejora correspondiente.
 					[i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeDemonite] -> [i:MagicStorage/StorageUnitDemonite]    [i:MagicStorage/StorageUnit] + [i:MagicStorage/UpgradeCrimtane] -> [i:MagicStorage/StorageUnitCrimtane]
 					[i:MagicStorage/StorageUnitDemonite] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]    [i:MagicStorage/StorageUnitCrimtane] + [i:MagicStorage/UpgradeHellstone] -> [i:MagicStorage/StorageUnitHellstone]
 					[i:MagicStorage/StorageUnitHellstone] + [i:MagicStorage/UpgradeHallowed] -> [i:MagicStorage/StorageUnitHallowed]    [i:MagicStorage/StorageUnitHallowed] + [i:MagicStorage/UpgradeBlueChlorophyte] -> [i:MagicStorage/StorageUnitBlueChlorophyte]
 					[i:MagicStorage/StorageUnitBlueChlorophyte] + [i:MagicStorage/UpgradeLuminite] -> [i:MagicStorage/StorageUnitLuminite]    [i:MagicStorage/StorageUnitLuminite] + [i:MagicStorage/UpgradeTerra] -> [i:MagicStorage/StorageUnitTerra]
 					(2/2)
 					'''
-				/* Help22:
+				Help22:
 					'''
-					This unit has noticed that you are currently playing in a multiplayer world.  Hence, some features within the [i:MagicStorage/StorageHeart] are locked behind the [c/cccc00:Server Operator] status.
-					To become a [c/cccc00:Server Operator], you must use the [c/ff6a00:/msreqop] command.  Using this command successfully will grant you the [c/cc0000:Server Admin] status.
-					Once you have the [c/cc0000:Server Admin] status, you can use the [c/ff6a00:/msop] command to grant other players the [c/cccc00:Server Operator] status or [c/ff6a00:/msdeop] to remove it.
-					Either status will stay active until you disconnect from the server.
-					The [c/ffff00:Magic Storage Server Config] has an option which forces the host to be a [c/cc0000:Server Admin] when enabled.
-					''' */
-				/* Help23:
+					Esta unidad ha detectado que estás jugando en un mundo multijugador. Por lo tanto, algunas funciones del [i:MagicStorage/StorageHeart] están bloqueadas tras el estado del [c/cccc00:operador de servidor]. Para convertirse en uno, debe usar el comando [c/ff6a00:/msreqop] y obtendrás el estado de [c/cc0000:administrador]. Gracias a ello, puedes usar el comando [c/ff6a00:/msop] para otorgar a otros jugadores el ser [c/cccc00:operadores] o usar [c/ff6a00:/msdeop] para eliminarlo. Cualquiera de los estados permanecerá activo hasta que te desconectes del servidor. En la opción de [c/ffff00:config. de Magic Storage en el servidor] tiene una opción que fuerza al host a ser un [c/cc0000:administrador] cuando está habilitada.
 					'''
-					Moving a storage system can be a hassle, especially if you have a lot of items stored.  To make it easier, you can use the Storage Core Wrench to remove the Storage Core from a placed Storage Unit.
+				Help23:
+					'''
+					¿Quieres mover el sistema de almacenamiento entero? En
+					ese caso necesitarás una [c/f4d58d:llave inglesa del núcleo de almacenamiento] para extraer el [c/f4d58d:núcleo de almacenamiento] de la unidad de almacenamiento.
 					[i:Wrench] + [i:MagicStorage/StorageComponent] + [i/s10:Wire] + [rg/s5:IronBar] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageExtractor]
-					Removing the Storage Core will turn the Storage Unit into an [i:MagicStorage/StorageUnitEmpty], which can then be picked up and placed elsewhere.
+					Al quitar el [c/f4d58d:núcleo de almacenamiento], la unidad de almacenamiento se convertirá en una [i:MagicStorage/StorageUnitEmpty], que luego podrá recogerse y colocarse en otro lugar.
 					(1/2)
-					''' */
-				/* Help24:
 					'''
-					Dropping a [i:MagicStorage/CraftingAccess] into Shimmer will transform it into an Aether Interface, which can be used to shimmer items in a storage system.
-					All actions from shimmering are supported: decrafting items into their ingredients, transmuting items into other items, sacrificing coins for Coin Luck, and spawning NPCs from shimmering certain items.
-					''' */
-				/* Help25:
+				Help24:
 					'''
-					By default, all [i:MagicStorage/StorageHeart] (and their components) are accessible to everyone.
-					To make your storage more secure, consider creating a Storage Security Wand. While holding the tool, left click a [i:MagicStorage/StorageHeart] to open the Security system.
-					In this system's UI, you can create a Security Network which, when made private, will cause the [i:MagicStorage/StorageHeart] and its components to require a password to access.
-					Double-left click a Security Network to assign it to the [i:MagicStorage/StorageHeart] you used to access the Security system.
-					Recipe: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
-					''' */
-				// Help26_Header: Are you finding the text prompts in the UIs cumbersome to use? Here are some helpful controls you can use to help with that:
-				/* Help26:
+					Al dejar caer la [i:MagicStorage/CraftingAccess] en el fulgor, este se transformará en una [c/e153ec:interfaz etérea de almacenamiento], que puede usarse para imbuir en fulgor cualquier objeto que tengas
+					en un sistema de almacenamiento.
+					Se admiten todas las acciones del fulgor: desarmar los objetos en sus ingredientes, transmutar un objeto en otros objetos, sacrificar monedas para aumentar tu suerte, como también generar NPC con fulgor, usando ciertos objetos.
+					'''
+				Help25:
+					'''
+					Por defecto, todos los jugadores pueden acceder al [i:MagicStorage/StorageHeart] y a sus componentes. Para mayor seguridad, considere crear una [c/f4d58d:varita de seguridad]. Con la cual, al hacer
+					[c/f4d58d:clic izquierdo] en el [i:MagicStorage/StorageHeart], se abrirá su red de seguridad. Aquí puedes crear una red de seguridad, la cual, al estar
+					privada, hará que el [i:MagicStorage/StorageHeart] y sus componentes estén protegidos con contraseña. Para asignar la misma red de
+					seguridad a otro [i:MagicStorage/StorageHeart], abra su red de seguridad y luego
+					haga [c/f4d58d:doble clic izquierdo] a una red ya existente.
+					Receta: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
+					'''
+				Help26_Header:
+					'''
+					¿Te resulta engorroso escribir en la barra de búsqueda?
+					Aquí tienes algunos atajos de teclas útiles.
+					'''
+				Help26:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					  [c/cccc00:Ctrl + Z] to clear
-					  [c/cccc00:Ctrl + X] or [c/cccc00:Shift + Delete] to copy to clipboard then clear
-					  [c/cccc00:Ctrl + C] to copy to clipboard
-					  [c/cccc00:Ctrl + V] or [c/cccc00:Shift + Insert] to paste from clipboard
+					Mientras tengas seleccionado la barra de búsqueda:
+					  [c/cccc00:Ctrl + Z] borre el texto.
+					  [c/cccc00:Ctrl + X] o [c/cccc00:Shift + supr] copiar al portapapeles y luego borrar el texto.
+					  [c/cccc00:Ctrl + C] copia y guardarlo en el portapapeles.
+					  [c/cccc00:Ctrl + V] o [c/cccc00:Shift + Insert] pega lo guardado en el portapapeles.
 					(1/3)
-					''' */
-				/* Help27:
+					'''
+				Help27:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is focused:
-					[c/cccc00:Ctrl + Backspace] to delete the last space-separated word
-					  [c/cccc00:Left Arrow] and [c/cccc00:Right Arrow] to move the cursor left and right by one character
-					  [c/cccc00:Home] and [c/cccc00:End] to move the cursor to the start and end
-					  [c/cccc00:Escape] or [c/cccc00:Right Click] the prompt to revert any changes made
+					Mientras tengas seleccionado la barra de búsqueda:
+					  [c/cccc00:Ctrl + retroceso] eliminar la última palabra separada por espacios.
+					  [c/cccc00:Flecha izquierda] y [c/cccc00:flecha derecha] para moverte por la barra de izquierda a derecha.
+					  [c/cccc00:inicio] y [c/cccc00:fin] para moverte al inicio o final del texto.
 					(2/3)
-					''' */
-				/* Help28:
+					'''
+				Help28:
 					'''
 					{$Mods.MagicStorage.Dialogue.Golem.Help26_Header}
-					While the prompt is not focused:
-					  [c/cccc00:Right Click] the prompt to clear
+					Mientras tengas seleccionado la barra de búsqueda:
+					  [c/cccc00:Esc] o [c/cccc00:clic derecho] revertir cualquier cambio realizado en la barra de búsqueda.
+					[c/f4d58d:Este atajo se puede usar siempre]:
+					  [c/cccc00:Clic derecho] borre el texto.
 					(3/3)
-					''' */
-				/* Help29:
 					'''
-					To insert a Storage Core back into the [i:MagicStorage/StorageUnitEmpty], simply right click it while holding the Storage Core.
+				Help29:
+					'''
+					Para volver a colocar el [c/f4d58d:núcleo] en la [i:MagicStorage/StorageUnitEmpty], haz [c/f4d58d:clic derecho] sobre el mientras mantienes el [c/f4d58d:núcleo] en tu mano.
 					  [i:MagicStorage/StorageUnit] -> [i:MagicStorage/StorageCore]    [i:MagicStorage/StorageUnitDemonite] -> [i:MagicStorage/StorageCoreDemonite]
 					  [i:MagicStorage/StorageUnitCrimtane] -> [i:MagicStorage/StorageCoreCrimtane]    [i:MagicStorage/StorageUnitHellstone] -> [i:MagicStorage/StorageCoreHellstone]
 					  [i:MagicStorage/StorageUnitHallowed] -> [i:MagicStorage/StorageCoreHallowed]    [i:MagicStorage/StorageUnitBlueChlorophyte] -> [i:MagicStorage/StorageCoreBlueChlorophyte]
 					  [i:MagicStorage/StorageUnitLuminite] -> [i:MagicStorage/StorageCoreLuminite]    [i:MagicStorage/StorageUnitTerra] -> [i:MagicStorage/StorageCoreTerra]
 					(2/2)
-					''' */
+					'''
 			}
 
 			ChatOptions: {
@@ -815,36 +895,40 @@ Mods: {
 				}
 			}
 
-			// NewHelpAvailable: The Automaton has new help tips available.
+			NewHelpAvailable: El autómata tiene nuevos consejos disponibles que te pueden ser de ayuda.
 		}
 
 		Active: Activo
 		Inactive: Inactivo
-		PortableAccessUnlocated: El Localizador no está configurado para ningún Corazón de Almacenamiento
-		PortableAccessMissing: ¡Falta el Corazón de Almacenamiento!
-		PortableAccessOutOfRange: El Localizador no pudo conectarse al sistema de almacenamiento vinculado
-		PortableAccessNoPylons: No había Pilones lo suficientemente cerca del sistema de almacenamiento vinculado
-		PortableCraftingUnlocated: El Localizador no está configurado para ninguna Interfaz de Creación
-		PortableCraftingMissing: ¡Falta el Acceso de Creación!
-		RemoteAccessSuccess: ¡Éxito!
-		RemoteAccessHasLocator: Este Acceso ya tiene un localizador, por favor, quítalo y vuelve a colocarlo para reiniciarlo
-		RemoteAccessUnlocated: El localizador no ha sido configurado para un destino
-		// RemoteAccessInvalidLocator: The locator is not connected to a Storage Heart
-		StorageUnitActivated: La Unidad de Almacenamiento ha sido activada
-		StorageUnitDeactivated: La Unidad de Almacenamiento ha sido desactivada
+		PortableAccessUnlocated: "El [c/f4d58d:localizador] no está configurado para ningún [c/0ecb75:corazón de almacenamiento]"
+		PortableAccessMissing: "¡Falta el [c/0ecb75:corazón de almacenamiento]!"
+		PortableAccessOutOfRange: "El [c/f4d58d:localizador] no pudo conectarse al sistema de almacenamiento vinculado"
+		PortableAccessNoPylons: "No hay [c/f4d58d:torres] lo suficientemente cerca del sistema de almacenamiento vinculado"
+		PortableCraftingUnlocated: "El [c/f4d58d:localizador] no está configurado para ninguna [c/a4ceeb:interfaz de creación]"
+		PortableCraftingMissing: "¡Falta la [c/a4ceeb:interfaz de creación]!"
+		RemoteAccessSuccess: "[c/00ff00:¡Enlazado correctamente!]"
+		RemoteAccessHasLocator: "Este [c/ef7273:acceso remoto] ya está enlazado a un [c/0ecb75:corazón], por favor, quítalo y vuelve a colocarlo para eliminar su enlace"
+		RemoteAccessUnlocated: "El [c/f4d58d:localizador] no tiene registro de ninguna ubicación"
+		RemoteAccessInvalidLocator: "El [c/f4d58d:localizador] no está conectado a un [c/0ecb75:corazón de almacenamiento] o este mismo fue movido a una ubicación diferente al registrado en el [c/f4d58d:localizador]"
+		StorageUnitActivated: "La unidad de almacenamiento ha sido [c/00ff00:activada]"
+		StorageUnitDeactivated: "La unidad de almacenamiento ha sido [c/ef7273:desactivada]"
 		FilterAllMods: Todos los mods
-		Capacity: "{0} / {1} Objetos"
-		LocatorSet: Localizador configurado con éxito: X={0}, Y={1}
-		StorageAccessFail: ¡No se pudo cargar la entidad del Bloque Corazón de Almacenamiento!
-		StorageAccessFailAlt: ¡Este acceso no está conectado a un Bloque Corazón de Almacenamiento!
-		StorageAccessFailLoad: ¡El área del Bloque Corazón de Almacenamiento no ha sido cargada! Inténtalo de nuevo
+		Capacity: "{0} / {1} objetos"
+		LocatorSet:
+			'''
+			[c/00ff00:¡Localizador configurado exitosamente!]
+			[c/53ec53:Coordenadas]: X={0}, Y={1}
+			'''
+		StorageAccessFail: "¡No se pudo cargar la entidad [c/0ecb75:corazón de almacenamiento]!"
+		StorageAccessFailAlt: "¡Este [c/f4d58d:acceso] no está enlazado a ningun [c/0ecb75:corazón de almacenamiento]!"
+		StorageAccessFailLoad: "¡El área donde se encuentra el [c/0ecb75:corazón de almacenamiento] no ha sido cargada! Inténtalo de nuevo"
 		TestItemSuffix: " ¡HASTA QUE REAPAREZCAS!"
 		SetTo: Ajustado a: X={0}, Y={1}
-		SnowBiomeBlock: Bloque de biomas de la Nieve
+		SnowBiomeBlock: Bloque de bioma de la nieve
 		DepositAll: Depositar todo
-		CraftingStations: Estaciones de creación
-		CraftTooltip: Clic izquierdo para Fabricar
-		CraftTooltipOld: Clic izquierdo para Fabricar (ctrl para obtener la cantidad máxima)
+		CraftingStations: Estaciones de elaboración
+		CraftTooltip: Clic izquierdo para elaborar
+		CraftTooltipOld: Clic izquierdo para elaborar (ctrl para obtener la cantidad máxima)
 
 		Crafting: {
 			Plus1: +1
@@ -853,217 +937,240 @@ Mods: {
 			Minus1: "-1"
 			Minus10: "-10"
 			Minus100: "-100"
-			MaxStack: Crear Max.
+			MaxStack: Crear max.
 			Reset: Restablecer
 			Amount: Creando: {0}
 		}
 
 		Search: Buscar
-		SearchName: Búsqueda por nombre
-		SearchMod: Búsqueda por mod
-		SortWaiting: Cargando ...
+		SearchName: Buscar por el nombre
+		SearchMod: Buscar por el nombre del mod
+		SortWaiting: Cargando...
 
 		SearchTips: {
-			SearchName: Búsqueda por Nombre
-			SearchMod: @NombreDelMod Búsqueda por Nombre
-			SearchTooltip: "#Búsqueda por Descripción"
-			SearchModAndTooltip: @NombreMod #Búsqueda por Descripción
-			TipModAndTooltip: "[c/ffff00:@NombreDelMod] para buscar por mod, [c/ffff00:#Busqueda por Descripción] para buscar por descripción (pueden combinarse en ese orden)"
-			TipTooltipOnly: "[c/ffff00:#Búsqueda por Descripción] para buscar por descripción"
+			SearchName: Buscar por el nombre
+			SearchMod: @Nombredelmod o buscar por el nombre
+			SearchTooltip: "Usa el [c/ffff00:#], para buscar por su descripción"
+			SearchModAndTooltip: @Nombredelmod #búsqueda por su descripción
+			TipModAndTooltip:
+				'''
+				[c/ffff00:@Nombredelmod] para buscar por mod
+				[c/ffff00:#buscar por su descripción] para buscar por su descripción
+				[c/f4d58d:Nota]: combinar ambos, usar el [c/ffff00:@], para buscar por el nombre del mod (sin espacios) y luego, buscar por su descripción usando el [c/ffff00:#].
+				'''
+			TipTooltipOnly: "Usa el [c/ffff00:#], para buscar por su descripción"
 		}
 
 		Recipes: Recetas
-		RecipeAvailable: Mostrar recetas disponibles
-		RecipeAll: Mostrar todas las recetas
-		RecipeBlacklist: Mostrar recetas ocultas (ctrl+clic en una receta para (des)ocultar)
+		RecipeAvailable: "[c/ffff00:Mostrar recetas disponibles]"
+		RecipeAll: "[c/ffff00:Mostrar todas las recetas]"
+		RecipeBlacklist:
+			'''
+			[c/ffff00:Mostrar recetas ocultas]
+			[c/ffff00:Ctrl + clic izquierdo: en una receta para añadirlo o quitarlo de la lista negra]
+			'''
 		SelectedRecipe: Receta seleccionada
 		Ingredients: Ingredientes
 		StoredItems: Ingredientes almacenados
-		ShowOnlyFavorited: Solo Favoritos
+		ShowOnlyFavorited: "[c/ffff00:Solo favoritos]"
 		ViewHistory: Clic para ver el historial de recetas
 		ClearHistory: Borrar
-		PrevHistory: Receta anterior en el historial
-		NextHistory: Receta siguiente en el historial
+		PrevHistory: Receta anterior del historial
+		NextHistory: La siguiente receta del historial
 		PanelTooSmol:
 			'''
-			No se puede abrir la interfaz de Magic Storage. Razón: la altura del panel es demasiado corta para mostrar correctamente los elementos de la interfaz.
-			Por favor, disminuye el "Tamaño UI" en Configuración o aumenta la resolución del juego en Configuración de Video.
+			No se puede abrir la interfaz de Magic Storage.
+			Razón:
+			La altura del panel es demasiado chica para mostrar correctamente los elementos que conforman la interfaz.
+			
+			Por favor, disminuye el valor de [c/00dc00:tamaño UI], que se encuentra en ajuste [c/00dc00:->] general, o aumenta la resolución del juego, esta se encuentra en, ajuste [c/00dc00:->] video [c/00dc00:->] resolución.
 			'''
-		/* ForcedLayoutChange:
+		ForcedLayoutChange:
 			'''
-			Current UI layout resulted in a panel that was too short to properly display the UI elements.
-			Forcing the UI layout to "Modern Paged" to allocate more vertical space.
-			''' */
+			El diseño actual de la interfaz, provocó que el panel sea demasiado pequeño para mostrar correctamente los elementos que conforman la interfaz. 
+			Forzar el diseño de la UI a [c/00dc00:página moderna] para asignar más espacio vertical.
+			'''
 
 		Warnings: {
-			StorageDefaultToAllItems: No se muestran elementos a pesar de que existen en el almacenamiento. Se utilizará el modo de filtro "Todos" por defecto.
-			StorageDefaultToAllMods: No se muestran elementos a pesar de que existen en el almacenamiento. Se utilizará el filtro de mod "{$Mods.MagicStorage.FilterAllMods}" por defecto.
-			CraftingNoBlacklist: No se muestran recetas a pesar de que existen recetas en la lista negra. Se ignorará la lista negra de recetas.
-			CraftingDefaultToAllMods: No se muestran recetas a pesar de que existen recetas de otros mods. Se utilizará el filtro de mod "{$Mods.MagicStorage.FilterAllMods}" por defecto.
-			DeleteItemsFailed: Fallo en la operación de eliminación por razones desconocidas. Por favor, inténtalo de nuevo o elimina los elementos manualmente si es necesario.
-			DeleteDataFailed: Fallo en la operación de eliminación por razones desconocidas. Algunos elementos pueden seguir conteniendo datos de mods no cargados.
-			// DecraftingNoBlacklist: No items displayed even though blacklisted items exist.  Ignoring item blacklisting.
-			// DecraftingDefaultToAllMods: No items displayed even though items exist from other mods.  Defaulting to "{$Mods.MagicStorage.FilterAllMods}" mod filter.
+			StorageDefaultToAllItems: "No se muestran los objetos a pesar de que existen dentro del almacenamiento. Por esta razón, se cambiará el [c/f4d58d:filtro actual], a por el modo [c/f4d58d:filtrar todos]."
+			StorageDefaultToAllMods: "No se muestran los objetos a pesar de que existen dentro del almacenamiento. Por esta razón, se cambiará el [c/f4d58d:filtro actual] de mod por el filtro llamado [c/f4d58d:todos los mods]."
+			CraftingNoBlacklist: "No se muestran las recetas, aunque existen recetas que están en la [c/f4d58d:lista negra], por esta razón se ignorará la [c/f4d58d:lista negra de recetas]."
+			CraftingDefaultToAllMods: "No se muestran las recetas, aunque existen recetas en otros mods. Por esta razón, se cambiará el [c/f4d58d:filtro actual] de mod por el filtro llamado [c/f4d58d:todos los mods]."
+			DeleteItemsFailed: Falló en la operación de eliminación por razones desconocidas. Por favor, inténtalo de nuevo o elimina los objetos manualmente si es necesario.
+			DeleteDataFailed: Falló en la operación de eliminación por razones desconocidas. Algunos objetos pueden seguir conteniendo datos de mods no cargados.
+			DecraftingNoBlacklist: "No se muestran los objetos, aunque existen objetos que están en la [c/f4d58d:lista negra], por esta razón se ignorará la [c/f4d58d:lista negra de objetos]."
+			DecraftingDefaultToAllMods: "No se muestran los objetos, aunque existen objetos en otros mods. Por esta razón, se cambiará el [c/f4d58d:filtro actual] de mod por el filtro llamado [c/f4d58d:todos los mods]."
 		}
 
-		RecipeHidden: La receta para el objeto "{0}" ha sido añadida a la lista negra.
-		RecipeRevealed: La receta para el objeto "{0}" ha sido añadida a la lista blanca.
-		// RecipeHiddenGlobal: Recipe for item "{0}" was global blacklisted.
-		// RecipeRevealedGlobal: Recipe for item "{0}" was global whitelisted.
+		RecipeHidden: La receta del objeto "{0}" ha sido añadida a la lista negra.
+		RecipeRevealed: La receta del objeto "{0}" ha sido añadida a la lista blanca.
+		RecipeHiddenGlobal: La receta del objeto "{0}" ha sido añadida a la lista negra mundial.
+		RecipeRevealedGlobal: La receta del objeto "{0}" ha sido añadida a la lista blanca mundial.
 
 		RecipeConditions: {
 			EctoMistOverride: "{$Conditions.InGraveyard} / {$Mods.MagicStorage.Items.CombinedStations4Item.DisplayName}"
-			CookedMarshmallowCondition: Bioma Global en una Interfaz de Creación
+			CookedMarshmallowCondition: "Bioma global en una [c/a4ceeb:interfaz de creación]"
 		}
 
-		DepositTooltip: Apilar Rápido - clic, Depositar Todo - ctrl+clic, Reabastecer - clic derecho
-		DepositTooltipAlt: Apilar Rápido - ctrl+clic, Depositar Todo - clic, Reabastecer - clic derecho
+		DepositTooltip:
+			'''
+			[c/ffff00:Clic izquierdo]: [c/ebeba4:guardar rápido]
+			[c/ffff00:Ctrl + clic izquierdo]: [c/ebeba4:depositar todo]
+			[c/ffff00:Clic derecho]: [c/ebeba4:reabastecer]
+			'''
+		DepositTooltipAlt:
+			'''
+			[c/ffff00:Ctrl + clic izquierdo]: [c/ebeba4:guardar rápido]
+			[c/ffff00:Clic izquierdo]: [c/ebeba4:depositar todo]
+			[c/ffff00:Clic derecho]: [c/ebeba4:reabastecer]
+			'''
 
 		ServerOperator: {
-			// ConfigChangeDenied: Only users with the Server Operator status or higher can modify this config
-			// ControlRequirement: This control requires the Server Operator status.
+			ConfigChangeDenied: "Solo los jugadores con el estado de [c/cccc00:operador de servidor] o superior pueden modificar esta configuración."
+			ControlRequirement: "Este control requiere el estado de [c/cccc00:operador de servidor]."
 
 			CommandInfo: {
 				Descriptions: {
-					// reqop: Requests the Server Admin status (for Magic Storage) from the server
-					// op: Gives the Server Operator status (for Magic Storage) to client <number>
-					// deop: Removes the Server Operator status (for Magic Storage) from client <number>
-					// whois: Prints what each player's client index is
-					// whoami: Prints this client's player index
+					reqop: "Solicita el estado de [c/cccc00:administrador del servidor] (en Magic Storage) en el servidor"
+					op: "Otorga el estado de [c/cccc00:operador de servidor] (en Magic Storage) al cliente <number>"
+					deop: "Elimina el estado de [c/cccc00:operador de servidor] (en Magic Storage) del cliente <number>"
+					whois: Imprime/print en el chat, cuál es el índice/index de cliente de cada jugador
+					whoami: Imprime/print en el chat, el índice/index del jugador de este cliente
 				}
 
-				// NoArguments: Expected no arguments
-				// MultiplayerOnly: This command can only be used by multiplayer clients
-				// AlreadyAdmin: This player already has the Server Admin status
-				// OneIntArgument: Expected one integer argument
-				// ArgumentNotByte: Argument was not a positive integer between 0 and 255
-				// MultiplayerAdminOnly: This command can only be used by multiplayer clients with the Server Admin status
-				// NotConnected: Client {0} is not connected to the server
-				// ClientAlreadyOp: Client {0} already has the Server Operator status
-				// ClientAlreadyDeop: Client {0} already lacks the Server Operator status
-				// MultiplayerOperatorOnly: This command can only be used by multiplayer clients with the Server Operator status
-				// Players: Players:
-				// YouAreClient: You are client {0}
-				/* ServerKeyText:
+				NoArguments: No se esperaban argumentos
+				MultiplayerOnly: Este comando solo lo pueden usar clientes multijugador
+				AlreadyAdmin: "Este jugador ya tiene el estado de [c/cccc00:administrador del servidor]"
+				OneIntArgument: Se esperaba un argumento entero
+				ArgumentNotByte: El argumento no era un entero positivo entre 0 y 255
+				MultiplayerAdminOnly: "Este comando solo lo pueden usar clientes multijugador con el estado de [c/cccc00:administrador del servidor]"
+				NotConnected: El cliente {0} no está conectado al servidor
+				ClientAlreadyOp: "El cliente {0} ya tiene el estado de [c/cccc00:operador de servidor]"
+				ClientAlreadyDeop: "El cliente {0} ya deja de tener el estado de [c/cccc00:operador de servidor]"
+				MultiplayerOperatorOnly: "Este comando solo lo pueden usar clientes multijugador con el estado de [c/cccc00:operador de servidor]"
+				Players: Jugadores:
+				YouAreClient: Usted es el cliente {0}
+				ServerKeyText:
 					'''
 					=====
-					THIS MESSAGE WILL ONLY BE DISPLAYED ONCE!
-					Server Operator/Administrator Key: {0}
+					[Magic Storage]
+					¡ESTE MENSAJE SÓLO SE MOSTRARÁ UNA VEZ!
+					[c/cccc00:Operador]/[c/cccc00:administrador], su clave es: {0}
 					=====
-					''' */
-				// ClientKeyText: === ENTER THE KEY PRINTED TO THE SERVER'S CONSOLE AND LOG FILE ===
-				// ClientKeyResponseFailed: Inputted key did not match the key stored on the server.
-				// ClientKeyResponseSuccess: Magic Storage Server Operator and Administrator statuses have been successfully added.
+					'''
+				ClientKeyText: === INTRODUZCA LA CLAVE IMPRESA/PRINTED EN LA CONSOLA DEL SERVIDOR Y EN EL ARCHIVO DE REGISTRO/LOG ===
+				ClientKeyResponseFailed: La clave ingresada no coincide con la clave almacenada en el servidor.
+				ClientKeyResponseSuccess: "[Magic Storage]: Se han agregado exitosamente los estados de [c/cccc00:operador] y [c/cccc00:administrador] en el servidor."
 			}
 		}
 
 		AuditLogging: {
 			CommandInfo: {
 				Descriptions: {
-					/* msaudit:
+					msaudit:
 						'''
-						Translates the Magic Storage audit log for the world into a human-readable format
-						The name of the resulting file is derived from the world file's name and is placed in the Worlds folder
-						''' */
-					// msauditclear: Clears the Magic Storage audit log for the world
+						Traduce el registro de auditoría (audit log) de Magic Storage para todo el mundo a un formato legible para humanos
+						El nombre del archivo resultante se deriva del nombre del archivo mundial y se coloca en la carpeta [c/f4d58d:worlds].
+						'''
+					msauditclear: Borra el registro de auditoría de Magic Storage en el mundo.
 				}
 
-				// NoArguments: Expected no arguments
-				// MultiplayerOnly: This command can only be used by the server console
-				// NoLogFile: No Magic Storage audit log file found for this world
-				// LoggingDisabled: Magic Storage audit logging is disabled in the config, please enable it first
-				// AdminOnly: This command can only be used by by the server console or multiplayer clients with the Server Administrator status
+				NoArguments: No se esperaban argumentos
+				MultiplayerOnly: Este comando sólo puede ser utilizado por la consola del servidor
+				NoLogFile: No se encontró ningún archivo de registro de auditoría de Magic Storage para este mundo
+				LoggingDisabled: El registro de auditoría de Magic Storage está deshabilitado en la configuración, por favor habilítelo nuevamente
+				AdminOnly: "Este comando solo lo puede utilizar la consola del servidor o los clientes multijugador con el estado de [c/cccc00:administrador del servidor]"
 			}
 
 			Errors: {
 				Client: {
-					// NoBuffers: Translation audit file couldn't be written due to missing buffers
-					// IncompleteBuffers: Translation audit file couldn't be written due to some sections not being received
-					// MismatchedBufferCount: Translation audit file couldn't be written due to the amount of received sections ({0}) not matching the expected amount ({1})
+					NoBuffers: No se pudo escribir el archivo de auditoría de traducción debido a la falta de amortiguadores/buffers
+					IncompleteBuffers: No se pudo escribir el archivo de auditoría de traducción debido a que no se recibieron algunas secciones
+					MismatchedBufferCount: No se pudo escribir el archivo de auditoría de traducción debido a que la cantidad de secciones recibidas ({0}) no coincide con la cantidad esperada ({1})
 				}
 
-				// LoadFailed: Failed to load audit file
-				// SaveFailed: Failed to save audit file
-				// TranslationFailed: Failed to write translated audit log to file
-				// TranslationAlreadyRunning: The Magic Storage audit log is already being translated, please wait for the action to finish
-				// ClearingAlreadyRunning: The Magic Storage audit log is already being cleared, please wait for the action to finish
+				LoadFailed: No se pudo cargar el archivo de auditoría
+				SaveFailed: No se pudo guardar el archivo de auditoría
+				TranslationFailed: No se pudo escribir el registro de auditoría traducido en el archivo
+				TranslationAlreadyRunning: El registro de auditoría de Magic Storage ya se está traduciendo, espere a que finalice la acción
+				ClearingAlreadyRunning: El registro de auditoría de Magic Storage ya se está borrando, espere a que finalice la acción
 			}
 
 			Messages: {
 				Client: {
-					// RequestSent: Command request sent to the server, check the server console or log for information
-					// TranslationSuccess: Translation success! Magic Storage audit log was translated to:
+					RequestSent: Solicitud de comando enviada al servidor, verifique la consola del servidor o el registro para obtener información
+					TranslationSuccess: ¡Traducción exitosa! El registro de auditoría de Magic Storage se tradujo a:
 				}
 
-				// LoadSuccess: Magic Storage audit log was loaded from: {0}
-				// SaveSuccess: Magic Storage audit log was saved to: {0}
-				// TranslationFileNotLoaded: Magic Storage audit log was not loaded yet, forcing load before translation...
-				// TranslationStarted: Translating Magic Storage audit log to a human-readable format...
-				// TranslationSuccess: Magic Storage audit log was translated to: {0}
-				// ClearingStarted: Magic Storage audit log will be cleared...
-				// ClearingSuccess: Magic Storage audit log was cleared, serializing empty file is pending
+				LoadSuccess: El registro de auditoría de Magic Storage se cargó desde: {0}
+				SaveSuccess: El registro de auditoría de Magic Storage se guardó en: {0}
+				TranslationFileNotLoaded: El registro de auditoría de Magic Storage aún no se ha cargado, lo que fuerza la carga antes de la traducción...
+				TranslationStarted: Traduciendo el registro de auditoría de Magic Storage a un formato legible para humanos...
+				TranslationSuccess: El registro de auditoría de Magic Storage se tradujo a: {0}
+				ClearingStarted: Se borrará el registro de auditoría de Magic Storage...
+				ClearingSuccess: Se borró el registro de auditoría de Magic Storage, la serialización del archivo vacío está pendiente
 			}
 		}
 
 		StorageGUI: {
-			ForceRefreshButton: Forzar Actualización UI
-			CompactCoinsButton: Compactar Monedas
-			DestroyUnloadedButton: Eliminar Ítems de Mods no Cargados
-			DestroyUnloadedDataButton: Eliminar Datos de Mods no Cargados
-			DepositPiggyBank: Depositar Ítems del Cerdito
-			DepositSafe: Depositar Ítems del Cofre Seguro
-			DepositForge: Depositar Ítems de la Forja del Defensor
-			DepositVault: Depositar Ítems de la Cámara del Vacío
-			InitShowcaseButton: Inicializar Vitrina
-			ResetShowcaseButton: Restablecer Ítems de la Vitrina
-			ClearItemsButton: Borrar Todos los Ítems
-			// FillWithGarbage: Fill With Random Items
-			SellDuplicatesHeader: Vender Duplicados
+			ForceRefreshButton: Forzar la recarga de la UI
+			CompactCoinsButton: Compactar las monedas
+			DestroyUnloadedButton: Eliminar los objetos de mods no cargados
+			DestroyUnloadedDataButton: Eliminar los datos de mods no cargados
+			DepositPiggyBank: Depositar objetos de la hucha
+			DepositSafe: Depositar objetos de la caja fuerte
+			DepositForge: Depositar objetos de la forja del defensor
+			DepositVault: Depositar objetos de la cámara del vacío
+			InitShowcaseButton: Inicializar vitrina
+			ResetShowcaseButton: Restablecer objetos de la vitrina
+			ClearItemsButton: Borrar todos los objetos
+			FillWithGarbage: Rellenar con objetos aleatorios
+			SellDuplicatesHeader: Vender duplicados
 			SellDuplicatesButton: Vender
-			// SetAStorageName: Enter a name here...
-			// NameWasCleared: Name was cleared
-			// NameWasSetTo: Name was set to: {0}
+			SetAStorageName: Introduzca un nombre aquí...
+			NameWasCleared: El nombre fue borrado
+			NameWasSetTo: El nombre se estableció en: {0}
 
 			ItemDeletionMode: {
-				// Label: Item Deletion Mode
-				// Enabled: Item Deletion mode is now [c/00ff00:enabled].  Double click an item to delete it.
-				// Disabled: Item Deletion mode is now [c/ff0000:disabled].
+				Label: Modo de eliminación de objetos
+				Enabled: El modo de eliminación de objetos está [c/00ff00:habilitado]. Haz doble clic izquierdo para eliminarlo.
+				Disabled: El modo de eliminación de objetos está [c/ff0000:deshabilitado].
 			}
 
 			SellDuplicatesMenu: {
-				// Label: Item Selling Mode
-				// Enabled: Item Selling Mode is now [c/00ff00:enabled].  Click on items to mark them as items to sell.
-				// Disabled: Item Selling Mode is now [c/ff0000:disabled].
-				NoPrefix: Vender Duplicados sin Prefijo
-				KeepMostValue: Conservar los Más Caros
-				KeepLeastValue: Conservar los Más Baratos
+				Label: Modo de venta de objetos
+				Enabled: El modo de venta de objetos está [c/00ff00:habilitado].  Haz doble clic izquierdo para marcarlo como objeto en venta.
+				Disabled: El modo de venta de objetos está [c/ff0000:deshabilitado].
+				NoPrefix: Vender duplicados sin mejoras
+				KeepMostValue: Conservar los más caros
+				KeepLeastValue: Conservar los más baratos
 
 				SoldItemsReport: {
-					// GotCoins: "{0}/{1} items were sold for {2}"
-					// NoCoins: "{0}/{1} items were sold, but none had any value"
-					// NoSell: No items were sold
-					// PacketTooLarge: The amount of item stacks to sell was too large to send in one packet.  Please try again with fewer stacks.
+					GotCoins: "{0}/{1} los objetos se vendieron por {2}"
+					NoCoins: "{0}/{1} Se vendieron los objetos, pero ninguno tenía valor"
+					NoSell: No se vendieron objetos
+					PacketTooLarge: La cantidad de objetos apilados/agrupados para vender era demasiado grande para enviarlos en un solo paquete. Inténtalo de nuevo con una cantidad más pequeña.
 				}
 			}
 
 			SellQuantityPopup: {
-				// Label: Quantity:
-				// HintText: "0"
+				Label: Cantidad:
+				HintText: "0"
 			}
 
 			ActiveNetwork: {
-				// None: Active security network: Unassigned
-				// Assigned: Active security network: {0}
+				None: Red de seguridad activa: [c/d8827b:sin asignar]
+				Assigned: Red de seguridad activa: {0}
 			}
 		}
 
 		CraftingGUI: {
-			// ShowAllIngredients: Show all possible ingredients
+			ShowAllIngredients: Mostrar todos los ingredientes posibles
 
 			RecursionErrors: {
-				// NoRecipe: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe]"
-				// NoObjects: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's required objects]"
-				// NoIngredients: "[c/ff0000:Simulation failed to find a valid recursion tree, defaulting to original recipe's ingredients]"
+				NoRecipe: "[c/ff0000:La simulación no pudo encontrar un árbol de recursión válido y se utilizó la receta original de forma predeterminada]"
+				NoObjects: "[c/ff0000:La simulación no pudo encontrar un árbol de recursión válido y utilizó de forma predeterminada los objetos requeridos de la receta original]"
+				NoIngredients: "[c/ff0000:La simulación no pudo encontrar un árbol de recursión válido y utilizó de forma predeterminada los ingredientes de la receta original]"
 			}
 		}
 
@@ -1071,16 +1178,16 @@ Mods: {
 			Reset: Restablecer posición y tamaño del panel
 
 			Errors: {
-				// RenderFail: This item could not be rendered due to an error.
-				// NetFail: This item failed to load on the current client.
-				// NBTFail: The NBT data on this item failed to deserialize.
-				// CapacityText: Some items failed to load on the current client.
+				RenderFail: Este objeto no se pudo mostrar debido a un error.
+				NetFail: Este objeto no se pudo cargar en el cliente actual.
+				NBTFail: No se pudieron deserializar los datos NBT de este elemento.
+				CapacityText: Algunos objetos no se pudieron cargar en el cliente actual.
 			}
 
 			TestItems: {
-				// NoTooltip: ""
-				// RenderFail: Error Test: Item Rendering
-				// NetFail: Error Test: Item Loading
+				NoTooltip: ""
+				RenderFail: Prueba de error: Renderización del objeto
+				NetFail: Prueba de error: Carga del objeto
 			}
 		}
 
@@ -1088,152 +1195,152 @@ Mods: {
 			EntryDisabledDefault: Este módulo está actualmente deshabilitado.
 			NoModules:
 				'''
-				No se han detectado módulos del Simulador de Entorno.
-				  Otros mods deberán agregar algunos para que aparezcan aquí.
+				No se han detectado módulos del [c/f4d58d:simulador de entorno].
+				Otros mods deberán agregar algunos para que aparezcan aquí.
 				'''
 		}
 
 		DecraftingGUI: {
-			// StoredResults: Stored Result Items
-			// ShimmeringReports: Shimmering Results
-			// ItemHidden: Item "{0}" was blacklisted.
-			// ItemRevealed: Item "{0}" was whitelisted.
-			// ItemHiddenGlobal: Item "{0}" was global blacklisted.
-			// ItemRevealedGlobal: Item "{0}" was global whitelisted.
-			// ShimmerButton: Shimmer
-			// ShimmerButtonTooltip: Left click to Shimmer item
-			// ShimmerButtonTooltipOld: Left click to Shimmer item (ctrl to shimmer max)
-			// ShimmerAmount: Shimmering: {0}
+			StoredResults: Resultado de objetos almacenados
+			ShimmeringReports: "[c/e153ec:Resultados esperados]"
+			ItemHidden: El objeto "{0}" fue incluido en la lista negra.
+			ItemRevealed: El objeto "{0}" fue incluido en la lista blanca.
+			ItemHiddenGlobal: El objeto "{0}" fue incluido en la lista negra mundial.
+			ItemRevealedGlobal: El objeto "{0}" fue incluido en la lista blanca mundial.
+			ShimmerButton: "[c/e153ec:Fulgurar]"
+			ShimmerButtonTooltip: Clic izquierdo para imbuirlo en el fulgor
+			ShimmerButtonTooltipOld: Clic izquierdo para imbuirlo en el fulgor (ctrl para obtener la cantidad máxima)
+			ShimmerAmount: "[c/e153ec:Fulgurar]: {0}"
 
 			ShimmerReports: {
-				// DoesNotShimmer: No shimmer results found
-				// CoinLuck: +{0}% Luck (+{1:0.##} value)
+				DoesNotShimmer: No se encontraron resultados
+				CoinLuck: +{0}% suerte (+{1:0.##} valor)
 
 				NPCSpawn: {
-					// DirectTransform: "{0}"
-					// IndirectTransform: "{0} (style #{1})"
+					DirectTransform: "{0}"
+					IndirectTransform: "{0} (estilo #{1})"
 				}
 			}
 		}
 
 		FilteringOption: {
-			All.Tooltip: Filtrar todo
-			Weapons.Tooltip: Filtrar por armas
-			Tools.Tooltip: Filtrar por herramientas
-			Equips.Tooltip: Filtrar por equipamiento
-			WeaponsMelee.Tooltip: Filtrar Armas Cuerpo a Cuerpo
-			WeaponsRanged.Tooltip: Filtrar Armas a Distancia
-			WeaponsMagic.Tooltip: Filtrar Armas Mágicas
-			WeaponsSummon.Tooltip: Filtrar Armas Invocaciones
-			WeaponsThrown.Tooltip: Filtrar Armas Arrojadizas
-			Ammo.Tooltip: Filtrar Munición
-			Armor.Tooltip: Filtrar Armaduras
-			Vanity.Tooltip: Filtrar Ítems de Vanidad
-			Potions.Tooltip: Filtrar por pociones
-			Tiles.Tooltip: Filtrar por Ítems colocables
-			Misc.Tooltip: Filtrar por otros
-			Recent.Tooltip: Filtrar Ítems Recientemente Añadidos
-			ArmorAndEquips.Tooltip: Filtrar Armaduras y Equipamiento
-			WeaponsOther.Tooltip: Filtrar Otras Armas
-			Unstackables.Tooltip: Filtrar Ítems que no se Pueden Apilar
-			Stackables.Tooltip: Filtrar Ítems que se Pueden Apilar
-			NotFullyResearched.Tooltip: Filtrar Ítems No Completamente Investigados
-			FullyResearched.Tooltip: Filtrar Ítems Completamente Investigados
-			Materials.Tooltip: Filtrar Materiales
-			// ToolsAndFishing.Tooltip: Filter Tools And Fishing Items
-			// Fishing.Tooltip: Filter Fishing Items
-			// MiscGameplayItems.Tooltip: Filter Misc Gameplay Items
-			// SellingItems.Tooltip: Filter Items Being Sold
+			All.Tooltip: Todo
+			Weapons.Tooltip: Armas
+			Tools.Tooltip: Herramientas
+			Equips.Tooltip: Equipamiento
+			WeaponsMelee.Tooltip: Armas de cuerpo a cuerpo
+			WeaponsRanged.Tooltip: Armas a distancia
+			WeaponsMagic.Tooltip: Armas mágicas
+			WeaponsSummon.Tooltip: Armas de invocadores
+			WeaponsThrown.Tooltip: Armas arrojadizas
+			Ammo.Tooltip: Munición
+			Armor.Tooltip: Armaduras
+			Vanity.Tooltip: Objetos de vanidad
+			Potions.Tooltip: Pociones
+			Tiles.Tooltip: Objetos colocables
+			Misc.Tooltip: Otros
+			Recent.Tooltip: Objetos recientemente añadidos
+			ArmorAndEquips.Tooltip: Armaduras y equipamiento
+			WeaponsOther.Tooltip: Otras armas
+			Unstackables.Tooltip: Objetos que no se pueden apilar
+			Stackables.Tooltip: Objetos que se pueden apilar
+			NotFullyResearched.Tooltip: Objetos no completamente investigados
+			FullyResearched.Tooltip: Objetos completamente investigados
+			Materials.Tooltip: Materiales
+			ToolsAndFishing.Tooltip: Herramientas y objetos de pesca
+			Fishing.Tooltip: Objetos de pesca
+			MiscGameplayItems.Tooltip: Objetos varios
+			SellingItems.Tooltip: Objetos en venta
 		}
 
 		SortingOption: {
-			Default.Tooltip: Ordenar por defecto
-			ID.Tooltip: Ordenar por ID
-			Name.Tooltip: Ordenar por nombre
-			Value.Tooltip: Ordenar por valor
-			Dps.Tooltip: Ordenar por DPS
-			QuantityAbsolute.Tooltip: Ordenar por Cantidad Total
-			QuantityRatio.Tooltip: Ordenar por Cantidad en Pila
-			Damage.Tooltip: Ordenar por Daño
+			Default.Tooltip: "[c/ffff00:Ordenar por defecto]"
+			ID.Tooltip: "[c/ffff00:Ordenar por ID]"
+			Name.Tooltip: "[c/ffff00:Ordenar por nombre]"
+			Value.Tooltip: "[c/ffff00:Ordenar por valor]"
+			Dps.Tooltip: "[c/ffff00:Ordenar por DPS]"
+			QuantityAbsolute.Tooltip: "[c/ffff00:Ordenar por cantidad total]"
+			QuantityRatio.Tooltip: "[c/ffff00:Ordenar por cantidad de objetos apilados]"
+			Damage.Tooltip: "[c/ffff00:Ordenar por daño]"
 		}
 
 		SellingDuplicateFinders: {
-			// SellAllExceptLeastExpensiveFinder.Label: Sell All Except Least Expensive
-			// SellAllExceptMostExpensiveFinder.Label: Sell All Except Most Expensive
-			// SellAllItemsWithNoPrefixFinder.Label: Sell All Items with No Prefix
+			SellAllExceptLeastExpensiveFinder.Label: Vender todos los objetos, excepto lo menos costoso
+			SellAllExceptMostExpensiveFinder.Label: Vender todos los objetos, excepto lo más costoso
+			SellAllItemsWithNoPrefixFinder.Label: Vender todos los objetos sin mejoras
 		}
 
-		ButtonConfigGear: Abrir Panel de Configuración
+		ButtonConfigGear: Abrir panel de configuración
 
 		UIPages: {
 			Sorting: Ordenar
 			Filtering: Filtrar
-			Crafting: Crafteo
+			Crafting: Elaboración
 			Storage: Almacenamiento
-			// Shimmering: Shimmering
+			Shimmering: Fulgurar
 			# StorageGUI page for the extra controls
 			Controls: Controles
 			# EnvironmentGUI page for the modules
 			Modules: Módulos
 			History: Historial
-			// Networks: Security Networks
+			Networks: Redes de seguridad
 		}
 
 		Security: {
-			// Creation.Success: "[c/00ff00:Successfully created a new network]"
-			// Join.Success: "[c/00ff00:Successfully joined the network]"
-			// Removal.Success: "[c/00ff00:Successfully deleted the network]"
-			// Modification.Success: "[c/00ff00:Successfully modified the network's settings]"
-			// Access.Success: "[c/00ff00:Successfully granted access to the network]"
-			// NetworkChange.Success: "[c/00ff00:Successfully updated the network for this Storage Heart]"
-			// NetworkNotFound: "[c/ff0000:No network with the given ID was found]"
-			// EmptyPassword: "[c/ff0000:Password cannot be empty for private networks]"
-			// EmptyName: "[c/ff0000:Display name cannot be empty]"
-			// InvalidPassword: "[c/ff0000:Invalid password]"
-			// InvalidPlayer: "[c/ff0000:Player instance did not refer to a valid player]"
-			// UnauthorizedAccess: "[c/ff0000:Player does not meet the requirements to access the network]"
-			// UnauthorizedModification: "[c/ff0000:Player does not meet the requirements to modify the network]"
-			// EntityNotFound: "[c/ff0000:Storage entity could not be found for the request]"
-			// EntityNotAccessible: "[c/ff0000:Player does not meet the requirements to access the storage entity]"
+			Creation.Success: "[c/00ff00:Se creó con éxito una nueva red]"
+			Join.Success: "[c/00ff00:Se unió exitosamente a la red]"
+			Removal.Success: "[c/00ff00:Se eliminó la red con éxito]"
+			Modification.Success: "[c/00ff00:Se modificó exitosamente la configuración de la red]"
+			Access.Success: "[c/00ff00:Se concedió con éxito el acceso a la red]"
+			NetworkChange.Success: "[c/00ff00:Se actualizó con éxito la red para este] [c/0ecb75:corazón de almacenamiento]"
+			NetworkNotFound: "[c/ff0000:No se encontró ninguna red con el ID proporcionado]"
+			EmptyPassword: "[c/ff0000:La contraseña no puede estar vacía para redes privadas]"
+			EmptyName: "[c/ff0000:El nombre para mostrar no puede estar vacío]"
+			InvalidPassword: "[c/ff0000:Contraseña inválida]"
+			InvalidPlayer: "[c/ff0000:La instancia del jugador no se refirió a un jugador válido]"
+			UnauthorizedAccess: "[c/ff0000:El jugador no cumple los requisitos para acceder a la red]"
+			UnauthorizedModification: "[c/ff0000:El jugador no cumple los requisitos para modificar la red]"
+			EntityNotFound: "[c/ff0000:No se pudo encontrar la entidad de almacenamiento para la solicitud.]"
+			EntityNotAccessible: "[c/ff0000:El jugador no cumple los requisitos para acceder al almacenamiento y sus componentes]"
 
 			UnauthorizedNetmodeContext: {
-				// Singleplayer: "[c/ff0000:Cannot perform this action in singleplayer]"
-				// MultiplayerClient: "[c/ff0000:Cannot perform this action as a client in multiplayer]"
-				// MultiplayerServer: "[c/ff0000:Cannot perform this action as a server in multiplayer]"
+				Singleplayer: "[c/ff0000:No se puede realizar esta acción en el modo de un jugador]"
+				MultiplayerClient: "[c/ff0000:No se puede realizar esta acción como cliente en modo multijugador]"
+				MultiplayerServer: "[c/ff0000:No se puede realizar esta acción como servidor en modo multijugador]"
 			}
 
 			UI: {
-				// NameHint: Enter a name for the network
-				// PasswordHint: Enter a password for the network
-				// Private: Private network
-				// Public: Public network
-				// SearchHint: Search for a network
-				// NetworkAccessQuestion: Private network?
-				// Create: Create a new network
-				// ServerWait: Waiting for server response...
-				// RequestingPassword: Enter password for: {0}
-				// AccessPasswordHint: Password...
-				// NoResponse: Security responses will be displayed here
-				// NoHeartAccessDenied: Access Denied
-				// NoHeartMustConnect1: Connect a [i:MagicStorage/StorageHeart] assigned to the security network
-				// NoHeartMustConnect2: with ID {0} to access.
-				// NetworkOwner: Owner: {0}
-				// NetworkID: ID: {0}
+				NameHint: Introduzca un nombre para la red
+				PasswordHint: Introduzca una contraseña para la red
+				Private: Red privada
+				Public: Red pública
+				SearchHint: Buscar una red
+				NetworkAccessQuestion: ¿Red privada?
+				Create: Crear una nueva red
+				ServerWait: Esperando la respuesta del servidor...
+				RequestingPassword: Introduzca la contraseña para: {0}
+				AccessPasswordHint: Contraseña...
+				NoResponse: Las respuestas de seguridad se mostrarán aquí
+				NoHeartAccessDenied: Acceso denegado
+				NoHeartMustConnect1: Conectar un [i:MagicStorage/StorageHeart] asignado a la red de seguridad
+				NoHeartMustConnect2: con ID {0} para acceder.
+				NetworkOwner: Dueño: {0}
+				NetworkID: ID: {0}
 
 				Modes: {
 					Search: {
-						// All: All networks
-						// Restricted: Private networks
-						// Public: Public networks
+						All: Todas las redes
+						Restricted: Redes privadas
+						Public: Redes públicas
 					}
 
 					Sort: {
-						// Name: Name A-Z
-						// NameReverse: Name Z-A
-						// Creator: Owner A-Z
-						// CreatorReverse: Owner Z-A
-						// ID: ID Ascending
-						// IDReverse: ID Descending
+						Name: Nombres A-Z
+						NameReverse: Nombres Z-A
+						Creator: Dueños A-Z
+						CreatorReverse: Dueños Z-A
+						ID: ID ascendente
+						IDReverse: ID descendiente
 					}
 				}
 			}
@@ -1243,10 +1350,11 @@ Mods: {
 			BetaLabel: Configuración BETA de Magic Storage
 
 			Headers: {
-				Storage: "[i:MagicStorage/StorageHeart] Configuración de la Interfaz de Almacenamiento"
-				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess] Configuración de la Interfaz de Crafteo"
-				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess] Configuración de las Interfaces de Almacenamiento y Creación"
-				General: Configuraciones Generales
+				Storage: "[i:MagicStorage/StorageHeart] Configuración de la interfaz de almacenamiento"
+				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess] Configuración de la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea]"
+				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess] Configuración de las interfaces de [c/0ecb75:almacenamiento] y de [c/a4ceeb:creación]"
+				General: Configuraciones generales
+				Debugging: Depuración
 			}
 
 			PrintTextToChat: {
@@ -1259,89 +1367,122 @@ Mods: {
 			}
 
 			ShowDebugPylonRangeAreas: {
-				Label: Depuración de Rango de Acceso Portátil
+				Label: Depuración de rango de acceso portátil
 				Tooltip:
 					'''
-					Activar para mostrar los rangos válidos para un Acceso Remoto Portátil mientras el jugador lo sostiene.
-					Para accesos con rango infinito, no se muestra nada.
+					Activar para mostrar los rangos válidos para un [c/f4d58d:acceso remoto portátil] mientras el jugador lo sostiene.
+					Para accesos remotos portátiles de rango infinito, no se mostrará nada.
 					'''
 			}
 		}
 
-		// Keybinds.PrintItemData.DisplayName: Print Item Data
+		Keybinds.PrintItemData.DisplayName: Imprimir/print datos del objeto
 
 		Configs: {
 			MagicStorageConfig: {
-				DisplayName: Configuración de Magic Storage
+				DisplayName: Config. de Magic Storage
 
 				quickStackDepositMode: {
-					Label: "[i:Chest]  Modo de apilado rápido"
-					Tooltip: Activa para apilar rápidamente con la tecla control(ctrl) presionada, desactiva para apilar rápidamente con la tecla control(ctrl) liberada
+					Label: "[i:Chest]  Modo de guardar rápido"
+					Tooltip:
+						'''
+						[c/00ff00:Habilitado]: Necesitas presionar la tecla control/ctrl para guardar rápido los objetos.
+						[c/ff0000:Deshabilitado]: No se necesita presionar la tecla control/ctrl para guardar rápido los objetos.
+						'''
 				}
 
 				useConfigFilter: {
 					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Usar filtro predeterminado"
-					Tooltip: Activa para usar el filtro que se muestra a continuación, desactiva para recordar el último filtro seleccionado en el juego (el filtro aún se utilizará al abrir la interfaz por primera vez después de cargar el mod)
+					Tooltip:
+						'''
+						[c/00ff00:Habilitado]: usar el filtro que se muestra a continuación.
+						[c/ff0000:Deshabilitado]: para recordar el último filtro seleccionado en el juego.
+						El filtro aún se utilizará al abrir la interfaz por primera vez después de cargar el mod.
+						'''
 				}
 
 				showAllRecipes: {
 					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Filtro de recetas predeterminado"
-					Tooltip: Activa para mostrar todas las recetas de forma predeterminada, desactiva para mostrar solo las recetas disponibles por defecto
+					Tooltip:
+						'''
+						[c/00ff00:Habilitado]: mostrar todas las recetas de forma predeterminada.
+						[c/ff0000:Deshabilitado]: mostrar solo las recetas disponibles por defecto.
+						'''
 				}
 
 				useOldCraftMenu: {
-					Label: "[i:WorkBench]  Usar botones antiguos de crafteo"
-					Tooltip: Activa para usar la interfaz de crafteo anterior en la interfaz de crafteo
+					Label: "[i:WorkBench]  Usar los botones antiguos de elaboración"
+					Tooltip: Activa para usar la versión de la UI anterior de la [c/a4ceeb:interfaz de creación], dentro de la [c/a4ceeb:interfaz de creación]
 				}
 
 				recipeBlacklist: {
 					Label: Lista blanca/negra de recetas
-					Tooltip: Activa para permitir agregar recetas a una lista blanca o negra en la interfaz de crafteo
+					Tooltip:
+						'''
+						Activa para permitir agregar recetas a la lista blanca o negra en la [c/a4ceeb:interfaz de creación]
+						Al estar activa la opción y hacer [c/f4d58d:clic izquierdo] + [c/f4d58d:ctrl] en una receta estando dentro de una interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea],
+						podrás añadirlo o removerlo de la lista negra.
+						Activa el filtro [c/f4d58d:mostrar recetas ocultas] que está en la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea] para ver lo que está en la lista negra.
+						'''
 				}
 
 				globalRecipeBlacklist: {
-					// Label: Global Recipe Blacklist
-					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
+					Label: Lista negra global de recetas
+					Tooltip:
+						'''
+						Haga [c/f4d58d:clic izquierdo] con [c/f4d58d:ctrl] + [c/f4d58d:shift], para agregar o quitar la receta de la lista negra.
+						Activa el filtro [c/f4d58d:mostrar recetas ocultas] que está en la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea] para ver lo que está en la lista negra.
+						'''
 				}
 
 				clearHistory: {
-					Label: "[i:Book]  Limpiar historial de recetas"
-					Tooltip: Activa para limpiar el historial de recetas en la interfaz de crafteo al abrirla
+					Label: "[i:Book]  Borrar historial de recetas"
+					Tooltip: "Si está activado, al abrirse la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea],el historial de recetas se borrará automáticamente"
 				}
 
 				recursionCraftingDepth: {
-					Label: Profundidad de Recursión en Recetas de Crafteo
+					Label: Profundidad de recursión de recetas
 					Tooltip:
 						'''
-						Determina qué tan profunda es la recursión para las recetas de crafteo en la GUI de Crafteo.
-						Configurar a 0 para deshabilitar esta función.
-						Configurar a -1 para una profundidad infinita.
+						Determina qué tan profunda es la recursión para las recetas de elaboración en la UI de la [c/a4ceeb:interfaz de creación].
+						Si una receta necesita elaborar 1 objeto y luego mejorarlo, entonces con un valor de 1 ya sería suficiente.
+						Esta opción es útil para ahorrar tiempo o saber si tienes los ingredientes básicos para el objeto que quieres elaborar.
+						Configurar en 0 para deshabilitar esta función.
+						Configurar en -1 para una profundidad infinita.
 						'''
 				}
 
 				glowNewItems: {
-					Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Mostrar nuevos ítems/recetas"
-					Tooltip: Activa o desactiva el resplandor de los nuevos ítems en el almacenamiento para indicar que son nuevos
+					Label: "[i:MagicStorage/Config_GlowItemGlowing] [i:MagicStorage/Config_GlowItemNotGlowing]  Resaltar los nuevos objetos y recetas"
+					Tooltip: Activa o desactiva el resplandor que sirve para indicar cuando el objeto o receta es nuevo, en el almacenamiento.
 				}
 
 				clearSearchText: {
-					Label: Limpiar texto de búsqueda
-					Tooltip: Activa para limpiar el texto de búsqueda al abrir la interfaz
+					Label: Borrar el texto de búsqueda
+					Tooltip: Al activarlo, cada vez que abras la interfaz, lo que tengas escrito en la barra de búsqueda se borrará
 				}
 
 				searchBarRefreshOnKey: {
-					Label: La barra de búsqueda se actualiza al presionar una tecla
-					Tooltip: Activa para que la barra de búsqueda en las interfaces de almacenamiento y crafteo se actualice con cada tecla presionada, desactiva para que la actualización solo ocurra cuando la barra de búsqueda pierda el enfoque
+					Label: La barra de búsqueda se actualiza mientras estás escribiendo
+					Tooltip:
+						'''
+						[c/00ff00:Habilitado]: la barra de búsqueda en las interfaces del [c/0ecb75:corazón], [c/a4ceeb:creación] o [c/e153ec:etérea] se actualiza cada vez que presionas una tecla.
+						[c/ff0000:Deshabilitado]: solo se actualizará cuando la barra de búsqueda deje de estar seleccionada.
+						'''
 				}
 
 				uiFavorites: {
 					Label: "[i:FallenStar]  Botón de filtro de favoritos"
-					Tooltip: Activa para permitir agregar ítems/recetas a favoritos en la interfaz de crafteo
+					Tooltip:
+						'''
+						Activa para permitir agregar objetos/recetas a favoritos desde el almacenamiento o interfaz.
+						Agrega un botón para hacer visibles solo los objetos/recetas favoritos.
+						'''
 				}
 
 				extraFilterIcons: {
 					Label: "[i:Cog]  Mostrar iconos de filtrado adicionales"
-					Tooltip: Activa para mostrar opciones de ordenamiento adicionales en el diseño de botones Legacy
+					Tooltip: "Activa para mostrar opciones de ordenamiento adicionales en el diseño de botones [c/f4d58d:legacy]"
 				}
 
 				buttonLayout: {
@@ -1350,112 +1491,151 @@ Mods: {
 				}
 
 				itemDataDebug: {
-					Label: "[i:IronPickaxe]  Información de depuración de ítems"
-					Tooltip: Activa para que los ítems en la interfaz de almacenamiento muestren si tienen datos de GlobalItem y permitan usar la tecla de \"Imprimir datos del ítem\" para imprimir datos
+					Label: "[i:IronPickaxe]  Información de depuración/debug en objetos"
+					Tooltip:
+						'''
+						Activa para que los objetos en la interfaz de almacenamiento,
+						muestren si tienen datos de [c/f4d58d:GlobalItem] y permitan usar la tecla [c/f4d58d:imprimir/print datos del objeto].
+						'''
 				}
 
 				canMovePanels: {
-					Label: Movimiento de Paneles de la Interfaz
+					Label: Movimiento de paneles de la interfaz
 					Tooltip: Desactivar para evitar mover y cambiar el tamaño de los paneles de la interfaz
 				}
 
 				automatonRemembers: {
-					Label: Automatón recuerda el último consejo de ayuda
-					Tooltip: El Automatón recordará qué consejo de ayuda mostró por última vez al usuario y mostrará ese consejo de ayuda al interactuar con él.
+					Label: Autómata recuerda el último consejo de ayuda
+					Tooltip: El autómata recordará qué consejo de ayuda mostró por última vez al jugador, para volver a leerlo.
 				}
 
 				globalShimmerItemBlacklist: {
-					// Label: Global Item Shimmering Blacklist
-					// Tooltip: Click with Left Ctrl + Left Shift to add/remove blacklist
+					Label: Lista negra global de objetos que no se pueden imbuir en fulgor
+					Tooltip:
+						'''
+						Haga [c/f4d58d:clic izquierdo] con [c/f4d58d:ctrl] + [c/f4d58d:shift], para agregar o quitar la receta de la lista negra.
+						Activa el filtro [c/f4d58d:mostrar recetas ocultas] que está en la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea] para ver lo que está en la lista negra.
+						'''
 				}
 
 				useOldSlotFocus: {
-					// Label: Legacy Item Splitting Logic
-					// Tooltip: Enable to use the slower legacy logic for splitting item stacks onto the mouse via right click.
+					Label: Lógica legacy para la división de objetos
+					Tooltip: "Actívalo para usar la lógica legacy, que es más lenta al dividir pilas de objetos con el [c/f4d58d:clic derecho]."
 				}
 
 				fadeButtonsNotSelected: {
-					// Label: Sorting & Filtering Button Fading
-					// Tooltip: Disable to make the icons for sorters and filters in the UIs not fade when not selected.
+					Label: Desvanecimiento de los botones de ordenamiento y filtrado
+					Tooltip: Desactive esta opción para evitar que los iconos de ordenamiento y filtrado en la interfaz se desvanezcan cuando no estén seleccionados.
+				}
+
+				printTextToChat: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Tooltip}
+				}
+
+				showPylonAreasOnMap: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Tooltip}
+				}
+
+				showPylonAreasInWorld: {
+					Label: Superposición en el mundo para la depuración del rango de acceso portátil
+					Tooltip:
+						'''
+						Muestra los rangos válidos para usar el [c/f4d58d:acceso remoto portátil] mientras el jugador lo sostiene, como una superposición sobre los bloques del mundo.
+						Para accesos remotos portátiles de rango infinito, no se mostrará nada.
+						'''
 				}
 			}
 
 			ButtonConfigurationMode: {
-				// Tooltip: ""
+				Tooltip: ""
 
 				Legacy: {
-					// Label: Legacy
+					Label: Legacy
 					Tooltip:
 						'''
 						Diseño utilizado en la versión v0.5.6.5 y anteriores.
-						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
 						'''
 				}
 
 				ModernPaged: {
-					// Label: Paged
-					Tooltip: Opciones de ordenamiento y filtrado movidas a las páginas de ordenamiento y filtrado.
+					Label: Pestaña
+					Tooltip:
+						'''
+						Las opciones de [c/ffff00:ordenamiento] y [c/ffff00:filtrado],
+						solo estarán disponibles en la pestaña [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
+						'''
 				}
 
 				ModernConfigurable: {
-					// Label: Configurable
-					Tooltip: Permite seleccionar qué opciones de ordenamiento y filtrado de las páginas de ordenamiento y filtrado aparecen en la página principal de la interfaz.
+					Label: Configurable
+					Tooltip:
+						'''
+						Elige qué opciones de [c/ffff00:ordenamiento] o [c/ffff00:filtros] deben aparecer en la pestaña principal.
+						Para personalizarlo, ve a la pestaña de [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
+						'''
 				}
 
 				LegacyWithGear: {
-					// Label: Legacy + Configurable
+					Label: Legacy + Configurable
 					Tooltip:
 						'''
-						Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
-						Se agrega un icono de engranaje adicional que, al hacer clic en él, abre un panel con todas las demás opciones.
-						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
+						está desactivado.
+						Se agrega el icono de un engranaje, el cual, al hacer clic en él,
+						abre un panel que contiene las opciones que faltan en la pestaña principal.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
 						'''
 				}
 
 				LegacyBasicWithPaged: {
-					// Label: Legacy + Paged
+					Label: Legacy + pestaña
 					Tooltip:
 						'''
-						Diseño utilizado en la versión v0.5.6.5 y anteriores si "Mostrar iconos de filtrado adicionales" está desactivado.
-						Iconos adicionales se encuentran en las páginas de ordenamiento y filtrado.
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
+						está desactivado.
+						Iconos para ordenar y filtrar objetos/recetas se encuentran en sus respectivas pestañas.
 						'''
 				}
 
 				ModernDropdown: {
-					// Label: Dropdown
+					Label: Menú desplegable
 					Tooltip:
 						'''
-						Se agregan dos menús desplegables en la página principal para seleccionar las opciones de ordenamiento y filtrado deseadas.
-						Las páginas de ordenamiento y filtrado están deshabilitadas.
+						Se agregan dos menús desplegables en la página principal para seleccionar las
+						opciones de ordenamiento y filtrado deseadas.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
 						'''
 				}
 			}
 
 			MagicStorageServerConfig: {
-				DisplayName: Configuración de Magic Storage en el Servidor
+				DisplayName: Config. Magic Storage en el servidor
 
 				allowAutomatonToMoveIn: {
-					Label: Vivienda del Automatón
-					Tooltip: Activar para permitir que el Automatón pueda moverse a una vivienda
+					Label: Vivienda del autómata
+					Tooltip: Al activarlo, permitirá que el autómata vuelva a aparecer de manera natural y mudarse a una vivienda
 				}
 
 				auditLog: {
-					Label: Registro de Auditoría del Servidor
+					Label: Registro de auditoría del servidor
 					Tooltip: Habilite para que las interacciones del cliente con cualquier sistema de almacenamiento se informen en un registro de auditoría
 				}
 
 				localHostAdmin: {
-					// Label: Give Server Admin to Local Host
-					// Tooltip: Enable to force the local host to have the Server Administrator status when joining a server
+					Label: Otorgar estado de administrador del servidor al host local
+					Tooltip: "Habilitar para forzar que el host local tenga el estado de [c/cccc00:administrador del servidor] al unirse a un servidor"
 				}
 
 				automatonHappiness: {
-					// Label: Automaton Happiness Affects Sell Prices
-					// Tooltip: Disable to prevent the Automaton from affecting the sell value of items sold via Item Selling Mode
+					Label: La felicidad del autómata, afecta los precios de venta
+					Tooltip: Desactiva esta opción, para evitar que el autómata afecte el valor de venta de los objetos vendidos a través del modo venta de objetos
 				}
 			}
 
-			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
+			MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
 		}
 	}
 }
