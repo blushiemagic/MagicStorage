@@ -22,7 +22,7 @@ Mods: {
 			CraftingAccess: {
 				DisplayName: Interfaz de creación de almacenamiento
 				Tooltip:
-				    '''
+					'''
 					Permite elaborar objetos a partir de los que
 					ya tengas guardados en el sistema de almacenamiento.
 					'''
@@ -100,7 +100,7 @@ Mods: {
 			SnowBiomeEmulator: {
 				DisplayName: Emulador de bioma de la nieve
 				Tooltip:
-				    '''
+					'''
 					Permite que la [c/0098ff:interfaz de creación de almacenamiento],
 					pueda hacer recetas en las cuales se necesiten estar en el bioma de la nieve.
 					'''
@@ -114,7 +114,7 @@ Mods: {
 			StorageComponent: {
 				DisplayName: Componente de almacenamiento
 				Tooltip:
-				    '''
+					'''
 					A partir de este objeto, se puede crear cualquier componente del sistema de almacenamiento.
 					También se puede usar para conectar componentes al sistema de almacenamiento.
 					'''
@@ -482,14 +482,36 @@ Mods: {
 					'''
 			}
 
+			ErrorItems: {
+				CommonTooltip:
+					'''
+					<FULLNAME>
+					<PREFIX>
+					'''
+				NameText: Nombre: {0}/{1}
+				NameTextUnknown: <unknown>
+				PrefixText: Prefijo: {0}
+				PrefixTextModded: Prefijo: {0}/{1}
+			}
+
 			Error_ItemSlotRenderFail: {
 				DisplayName: Error//ItemRender
-				Tooltip: ""
+				Message: "{$Mods.MagicStorage.HoverText.Errors.RenderFail}"
 			}
 
 			Error_ItemNetReadFail: {
 				DisplayName: Error//ItemClientRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NetFail}"
+			}
+
+			TagIOStressTest: {
+				DisplayName: Debug//DataCompressionTest
 				Tooltip: ""
+			}
+
+			Error_ItemNBTFail: {
+				DisplayName: Error//NBTRead
+				Message: "{$Mods.MagicStorage.HoverText.Errors.NBTFail}"
 			}
 		}
 
@@ -520,7 +542,7 @@ Mods: {
 
 				# Census support
 				Census.SpawnCondition:
-				    '''
+					'''
 					Para habilitar su aparición natural, ve a configurar mods [c/00dc00:->] magic storage [c/00dc00:--]
 					[c/00dc00:-->] Config. de Magic Storage en el servidor [c/00dc00:->] y habilita la opcion [c/f4d58d:vivienda del autómata]
 					'''
@@ -567,10 +589,10 @@ Mods: {
 		GameTips: {
 			Automaton: El autómata puede enseñarte todo lo que hay que saber sobre Magic Storage.
 			ShadowDiamonds: El [c/b093b7:diamante sombrío] se obtiene al derrotar a un jefe por primera vez. Se pueden usar como alternativa a los diamantes normales, en las recetas de Magic Storage.
-			RadiantJewel: Al derrotar al Señor de la luna, este puede soltar la [c/00FFFF:joya radiante], la cual puede usarse para fabricar accesos remotos portátiles con un rango de acceso ilimitado.
+			RadiantJewel: Al derrotar al Señor de la luna, este puede soltar la [c/00FFFF:joya radiante], la cual puede usarse para fabricar [c/f4d58d:accesos remotos portátiles] con un rango de acceso ilimitado.
 			StorageUpgrades: ¿Te estás quedando sin espacio de almacenamiento? ¡Mejora tus unidades de almacenamiento con una [c/f4d58d:actualización de unidad de almacenamiento]!
 			RemoteStorage:
-			    '''
+				'''
 				Accede a tu almacenamiento desde otras ubicaciones del mundo, vinculando el corazón de almacenamiento a un acceso remoto.
 				Para vincular el acceso al corazón, necesitas un localizador o un disco localizador.
 				'''
@@ -579,7 +601,7 @@ Mods: {
 			PortableAccess: Cree un [c/f4d58d:acceso remoto de almacenamiento portátil] para acceder a su almacenamiento mientras está fuera de casa.
 			StorageCores: Utilice una [c/f4d58d:llave inglesa del núcleo de almacenamiento] para quitar el [c/f4d58d:núcleo de almacenamiento], de una unidad de almacenamiento, que luego se puede insertar a una [c/f4d58d:unidad de almacenamiento vacía].
 			DisableUnit:
-			    '''
+				'''
 				Usa una [c/f4d58d:varita de unidad de almacenamiento] para desactivar la unidad de almacenamiento.
 				Una [c/f4d58d:unidad de almacenamiento] desactivada no puede almacenar objetos e intentará moverlos a las [c/f4d58d:unidades de almacenamiento] conectadas.
 				'''
@@ -599,13 +621,13 @@ Mods: {
 				NotLihzahrd: Esta unidad no está construida con ladrillos de Lihzahrd. Por favor, deja de preguntar.
 				Bluemagic: Bluemagic es una fuente asombrosa de poder. Sería sabio no subestimar sus capacidades.
 				Violence:
-				    '''
+					'''
 					Hola {0}, mi creador olvidó instalar mi chip de violen... quiero decir, de autodefensa.
 					He sido mejorado y ahora estoy listo para el combate.
 					'''
 				NoPlant: Esta unidad no posee ninguna materia orgánica de origen vegetal. Debes estar pensando en otra persona.
 				NeedPlant:
-				    '''
+					'''
 					[c/ff0000:DAME LA PLANTA.] *beep*
 					Disculpas, {0}, parece que esta unidad ha ejecutado una rutina no autorizada.
 					'''
@@ -660,12 +682,12 @@ Mods: {
 					Receta: [rg/s16:Wood] [rg:IronBar] @ [rg:MagicStorage:AnyWorkBench] = [i/s16:MagicStorage/StorageConnector]
 					'''
 				Help8:
-				    '''
+					'''
 					Oculto en el núcleo de todos los jefes se encuentra un [c/b093b7:diamante sombrío]. Esta joya maldita se puede utilizar como alternativa al [i:Diamond] para todas las recetas de
 					Magic Storage.
 					Una vez que obtienes el [c/b093b7:diamante sombrío] de un jefe, ¡no puedes obtener más de él!
 					Por otro lado, algunos jefes sueltan más de uno.
-				    '''
+					'''
 				Help9:
 					'''
 					¿Te quedaste sin espacio de almacenamiento? ¡Mejora tus unidades de almacenamiento aplicándole
@@ -705,12 +727,12 @@ Mods: {
 					[i/s25:MartianConduitPlating] [i/s2:LunarBar] @ [i:LunarCraftingStation] = [i:MagicStorage/LocatorDisk]
 					'''
 				Help13:
-				    '''
+					'''
 					Puedes adjuntar componentes de almacenamiento a un [c/ef7273:acceso remoto] y aún así poder acceder al sistema de almacenamiento principal.
 					Es muy útil para tener la [c/a4ceeb:interfaz de creación] lejos del [c/0ecb75:corazón de almacenamiento].
 					'''
 				Help14:
-				    '''
+					'''
 					La [c/f4d58d:varita de unidad de almacenamiento] te permite desactivar cualquier [i:MagicStorage/StorageUnit]. Al estar desactivada, no puede
 					almacenar objetos y rápidamente intentará moverlo a las
 					otras [i:MagicStorage/StorageUnit] conectadas.
@@ -752,7 +774,7 @@ Mods: {
 					[i:MagicStorage/CombinedStations3Item] [i:MagicStorage/CombinedFurnitureStations2Item] [i:Autohammer] [i:LunarCraftingStation] [i:Fargowiltas/GoldenDippingVat] [i/s10:LavaBucket] [i/s10:HoneyBucket] @ a mano = [i:MagicStorage/CombinedStations4Item]
 					'''
 				Help18:
-				    '''
+					'''
 					El Señor de la luna protege la [c/00ff00:joya radiante],
 					una gema que contiene un poder increíble.
 					¡Puedes usarla para fabricar [c/f4d58d:accesos remotos portátiles],
@@ -823,7 +845,7 @@ Mods: {
 					Receta: [i/s3:GoldenKey] [i/s25:Wire] [rg/s5:IronBar] [i:MagicStorage/StorageComponent] [i/s6:Amber] @ [rg:MagicStorage:AnyPreHmAnvil] = [i:MagicStorage/StorageSecurity]
 					'''
 				Help26_Header:
-				    '''
+					'''
 					¿Te resulta engorroso escribir en la barra de búsqueda?
 					Aquí tienes algunos atajos de teclas útiles.
 					'''
@@ -893,7 +915,7 @@ Mods: {
 		FilterAllMods: Todos los mods
 		Capacity: "{0} / {1} objetos"
 		LocatorSet:
-		    '''
+			'''
 			[c/00ff00:¡Localizador configurado exitosamente!]
 			[c/53ec53:Coordenadas]: X={0}, Y={1}
 			'''
@@ -931,7 +953,7 @@ Mods: {
 			SearchTooltip: "Usa el [c/ffff00:#], para buscar por su descripción"
 			SearchModAndTooltip: @Nombredelmod #búsqueda por su descripción
 			TipModAndTooltip:
-			    '''
+				'''
 				[c/ffff00:@Nombredelmod] para buscar por mod
 				[c/ffff00:#buscar por su descripción] para buscar por su descripción
 				[c/f4d58d:Nota]: combinar ambos, usar el [c/ffff00:@], para buscar por el nombre del mod (sin espacios) y luego, buscar por su descripción usando el [c/ffff00:#].
@@ -991,13 +1013,13 @@ Mods: {
 		}
 
 		DepositTooltip:
-		    '''
+			'''
 			[c/ffff00:Clic izquierdo]: [c/ebeba4:guardar rápido]
 			[c/ffff00:Ctrl + clic izquierdo]: [c/ebeba4:depositar todo]
 			[c/ffff00:Clic derecho]: [c/ebeba4:reabastecer]
 			'''
 		DepositTooltipAlt:
-		    '''
+			'''
 			[c/ffff00:Ctrl + clic izquierdo]: [c/ebeba4:guardar rápido]
 			[c/ffff00:Clic izquierdo]: [c/ebeba4:depositar todo]
 			[c/ffff00:Clic derecho]: [c/ebeba4:reabastecer]
@@ -1158,6 +1180,8 @@ Mods: {
 			Errors: {
 				RenderFail: Este objeto no se pudo mostrar debido a un error.
 				NetFail: Este objeto no se pudo cargar en el cliente actual.
+				NBTFail: No se pudieron deserializar los datos NBT de este elemento.
+				CapacityText: Algunos objetos no se pudieron cargar en el cliente actual.
 			}
 
 			TestItems: {
@@ -1193,7 +1217,7 @@ Mods: {
 				CoinLuck: +{0}% suerte (+{1:0.##} valor)
 
 				NPCSpawn: {
-					// DirectTransform: "{0}"
+					DirectTransform: "{0}"
 					IndirectTransform: "{0} (estilo #{1})"
 				}
 			}
@@ -1276,7 +1300,7 @@ Mods: {
 			InvalidPlayer: "[c/ff0000:La instancia del jugador no se refirió a un jugador válido]"
 			UnauthorizedAccess: "[c/ff0000:El jugador no cumple los requisitos para acceder a la red]"
 			UnauthorizedModification: "[c/ff0000:El jugador no cumple los requisitos para modificar la red]"
-			EntityNotFound: "[c/ff0000:Storage entity could not be found for the request]"
+			EntityNotFound: "[c/ff0000:No se pudo encontrar la entidad de almacenamiento para la solicitud.]"
 			EntityNotAccessible: "[c/ff0000:El jugador no cumple los requisitos para acceder al almacenamiento y sus componentes]"
 
 			UnauthorizedNetmodeContext: {
@@ -1301,7 +1325,7 @@ Mods: {
 				NoHeartMustConnect1: Conectar un [i:MagicStorage/StorageHeart] asignado a la red de seguridad
 				NoHeartMustConnect2: con ID {0} para acceder.
 				NetworkOwner: Dueño: {0}
-				// NetworkID: ID: {0}
+				NetworkID: ID: {0}
 
 				Modes: {
 					Search: {
@@ -1330,6 +1354,7 @@ Mods: {
 				Crafting: "[i:MagicStorage/CraftingAccess] [i:MagicStorage/DecraftingAccess] Configuración de la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea]"
 				StorageAndCrafting: "[i:MagicStorage/StorageHeart] [i:MagicStorage/CraftingAccess] Configuración de las interfaces de [c/0ecb75:almacenamiento] y de [c/a4ceeb:creación]"
 				General: Configuraciones generales
+				Debugging: Depuración
 			}
 
 			PrintTextToChat: {
@@ -1360,7 +1385,7 @@ Mods: {
 				quickStackDepositMode: {
 					Label: "[i:Chest]  Modo de guardar rápido"
 					Tooltip:
-					    '''
+						'''
 						[c/00ff00:Habilitado]: Necesitas presionar la tecla control/ctrl para guardar rápido los objetos.
 						[c/ff0000:Deshabilitado]: No se necesita presionar la tecla control/ctrl para guardar rápido los objetos.
 						'''
@@ -1369,7 +1394,7 @@ Mods: {
 				useConfigFilter: {
 					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Usar filtro predeterminado"
 					Tooltip:
-					    '''
+						'''
 						[c/00ff00:Habilitado]: usar el filtro que se muestra a continuación.
 						[c/ff0000:Deshabilitado]: para recordar el último filtro seleccionado en el juego.
 						El filtro aún se utilizará al abrir la interfaz por primera vez después de cargar el mod.
@@ -1379,7 +1404,7 @@ Mods: {
 				showAllRecipes: {
 					Label: "[i:MagicStorage/Config_RecipeFilterAvailable] [i:MagicStorage/Config_RecipeFilterAll]  Filtro de recetas predeterminado"
 					Tooltip:
-					    '''
+						'''
 						[c/00ff00:Habilitado]: mostrar todas las recetas de forma predeterminada.
 						[c/ff0000:Deshabilitado]: mostrar solo las recetas disponibles por defecto.
 						'''
@@ -1393,7 +1418,7 @@ Mods: {
 				recipeBlacklist: {
 					Label: Lista blanca/negra de recetas
 					Tooltip:
-					    '''
+						'''
 						Activa para permitir agregar recetas a la lista blanca o negra en la [c/a4ceeb:interfaz de creación]
 						Al estar activa la opción y hacer [c/f4d58d:clic izquierdo] + [c/f4d58d:ctrl] en una receta estando dentro de una interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea],
 						podrás añadirlo o removerlo de la lista negra.
@@ -1404,7 +1429,7 @@ Mods: {
 				globalRecipeBlacklist: {
 					Label: Lista negra global de recetas
 					Tooltip:
-					    '''
+						'''
 						Haga [c/f4d58d:clic izquierdo] con [c/f4d58d:ctrl] + [c/f4d58d:shift], para agregar o quitar la receta de la lista negra.
 						Activa el filtro [c/f4d58d:mostrar recetas ocultas] que está en la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea] para ver lo que está en la lista negra.
 						'''
@@ -1440,7 +1465,7 @@ Mods: {
 				searchBarRefreshOnKey: {
 					Label: La barra de búsqueda se actualiza mientras estás escribiendo
 					Tooltip:
-					    '''
+						'''
 						[c/00ff00:Habilitado]: la barra de búsqueda en las interfaces del [c/0ecb75:corazón], [c/a4ceeb:creación] o [c/e153ec:etérea] se actualiza cada vez que presionas una tecla.
 						[c/ff0000:Deshabilitado]: solo se actualizará cuando la barra de búsqueda deje de estar seleccionada.
 						'''
@@ -1462,38 +1487,13 @@ Mods: {
 
 				buttonLayout: {
 					Label: Diseño de botones de ordenamiento/filtrado
-					Tooltip:
-						'''
-						Legacy:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores.
-						  Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
-						Pestaña:
-						  Las opciones de [c/ffff00:ordenamiento] y [c/ffff00:filtrado],
-						  solo estarán disponibles en la pestaña [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
-						Configurable:
-						  Elige qué opciones de [c/ffff00:ordenamiento] o [c/ffff00:filtros] deben aparecer en la pestaña principal.
-						  Para personalizarlo, ve a la pestaña de [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
-						Legacy + configurable:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
-						  está desactivado.
-						  Se agrega el icono de un engranaje, el cual, al hacer clic en él,
-						  abre un panel que contiene las opciones que faltan en la pestaña principal.
-						  Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
-						Legacy + pestaña:
-						  Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
-						  está desactivado.
-						  Iconos para ordenar y filtrar objetos/recetas se encuentran en sus respectivas pestañas.
-						Menú desplegable:
-						  Se agregan dos menús desplegables en la página principal para seleccionar las
-						  opciones de ordenamiento y filtrado deseadas.
-						  Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
-						'''
+					Tooltip: ""
 				}
 
 				itemDataDebug: {
 					Label: "[i:IronPickaxe]  Información de depuración/debug en objetos"
 					Tooltip:
-					    '''
+						'''
 						Activa para que los objetos en la interfaz de almacenamiento,
 						muestren si tienen datos de [c/f4d58d:GlobalItem] y permitan usar la tecla [c/f4d58d:imprimir/print datos del objeto].
 						'''
@@ -1512,21 +1512,103 @@ Mods: {
 				globalShimmerItemBlacklist: {
 					Label: Lista negra global de objetos que no se pueden imbuir en fulgor
 					Tooltip:
-					    '''
+						'''
 						Haga [c/f4d58d:clic izquierdo] con [c/f4d58d:ctrl] + [c/f4d58d:shift], para agregar o quitar la receta de la lista negra.
 						Activa el filtro [c/f4d58d:mostrar recetas ocultas] que está en la interfaz de [c/a4ceeb:creación] o [c/e153ec:etérea] para ver lo que está en la lista negra.
+						'''
+				}
+
+				useOldSlotFocus: {
+					Label: Lógica legacy para la división de objetos
+					Tooltip: "Actívalo para usar la lógica legacy, que es más lenta al dividir pilas de objetos con el [c/f4d58d:clic derecho]."
+				}
+
+				fadeButtonsNotSelected: {
+					Label: Desvanecimiento de los botones de ordenamiento y filtrado
+					Tooltip: Desactive esta opción para evitar que los iconos de ordenamiento y filtrado en la interfaz se desvanezcan cuando no estén seleccionados.
+				}
+
+				printTextToChat: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.PrintTextToChat.Tooltip}
+				}
+
+				showPylonAreasOnMap: {
+					Label: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Label}
+					Tooltip: {$Mods.MagicStorage.MagicStorageBetaConfig.ShowDebugPylonRangeAreas.Tooltip}
+				}
+
+				showPylonAreasInWorld: {
+					Label: Superposición en el mundo para la depuración del rango de acceso portátil
+					Tooltip:
+						'''
+						Muestra los rangos válidos para usar el [c/f4d58d:acceso remoto portátil] mientras el jugador lo sostiene, como una superposición sobre los bloques del mundo.
+						Para accesos remotos portátiles de rango infinito, no se mostrará nada.
 						'''
 				}
 			}
 
 			ButtonConfigurationMode: {
-				// Tooltip: ""
-				// Legacy.Label: Legacy
-				ModernPaged.Label: Pestaña
-				ModernConfigurable.Label: Configurable
-				LegacyWithGear.Label: Legacy + Configurable
-				LegacyBasicWithPaged.Label: Legacy + pestaña
-				ModernDropdown.Label: Menú desplegable
+				Tooltip: ""
+
+				Legacy: {
+					Label: Legacy
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
+						'''
+				}
+
+				ModernPaged: {
+					Label: Pestaña
+					Tooltip:
+						'''
+						Las opciones de [c/ffff00:ordenamiento] y [c/ffff00:filtrado],
+						solo estarán disponibles en la pestaña [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
+						'''
+				}
+
+				ModernConfigurable: {
+					Label: Configurable
+					Tooltip:
+						'''
+						Elige qué opciones de [c/ffff00:ordenamiento] o [c/ffff00:filtros] deben aparecer en la pestaña principal.
+						Para personalizarlo, ve a la pestaña de [c/f4d58d:ordenar] y [c/f4d58d:filtrar].
+						'''
+				}
+
+				LegacyWithGear: {
+					Label: Legacy + Configurable
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
+						está desactivado.
+						Se agrega el icono de un engranaje, el cual, al hacer clic en él,
+						abre un panel que contiene las opciones que faltan en la pestaña principal.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
+						'''
+				}
+
+				LegacyBasicWithPaged: {
+					Label: Legacy + pestaña
+					Tooltip:
+						'''
+						Diseño utilizado en la versión v0.5.6.5 y anteriores si [c/f4d58d:mostrar iconos de filtrado adicionales]
+						está desactivado.
+						Iconos para ordenar y filtrar objetos/recetas se encuentran en sus respectivas pestañas.
+						'''
+				}
+
+				ModernDropdown: {
+					Label: Menú desplegable
+					Tooltip:
+						'''
+						Se agregan dos menús desplegables en la página principal para seleccionar las
+						opciones de ordenamiento y filtrado deseadas.
+						Las pestañas para ordenar y filtrar objetos/recetas, están deshabilitadas.
+						'''
+				}
 			}
 
 			MagicStorageServerConfig: {
@@ -1549,14 +1631,11 @@ Mods: {
 
 				automatonHappiness: {
 					Label: La felicidad del autómata, afecta los precios de venta
-					Tooltip:
-						'''
-						Desactiva esta opción, para evitar que el autómata afecte el valor de venta de los objetos vendidos a través del modo venta de objetos
-						'''
+					Tooltip: Desactiva esta opción, para evitar que el autómata afecte el valor de venta de los objetos vendidos a través del modo venta de objetos
 				}
 			}
 
-			// MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
+			MagicStorageBetaConfig.DisplayName: "{$Mods.MagicStorage.Config.BetaLabel}"
 		}
 	}
 }
