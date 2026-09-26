@@ -4,6 +4,10 @@ using Terraria.ID;
 
 namespace MagicStorage {
 	partial class Utility {
+		public static string ItemIdentifier(int type) => BuildItemIdentifier(type, 1);
+
+		public static string Identifier(this Item @this) => BuildItemIdentifier(@this.type, 1);
+
 		public static string IdentifierAndStack(this Item @this) => BuildItemIdentifier(@this.type, @this.stack);
 
 		public static string IdentifierWithStack(this Item @this, int stack) => BuildItemIdentifier(@this.type, stack);
@@ -21,6 +25,10 @@ namespace MagicStorage {
 
 			return sb.ToString();
 		}
+
+		public static string PrefixedItemIdentifier(int type, int prefix) => BuildItemIdentifier(type, 1, prefix);
+
+		public static string PrefixedIdentifier(this Item @this) => BuildItemIdentifier(@this.type, 1, @this.prefix);
 
 		public static string PrefixedIdentifierAndStack(this Item @this) => BuildItemIdentifier(@this.type, @this.stack, @this.prefix);
 

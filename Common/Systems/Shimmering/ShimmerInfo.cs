@@ -45,14 +45,17 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			if (iconicItem is ItemID.CopperCoin or ItemID.SilverCoin or ItemID.GoldCoin or ItemID.PlatinumCoin || ItemID.Sets.CoinLuckValue[iconicItem] > 0)
 				return ShimmerAttemptResult.CoinLuck;
 
-			if (iconicItem is ItemID.RodofDiscord or ItemID.Clentaminator or ItemID.BottomlessBucket or ItemID.BottomlessShimmerBucket or ItemID.LunarBrick)
+			if (sample.createTile == TileID.MusicBoxes)
+				return ShimmerAttemptResult.TransmutedItem;
+
+			if (ShimmerMetrics.HasRegisteredTransformation(iconicItem))
+				return ShimmerAttemptResult.TransmutedItem;
+
+			if (ItemID.Sets.ShimmerTransformToItem[iconicItem] > ItemID.None)
 				return ShimmerAttemptResult.TransmutedItem;
 
 			if (iconicItem is ItemID.GelBalloon || sample.makeNPC > NPCID.None)
 				return ShimmerAttemptResult.NPCSpawn;
-
-			if (ItemID.Sets.ShimmerTransformToItem[iconicItem] > ItemID.None)
-				return ShimmerAttemptResult.TransmutedItem;
 
 			decraftingRecipeIndex = ShimmerTransforms.GetDecraftingRecipeIndex(iconicItem);
 			if (decraftingRecipeIndex > -1) {

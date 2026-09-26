@@ -1,8 +1,10 @@
 ﻿using MagicStorage.Common;
 using MagicStorage.Common.Systems;
+using MagicStorage.Common.Systems.Shimmering;
 using MagicStorage.Common.Threading.Refreshing;
 using MagicStorage.Sorting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ID;
@@ -10,7 +12,7 @@ using Terraria.Localization;
 
 namespace MagicStorage {
 	partial class DecraftingGUI {
-		private class ItemWatchTarget : IRefreshUIWatchTarget {
+		private class ItemWatchTarget : IRefreshUIWatchTarget_2 {
 			private readonly int _itemType;
 
 			public ItemWatchTarget(int itemType) {
@@ -19,9 +21,38 @@ namespace MagicStorage {
 
 			public bool GetCurrentState() => IsAvailable(_itemType);
 
-			public void OnStateChange(out bool forceFullRefresh) {
+			public void OnStateChange(bool currentState) {
 				SetNextDefaultItemCollectionToRefresh(_itemType);
-				forceFullRefresh = false;
+				MagicUI.RequestMainZoneThread();
+			}
+		}
+
+		private class ItemTransmutationWatchTarget : IRefreshUIWatchTarget_2 {
+			private readonly int _itemType;
+			private readonly List<IShimmerResultReport> _cachedReports;
+
+			public ItemTransmutationWatchTarget(int itemType) {
+				_itemType = itemType;
+				_cachedReports = [.. MagicCache.ShimmerInfos[itemType].GetResult().GetShimmerReports(itemType) ];
+			}
+
+			public bool GetCurrentState() {
+				List<IShimmerResultReport> currentReports = [.. MagicCache.ShimmerInfos[_itemType].GetResult().GetShimmerReports(_itemType)];
+
+				if (_cachedReports.Count != currentReports.Count)
+					return false;
+
+				for (int i = 0; i < currentReports.Count; i++) {
+					if (!currentReports[i].Equals(_cachedReports[i]))
+						return false;
+				}
+
+				return true;
+			}
+
+			public void OnStateChange(bool currentState) {
+				SetNextDefaultItemCollectionToRefresh(_itemType);
+				MagicUI.RequestMainZoneThread();
 			}
 		}
 
@@ -32,6 +63,13 @@ namespace MagicStorage {
 				RefreshAllItemsAvailability(thread);  //Refresh all items
 			else
 				RefreshSpecificItemsAvailablity(thread);
+
+			MagicUI.ClearRefreshWatchdogs();
+
+			foreach (var (item, available) in thread.MainZoneObjectsResults.Enumerate()) {
+				MagicUI.AddRefreshWatchdog(new ItemWatchTarget(item), available);
+				MagicUI.AddRefreshWatchdog(new ItemTransmutationWatchTarget(item), true);
+			}
 
 			NetHelper.Report(false, "Visible items: " + thread.MainZoneObjectsResults.objects.Count);
 			NetHelper.Report(false, "Available items: " + thread.MainZoneObjectsResults.objectIsAvailable.Count(static b => b));
@@ -100,9 +138,6 @@ namespace MagicStorage {
 					PopulateViewingItems(thread, attempt: 2);
 				}
 			}
-
-			foreach (var (item, available) in thread.MainZoneObjectsResults.Enumerate())
-				MagicUI.AddRefreshWatchdog(new ItemWatchTarget(item), available);
 
 			if (!didDefault)
 				errorText = null;

@@ -38,6 +38,9 @@
 					.Set("tile", new Node()
 						.Set("aether", new Node()
 							.Set("requests", false)
+							.Set("details", new Node()
+								.Set("requests", false)
+							)
 						)
 						.Set("centers", new Node()
 							.Set("link", false)
@@ -170,6 +173,12 @@
 			#region entity.tile.aether
 			public const string AetherInterfaceLogic = TileEntityLogic + ".aether";
 			public const string ShimmeringRequests = AetherInterfaceLogic + ".requests";
+
+			#region entity.tile.aether.details
+			public const string AetherInterfaceLogicDetails = AetherInterfaceLogic + ".details";
+			public const string ShimmeringRequestsVerbose = AetherInterfaceLogicDetails + ".requests";
+			#endregion  // entity.tile.aether.details
+
 			#endregion  // entity.tile.aether
 
 			#region entity.tile.centers

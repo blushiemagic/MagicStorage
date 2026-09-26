@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using MagicStorage.Common.Systems.Debugging;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.IO;
 using Terraria;
@@ -6,14 +7,32 @@ using Terraria.ID;
 
 namespace MagicStorage.Common.Systems.Shimmering {
 	public readonly struct TransformItem : IShimmerResult {
-		IEnumerable<IShimmerResultReport> IShimmerResult.GetShimmerReports(Item item, int iconicType) {
-			yield return new ItemReport(ShimmerMetrics.TransformItem(iconicType));
+		public IEnumerable<IShimmerResultReport> GetShimmerReports(Item item, int iconicType) {
+			int transmuted = ShimmerMetrics.TransformItem(iconicType);
+
+			if (transmuted > ItemID.None)
+				yield return new ItemReport(transmuted);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+		public void OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.ShimmeringRequestsVerbose);
+
 			int result = ShimmerMetrics.TransformItem(iconicType);
 
-			NetHelper.Report(false, $"  TransformItem: {ItemID.Search.GetName(iconicType)} -> {ItemID.Search.GetName(result)}");
+			if (result <= ItemID.None) {
+				// Failsafe to ensure that invalid transmutations don't do anything
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Failed.  Item transformation resulted in an invalid or empty item.");
+				return;
+			}
+
+			if (debugging.IsDebugging) {
+				debugging
+					.Report(false, new NetmodeContextMessage(
+						ChatMessage: new("Success.  Transformed item into {0}", Utility.GetItemChatTag(result, item.stack, 0)),
+						ConsoleOrLogMessage: new("Success.  Transformed item into: {0}", Utility.ItemIdentifierWithStack(result, item.stack))
+					));
+			}
 
 			if (!storage.IgnoreContentChanges)
 				storage.Deposit(new Item(result, item.stack));
@@ -23,20 +42,23 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			item.stack = 0;
 		}
 
-		void IShimmerResult.Send(BinaryWriter writer) { }
+		public void Send(BinaryWriter writer) { }
 
-		IShimmerResult IShimmerResult.Receive(BinaryReader reader) => this;
+		public IShimmerResult Receive(BinaryReader reader) => this;
 	}
 
 	public readonly struct CoinLuck : IShimmerResult {
-		IEnumerable<IShimmerResultReport> IShimmerResult.GetShimmerReports(Item item, int iconicType) {
+		public IEnumerable<IShimmerResultReport> GetShimmerReports(Item item, int iconicType) {
 			yield return new CoinLuckReport(item.stack * ItemID.Sets.CoinLuckValue[iconicType]);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+		public void OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.ShimmeringRequestsVerbose);
+
 			int coinValue = item.stack * ItemID.Sets.CoinLuckValue[iconicType];
 
-			NetHelper.Report(false, $"  CoinLuck: {Utility.ItemIdentifierWithStack(iconicType, item.stack)} -> {coinValue} luck value");
+			if (debugging.IsDebugging)
+				debugging.Report(false, "Adding {0} value to the coin luck counter", coinValue);
 
 			if (Main.netMode == NetmodeID.SinglePlayer)
 				Main.LocalPlayer.AddCoinLuck(storage.playerCenter, coinValue);  // Add coin luck immediately
@@ -49,26 +71,33 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			item.stack = 0;
 		}
 
-		void IShimmerResult.Send(BinaryWriter writer) { }
+		public void Send(BinaryWriter writer) { }
 
-		IShimmerResult IShimmerResult.Receive(BinaryReader reader) => this;
+		public IShimmerResult Receive(BinaryReader reader) => this;
 	}
 
 	public readonly struct NPCSpawn : IShimmerResult {
-		IEnumerable<IShimmerResultReport> IShimmerResult.GetShimmerReports(Item item, int iconicType) {
+		public IEnumerable<IShimmerResultReport> GetShimmerReports(Item item, int iconicType) {
 			if (iconicType == ItemID.GelBalloon)
 				yield return new NPCSpawnReport(NPCID.TownSlimeRainbow);
 			else if (item.makeNPC > NPCID.None)
 				yield return new NPCSpawnReport(item);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+		public void OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+			using var debugging = DebugMessage.CreateIf(DebugControls.Names.ShimmeringRequestsVerbose);
+
 			if (iconicType == ItemID.GelBalloon) {
 				// Rainbow slime spawning
-				if (NPC.unlockedSlimeRainbowSpawn)
-					return;
+				if (NPC.unlockedSlimeRainbowSpawn) {
+					if (debugging.IsDebugging)
+						debugging.Report(false, "Skipped.  Diva Slime has already been unlocked.");
 
-				NetHelper.Report(false, $"  NPCSpawn: {ItemID.Search.GetName(iconicType)} -> {nameof(NPCID.TownSlimeRainbow)}");
+					return;
+				}
+
+				if (debugging.IsDebugging)
+					debugging.Report(false, "Success.  Unlocking the Diva Slime.");
 
 				if (!net) {
 					NPC.unlockedSlimeRainbowSpawn = true;
@@ -92,11 +121,16 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				int num10 = 50;
 				int num11 = NPC.GetAvailableAmountOfNPCsToSpawnUpToSlot(item.stack, Main.maxNPCs);
 				int count = 0;
+				int countNPC = 0;
 
 				int shimmerTransform = NPCID.Sets.ShimmerTransformToNPC[item.makeNPC];
 
-				if (num11 > 0)
-					NetHelper.Report(false, $"  NPCSpawn: {ItemID.Search.GetName(iconicType)} -> {NPCID.Search.GetName(shimmerTransform < 0 ? item.makeNPC : shimmerTransform)}{(shimmerTransform < 0 ? $" (style: {item.placeStyle})" : "")}");
+				if (num11 > 0 && debugging.IsDebugging) {
+					debugging.Report(false, "Spawned NPC: {0}", NPCID.Search.GetName(shimmerTransform < 0 ? item.makeNPC : shimmerTransform));
+
+					if (shimmerTransform < 0)
+						debugging.Report(false, "NPC Style: {0}", item.placeStyle);
+				}
 
 				while (num10 > 0 && num11 > 0 && item.stack > 0) {
 					num10--;
@@ -110,6 +144,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 							: NPC.ReleaseNPC((int)storage.playerBottom.X, (int)storage.playerBottom.Y, shimmerTransform, 0, Main.myPlayer);
 
 						if (spawnedNPC >= 0) {
+							countNPC++;
+
 							NPC npc = Main.npc[spawnedNPC];
 
 							npc.shimmerTransparency = 1f;
@@ -123,13 +159,19 @@ namespace MagicStorage.Common.Systems.Shimmering {
 					}
 				}
 
+				if (!net && debugging.IsDebugging) {
+					debugging
+						.Report(false, "Consumed {0} items", count)
+						.Report(false, "Spawned {0} NPCs", countNPC);
+				}
+
 				storage.Withdraw(item.type, count);
 			}
 		}
 
-		void IShimmerResult.Send(BinaryWriter writer) { }
+		public void Send(BinaryWriter writer) { }
 
-		IShimmerResult IShimmerResult.Receive(BinaryReader reader) => this;
+		public IShimmerResult Receive(BinaryReader reader) => this;
 	}
 
 	public readonly struct Decraft : IShimmerResult {
@@ -139,7 +181,7 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			this.decraftingRecipeIndex = decraftingRecipeIndex;
 		}
 
-		IEnumerable<IShimmerResultReport> IShimmerResult.GetShimmerReports(Item item, int iconicType) {
+		public IEnumerable<IShimmerResultReport> GetShimmerReports(Item item, int iconicType) {
 			Recipe recipe = Main.recipe[decraftingRecipeIndex];
 
 			var items = recipe.customShimmerResults is { } list ? list : recipe.requiredItem;
@@ -148,10 +190,8 @@ namespace MagicStorage.Common.Systems.Shimmering {
 				yield return new ItemReport(reqItem.type);
 		}
 
-		void IShimmerResult.OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
+		public void OnShimmer(Item item, int iconicType, StorageIntermediary storage, bool net) {
 			int oldStack = item.stack;
-
-			NetHelper.Report(false, $"  Decraft: {ItemID.Search.GetName(iconicType)}");
 
 			foreach (var result in ShimmerMetrics.AttemptDecraft(Main.recipe[decraftingRecipeIndex], iconicType, ref item.stack)) {
 				if (!storage.IgnoreContentChanges)
@@ -161,11 +201,11 @@ namespace MagicStorage.Common.Systems.Shimmering {
 			storage.Withdraw(item.type, oldStack - item.stack);
 		}
 
-		void IShimmerResult.Send(BinaryWriter writer) {
+		public void Send(BinaryWriter writer) {
 			writer.Write(decraftingRecipeIndex);
 		}
 
-		IShimmerResult IShimmerResult.Receive(BinaryReader reader) {
+		public IShimmerResult Receive(BinaryReader reader) {
 			return new Decraft(reader.ReadInt32());
 		}
 	}

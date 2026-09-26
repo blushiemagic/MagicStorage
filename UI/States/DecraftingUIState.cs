@@ -327,13 +327,19 @@ namespace MagicStorage.UI.States {
 				bool isEmpty = true;
 				StringBuilder text = new();
 
-				if (ShimmerMetrics.GetTransformCondition(DecraftingGUI.selectedItem) is Condition condition)
-					AddObjectTextToBuilder(text, condition.Description.Value, ref isEmpty);
+				List<Condition> conditions = [];
+
+				conditions.AddRange(ShimmerMetrics.GetTransformConditions(DecraftingGUI.selectedItem));
 
 				if (ShimmerMetrics.GetDecraftingRecipeFor(DecraftingGUI.selectedItem) is Recipe recipe) {
-					foreach (var decraftCondition in recipe.DecraftConditions)
-						AddObjectTextToBuilder(text, decraftCondition.Description.Value, ref isEmpty);
+					foreach (var decraftCondition in recipe.DecraftConditions) {
+						if (!conditions.Contains(decraftCondition))
+							conditions.Add(decraftCondition);
+					}
 				}
+
+				foreach (var condition in conditions)
+					AddObjectTextToBuilder(text, condition.Description.Value, ref isEmpty);
 
 				if (isEmpty)
 					AppendNoneObjectText();

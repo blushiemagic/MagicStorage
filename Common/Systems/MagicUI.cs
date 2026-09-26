@@ -158,6 +158,9 @@ public class MagicUI : ModSystem
 		} else if (_requestingZoneThread) {
 			StartMainZoneRefreshThread(caller: "MagicUI.CheckRefresh()");
 			ResetThreadRequests();
+		} else if (_requestingSelectionThread) {
+			StartSelectedObjectRefreshThread(caller: "MagicUI.CheckRefresh()");
+			ResetThreadRequests();
 		}
 
 		if (CurrentlyRefreshing)
@@ -207,16 +210,20 @@ public class MagicUI : ModSystem
 
 	private static bool _requestingFullThread;
 	private static bool _requestingZoneThread;
+	private static bool _requestingSelectionThread;
 
 	public static void RequestFullRefresh() => _requestingFullThread = true;
 
 	public static void RequestMainZoneThread() => _requestingZoneThread = true;
+
+	public static void RequestSelectedItemThread() => _requestingSelectionThread = true;
 
 	private static void ResetThreadRequests() {
 		_refreshUI = false;
 		StorageGUI.Obsolete_needRefresh() = false;
 		_requestingFullThread = false;
 		_requestingZoneThread = false;
+		_requestingSelectionThread = false;
 		forceFullRefresh = false;
 	}
 

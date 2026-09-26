@@ -1811,7 +1811,7 @@ namespace MagicStorage
 			ShimmerMetrics.SendShimmerResults(packet, results);
 			packet.Send();
 
-			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.ShimmerRequestNetcode);
+			using var debugging = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.ShimmeringRequests);
 
 			if (debugging.IsDebugging) {
 				debugging
@@ -1831,7 +1831,7 @@ namespace MagicStorage
 
 			var results = ShimmerMetrics.ReceiveShimmerResults(reader);
 
-			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.ShimmerRequestNetcode);
+			using var debuggingIncoming = DebugMessage.ChainIfAll(DebugControls.Names.IncomingNetcodePackets, DebugControls.Names.ShimmeringRequests);
 
 			if (debuggingIncoming.IsDebugging) {
 				debuggingIncoming
@@ -1847,17 +1847,28 @@ namespace MagicStorage
 			int iconicItem = MagicCache.ShimmerInfos[itemType].iconicItem;
 
 			List<Item> items;
-			using(var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.ShimmerRequestNetcode)) {
+			using(var debuggingWork = DebugMessage.CreateIf(DebugControls.Names.ShimmeringRequests)) {
 				if (debuggingWork.IsDebugging) {
 					debuggingWork
 						.Report(true, "Processing shimmer request")
 						.Indent()
-						.Report(false, "Shimmering item: {0}", shimmeringItem.IdentifierAndStack())
-						.Unindent();
+						.Report(false, "Shimmering item: {0}", shimmeringItem.PrefixedIdentifierAndStack());
 				}
 
-				foreach (var result in results)
+				foreach (var result in results) {
+					if (debuggingWork.IsDebugging)
+						debuggingWork.Report(false, "Shimmer action category: {0}", result?.GetType().Name ?? "<null>");
+
+					using var debuggingWorkVerbose = debuggingWork.CreateIf(DebugControls.Names.ShimmeringRequestsVerbose);
+
+					if (debuggingWorkVerbose.IsDebugging) {
+						debuggingWorkVerbose
+							.Report(false, "Details:")
+							.Indent();
+					}
+
 					result?.OnShimmer(shimmeringItem, iconicItem, storage, net: true);
+				}
 
 				if (debuggingWork.IsDebugging) {
 					debuggingWork
@@ -1883,11 +1894,7 @@ namespace MagicStorage
 					ItemIO.Send(item, packet, true, true);
 				packet.Send(sender);
 
-				using var debuggingOutgoing = DebugMessage.CreateIf(
-					DebugControls.Combine()
-						.Get(DebugControls.Names.OutgoingNetcodePackets)
-						.AndAny(DebugControls.Names.ShimmerRequestNetcode, DebugControls.Names.StorageOperationsNetcode)
-				);
+				using var debuggingOutgoing = DebugMessage.CreateIfAll(DebugControls.Names.OutgoingNetcodePackets, DebugControls.Names.ShimmeringRequests);
 
 				if (debuggingOutgoing.IsDebugging)
 					debuggingOutgoing.Report(false, "Sent packet {0} to client {1}", MessageType.CraftResult, sender);
