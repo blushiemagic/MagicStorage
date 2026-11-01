@@ -36,10 +36,13 @@ jobs:
           repository: absoluteAquarian/SerousCommonLib
           path: SerousCommonLib
 
-      - name: Setup .NET 8
+      # 8 = runtime tModLoader.dll runs on; 10 = SDK/compiler (C# 13+ needed by the mod)
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            10.0.x
 
       - name: Download tModLoader
         shell: bash
