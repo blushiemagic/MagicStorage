@@ -64,8 +64,9 @@ jobs:
       - name: Build SerousCommonLib
         run: dotnet build SerousCommonLib/SerousCommonLib.csproj --configuration Release
 
+      # Debug on purpose: only Debug defines NETPLAY, which the source requires to compile
       - name: Build MagicStorage
-        run: dotnet build MagicStorage/MagicStorage.csproj --configuration Release
+        run: dotnet build MagicStorage/MagicStorage.csproj --configuration Debug
 
       - name: Locate MagicStorage.tmod
         id: tmod
