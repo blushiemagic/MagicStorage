@@ -1,6 +1,8 @@
 name: Build MagicStorage
 
 on:
+  push:
+    branches: [add-build-workflow]
   workflow_dispatch:
     inputs:
       create_release:
