@@ -1,0 +1,100 @@
+name: Build MagicStorage
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: Publish the built .tmod as a GitHub release
+        type: boolean
+        default: false
+      release_tag:
+        description: Release tag (blank = v<version from build.txt>-<run number>)
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    # Layout expected by MagicStorage.csproj:
+    #   <ws>/MagicStorage, <ws>/SerousCommonLib, <ws>/tModLoader,
+    #   <ws>/tModLoader.targets, <ws>/references (SerousCommonLib output)
+    steps:
+      - name: Checkout MagicStorage
+        uses: actions/checkout@v4
+        with:
+          path: MagicStorage
+
+      - name: Checkout SerousCommonLib (dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: absoluteAquarian/SerousCommonLib
+          path: SerousCommonLib
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Download tModLoader
+        shell: bash
+        run: |
+          curl -fsSL https://github.com/tModLoader/tModLoader/releases/latest/download/tModLoader.zip -o tModLoader.zip
+          unzip -q tModLoader.zip -d tModLoader
+          rm tModLoader.zip
+
+      - name: Create tModLoader.targets
+        shell: bash
+        run: |
+          cat > tModLoader.targets << 'EOF'
+          <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+            <Import Project="$(MSBuildThisFileDirectory)tModLoader/tMLMod.targets" />
+          </Project>
+          EOF
+
+      # Also copies SerousCommonLib.dll into <ws>/references
+      - name: Build SerousCommonLib
+        run: dotnet build SerousCommonLib/SerousCommonLib.csproj --configuration Release
+
+      - name: Build MagicStorage
+        run: dotnet build MagicStorage/MagicStorage.csproj --configuration Release
+
+      - name: Locate MagicStorage.tmod
+        id: tmod
+        shell: pwsh
+        run: |
+          $roots = @("$env:USERPROFILE", "$env:GITHUB_WORKSPACE") | Where-Object { Test-Path $_ }
+          $file = $roots | ForEach-Object {
+            Get-ChildItem -Path $_ -Recurse -Filter MagicStorage.tmod -File -ErrorAction SilentlyContinue
+          } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $file) { throw "MagicStorage.tmod was not produced" }
+          Write-Host "Found $($file.FullName)"
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item $file.FullName dist/MagicStorage.tmod
+          $version = (Select-String -Path MagicStorage/build.txt -Pattern '^version\s*=\s*(.+)$').Matches[0].Groups[1].Value.Trim()
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MagicStorage-${{ steps.tmod.outputs.version }}
+          path: dist/MagicStorage.tmod
+          if-no-files-found: error
+
+      - name: Create release
+        if: ${{ inputs.create_release }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_INPUT: ${{ inputs.release_tag }}
+          VERSION: ${{ steps.tmod.outputs.version }}
+        run: |
+          TAG="${TAG_INPUT:-v${VERSION}-${GITHUB_RUN_NUMBER}}"
+          gh release create "$TAG" dist/MagicStorage.tmod \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --notes "Personal build of ${GITHUB_SHA::7} (MagicStorage ${VERSION})"
