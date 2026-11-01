@@ -1,8 +1,6 @@
 name: Build MagicStorage
 
 on:
-  push:
-    branches: [add-build-workflow]
   workflow_dispatch:
     inputs:
       ref:
@@ -33,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: MagicStorage
-          ref: ${{ inputs.ref || 'd254c70b484993795bff7478a8fe471b614d4edc' }}
+          ref: ${{ inputs.ref }}
 
       - name: Checkout SerousCommonLib (dependency)
         uses: actions/checkout@v4
