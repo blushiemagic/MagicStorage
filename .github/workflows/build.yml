@@ -5,6 +5,10 @@ on:
     branches: [add-build-workflow]
   workflow_dispatch:
     inputs:
+      ref:
+        description: Branch, tag or commit SHA to build (blank = the branch you run this on)
+        type: string
+        default: ''
       create_release:
         description: Publish the built .tmod as a GitHub release
         type: boolean
@@ -29,6 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: MagicStorage
+          ref: ${{ inputs.ref || 'd254c70' }}
 
       - name: Checkout SerousCommonLib (dependency)
         uses: actions/checkout@v4
@@ -64,9 +69,8 @@ jobs:
       - name: Build SerousCommonLib
         run: dotnet build SerousCommonLib/SerousCommonLib.csproj --configuration Release
 
-      # Debug on purpose: only Debug defines NETPLAY, which the source requires to compile
       - name: Build MagicStorage
-        run: dotnet build MagicStorage/MagicStorage.csproj --configuration Debug
+        run: dotnet build MagicStorage/MagicStorage.csproj --configuration Release
 
       - name: Locate MagicStorage.tmod
         id: tmod
