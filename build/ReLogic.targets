@@ -1,0 +1,13 @@
+<Project>
+  <!--
+    ReLogic.dll is Re-Logic's library. Terraria.exe carries it as the embedded resource
+    "Terraria.Libraries.ReLogic.ReLogic.dll"; the mods need it only as a compile-time reference.
+    Instead of shipping it in the repository, extract it from the builder's own Terraria.exe.
+  -->
+  <Target Name="ExtractReLogic" BeforeTargets="ResolveAssemblyReferences" Condition="!Exists('$(ReLogicDll)')">
+    <Error Condition="!Exists('$(TerrariaDir)\Terraria.exe')"
+           Text="Terraria.exe not found in '$(TerrariaDir)'. Set TerrariaDir in build/Local.props (see Local.props.example) or pass -p:TerrariaDir=&quot;X:\path\to\Terraria&quot;." />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)extract-relogic.ps1&quot; -TerrariaExe &quot;$(TerrariaDir)\Terraria.exe&quot; -OutFile &quot;$(ReLogicDll)&quot;" />
+    <Message Importance="high" Text="Extracted ReLogic.dll from $(TerrariaDir)\Terraria.exe (compile-time reference only; git-ignored)" />
+  </Target>
+</Project>

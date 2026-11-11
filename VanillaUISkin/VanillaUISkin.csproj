@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Vanilla UI Skin for TerrariaModder (Terraria 1.4.5.8): draws every TerrariaModder window with
+    vanilla / tModLoader-style textures (UIPanel, inventory slots, scrollbars, tooltip boxes).
+    Build:   dotnet build -c Release
+    Deploy:  dotnet build -c Release -p:Deploy=true   (copies into the game's TerrariaModder\mods\vanilla-ui-skin)
+    Game folder: build/Local.props, or -p:TerrariaDir="X:\path\to\Terraria" (see build/Terraria.props).
+  -->
+  <Import Project="..\build\Terraria.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>VanillaUISkin</AssemblyName>
+    <RootNamespace>VanillaUISkin</RootNamespace>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    <NoWarn>$(NoWarn);CS1591;MSB3270</NoWarn>
+    <Version>0.1.0</Version>
+    <ModDeployDir>$(TerrariaDir)\TerrariaModder\mods\vanilla-ui-skin</ModDeployDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Terraria">
+      <HintPath>$(TerrariaDir)\Terraria.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Extracted from your Terraria.exe at build time (build/ReLogic.targets). Compile-time only. -->
+    <Reference Include="ReLogic">
+      <HintPath>$(ReLogicDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaModder.Core">
+      <HintPath>$(TerrariaDir)\TerrariaModder\core\TerrariaModder.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(TerrariaDir)\TerrariaModder\core\deps\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework">
+      <HintPath>$(XnaGac)\Microsoft.Xna.Framework\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Graphics">
+      <HintPath>$(XnaGac)\Microsoft.Xna.Framework.Graphics\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.Graphics.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Game">
+      <HintPath>$(XnaGac)\Microsoft.Xna.Framework.Game\v4.0_4.0.0.0__842cf8be1de50553\Microsoft.Xna.Framework.Game.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
+    <ItemGroup>
+      <DeployFiles Include="$(OutDir)VanillaUISkin.dll;$(OutDir)VanillaUISkin.pdb;$(OutDir)manifest.json" />
+    </ItemGroup>
+    <MakeDir Directories="$(ModDeployDir)" />
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(ModDeployDir)" SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="Deployed Vanilla UI Skin to $(ModDeployDir)" />
+  </Target>
+
+  <Import Project="..\build\ReLogic.targets" />
+</Project>

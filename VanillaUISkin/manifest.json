@@ -1,0 +1,11 @@
+{
+  "id": "vanilla-ui-skin",
+  "name": "Vanilla UI Skin",
+  "version": "0.1.0",
+  "framework_version": "^0.4.1",
+  "terraria_version": "=1.4.5",
+  "author": "Magic Storage TerrariaModder port contributors",
+  "description": "Draws every TerrariaModder window with vanilla / tModLoader-style panels, item slots, scrollbars and tooltip boxes.",
+  "entry_dll": "VanillaUISkin.dll",
+  "multiplayer": "client-only"
+}

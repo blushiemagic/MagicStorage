@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    Shared settings for both mods.
+    Game folder: set it in build/Local.props (git-ignored, see Local.props.example), as an environment
+    variable named TerrariaDir, or on the command line with -p:TerrariaDir="X:\path\to\Terraria".
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)Local.props" Condition="Exists('$(MSBuildThisFileDirectory)Local.props')" />
+
+  <PropertyGroup>
+    <TerrariaDir Condition="'$(TerrariaDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Terraria</TerrariaDir>
+    <!-- XNA 4.0 (installed with Terraria) -->
+    <XnaGac>C:\Windows\Microsoft.NET\assembly\GAC_32</XnaGac>
+    <!-- Re-Logic's ReLogic.dll is embedded in Terraria.exe; build/ReLogic.targets extracts it here. Never commit it. -->
+    <ReLogicDll>$(MSBuildThisFileDirectory)..\lib\ReLogic.dll</ReLogicDll>
+  </PropertyGroup>
+</Project>

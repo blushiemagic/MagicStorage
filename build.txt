@@ -1,9 +1,0 @@
-author = absoluteAquarian & Contributors
-version = 0.7.1
-displayName = Magic Storage
-homepage = https://github.com/blushiemagic/MagicStorage/wiki
-hideCode = false
-hideResources = false
-includeSource = true
-includePDB = true
-modReferences = SerousCommonLib@1.0.7

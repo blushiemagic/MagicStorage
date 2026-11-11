@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2017 Kaylee Minsuh Kim
+Copyright (c) 2017 Kaylee Minsuh Kim (Magic Storage)
+Copyright (c) 2026 Magic Storage TerrariaModder port contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---------------------------------------------------------------------------------
+Third-party material
+
+* Magic Storage (https://github.com/blushiemagic/MagicStorage), MIT License,
+  Copyright (c) 2017 Kaylee Minsuh Kim. The tile, item and UI sprites in
+  MagicStorageTM/Assets come from Magic Storage, and much of the game logic
+  is a port of its source.
+* TerrariaModder (https://github.com/Inidar1/terraria-modder), MIT License.
+  Required at runtime, not included in this repository.
+* Terraria and ReLogic.dll are property of Re-Logic. No Re-Logic files are
+  included in this repository; the build extracts ReLogic.dll from your own
+  copy of Terraria.exe as a compile-time reference only. This project is not
+  affiliated with or endorsed by Re-Logic.

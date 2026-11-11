@@ -1,0 +1,6 @@
+<Project>
+  <!-- Copy to build/Local.props (git-ignored) and point it at your Terraria folder. -->
+  <PropertyGroup>
+    <TerrariaDir>D:\SteamLibrary\steamapps\common\Terraria</TerrariaDir>
+  </PropertyGroup>
+</Project>

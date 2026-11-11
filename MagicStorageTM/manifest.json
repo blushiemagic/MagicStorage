@@ -1,0 +1,12 @@
+{
+  "id": "magic-storage",
+  "name": "Magic Storage",
+  "version": "0.1.0",
+  "author": "Unofficial TerrariaModder port (original Magic Storage by blushiemagic, absoluteAquarian & contributors)",
+  "description": "Port of Magic Storage to TerrariaModder: a central storage network with Storage Hearts, Storage Units, access points, crafting from storage, and combined crafting stations. Adds real custom tiles. Singleplayer only.",
+  "entry_dll": "MagicStorageTM.dll",
+  "framework_version": "^0.4.1",
+  "terraria_version": "=1.4.5",
+  "multiplayer": "required",
+  "tags": ["storage", "crafting", "qol"]
+}
